@@ -19,6 +19,8 @@ begin
   @has_rdoc           = @project_specs['has_rdoc']
   @executables        = @project_specs['executables']
   @default_executable = @project_specs['default_executables']
+  @deb_build_depends  = @project_specs['deb_build_depends']
+  @deb_depends        = @project_specs['deb_depends']
 rescue
   STDERR.puts "There was an error loading the project specifications from the specifications.yaml file."
   exit 1

@@ -6,9 +6,9 @@ spec = Gem::Specification.new do |s|
   s.homepage = @homepage
   s.summary = @summary
   s.description = @description
-  s.files = FileList[@files].to_a
+  s.files = FileList[@gem_files.split(' ')]
   s.require_path = @gem_require_path
-  s.test_files = FileList[@gem_test_files].to_a
+  s.test_files = FileList[@gem_test_files.split(' ')]
   s.executables = @gem_executables
   s.default_executable = @gem_default_executable
 end

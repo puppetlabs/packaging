@@ -13,6 +13,7 @@ begin
   @summary                = @project_specs['summary']
   @description            = @project_specs['description']
   @files                  = @project_specs['files']
+  @gem_files              = @project_specs['gem_files']
   @gem_require_path       = @project_specs['gem_require_path']
   @gem_test_files         = @project_specs['gem_test_files']
   @gem_executables        = @project_specs['gem_executables']

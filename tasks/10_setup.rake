@@ -13,10 +13,10 @@ begin
   @summary                = @project_specs['summary']
   @description            = @project_specs['description']
   @files                  = @project_specs['files']
-  @gem_require_path       = @project_specs['require_path']
-  @gem_test_files         = @project_specs['test_files']
-  @gem_executables        = @project_specs['executables']
-  @gem_default_executable = @project_specs['default_executables']
+  @gem_require_path       = @project_specs['gem_require_path']
+  @gem_test_files         = @project_specs['gem_test_files']
+  @gem_executables        = @project_specs['gem_executables']
+  @gem_default_executable = @project_specs['gem_default_executables']
 rescue
   STDERR.puts "There was an error loading the project specifications from the data.yaml file."
   exit 1
@@ -40,23 +40,3 @@ end
 @origversion  ||= get_origversion
 @rpmversion   ||= get_rpmversion
 @release      ||= get_release
-
-spec = Gem::Specification.new do |s|
-  s.name = @name
-  s.version = described_version
-  s.author = @author
-  s.email = @email
-  s.homepage = @homepage
-  s.summary = @summary
-  s.description = @description
-  s.files = FileList[@files].to_a
-  s.require_path = @gem_require_path
-  s.test_files = FileList[@gem_test_files].to_a
-  s.executables = @gem_executables
-  s.default_executable = @gem_default_executable
-end
-
-Gem::PackageTask.new(spec) do |pkg|
-  pkg.need_tar_gz = true
-end
-

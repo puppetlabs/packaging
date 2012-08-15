@@ -6,10 +6,7 @@ def build_rpm(buildarg = "-bs")
      --define "_binary_payload w9.gzdio" --define "_source_payload w9.gzdio" \
      --define "_default_patch_fuzz 2"'
   args = rpm_define + ' ' + rpm_old_version
-  mkdir_p temp
-  mkdir_p 'pkg/rpm'
-  mkdir_p "#{temp}/SOURCES"
-  mkdir_p "#{temp}/SPECS"
+  mkdir_pr temp, 'pkg/rpm', 'pkg/srpm', "#{temp}/SOURCES", "#{temp}/SPECS"
   if @sign_srpm
     gpg_sign_file "pkg/#{@name}-#{@version}.tar.gz"
     cp_p "pkg/#{@name}-#{@version}.tar.gz.asc", "#{temp}/SOURCES"
@@ -18,7 +15,8 @@ def build_rpm(buildarg = "-bs")
   erb "ext/redhat/#{@name}.spec.erb", "#{temp}/SPECS/#{@name}.spec"
   sh "rpmbuild #{args} #{buildarg} --nodeps #{temp}/SPECS/#{@name}.spec"
   output = `find #{temp} -name *.rpm`
-  mv FileList["#{temp}/SRPMS/*.rpm", "#{temp}/RPMS/*/*.rpm"], "pkg/rpm"
+  mv FileList["#{temp}/SRPMS/*.rpm"], "pkg/srpm"
+  mv FileList["#{temp}/RPMS/*/*.rpm"], "pkg/rpm"
   rm_rf temp
   puts
   puts "Wrote:"

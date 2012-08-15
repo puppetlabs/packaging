@@ -14,6 +14,6 @@ namespace :package do
     end
     rm_rf workdir
     puts
-    puts "Wrote #{`pwd`.strip}/pkg/#{@name}-#{@version}"
+    puts "Wrote #{`pwd`.strip}/pkg/#{@name}-#{@version}.tar.gz"
   end
 end

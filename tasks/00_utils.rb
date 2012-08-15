@@ -114,3 +114,8 @@ def gpg_sign_file(file)
    %x{/usr/bin/gpg --armor --detach-sign -u #{@key_id} #{file}}
 end
 
+def mkdir_pr *args
+  args.each do |arg|
+    mkdir_p arg
+  end
+end

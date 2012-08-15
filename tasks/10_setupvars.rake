@@ -29,6 +29,10 @@ begin
   @pbuild_conf  = ENV['PBUILDCONF']   || @pkg_defaults['pbuild_conf']
   @deb_packager = ENV['DEB_PACKAGER'] || @pkg_defaults['deb_packager']
   @sign_srpm    = ENV['SIGN_SRPM']    || @pkg_defaults['sign_srpm']
+  @final_mocks  = ENV['MOCK']         || @pkg_defaults['final_mocks']
+  @rc_mocks     = ENV['MOCK']         || @pkg_defaults['rc_mocks']
+  @gpg_name     = ENV['GPG_NAME']     || @pkg_defaults['gpg_name']
+  @gpg_key      = ENV['GPG_KEY']      || @pkg_defaults['gpg_key']
   @version_file = @pkg_defaults['version_file']
 rescue
   STDERR.puts "There was an error loading the packaging defaults from the data.yaml file."

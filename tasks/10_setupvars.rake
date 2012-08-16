@@ -24,7 +24,8 @@ end
 
 @pkg_defaults ||= YAML.load(File.read('ext/build_defaults.yaml'))
 begin
-  @cow            = ENV['COW']          || @pkg_defaults['cow']
+  @default_cow    = ENV['COW']          || @pkg_defaults['default_cow']
+  @cows           = ENV['COW']          || @pkg_defaults['cows']
   @pbuild_conf    = ENV['PBUILDCONF']   || @pkg_defaults['pbuild_conf']
   @deb_packager   = ENV['DEB_PACKAGER'] || @pkg_defaults['deb_packager']
   @sign_srpm      = ENV['SIGN_SRPM']    || @pkg_defaults['sign_srpm']

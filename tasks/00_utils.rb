@@ -64,6 +64,22 @@ def get_temp
   temp = `mktemp -d -t tmpXXXXXX`.strip
 end
 
+def remote_ssh_cmd target, command
+  check_tool('ssh')
+  puts "Executing '#{command}' on #{target}"
+  %x{ssh #{target} '#{command}'}
+end
+
+def rsync_to *args
+  check_tool('rsync')
+  flags = "-Havxl -O --no-perms --no-owner --no-group"
+  source  = args[0]
+  target  = args[1]
+  dest    = args[2]
+  puts "rsyncing #{source} to #{target}"
+  %x{rsync #{flags} #{source} #{ENV['USER']}@#{target}:#{dest}}
+end
+
 def scp_file_from(host,path,file)
   %x{scp #{ENV['USER']}@#{host}:#{path}/#{file} #{@tempdir}/#{file}}
 end

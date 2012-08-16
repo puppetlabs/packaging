@@ -17,7 +17,6 @@ begin
   @gem_require_path       = @project_specs['gem_require_path']
   @gem_test_files         = @project_specs['gem_test_files']
   @gem_executables        = @project_specs['gem_executables']
-  @gem_default_executable = @project_specs['gem_default_executables']
 rescue
   STDERR.puts "There was an error loading the project specifications from the data.yaml file."
   exit 1

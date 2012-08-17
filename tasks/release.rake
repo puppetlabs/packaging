@@ -1,4 +1,3 @@
-desc "Bump version prior to release (internal task)"
 task :versionbump  do
   old_version =  get_current_version
   contents = IO.read(@version_file)

@@ -1,4 +1,3 @@
-desc "Build various packages"
 namespace :package do
   task :build_environment do
     unless ENV['FORCE'] == '1'

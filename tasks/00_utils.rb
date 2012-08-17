@@ -101,7 +101,7 @@ def get_version
 end
 
 def get_debversion
-  @version.include?("rc") ? @version.sub(/rc[0-9]+/, '-0.1\0') : @version + "-1#{deb_packager}1"
+  @version.include?("rc") ? @version.sub(/rc[0-9]+/, '-0.1\0') : @version + "-1#{@packager}1"
 end
 
 def get_origversion

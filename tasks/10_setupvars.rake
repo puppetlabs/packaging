@@ -3,6 +3,7 @@ require 'rubygems/package_task'
 require 'rspec/core/rake_task'
 require 'yaml'
 require 'benchmark'
+require 'erb'
 
 @project_specs ||= YAML.load(File.read('ext/project_data.yaml'))
 begin
@@ -27,7 +28,7 @@ begin
   @default_cow    = ENV['COW']          || @pkg_defaults['default_cow']
   @cows           = ENV['COW']          || @pkg_defaults['cows']
   @pbuild_conf    = ENV['PBUILDCONF']   || @pkg_defaults['pbuild_conf']
-  @deb_packager   = ENV['DEB_PACKAGER'] || @pkg_defaults['deb_packager']
+  @packager       = ENV['PACKAGER']     || @pkg_defaults['packager']
   @sign_srpm      = ENV['SIGN_SRPM']    || @pkg_defaults['sign_srpm']
   @final_mocks    = ENV['MOCK']         || @pkg_defaults['final_mocks']
   @rc_mocks       = ENV['MOCK']         || @pkg_defaults['rc_mocks']

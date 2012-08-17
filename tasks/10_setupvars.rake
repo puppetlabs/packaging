@@ -33,6 +33,7 @@ begin
   @rc_mocks       = ENV['MOCK']         || @pkg_defaults['rc_mocks']
   @gpg_name       = ENV['GPG_NAME']     || @pkg_defaults['gpg_name']
   @gpg_key        = ENV['GPG_KEY']      || @pkg_defaults['gpg_key']
+  @build_gem      = ENV['GEM']          || @pkg_defaults['build_gem']
   @version_file   = @pkg_defaults['version_file']
   @yum_host       = @pkg_defaults['yum_host']
   @yum_repo_path  = @pkg_defaults['yum_repo_path']

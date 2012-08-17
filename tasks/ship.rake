@@ -9,6 +9,11 @@ namespace :pl do
   task :update_yum_repo do
     remote_ssh_cmd @yum_host, '/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -I /opt/repository/ mk_repo'
   end
+
+  desc "Ship cow-built debs to #{@apt_host}"
+  task :ship_debs do
+    rsync_to 'pkg/deb/', @apt_host, @apt_repo_path
+  end
 end
 
 

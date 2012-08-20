@@ -1,6 +1,6 @@
 namespace :package do
   desc "Create a source tar archive"
-  task :tar => [ :clean, :build_environment ] do
+  task :tar => [ :clean ] do
     workdir = "pkg/#{@name}-#{@version}"
     mkdir_p workdir
     FileList[@files.split(' ')].each do |f|

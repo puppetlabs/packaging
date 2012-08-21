@@ -23,7 +23,7 @@ rescue
   exit 1
 end
 
-@pkg_defaults ||= YAML.load(File.read('ext/build_defaults.yaml'))
+@pkg_defaults ||= YAML.load_file('ext/build_defaults.yaml')
 begin
   @default_cow    = ENV['COW']          || @pkg_defaults['default_cow']
   @cows           = ENV['COW']          || @pkg_defaults['cows']

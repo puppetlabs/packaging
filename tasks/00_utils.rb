@@ -127,7 +127,7 @@ end
 
 def gpg_sign_file(file)
    check_tool('gpg')
-   %x{/usr/bin/gpg --armor --detach-sign -u #{@key_id} #{file}}
+   %x{/usr/bin/gpg --armor --detach-sign -u #{@gpg_key} #{file}}
 end
 
 def mkdir_pr *args

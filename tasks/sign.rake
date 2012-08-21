@@ -7,7 +7,7 @@ def sign_modern(rpm)
 end
 
 def rpm_has_sig(rpm)
-  %x{rpm -Kv #{rpm} | grep "#{"4BD6EC30".downcase}" &> /dev/null}
+  %x{rpm -Kv #{rpm} | grep "#{@gpg_key.downcase}" &> /dev/null}
   $?.success?
 end
 

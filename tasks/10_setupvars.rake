@@ -29,7 +29,7 @@ begin
   @cows           = ENV['COW']          || @pkg_defaults['cows']
   @pbuild_conf    = ENV['PBUILDCONF']   || @pkg_defaults['pbuild_conf']
   @packager       = ENV['PACKAGER']     || @pkg_defaults['packager']
-  @sign_srpm      = ENV['SIGN_SRPM']    || @pkg_defaults['sign_srpm']
+  @sign_tar       = ENV['SIGN_TAR']     || @pkg_defaults['sign_tar']
   @final_mocks    = ENV['MOCK']         || @pkg_defaults['final_mocks']
   @rc_mocks       = ENV['MOCK']         || @pkg_defaults['rc_mocks']
   @gpg_name       = ENV['GPG_NAME']     || @pkg_defaults['gpg_name']

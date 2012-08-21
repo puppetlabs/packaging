@@ -7,7 +7,7 @@ def build_rpm(buildarg = "-bs")
      --define "_default_patch_fuzz 2"'
   args = rpm_define + ' ' + rpm_old_version
   mkdir_pr temp, 'pkg/rpm', 'pkg/srpm', "#{temp}/SOURCES", "#{temp}/SPECS"
-  if @sign_srpm
+  if @sign_tar
     gpg_sign_file "pkg/#{@name}-#{@version}.tar.gz"
     cp_p "pkg/#{@name}-#{@version}.tar.gz.asc", "#{temp}/SOURCES"
   end

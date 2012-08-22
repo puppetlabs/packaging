@@ -20,11 +20,11 @@ begin
   @gem_test_files         = @project_specs['gem_test_files']
   @gem_executables        = @project_specs['gem_executables']
 rescue
-  STDERR.puts "There was an error loading the project specifications from the data.yaml file."
+  STDERR.puts "There was an error loading the project specifications from the 'ext/project_data.yaml' file."
   exit 1
 end
 
-@pkg_defaults ||= YAML.load(File.read('ext/build_defaults.yaml'))
+@pkg_defaults ||= YAML.load_file('ext/build_defaults.yaml')
 begin
   @default_cow    = ENV['COW']          || @pkg_defaults['default_cow']
   @cows           = ENV['COW']          || @pkg_defaults['cows']
@@ -42,7 +42,7 @@ begin
   @apt_repo_url   = @pkg_defaults['apt_repo_url']
   @apt_repo_path  = @pkg_defaults['apt_repo_path']
 rescue
-  STDERR.puts "There was an error loading the packaging defaults from the data.yaml file."
+  STDERR.puts "There was an error loading the packaging defaults from the 'ext/build_defaults.yaml' file."
   exit 1
 end
 

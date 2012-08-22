@@ -11,6 +11,10 @@ def rpm_has_sig(rpm)
   $?.success?
 end
 
+def sign_deb_changes(file)
+  %x{debsign --re-sign -k#{@gpg_key} #{file}}
+end
+
 namespace :pl do
   desc "Sign mocked rpms, Defaults to PL Key, pass KEY to override"
   task :sign_rpms do
@@ -37,6 +41,12 @@ namespace :pl do
     end
     exit 1 unless signed
     puts "All rpms signed"
+  end
+
+  desc "Sign generated debian changes files."
+  task :sign_deb_changes do
+    sign_deb_changes("pkg/deb/*/*.changes") unless Dir["pkg/deb/*/*.changes"].empty?
+    sign_deb_changes("pkg/deb/*.changes") unless Dir["pkg/deb/*.changes"].empty?
   end
 end
 

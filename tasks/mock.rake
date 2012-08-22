@@ -39,13 +39,14 @@ def build_rpm_with_mock(is_rc, subdir)
 
     Dir[result].each do |rpm|
       rpm.strip!
-
-      if is_rc == FALSE and rpm =~ /[0-9]+rc[0-9]+\./
-        puts "It looks like you might be trying to ship an RC to the production repos. Leaving rpm in #{result}"
-        next
-      elsif is_rc and rpm !~ /[0-9]+rc[0-9]+\./
-        puts "It looks like you might be trying to ship a production release to the development repos. Leaving rpm in #{result}"
-        next
+      unless ENV['RC_OVERRIDE'] == '1'
+        if is_rc == FALSE and rpm =~ /[0-9]+rc[0-9]+\./
+          puts "It looks like you might be trying to ship an RC to the production repos. Leaving rpm in #{result}. Pass RC_OVERRIDE=1 to override."
+          next
+        elsif is_rc and rpm !~ /[0-9]+rc[0-9]+\./
+          puts "It looks like you might be trying to ship a production release to the development repos. Leaving rpm in #{result}. Pass RC_OVERRIDE=1 to override."
+          next
+        end
       end
 
       case rpm

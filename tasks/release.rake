@@ -1,5 +1,5 @@
 namespace :package do
-  desc "Update the version in #{@version_file} to current."
+  desc "Update the version in #{@version_file} to current and commit."
   task :versionbump  do
     old_version =  get_version_file_version
     contents = IO.read(@version_file)
@@ -12,6 +12,7 @@ namespace :package do
     file = File.open(@version_file, 'w')
     file.write contents
     file.close
+    git_commit_file(@version_file)
   end
 end
 

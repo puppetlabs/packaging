@@ -16,6 +16,15 @@ def sign_deb_changes(file)
 end
 
 namespace :pl do
+  desc "Sign the tarball, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
+  task :sign_tar do
+    unless File.exist? "pkg/#{@name}-#{@version}.tar.gz"
+      STDERR.puts "No tarball exists. Try rake package:tar?"
+      exit 1
+    end
+    gpg_sign_file "pkg/#{@name}-#{@version}.tar.gz"
+  end
+
   desc "Sign mocked rpms, Defaults to PL Key, pass KEY to override"
   task :sign_rpms do
     el5_rpms    = Dir["pkg/el/5/**/*.rpm"].join(' ')

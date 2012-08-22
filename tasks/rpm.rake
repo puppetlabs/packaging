@@ -8,7 +8,7 @@ def build_rpm(buildarg = "-bs")
   args = rpm_define + ' ' + rpm_old_version
   mkdir_pr temp, 'pkg/rpm', 'pkg/srpm', "#{temp}/SOURCES", "#{temp}/SPECS"
   if @sign_tar
-    Rake::Task["package:sign_tar"].invoke
+    Rake::Task["pl:sign_tar"].invoke
     cp_p "pkg/#{@name}-#{@version}.tar.gz.asc", "#{temp}/SOURCES"
   end
   cp_p "pkg/#{@name}-#{@version}.tar.gz", "#{temp}/SOURCES"

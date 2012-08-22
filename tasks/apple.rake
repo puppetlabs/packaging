@@ -2,7 +2,7 @@
 # Author:       Gary Larizza
 # Date:         05/18/2012
 # Description:  This task will create a DMG-encapsulated package that will
-#               install Facter on OS X systems. This happens by building
+#               install a package on OS X systems. This happens by building
 #               a directory tree of files that will then be fed to the
 #               packagemaker binary (can be installed by installing the
 #               XCode Tools) which will create the .pkg file.

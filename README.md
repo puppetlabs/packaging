@@ -42,7 +42,7 @@ end
 Also in ext should be two files, build_defaults.yaml and project_data.yaml.
 
 This is the sample build_defaults.yaml file from Hiera:
-```
+```yaml
 ---
 packaging_url: 'git@github.com:puppetlabs/packaging --branch=master'
 packaging_repo: 'packaging'
@@ -66,7 +66,7 @@ build_gem: TRUE
 build_dmg: TRUE
 ```
 This is the sample project_data.yaml file:
-```
+```yaml
 ---
 project: 'hiera'
 author: 'Puppet Labs'

@@ -12,7 +12,7 @@ def rpm_has_sig(rpm)
 end
 
 namespace :pl do
-  desc "Sign mocked rpms, Defaults to Puppet Labs Key, pass KEY to override"
+  desc "Sign mocked rpms, Defaults to PL Key, pass KEY to override"
   task :sign_rpms do
     el5_rpms    = Dir["pkg/el/5/**/*.rpm"].join(' ')
     modern_rpms = (Dir["pkg/el/6/**/*.rpm"] + Dir["pkg/fedora/**/*.rpm"]).join(' ')

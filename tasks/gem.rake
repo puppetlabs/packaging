@@ -19,9 +19,10 @@ if @build_gem == TRUE or @build_gem == 'true' or @build_gem == 'TRUE'
       end
     end
   end
-
-  Gem::PackageTask.new(spec) do |pkg|
-    pkg.need_tar_gz = true
+  namespace :package do
+    Gem::PackageTask.new(spec) do |pkg|
+      pkg.need_tar_gz = true
+    end
   end
 end
 

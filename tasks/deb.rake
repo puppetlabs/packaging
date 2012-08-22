@@ -1,10 +1,23 @@
 def pdebuild args
   results_dir = args[:work_dir]
   cow         = args[:cow]
+  is_rc       = args[:is_rc]
+  update_cow(cow, is_rc)
   begin
     sh "pdebuild --configfile #{@pbuild_conf} --buildresult #{results_dir} --pbuilder cowbuilder -- --basepath /var/cache/pbuilder/#{cow}/"
   rescue
     STDERR.puts "Something went wrong. Hopefully the backscroll or #{results_dir}/#{@name}_#{@debversion}.build file has a clue."
+  end
+end
+
+def update_cow(cow, is_rc = nil)
+  ENV['FOSS_DEVEL'] = is_rc
+  set_cow_envs(cow)
+  begin
+    sh "sudo cowbuilder --update --override-config --configfile #{@pbuild_conf} --basepath /var/cache/pbuilder/#{cow} --dist #{ENV['DIST']} --architecture #{ENV['ARCH']}"
+  rescue
+    STDERR.puts "Couldn't update the cow #{cow}. Perhaps you don't have sudo?"
+    exit 1
   end
 end
 
@@ -27,14 +40,15 @@ task :prep_deb_tars, :work_dir do |t,args|
   end
 end
 
-task :build_deb, :deb_command, :cow do |t,args|
+task :build_deb, :deb_command, :cow, :is_rc do |t,args|
   deb_build = args.deb_command
   cow       = args.cow
+  is_rc     = args.is_rc
   work_dir  = get_temp
   dest_dir  = "#{@build_root}/pkg/deb/#{cow.split('-')[1] unless cow.nil?}"
   check_tool(deb_build)
   mkdir_p dest_dir
-  deb_args  = { :work_dir => work_dir, :cow => cow }
+  deb_args  = { :work_dir => work_dir, :cow => cow, :is_rc => is_rc}
   Rake::Task[:prep_deb_tars].reenable
   Rake::Task[:prep_deb_tars].invoke(work_dir)
   cd "#{work_dir}/#{@name}-#{@debversion}" do
@@ -59,16 +73,30 @@ end
 
 namespace :pl do
   desc "Create a deb from this repo using the default cow #{@default_cow}."
-  task :deb_cow => "package:tar"  do
+  task :deb => "package:tar"  do
     Rake::Task[:build_deb].invoke('pdebuild', @default_cow)
   end
 
-  desc "Create debs from this git repository using all cows specified in build_defaults.yaml"
-  task :deb_all_cows do
+  desc "Create an RC deb from this repo using the default cow #{@default_cow}."
+  task :deb_rc => "package:tar" do
+    Rake::Task[:build_deb].invoke('pdebuild', @default_cow, 'TRUE')
+  end
+
+  desc "Create debs from this git repository using all cows specified in build_defaults yaml"
+  task :deb_all do
     @cows.split(' ').each do |cow|
       Rake::Task["package:tar"].invoke
       Rake::Task[:build_deb].reenable
       Rake::Task[:build_deb].invoke('pdebuild', cow)
+    end
+  end
+
+  desc "Create RC debs from this git repository using all cows specified in build_defaults yaml"
+  task :deb_all_rc do
+    @cows.split(' ').each do |cow|
+      Rake::Task["package:tar"].invoke
+      Rake::Task[:build_deb].reenable
+      Rake::Task[:build_deb].invoke('pdebuild', cow, 'TRUE')
     end
   end
 end

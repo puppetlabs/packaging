@@ -135,3 +135,22 @@ def mkdir_pr *args
     mkdir_p arg
   end
 end
+
+def set_cow_envs(cow)
+  elements = cow.split('-')
+  if elements.size != 3
+    STDERR.puts "Expecting a cow name split on hyphens, e.g. 'base-squeeze-i386'"
+    exit 1
+  else
+    dist = elements[1]
+    arch = elements[2]
+    if dist.nil? or arch.nil?
+      STDERR.puts "Couldn't get the arg and dist from cow name. Expecting something like 'base-dist-arch'"
+      exit 1
+    end
+    arch = arch.split('.')[0] if arch.include?('.')
+  end
+
+  ENV['DIST'] = dist
+  ENV['ARCH'] = arch
+end

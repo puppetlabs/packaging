@@ -154,3 +154,8 @@ def set_cow_envs(cow)
   ENV['DIST'] = dist
   ENV['ARCH'] = arch
 end
+
+def ln(target, name)
+  %x{ln -f #{target} #{name}}
+end
+

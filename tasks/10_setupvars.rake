@@ -2,7 +2,6 @@ require 'rubygems'
 require 'rubygems/package_task'
 require 'rspec/core/rake_task'
 require 'yaml'
-require 'benchmark'
 require 'erb'
 
 begin

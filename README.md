@@ -61,6 +61,7 @@ yum_repo_path: '~/repo/'
 apt_host: 'burji.puppetlabs.com'
 apt_repo_url: 'http://apt.puppetlabs.com'
 apt_repo_path: '/opt/repository/incoming'
+# Whether to present the gem and apple tasks
 build_gem: TRUE
 build_dmg: TRUE
 ```
@@ -81,4 +82,7 @@ gem_require_path: 'lib'
 gem_test_files: 'spec/**/*'
 gem_executables: 'hiera'
 gem_default_executables: 'hiera'
+# To add gem dependencies, indent. E.g.:
+gem_dependencies:
+  hiera-puppet: '1.0.0rc'
 ```

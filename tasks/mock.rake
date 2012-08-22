@@ -72,13 +72,13 @@ namespace :pl do
     %x{mkdir -p pkg/fedora/{f15,f16,f17}/{products,devel,dependencies}/{SRPMS,i386,x86_64}}
   end
 
-  desc "Use mock to make a final rpm, keyed to Puppet Labs infrastructure, pass MOCK to specifiy config"
+  desc "Use specified mocks to make final rpms, keyed to Puppet Labs infrastructure, pass MOCK to specifiy config"
   task :mock_final => [ "package:srpm", "pl:setup_el_dirs" ] do
     subdir = ENV['subdir'] || 'products'
     build_rpm_with_mock(FALSE, subdir)
   end
 
-  desc "Use mock to make an RC rpm, keyed to Puppet Labs infrastructure, pass MOCK to specify config"
+  desc "Use specified mocks to make RC rpms, keyed to Puppet Labs infrastructure, pass MOCK to specify config"
   task :mock_rc => [ "package:srpm", "pl:setup_el_dirs" ] do
     subdir = 'devel'
     build_rpm_with_mock(TRUE, subdir)

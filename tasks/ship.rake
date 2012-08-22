@@ -1,5 +1,5 @@
 namespace :pl do
-  desc "Ship mocked rpms repo"
+  desc "Ship mocked rpms to #{@yum_host}"
   task :ship_rpms do
     rsync_to 'pkg/el', @yum_host, @yum_repo_path
     rsync_to 'pkg/fedora', @yum_host, @yum_repo_path

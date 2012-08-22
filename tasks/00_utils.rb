@@ -23,7 +23,7 @@ def check_var(varname,var=nil)
 end
 
 def check_host(host)
-  unless host == %x{'hostname'}.chomp!
+  unless host == %x{hostname}.chomp!
     STDERR.puts "Requires host to be #{host}...exiting"
     exit 5
   end
@@ -55,7 +55,7 @@ end
 def git_co(dist)
   %x{git reset --hard ; git checkout #{dist}}
   unless $?.success?
-    STDERR.puts 'Could not checkout dist git branch to build package from...exiting'
+    STDERR.puts 'Could not checkout #{dist} git branch to build package from...exiting'
     exit 1
   end
 end

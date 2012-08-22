@@ -17,7 +17,7 @@ namespace :package do
     puts "Wrote #{`pwd`.strip}/pkg/#{@name}-#{@version}.tar.gz"
   end
 
-  desc "Sign the tarball"
+  desc "Sign the tarball, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_tar do
     unless File.exist? "pkg/#{@name}-#{@version}.tar.gz"
       STDERR.puts "No tarball exists. Try rake package:tar?"

@@ -82,7 +82,8 @@ gem_require_path: 'lib'
 gem_test_files: 'spec/**/*'
 gem_executables: 'hiera'
 gem_default_executables: 'hiera'
-# To add gem dependencies, indent. E.g.:
+# To add gem dependencies, indent.
+# This is an example only, hiera doesn't really depend on hiera-puppet
 gem_dependencies:
   hiera-puppet: '1.0.0rc'
 ```

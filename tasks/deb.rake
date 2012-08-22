@@ -7,6 +7,7 @@ def pdebuild args
     sh "pdebuild --configfile #{@pbuild_conf} --buildresult #{results_dir} --pbuilder cowbuilder -- --override-config --othermirror=\"deb #{@apt_repo_url} #{ENV['DIST']} main dependencies #{devel_repo}\" --basepath /var/cache/pbuilder/#{cow}/"
   rescue
     STDERR.puts "Something went wrong. Hopefully the backscroll or #{results_dir}/#{@name}_#{@debversion}.build file has a clue."
+    exit 1
   end
 end
 
@@ -27,6 +28,7 @@ def debuild args
     sh "debuild --no-lintian -uc -us"
   rescue
     STDERR.puts "Something went wrong. Hopefully the backscroll or #{results_dir}/#{@name}_#{@debversion}.build file has a clue."
+    exit 1
   end
 end
 

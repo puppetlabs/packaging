@@ -30,6 +30,10 @@ def debuild args
   end
 end
 
+def sign_deb_changes(file)
+  %x{debsign --re-sign -k#{@gpg_key} #{file}}
+end
+
 task :prep_deb_tars, :work_dir do |t,args|
   work_dir = args.work_dir
   cp_p "pkg/#{@name}-#{@version}.tar.gz", work_dir
@@ -56,6 +60,7 @@ task :build_deb, :deb_command, :cow, :is_rc do |t,args|
     begin
       send(deb_build, deb_args)
       cp FileList["#{work_dir}/*.deb", "#{work_dir}/*.dsc", "#{work_dir}/*.changes", "#{work_dir}/*.debian.tar.gz", "#{work_dir}/*.orig.tar.gz"], dest_dir
+      sign_deb_changes("#{dest_dir}/*.changes")
       rm_rf "#{work_dir}/#{@name}-#{@debversion}"
     rescue
       STDERR.puts "Something went wrong. Hopefully the backscroll or #{work_dir}/#{@name}_#{@debversion}.build file has a clue."

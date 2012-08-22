@@ -52,8 +52,9 @@ namespace :pl do
     puts "All rpms signed"
   end
 
-  desc "Sign generated debian changes files."
+  desc "Sign generated debian changes files. Defaults to PL Key, pass KEY to override"
   task :sign_deb_changes do
+    restart_keychain
     sign_deb_changes("pkg/deb/*/*.changes") unless Dir["pkg/deb/*/*.changes"].empty?
     sign_deb_changes("pkg/deb/*.changes") unless Dir["pkg/deb/*.changes"].empty?
   end

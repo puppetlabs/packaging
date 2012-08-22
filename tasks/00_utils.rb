@@ -125,6 +125,21 @@ def get_release
     end
 end
 
+def restart_keychain
+  kill_keychain
+  start_keychain
+end
+
+def kill_keychain
+  %x{keychain -k mine}
+end
+
+def start_keychain
+  keychain = %x{/usr/bin/keychain -q --agents gpg --eval #{@gpg_key}}.chomp
+  new_env = keychain.match(/(GPG_AGENT_INFO)=([^;]*)/)
+  ENV[new_env[1]] = new_env[2]
+end
+
 def gpg_sign_file(file)
    check_tool('gpg')
    %x{/usr/bin/gpg --armor --detach-sign -u #{@gpg_key} #{file}}

@@ -39,6 +39,7 @@ begin
   @yum_host       = @pkg_defaults['yum_host']
   @yum_repo_path  = @pkg_defaults['yum_repo_path']
   @apt_host       = @pkg_defaults['apt_host']
+  @apt_repo_url   = @pkg_defaults['apt_repo_url']
   @apt_repo_path  = @pkg_defaults['apt_repo_path']
 rescue
   STDERR.puts "There was an error loading the packaging defaults from the data.yaml file."

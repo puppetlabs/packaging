@@ -1,10 +1,10 @@
 def pdebuild args
   results_dir = args[:work_dir]
   cow         = args[:cow]
-  is_rc       = args[:is_rc]
-  update_cow(cow, is_rc)
+  devel_repo  = args[:devel]
+  set_cow_envs(cow)
   begin
-    sh "pdebuild --configfile #{@pbuild_conf} --buildresult #{results_dir} --pbuilder cowbuilder -- --basepath /var/cache/pbuilder/#{cow}/"
+    sh "pdebuild --configfile #{@pbuild_conf} --buildresult #{results_dir} --pbuilder cowbuilder -- --override-config --othermirror=\"deb #{@apt_repo_url} #{ENV['DIST']} main dependencies #{devel_repo}\" --basepath /var/cache/pbuilder/#{cow}/"
   rescue
     STDERR.puts "Something went wrong. Hopefully the backscroll or #{results_dir}/#{@name}_#{@debversion}.build file has a clue."
   end
@@ -44,15 +44,15 @@ task :prep_deb_tars, :work_dir do |t,args|
   end
 end
 
-task :build_deb, :deb_command, :cow, :is_rc do |t,args|
+task :build_deb, :deb_command, :cow, :devel do |t,args|
   deb_build = args.deb_command
   cow       = args.cow
-  is_rc     = args.is_rc
+  devel     = args.devel
   work_dir  = get_temp
   dest_dir  = "#{@build_root}/pkg/deb/#{cow.split('-')[1] unless cow.nil?}"
   check_tool(deb_build)
   mkdir_p dest_dir
-  deb_args  = { :work_dir => work_dir, :cow => cow, :is_rc => is_rc}
+  deb_args  = { :work_dir => work_dir, :cow => cow, :devel => devel}
   Rake::Task[:prep_deb_tars].reenable
   Rake::Task[:prep_deb_tars].invoke(work_dir)
   cd "#{work_dir}/#{@name}-#{@debversion}" do
@@ -84,7 +84,7 @@ namespace :pl do
 
   desc "Create an RC deb from this repo using the default cow #{@default_cow}."
   task :deb_rc => "package:tar" do
-    Rake::Task[:build_deb].invoke('pdebuild', @default_cow, 'TRUE')
+    Rake::Task[:build_deb].invoke('pdebuild', @default_cow, 'devel')
   end
 
   desc "Create debs from this git repository using all cows specified in build_defaults yaml"
@@ -101,7 +101,7 @@ namespace :pl do
     @cows.split(' ').each do |cow|
       Rake::Task["package:tar"].invoke
       Rake::Task[:build_deb].reenable
-      Rake::Task[:build_deb].invoke('pdebuild', cow, 'TRUE')
+      Rake::Task[:build_deb].invoke('pdebuild', cow, 'devel')
     end
   end
 end

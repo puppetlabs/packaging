@@ -5,8 +5,8 @@ require 'yaml'
 require 'benchmark'
 require 'erb'
 
-@project_specs ||= YAML.load(File.read('ext/project_data.yaml'))
 begin
+  @project_specs          ||= YAML.load_file('ext/project_data.yaml')
   @name                   = @project_specs['project']
   @author                 = @project_specs['author']
   @email                  = @project_specs['email']
@@ -25,8 +25,8 @@ rescue
   exit 1
 end
 
-@pkg_defaults ||= YAML.load_file('ext/build_defaults.yaml')
 begin
+  @pkg_defaults   ||= YAML.load_file('ext/build_defaults.yaml')
   @default_cow    = ENV['COW']          || @pkg_defaults['default_cow']
   @cows           = ENV['COW']          || @pkg_defaults['cows']
   @pbuild_conf    = ENV['PBUILDCONF']   || @pkg_defaults['pbuild_conf']

@@ -15,8 +15,8 @@ redhat spec file, and an osx preflight and plist.
 The top level Rakefile in the project should have the following added:
 ```ruby
 Dir['ext/packaging/tasks/**/*'].sort.each { |t| load t }
-@build_defaults ||= YAML.load(File.read('ext/build_defaults.yaml'))
 begin
+  @build_defaults ||= YAML.load_file('ext/build_defaults.yaml')
   @packaging_url  = @build_defaults['packaging_url']
   @packaging_repo = @build_defaults['packaging_repo']
 rescue

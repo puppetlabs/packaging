@@ -30,12 +30,12 @@ def build_rpm_with_mock(is_rc, subdir)
   end
 
   mocks.split(' ').each do |mock_config|
-    family  = mock_el_family mock_config
-    version = mock_el_ver mock_config
+    family  = mock_el_family(mock_config)
+    version = mock_el_ver(mock_config)
     arch    = mock_config.split('-')[2]
     result  = "/var/lib/mock/#{mock_config}/result/*.rpm"
 
-    mock mock_config, srpm_file
+    mock(mock_config, srpm_file)
 
     Dir[result].each do |rpm|
       rpm.strip!
@@ -51,16 +51,16 @@ def build_rpm_with_mock(is_rc, subdir)
 
       case rpm
         when /debuginfo/
-          rm_rf rpm
+          rm_rf(rpm)
         when /src\.rpm/
-          cp_pr rpm, "pkg/#{family}/#{version}/#{subdir}/SRPMS"
+          cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/SRPMS")
         when /i.?86/
-          cp_pr rpm, "pkg/#{family}/#{version}/#{subdir}/i386"
+          cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/i386")
         when /x86_64/
-          cp_pr rpm, "pkg/#{family}/#{version}/#{subdir}/x86_64"
+          cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/x86_64")
         when /noarch/
-          cp_pr rpm, "pkg/#{family}/#{version}/#{subdir}/i386"
-          ln "pkg/#{family}/#{version}/#{subdir}/i386/#{File.basename rpm}", "pkg/#{family}/#{version}/#{subdir}/x86_64/"
+          cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/i386")
+          ln("pkg/#{family}/#{version}/#{subdir}/i386/#{File.basename rpm}", "pkg/#{family}/#{version}/#{subdir}/x86_64/")
       end
     end
   end

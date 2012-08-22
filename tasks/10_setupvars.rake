@@ -36,6 +36,7 @@ begin
   @gpg_name       = ENV['GPG_NAME']     || @pkg_defaults['gpg_name']
   @gpg_key        = ENV['GPG_KEY']      || @pkg_defaults['gpg_key']
   @build_gem      = ENV['GEM']          || @pkg_defaults['build_gem']
+  @build_dmg      = ENV['DMG']          || @pkg_defaults['build_dmg']
   @yum_host       = @pkg_defaults['yum_host']
   @yum_repo_path  = @pkg_defaults['yum_repo_path']
   @apt_host       = @pkg_defaults['apt_host']

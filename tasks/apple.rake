@@ -151,17 +151,20 @@ def pack_source
   end
 end
 
-namespace :package do
-  desc "Task for building an Apple Package"
-  task :apple => [:setup] do
-    # Test for Root and Packagemaker binary
-    raise "Please run rake as root to build Apple Packages" unless Process.uid == 0
-    raise "Packagemaker must be installed. Please install XCode Tools" unless \
-      File.exists?('/Developer/usr/bin/packagemaker')
+if @build_dmg or @build_dmg == 'TRUE' or @build_dmg == 'true'
+  namespace :package do
+    desc "Task for building an Apple Package"
+    task :apple => [:setup] do
+      # Test for Root and Packagemaker binary
+      raise "Please run rake as root to build Apple Packages" unless Process.uid == 0
+      raise "Packagemaker must be installed. Please install XCode Tools" unless \
+        File.exists?('/Developer/usr/bin/packagemaker')
 
-    make_directory_tree
-    pack_source
-    build_dmg
-    chmod_R(0775, "#{pwd}/pkg")
+      make_directory_tree
+      pack_source
+      build_dmg
+      chmod_R(0775, "#{pwd}/pkg")
+    end
   end
 end
+

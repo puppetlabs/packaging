@@ -181,3 +181,7 @@ def git_commit_file(file)
   end
 end
 
+def ship_gem(file)
+  %x{gem push #{file}}
+end
+

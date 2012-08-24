@@ -18,6 +18,13 @@ SED           = '/usr/bin/sed'
 
 # Setup task to populate all the variables
 task :setup do
+  # Read the Apple file-mappings
+  begin
+    @source_files        = YAML.load_file('ext/osx/file_mapping.yaml')
+  rescue
+    STDERR.puts "Could not load Apple file mappings from 'ext/osx/file_mapping.yaml'"
+    exit 1
+  end
   @package_name          = @name
   @title                 = "#{@name}-#{@version}"
   @reverse_domain        = "com.#{@packager}.#{@package_name}"
@@ -32,7 +39,7 @@ end
 # description:  This method sets up the directory structure that packagemaker
 #               needs to build a package. A prototype.plist file (holding
 #               package-specific options) is built from an ERB template located
-#               in the tasks/rake/templates directory.
+#               in the ext/osx directory.
 def make_directory_tree
   project_tmp    = "#{get_temp}/#{@package_name}"
   @scratch       = "#{project_tmp}/#{@title}"
@@ -45,7 +52,6 @@ def make_directory_tree
   puts "Cleaning Tree: #{project_tmp}"
   rm_rf(project_tmp)
   @working_tree.each do |key,val|
-    puts "Creating: #{val}"
     mkdir_p(val)
   end
 
@@ -116,17 +122,22 @@ def pack_source
   source = pwd
 
   # Make all necessary directories
-  directories = ["#{work}/usr/bin",
-                 "#{work}/usr/share/doc/#{@package_name}",
-                 "#{work}/usr/lib/ruby/site_ruby/1.8/#{@package_name}",
-                 "#{work}/var/lib/#{@package_name}",
-                 "#{work}/etc"]
-  mkdir_p(directories)
+  @source_files.each_value do |files|
+    files.each_value do |params|
+      mkdir_p "#{work}/#{params['path']}"
+    end
+  end
 
-  # Install necessary files
-  system("#{DITTO} #{source}/bin/ #{work}/usr/bin")
-  system("#{DITTO} #{source}/lib/ #{work}/usr/lib/ruby/site_ruby/1.8/")
-  system("#{DITTO} #{source}/ext/#{@name}.yaml #{work}/etc")
+  # Install directory contents into place
+  unless @source_files['directories'].nil?
+    @source_files['directories'].each do |dir, params|
+      unless FileList["#{source}/#{dir}/*"].empty?
+        cmd = "#{DITTO} #{source}/#{dir}/ #{work}/#{params['path']}"
+        puts cmd
+        system(cmd)
+      end
+    end
+  end
 
   # Setup a preflight script and replace variables in the files with
   # the correct paths.
@@ -135,19 +146,37 @@ def pack_source
   system("#{SED} -i '' \"s\#{SITELIBDIR}\#/usr/lib/ruby/site_ruby/1.8\#g\" #{@working_tree['scripts']}/preflight")
   system("#{SED} -i '' \"s\#{BINDIR}\#/usr/bin\#g\" #{@working_tree['scripts']}/preflight")
 
-  # Install documentation (matching for files with capital letters)
-  Dir.foreach("#{source}") do |file|
-    system("#{INSTALL} -o root -g wheel -m 644 #{source}/#{file} #{work}/usr/share/doc/#{@package_name}") if file =~ /^[A-Z][A-Z]/
+  # Do a run through first setting the specified permissions then
+  # making sure 755 is set for all directories
+  unless @source_files['directories'].nil?
+    @source_files['directories'].each do |dir, params|
+      owner = params['owner']
+      group = params['group']
+      perms = params['perms']
+      path  = params['path']
+      chmod_R(Integer(perms), "#{work}/#{path}")
+      chown_R(owner, group, "#{work}/#{path}")
+      chmod(0755, "#{work}/#{path}")
+      Dir["#{work}/#{path}/**/*"].each do |file|
+        chmod(0755, file) if File.directory?(file)
+      end
+    end
   end
 
-  # Set Permissions
-  executable_directories = [ "#{work}/usr/bin", ]
-  chmod_R(0755, executable_directories)
-  chown_R('root', 'wheel', directories)
-  chmod_R(0644, "#{work}/usr/lib/ruby/site_ruby/1.8/")
-  chown_R('root', 'wheel', "#{work}/usr/lib/ruby/site_ruby/1.8/")
-  Dir["#{work}/usr/lib/ruby/site_ruby/1.8/**/*"].each do |file|
-    chmod(0755, file) if File.directory?(file)
+  # Install any files
+  unless @source_files['files'].nil?
+    @source_files['files'].each do |file, params|
+      owner = params['owner']
+      group = params['group']
+      perms = params['perms']
+      dest  = params['path']
+      # Allow for regexs like [A-Z]*
+      FileList[file].each do |file|
+        cmd = "#{INSTALL} -o #{owner} -g #{group} -m #{perms} #{source}/#{file} #{work}/#{dest}"
+        puts cmd
+        system(cmd)
+      end
+    end
   end
 end
 

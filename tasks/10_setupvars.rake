@@ -19,6 +19,7 @@ begin
   @gem_test_files         = @project_specs['gem_test_files']
   @gem_executables        = @project_specs['gem_executables']
   @gem_dependencies       = @project_specs['gem_dependencies']
+  @gem_rdoc_options       = @project_specs['gem_rdoc_options']
 rescue
   STDERR.puts "There was an error loading the project specifications from the 'ext/project_data.yaml' file."
   exit 1

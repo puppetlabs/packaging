@@ -14,14 +14,14 @@ def build_rpm(buildarg = "-bs")
   cp_p "pkg/#{@name}-#{@version}.tar.gz", "#{temp}/SOURCES"
   erb "ext/redhat/#{@name}.spec.erb", "#{temp}/SPECS/#{@name}.spec"
   sh "rpmbuild #{args} #{buildarg} --nodeps #{temp}/SPECS/#{@name}.spec"
-  output = `find #{temp} -name *.rpm`
   mv FileList["#{temp}/SRPMS/*.rpm"], "pkg/srpm"
   mv FileList["#{temp}/RPMS/*/*.rpm"], "pkg/rpm"
   rm_rf temp
   puts
+  output = FileList['pkg/*/*.rpm']
   puts "Wrote:"
-  output.each_line do | line |
-    puts "#{`pwd`.strip}/pkg/rpm/#{line.split('/')[-1]}"
+  output.each do | line |
+    puts line
   end
 end
 

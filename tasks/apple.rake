@@ -33,6 +33,10 @@ task :setup do
                            @version.split('.')[2].split('-')[0].split('rc')[0]
   @pm_restart            = 'None'
   @build_date            = timestamp
+  @apple_bindir          = '/usr/bin'
+  @apple_sbindir         = '/usr/sbin'
+  @apple_libdir          = '/usr/lib/ruby/site_ruby/1.8'
+  @apple_docdir          = '/usr/share/doc'
 end
 
 # method:       make_directory_tree
@@ -143,8 +147,6 @@ def pack_source
   # the correct paths.
   chown('root', 'wheel', "#{@working_tree['scripts']}/preflight")
   chmod(0644, "#{@working_tree['scripts']}/preflight")
-  system("#{SED} -i '' \"s\#{SITELIBDIR}\#/usr/lib/ruby/site_ruby/1.8\#g\" #{@working_tree['scripts']}/preflight")
-  system("#{SED} -i '' \"s\#{BINDIR}\#/usr/bin\#g\" #{@working_tree['scripts']}/preflight")
 
   # Do a run through first setting the specified permissions then
   # making sure 755 is set for all directories

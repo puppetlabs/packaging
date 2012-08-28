@@ -5,23 +5,23 @@ require 'yaml'
 require 'erb'
 
 begin
-  @project_specs          ||= YAML.load_file('ext/project_data.yaml')
-  @name                   = @project_specs['project']
-  @author                 = @project_specs['author']
-  @email                  = @project_specs['email']
-  @homepage               = @project_specs['homepage']
-  @summary                = @project_specs['summary']
-  @description            = @project_specs['description']
-  @files                  = @project_specs['files']
-  @version_file           = @project_specs['version_file']
-  @gem_files              = @project_specs['gem_files']
-  @gem_require_path       = @project_specs['gem_require_path']
-  @gem_test_files         = @project_specs['gem_test_files']
-  @gem_executables        = @project_specs['gem_executables']
-  @gem_dependencies       = @project_specs['gem_dependencies']
-  @gem_devel_dependencies = @project_specs['gem_devel_dependencies']
-  @gem_rdoc_options       = @project_specs['gem_rdoc_options']
-  @gem_forge_project      = @project_specs['gem_forge_project']
+  @project_specs            ||= YAML.load_file('ext/project_data.yaml')
+  @name                     = @project_specs['project']
+  @author                   = @project_specs['author']
+  @email                    = @project_specs['email']
+  @homepage                 = @project_specs['homepage']
+  @summary                  = @project_specs['summary']
+  @description              = @project_specs['description']
+  @files                    = @project_specs['files']
+  @version_file             = @project_specs['version_file']
+  @gem_files                = @project_specs['gem_files']
+  @gem_require_path         = @project_specs['gem_require_path']
+  @gem_test_files           = @project_specs['gem_test_files']
+  @gem_executables          = @project_specs['gem_executables']
+  @gem_runtime_dependencies = @project_specs['gem_runtime_dependencies']
+  @gem_devel_dependencies   = @project_specs['gem_devel_dependencies']
+  @gem_rdoc_options         = @project_specs['gem_rdoc_options']
+  @gem_forge_project        = @project_specs['gem_forge_project']
 rescue
   STDERR.puts "There was an error loading the project specifications from the 'ext/project_data.yaml' file."
   exit 1

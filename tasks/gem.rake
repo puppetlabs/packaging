@@ -19,6 +19,10 @@ if @build_gem == TRUE or @build_gem == 'true' or @build_gem == 'TRUE'
       s.add_dependency("#{key}", "#{value}")
     end unless @gem_dependencies.nil?
 
+    @gem_devel_dependencies.each do |key, value|
+      s.add_dependency("#{key}", "#{value}")
+    end unless @gem_devel_dependencies.nil?
+
     @gem_rdoc_options.each do |option|
       s.rdoc_options << option
     end unless @gem_rdoc_options.nil?

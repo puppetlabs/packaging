@@ -13,12 +13,21 @@ if @build_gem == TRUE or @build_gem == 'true' or @build_gem == 'TRUE'
     s.require_path = @gem_require_path
     s.test_files = FileList[@gem_test_files.split(' ')]
     s.executables = @gem_executables
-    unless @gem_dependencies.nil?
-      @gem_dependencies.each do |key, value|
-        s.add_dependency("#{key}", "#{value}")
-      end
-    end
+    s.rubyforge_project = @gem_forge_project
+
+    @gem_runtime_dependencies.each do |key, value|
+      s.add_runtime_dependency("#{key}", "#{value}")
+    end unless @gem_runtime_dependencies.nil?
+
+    @gem_devel_dependencies.each do |key, value|
+      s.add_devel_dependency("#{key}", "#{value}")
+    end unless @gem_devel_dependencies.nil?
+
+    @gem_rdoc_options.each do |option|
+      s.rdoc_options << option
+    end unless @gem_rdoc_options.nil?
   end
+
   namespace :package do
     Gem::PackageTask.new(spec) do |pkg|
       pkg.need_tar_gz = true

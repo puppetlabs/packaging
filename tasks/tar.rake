@@ -10,7 +10,7 @@ namespace :package do
     erb("#{workdir}/ext/debian/changelog.erb", "#{workdir}/ext/debian/changelog")
     rm_rf(FileList["#{workdir}/ext/debian/*.erb", "#{workdir}/ext/redhat/*.erb"])
     cd "pkg" do
-      sh "tar --exclude=.gitignore -zcf #{@name}-#{@version}.tar.gz #{@name}-#{@version}"
+      sh "tar --exclude=.gitignore --exclude=ext/#{@packaging_repo} -zcf #{@name}-#{@version}.tar.gz #{@name}-#{@version}"
     end
     rm_rf(workdir)
     puts

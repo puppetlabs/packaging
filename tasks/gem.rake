@@ -1,6 +1,19 @@
 if @build_gem == TRUE or @build_gem == 'true' or @build_gem == 'TRUE'
   require 'rubygems/package_task'
 
+  def glob_gem_files
+    gem_files = []
+    files = FileList[@gem_files.split(' ')]
+    files.each do |file|
+      if File.directory?(file)
+        gem_files << FileList["#{file}/**/*"].exclude("ext/packaging/")
+      else
+        gem_files << file
+      end
+    end
+    gem_files
+  end
+
   spec = Gem::Specification.new do |s|
     s.name = @name
     s.version = @version
@@ -9,7 +22,7 @@ if @build_gem == TRUE or @build_gem == 'true' or @build_gem == 'TRUE'
     s.homepage = @homepage
     s.summary = @summary
     s.description = @description
-    s.files = FileList[@gem_files.split(' ')]
+    s.files = glob_gem_files
     s.require_path = @gem_require_path
     s.test_files = FileList[@gem_test_files.split(' ')]
     s.executables = @gem_executables

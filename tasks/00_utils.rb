@@ -8,6 +8,11 @@ def check_tool(tool)
   end
 end
 
+def find_tool(tool)
+  location = %x{which #{tool}}.chomp
+  location if $?.success?
+end
+
 def check_file(file)
   unless File.exist?(file)
     STDERR.puts "#{file} file not found...exiting"
@@ -141,8 +146,14 @@ def start_keychain
 end
 
 def gpg_sign_file(file)
-   check_tool('gpg')
-   %x{/usr/bin/gpg --armor --detach-sign -u #{@gpg_key} #{file}}
+  gpg ||= find_tool('gpg')
+  
+  if gpg
+    sh "#{gpg} --armor --detach-sign -u #{@gpg_key} #{file}"
+  else
+    STDERR.puts "No gpg available. Cannot sign tarball. Exiting..."
+    exit 1
+  end
 end
 
 def mkdir_pr *args

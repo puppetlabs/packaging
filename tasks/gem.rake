@@ -28,12 +28,14 @@ if @build_gem == TRUE or @build_gem == 'true' or @build_gem == 'TRUE'
     s.executables = @gem_executables
     s.rubyforge_project = @gem_forge_project
 
-    @gem_runtime_dependencies.each do |key, value|
-      s.add_runtime_dependency("#{key}", "#{value}")
+    @gem_runtime_dependencies.each do |gem, version|
+      s.add_runtime_dependency("#{gem}", "#{version}") unless (version.nil? or version.empty?)
+      s.add_runtime_dependency("#{gem}") if (version.nil? or version.empty?)
     end unless @gem_runtime_dependencies.nil?
 
-    @gem_devel_dependencies.each do |key, value|
-      s.add_devel_dependency("#{key}", "#{value}")
+    @gem_devel_dependencies.each do |gem, version|
+      s.add_devel_dependency("#{gem}", "#{version}") unless (version.nil? or version.empty?)
+      s.add_devel_dependency("#{gem}") if (version.nil? or version.empty?)
     end unless @gem_devel_dependencies.nil?
 
     @gem_rdoc_options.each do |option|

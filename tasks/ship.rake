@@ -17,7 +17,7 @@ namespace :pl do
 
   desc "Ship built gem to rubygems"
   task :ship_gem do
-    ship_gem("pkg/#{@name}-#{@version}.gem")
+    ship_gem("pkg/#{@name}-#{@gemversion}.gem")
   end
 
 end

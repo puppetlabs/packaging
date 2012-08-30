@@ -97,16 +97,28 @@ def timestamp
   Time.now.strftime("%Y-%m-%d %H:%M:%S")
 end
 
-def get_version
+def get_dash_version
   if File.exists?('.git')
-    %x{git describe}.chomp.gsub('-', '.').split('.')[0..3].join('.').gsub('v', '')
+    %x{git describe}.chomp.split('-')[0..1].join('-').gsub('v','')
   else
-    %x{pwd}.strip!.split('.')[-1]
+    get_pwd_version
   end
 end
 
+def get_dot_version
+  if File.exists?('.git')
+    %x{git describe}.chomp.gsub('-', '.').split('.')[0..3].join('.').gsub('v', '')
+  else
+    get_pwd_version
+  end
+end
+
+def get_pwd_version
+  %x{pwd}.strip.split('.')[-1]
+end
+
 def get_debversion
-  @version.include?("rc") ? @version.sub(/rc[0-9]+/, '-0.1\0') : @version + "-1#{@packager}1"
+  (@version.include?("rc") ? @version.sub(/rc[0-9]+/, '0.1\0') : "#{@version}-1") + "#{@packager}#{get_debrelease}"
 end
 
 def get_origversion
@@ -121,7 +133,11 @@ def get_version_file_version
   File.open( @version_file ) {|io| io.grep(/VERSION = /)}[0].split()[-1]
 end
 
-def get_release
+def get_debrelease
+  ENV['RELEASE'] || '1'
+end
+
+def get_rpmrelease
   ENV['RELEASE'] ||
     if @version.include?("rc")
       "0.1" + @version.gsub('-', '_').match(/rc[0-9]+.*/)[0]
@@ -147,7 +163,7 @@ end
 
 def gpg_sign_file(file)
   gpg ||= find_tool('gpg')
-  
+
   if gpg
     sh "#{gpg} --armor --detach-sign -u #{@gpg_key} #{file}"
   else

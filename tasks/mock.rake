@@ -1,7 +1,7 @@
 
 def mock(mock_config, srpm)
   check_tool('mock')
-  %x{mock -r #{mock_config} #{srpm}}
+  sh "mock -r #{mock_config} #{srpm}"
 end
 
 def srpm_file

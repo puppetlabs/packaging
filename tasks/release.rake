@@ -3,7 +3,7 @@ namespace :package do
   task :versionbump  do
     old_version =  get_version_file_version
     contents = IO.read(@version_file)
-    new_version = '"' + get_version.to_s.strip + '"'
+    new_version = '"' + @version.to_s.strip + '"'
     if contents.match("VERSION = #{old_version}")
       contents.gsub!("VERSION = #{old_version}", "VERSION = #{new_version}")
     else

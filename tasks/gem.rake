@@ -16,7 +16,7 @@ if @build_gem == TRUE or @build_gem == 'true' or @build_gem == 'TRUE'
 
   spec = Gem::Specification.new do |s|
     s.name = @name
-    s.version = @version
+    s.version = @gemversion
     s.author = @author
     s.email = @email
     s.homepage = @homepage

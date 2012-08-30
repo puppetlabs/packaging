@@ -51,8 +51,9 @@ rescue
 end
 
 @build_root   ||= Dir.pwd
-@version      ||= get_version
+@version      ||= get_dash_version
+@gemversion   ||= get_dot_version
 @debversion   ||= get_debversion
 @origversion  ||= get_origversion
 @rpmversion   ||= get_rpmversion
-@release      ||= get_release
+@rpmrelease   ||= get_rpmrelease

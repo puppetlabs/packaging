@@ -229,3 +229,8 @@ def ship_gem(file)
   %x{gem push #{file}}
 end
 
+def x(v)
+  puts %[#{v}]
+  print %x[#{v}]
+end
+

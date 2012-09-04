@@ -45,6 +45,7 @@ begin
   @apt_host       = @pkg_defaults['apt_host']
   @apt_repo_url   = @pkg_defaults['apt_repo_url']
   @apt_repo_path  = @pkg_defaults['apt_repo_path']
+  @ips_repo       = @pkg_defaults['ips_repo']
 rescue
   STDERR.puts "There was an error loading the packaging defaults from the 'ext/build_defaults.yaml' file."
   exit 1
@@ -53,6 +54,7 @@ end
 @build_root   ||= Dir.pwd
 @version      ||= get_dash_version
 @gemversion   ||= get_dot_version
+@ipsversion   ||= get_ips_version
 @debversion   ||= get_debversion
 @origversion  ||= get_origversion
 @rpmversion   ||= get_rpmversion

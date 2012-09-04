@@ -15,11 +15,12 @@ namespace :pl do
     rsync_to('pkg/deb/', @apt_host, @apt_repo_path)
   end
 
-  desc "Ship built gem to rubygems"
-  task :ship_gem do
-    ship_gem("pkg/#{@name}-#{@gemversion}.gem")
+  if @build_gem == TRUE or @build_gem == 'true' or @build_gem == 'TRUE'
+    desc "Ship built gem to rubygems"
+    task :ship_gem do
+      ship_gem("pkg/#{@name}-#{@gemversion}.gem")
+    end
   end
-
 end
 
 

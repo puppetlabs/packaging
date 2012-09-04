@@ -105,6 +105,23 @@ def get_dash_version
   end
 end
 
+def get_ips_version
+  if File.exists?('.git')
+    desc = %x{git describe}.chomp
+    osrelease = %x{uname -r}.chomp
+    varr = desc.gsub(/[a-zA-Z]+/,' ').split(' ')
+    ver = varr[0]
+    res = case varr[1]
+    when /(\d+)-(\d+)/    # rcX-build
+      "#{ver},#{osrelease}-#{$1}.#{$2}"
+    else
+      "#{ver},#{osrelease}"
+    end
+  else
+    get_pwd_version
+  end
+end
+
 def get_dot_version
   if File.exists?('.git')
     %x{git describe}.chomp.gsub('-', '.').split('.')[0..3].join('.').gsub('v', '')
@@ -210,5 +227,10 @@ end
 
 def ship_gem(file)
   %x{gem push #{file}}
+end
+
+def x(v)
+  puts %[#{v}]
+  print %x[#{v}]
 end
 

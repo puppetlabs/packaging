@@ -147,7 +147,13 @@ def get_rpmversion
 end
 
 def get_version_file_version
-  File.open( @version_file ) {|io| io.grep(/VERSION = /)}[0].split()[-1]
+  # Match version files containing 'VERSION = "x.x.x"' and just x.x.x
+  contents = IO.read(@version_file)
+  if version_string = contents.match(/VERSION =.*/)
+    version_string.to_s.split()[-1]
+  else
+    contents
+  end
 end
 
 def get_debrelease

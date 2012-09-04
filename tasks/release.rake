@@ -6,8 +6,10 @@ namespace :package do
     new_version = '"' + @version.to_s.strip + '"'
     if contents.match("VERSION = #{old_version}")
       contents.gsub!("VERSION = #{old_version}", "VERSION = #{new_version}")
-    else
+    elsif contents.match("#{@name.upcase}VERSION = #{old_version}")
       contents.gsub!("#{@name.upcase}VERSION = #{old_version}", "#{@name.upcase}VERSION = #{new_version}")
+    else
+      contents.gsub!(old_version, @version)
     end
     file = File.open(@version_file, 'w')
     file.write contents

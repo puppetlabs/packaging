@@ -19,9 +19,7 @@ namespace :package do
 
     # Process templates and write the initial manifest
     task :prototmpl do
-      File.open(workdir + '/' + @name + '.p5m.x', 'w') do |f|
-        f.puts ERB.new(File.read('ext/ips/facter.p5m.erb')).result(binding)
-      end
+      erb("ext/ips/#{@name}.p5m.erb", workdir + '/' + @name + '.p5m.x')
     end
 
     # Update manifest to include the installation image information.
@@ -44,7 +42,7 @@ namespace :package do
 
     # Generate and resolve dependency list
     task :license => :protomogrify do
-      x %[cp LICENSE #{proto}/facter.license]
+      x %[cp LICENSE #{proto}/#{@name}.license]
     end
 
     # Ensure that our manifest is sane.
@@ -52,8 +50,9 @@ namespace :package do
       x %[pkglint #{workdir}/#{@name}.p5m]
     end
 
+    # the older versions may require --fmri-in-manifest
     task :package => :lint do
-      x %[pkgsend -s #{@ips_repo} publish -d #{proto} #{workdir}/#{@name}.p5m]
+      x %[pkgsend -s #{@ips_repo} publish -d #{proto} --fmri-in-manifest #{workdir}/#{@name}.p5m]
     end
 
     task :retrieve do

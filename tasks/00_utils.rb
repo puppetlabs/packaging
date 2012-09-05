@@ -110,7 +110,7 @@ def get_ips_version
     desc = %x{git describe}.chomp
     osrelease = %x{uname -r}.chomp
     varr = desc.gsub(/[a-zA-Z]+/,' ').split(' ')
-    ver = varr[0]
+    ver = varr[0].gsub('-', '')
     res = case varr[1]
     when /(\d+)-(\d+)/    # rcX-build
       "#{ver},#{osrelease}-#{$1}.#{$2}"

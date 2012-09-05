@@ -135,7 +135,7 @@ def get_pwd_version
 end
 
 def get_debversion
-  (@version.include?("rc") ? @version.sub(/rc[0-9]+/, '0.1\0') : "#{@version}-1") + "#{@packager}#{get_debrelease}"
+  (@version.include?("rc") ? @version.sub(/rc[0-9]+/, '0.1\0') : "#{@version.gsub('-','.')}-1") + "#{@packager}#{get_debrelease}"
 end
 
 def get_origversion

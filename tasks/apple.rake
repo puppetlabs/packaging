@@ -32,7 +32,7 @@ task :setup do
   @package_minor_version = @version.split('.')[1] +
                            @version.split('.')[2].split('-')[0].split('rc')[0]
   @pm_restart            = 'None'
-  @build_date            = timestamp
+  @build_date            = Time.new.strftime("%Y-%m-%dT%H:%M:%SZ")
   @apple_bindir          = '/usr/bin'
   @apple_sbindir         = '/usr/sbin'
   @apple_libdir          = '/usr/lib/ruby/site_ruby/1.8'
@@ -81,7 +81,7 @@ def build_dmg
   dmg_file          = "#{@title}.dmg"
   package_file      = "#{@title}.pkg"
   pm_extra_args     = '--verbose --no-recommend --no-relocate'
-  package_target_os = '10.5'
+  package_target_os = '10.4'
 
   # Build .pkg file
   system("sudo #{PACKAGEMAKER} --root #{@working_tree['working']} \

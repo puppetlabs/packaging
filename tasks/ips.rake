@@ -3,6 +3,10 @@ namespace :package do
   namespace :ips do
     workdir = "pkg/ips"
     proto = workdir + '/proto'
+    repo = workdir + '/repo'
+    pkgs = workdir + '/pkgs'
+    repouri = "file://#{`pwd`.strip + '/' + repo}"
+    artifact = "#{pkgs}/#{@name}@#{@ipsversion}.p5p"
 
     # Create a source repo
     # We dont clean the base pkg directory only ips work dir.
@@ -50,27 +54,22 @@ namespace :package do
       x %[pkglint #{workdir}/#{@name}.p5m]
     end
 
-    # the older versions may require --fmri-in-manifest
     task :package => :lint do
-      x %[pkgsend -s #{@ips_repo} publish -d #{proto} --fmri-in-manifest #{workdir}/#{@name}.p5m]
-    end
+      x %[rm -rf #{pkgs}]
+      x %[mkdir -p #{pkgs}]
+      x %[pkgrepo create #{repo}]
+      x %[pkgrepo set -s #{repo} publisher/prefix=puppetlabs.com]
+      x %[pkgsend -s #{repouri} publish -d #{proto} --fmri-in-manifest #{workdir}/#{@name}.p5m]
+      x %[rm -f #{artifact}]
+      x %[pkgrecv -s #{repouri} -a -d #{artifact} #{@name}@#{@ipsversion}]
+     end
 
-    task :retrieve do
-      %x[rm #{workdir}/#{@name}.p5p]
-      x %[pkgrecv -s #{@ips_repo} -a -d #{workdir}/#{@name}.p5p #{@name}@#{@ipsversion}]
-      x %[pkg list -n -g #{workdir}/#{@name}.p5p #{@name}@#{@ipsversion}]
-    end
-
-    task :dry_install => :retrieve do
-      x %[pkg install -nv -g #{workdir}/#{@name}.p5p #{@name}@#{@ipsversion}]
-    end
-
-    task :install_cmd => :retrieve do
-      puts %x[pkg install -nv -g #{workdir}/#{@name}.p5p #{@name}@#{@ipsversion}]
+    task :dry_install do
+      x %[pkg install -nv -g #{artifact} #{@name}@#{@ipsversion}]
     end
   end
 
-  desc "Uploads an ips version"
+  desc "Creates an ips version"
   task :ips do
     Rake::Task['package:ips:prepare'].invoke
     Rake::Task['package:ips:package'].invoke

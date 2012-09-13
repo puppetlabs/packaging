@@ -15,6 +15,14 @@ namespace :pl do
     rsync_to('pkg/deb/', @apt_host, @apt_repo_path)
   end
 
+  desc "Update remote ips repository on #{@ips_host}"
+  task :update_ips_repo do
+    rsync_to('pkg/ips/pkgs', @ips_host, @ips_store)
+    remote_ssh_cmd(@ips_host, "pkgrecv -s #{@ips_store}/pkgs/#{@name}@#{@ipsversion}.p5p -d #{@ips_repo} \\*")
+    remote_ssh_cmd(@ips_host, "pkgrepo refresh -s #{@ips_repo}")
+    remote_ssh_cmd(@ips_host, "/usr/sbin/svcadm restart svc:/application/pkg/server")
+  end
+
   if @build_gem == TRUE or @build_gem == 'true' or @build_gem == 'TRUE'
     desc "Ship built gem to rubygems"
     task :ship_gem do

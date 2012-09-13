@@ -35,6 +35,8 @@ begin
   @rc_mocks       = ENV['MOCK']         || @pkg_defaults['rc_mocks']
   @gpg_name       = ENV['GPG_NAME']     || @pkg_defaults['gpg_name']
   @gpg_key        = ENV['GPG_KEY']      || @pkg_defaults['gpg_key']
+  @certificate_pem= ENV['CERT_PEM']     || @pkg_defaults['certificate_pem']
+  @privatekey_pem = ENV['PRIVATE_PEM']  || @pkg_defaults['privatekey_pem']
   @build_gem      = ENV['GEM']          || @pkg_defaults['build_gem']
   @build_dmg      = ENV['DMG']          || @pkg_defaults['build_dmg']
   @yum_host       = @pkg_defaults['yum_host']
@@ -43,6 +45,8 @@ begin
   @apt_repo_url   = @pkg_defaults['apt_repo_url']
   @apt_repo_path  = @pkg_defaults['apt_repo_path']
   @ips_repo       = @pkg_defaults['ips_repo']
+  @ips_store      = @pkg_defaults['ips_store']
+  @ips_host       = @pkg_defaults['ips_host']
 rescue
   STDERR.puts "There was an error loading the packaging defaults from the 'ext/build_defaults.yaml' file."
   exit 1

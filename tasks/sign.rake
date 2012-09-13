@@ -15,6 +15,13 @@ def sign_deb_changes(file)
   %x{debsign --re-sign -k#{@gpg_key} #{file}}
 end
 
+# requires atleast a self signed prvate key and certificate pair
+def sign_ips(pkg)
+  %x{pkgsign -s pkg/ips/repo/  -k #{@privatekey_pem} -c #{@certificate_pem} #{@name}@#{@ipsversion}}
+  %x{rm -f #{pkg}}
+  %x{pkgrecv -s pkg/ips/repo -a -d #{pkg} #{@name}@#{@ipsversion}}
+end
+
 namespace :pl do
   desc "Sign the tarball, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_tar do
@@ -33,6 +40,13 @@ namespace :pl do
     sign_el5 el5_rpms
     puts "Signing el6 and fedora rpms..."
     sign_modern modern_rpms
+  end
+
+  desc "Sign ips package, Defaults to PL Key, pass KEY to override"
+  task :sign_ips do
+    ips_pkgs    = Dir["pkg/ips/pkgs/*.p5p"].join(' ')
+    puts "Signing ips packages..."
+    sign_ips ips_pkgs
   end
 
   desc "Check if all rpms are signed"

@@ -15,18 +15,18 @@ if @build_gem == TRUE or @build_gem == 'true' or @build_gem == 'TRUE'
   end
 
   spec = Gem::Specification.new do |s|
-    s.name = @name
-    s.version = @gemversion
-    s.author = @author
-    s.email = @email
-    s.homepage = @homepage
-    s.summary = @summary
-    s.description = @description
-    s.files = glob_gem_files
-    s.require_path = @gem_require_path
-    s.test_files = FileList[@gem_test_files.split(' ')]
-    s.executables = @gem_executables
-    s.rubyforge_project = @gem_forge_project
+    s.name = @name                                        unless @name.nil?
+    s.version = @gemversion                               unless @gemversion.nil?
+    s.author = @author                                    unless @author.nil?
+    s.email = @email                                      unless @email.nil?
+    s.homepage = @homepage                                unless @homepage.nil?
+    s.summary = @summary                                  unless @summary.nil?
+    s.description = @description                          unless @description.nil?
+    s.files = glob_gem_files                              unless glob_gem_files.nil?
+    s.executables = @gem_executables                      unless @gem_executables.nil?
+    s.require_path = @gem_require_path                    unless @gem_require_path.nil?
+    s.test_files = FileList[@gem_test_files.split(' ')]   unless @gem_test_files.nil?
+    s.rubyforge_project = @gem_forge_project              unless @gem_forge_project.nil?
 
     @gem_runtime_dependencies.each do |gem, version|
       s.add_runtime_dependency("#{gem}", "#{version}") unless (version.nil? or version.empty?)

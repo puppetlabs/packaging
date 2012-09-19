@@ -7,7 +7,7 @@ namespace :pl do
 
   desc "Update remote rpm repodata on #{@yum_host}"
   task :update_yum_repo do
-    remote_ssh_cmd(@yum_host, '/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -I /opt/repository/ mk_repo')
+    remote_ssh_cmd(@yum_host, '/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile mk_repo')
   end
 
   desc "Ship cow-built debs to #{@apt_host}"

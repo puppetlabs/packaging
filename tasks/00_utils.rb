@@ -107,16 +107,10 @@ end
 
 def get_ips_version
   if File.exists?('.git')
-    desc = %x{git describe}.chomp
+    desc = %x{git describe}.chomp.split(/[.-]/)
+    commits = %x{git log --oneline --no-merges | wc -l}.chomp.strip
     osrelease = %x{uname -r}.chomp
-    varr = desc.gsub(/[a-zA-Z]+/,' ').split(' ')
-    ver = varr[0].gsub('-', '')
-    res = case varr[1]
-    when /(\d+)-(\d+)/    # rcX-build
-      "#{ver},#{osrelease}-#{$1}.#{$2}"
-    else
-      "#{ver},#{osrelease}"
-    end
+    "%s.%s.%s,#{osrelease}-%s" % [ desc[0],desc[1], desc[2], commits]
   else
     get_pwd_version
   end

@@ -1,20 +1,54 @@
-namespace :package do
-  desc "Update the version in #{@version_file} to current and commit."
-  task :versionbump  do
-    old_version =  get_version_file_version
-    contents = IO.read(@version_file)
-    new_version = '"' + @version.to_s.strip + '"'
-    if contents.match("VERSION = #{old_version}")
-      contents.gsub!("VERSION = #{old_version}", "VERSION = #{new_version}")
-    elsif contents.match("#{@name.upcase}VERSION = #{old_version}")
-      contents.gsub!("#{@name.upcase}VERSION = #{old_version}", "#{@name.upcase}VERSION = #{new_version}")
-    else
-      contents.gsub!(old_version, @version)
+# These tasks are "release" chains that couple as much of the release process for a package as possible
+
+namespace :pl do
+  if @build_gem == TRUE or @build_gem == 'true' or @build_gem == 'TRUE'
+    desc "Build and ship a gem"
+    task :release_gem do
+      invoke_task("package:gem")
+      if confirm_ship(FileList["pkg/*.gem"])
+        invoke_task("pl:ship_gem")
+      end
     end
-    file = File.open(@version_file, 'w')
-    file.write contents
-    file.close
-    git_commit_file(@version_file)
+  end
+
+  desc "Release deb RCs, e.g. package:tar, pl:{deb_all_rc, sign_deb_changes, ship_debs}"
+  task :release_deb_rc do
+    invoke_task("pl:deb_all_rc")
+    invoke_task("pl:sign_deb_changes")
+    if confirm_ship(FileList["pkg/deb/**/*"])
+      invoke_task("pl:ship_debs")
+    end
+  end
+
+  desc "Release deb FINALs, e.g. package:tar, pl:{deb_all, sign_deb_changes, ship_debs}"
+  task :release_deb_final do
+    invoke_task("pl:deb_all")
+    invoke_task("pl:sign_deb_changes")
+    if confirm_ship(FileList["pkg/deb/**/*"])
+      invoke_task("pl:ship_debs")
+    end
+  end
+
+  desc "Release rpm RCs, e.g. package:tar, pl:{mock_rc, sign_rpms, ship_rpms, update_yum_repo}"
+  task :release_rpm_rc do
+    invoke_task("pl:mock_rc")
+    invoke_task("pl:sign_rpms")
+    if confirm_ship(FileList["pkg/el/**/*", "pkg/fedora/**/*"])
+      invoke_task("pl:ship_rpms")
+      invoke_task("pl:update_yum_repo")
+    end
+  end
+
+  desc "Release rpm FINALs, e.g. package:tar, pl:{mock_final, sign_rpms, ship_rpms, update_yum_repo}"
+  task :release_rpm_final do
+    invoke_task("pl:mock_final")
+    invoke_task("pl:sign_rpms")
+    if confirm_ship(FileList["pkg/el/**/*", "pkg/fedora/**/*"])
+      invoke_task("pl:ship_rpms")
+      invoke_task("pl:update_yum_repo")
+    end
   end
 end
+
+
 

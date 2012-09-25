@@ -13,9 +13,10 @@ end
 
 def update_cow(cow, is_rc = nil)
   ENV['FOSS_DEVEL'] = is_rc
+  ENV['PATH'] = "/usr/sbin:#{ENV['PATH']}"
   set_cow_envs(cow)
   begin
-    sh "sudo cowbuilder --update --override-config --configfile #{@pbuild_conf} --basepath /var/cache/pbuilder/#{cow} --distribution #{ENV['DIST']} --architecture #{ENV['ARCH']}"
+    sh "sudo -E /usr/sbin/cowbuilder --update --override-config --configfile #{@pbuild_conf} --basepath /var/cache/pbuilder/#{cow} --distribution #{ENV['DIST']} --architecture #{ENV['ARCH']}"
   rescue
     STDERR.puts "Couldn't update the cow #{cow}. Perhaps you don't have sudo?"
     exit 1
@@ -49,6 +50,7 @@ task :build_deb, :deb_command, :cow, :devel do |t,args|
   work_dir  = get_temp
   dest_dir  = "#{@build_root}/pkg/deb/#{cow.split('-')[1] unless cow.nil?}"
   check_tool(deb_build)
+  update_cow(cow)
   mkdir_p dest_dir
   deb_args  = { :work_dir => work_dir, :cow => cow, :devel => devel}
   Rake::Task[:prep_deb_tars].reenable

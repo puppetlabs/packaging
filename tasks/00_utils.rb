@@ -260,8 +260,8 @@ end
 
 def confirm_ship(files)
   STDOUT.puts "The following files have been built and are ready to ship:"
-  files.each { |file| STDOUT.puts "\t#{file}\n" }
-  STDOUT.puts "Ship these files??"
+  files.each { |file| STDOUT.puts "\t#{file}\n" unless File.directory?(file) }
+  STDOUT.puts "Ship these files?? [y,n]"
   ask_yes_or_no
 end
 

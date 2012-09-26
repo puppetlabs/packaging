@@ -265,3 +265,8 @@ def confirm_ship(files)
   ask_yes_or_no
 end
 
+def boolean_value(var)
+  return TRUE if (var == TRUE || ( var.is_a?(String) && var.downcase == 'true' ))
+  FALSE
+end
+

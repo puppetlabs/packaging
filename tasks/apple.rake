@@ -182,7 +182,7 @@ def pack_source
   end
 end
 
-if @build_dmg or @build_dmg == 'TRUE' or @build_dmg == 'true'
+if @build_dmg
   namespace :package do
     desc "Task for building an Apple Package"
     task :apple => [:setup] do

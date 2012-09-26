@@ -1,4 +1,4 @@
-if @build_gem == TRUE or @build_gem == 'true' or @build_gem == 'TRUE'
+if @build_gem
   require 'rubygems/package_task'
 
   def glob_gem_files

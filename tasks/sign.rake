@@ -42,11 +42,13 @@ namespace :pl do
     sign_modern modern_rpms
   end
 
-  desc "Sign ips package, Defaults to PL Key, pass KEY to override"
-  task :sign_ips do
-    ips_pkgs    = Dir["pkg/ips/pkgs/*.p5p"].join(' ')
-    puts "Signing ips packages..."
-    sign_ips ips_pkgs
+  if @build_ips
+    desc "Sign ips package, Defaults to PL Key, pass KEY to override"
+    task :sign_ips do
+      ips_pkgs    = Dir["pkg/ips/pkgs/*.p5p"].join(' ')
+      puts "Signing ips packages..."
+      sign_ips ips_pkgs
+    end
   end
 
   desc "Check if all rpms are signed"

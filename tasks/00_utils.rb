@@ -236,16 +236,10 @@ end
 
 def ask_yes_or_no
   answer = STDIN.gets.downcase.chomp
-  case answer
-    when /^y$|^yes$/
-      answer = TRUE
-    when /^n$|^no$/
-      answer = FALSE
-    else
-      puts "Nope, try something like yes or no or y or n, etc:"
-      ask_yes_or_no
-  end
-  answer
+  return TRUE if answer =~ /^y$|^yes$/
+  return FALSE if answer =~ /^n$|^no$/
+  puts "Nope, try something like yes or no or y or n, etc:"
+  ask_yes_or_no
 end
 
 def handle_method_failure(method, args)

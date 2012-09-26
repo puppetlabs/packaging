@@ -13,7 +13,7 @@ namespace :pl do
 
   desc "Release deb RCs, e.g. package:tar, pl:{deb_all_rc, sign_deb_changes, ship_debs}"
   task :release_deb_rc do
-    load_keychain
+    load_keychain if has_tool('keychain')
     invoke_task("pl:deb_all_rc")
     invoke_task("pl:sign_deb_changes")
     if confirm_ship(FileList["pkg/deb/**/*"])
@@ -23,7 +23,7 @@ namespace :pl do
 
   desc "Release deb FINALs, e.g. package:tar, pl:{deb_all, sign_deb_changes, ship_debs}"
   task :release_deb_final do
-    load_keychain
+    load_keychain if has_tool('keychain')
     invoke_task("pl:deb_all")
     invoke_task("pl:sign_deb_changes")
     if confirm_ship(FileList["pkg/deb/**/*"])

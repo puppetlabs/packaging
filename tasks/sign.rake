@@ -29,7 +29,7 @@ namespace :pl do
       STDERR.puts "No tarball exists. Try rake package:tar?"
       exit 1
     end
-    load_keychain
+    load_keychain if has_tool('keychain')
     gpg_sign_file "pkg/#{@name}-#{@version}.tar.gz"
   end
 
@@ -71,7 +71,7 @@ namespace :pl do
 
   desc "Sign generated debian changes files. Defaults to PL Key, pass KEY to override"
   task :sign_deb_changes do
-    load_keychain
+    load_keychain if has_tool('keychain')
     sign_deb_changes("pkg/deb/*/*.changes") unless Dir["pkg/deb/*/*.changes"].empty?
     sign_deb_changes("pkg/deb/*.changes") unless Dir["pkg/deb/*.changes"].empty?
   end

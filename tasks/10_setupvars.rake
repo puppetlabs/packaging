@@ -53,11 +53,12 @@ rescue
   exit 1
 end
 
-@build_root   ||= Dir.pwd
-@version      ||= get_dash_version
-@gemversion   ||= get_dot_version
-@ipsversion   ||= get_ips_version
-@debversion   ||= get_debversion
-@origversion  ||= get_origversion
-@rpmversion   ||= get_rpmversion
-@rpmrelease   ||= get_rpmrelease
+@build_root      ||= Dir.pwd
+@version         ||= get_dash_version
+@gemversion      ||= get_dot_version
+@ipsversion      ||= get_ips_version
+@debversion      ||= get_debversion
+@origversion     ||= get_origversion
+@rpmversion      ||= get_rpmversion
+@rpmrelease      ||= get_rpmrelease
+@keychain_loaded ||= FALSE

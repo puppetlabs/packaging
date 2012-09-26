@@ -253,3 +253,15 @@ def handle_method_failure(method, args)
   end
 end
 
+def invoke_task(task, args=nil)
+  Rake::Task[task].reenable
+  Rake::Task[task].invoke(args)
+end
+
+def confirm_ship(files)
+  STDOUT.puts "The following files have been built and are ready to ship:"
+  files.each { |file| STDOUT.puts "\t#{file}\n" }
+  STDOUT.puts "Ship these files??"
+  ask_yes_or_no
+end
+

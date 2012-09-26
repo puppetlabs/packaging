@@ -270,3 +270,13 @@ def boolean_value(var)
   FALSE
 end
 
+def git_tag(version)
+  begin
+    sh "git tag -s -u #{@gpg_key} -m '#{version}' #{version}"
+  rescue Exception => e
+    STDERR.puts e
+    STDERR.puts "Unable to tag repo at #{version}"
+    exit 1
+  end
+end
+

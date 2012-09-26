@@ -5,9 +5,9 @@ def pdebuild args
   set_cow_envs(cow)
   begin
     sh "pdebuild --configfile #{@pbuild_conf} --buildresult #{results_dir} --pbuilder cowbuilder -- --override-config --othermirror=\"deb #{@apt_repo_url} #{ENV['DIST']} main dependencies #{devel_repo}\" --basepath /var/cache/pbuilder/#{cow}/"
-  rescue
-    STDERR.puts "Something went wrong. Hopefully the backscroll or #{results_dir}/#{@name}_#{@debversion}.build file has a clue."
-    exit 1
+  rescue Exception => e
+    puts e
+    handle_method_failure('pdebuild', args)
   end
 end
 
@@ -55,13 +55,9 @@ task :build_deb, :deb_command, :cow, :devel do |t,args|
   Rake::Task[:prep_deb_tars].invoke(work_dir)
   cd "#{work_dir}/#{@name}-#{@debversion}" do
     mv 'ext/debian', '.'
-    begin
-      send(deb_build, deb_args)
-      cp FileList["#{work_dir}/*.deb", "#{work_dir}/*.dsc", "#{work_dir}/*.changes", "#{work_dir}/*.debian.tar.gz", "#{work_dir}/*.orig.tar.gz"], dest_dir
-      rm_rf "#{work_dir}/#{@name}-#{@debversion}"
-    rescue
-      STDERR.puts "Something went wrong. Hopefully the backscroll or #{work_dir}/#{@name}_#{@debversion}.build file has a clue."
-    end
+    send(deb_build, deb_args)
+    cp FileList["#{work_dir}/*.deb", "#{work_dir}/*.dsc", "#{work_dir}/*.changes", "#{work_dir}/*.debian.tar.gz", "#{work_dir}/*.orig.tar.gz"], dest_dir
+    rm_rf "#{work_dir}/#{@name}-#{@debversion}"
     rm_rf work_dir
   end
 end

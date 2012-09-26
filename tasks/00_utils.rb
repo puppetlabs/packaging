@@ -234,3 +234,28 @@ def x(v)
   print %x[#{v}]
 end
 
+def ask_yes_or_no
+  answer = STDIN.gets.downcase.chomp
+  case answer
+    when /^y$|^yes$/
+      answer = TRUE
+    when /^n$|^no$/
+      answer = FALSE
+    else
+      puts "Nope, try something like yes or no or y or n, etc:"
+      ask_yes_or_no
+  end
+  answer
+end
+
+def handle_method_failure(method, args)
+  STDERR.puts "There was an error running the method #{method} with the arguments:"
+  args.each { |param, arg| STDERR.puts "\t#{param} => #{arg}\n" }
+  STDERR.puts "The rake session is paused. Would you like to retry #{method} with these args and continue where you left off? [y,n]"
+  if ask_yes_or_no
+    send(method, args)
+  else
+    exit 1
+  end
+end
+

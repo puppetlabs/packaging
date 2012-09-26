@@ -1,7 +1,7 @@
 # These tasks are "release" chains that couple as much of the release process for a package as possible
 
 namespace :pl do
-  if @build_gem == TRUE or @build_gem == 'true' or @build_gem == 'TRUE'
+  if @build_gem
     desc "Build and ship a gem"
     task :release_gem do
       invoke_task("package:gem")

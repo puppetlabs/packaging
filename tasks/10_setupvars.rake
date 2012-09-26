@@ -25,28 +25,29 @@ rescue
 end
 
 begin
-  @pkg_defaults   ||= YAML.load_file('ext/build_defaults.yaml')
-  @default_cow    = ENV['COW']          || @pkg_defaults['default_cow']
-  @cows           = ENV['COW']          || @pkg_defaults['cows']
-  @pbuild_conf    = ENV['PBUILDCONF']   || @pkg_defaults['pbuild_conf']
-  @packager       = ENV['PACKAGER']     || @pkg_defaults['packager']
-  @sign_tar       = ENV['SIGN_TAR']     || @pkg_defaults['sign_tar']
-  @final_mocks    = ENV['MOCK']         || @pkg_defaults['final_mocks']
-  @rc_mocks       = ENV['MOCK']         || @pkg_defaults['rc_mocks']
-  @gpg_name       = ENV['GPG_NAME']     || @pkg_defaults['gpg_name']
-  @gpg_key        = ENV['GPG_KEY']      || @pkg_defaults['gpg_key']
-  @certificate_pem= ENV['CERT_PEM']     || @pkg_defaults['certificate_pem']
-  @privatekey_pem = ENV['PRIVATE_PEM']  || @pkg_defaults['privatekey_pem']
-  @build_gem      = ENV['GEM']          || @pkg_defaults['build_gem']
-  @build_dmg      = ENV['DMG']          || @pkg_defaults['build_dmg']
-  @yum_host       = @pkg_defaults['yum_host']
-  @yum_repo_path  = @pkg_defaults['yum_repo_path']
-  @apt_host       = @pkg_defaults['apt_host']
-  @apt_repo_url   = @pkg_defaults['apt_repo_url']
-  @apt_repo_path  = @pkg_defaults['apt_repo_path']
-  @ips_repo       = @pkg_defaults['ips_repo']
-  @ips_store      = @pkg_defaults['ips_store']
-  @ips_host       = @pkg_defaults['ips_host']
+  @pkg_defaults    ||= YAML.load_file('ext/build_defaults.yaml')
+  @sign_tar        = boolean_value( ENV['SIGN_TAR'] || @pkg_defaults['sign_tar']  )
+  @build_gem       = boolean_value( ENV['GEM']      || @pkg_defaults['build_gem'] )
+  @build_dmg       = boolean_value( ENV['DMG']      || @pkg_defaults['build_dmg'] )
+  @build_ips       = boolean_value( ENV['IPS']      || @pkg_defaults['build_ips'] )
+  @default_cow     = ENV['COW']          || @pkg_defaults['default_cow']
+  @cows            = ENV['COW']          || @pkg_defaults['cows']
+  @pbuild_conf     = ENV['PBUILDCONF']   || @pkg_defaults['pbuild_conf']
+  @packager        = ENV['PACKAGER']     || @pkg_defaults['packager']
+  @final_mocks     = ENV['MOCK']         || @pkg_defaults['final_mocks']
+  @rc_mocks        = ENV['MOCK']         || @pkg_defaults['rc_mocks']
+  @gpg_name        = ENV['GPG_NAME']     || @pkg_defaults['gpg_name']
+  @gpg_key         = ENV['GPG_KEY']      || @pkg_defaults['gpg_key']
+  @certificate_pem = ENV['CERT_PEM']     || @pkg_defaults['certificate_pem']
+  @privatekey_pem  = ENV['PRIVATE_PEM']  || @pkg_defaults['privatekey_pem']
+  @yum_host        = @pkg_defaults['yum_host']
+  @yum_repo_path   = @pkg_defaults['yum_repo_path']
+  @apt_host        = @pkg_defaults['apt_host']
+  @apt_repo_url    = @pkg_defaults['apt_repo_url']
+  @apt_repo_path   = @pkg_defaults['apt_repo_path']
+  @ips_repo        = @pkg_defaults['ips_repo']
+  @ips_store       = @pkg_defaults['ips_store']
+  @ips_host        = @pkg_defaults['ips_host']
 rescue
   STDERR.puts "There was an error loading the packaging defaults from the 'ext/build_defaults.yaml' file."
   exit 1

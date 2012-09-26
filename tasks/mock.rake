@@ -49,7 +49,7 @@ def build_rpm_with_mock(is_rc, subdir)
         end
       end
 
-      case rpm
+      case File.basename(rpm)
         when /debuginfo/
           rm_rf(rpm)
         when /src\.rpm/
@@ -60,7 +60,7 @@ def build_rpm_with_mock(is_rc, subdir)
           cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/x86_64")
         when /noarch/
           cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/i386")
-          ln("pkg/#{family}/#{version}/#{subdir}/i386/#{File.basename rpm}", "pkg/#{family}/#{version}/#{subdir}/x86_64/")
+          ln("pkg/#{family}/#{version}/#{subdir}/i386/#{File.basename(rpm)}", "pkg/#{family}/#{version}/#{subdir}/x86_64/")
       end
     end
   end

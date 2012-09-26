@@ -8,6 +8,11 @@ def check_tool(tool)
   end
 end
 
+def has_tool(tool)
+  %x{which #{tool}}
+  return $?.success?
+end
+
 def find_tool(tool)
   location = %x{which #{tool}}.chomp
   location if $?.success?

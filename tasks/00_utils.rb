@@ -163,9 +163,12 @@ def get_rpmrelease
     end
 end
 
-def restart_keychain
-  kill_keychain
-  start_keychain
+def load_keychain
+  unless @keychain_loaded
+    kill_keychain
+    start_keychain
+    @keychain_loaded = TRUE
+  end
 end
 
 def kill_keychain

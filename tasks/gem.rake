@@ -44,8 +44,11 @@ if @build_gem
   end
 
   namespace :package do
-    Gem::PackageTask.new(spec) do |pkg|
-      pkg.need_tar_gz = true
+    gem_task = Gem::PackageTask.new(spec)
+    desc "Build a gem"
+    task :gem => [ "clean" ] do
+      gem_task.define
+      Rake::Task[:gem].invoke
     end
   end
 end

@@ -253,6 +253,7 @@ def x(v)
 end
 
 def ask_yes_or_no
+  return boolean_value(ENV['ANSWER_OVERRIDE']) unless ENV['ANSWER_OVERRIDE'].nil?
   answer = STDIN.gets.downcase.chomp
   return TRUE if answer =~ /^y$|^yes$/
   return FALSE if answer =~ /^n$|^no$/
@@ -284,7 +285,7 @@ def confirm_ship(files)
 end
 
 def boolean_value(var)
-  return TRUE if (var == TRUE || ( var.is_a?(String) && var.downcase == 'true' ))
+  return TRUE if (var == TRUE || ( var.is_a?(String) && ( var.downcase == 'true' || var.downcase =~ /^y$|^yes$/ )))
   FALSE
 end
 

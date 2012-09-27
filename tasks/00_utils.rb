@@ -77,7 +77,7 @@ end
 def remote_ssh_cmd target, command
   check_tool('ssh')
   puts "Executing '#{command}' on #{target}"
-  %x{ssh #{target} '#{command}'}
+  sh "ssh -t #{target} '#{command}'"
 end
 
 def rsync_to *args

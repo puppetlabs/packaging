@@ -299,3 +299,26 @@ def git_tag(version)
   end
 end
 
+def rand_string
+  rand.to_s.split('.')[1]
+end
+
+def git_bundle(treeish)
+  temp = get_temp
+  appendix = rand_string
+  sh "git bundle create #{temp}/#{@name}-#{@version}-#{appendix} #{treeish} --tags"
+  cd temp do
+    sh "tar -czf #{@name}-#{@version}-#{appendix}.tar.gz #{@name}-#{@version}-#{appendix}"
+    rm_rf "#{@name}-#{@version}-#{appendix}"
+  end
+  "#{temp}/#{@name}-#{@version}-#{appendix}.tar.gz"
+end
+
+def remote_bootstrap(host, treeish)
+  tarball = git_bundle(treeish)
+  tarball_name = File.basename(tarball).gsub('.tar.gz','')
+  rsync_to(tarball, host, '/tmp')
+  appendix = rand_string
+  sh "ssh -t #{host} 'tar -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone /tmp/#{tarball_name} /tmp/#{@name}-#{appendix} ; cd /tmp/#{@name}-#{appendix} ; rake package:bootstrap'"
+  "/tmp/#{@name}-#{appendix}"
+end

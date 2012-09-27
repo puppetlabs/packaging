@@ -90,6 +90,16 @@ def rsync_to *args
   %x{rsync #{flags} #{source} #{ENV['USER']}@#{target}:#{dest}}
 end
 
+def rsync_from *args
+  check_tool('rsync')
+  flags = "-Havxl -O --no-perms --no-owner --no-group"
+  source  = args[0]
+  target  = args[1]
+  dest    = args[2]
+  puts "rsyncing #{source} from #{target} to #{dest}"
+  %x{rsync #{flags} #{ENV['USER']}@#{target}:#{source} #{dest}}
+end
+
 def scp_file_from(host,path,file)
   %x{scp #{ENV['USER']}@#{host}:#{path}/#{file} #{@tempdir}/#{file}}
 end

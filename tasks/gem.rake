@@ -49,6 +49,7 @@ if @build_gem
     task :gem => [ "clean" ] do
       gem_task.define
       Rake::Task[:gem].invoke
+      rm_rf "pkg/#{@name}-#{@gemversion}"
     end
   end
 end

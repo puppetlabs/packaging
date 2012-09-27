@@ -15,6 +15,16 @@ namespace :pl do
     rsync_to('pkg/deb/', @apt_host, @apt_repo_path)
   end
 
+  desc "freight RCs to devel repos on #{@apt_host}"
+  task :remote_freight_devel do
+    remote_ssh_cmd(@apt_host, '/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile devel')
+  end
+
+  desc "remote freight final packages to PRODUCTION repos on #{@apt_host}"
+  task :remote_freight_final do
+    remote_ssh_cmd(@apt_host, '/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile community')
+  end
+
   if @build_ips
     desc "Update remote ips repository on #{@ips_host}"
     task :update_ips_repo do
@@ -29,6 +39,30 @@ namespace :pl do
     desc "Ship built gem to rubygems"
     task :ship_gem do
       ship_gem("pkg/#{@name}-#{@gemversion}.gem")
+    end
+  end
+
+  if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
+    desc "ship apple dmg to package host"
+    task :ship_dmg => :fetch do
+      rsync_to('pkg/apple/*.dmg', @yum_host, @dmg_path)
+    end if @build_dmg
+
+    desc "ship tarball and signature to package host"
+    task :ship_tar => :fetch do
+      rsync_to("pkg/#{@name}-#{@version}.tar.gz*", @yum_host, @tarball_path)
+    end
+
+    desc "UBER ship: ship all the things in pkg"
+    task :uber_ship => :fetch do
+      if confirm_ship(FileList["pkg/**/*"])
+        ENV['ANSWER_OVERRIDE'] = 'yes'
+        Rake::Task["pl:ship_gem"].invoke if @build_gem
+        Rake::Task["pl:ship_rpms"].invoke
+        Rake::Task["pl:ship_debs"].invoke
+        Rake::Task["pl:ship_dmg"].execute if @build_dmg
+        Rake::Task["pl:ship_tar"].execute
+      end
     end
   end
 end

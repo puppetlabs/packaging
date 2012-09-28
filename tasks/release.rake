@@ -1,15 +1,13 @@
 # These tasks are "release" chains that couple as much of the release process for a package as possible
 
 namespace :pl do
-  if @build_gem
-    desc "Release gem, e.g. package:gem, pl:ship_gem"
-    task :release_gem do
-      invoke_task("package:gem")
-      if confirm_ship(FileList["pkg/*.gem"])
-        invoke_task("pl:ship_gem")
-      end
+  desc "Release gem, e.g. package:gem, pl:ship_gem"
+  task :release_gem do
+    invoke_task("package:gem")
+    if confirm_ship(FileList["pkg/*.gem"])
+      invoke_task("pl:ship_gem")
     end
-  end
+  end if @build_gem
 
   desc "Release deb RCs, e.g. package:tar, pl:{deb_all_rc, sign_deb_changes, ship_debs}"
   task :release_deb_rc do

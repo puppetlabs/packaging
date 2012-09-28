@@ -25,22 +25,18 @@ namespace :pl do
     remote_ssh_cmd(@apt_host, '/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile community')
   end
 
-  if @build_ips
-    desc "Update remote ips repository on #{@ips_host}"
-    task :update_ips_repo do
-      rsync_to('pkg/ips/pkgs', @ips_host, @ips_store)
-      remote_ssh_cmd(@ips_host, "pkgrecv -s #{@ips_store}/pkgs/#{@name}@#{@ipsversion}.p5p -d #{@ips_repo} \\*")
-      remote_ssh_cmd(@ips_host, "pkgrepo refresh -s #{@ips_repo}")
-      remote_ssh_cmd(@ips_host, "/usr/sbin/svcadm restart svc:/application/pkg/server")
-    end
-  end
+  desc "Update remote ips repository on #{@ips_host}"
+  task :update_ips_repo do
+    rsync_to('pkg/ips/pkgs', @ips_host, @ips_store)
+    remote_ssh_cmd(@ips_host, "pkgrecv -s #{@ips_store}/pkgs/#{@name}@#{@ipsversion}.p5p -d #{@ips_repo} \\*")
+    remote_ssh_cmd(@ips_host, "pkgrepo refresh -s #{@ips_repo}")
+    remote_ssh_cmd(@ips_host, "/usr/sbin/svcadm restart svc:/application/pkg/server")
+  end if @build_ips
 
-  if @build_gem
-    desc "Ship built gem to rubygems"
-    task :ship_gem do
-      ship_gem("pkg/#{@name}-#{@gemversion}.gem")
-    end
-  end
+  desc "Ship built gem to rubygems"
+  task :ship_gem do
+    ship_gem("pkg/#{@name}-#{@gemversion}.gem")
+  end if @build_gem
 
   if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
     desc "ship apple dmg to #{@yum_host}"

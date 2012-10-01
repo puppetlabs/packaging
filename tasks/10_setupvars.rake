@@ -19,6 +19,7 @@ begin
   @gem_devel_dependencies   = @project_specs['gem_devel_dependencies']
   @gem_rdoc_options         = @project_specs['gem_rdoc_options']
   @gem_forge_project        = @project_specs['gem_forge_project']
+  @gem_excludes             = @project_specs['gem_excludes']
 rescue
   STDERR.puts "There was an error loading the project specifications from the 'ext/project_data.yaml' file."
   exit 1

@@ -26,12 +26,15 @@ if @build_gem
 
   spec = Gem::Specification.new do |s|
     s.name = @name                                        unless @name.nil?
+    s.name = @gem_name                                    unless @gem_name.nil?
     s.version = @gemversion                               unless @gemversion.nil?
     s.author = @author                                    unless @author.nil?
     s.email = @email                                      unless @email.nil?
     s.homepage = @homepage                                unless @homepage.nil?
     s.summary = @summary                                  unless @summary.nil?
+    s.summary = @gem_summary                              unless @gem_summary.nil?
     s.description = @description                          unless @description.nil?
+    s.description = @gem_description                      unless @gem_description.nil?
     s.files = glob_gem_files                              unless glob_gem_files.nil?
     s.executables = @gem_executables                      unless @gem_executables.nil?
     s.require_path = @gem_require_path                    unless @gem_require_path.nil?

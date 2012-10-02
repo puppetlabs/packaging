@@ -16,7 +16,6 @@ namespace :package do
     file = File.open(@version_file, 'w')
     file.write contents
     file.close
-    git_commit_file(@version_file)
   end
 end
 

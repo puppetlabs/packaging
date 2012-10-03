@@ -17,12 +17,16 @@ namespace :pl do
 
   desc "freight RCs to devel repos on #{@apt_host}"
   task :remote_freight_devel do
-    remote_ssh_cmd(@apt_host, '/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile devel')
+    override = "OVERRIDE=1" if ENV['OVERRIDE']
+    # assume we're building in cows when we ship, since that's what the repo supports
+    # allow OVERRIDE as well for cases where we intend to ship final-style versions to devel repos and vice versa
+    remote_ssh_cmd(@apt_host, "/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile devel COW=1 #{override}")
   end
 
   desc "remote freight final packages to PRODUCTION repos on #{@apt_host}"
   task :remote_freight_final do
-    remote_ssh_cmd(@apt_host, '/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile community')
+    override = "OVERRIDE=1" if ENV['OVERRIDE']
+    remote_ssh_cmd(@apt_host, "/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile community COW=1 #{override}")
   end
 
   desc "Update remote ips repository on #{@ips_host}"

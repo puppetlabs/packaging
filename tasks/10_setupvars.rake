@@ -19,6 +19,7 @@ begin
   @gem_devel_dependencies   = @project_specs['gem_devel_dependencies']
   @gem_rdoc_options         = @project_specs['gem_rdoc_options']
   @gem_forge_project        = @project_specs['gem_forge_project']
+  @gem_excludes             = @project_specs['gem_excludes']
 rescue
   STDERR.puts "There was an error loading the project specifications from the 'ext/project_data.yaml' file."
   exit 1
@@ -30,6 +31,7 @@ begin
   @build_gem       = boolean_value( ENV['GEM']      || @pkg_defaults['build_gem'] )
   @build_dmg       = boolean_value( ENV['DMG']      || @pkg_defaults['build_dmg'] )
   @build_ips       = boolean_value( ENV['IPS']      || @pkg_defaults['build_ips'] )
+  @build_doc       = boolean_value( ENV['DOC']      || @pkg_defaults['build_doc'] )
   @default_cow     = ENV['COW']          || @pkg_defaults['default_cow']
   @cows            = ENV['COW']          || @pkg_defaults['cows']
   @pbuild_conf     = ENV['PBUILDCONF']   || @pkg_defaults['pbuild_conf']

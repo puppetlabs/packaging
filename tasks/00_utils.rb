@@ -77,7 +77,7 @@ end
 def remote_ssh_cmd target, command
   check_tool('ssh')
   puts "Executing '#{command}' on #{target}"
-  %x{ssh #{target} '#{command}'}
+  sh "ssh -t #{target} '#{command}'"
 end
 
 def rsync_to *args
@@ -88,6 +88,16 @@ def rsync_to *args
   dest    = args[2]
   puts "rsyncing #{source} to #{target}"
   %x{rsync #{flags} #{source} #{ENV['USER']}@#{target}:#{dest}}
+end
+
+def rsync_from *args
+  check_tool('rsync')
+  flags = "-Havxl -O --no-perms --no-owner --no-group"
+  source  = args[0]
+  target  = args[1]
+  dest    = args[2]
+  puts "rsyncing #{source} from #{target} to #{dest}"
+  %x{rsync #{flags} #{ENV['USER']}@#{target}:#{source} #{dest}}
 end
 
 def scp_file_from(host,path,file)
@@ -243,6 +253,7 @@ def x(v)
 end
 
 def ask_yes_or_no
+  return boolean_value(ENV['ANSWER_OVERRIDE']) unless ENV['ANSWER_OVERRIDE'].nil?
   answer = STDIN.gets.downcase.chomp
   return TRUE if answer =~ /^y$|^yes$/
   return FALSE if answer =~ /^n$|^no$/
@@ -274,7 +285,7 @@ def confirm_ship(files)
 end
 
 def boolean_value(var)
-  return TRUE if (var == TRUE || ( var.is_a?(String) && var.downcase == 'true' ))
+  return TRUE if (var == TRUE || ( var.is_a?(String) && ( var.downcase == 'true' || var.downcase =~ /^y$|^yes$/ )))
   FALSE
 end
 
@@ -288,3 +299,26 @@ def git_tag(version)
   end
 end
 
+def rand_string
+  rand.to_s.split('.')[1]
+end
+
+def git_bundle(treeish)
+  temp = get_temp
+  appendix = rand_string
+  sh "git bundle create #{temp}/#{@name}-#{@version}-#{appendix} #{treeish} --tags"
+  cd temp do
+    sh "tar -czf #{@name}-#{@version}-#{appendix}.tar.gz #{@name}-#{@version}-#{appendix}"
+    rm_rf "#{@name}-#{@version}-#{appendix}"
+  end
+  "#{temp}/#{@name}-#{@version}-#{appendix}.tar.gz"
+end
+
+def remote_bootstrap(host, treeish)
+  tarball = git_bundle(treeish)
+  tarball_name = File.basename(tarball).gsub('.tar.gz','')
+  rsync_to(tarball, host, '/tmp')
+  appendix = rand_string
+  sh "ssh -t #{host} 'tar -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone /tmp/#{tarball_name} /tmp/#{@name}-#{appendix} ; cd /tmp/#{@name}-#{appendix} ; rake package:bootstrap'"
+  "/tmp/#{@name}-#{appendix}"
+end

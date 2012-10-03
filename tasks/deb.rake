@@ -3,6 +3,7 @@ def pdebuild args
   cow         = args[:cow]
   devel_repo  = args[:devel]
   set_cow_envs(cow)
+  update_cow(cow, devel_repo)
   begin
     sh "pdebuild --configfile #{@pbuild_conf} --buildresult #{results_dir} --pbuilder cowbuilder -- --override-config --othermirror=\"deb #{@apt_repo_url} #{ENV['DIST']} main dependencies #{devel_repo}\" --basepath /var/cache/pbuilder/#{cow}/"
   rescue Exception => e
@@ -50,7 +51,6 @@ task :build_deb, :deb_command, :cow, :devel do |t,args|
   work_dir  = get_temp
   dest_dir  = "#{@build_root}/pkg/deb/#{cow.split('-')[1] unless cow.nil?}"
   check_tool(deb_build)
-  update_cow(cow, devel)
   mkdir_p dest_dir
   deb_args  = { :work_dir => work_dir, :cow => cow, :devel => devel}
   Rake::Task[:prep_deb_tars].reenable

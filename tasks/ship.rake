@@ -6,7 +6,7 @@ namespace :pl do
   end
 
   desc "Update remote rpm repodata on #{@yum_host}"
-  task :update_yum_repo do
+  task :remote_update_yum_repo do
     STDOUT.puts "Really run remote repo update on #{@yum_host}? [y,n]"
     if ask_yes_or_no
       remote_ssh_cmd(@yum_host, '/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile mk_repo')

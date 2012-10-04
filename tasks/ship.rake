@@ -7,7 +7,10 @@ namespace :pl do
 
   desc "Update remote rpm repodata on #{@yum_host}"
   task :update_yum_repo do
-    remote_ssh_cmd(@yum_host, '/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile mk_repo')
+    STDOUT.puts "Really run remote repo update on #{@yum_host}? [y,n]"
+    if ask_yes_or_no
+      remote_ssh_cmd(@yum_host, '/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile mk_repo')
+    end
   end
 
   desc "Ship cow-built debs to #{@apt_host}"
@@ -17,16 +20,22 @@ namespace :pl do
 
   desc "freight RCs to devel repos on #{@apt_host}"
   task :remote_freight_devel do
-    override = "OVERRIDE=1" if ENV['OVERRIDE']
-    # assume we're building in cows when we ship, since that's what the repo supports
-    # allow OVERRIDE as well for cases where we intend to ship final-style versions to devel repos and vice versa
-    remote_ssh_cmd(@apt_host, "/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile devel COW=1 #{override}")
+    STDOUT.puts "Really run remote freight RC command on #{@apt_host}? [y,n]"
+    if ask_yes_or_no
+      override = "OVERRIDE=1" if ENV['OVERRIDE']
+      # assume we're building in cows when we ship, since that's what the repo supports
+      # allow OVERRIDE as well for cases where we intend to ship final-style versions to devel repos and vice versa
+      remote_ssh_cmd(@apt_host, "/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile devel COW=1 #{override}")
+    end
   end
 
   desc "remote freight final packages to PRODUCTION repos on #{@apt_host}"
   task :remote_freight_final do
-    override = "OVERRIDE=1" if ENV['OVERRIDE']
-    remote_ssh_cmd(@apt_host, "/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile community COW=1 #{override}")
+    STDOUT.puts "Really run remote freight final command on #{@apt_host}? [y,n]"
+    if ask_yes_or_no
+      override = "OVERRIDE=1" if ENV['OVERRIDE']
+      remote_ssh_cmd(@apt_host, "/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile community COW=1 #{override}")
+    end
   end
 
   desc "Update remote ips repository on #{@ips_host}"

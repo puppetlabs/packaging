@@ -113,7 +113,7 @@ def timestamp
 end
 
 def get_dash_version
-  if File.exists?('.git')
+  if is_git_repo
     %x{git describe}.chomp.split('-')[0..1].join('-').gsub('v','')
   else
     get_pwd_version
@@ -322,3 +322,9 @@ def remote_bootstrap(host, treeish)
   sh "ssh -t #{host} 'tar -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone /tmp/#{tarball_name} /tmp/#{@name}-#{appendix} ; cd /tmp/#{@name}-#{appendix} ; rake package:bootstrap'"
   "/tmp/#{@name}-#{appendix}"
 end
+
+def is_git_repo
+  %x{git rev-parse --git-dir > /dev/null 2>&1}
+  return $?.success?
+end
+

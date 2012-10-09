@@ -5,7 +5,17 @@ def pdebuild args
   set_cow_envs(cow)
   update_cow(cow, devel_repo)
   begin
-    sh "pdebuild --configfile #{@pbuild_conf} --buildresult #{results_dir} --pbuilder cowbuilder -- --override-config --othermirror=\"deb #{@apt_repo_url} #{ENV['DIST']} main dependencies #{devel_repo}\" --basepath /var/cache/pbuilder/#{cow}/"
+    if ENV['PE_VER']
+      othermirror="\"deb #{@apt_repo_url} #{ENV['PE_VER']} #{ENV['DIST']}\""
+    else
+      othermirror="\"deb #{@apt_repo_url} #{ENV['DIST']} main dependencies #{devel_repo}\""
+    end
+    sh "pdebuild  --configfile #{@pbuild_conf} \
+                  --buildresult #{results_dir} \
+                  --pbuilder cowbuilder -- \
+                  --override-config \
+                  --othermirror=#{othermirror} \
+                  --basepath /var/cache/pbuilder/#{cow}/"
   rescue Exception => e
     puts e
     handle_method_failure('pdebuild', args)

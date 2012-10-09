@@ -18,7 +18,15 @@ namespace :pl do
     rsync_to('pkg/deb/', @apt_host, @apt_repo_path)
   end
 
-  desc "freight RCs to devel repos on #{@apt_host}"
+  if @build_pe
+    desc "Ship PE packages to #{@apt_host}"
+    task :ship_pe_debs do
+      check_var('PE_VER', ENV['PE_VER'])
+      rsync_to('pkg/deb/', @apt_host, "#{@apt_repo_path}/#{ENV['PE_VER']}/repos/incoming/disparate/")
+    end
+  end
+
+  "freight RCs to devel repos on #{@apt_host}"
   task :remote_freight_devel do
     STDOUT.puts "Really run remote freight RC command on #{@apt_host}? [y,n]"
     if ask_yes_or_no
@@ -35,6 +43,14 @@ namespace :pl do
     if ask_yes_or_no
       override = "OVERRIDE=1" if ENV['OVERRIDE']
       remote_ssh_cmd(@apt_host, "/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile community COW=1 #{override}")
+    end
+  end
+
+  if @build_pe
+    desc "remote freight PE packages to #{@apt_host}"
+    task :remote_freight_pe do
+      check_var('PE_VER', ENV['PE_VER'])
+      remote_ssh_cmd(@apt_host, "sudo deb-the-the-things #{ENV['PE_VER']}")
     end
   end
 

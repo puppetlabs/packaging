@@ -8,9 +8,7 @@ namespace :package do
     FileList[@files.split(' ')].each do |f|
       cp_pr(f, workdir)
     end
-    erb("#{workdir}/ext/redhat/#{@name}.spec.erb", "#{workdir}/ext/redhat/#{@name}.spec")
-    erb("#{workdir}/ext/debian/changelog.erb", "#{workdir}/ext/debian/changelog")
-    rm_rf(FileList["#{workdir}/ext/debian/*.erb", "#{workdir}/ext/redhat/*.erb"])
+    Rake::Task["package:template"].invoke(workdir)
     cd "pkg" do
       sh "#{tar} --exclude=.gitignore --exclude=ext/#{@packaging_repo} -zcf #{@name}-#{@version}.tar.gz #{@name}-#{@version}"
     end

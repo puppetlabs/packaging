@@ -32,6 +32,7 @@ begin
   @build_dmg       = boolean_value( ENV['DMG']      || @pkg_defaults['build_dmg'] )
   @build_ips       = boolean_value( ENV['IPS']      || @pkg_defaults['build_ips'] )
   @build_doc       = boolean_value( ENV['DOC']      || @pkg_defaults['build_doc'] )
+  @build_pe        = boolean_value( ENV['PE']       || @pkg_defaults['build_pe'] )
   @default_cow     = ENV['COW']          || @pkg_defaults['default_cow']
   @cows            = ENV['COW']          || @pkg_defaults['cows']
   @pbuild_conf     = ENV['PBUILDCONF']   || @pkg_defaults['pbuild_conf']

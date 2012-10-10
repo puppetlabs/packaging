@@ -5,14 +5,6 @@ namespace :pl do
     rsync_to('pkg/fedora', @yum_host, @yum_repo_path)
   end
 
-  if @build_pe
-    desc "ship PE rpms to #{@yum_host}"
-    task :ship_pe_rpms do
-      check_var('PE_VER', ENV['PE_VER'])
-      rsync_to('pkg/pe/', @yum_host, "#{@yum_repo_path}/#{ENV['PE_VER']}/repos/")
-    end
-  end
-
   desc "Update remote rpm repodata on #{@yum_host}"
   task :remote_update_yum_repo do
     STDOUT.puts "Really run remote repo update on #{@yum_host}? [y,n]"
@@ -21,25 +13,9 @@ namespace :pl do
     end
   end
 
-  if @build_pe
-    desc "Update remote rpm repodata for PE on #{@yum_host}"
-    task :remote_update_pe_yum do
-      check_var('PE_VER', ENV['PE_VER'])
-      remote_ssh_cmd(@yum_host, "for dir in  $(find /opt/enterprise/#{ENV['PE_VER']}/repos/el* -type d | grep -v repodata | grep -v cache | xargs)  ; do   pushd $dir; sudo rm -rf repodata; createrepo -q -d .; popd &> /dev/null ; done; sync")
-    end
-  end
-
   desc "Ship cow-built debs to #{@apt_host}"
   task :ship_debs do
     rsync_to('pkg/deb/', @apt_host, @apt_repo_path)
-  end
-
-  if @build_pe
-    desc "Ship PE debs to #{@apt_host}"
-    task :ship_pe_debs do
-      check_var('PE_VER', ENV['PE_VER'])
-      rsync_to('pkg/pe/deb/', @apt_host, "#{@apt_repo_path}/#{ENV['PE_VER']}/repos/incoming/disparate/")
-    end
   end
 
   "freight RCs to devel repos on #{@apt_host}"
@@ -59,14 +35,6 @@ namespace :pl do
     if ask_yes_or_no
       override = "OVERRIDE=1" if ENV['OVERRIDE']
       remote_ssh_cmd(@apt_host, "/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile community COW=1 #{override}")
-    end
-  end
-
-  if @build_pe
-    desc "remote freight PE packages to #{@apt_host}"
-    task :remote_freight_pe do
-      check_var('PE_VER', ENV['PE_VER'])
-      remote_ssh_cmd(@apt_host, "sudo deb-the-the-things #{ENV['PE_VER']}")
     end
   end
 
@@ -108,4 +76,31 @@ namespace :pl do
   end
 end
 
+if @build_pe
+  namespace :pe do
+    desc "ship PE rpms to #{@yum_host}"
+    task :ship_rpms do
+      check_var('PE_VER', ENV['PE_VER'])
+      rsync_to('pkg/pe/', @yum_host, "#{@yum_repo_path}/#{ENV['PE_VER']}/repos/")
+    end
+
+    desc "Update remote rpm repodata for PE on #{@yum_host}"
+    task :remote_update_yum_repo do
+      check_var('PE_VER', ENV['PE_VER'])
+      remote_ssh_cmd(@yum_host, "for dir in  $(find /opt/enterprise/#{ENV['PE_VER']}/repos/el* -type d | grep -v repodata | grep -v cache | xargs)  ; do   pushd $dir; sudo rm -rf repodata; createrepo -q -d .; popd &> /dev/null ; done; sync")
+    end
+
+    desc "Ship PE debs to #{@apt_host}"
+    task :ship_debs do
+      check_var('PE_VER', ENV['PE_VER'])
+      rsync_to('pkg/pe/deb/', @apt_host, "#{@apt_repo_path}/#{ENV['PE_VER']}/repos/incoming/disparate/")
+    end
+
+    desc "remote freight PE packages to #{@apt_host}"
+    task :remote_freight do
+      check_var('PE_VER', ENV['PE_VER'])
+      remote_ssh_cmd(@apt_host, "sudo deb-the-the-things #{ENV['PE_VER']}")
+    end
+  end
+end
 

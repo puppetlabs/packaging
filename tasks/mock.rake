@@ -126,3 +126,19 @@ namespace :pl do
   end
 end
 
+if @build_pe
+  namespace :pe do
+    desc "Build a PE rpm using rpmbuild (requires all BuildRequires, rpmbuild, etc)"
+    task :rpm => "package:rpm"
+
+    desc "Build a PE rpm using the mocks in build_defaults yaml, keyed to PL infrastructure, pass MOCK to override"
+    task :mock_all => "pl:mock_final"
+
+    desc "Build a PE rpm using the default mock, pupent-el6-i386"
+    task :mock do
+      ENV['MOCK'] = 'pupent-el6-i386'
+      Rake::Task["pl:mock_final"].invoke
+    end
+  end
+end
+

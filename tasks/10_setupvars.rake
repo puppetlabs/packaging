@@ -37,6 +37,7 @@ begin
   @cows            = ENV['COW']          || @pkg_defaults['cows']
   @pbuild_conf     = ENV['PBUILDCONF']   || @pkg_defaults['pbuild_conf']
   @packager        = ENV['PACKAGER']     || @pkg_defaults['packager']
+  @default_mock    = ENV['MOCK']         || @pkg_defaults['default_mock']
   @final_mocks     = ENV['MOCK']         || @pkg_defaults['final_mocks']
   @rc_mocks        = ENV['MOCK']         || @pkg_defaults['rc_mocks']
   @gpg_name        = ENV['GPG_NAME']     || @pkg_defaults['gpg_name']

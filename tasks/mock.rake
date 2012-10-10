@@ -38,13 +38,7 @@ def mock_arch(mock_config)
   end
 end
 
-def build_rpm_with_mock(is_rc, subdir)
-  if is_rc
-    mocks = @rc_mocks
-  else
-    mocks = @final_mocks
-  end
-
+def build_rpm_with_mock(mocks, is_rc, subdir)
   mocks.split(' ').each do |mock_config|
     family  = mock_el_family(mock_config)
     version = mock_el_ver(mock_config)
@@ -113,16 +107,24 @@ namespace :pl do
       %x{mkdir -p pkg/pe/sles-11-{i386,x86_64,srpms}}
   end
 
+  desc "Use default mock to make a final rpm, keyed to PL infrastructure, pass MOCK to specify config"
+  task :mock => [ "package:srpm", "pl:setup_el_dirs" ] do
+    # If default mock isn't specified, just take the first one in the @final_mocks list
+    @default_mock ||= @final_mocks.split(' ')[0]
+    subdir = ENV['subdir'] || 'products'
+    build_rpm_with_mock(@default_mock, FALSE, subdir)
+  end
+
   desc "Use specified mocks to make final rpms, keyed to PL infrastructure, pass MOCK to specifiy config"
   task :mock_final => [ "package:srpm", "pl:setup_el_dirs" ] do
     subdir = ENV['subdir'] || 'products'
-    build_rpm_with_mock(FALSE, subdir)
+    build_rpm_with_mock(@final_mocks, FALSE, subdir)
   end
 
   desc "Use specified mocks to make RC rpms, keyed to PL infrastructure, pass MOCK to specify config"
   task :mock_rc => [ "package:srpm", "pl:setup_el_dirs" ] do
     subdir = 'devel'
-    build_rpm_with_mock(TRUE, subdir)
+    build_rpm_with_mock(@rc_mocks, TRUE, subdir)
   end
 end
 
@@ -131,14 +133,11 @@ if @build_pe
     desc "Build a PE rpm using rpmbuild (requires all BuildRequires, rpmbuild, etc)"
     task :rpm => "package:rpm"
 
-    desc "Build a PE rpm using the mocks in build_defaults yaml, keyed to PL infrastructure, pass MOCK to override"
-    task :mock_all => "pl:mock_final"
+    desc "Build all PE rpms using the final mocks in build_defaults yaml, keyed to PL infrastructure, pass MOCK to override"
+    task :mock_final => "pl:mock_final"
 
-    desc "Build a PE rpm using the default mock, pupent-el6-i386"
-    task :mock do
-      ENV['MOCK'] = 'pupent-el6-i386'
-      Rake::Task["pl:mock_final"].invoke
-    end
+    desc "Build a PE rpm using the default mock"
+    task :mock => "pl:mock"
   end
 end
 

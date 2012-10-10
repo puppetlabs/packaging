@@ -78,6 +78,7 @@ end
 namespace :pl do
   desc "Create a deb from this repo using the default cow #{@default_cow}."
   task :deb => "package:tar"  do
+    check_var('PE_VER', ENV['PE_VER']) if @build_pe
     Rake::Task[:build_deb].invoke('pdebuild', @default_cow)
   end
 
@@ -88,6 +89,7 @@ namespace :pl do
 
   desc "Create debs from this git repository using all cows specified in build_defaults yaml"
   task :deb_all do
+    check_var('PE_VER', ENV['PE_VER']) if @build_pe
     @cows.split(' ').each do |cow|
       Rake::Task["package:tar"].invoke
       Rake::Task[:build_deb].reenable

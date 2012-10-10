@@ -5,11 +5,27 @@ namespace :pl do
     rsync_to('pkg/fedora', @yum_host, @yum_repo_path)
   end
 
+  if @build_pe
+    desc "ship PE rpms to #{@yum_host}"
+    task :ship_pe_rpms do
+      check_var('PE_VER', ENV['PE_VER'])
+      rsync_to('pkg/pe/', @yum_host, "#{@yum_repo_path}/#{ENV['PE_VER']}/repos/")
+    end
+  end
+
   desc "Update remote rpm repodata on #{@yum_host}"
   task :remote_update_yum_repo do
     STDOUT.puts "Really run remote repo update on #{@yum_host}? [y,n]"
     if ask_yes_or_no
       remote_ssh_cmd(@yum_host, '/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile mk_repo')
+    end
+  end
+
+  if @build_pe
+    desc "Update remote rpm repodata for PE on #{@yum_host}"
+    task :remote_update_pe_yum do
+      check_var('PE_VER', ENV['PE_VER'])
+      remote_ssh_cmd(@yum_host, "for dir in  $(find /opt/enterprise/#{ENV['PE_VER']}/repos/el* -type d | grep -v repodata | grep -v cache | xargs)  ; do   pushd $dir; sudo rm -rf repodata; createrepo -q -d .; popd &> /dev/null ; done; sync")
     end
   end
 
@@ -19,10 +35,10 @@ namespace :pl do
   end
 
   if @build_pe
-    desc "Ship PE packages to #{@apt_host}"
+    desc "Ship PE debs to #{@apt_host}"
     task :ship_pe_debs do
       check_var('PE_VER', ENV['PE_VER'])
-      rsync_to('pkg/deb/', @apt_host, "#{@apt_repo_path}/#{ENV['PE_VER']}/repos/incoming/disparate/")
+      rsync_to('pkg/pe/deb/', @apt_host, "#{@apt_repo_path}/#{ENV['PE_VER']}/repos/incoming/disparate/")
     end
   end
 

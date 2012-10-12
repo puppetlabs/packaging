@@ -52,7 +52,8 @@ task :build_deb, :deb_command, :cow, :devel do |t,args|
   cow       = args.cow
   devel     = args.devel
   work_dir  = get_temp
-  dest_dir  = "#{@build_root}/pkg/deb/#{cow.split('-')[1] unless cow.nil?}"
+  subdir    = 'pe/' if @build_pe
+  dest_dir  = "#{@build_root}/pkg/#{subdir}deb/#{cow.split('-')[1] unless cow.nil?}"
   check_tool(deb_build)
   mkdir_p dest_dir
   deb_args  = { :work_dir => work_dir, :cow => cow, :devel => devel}
@@ -77,6 +78,7 @@ end
 namespace :pl do
   desc "Create a deb from this repo using the default cow #{@default_cow}."
   task :deb => "package:tar"  do
+    check_var('PE_VER', ENV['PE_VER']) if @build_pe
     Rake::Task[:build_deb].invoke('pdebuild', @default_cow)
   end
 
@@ -87,6 +89,7 @@ namespace :pl do
 
   desc "Create debs from this git repository using all cows specified in build_defaults yaml"
   task :deb_all do
+    check_var('PE_VER', ENV['PE_VER']) if @build_pe
     @cows.split(' ').each do |cow|
       Rake::Task["package:tar"].invoke
       Rake::Task[:build_deb].reenable
@@ -104,3 +107,12 @@ namespace :pl do
   end
 end
 
+if @build_pe
+  namespace :pe do
+    desc "Create a PE deb from this repo using the default cow #{@default_cow}."
+    task :deb => "pl:deb"
+
+    desc "Create PE debs from this git repository using all cows specified in build_defaults yaml"
+    task :deb_all => "pl:deb_all"
+  end
+end

@@ -127,17 +127,3 @@ namespace :pl do
     build_rpm_with_mock(@rc_mocks, TRUE, subdir)
   end
 end
-
-if @build_pe
-  namespace :pe do
-    desc "Build a PE rpm using rpmbuild (requires all BuildRequires, rpmbuild, etc)"
-    task :rpm => "package:rpm"
-
-    desc "Build all PE rpms using the final mocks in build_defaults yaml, keyed to PL infrastructure, pass MOCK to override"
-    task :mock_final => "pl:mock_final"
-
-    desc "Build a PE rpm using the default mock"
-    task :mock => "pl:mock"
-  end
-end
-

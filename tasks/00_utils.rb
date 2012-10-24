@@ -328,3 +328,7 @@ def is_git_repo
   return $?.success?
 end
 
+def git_pull(remote, branch)
+  sh "git pull #{remote} #{branch}"
+end
+

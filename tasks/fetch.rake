@@ -1,4 +1,9 @@
-pl_packaging_url = "https://raw.github.com/puppetlabs/build-data/#{@name}"
+if @build_pe
+  pl_packaging_url = "https://raw.github.com/puppetlabs/build-data/pe"
+else
+  pl_packaging_url = "https://raw.github.com/puppetlabs/build-data/#{@name}"
+end
+
 namespace :pl do
   task :fetch do
     rm_rf "#{ENV['HOME']}/.packaging"

@@ -18,7 +18,7 @@ namespace :pl do
     rsync_to('pkg/deb/', @apt_host, @apt_repo_path)
   end
 
-  "freight RCs to devel repos on #{@apt_host}"
+  desc "freight RCs to devel repos on #{@apt_host}"
   task :remote_freight_devel do
     STDOUT.puts "Really run remote freight RC command on #{@apt_host}? [y,n]"
     if ask_yes_or_no

@@ -3,7 +3,7 @@ if @build_pe
     desc "ship PE rpms to #{@yum_host}"
     task :ship_rpms do
       check_var('PE_VER', ENV['PE_VER'])
-      rsync_to('pkg/pe/', @yum_host, "#{@yum_repo_path}/#{ENV['PE_VER']}/repos/")
+      rsync_to('pkg/pe/rpm/', @yum_host, "#{@yum_repo_path}/#{ENV['PE_VER']}/repos/")
       Rake::Task["pe:remote_update_yum_repo"].invoke
     end
 

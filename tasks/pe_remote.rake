@@ -2,6 +2,7 @@ if @build_pe
   namespace :pe do
     desc "Execute remote debian build using default cow on builder and retrieve package"
     task :deb => 'pl:fetch' do
+      ENV['PE_VER'] ||= @pe_version
       check_var('PE_VER', ENV['PE_VER'])
       Rake::Task["pl:remote_build"].reenable
       Rake::Task["pl:remote_build"].invoke(@deb_build_host, 'HEAD', "pe:local_deb PE_VER=#{ENV['PE_VER']}")
@@ -9,6 +10,7 @@ if @build_pe
 
     desc "Execute remote debian build using ALL cows on builder and retrieve packages"
     task :deb_all => 'pl:fetch' do
+      ENV['PE_VER'] ||= @pe_version
       check_var('PE_VER', ENV['PE_VER'])
       Rake::Task["pl:remote_build"].reenable
       Rake::Task["pl:remote_build"].invoke(@deb_build_host, 'HEAD', "pe:local_deb_all PE_VER=#{ENV['PE_VER']}")

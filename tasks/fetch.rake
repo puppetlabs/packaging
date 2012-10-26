@@ -16,6 +16,7 @@ namespace :pl do
       @osx_build_host = @build_data['osx_build_host']
       @tarball_path   = @build_data['tarball_path']
       @dmg_path       = @build_data['dmg_path']
+      @pe_version     = @build_data['pe_version']
     rescue
       STDERR.puts "There was an error loading the builder data from #{ENV['HOME']}/.packaging/#{@builder_data_file}"
       exit 1

@@ -319,7 +319,7 @@ def remote_bootstrap(host, treeish)
   tarball_name = File.basename(tarball).gsub('.tar.gz','')
   rsync_to(tarball, host, '/tmp')
   appendix = rand_string
-  sh "ssh -t #{host} 'tar -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone /tmp/#{tarball_name} /tmp/#{@name}-#{appendix} ; cd /tmp/#{@name}-#{appendix} ; rake package:bootstrap'"
+  sh "ssh -t #{host} 'tar -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone --recursive /tmp/#{tarball_name} /tmp/#{@name}-#{appendix} ; cd /tmp/#{@name}-#{appendix} ; rake package:bootstrap'"
   "/tmp/#{@name}-#{appendix}"
 end
 

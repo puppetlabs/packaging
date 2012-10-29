@@ -64,14 +64,14 @@ def build_rpm_with_mock(mocks, is_rc, subdir)
           when /debuginfo/
             rm_rf(rpm)
           when /src\.rpm/
-            cp_pr(rpm, "pkg/pe/#{family}-#{version}-srpms")
+            cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-srpms")
           when /i.?86/
-            cp_pr(rpm, "pkg/pe/#{family}-#{version}-i386")
+            cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-i386")
           when /x66_64/
-            cp_pr(rpm, "pkg/pe/#{family}-#{version}-x86_64")
+            cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-x86_64")
           when /noarch/
-            cp_pr(rpm, "pkg/pe/#{family}-#{version}-i386")
-            ln("pkg/pe/#{family}-#{version}-i386/#{File.basename(rpm)}", "pkg/pe/#{family}-#{version}-x86_64/")
+            cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-i386")
+            ln("pkg/pe/rpm/#{family}-#{version}-i386/#{File.basename(rpm)}", "pkg/pe/rpm/#{family}-#{version}-x86_64/")
         end
       else
         case File.basename(rpm)
@@ -96,7 +96,7 @@ end
 namespace :pl do
   task :setup_el_dirs do
     if @build_pe
-      %x{mkdir -p pkg/pe/el-{5,6}-{i386,x86_64,srpms}}
+      %x{mkdir -p pkg/pe/rpm/el-{5,6}-{i386,x86_64,srpms}}
     else
       %x{mkdir -p pkg/el/{5,6}/{products,devel,dependencies}/{SRPMS,i386,x86_64}}
       %x{mkdir -p pkg/fedora/{f15,f16,f17}/{products,devel,dependencies}/{SRPMS,i386,x86_64}}
@@ -127,17 +127,3 @@ namespace :pl do
     build_rpm_with_mock(@rc_mocks, TRUE, subdir)
   end
 end
-
-if @build_pe
-  namespace :pe do
-    desc "Build a PE rpm using rpmbuild (requires all BuildRequires, rpmbuild, etc)"
-    task :rpm => "package:rpm"
-
-    desc "Build all PE rpms using the final mocks in build_defaults yaml, keyed to PL infrastructure, pass MOCK to override"
-    task :mock_final => "pl:mock_final"
-
-    desc "Build a PE rpm using the default mock"
-    task :mock => "pl:mock"
-  end
-end
-

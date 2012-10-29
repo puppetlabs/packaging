@@ -1,4 +1,9 @@
-pl_packaging_url = "https://raw.github.com/puppetlabs/build-data/#{@name}"
+if @build_pe
+  pl_packaging_url = "https://raw.github.com/puppetlabs/build-data/#{@team}"
+else
+  pl_packaging_url = "https://raw.github.com/puppetlabs/build-data/#{@name}"
+end
+
 namespace :pl do
   task :fetch do
     rm_rf "#{ENV['HOME']}/.packaging"
@@ -11,6 +16,7 @@ namespace :pl do
       @osx_build_host = @build_data['osx_build_host']
       @tarball_path   = @build_data['tarball_path']
       @dmg_path       = @build_data['dmg_path']
+      @pe_version     = @build_data['pe_version']
     rescue
       STDERR.puts "There was an error loading the builder data from #{ENV['HOME']}/.packaging/#{@builder_data_file}"
       exit 1

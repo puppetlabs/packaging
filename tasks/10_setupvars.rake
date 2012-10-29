@@ -58,7 +58,7 @@ rescue
 end
 
 @build_root        ||= Dir.pwd
-@version           ||= get_dash_version
+@version           ||= @build_pe ? get_dot_version : get_dash_version
 @gemversion        ||= get_dot_version
 @ipsversion        ||= get_ips_version
 @debversion        ||= get_debversion
@@ -67,3 +67,4 @@ end
 @rpmrelease        ||= get_rpmrelease
 @keychain_loaded   ||= FALSE
 @builder_data_file ||= 'builder_data.yaml'
+@team              ||= ENV['TEAM'] || 'pe'

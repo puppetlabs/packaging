@@ -67,3 +67,4 @@ end
 @rpmrelease        ||= get_rpmrelease
 @keychain_loaded   ||= FALSE
 @builder_data_file ||= 'builder_data.yaml'
+@team              ||= ENV['TEAM'] || 'pe'

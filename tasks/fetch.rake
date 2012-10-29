@@ -1,5 +1,5 @@
 if @build_pe
-  pl_packaging_url = "https://raw.github.com/puppetlabs/build-data/pe"
+  pl_packaging_url = "https://raw.github.com/puppetlabs/build-data/#{@team}"
 else
   pl_packaging_url = "https://raw.github.com/puppetlabs/build-data/#{@name}"
 end

@@ -110,6 +110,11 @@ version_file: '/lib/hiera.rb'
 # files and gem_files are space separated lists
 # files to be packaged into a tarball and released with deb/rpm
 files: '[A-Z]* ext lib bin spec acceptance_tests'
+# space separated list of files to *exclude* from the tarball
+# note that each listing in files, above, is recursively copied into the tarball, so
+# 'tar_excludes' only needs to include any undesired subdirectories/files of the 'files'
+# list to exclude
+tar_excludes: 'ext/packaging lib/some_excluded_file'
 # files to be packaged into a gem
 gem_files: '{bin,lib}/**/* CHANGELOG COPYING README.md LICENSE'
 # To exclude specific files from inclusion in a gem:

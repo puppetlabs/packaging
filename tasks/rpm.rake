@@ -31,7 +31,7 @@ def find_dist_version()
       nil
    elsif File.exists?('/etc/redhat-release')
       dist = %x{rpm -q --qf \"%{VERSION}\" $(rpm -q --whatprovides /etc/redhat-release )}
-      unless dist > 5
+      unless dist.to_i > 5
         return "--define \"%dist .el#{dist}\""
       end
       nil

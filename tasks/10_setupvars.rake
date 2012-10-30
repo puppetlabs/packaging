@@ -10,6 +10,7 @@ begin
   @summary                  = @project_specs['summary']
   @description              = @project_specs['description']
   @files                    = @project_specs['files']
+  @tar_excludes             = @project_specs['tar_excludes']
   @version_file             = @project_specs['version_file']
   @gem_files                = @project_specs['gem_files']
   @gem_require_path         = @project_specs['gem_require_path']

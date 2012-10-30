@@ -8,9 +8,11 @@ namespace :package do
     FileList[@files.split(' ')].each do |f|
       cp_pr(f, workdir)
     end
+    tar_excludes = @tar_excludes.nil? ? [] : @tar_excludes.split(' ')
+    tar_excludes << "ext/#{@packaging_repo}"
     Rake::Task["package:template"].invoke(workdir)
     cd "pkg" do
-      sh "#{tar} --exclude=.gitignore --exclude=ext/#{@packaging_repo} -zcf #{@name}-#{@version}.tar.gz #{@name}-#{@version}"
+      sh "#{tar} --exclude #{tar_excludes.join(" --exclude ")} -zcf #{@name}-#{@version}.tar.gz #{@name}-#{@version}"
     end
     rm_rf(workdir)
     puts

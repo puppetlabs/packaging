@@ -87,7 +87,7 @@ def rsync_to *args
   target  = args[1]
   dest    = args[2]
   puts "rsyncing #{source} to #{target}"
-  %x{rsync #{flags} #{source} #{ENV['USER']}@#{target}:#{dest}}
+  %x{rsync #{flags} #{source} #{target}:#{dest}}
 end
 
 def rsync_from *args
@@ -97,15 +97,15 @@ def rsync_from *args
   target  = args[1]
   dest    = args[2]
   puts "rsyncing #{source} from #{target} to #{dest}"
-  %x{rsync #{flags} #{ENV['USER']}@#{target}:#{source} #{dest}}
+  %x{rsync #{flags} #{target}:#{source} #{dest}}
 end
 
 def scp_file_from(host,path,file)
-  %x{scp #{ENV['USER']}@#{host}:#{path}/#{file} #{@tempdir}/#{file}}
+  %x{scp #{host}:#{path}/#{file} #{@tempdir}/#{file}}
 end
 
 def scp_file_to(host,path,file)
-  %x{scp #{@tempdir}/#{file} #{ENV['USER']}@#{host}:#{path}}
+  %x{scp #{@tempdir}/#{file} #{host}:#{path}}
 end
 
 def timestamp

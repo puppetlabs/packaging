@@ -1,7 +1,7 @@
 def build_rpm(buildarg = "-bs")
   check_tool('rpmbuild')
   temp = get_temp
-  rpm_define = "--define \"%dist .el5\" --define \"%_topdir  #{temp}\" "
+  rpm_define = "--define \"%dist .el#{%x(lsb_release -rs)[/(\d+)/, 1]}\" --define \"%_topdir  #{temp}\" "
   rpm_old_version = '--define "_source_filedigest_algorithm 1" --define "_binary_filedigest_algorithm 1" \
      --define "_binary_payload w9.gzdio" --define "_source_payload w9.gzdio" \
      --define "_default_patch_fuzz 2"'

@@ -1,7 +1,7 @@
 def build_rpm(buildarg = "-bs")
   check_tool('rpmbuild')
   temp = get_temp
-  dist = find_version
+  dist = find_dist_version
   rpm_define = "#{dist} --define \"%_topdir  #{temp}\" "
   rpm_old_version = '--define "_source_filedigest_algorithm 1" --define "_binary_filedigest_algorithm 1" \
      --define "_binary_payload w9.gzdio" --define "_source_payload w9.gzdio" \
@@ -26,7 +26,7 @@ def build_rpm(buildarg = "-bs")
   end
 end
 
-def find_version()
+def find_dist_version()
    if File.exists?('/etc/fedora-release')
       nil
    elsif File.exists?('/etc/redhat-release')

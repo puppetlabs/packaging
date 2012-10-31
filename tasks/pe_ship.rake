@@ -28,7 +28,7 @@ if @build_pe
     desc "remote freight PE packages to #{@apt_host}"
     task :remote_freight do
       check_var('PE_VER', ENV['PE_VER'])
-      remote_ssh_cmd(@apt_host, "sudo pe-the-things #{ENV['PE_VER']} #{@apt_repo_path}")
+      remote_ssh_cmd(@apt_host, "sudo pe-the-things #{ENV['PE_VER']} #{@apt_repo_path} #{@freight_conf}")
     end
   end
 end

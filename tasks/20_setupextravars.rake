@@ -13,7 +13,7 @@ namespace :pl do
       @apt_repo_path  = @build_data['apt_repo_path']  if @build_data['apt_repo_path']
       @freight_conf   = @build_data['freight_conf']   if @build_data['freight_conf']
     rescue
-      STDERR.puts "There was an error loading the builder data from #{ENV['HOME']}/.packaging/#{@builder_data_file}. Maybe try rake pl:fetch?"
+      STDERR.puts "There was an error loading the builder data from #{ENV['HOME']}/.packaging/#{@builder_data_file}. Try rake pl:fetch to download the current extras builder data."
       exit 1
     end
   end

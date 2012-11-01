@@ -1,7 +1,7 @@
 if @build_pe
   namespace :pe do
     desc "ship PE rpms to #{@yum_host}"
-    task :ship_rpms => "pl:load_extras" do
+    task :ship_rpms => ["pl:load_extras"] do
       rsync_to('pkg/pe/rpm/', @yum_host, "#{@yum_repo_path}/#{@pe_version}/repos/")
       Rake::Task["pe:remote_update_yum_repo"].invoke
     end

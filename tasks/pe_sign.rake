@@ -13,13 +13,10 @@ namespace :pe do
         version=dist[/[0-9]+/]
         rpm_stagedir        = "pkg/pe/rpm/#{family}-#{version}-#{arch}/*.rpm"
         srpm_stagedir       = "pkg/pe/rpm/#{family}-#{version}-srpms/*.rpm"
-        sles_stagedir       = "pkg/pe/sles/#{family}-#{version}-#{arch}/*.rpm"
-        sles_srpm_stagedir  = "pkg/pe/sles/#{family}-#{version}-srpms/*.rpm"
         if family == 'el' and version == '6'
           modern_rpms += FileList[rpm_stagedir] + FileList[srpm_stagedir]
         else
           old_rpms += FileList[rpm_stagedir] + FileList[srpm_stagedir]
-          old_rpms += FileList[sles_stagedir] + FileList[sles_srpm_stagedir]
         end
       end
     end

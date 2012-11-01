@@ -6,13 +6,6 @@ if @build_pe
       Rake::Task["pe:remote_update_yum_repo"].invoke
     end
 
-    desc "ship PE sles rpms to #{@yum_host}"
-    task :ship_sles => ["pl:load_extras"] do
-      Rake::Task["pe:sign_rpms"].invoke
-      rsync_to('pkg/pe/sles/', @yum_host, "#{@sles_repo_path}/#{@pe_version}/repos/")
-      Rake::Task["pe:remote_update_yum_repo"].invoke
-    end
-
     desc "Update remote rpm repodata for PE on #{@yum_host}"
     task :remote_update_yum_repo => "pl:load_extras" do
       remote_ssh_cmd(@yum_host, "for dir in  $(find #{@apt_repo_path}/#{@pe_version}/repos/el* -type d | grep -v repodata | grep -v cache | xargs)  ; do   pushd $dir; sudo rm -rf repodata; createrepo -q -d .; popd &> /dev/null ; done; sync")

@@ -96,15 +96,12 @@ end
 namespace :pl do
   task :setup_el_dirs do
     if @build_pe
+      %x{mkdir -p pkg/pe/sles/sles-11-{i586,x86_64,srpms}}
       %x{mkdir -p pkg/pe/rpm/el-{5,6}-{i386,x86_64,srpms}}
     else
       %x{mkdir -p pkg/el/{5,6}/{products,devel,dependencies}/{SRPMS,i386,x86_64}}
       %x{mkdir -p pkg/fedora/{f15,f16,f17}/{products,devel,dependencies}/{SRPMS,i386,x86_64}}
     end
-  end
-
-  task :setup_sles_dirs do
-      %x{mkdir -p pkg/pe/sles-11-{i386,x86_64,srpms}}
   end
 
   desc "Use default mock to make a final rpm, keyed to PL infrastructure, pass MOCK to specify config"

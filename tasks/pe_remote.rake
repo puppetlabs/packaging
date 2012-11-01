@@ -27,6 +27,12 @@ if @build_pe
       Rake::Task["pl:remote_build"].reenable
       Rake::Task["pl:remote_build"].invoke(@rpm_build_host, 'HEAD', "pe:local_mock_final")
     end
+
+    desc "Execute remote sles rpm build and retrieve package"
+    task :sles => ['pl:fetch', 'pl:load_extras'] do
+      Rake::Task["pl:remote_build"].reenable
+      Rake::Task["pl:remote_build"].invoke(@sles_build_host, 'HEAD', "pe:local_sles TEAM=#{@team}")
+    end
   end
 end
 

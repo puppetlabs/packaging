@@ -332,3 +332,17 @@ def git_pull(remote, branch)
   sh "git pull #{remote} #{branch}"
 end
 
+def create_rpm_repo(dir)
+  check_tool('createrepo')
+  cd dir do
+    sh "createrepo -d ."
+  end
+end
+
+def update_rpm_repo(dir)
+  check_tool('createrepo')
+  cd dir do
+    sh "createrepo -d --update ."
+  end
+end
+

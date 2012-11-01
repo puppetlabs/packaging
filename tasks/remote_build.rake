@@ -14,25 +14,25 @@ if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
     end
 
     desc "Execute release_deb_rc full build set on remote debian build host"
-    task :remote_deb_rc => :fetch do
+    task :remote_deb_rc => ['pl:fetch', 'pl:load_extras'] do
       Rake::Task["pl:remote_build"].reenable
       Rake::Task["pl:remote_build"].invoke(@deb_build_host, 'HEAD', "pl:release_deb_rc")
     end
 
     desc "Execute release_deb_final full build set on remote debian build host"
-    task :remote_deb_final => :fetch do
+    task :remote_deb_final => ['pl:fetch', 'pl:load_extras'] do
       Rake::Task["pl:remote_build"].reenable
       Rake::Task["pl:remote_build"].invoke(@deb_build_host, 'HEAD', "pl:release_deb_final")
     end
 
     desc "Execute release_rpm_rc full build set on remote rpm build host"
-    task :remote_rpm_rc => :fetch do
+    task :remote_rpm_rc => ['pl:fetch', 'pl:load_extras'] do
       Rake::Task["pl:remote_build"].reenable
       Rake::Task["pl:remote_build"].invoke(@rpm_build_host, 'HEAD', "pl:release_rpm_rc")
     end
 
     desc "Execute release_deb_final full build set on remote rpm build host"
-    task :remote_rpm_final => :fetch do
+    task :remote_rpm_final => ['pl:fetch', 'pl:load_extras'] do
       Rake::Task["pl:remote_build"].reenable
       Rake::Task["pl:remote_build"].invoke(@rpm_build_host, 'HEAD', "pl:release_rpm_final")
     end

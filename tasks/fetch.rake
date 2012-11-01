@@ -8,17 +8,10 @@ namespace :pl do
   task :fetch do
     rm_rf "#{ENV['HOME']}/.packaging"
     mkdir_p "#{ENV['HOME']}/.packaging"
-    sh "curl #{pl_packaging_url}/#{@builder_data_file} > #{ENV['HOME']}/.packaging/#{@builder_data_file}"
     begin
-      @build_data = YAML.load_file("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
-      @rpm_build_host = @build_data['rpm_build_host']
-      @deb_build_host = @build_data['deb_build_host']
-      @osx_build_host = @build_data['osx_build_host']
-      @tarball_path   = @build_data['tarball_path']
-      @dmg_path       = @build_data['dmg_path']
-      @pe_version     = @build_data['pe_version']
+      sh "curl #{pl_packaging_url}/#{@builder_data_file} > #{ENV['HOME']}/.packaging/#{@builder_data_file}"
     rescue
-      STDERR.puts "There was an error loading the builder data from #{ENV['HOME']}/.packaging/#{@builder_data_file}"
+      STDERR.puts "There was an error fetching the builder extras data."
       exit 1
     end
   end

@@ -53,17 +53,17 @@ namespace :pl do
 
   if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
     desc "ship apple dmg to #{@yum_host}"
-    task :ship_dmg => :fetch do
+    task :ship_dmg => ['pl:fetch', 'pl:load_extras'] do
       rsync_to('pkg/apple/*.dmg', @yum_host, @dmg_path)
     end if @build_dmg
 
     desc "ship tarball and signature to #{@yum_host}"
-    task :ship_tar => :fetch do
+    task :ship_tar => ['pl:fetch', 'pl:load_extras'] do
       rsync_to("pkg/#{@name}-#{@version}.tar.gz*", @yum_host, @tarball_path)
     end
 
     desc "UBER ship: ship all the things in pkg"
-    task :uber_ship => :fetch do
+    task :uber_ship => ['pl:fetch', 'pl:load_extras'] do
       if confirm_ship(FileList["pkg/**/*"])
         ENV['ANSWER_OVERRIDE'] = 'yes'
         Rake::Task["pl:ship_gem"].invoke if @build_gem

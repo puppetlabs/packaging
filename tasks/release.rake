@@ -51,7 +51,7 @@ namespace :pl do
 
   if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
     desc "Release tarball, e.g. package:tar, pl:{sign_tar, ship_tar}"
-    task :release_tar => :fetch do
+    task :release_tar => ['pl:fetch', 'pl:load_extras'] do
       invoke_task("package:tar")
       invoke_task("pl:sign_tar")
       if confirm_ship(FileList["pkg/*tar.gz*"])
@@ -60,7 +60,7 @@ namespace :pl do
     end
 
     desc "Release dmg, e.g. package:apple, pl:ship_dmg"
-    task :release_dmg => :fetch do
+    task :release_dmg => ['pl:fetch', 'pl:load_extras'] do
       sh "rvmsudo rake package:apple"
       if confirm_ship(FileList["pkg/apple/*.dmg"])
         Rake::Task["pl:ship_dmg"].execute

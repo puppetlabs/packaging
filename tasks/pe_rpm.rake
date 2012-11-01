@@ -4,10 +4,18 @@ if @build_pe
     task :local_rpm => "package:rpm"
 
     desc "Build rpms using ALL final mocks in build_defaults yaml, keyed to PL infrastructure, pass MOCK to override"
-    task :local_mock_final => "pl:mock_final"
+    task :local_mock_final => ["pl:fetch", "pl:load_extras", "pl:mock_final"] do
+      if @team == 'release'
+        Rake::Task["pe:sign_rpms"].invoke
+      end
+    end
 
     desc "Build a PE rpm using the default mock"
-    task :local_mock => "pl:mock"
+    task :local_mock => ["pl:fetch", "pl:load_extras", "pl:mock" ] do
+      if @team == 'release'
+        Rake::Task["pe:sign_rpms"].invoke
+      end
+    end
   end
 end
 

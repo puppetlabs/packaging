@@ -77,6 +77,16 @@ if @build_pe
           end
         end
       end
+      cd 'pkg/pe/sles' do
+        if File.exist?('sles-11-i586')
+          mkdir_p 'sles-11-i386'
+          cp FileList["sles-11-i586/*"], 'sles-11-i386'
+          rm_rf 'sles-11-i586'
+        end
+      end
+      if @team == 'release'
+        Rake::Task["pe:sign_rpms"].invoke
+      end
     end
   end
 end

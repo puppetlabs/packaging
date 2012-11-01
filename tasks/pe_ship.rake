@@ -1,18 +1,14 @@
 if @build_pe
   namespace :pe do
     desc "ship PE rpms to #{@yum_host}"
-    task :ship_rpms => "pl:load_extras" do
+    task :ship_rpms => ["pl:load_extras"] do
       rsync_to('pkg/pe/rpm/', @yum_host, "#{@yum_repo_path}/#{@pe_version}/repos/")
       Rake::Task["pe:remote_update_yum_repo"].invoke
     end
 
     desc "ship PE sles rpms to #{@yum_host}"
-    task :ship_sles => "pl:load_extras" do
-      cd 'pkg/pe/sles' do
-        if File.exist?('sles-11-i586')
-          mv 'sles-11-i586', 'sles-11-i386'
-        end
-      end
+    task :ship_sles => ["pl:load_extras"] do
+      Rake::Task["pe:sign_rpms"].invoke
       rsync_to('pkg/pe/sles/', @yum_host, "#{@sles_repo_path}/#{@pe_version}/repos/")
       Rake::Task["pe:remote_update_yum_repo"].invoke
     end

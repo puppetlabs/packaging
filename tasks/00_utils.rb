@@ -87,7 +87,7 @@ def rsync_to *args
   target  = args[1]
   dest    = args[2]
   puts "rsyncing #{source} to #{target}"
-  %x{rsync #{flags} #{source} #{target}:#{dest}}
+  sh "rsync #{flags} #{source} #{target}:#{dest}"
 end
 
 def rsync_from *args
@@ -97,7 +97,7 @@ def rsync_from *args
   target  = args[1]
   dest    = args[2]
   puts "rsyncing #{source} from #{target} to #{dest}"
-  %x{rsync #{flags} #{target}:#{source} #{dest}}
+  sh "rsync #{flags} #{target}:#{source} #{dest}"
 end
 
 def scp_file_from(host,path,file)

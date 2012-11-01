@@ -27,6 +27,9 @@ if @build_pe
       end
       cd "#{ENV['HOME']}/package_repos" do
         unless File.symlink?('sles-11-i586')
+          if File.exist?('sles-11-i586')
+            rm_rf 'sles-11-i586'
+          end
           File.symlink('sles-11-i386', 'sles-11-i586')
         end
       end

@@ -1,35 +1,65 @@
 #Packaging
 
-This is a repository for packaging automation for Puppet Labs software.  
+This is a repository for packaging automation for Puppet Labs software.
 The goal is to abstract and automate packaging processes beyond individual
-software projects to a level where this repo can be cloned inside any
-project and used to build Debian and Redhat packages, as well as gems,
-apple packages and tarballs.  
+software projects to a level where this repo can be cloned inside any project
+and used to build Debian and Redhat packages, as well as gems, apple packages
+and tarballs.
 
 ##Using the Packaging Repo
-Several Puppet Labs projects have been migrated to the packaging repo, including
-puppet, facter, puppet-dashboard, and hiera. Generally speaking, ruby 1.9.3 and rake 0.9.x seem to work best. To pull the packaging tasks into your source repo, do a `rake package:bootstrap`. This will clone this repo into the ext directory of the project and make many packaging tasks available. The tasks are generally grouped into two categories, `package:` namespaced tasks and `pl:` namespaced tasks.  
 
-`package:` namespaced tasks are general purpose tasks that are set up to use the most minimal tool chain possible for creating packages. These tasks will create rpms and debs, but any build dependencies will need to be satisifed by the building host, and any dynamically generated dependencies may result in packages that are only suitable for the OS/version of the build host. However, for rolling one's own debs and rpms or for use in environments without many OSes/versions, this may work just fine.
+Several Puppet Labs projects have been migrated to the packaging repo,
+including puppet, facter, puppet-dashboard, and hiera. Generally speaking,
+ruby 1.9.3 and rake 0.9.x seem to work best. To pull the packaging tasks into
+your source repo, do a `rake package:bootstrap`. This will clone this repo
+into the ext directory of the project and make many packaging tasks
+available. The tasks are generally grouped into two categories, `package:`
+namespaced tasks and `pl:` namespaced tasks.
 
-`pl:` namespaced tasks rely on a slighly more complex toolchain for packaging inside clean chroot environments for the various operating systems and versions that Puppet Labs supports. On the rpm side, this is done with [mock](http://fedoraproject.org/wiki/Projects/Mock) and for debs, we use pdebuild and [cowbuilder](http://wiki.debian.org/cowbuilder). For the most part, these tasks are keyed to puppetlabs infrastructure, and are used by the Release Engineering team to create release packages. However, they can certainly be modified to suit other environments, and much effort went into making tasks as modular and reusable as possible.  
+`package:` namespaced tasks are general purpose tasks that are set up to use
+the most minimal tool chain possible for creating packages. These tasks will
+create rpms and debs, but any build dependencies will need to be satisifed by
+the building host, and any dynamically generated dependencies may result in
+packages that are only suitable for the OS/version of the build host. However,
+for rolling one's own debs and rpms or for use in environments without many
+OSes/versions, this may work just fine.
 
-A puppet module, [puppetlabs-debbuilder](https://github.com/puppetlabs/puppetlabs-debbuilder), has been created to stand up a debian build host compatible with the debian side this packaging repo. The rpm-side module, [puppetlabs-rpmbuilder](https://github.com/puppetlabs/puppetlabs-rpmbuilder), is currently a work in progress and.
+`pl:` namespaced tasks rely on a slighly more complex toolchain for packaging
+inside clean chroot environments for the various operating systems and
+versions that Puppet Labs supports. On the rpm side, this is done with
+[mock](http://fedoraproject.org/wiki/Projects/Mock) and for debs, we use
+pdebuild and [cowbuilder](http://wiki.debian.org/cowbuilder). For the most
+part, these tasks are keyed to puppetlabs infrastructure, and are used by the
+Release Engineering team to create release packages. However, they can
+certainly be modified to suit other environments, and much effort went into
+making tasks as modular and reusable as possible.
 
-To remove the packaging repo, remove the ext/packaging directory or run `rake package:implode`.
+A puppet module,
+[puppetlabs-debbuilder](https://github.com/puppetlabs/puppetlabs-debbuilder),
+has been created to stand up a debian build host compatible with the debian
+side this packaging repo. The rpm-side module,
+[puppetlabs-rpmbuilder](https://github.com/puppetlabs/puppetlabs-rpmbuilder),
+is currently a work in progress and.
+
+To remove the packaging repo, remove the ext/packaging directory or run `rake
+package:implode`.
 
 ##Setting up projects for the Packaging Repo
-The packaging repo requires many project-side artifacts inside the ext directory at the top level.  
-It expects the following directory structure in the project  
+
+The packaging repo requires many project-side artifacts inside the ext
+directory at the top level.  It expects the following directory structure in
+the project
+
 *   ext/{debian,redhat,osx}
 
 each of which contains templated erb files using the instance variables
-specified in the setupvars task. These include a debian changelog, a
-redhat spec file, and an osx preflight and plist.  
+specified in the setupvars task. These include a debian changelog, a redhat
+spec file, and an osx preflight and plist.
 
 The top level Rakefile in the project should have the following added:
+
 ```ruby
-Dir['ext/packaging/tasks/**/*'].sort.each { |t| load t }
+Dir['ext/packaging/tasks/**/*.rake'].sort.each { |t| load t }
 
 build_defs_file = 'ext/build_defaults.yaml'
 if File.exist?(build_defs_file)
@@ -64,7 +94,7 @@ if File.exist?(build_defs_file)
 end
 ```
 
-Also in ext should be two files, build_defaults.yaml and project_data.yaml.  
+Also in ext should be two files, build_defaults.yaml and project_data.yaml.
 
 This is the sample build_defaults.yaml file from Hiera:
 ```yaml
@@ -142,9 +172,9 @@ gem_rdoc_options:
   - --main
   - Hiera.README
 ```
-For basic mac packaging, add an osx directory in ext containing the following files:  
-1. a preflight.erb template for any pre-flight actions, perhaps removing the old package if present.  
-2. a prototype.plist.erb that is templated into the pkginfo.plist file for the package. This is the one from puppet. Note that these variable names aren't mutable here, but there's no need to worry about their value assignment, it's done in the apple task:  
+For basic mac packaging, add an osx directory in ext containing the following files:
+1. a preflight.erb template for any pre-flight actions, perhaps removing the old package if present.
+2. a prototype.plist.erb that is templated into the pkginfo.plist file for the package. This is the one from puppet. Note that these variable names aren't mutable here, but there's no need to worry about their value assignment, it's done in the apple task:
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

@@ -75,7 +75,7 @@ end
 def remote_ssh_cmd target, command
   check_tool('ssh')
   puts "Executing '#{command}' on #{target}"
-  sh "ssh -t #{target} '#{command}'"
+  sh "ssh -t #{target} '#{command.gsub("'", "'\\\\''")}'"
 end
 
 def rsync_to *args

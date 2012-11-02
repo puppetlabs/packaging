@@ -249,7 +249,7 @@ def set_cow_envs(cow)
 end
 
 def ln(target, name)
-  %x{ln -f #{target} #{name}}
+  FileUtils.ln(name, target, :force => true, :verbose => true)
 end
 
 def git_commit_file(file)

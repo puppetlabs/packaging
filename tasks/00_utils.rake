@@ -1,22 +1,19 @@
 # Utility methods used by the various rake tasks
 
 def check_tool(tool)
-  %x{which #{tool}}
-  unless $?.success?
-    STDERR.puts "#{tool} tool not found...exiting"
-    exit 1
-  end
-end
-
-def has_tool(tool)
-  %x{which #{tool}}
-  return $?.success?
+  return true if has_tool(tool)
+  STDERR.puts "#{tool} tool not found...exiting"
+  exit 1
 end
 
 def find_tool(tool)
-  location = %x{which #{tool}}.chomp
-  location if $?.success?
+  ENV['PATH'].split(File::PATH_SEPARATOR).each do |root|
+    location = File.join(root, tool)
+    return location if FileTest.executable? location
+  end
+  return nil
 end
+alias :has_tool :find_tool
 
 def check_file(file)
   unless File.exist?(file)

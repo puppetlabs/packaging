@@ -38,7 +38,7 @@ if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
     end
 
     desc "Execute package:apple on remote apple build host"
-    task :remote_dmg => :fetch do
+    task :remote_dmg => ['pl:fetch', 'pl:load_extras'] do
       # Because we use rvmsudo for apple, we end up replicating the :remote_build task
       host                    = @osx_build_host
       treeish                 = 'HEAD'

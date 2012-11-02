@@ -253,8 +253,7 @@ def ln(target, name)
 end
 
 def git_commit_file(file)
-  %x{which git &> /dev/null}
-  if $?.success? and File.exist?('.git')
+  if has_tool('git') and File.exist?('.git')
     %x{git commit #{file} -m "Commit changes to #{file}" &> /dev/null}
   end
 end

@@ -16,8 +16,8 @@ namespace :pl do
       @sles_arch_repos  = @build_data['sles_arch_repos'] if @build_data['sles_arch_repos']
       @sles_repo_path   = @build_data['sles_repo_path']  if @build_data['sles_repo_path']
       @sles_repo_host   = @build_data['sles_repo_host']  if @build_data['sles_repo_host']
-    rescue
-      STDERR.puts "There was an error loading the builder data from #{ENV['HOME']}/.packaging/#{@builder_data_file}. Try rake pl:fetch to download the current extras builder data."
+    rescue => e
+      STDERR.puts "There was an error loading the builder data from #{ENV['HOME']}/.packaging/#{@builder_data_file}. Try rake pl:fetch to download the current extras builder data.\n" + e
       exit 1
     end
   end

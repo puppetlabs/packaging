@@ -110,31 +110,49 @@ def timestamp
   Time.now.strftime("%Y-%m-%d %H:%M:%S")
 end
 
+# Return information about the current tree, using `git describe`, ready for
+# further processing.
+#
+# Returns an array of one to three elements, being:
+# * version (three dot-joined numbers, leading `v` stripped)
+# * commits (string containing integer, number of commits since that version was tagged)
+# * dirty (string 'dirty' if local changes exist in the repo)
+def git_describe_version
+  return nil unless is_git_repo and raw = run_git_describe_internal
+  # reprocess that into a nice set of output data
+  raw.chomp.sub(/^v/, '').split('-').values_at(0,1,3).compact
+end
+
+# This is a stub to ease testing...
+def run_git_describe_internal
+  raw = %x{git describe --tags --dirty 2>/dev/null}
+  $?.success? ? raw : nil
+end
+
 def get_dash_version
-  if is_git_repo
-    %x{git describe}.chomp.split('-')[0..1].join('-').gsub('v','')
+  if info = git_describe_version
+    info.join('-')
   else
     get_pwd_version
   end
 end
 
+def uname_r
+  %x{uname -r}.chomp
+end
+
 def get_ips_version
-  if File.exists?('.git')
-    desc = %x{git describe}.chomp.split(/[.-]/)
-    commits = %x{git log --oneline --no-merges | wc -l}.chomp.strip
-    osrelease = %x{uname -r}.chomp
-    "%s.%s.%s,#{osrelease}-%s" % [ desc[0],desc[1], desc[2], commits]
+  if info = git_describe_version
+    version, commits, dirty = info
+    osrelease = uname_r
+    "#{version},#{osrelease}-#{commits.to_i}#{dirty ? '-dirty' : ''}"
   else
     get_pwd_version
   end
 end
 
 def get_dot_version
-  if File.exists?('.git')
-    %x{git describe}.chomp.gsub('-', '.').split('.')[0..3].join('.').gsub('v', '')
-  else
-    get_pwd_version
-  end
+  get_dash_version.gsub('-', '.')
 end
 
 def get_pwd_version

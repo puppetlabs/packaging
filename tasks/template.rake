@@ -2,9 +2,12 @@
 namespace :package do
   task :template, :workdir do |t, args|
     workdir = args.workdir
-    erb("#{workdir}/ext/redhat/#{@name}.spec.erb", "#{workdir}/ext/redhat/#{@name}.spec")
-    erb("#{workdir}/ext/debian/changelog.erb", "#{workdir}/ext/debian/changelog")
-    rm_rf(FileList["#{workdir}/ext/debian/*.erb", "#{workdir}/ext/redhat/*.erb"])
+
+    FileList["#{workdir}/ext/**/*.erb"].each do |template|
+      # process the template, stripping off the ERB extension
+      erb(template, template[0..-5])
+      rm_f(template)
+    end
   end
 end
 

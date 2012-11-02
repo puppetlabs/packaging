@@ -21,8 +21,8 @@ begin
   @gem_rdoc_options         = @project_specs['gem_rdoc_options']
   @gem_forge_project        = @project_specs['gem_forge_project']
   @gem_excludes             = @project_specs['gem_excludes']
-rescue
-  STDERR.puts "There was an error loading the project specifications from the 'ext/project_data.yaml' file."
+rescue => e
+  STDERR.puts "There was an error loading the project specifications from the 'ext/project_data.yaml' file.\n" + e
   exit 1
 end
 
@@ -53,8 +53,8 @@ begin
   @ips_repo        = @pkg_defaults['ips_repo']
   @ips_store       = @pkg_defaults['ips_store']
   @ips_host        = @pkg_defaults['ips_host']
-rescue
-  STDERR.puts "There was an error loading the packaging defaults from the 'ext/build_defaults.yaml' file."
+rescue => e
+  STDERR.puts "There was an error loading the packaging defaults from the 'ext/build_defaults.yaml' file.\n" + e
   exit 1
 end
 

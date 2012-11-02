@@ -1,22 +1,19 @@
 # Utility methods used by the various rake tasks
 
 def check_tool(tool)
-  %x{which #{tool}}
-  unless $?.success?
-    STDERR.puts "#{tool} tool not found...exiting"
-    exit 1
-  end
-end
-
-def has_tool(tool)
-  %x{which #{tool}}
-  return $?.success?
+  return true if has_tool(tool)
+  STDERR.puts "#{tool} tool not found...exiting"
+  exit 1
 end
 
 def find_tool(tool)
-  location = %x{which #{tool}}.chomp
-  location if $?.success?
+  ENV['PATH'].split(File::PATH_SEPARATOR).each do |root|
+    location = File.join(root, tool)
+    return location if FileTest.executable? location
+  end
+  return nil
 end
+alias :has_tool :find_tool
 
 def check_file(file)
   unless File.exist?(file)
@@ -40,9 +37,10 @@ def check_host(host)
 end
 
 def erb(erbfile,  outfile)
-  template = File.read(erbfile)
-  message = ERB.new(template, nil, "-")
-  output = message.result(binding)
+  template         = File.read(erbfile)
+  message          = ERB.new(template, nil, "-")
+  message.filename = erbfile
+  output           = message.result(binding)
   File.open(outfile, 'w') { |f| f.write output }
   puts "Generated: #{outfile}"
 end
@@ -77,7 +75,7 @@ end
 def remote_ssh_cmd target, command
   check_tool('ssh')
   puts "Executing '#{command}' on #{target}"
-  sh "ssh -t #{target} '#{command}'"
+  sh "ssh -t #{target} '#{command.gsub("'", "'\\\\''")}'"
 end
 
 def rsync_to *args
@@ -112,31 +110,49 @@ def timestamp
   Time.now.strftime("%Y-%m-%d %H:%M:%S")
 end
 
+# Return information about the current tree, using `git describe`, ready for
+# further processing.
+#
+# Returns an array of one to three elements, being:
+# * version (three dot-joined numbers, leading `v` stripped)
+# * commits (string containing integer, number of commits since that version was tagged)
+# * dirty (string 'dirty' if local changes exist in the repo)
+def git_describe_version
+  return nil unless is_git_repo and raw = run_git_describe_internal
+  # reprocess that into a nice set of output data
+  raw.chomp.sub(/^v/, '').split('-').values_at(0,1,3).compact
+end
+
+# This is a stub to ease testing...
+def run_git_describe_internal
+  raw = %x{git describe --tags --dirty 2>/dev/null}
+  $?.success? ? raw : nil
+end
+
 def get_dash_version
-  if is_git_repo
-    %x{git describe}.chomp.split('-')[0..1].join('-').gsub('v','')
+  if info = git_describe_version
+    info.join('-')
   else
     get_pwd_version
   end
 end
 
+def uname_r
+  %x{uname -r}.chomp
+end
+
 def get_ips_version
-  if File.exists?('.git')
-    desc = %x{git describe}.chomp.split(/[.-]/)
-    commits = %x{git log --oneline --no-merges | wc -l}.chomp.strip
-    osrelease = %x{uname -r}.chomp
-    "%s.%s.%s,#{osrelease}-%s" % [ desc[0],desc[1], desc[2], commits]
+  if info = git_describe_version
+    version, commits, dirty = info
+    osrelease = uname_r
+    "#{version},#{osrelease}-#{commits.to_i}#{dirty ? '-dirty' : ''}"
   else
     get_pwd_version
   end
 end
 
 def get_dot_version
-  if File.exists?('.git')
-    %x{git describe}.chomp.gsub('-', '.').split('.')[0..3].join('.').gsub('v', '')
-  else
-    get_pwd_version
-  end
+  get_dash_version.gsub('-', '.')
 end
 
 def get_pwd_version
@@ -233,12 +249,11 @@ def set_cow_envs(cow)
 end
 
 def ln(target, name)
-  %x{ln -f #{target} #{name}}
+  FileUtils.ln(name, target, :force => true, :verbose => true)
 end
 
 def git_commit_file(file)
-  %x{which git &> /dev/null}
-  if $?.success? and File.exist?('.git')
+  if has_tool('git') and File.exist?('.git')
     %x{git commit #{file} -m "Commit changes to #{file}" &> /dev/null}
   end
 end

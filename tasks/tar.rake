@@ -45,7 +45,11 @@ namespace :package do
 
     # Transfer all the files and symlinks into the working directory...
     install = install.select {|x| File.file?(x) or File.symlink?(x) }
-    sh "tar c #{install} | tar x -C #{workdir}"
+
+    install.each do |file|
+      mkpath(File.dirname( File.join(workdir, file) ), :verbose => false)
+      cp_p(file, File.join(workdir, file), :verbose => false)
+    end
 
     tar_excludes = @tar_excludes.nil? ? [] : @tar_excludes.split(' ')
     tar_excludes << "ext/#{@packaging_repo}"

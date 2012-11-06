@@ -20,8 +20,8 @@ namespace :pe do
         end
       end
     end
-    sign_el5(old_rpms)
-    sign_modern(modern_rpms)
+    sign_el5(old_rpms) unless old_rpms.empty?
+    sign_modern(modern_rpms) unless modern_rpms.empty?
   end
 end
 

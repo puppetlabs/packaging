@@ -37,10 +37,15 @@ namespace :pl do
   task :sign_rpms do
     el5_rpms    = Dir["pkg/el/5/**/*.rpm"].join(' ')
     modern_rpms = (Dir["pkg/el/6/**/*.rpm"] + Dir["pkg/fedora/**/*.rpm"]).join(' ')
-    puts "Signing el5 rpms..."
-    sign_el5 el5_rpms
-    puts "Signing el6 and fedora rpms..."
-    sign_modern modern_rpms
+    unless el5_rpms.empty?
+      puts "Signing el5 rpms..."
+      sign_el5(el5_rpms)
+    end
+
+    unless modern_rpms.empty?
+      puts "Signing el6 and fedora rpms..."
+      sign_modern(modern_rpms)
+    end
   end
 
   desc "Sign ips package, Defaults to PL Key, pass KEY to override"

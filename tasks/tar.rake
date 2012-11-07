@@ -9,22 +9,6 @@ namespace :package do
     # The list of files to install in the tarball
     install = FileList.new
 
-    # It is nice to use arrays in YAML to represent array content, but we used
-    # to support a mode where a space-separated string was used.  Support both
-    # to allow a gentle migration to a modern style...
-    patterns =
-      case @files
-      when String
-        STDERR.puts "warning: `files` should be an array, not a string"
-        @files.split(' ')
-
-      when Array
-        @files
-
-      else
-        raise "`files` must be a string or an array!"
-      end
-
     # We need to add our list of file patterns from the configuration; this
     # used to be a list of "things to copy recursively", which would install
     # editor backup files and other nasty things.
@@ -35,7 +19,7 @@ namespace :package do
     # Eventually, when all our projects are migrated to the new standard, we
     # can drop this in favour of just pushing the patterns directly into the
     # FileList and eliminate many lines of code and comment.
-    patterns.each do |pattern|
+    patterns = @files.split(' ').each do |pattern|
       if File.directory?(pattern)
         install.add(pattern + "/**/*")
       else

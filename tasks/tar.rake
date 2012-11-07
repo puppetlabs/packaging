@@ -36,7 +36,7 @@ namespace :package do
     # can drop this in favour of just pushing the patterns directly into the
     # FileList and eliminate many lines of code and comment.
     patterns.each do |pattern|
-      if File.directory?(pattern)
+      if File.directory?(pattern) and not Dir[pattern + "/**/*"].empty?
         install.add(pattern + "/**/*")
       else
         install.add(pattern)
@@ -44,11 +44,15 @@ namespace :package do
     end
 
     # Transfer all the files and symlinks into the working directory...
-    install = install.select {|x| File.file?(x) or File.symlink?(x) }
+    install = install.select { |x| File.file?(x) or File.symlink?(x) or empty_dir?(x) }
 
     install.each do |file|
-      mkpath(File.dirname( File.join(workdir, file) ), :verbose => false)
-      cp_p(file, File.join(workdir, file), :verbose => false)
+      if empty_dir?(file)
+        mkpath(File.join(workdir,file), :verbose => false)
+      else
+        mkpath(File.dirname( File.join(workdir, file) ), :verbose => false)
+        cp_p(file, File.join(workdir, file), :verbose => false)
+      end
     end
 
     tar_excludes = @tar_excludes.nil? ? [] : @tar_excludes.split(' ')

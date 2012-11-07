@@ -361,3 +361,6 @@ def update_rpm_repo(dir)
   end
 end
 
+def empty_dir?(dir)
+  File.exist?(dir) and File.directory?(dir) and Dir["#{dir}/**/*"].empty?
+end

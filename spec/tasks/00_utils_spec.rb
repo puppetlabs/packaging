@@ -4,29 +4,47 @@ require_task '00_utils'
 
 describe "00_utils" do
   TestVersions = {
-    '0.7.0'                   => {
-      :git_describe_version   => %w{0.7.0},
-      :get_dash_version       => '0.7.0',
-      :get_ips_version        => '0.7.0,3.14159-0',
-      :get_dot_version        => '0.7.0'
+    '0.7.0'                       => {
+      :git_describe_version       => %w{0.7.0},
+      :get_dash_version           => '0.7.0',
+      :get_ips_version            => '0.7.0,3.14159-0',
+      :get_dot_version            => '0.7.0'
     },
-    '0.7.0rc1'                => {
-      :git_describe_version   => %w{0.7.0rc1},
-      :get_dash_version       => '0.7.0rc1',
-      :get_ips_version        => '0.7.0rc1,3.14159-0',
-      :get_dot_version        => '0.7.0rc1'
+    '0.7.0rc1'                    => {
+      :git_describe_version       => %w{0.7.0rc1},
+      :get_dash_version           => '0.7.0rc1',
+      :get_ips_version            => '0.7.0rc1,3.14159-0',
+      :get_dot_version            => '0.7.0rc1'
     },
-    '0.7.0-63-ge391f55'       => {
-      :git_describe_version   => %w{0.7.0 63},
-      :get_dash_version       => '0.7.0-63',
-      :get_ips_version        => '0.7.0,3.14159-63',
-      :get_dot_version        => '0.7.0.63'
+    '0.7.0-rc1'                   => {
+      :git_describe_version       => %w{0.7.0 rc1},
+      :get_dash_version           => '0.7.0-rc1',
+      :get_ips_version            => '0.7.0,3.14159-0',
+      :get_dot_version            => '0.7.0.rc1'
     },
-    '0.7.0-63-ge391f55-dirty' => {
-      :git_describe_version   => %w{0.7.0 63 dirty},
-      :get_dash_version       => '0.7.0-63-dirty',
-      :get_ips_version        => '0.7.0,3.14159-63-dirty',
-      :get_dot_version        => '0.7.0.63.dirty'
+    '0.7.0-rc1-63-ge391f55'       => {
+      :git_describe_version       => %w{0.7.0 rc1 63},
+      :get_dash_version           => '0.7.0-rc1-63',
+      :get_ips_version            => '0.7.0,3.14159-63',
+      :get_dot_version            => '0.7.0.rc1.63'
+    },
+    '0.7.0-rc1-63-ge391f55-dirty' => {
+      :git_describe_version       => %w{0.7.0 rc1 63 dirty},
+      :get_dash_version           => '0.7.0-rc1-63-dirty',
+      :get_ips_version            => '0.7.0,3.14159-63-dirty',
+      :get_dot_version            => '0.7.0.rc1.63.dirty'
+    },
+    '0.7.0-63-ge391f55'           => {
+      :git_describe_version       => %w{0.7.0 63},
+      :get_dash_version           => '0.7.0-63',
+      :get_ips_version            => '0.7.0,3.14159-63',
+      :get_dot_version            => '0.7.0.63'
+    },
+    '0.7.0-63-ge391f55-dirty'     => {
+      :git_describe_version       => %w{0.7.0 63 dirty},
+      :get_dash_version           => '0.7.0-63-dirty',
+      :get_ips_version            => '0.7.0,3.14159-63-dirty',
+      :get_dot_version            => '0.7.0.63.dirty'
     },
   }
 

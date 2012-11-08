@@ -33,6 +33,13 @@ if @build_pe
       Rake::Task["pl:remote_build"].reenable
       Rake::Task["pl:remote_build"].invoke(@sles_build_host, 'HEAD', "pe:local_sles TEAM=#{@team}")
     end
+
+    desc "Execute remote debian, el, and sles builds, sign, and ship pkgs"
+    task :all => ['clean', 'pl:fetch', 'pl:load_extras'] do
+      ['pe:deb', 'pe:mock_all', 'pe:sles', 'pe:ship_rpms', 'pe:ship_debs'].each do |task|
+        Rake::Task[task].execute
+      end
+    end
   end
 end
 

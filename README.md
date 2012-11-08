@@ -44,7 +44,7 @@ generally consumable by everyone.
 A puppet module,
 [puppetlabs-debbuilder](https://github.com/puppetlabs/puppetlabs-debbuilder),
 has been created to stand up a debian build host compatible with the debian
-side this packaging repo. The rpm-side module,
+side of this packaging repo. The rpm-side module,
 [puppetlabs-rpmbuilder](https://github.com/puppetlabs/puppetlabs-rpmbuilder),
 is currently a work in progress and.
 

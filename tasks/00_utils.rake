@@ -113,14 +113,26 @@ end
 # Return information about the current tree, using `git describe`, ready for
 # further processing.
 #
-# Returns an array of one to three elements, being:
+# Returns an array of one to four elements, being:
 # * version (three dot-joined numbers, leading `v` stripped)
+# * the string 'rcX' (if the last tag was an rc release, where X is the rc number)
 # * commits (string containing integer, number of commits since that version was tagged)
 # * dirty (string 'dirty' if local changes exist in the repo)
 def git_describe_version
   return nil unless is_git_repo and raw = run_git_describe_internal
   # reprocess that into a nice set of output data
-  raw.chomp.sub(/^v/, '').split('-').values_at(0,1,3).compact
+  # The elements we select potentially change if this is an rc
+  # For an rc with added commits our string will be something like '0.7.0-rc1-63-g51ccc51'
+  # and our return will be [0.7.0, rc1, 63, <dirty>]
+  # For a final with added commits, it will look like '0.7.0-63-g51ccc51'
+  # and our return will be [0.7.0, 64, <dirty>]
+  info = raw.chomp.sub(/^v/, '').split('-')
+  if info[1] and not info[1].match('^[\d]+').nil?
+    version_string = info.values_at(0,1,3).compact
+  else
+    version_string = info.values_at(0,1,2,4).compact
+  end
+  version_string
 end
 
 # This is a stub to ease testing...
@@ -144,6 +156,10 @@ end
 def get_ips_version
   if info = git_describe_version
     version, commits, dirty = info
+    commits and unless commits.match('^rc[\d]+').nil?
+      commits = info[2]
+      dirty   = info[3]
+    end
     osrelease = uname_r
     "#{version},#{osrelease}-#{commits.to_i}#{dirty ? '-dirty' : ''}"
   else

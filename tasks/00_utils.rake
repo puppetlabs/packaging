@@ -127,7 +127,7 @@ def git_describe_version
   # For a final with added commits, it will look like '0.7.0-63-g51ccc51'
   # and our return will be [0.7.0, 64, <dirty>]
   info = raw.chomp.sub(/^v/, '').split('-')
-  if info[1] and not info[1].match('^[\d]+').nil?
+  if info[1].to_s.match('^[\d]+')
     version_string = info.values_at(0,1,3).compact
   else
     version_string = info.values_at(0,1,2,4).compact
@@ -156,7 +156,7 @@ end
 def get_ips_version
   if info = git_describe_version
     version, commits, dirty = info
-    commits and unless commits.match('^rc[\d]+').nil?
+    if commits.to_s.match('^rc[\d]+')
       commits = info[2]
       dirty   = info[3]
     end

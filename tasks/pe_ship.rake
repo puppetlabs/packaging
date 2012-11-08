@@ -26,6 +26,9 @@ if @build_pe
       end
     end
 
+    # This is particularly hacky. The 'pe-the-things' script resides on the @apt_host and takes packages placed
+    # in the directory/structure shown in the rsync target of pe:ship_debs and adds them to the remote PE
+    # freight repository and updates the apt repo metadata
     desc "remote freight PE packages to #{@apt_host}"
     task :remote_freight => "pl:load_extras" do
       remote_ssh_cmd(@apt_host, "sudo pe-the-things #{@pe_version} #{@apt_repo_path} #{@freight_conf}")

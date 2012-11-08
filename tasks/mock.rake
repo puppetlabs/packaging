@@ -1,3 +1,22 @@
+# The mock methods/tasks are fairly specific to puppetlabs infrastructure, e.g., the mock configs
+# have to be named in a format like the PL mocks, e.g. dist-version-architecture, such as:
+# el-5-i386
+# fedora-17-i386
+# as well as the oddly formatted exception, 'pl-5-i386' which is the default puppetlabs FOSS mock
+# format for 'el-5-i386' (note swap 'pl' for 'el')
+#
+# The mock-built rpms are placed in a directory structure under 'pkg' based on how the Puppet Labs
+# repo structure is laid out in order to facilitate easy shipping from the local repository to the
+# Puppet Labs repos. For open source, the directory structure mirrors that of yum.puppetlabs.com:
+# pkg/<dist>/<version>/{products,devel,dependencies}/<arch>/*.rpm
+# e.g.,
+# pkg/el/5/products/i386/*.rpm
+# pkg/fedora/f15/products/i386/*.rpm
+#
+# For PE, the directory structure is flatter:
+# pkg/<dist>-<version>-<arch>/*.rpm
+# e.g.,
+# pkg/el-5-i386/*.rpm
 
 def mock(mock_config, srpm)
   check_tool('mock')

@@ -218,7 +218,7 @@ def gpg_sign_file(file)
   if gpg
     sh "#{gpg} --armor --detach-sign -u #{@gpg_key} #{file}"
   else
-    STDERR.puts "No gpg available. Cannot sign tarball. Exiting..."
+    STDERR.puts "No gpg available. Cannot sign #{file}. Exiting..."
     exit 1
   end
 end

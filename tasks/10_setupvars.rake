@@ -1,5 +1,6 @@
 require 'yaml'
 require 'erb'
+require 'benchmark'
 
 begin
   @project_specs            ||= YAML.load_file('ext/project_data.yaml')

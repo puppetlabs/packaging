@@ -48,24 +48,27 @@ task :prep_deb_tars, :work_dir do |t,args|
 end
 
 task :build_deb, :deb_command, :cow, :devel do |t,args|
-  deb_build = args.deb_command
-  cow       = args.cow
-  devel     = args.devel
-  work_dir  = get_temp
-  subdir    = 'pe/' if @build_pe
-  dest_dir  = "#{@build_root}/pkg/#{subdir}deb/#{cow.split('-')[1] unless cow.nil?}"
-  check_tool(deb_build)
-  mkdir_p dest_dir
-  deb_args  = { :work_dir => work_dir, :cow => cow, :devel => devel}
-  Rake::Task[:prep_deb_tars].reenable
-  Rake::Task[:prep_deb_tars].invoke(work_dir)
-  cd "#{work_dir}/#{@name}-#{@debversion}" do
-    mv 'ext/debian', '.'
-    send(deb_build, deb_args)
-    cp FileList["#{work_dir}/*.deb", "#{work_dir}/*.dsc", "#{work_dir}/*.changes", "#{work_dir}/*.debian.tar.gz", "#{work_dir}/*.orig.tar.gz"], dest_dir
-    rm_rf "#{work_dir}/#{@name}-#{@debversion}"
-    rm_rf work_dir
+  bench = Benchmark.realtime do
+    deb_build = args.deb_command
+    cow       = args.cow
+    devel     = args.devel
+    work_dir  = get_temp
+    subdir    = 'pe/' if @build_pe
+    dest_dir  = "#{@build_root}/pkg/#{subdir}deb/#{cow.split('-')[1] unless cow.nil?}"
+    check_tool(deb_build)
+    mkdir_p dest_dir
+    deb_args  = { :work_dir => work_dir, :cow => cow, :devel => devel}
+    Rake::Task[:prep_deb_tars].reenable
+    Rake::Task[:prep_deb_tars].invoke(work_dir)
+    cd "#{work_dir}/#{@name}-#{@debversion}" do
+      mv 'ext/debian', '.'
+      send(deb_build, deb_args)
+      cp FileList["#{work_dir}/*.deb", "#{work_dir}/*.dsc", "#{work_dir}/*.changes", "#{work_dir}/*.debian.tar.gz", "#{work_dir}/*.orig.tar.gz"], dest_dir
+      rm_rf "#{work_dir}/#{@name}-#{@debversion}"
+      rm_rf work_dir
+    end
   end
+  Metrics_helper.add({ :dist => ENV['DIST'], :bench => bench }) if @benchmark
 end
 
 namespace :package do
@@ -80,11 +83,13 @@ namespace :pl do
   task :deb => "package:tar"  do
     check_var('PE_VER', ENV['PE_VER']) if @build_pe
     Rake::Task[:build_deb].invoke('pdebuild', @default_cow)
+    Metrics_helper.post if @benchmark
   end
 
   desc "Create an RC deb from this repo using the default cow #{@default_cow}."
   task :deb_rc => "package:tar" do
     Rake::Task[:build_deb].invoke('pdebuild', @default_cow, 'devel')
+    Metrics_helper.post if @benchmark
   end
 
   desc "Create debs from this git repository using all cows specified in build_defaults yaml"
@@ -95,6 +100,7 @@ namespace :pl do
       Rake::Task[:build_deb].reenable
       Rake::Task[:build_deb].invoke('pdebuild', cow)
     end
+    Metrics_helper.post if @benchmark
   end
 
   desc "Create RC debs from this git repository using all cows specified in build_defaults yaml"
@@ -105,4 +111,5 @@ namespace :pl do
       Rake::Task[:build_deb].invoke('pdebuild', cow, 'devel')
     end
   end
+  Metrics_helper.post if @benchmark
 end

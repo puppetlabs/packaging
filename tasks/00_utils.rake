@@ -385,3 +385,7 @@ def empty_dir?(dir)
   File.exist?(dir) and File.directory?(dir) and Dir["#{dir}/**/*"].empty?
 end
 
+def hostname
+  require 'socket'
+  host = Socket.gethostname
+end

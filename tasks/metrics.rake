@@ -18,24 +18,26 @@ if @benchmark
     end
 
     def self.post
-      ENV["PGCONNECT_TIMEOUT"]="10"
+      if psql = find_tool('psql')
+        ENV["PGCONNECT_TIMEOUT"]="10"
 
-      @metrics.each do |metric|
-        date        = metric[:date]
-        pkg         = metric[:pkg]
-        dist        = metric[:dist]
-        bench       = metric[:bench]
-        who         = metric[:who]
-        where       = metric[:where]
-        version     = metric[:version]
-        pe_version  = metric[:pe_version]
-        @pg_major_version ||= %x{/usr/bin/psql --version}.match(/psql \(PostgreSQL\) (\d)\..*/)[1].to_i
-        no_pass_fail = "-w" if @pg_major_version > 8
-        %x{/usr/bin/psql #{no_pass_fail} -c "INSERT INTO #{@db_table} \
-        (date, package, dist, build_time, build_user, build_loc, version, pe_version) \
-        VALUES ('#{date}', '#{pkg}', '#{dist}', #{bench}, '#{who}', '#{where}', '#{version}', '#{pe_version}')"}
+        @metrics.each do |metric|
+          date        = metric[:date]
+          pkg         = metric[:pkg]
+          dist        = metric[:dist]
+          bench       = metric[:bench]
+          who         = metric[:who]
+          where       = metric[:where]
+          version     = metric[:version]
+          pe_version  = metric[:pe_version]
+          @pg_major_version ||= %x{/usr/bin/psql --version}.match(/psql \(PostgreSQL\) (\d)\..*/)[1].to_i
+          no_pass_fail = "-w" if @pg_major_version > 8
+          %x{#{psql} #{no_pass_fail} -c "INSERT INTO #{@db_table} \
+          (date, package, dist, build_time, build_user, build_loc, version, pe_version) \
+          VALUES ('#{date}', '#{pkg}', '#{dist}', #{bench}, '#{who}', '#{where}', '#{version}', '#{pe_version}')"}
+        end
+        @metrics = []
       end
-      @metrics = []
     end
   end
 end

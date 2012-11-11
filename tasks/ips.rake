@@ -2,12 +2,12 @@ if @build_ips
   require 'erb'
   namespace :package do
     namespace :ips do
-      workdir = "pkg/ips"
+      workdir = "pkg/ips/workdir"
       proto = workdir + '/proto'
       repo = workdir + '/repo'
-      pkgs = workdir + '/pkgs'
+      pkgs = 'pkg/ips/pkgs'
       repouri = 'file://' + Dir.pwd + '/' + repo
-      artifact = "#{pkgs}/#{@name}@#{@ipsversion}.p5p"
+      artifact = pkgs + "/#{@name}@#{@ipsversion}.p5p"
 
       # Create a source repo
       # We dont clean the base pkg directory only ips work dir.
@@ -63,6 +63,7 @@ if @build_ips
         x %[pkgsend -s #{repouri} publish -d #{proto} --fmri-in-manifest #{workdir}/#{@name}.p5m]
         x %[rm -f #{artifact}]
         x %[pkgrecv -s #{repouri} -a -d #{artifact} #{@name}@#{@ipsversion}]
+        Rake::Task['package:ips:clean'].execute
        end
 
       task :dry_install do

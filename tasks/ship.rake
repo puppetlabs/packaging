@@ -40,11 +40,22 @@ namespace :pl do
 
   desc "Update remote ips repository on #{@ips_host}"
   task :update_ips_repo do
-    rsync_to('pkg/ips/pkgs', @ips_host, @ips_store)
+    rsync_to('pkg/ips/pkgs/', @ips_host, @ips_store)
     remote_ssh_cmd(@ips_host, "pkgrecv -s #{@ips_store}/pkgs/#{@name}@#{@ipsversion}.p5p -d #{@ips_repo} \\*")
     remote_ssh_cmd(@ips_host, "pkgrepo refresh -s #{@ips_repo}")
     remote_ssh_cmd(@ips_host, "/usr/sbin/svcadm restart svc:/application/pkg/server")
   end if @build_ips
+
+  if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
+    desc "Upload ips p5p packages to downloads"
+    task :ship_ips => [ 'pl:fetch', 'pl:load_extras' ] do
+      if Dir['pkg/ips/pkgs/**/*'].empty?
+        STDOUT.puts "There aren't any p5p packages in pkg/ips/pkgs. Maybe something went wrong?"
+      else
+        rsync_to('pkg/ips/pkgs/', @ips_package_host, @ips_path)
+      end
+    end
+  end
 
   desc "Ship built gem to rubygems"
   task :ship_gem do

@@ -6,7 +6,7 @@ if @build_ips
       proto = workdir + '/proto'
       repo = workdir + '/repo'
       pkgs = workdir + '/pkgs'
-      repouri = "file://#{`pwd`.strip + '/' + repo}"
+      repouri = 'file://' + Dir.pwd + '/' + repo
       artifact = "#{pkgs}/#{@name}@#{@ipsversion}.p5p"
 
       # Create a source repo

@@ -32,12 +32,19 @@ pdebuild and [cowbuilder](http://wiki.debian.org/cowbuilder). For the most
 part, these tasks are keyed to puppetlabs infrastructure, and are used by the
 Release Engineering team to create release packages. However, they can
 certainly be modified to suit other environments, and much effort went into
-making tasks as modular and reusable as possible.
+making tasks as modular and reusable as possible. Several Puppet Labs-specific
+tasks are only available if the file '~/.packaging/builder\_data.yaml' is present.
+This file is created by the `pl:fetch` task, which pulls down another yaml file
+from a [separate build data repository](https://github.com/puppetlabs/build-data),
+which contains additional settings/data specific to Puppet Labs release
+infrastructure. The goal in separating these data and tasks out is to refrain
+from presenting by default yet more Puppet Labs-specific tasks that aren't
+generally consumable by everyone.
 
 A puppet module,
 [puppetlabs-debbuilder](https://github.com/puppetlabs/puppetlabs-debbuilder),
 has been created to stand up a debian build host compatible with the debian
-side this packaging repo. The rpm-side module,
+side of this packaging repo. The rpm-side module,
 [puppetlabs-rpmbuilder](https://github.com/puppetlabs/puppetlabs-rpmbuilder),
 is currently a work in progress and.
 

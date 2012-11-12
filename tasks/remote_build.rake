@@ -61,6 +61,7 @@ if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
       Rake::Task["pl:sign_tar"].invoke
       Rake::Task["pl:uber_ship"].execute
       Rake::Task["pl:remote_freight_devel"].invoke
+      Rake::Task["pl:remote_update_yum_repo"].invoke
     end
 
     desc "UBER FINAL build: build and ship FINAL tar, gem (as applicable), remote dmg, remote deb, remote rpm"
@@ -73,6 +74,7 @@ if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
       Rake::Task["pl:sign_tar"].invoke
       Rake::Task["pl:uber_ship"].execute
       Rake::Task["pl:remote_freight_final"].invoke
+      Rake::Task["pl:remote_update_yum_repo"].invoke
     end
   end
 end

@@ -18,6 +18,8 @@ namespace :pl do
     rsync_to('pkg/deb/', @apt_host, @apt_repo_path)
   end
 
+  # These hacky bits execute a pre-existing rake task on the @apt_host that adds the debs
+  # shipped with the ship task to the apt repo and updates the repo metadata
   desc "freight RCs to devel repos on #{@apt_host}"
   task :remote_freight_devel do
     STDOUT.puts "Really run remote freight RC command on #{@apt_host}? [y,n]"
@@ -29,6 +31,8 @@ namespace :pl do
     end
   end
 
+  # These similar hacky bits execute the same pre-existing rake task on the @apt_host, but
+  # with a different argument
   desc "remote freight final packages to PRODUCTION repos on #{@apt_host}"
   task :remote_freight_final do
     STDOUT.puts "Really run remote freight final command on #{@apt_host}? [y,n]"

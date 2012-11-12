@@ -4,7 +4,10 @@ This is a repository for packaging automation for Puppet Labs software.
 The goal is to abstract and automate packaging processes beyond individual
 software projects to a level where this repo can be cloned inside any project
 and used to build Debian and Redhat packages, as well as gems, apple packages
-and tarballs.
+and tarballs. This repo is currently under heavy development and in a state
+flux, and it should not be considered to have a formal API. However, every
+effort is being made to ensure existing tasks/behavior are not broken as we
+continue to iterate and improve upon it.
 
 ##Using the Packaging Repo
 
@@ -22,7 +25,8 @@ create rpms and debs, but any build dependencies will need to be satisifed by
 the building host, and any dynamically generated dependencies may result in
 packages that are only suitable for the OS/version of the build host. However,
 for rolling one's own debs and rpms or for use in environments without many
-OSes/versions, this may work just fine.
+OSes/versions, this may work just fine. To build an rpm using the packaging
+repo, do a `rake package:rpm`. To build a deb, use `rake package:deb`.
 
 `pl:` namespaced tasks rely on a slighly more complex toolchain for packaging
 inside clean chroot environments for the various operating systems and
@@ -39,7 +43,36 @@ from a [separate build data repository](https://github.com/puppetlabs/build-data
 which contains additional settings/data specific to Puppet Labs release
 infrastructure. The goal in separating these data and tasks out is to refrain
 from presenting by default yet more Puppet Labs-specific tasks that aren't
-generally consumable by everyone.
+generally consumable by everyone. To build a deb from a local repository using
+a `pl` task, ssh into a builder (e.g., one stood up using the modules detailed
+below) and clone the source repo, e.g. puppet. Then, run `rake package:bootstrap`
+and `rake pl:deb` to create a deb, and `rake pl:mock` to make an rpm (on a debian
+or redhat host, respectively).
+
+There is also a `pe:` namespace, for the building of Puppet Labs' Puppet
+Enterprise packages that have been converted to using this repo. The `pe:`
+tasks rely heavily on PL internal infrastructure, and are not generally useful
+outside of this environment. To create packages, in the source repository run
+`rake package:bootstrap`, followed by `rake pl:fetch`. These two commands
+bootstrap the packaging environment and pull in the additional data needed for
+PE building (see `pl:fetch` notes above).
+Then, to make a debian package, run `rake pe:deb`, and to make an rpm, run
+`rake pe:mock`. There are also `pe:deb_all` and `pe:mock_all` tasks, which build
+packages against all shipped debian/redhat targets. The `pe:deb_all` task is not
+generally necessary for developer use for building test packages; the `pe:deb`
+task creates a package that will work against virtually all supported PE debian
+versions. The same is generally true for PE internal rpms, but because of variances
+in build macros for rpm, rpms should generally be built with `pe:mock_all`, and
+then the desired version installed, or by building only for a specific target.
+This is accomplished by passing MOCK=<mock> to the rake call, e.g. `rake pe:mock MOCK=<mock>`.
+The available mocks are listed in `ext/build_defaults.yaml` after `final_mocks:`.
+For PE, the mocks are formatted as `pupent-<peversion>-<distversion>-<arch>`, e.g.
+`pupent-2.7-el5-i386`. To build for a specific target, set `MOCK=<mock>` to the mock
+that matches the target. The `pe:deb` and `pe:mock` tasks work by building on a
+remote builder using the current committed state of the source repository. To forego
+remote building and build on the local station (e.g., by ssh-ing into a remote
+builder first), the tasks `pe:local_mock` and `pe:local_deb` build using the
+local host.
 
 A puppet module,
 [puppetlabs-debbuilder](https://github.com/puppetlabs/puppetlabs-debbuilder),
@@ -54,8 +87,9 @@ package:implode`.
 ##Setting up projects for the Packaging Repo
 
 The packaging repo requires many project-side artifacts inside the ext
-directory at the top level.  It expects the following directory structure in
-the project
+directory at the top level. [facter](https://github.com:puppetlabs/facter) and
+[hiera](https://github.com:puppetlabs/hiera) are good examples.
+It expects the following directory structure in the project
 
 *   ext/{debian,redhat,osx}
 

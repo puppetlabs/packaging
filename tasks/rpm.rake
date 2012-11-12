@@ -19,7 +19,7 @@ def build_rpm(buildarg = "-bs")
   erb "ext/redhat/#{@name}.spec.erb", "#{temp}/SPECS/#{@name}.spec"
   sh "rpmbuild #{args} #{buildarg} --nodeps #{temp}/SPECS/#{@name}.spec"
   mv FileList["#{temp}/SRPMS/*.rpm"], "pkg/srpm"
-  if buildarch == '-ba'
+  if buildarg == '-ba'
     mv FileList["#{temp}/RPMS/*/*.rpm"], "pkg/rpm"
   end
   rm_rf temp

@@ -1,3 +1,8 @@
+# For PE, the natural default tasks are the remote tasks, rather than
+# the local ones, in reflection of which will be most ideal for PE devs.
+# e.g., pe:local_deb is the task to build a deb on the local host,
+# while pe:deb is the task for building on the remote builder host
+
 if @build_pe
   namespace :pe do
     desc "Create a PE deb from this repo using the default cow #{@default_cow}."

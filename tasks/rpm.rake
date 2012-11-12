@@ -7,7 +7,10 @@ def build_rpm(buildarg = "-bs")
      --define "_binary_payload w9.gzdio" --define "_source_payload w9.gzdio" \
      --define "_default_patch_fuzz 2"'
   args = rpm_define + ' ' + rpm_old_version
-  mkdir_pr temp, 'pkg/rpm', 'pkg/srpm', "#{temp}/SOURCES", "#{temp}/SPECS"
+  mkdir_pr temp, 'pkg/srpm', "#{temp}/SOURCES", "#{temp}/SPECS"
+  if buildarg == '-ba'
+    mkdir_p 'pkg/rpm'
+  end
   if @sign_tar
     Rake::Task["pl:sign_tar"].invoke
     cp_p "pkg/#{@name}-#{@version}.tar.gz.asc", "#{temp}/SOURCES"
@@ -16,7 +19,9 @@ def build_rpm(buildarg = "-bs")
   erb "ext/redhat/#{@name}.spec.erb", "#{temp}/SPECS/#{@name}.spec"
   sh "rpmbuild #{args} #{buildarg} --nodeps #{temp}/SPECS/#{@name}.spec"
   mv FileList["#{temp}/SRPMS/*.rpm"], "pkg/srpm"
-  mv FileList["#{temp}/RPMS/*/*.rpm"], "pkg/rpm"
+  if buildarg == '-ba'
+    mv FileList["#{temp}/RPMS/*/*.rpm"], "pkg/rpm"
+  end
   rm_rf temp
   puts
   output = FileList['pkg/*/*.rpm']

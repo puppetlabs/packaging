@@ -268,9 +268,14 @@ def ln(target, name)
   FileUtils.ln(name, target, :force => true, :verbose => true)
 end
 
-def git_commit_file(file)
+def git_commit_file(file, message=nil)
   if has_tool('git') and File.exist?('.git')
-    %x{git commit #{file} -m "Commit changes to #{file}" &> /dev/null}
+    message ||= "changes"
+    puts "Commiting changes:"
+    puts
+    diff = %x{git diff HEAD #{file}}
+    puts diff
+    %x{git commit #{file} -m "Commit #{message} in #{file}" &> /dev/null}
   end
 end
 

@@ -14,11 +14,13 @@
 namespace :package do
   desc "Update the version in #{@version_file} to current and commit."
   task :versionbump  do
+    version = ENV['VERSION'] || @version.to_s.strip
     old_version =  get_version_file_version
     contents = IO.read(@version_file)
-    new_version = '"' + @version.to_s.strip + '"'
+    new_version = '"' + version + '"'
+    puts "Updating #{old_version} to #{new_version} in #{@version_file}"
     if contents.match("@DEVELOPMENT_VERSION@")
-      contents.gsub!("@DEVELOPMENT_VERSION@", @version.to_s.strip)
+      contents.gsub!("@DEVELOPMENT_VERSION@", version)
     elsif contents.match("VERSION = #{old_version}")
       contents.gsub!("VERSION = #{old_version}", "VERSION = #{new_version}")
     elsif contents.match("#{@name.upcase}VERSION = #{old_version}")
@@ -29,6 +31,13 @@ namespace :package do
     file = File.open(@version_file, 'w')
     file.write contents
     file.close
+  end
+
+  desc "Set and commit the version in #{@version_file}, requires VERSION."
+  task :versionset do
+    check_var('VERSION', ENV['VERSION'])
+    Rake::Task["package:versionbump"].invoke
+    git_commit_file(@version_file, "update to #{ENV['VERSION']}")
   end
 end
 

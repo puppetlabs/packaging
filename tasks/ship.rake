@@ -58,7 +58,7 @@ namespace :pl do
       else
         rsync_to('pkg/ips/pkgs/', @ips_package_host, @ips_path)
       end
-    end
+    end if @build_ips
   end
 
   desc "Ship built gem to rubygems"

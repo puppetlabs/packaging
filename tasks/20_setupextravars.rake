@@ -25,6 +25,9 @@ namespace :pl do
       @sles_repo_host   = @build_data['sles_repo_host']   if @build_data['sles_repo_host']
       @ips_path         = @build_data['ips_path']         if @build_data['ips_path']
       @ips_package_host = @build_data['ips_package_host'] if @build_data['ips_package_host']
+      @certificate_pem  = @build_data['certificate_pem']  if @build_data['certificate_pem']
+      @privatekey_pem   = @build_data['privatekey_pem']   if @build_data['privatekey_pem']
+      @ips_inter_cert   = @build_data['ips_inter_cert']   if @build_data['ips_inter_cert']
     rescue => e
       STDERR.puts "There was an error loading the builder data from #{ENV['HOME']}/.packaging/#{@builder_data_file}. Try rake pl:fetch to download the current extras builder data.\n" + e
       exit 1

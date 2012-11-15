@@ -87,13 +87,14 @@ if @build_ips
     end
 
     desc "Creates an ips p5p archive package from this repository"
-    task :ips do
+    task :ips, :sign_ips do |t, args|
       # make sure our system dependencies are met
       check_tool('pkg')
       check_tool('pkgdepend')
       check_tool('pkgsend')
       check_tool('pkglint')
       check_tool('pkgmogrify')
+      sign_ips = args.sign_ips
       # create the package manifest & files (the "package")
       Rake::Task['package:ips:package'].invoke
       # create the local repository
@@ -101,7 +102,7 @@ if @build_ips
       # publish the package to the repository
       Rake::Task['package:ips:send'].invoke
       # signing the package occurs remotely in the repository
-      Rake::Task['package:ips:sign'].invoke if @sign_ips
+      Rake::Task['pl:sign_ips'].invoke if sign_ips
       # retrieve the signed package in a .p5p archive file format
       Rake::Task['package:ips:receive'].invoke
       # clean up the workdir area

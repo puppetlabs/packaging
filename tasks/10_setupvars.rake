@@ -53,6 +53,7 @@ begin
   @ips_repo        = @pkg_defaults['ips_repo']
   @ips_store       = @pkg_defaults['ips_store']
   @ips_host        = @pkg_defaults['ips_host']
+  @ips_inter_cert  = @pkg_defaults['ips_inter_cert']
 rescue => e
   STDERR.puts "There was an error loading the packaging defaults from the 'ext/build_defaults.yaml' file.\n" + e
   exit 1

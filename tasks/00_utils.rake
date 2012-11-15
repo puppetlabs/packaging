@@ -283,11 +283,6 @@ def ship_gem(file)
   %x{gem push #{file}}
 end
 
-def x(v)
-  puts %[#{v}]
-  print %x[#{v}]
-end
-
 def ask_yes_or_no
   return boolean_value(ENV['ANSWER_OVERRIDE']) unless ENV['ANSWER_OVERRIDE'].nil?
   answer = STDIN.gets.downcase.chomp

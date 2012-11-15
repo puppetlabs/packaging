@@ -345,12 +345,16 @@ def git_bundle(treeish)
   "#{temp}/#{@name}-#{@version}-#{appendix}.tar.gz"
 end
 
-def remote_bootstrap(host, treeish)
+# We take a tar argument for cases where `tar` isn't best, e.g. Solaris
+def remote_bootstrap(host, treeish, tar_cmd=nil)
+  unless tar = tar_cmd
+    tar = 'tar'
+  end
   tarball = git_bundle(treeish)
   tarball_name = File.basename(tarball).gsub('.tar.gz','')
   rsync_to(tarball, host, '/tmp')
   appendix = rand_string
-  sh "ssh -t #{host} 'tar -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone --recursive /tmp/#{tarball_name} /tmp/#{@name}-#{appendix} ; cd /tmp/#{@name}-#{appendix} ; rake package:bootstrap'"
+  sh "ssh -t #{host} '#{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone --recursive /tmp/#{tarball_name} /tmp/#{@name}-#{appendix} ; cd /tmp/#{@name}-#{appendix} ; rake package:bootstrap'"
   "/tmp/#{@name}-#{appendix}"
 end
 
@@ -380,3 +384,4 @@ end
 def empty_dir?(dir)
   File.exist?(dir) and File.directory?(dir) and Dir["#{dir}/**/*"].empty?
 end
+

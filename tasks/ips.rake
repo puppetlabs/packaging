@@ -54,7 +54,7 @@ if @build_ips
 
       # Ensure that our manifest is sane.
       task :lint => :license do
-        sh "pkglint #{workdir}/#{@name}.p5m"
+        print %x{pkglint #{workdir}/#{@name}.p5m}
       end
 
       task :package => [:clean_pkgs, :clean, :prepare, :lint] do
@@ -113,7 +113,8 @@ if @build_ips
   namespace :pl do
     desc "Create and sign a p5p archive package from this repository"
     task :ips do
-      Rake::Task['package:ips:package'].invoke(TRUE)
+      Rake::Task['package:ips'].reenable
+      Rake::Task['package:ips'].invoke(TRUE)
     end
   end
 end

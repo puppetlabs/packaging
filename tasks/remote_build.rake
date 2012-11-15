@@ -43,7 +43,7 @@ if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
     task :remote_ips => ['pl:fetch', 'pl:load_extras'] do
       Rake::Task["pl:remote_build"].reenable
       Rake::Task["pl:remote_build"].invoke(@ips_build_host, 'HEAD', 'pl:ips', 'gtar')
-    end
+    end if @build_ips
 
     desc "Execute package:apple on remote apple build host"
     task :remote_dmg => ['pl:fetch', 'pl:load_extras'] do

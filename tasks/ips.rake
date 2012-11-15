@@ -12,13 +12,13 @@ if @build_ips
       # Create a source repo
       # We dont clean the base pkg directory only ips work dir.
       task :clean do
-        %x[rm -rf #{workdir}]
+        rm_rf workdir
       end
 
       # Create an installation image at ips/proto
       task :prepare => :clean do
         check_tool('pkgsend')
-        x %[mkdir -p #{workdir}]
+        mkdir_p workdir
         x %[gmake -f ext/ips/rules DESTDIR=#{proto} 2>#{workdir}/build.out ]
       end
 
@@ -47,7 +47,7 @@ if @build_ips
 
       # Generate and resolve dependency list
       task :license => :protomogrify do
-        x %[cp LICENSE #{proto}/#{@name}.license]
+        cp 'LICENSE', "#{proto}/#{@name}.license"
       end
 
       # Ensure that our manifest is sane.
@@ -56,12 +56,12 @@ if @build_ips
       end
 
       task :package => :lint do
-        x %[rm -rf #{pkgs}]
-        x %[mkdir -p #{pkgs}]
+        rm_rf pkgs
+        mkdir_p pkgs
         x %[pkgrepo create #{repo}]
         x %[pkgrepo set -s #{repo} publisher/prefix=puppetlabs.com]
         x %[pkgsend -s #{repouri} publish -d #{proto} --fmri-in-manifest #{workdir}/#{@name}.p5m]
-        x %[rm -f #{artifact}]
+        rm_f artifact
         x %[pkgrecv -s #{repouri} -a -d #{artifact} #{@name}@#{@ipsversion}]
         Rake::Task['package:ips:clean'].execute
        end

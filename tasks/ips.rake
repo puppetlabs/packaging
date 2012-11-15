@@ -15,10 +15,13 @@ if @build_ips
         rm_rf workdir
       end
 
+      task :clean_pkgs do
+        rm_rf pkgs
+      end
+
       # Create an installation image at ips/proto
-      task :prepare => :clean do
-        check_tool('pkgsend')
-        mkdir_p workdir
+      task :prepare do
+        mkdir_pr workdir, pkgs
         sh "gmake -f ext/ips/rules DESTDIR=#{proto} 2>#{workdir}/build.out"
       end
 
@@ -54,27 +57,56 @@ if @build_ips
         sh "pkglint #{workdir}/#{@name}.p5m"
       end
 
-      task :package => :lint do
-        rm_rf pkgs
-        mkdir_p pkgs
+      task :package => [:clean_pkgs, :clean, :prepare, :lint] do
+        # the package is actually created via the dependency chain of :lint
+      end
+
+      # Create a local file-based IPS repository
+      task :createrepo do
+        check_tool('pkgrepo')
         sh "pkgrepo create #{repo}"
         sh "pkgrepo set -s #{repo} publisher/prefix=puppetlabs.com"
+      end
+
+      # Send a created package to the local IPS repository
+      task :send do
+        check_tool('pkgsend')
         sh "pkgsend -s #{repouri} publish -d #{proto} --fmri-in-manifest #{workdir}/#{@name}.p5m"
-        rm_f artifact
+      end
+
+      # Retrieve the package from the remote repository in .p5p archive format
+      task :receive do
+        check_tool('pkgrecv')
         sh "pkgrecv -s #{repouri} -a -d #{artifact} #{@name}@#{@ipsversion}"
-        Rake::Task['package:ips:clean'].execute
-       end
+      end
+
 
       task :dry_install do
         sh "pkg install -nv -g #{artifact} #{@name}@#{@ipsversion}"
       end
     end
 
-    desc "Creates an ips version"
+    desc "Creates an ips p5p archive package from this repository"
     task :ips do
-      Rake::Task['package:ips:prepare'].invoke
+      # make sure our system dependencies are met
+      check_tool('pkg')
+      check_tool('pkgdepend')
+      check_tool('pkgsend')
+      check_tool('pkglint')
+      check_tool('pkgmogrify')
+      # create the package manifest & files (the "package")
       Rake::Task['package:ips:package'].invoke
+      # create the local repository
+      Rake::Task['package:ips:createrepo'].invoke
+      # publish the package to the repository
+      Rake::Task['package:ips:send'].invoke
+      # signing the package occurs remotely in the repository
+      Rake::Task['package:ips:sign'].invoke if @sign_ips
+      # retrieve the signed package in a .p5p archive file format
+      Rake::Task['package:ips:receive'].invoke
+      # clean up the workdir area
+      Rake::Task['package:ips:clean'].execute
+      STDOUT.puts "Created #{Dir['pkg/ips/pkgs/*']}"
     end
-
   end
 end

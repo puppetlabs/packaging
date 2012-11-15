@@ -110,4 +110,10 @@ if @build_ips
       STDOUT.puts "Created #{Dir['pkg/ips/pkgs/*']}"
     end
   end
+  namespace :pl do
+    desc "Create and sign a p5p archive package from this repository"
+    task :ips do
+      Rake::Task['package:ips:package'].invoke(TRUE)
+    end
+  end
 end

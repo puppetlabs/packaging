@@ -66,8 +66,12 @@ namespace :pl do
         Rake::Task["pl:ship_dmg"].execute
       end
     end if @build_dmg
+
+    desc "Release ips, e.g. pl:ips, pl:ship_ips"
+    task :release_ips => ['pl:fetch', 'pl:load_extras'] do
+      Rake::Task['pl:ips'].invoke
+      Rake::Task['pl:ship_ips'].invoke
+    end
   end
 end
-
-
 

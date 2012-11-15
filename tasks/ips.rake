@@ -84,37 +84,40 @@ if @build_ips
       task :dry_install do
         sh "pkg install -nv -g #{artifact} #{@name}@#{@ipsversion}"
       end
+
+      task :p5p, :sign_ips do |t, args|
+        # make sure our system dependencies are met
+        check_tool('pkg')
+        check_tool('pkgdepend')
+        check_tool('pkgsend')
+        check_tool('pkglint')
+        check_tool('pkgmogrify')
+        sign_ips = args.sign_ips
+        # create the package manifest & files (the "package")
+        Rake::Task['package:ips:package'].invoke
+        # create the local repository
+        Rake::Task['package:ips:createrepo'].invoke
+        # publish the package to the repository
+        Rake::Task['package:ips:send'].invoke
+        # signing the package occurs remotely in the repository
+        Rake::Task['pl:sign_ips'].invoke(repouri,"#{@name}@#{@ipsversion}") if sign_ips
+        # retrieve the signed package in a .p5p archive file format
+        Rake::Task['package:ips:receive'].invoke
+        # clean up the workdir area
+        Rake::Task['package:ips:clean'].execute
+        STDOUT.puts "Created #{Dir['pkg/ips/pkgs/*']}"
+      end
     end
 
     desc "Creates an ips p5p archive package from this repository"
-    task :ips, :sign_ips do |t, args|
-      # make sure our system dependencies are met
-      check_tool('pkg')
-      check_tool('pkgdepend')
-      check_tool('pkgsend')
-      check_tool('pkglint')
-      check_tool('pkgmogrify')
-      sign_ips = args.sign_ips
-      # create the package manifest & files (the "package")
-      Rake::Task['package:ips:package'].invoke
-      # create the local repository
-      Rake::Task['package:ips:createrepo'].invoke
-      # publish the package to the repository
-      Rake::Task['package:ips:send'].invoke
-      # signing the package occurs remotely in the repository
-      Rake::Task['pl:sign_ips'].invoke if sign_ips
-      # retrieve the signed package in a .p5p archive file format
-      Rake::Task['package:ips:receive'].invoke
-      # clean up the workdir area
-      Rake::Task['package:ips:clean'].execute
-      STDOUT.puts "Created #{Dir['pkg/ips/pkgs/*']}"
-    end
+    task :ips => ['package:ips:p5p']
   end
+
   namespace :pl do
     desc "Create and sign a p5p archive package from this repository"
     task :ips do
-      Rake::Task['package:ips'].reenable
-      Rake::Task['package:ips'].invoke(TRUE)
+      Rake::Task['package:ips:p5p'].reenable
+      Rake::Task['package:ips:p5p'].invoke(TRUE)
     end
   end
 end

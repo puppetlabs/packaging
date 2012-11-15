@@ -30,7 +30,6 @@ if @build_ips
       # Update manifest to include the installation image information.
       task :protogen => :prototmpl do
         x %[pkgsend generate #{proto} >> #{workdir}/#{@name}.p5m.x ]
-        os=%x[uname -p].chomp
       end
 
       # Generate and resolve dependency list

@@ -1,11 +1,13 @@
 # Tasks for remote building on builder hosts
+
 if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
   namespace 'pl' do
-    task :remote_build, :host, :treeish, :task do |t, args|
+    task :remote_build, :host, :treeish, :task, :tar do |t, args|
       host                    = args.host
       treeish                 = args.treeish
       task                    = args.task
-      remote_repo             = remote_bootstrap(host, treeish)
+      tar                     = args.tar
+      remote_repo             = remote_bootstrap(host, treeish, tar)
       STDOUT.puts "Beginning package build on #{host}"
       remote_ssh_cmd(host, "cd #{remote_repo} ; rake #{task} ANSWER_OVERRIDE=no")
       rsync_from("#{remote_repo}/pkg/", host, 'pkg/')
@@ -37,9 +39,10 @@ if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
       Rake::Task["pl:remote_build"].invoke(@rpm_build_host, 'HEAD', "pl:release_rpm_final")
     end
 
+    desc "Execute pl:ips on remote ips build host"
     task :remote_ips => ['pl:fetch', 'pl:load_extras'] do
       Rake::Task["pl:remote_build"].reenable
-      Rake::Task["pl:remote_build"].invoke(@ips_build_host, 'HEAD', 'pl:ips')
+      Rake::Task["pl:remote_build"].invoke(@ips_build_host, 'HEAD', 'pl:ips', 'gtar')
     end
 
     desc "Execute package:apple on remote apple build host"

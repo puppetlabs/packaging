@@ -19,7 +19,7 @@ if @build_ips
       task :prepare => :clean do
         check_tool('pkgsend')
         mkdir_p workdir
-        x %[gmake -f ext/ips/rules DESTDIR=#{proto} 2>#{workdir}/build.out ]
+        sh "gmake -f ext/ips/rules DESTDIR=#{proto} 2>#{workdir}/build.out"
       end
 
       # Process templates and write the initial manifest
@@ -29,19 +29,19 @@ if @build_ips
 
       # Update manifest to include the installation image information.
       task :protogen => :prototmpl do
-        x %[pkgsend generate #{proto} >> #{workdir}/#{@name}.p5m.x ]
+        sh "pkgsend generate #{proto} >> #{workdir}/#{@name}.p5m.x"
       end
 
       # Generate and resolve dependency list
       task :protodeps => :protogen do
-        x %[pkgdepend generate -d #{proto} #{workdir}/#{@name}.p5m.x > #{workdir}/#{@name}.depends ]
-        x %[pkgdepend resolve -m #{workdir}/#{@name}.depends ]
-        x %[cat #{workdir}/#{@name}.depends.res >> #{workdir}/#{@name}.p5m.x]
+        sh "pkgdepend generate -d #{proto} #{workdir}/#{@name}.p5m.x > #{workdir}/#{@name}.depends"
+        sh "pkgdepend resolve -m #{workdir}/#{@name}.depends"
+        sh "cat #{workdir}/#{@name}.depends.res >> #{workdir}/#{@name}.p5m.x"
       end
 
       # Mogrify manifest to remove unncecessary info, and other kinds of transforms.
       task :protomogrify => :protodeps do
-        x %[pkgmogrify ./ext/ips/transforms ./#{workdir}/#{@name}.p5m.x| pkgfmt >> #{workdir}/#{@name}.p5m ]
+        sh "pkgmogrify ./ext/ips/transforms ./#{workdir}/#{@name}.p5m.x| pkgfmt >> #{workdir}/#{@name}.p5m"
       end
 
       # Generate and resolve dependency list
@@ -51,22 +51,22 @@ if @build_ips
 
       # Ensure that our manifest is sane.
       task :lint => :license do
-        x %[pkglint #{workdir}/#{@name}.p5m]
+        sh "pkglint #{workdir}/#{@name}.p5m"
       end
 
       task :package => :lint do
         rm_rf pkgs
         mkdir_p pkgs
-        x %[pkgrepo create #{repo}]
-        x %[pkgrepo set -s #{repo} publisher/prefix=puppetlabs.com]
-        x %[pkgsend -s #{repouri} publish -d #{proto} --fmri-in-manifest #{workdir}/#{@name}.p5m]
+        sh "pkgrepo create #{repo}"
+        sh "pkgrepo set -s #{repo} publisher/prefix=puppetlabs.com"
+        sh "pkgsend -s #{repouri} publish -d #{proto} --fmri-in-manifest #{workdir}/#{@name}.p5m"
         rm_f artifact
-        x %[pkgrecv -s #{repouri} -a -d #{artifact} #{@name}@#{@ipsversion}]
+        sh "pkgrecv -s #{repouri} -a -d #{artifact} #{@name}@#{@ipsversion}"
         Rake::Task['package:ips:clean'].execute
        end
 
       task :dry_install do
-        x %[pkg install -nv -g #{artifact} #{@name}@#{@ipsversion}]
+        sh "pkg install -nv -g #{artifact} #{@name}@#{@ipsversion}"
       end
     end
 

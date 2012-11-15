@@ -37,6 +37,7 @@ if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
       Rake::Task["pl:remote_build"].invoke(@rpm_build_host, 'HEAD', "pl:release_rpm_final")
     end
 
+    desc "Execute pl:ips on remote ips build host"
     task :remote_ips => ['pl:fetch', 'pl:load_extras'] do
       Rake::Task["pl:remote_build"].reenable
       Rake::Task["pl:remote_build"].invoke(@ips_build_host, 'HEAD', 'pl:ips')

@@ -16,10 +16,12 @@ def sign_deb_changes(file)
 end
 
 # requires atleast a self signed prvate key and certificate pair
-def sign_ips(pkg)
-  %x{pkgsign -s pkg/ips/repo/  -k #{@privatekey_pem} -c #{@certificate_pem} #{@name}@#{@ipsversion}}
-  %x{rm -f #{pkg}}
-  %x{pkgrecv -s pkg/ips/repo -a -d #{pkg} #{@name}@#{@ipsversion}}
+# fmri is the full IPS package name with version, e.g.
+# facter@facter@1.6.15,5.11-0:20121112T042120Z
+# technically this can be any ips-compliant package identifier, e.g. application/facter
+# repo_uri is the path to the repo currently containing the package
+def sign_ips(fmri, repo_uri)
+  %x{pkgsign -s #{repo_uri}  -k #{@privatekey_pem} -c #{@certificate_pem} -i #{@ips_inter_cert} #{fmri}}
 end
 
 namespace :pl do
@@ -49,10 +51,11 @@ namespace :pl do
   end
 
   desc "Sign ips package, Defaults to PL Key, pass KEY to override"
-  task :sign_ips do
-    ips_pkgs    = Dir["pkg/ips/pkgs/*.p5p"].join(' ')
+  task :sign_ips, :repo_uri, :fmri do |t, args|
+    repo_uri  = args.repo_uri
+    fmri      = args.fmri
     puts "Signing ips packages..."
-    sign_ips ips_pkgs
+    sign_ips(fmri, repo_uri)
   end if @build_ips
 
   desc "Check if all rpms are signed"

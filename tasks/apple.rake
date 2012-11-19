@@ -186,15 +186,21 @@ if @build_dmg
   namespace :package do
     desc "Task for building an Apple Package"
     task :apple => [:setup] do
-      # Test for Root and Packagemaker binary
-      raise "Please run rake as root to build Apple Packages" unless Process.uid == 0
-      raise "Packagemaker must be installed. Please install XCode Tools" unless \
-        File.exists?('/Developer/usr/bin/packagemaker')
+      bench = Benchmark.realtime do
+        # Test for Root and Packagemaker binary
+        raise "Please run rake as root to build Apple Packages" unless Process.uid == 0
+        raise "Packagemaker must be installed. Please install XCode Tools" unless \
+          File.exists?('/Developer/usr/bin/packagemaker')
 
-      make_directory_tree
-      pack_source
-      build_dmg
-      chmod_R(0775, "#{pwd}/pkg")
+        make_directory_tree
+        pack_source
+        build_dmg
+        chmod_R(0775, "#{pwd}/pkg")
+      end
+      if @benchmark
+        Metrics_helper.add({ :dist => 'osx', :bench => bench })
+        Metrics_helper.post
+      end
     end
   end
 end

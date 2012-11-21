@@ -109,7 +109,7 @@ def build_rpm_with_mock(mocks, is_rc, subdir)
         end
       end
     end
-    Metrics_helper.add({ :dist => "#{family}-#{version}", :bench => bench }) if @benchmark
+    add_metrics({ :dist => "#{family}-#{version}", :bench => bench }) if @benchmark
   end
 end
 
@@ -131,20 +131,20 @@ namespace :pl do
     @default_mock ||= @final_mocks.split(' ')[0]
     subdir = ENV['subdir'] || 'products'
     build_rpm_with_mock(@default_mock, FALSE, subdir)
-    Metrics_helper.post if @benchmark
+    post_metrics if @benchmark
   end
 
   desc "Use specified mocks to make final rpms, keyed to PL infrastructure, pass MOCK to specifiy config"
   task :mock_final => [ "package:srpm", "pl:setup_el_dirs" ] do
     subdir = ENV['subdir'] || 'products'
     build_rpm_with_mock(@final_mocks, FALSE, subdir)
-    Metrics_helper.post if @benchmark
+    post_metrics if @benchmark
   end
 
   desc "Use specified mocks to make RC rpms, keyed to PL infrastructure, pass MOCK to specify config"
   task :mock_rc => [ "package:srpm", "pl:setup_el_dirs" ] do
     subdir = 'devel'
     build_rpm_with_mock(@rc_mocks, TRUE, subdir)
-    Metrics_helper.post if @benchmark
+    post_metrics if @benchmark
   end
 end

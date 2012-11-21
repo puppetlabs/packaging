@@ -66,8 +66,8 @@ if @build_gem
         rm_rf "pkg/#{@name}-#{@gemversion}"
       end
       if @benchmark
-        Metrics_helper.add({ :dist => 'gem', :bench => bench })
-        Metrics_helper.post
+        add_metrics({ :dist => 'gem', :bench => bench })
+        post_metrics
       end
     end
   end

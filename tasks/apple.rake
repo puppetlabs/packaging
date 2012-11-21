@@ -198,8 +198,8 @@ if @build_dmg
         chmod_R(0775, "#{pwd}/pkg")
       end
       if @benchmark
-        Metrics_helper.add({ :dist => 'osx', :bench => bench })
-        Metrics_helper.post
+        add_metrics({ :dist => 'osx', :bench => bench })
+        post_metrics
       end
     end
   end

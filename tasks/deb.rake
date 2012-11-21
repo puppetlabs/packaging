@@ -68,7 +68,8 @@ task :build_deb, :deb_command, :cow, :devel do |t,args|
       rm_rf work_dir
     end
   end
-  Metrics_helper.add({ :dist => ENV['DIST'], :bench => bench }) if @benchmark
+  # See 30_metrics.rake to see what this is doing
+  add_metrics({ :dist => ENV['DIST'], :bench => bench }) if @benchmark
 end
 
 namespace :package do
@@ -83,13 +84,13 @@ namespace :pl do
   task :deb => "package:tar"  do
     check_var('PE_VER', ENV['PE_VER']) if @build_pe
     Rake::Task[:build_deb].invoke('pdebuild', @default_cow)
-    Metrics_helper.post if @benchmark
+    post_metrics if @benchmark
   end
 
   desc "Create an RC deb from this repo using the default cow #{@default_cow}."
   task :deb_rc => "package:tar" do
     Rake::Task[:build_deb].invoke('pdebuild', @default_cow, 'devel')
-    Metrics_helper.post if @benchmark
+    post_metrics if @benchmark
   end
 
   desc "Create debs from this git repository using all cows specified in build_defaults yaml"
@@ -100,7 +101,7 @@ namespace :pl do
       Rake::Task[:build_deb].reenable
       Rake::Task[:build_deb].invoke('pdebuild', cow)
     end
-    Metrics_helper.post if @benchmark
+    post_metrics if @benchmark
   end
 
   desc "Create RC debs from this git repository using all cows specified in build_defaults yaml"
@@ -111,5 +112,5 @@ namespace :pl do
       Rake::Task[:build_deb].invoke('pdebuild', cow, 'devel')
     end
   end
-  Metrics_helper.post if @benchmark
+  post_metrics if @benchmark
 end

@@ -35,4 +35,7 @@ namespace :pl do
     end
   end
 end
+if @team == 'release'
+  @benchmark = TRUE
+end
 

@@ -53,26 +53,30 @@ if @build_pe
       built_arch        = ''
       @sles_arch_repos.each do |arch, deps_repo|
         if noarch == FALSE
-          linux_cmd = arch == 'i586' ? 'linux32' : 'linux64'
-          sh "yes | sudo #{linux_cmd} build \
-            --rpms        #{deps_repo}:#{ENV['HOME']}/package_repos/sles-11-#{arch} \
-            --root        #{build_root}/#{arch}                                     \
-            --rsync-src   #{build_source_dir}                                       \
-            --rsync-dest  /usr/src/packages/SOURCES                                 \
-            --no-checks   #{build_spec}                                             \
-            --arch        #{arch} || true"
-          rpms = FileList["#{build_root}/#{arch}/#{build_dest_dir}/RPMS/**/*.rpm"]
-          srpms = FileList["#{build_root}/#{arch}/#{build_dest_dir}/SRPMS/**/*.rpm"]
-          if rpms.empty?
-            STDERR.puts "No RPMS were built. Perhaps an error occurred?"
-            exit 1
+          bench = Benchmark.realtime do
+            linux_cmd = arch == 'i586' ? 'linux32' : 'linux64'
+            sh "yes | sudo #{linux_cmd} build \
+              --rpms        #{deps_repo}:#{ENV['HOME']}/package_repos/sles-11-#{arch} \
+              --root        #{build_root}/#{arch}                                     \
+              --rsync-src   #{build_source_dir}                                       \
+              --rsync-dest  /usr/src/packages/SOURCES                                 \
+              --no-checks   #{build_spec}                                             \
+              --arch        #{arch} || true"
+            rpms = FileList["#{build_root}/#{arch}/#{build_dest_dir}/RPMS/**/*.rpm"]
+            srpms = FileList["#{build_root}/#{arch}/#{build_dest_dir}/SRPMS/**/*.rpm"]
+            if rpms.empty?
+              STDERR.puts "No RPMS were built. Perhaps an error occurred?"
+              exit 1
+            end
+            built_arch = arch
+            cp rpms, "pkg/pe/rpm/sles-11-#{arch}"
+            cp srpms, "pkg/pe/rpm/sles-11-srpms"
+            noarch = rpms.exclude(/noarch/).empty?
+            rm_rf build_root
+            rm_rf work_dir
           end
-          built_arch = arch
-          cp rpms, "pkg/pe/rpm/sles-11-#{arch}"
-          cp srpms, "pkg/pe/rpm/sles-11-srpms"
-          noarch = rpms.exclude(/noarch/).empty?
-          rm_rf build_root
-          rm_rf work_dir
+          # See 30_metrics.rake to see what this is doing
+          add_metrics({ :dist => 'sles', :bench => bench }) if @benchmark
         else
           arches_to_copy_to = @sles_arch_repos.keys - [ built_arch ]
           arches_to_copy_to.each do |other_arch|
@@ -80,6 +84,7 @@ if @build_pe
           end
         end
       end
+      post_metrics if @benchmark
       cd 'pkg/pe/rpm' do
         if File.exist?('sles-11-i586')
           mkdir_p 'sles-11-i386'

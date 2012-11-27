@@ -10,7 +10,7 @@ if @build_pe
       ENV['PE_VER'] ||= @pe_version
       check_var('PE_VER', ENV['PE_VER'])
       Rake::Task["pl:remote_build"].reenable
-      Rake::Task["pl:remote_build"].invoke(@deb_build_host, 'HEAD', "pe:local_deb PE_VER=#{ENV['PE_VER']}")
+      Rake::Task["pl:remote_build"].invoke(@deb_build_host, 'HEAD', "pe:local_deb TEAM=#{@team} PE_VER=#{ENV['PE_VER']}")
     end
 
     desc "Execute remote debian build using ALL cows on builder and retrieve packages"
@@ -18,7 +18,7 @@ if @build_pe
       ENV['PE_VER'] ||= @pe_version
       check_var('PE_VER', ENV['PE_VER'])
       Rake::Task["pl:remote_build"].reenable
-      Rake::Task["pl:remote_build"].invoke(@deb_build_host, 'HEAD', "pe:local_deb_all PE_VER=#{ENV['PE_VER']}")
+      Rake::Task["pl:remote_build"].invoke(@deb_build_host, 'HEAD', "pe:local_deb_all TEAM=#{@team} PE_VER=#{ENV['PE_VER']}")
     end
 
     desc "Execute remote rpm build using default mock on builder and retrieve package"

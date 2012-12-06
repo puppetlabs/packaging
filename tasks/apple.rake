@@ -13,7 +13,8 @@ TAR           = '/usr/bin/tar'
 CP            = '/bin/cp'
 INSTALL       = '/usr/bin/install'
 DITTO         = '/usr/bin/ditto'
-PACKAGEMAKER  = '/Developer/usr/bin/packagemaker'
+PACKAGEMAKER  = '/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker'
+PKGBUILD      = '/usr/bin/pkgbuild'
 SED           = '/usr/bin/sed'
 
 # Setup task to populate all the variables
@@ -59,8 +60,12 @@ def make_directory_tree
     mkdir_p(val)
   end
 
-  erb 'ext/osx/preflight.erb', "#{@working_tree["scripts"]}/preflight"
-  erb 'ext/osx/prototype.plist.erb', "#{@scratch}/prototype.plist"
+  if File.exists?('ext/osx/postflight.erb')
+    erb 'ext/osx/postflight.erb', "#{@working_tree["scripts"]}/postflight"
+  end
+  if File.exists?('ext/osx/prototype.plist.erb')
+    erb 'ext/osx/prototype.plist.erb', "#{@scratch}/prototype.plist"
+  end
 
 end
 
@@ -84,16 +89,13 @@ def build_dmg
   package_target_os = '10.4'
 
   # Build .pkg file
-  system("sudo #{PACKAGEMAKER} --root #{@working_tree['working']} \
-    --id #{@reverse_domain} \
-    --filter DS_Store \
-    --target #{package_target_os} \
-    --title #{@title} \
-    --info #{@scratch}/prototype.plist \
-    --scripts #{@working_tree['scripts']} \
-    --resources #{@working_tree['resources']} \
-    --version #{@version} \
-    #{pm_extra_args} --out #{@working_tree['payload']}/#{package_file}")
+  #build with pkgbuild
+  system("sudo #{PKGBUILD} --root #{@working_tree['working']} \
+         --identifier #{@reverse_domain} \
+         --scripts #{@working_tree['scripts']} \
+         --version #{@version} \
+         #{@working_tree['payload']}/#{package_file}")
+
 
   # Build .dmg file
   system("sudo hdiutil create -volname #{@title} \
@@ -143,10 +145,11 @@ def pack_source
     end
   end
 
-  # Setup a preflight script and replace variables in the files with
-  # the correct paths.
-  chown('root', 'wheel', "#{@working_tree['scripts']}/preflight")
-  chmod(0644, "#{@working_tree['scripts']}/preflight")
+  # Setup a postflight from from the erb created earlier
+  if File.exists?("#{@working_tree['scripts']}/postflight")
+    chown('root', 'wheel', "#{@working_tree['scripts']}/postflight")
+    chmod(0644, "#{@working_tree['scripts']}/postflight")
+  end
 
   # Do a run through first setting the specified permissions then
   # making sure 755 is set for all directories
@@ -190,7 +193,7 @@ if @build_dmg
         # Test for Root and Packagemaker binary
         raise "Please run rake as root to build Apple Packages" unless Process.uid == 0
         raise "Packagemaker must be installed. Please install XCode Tools" unless \
-          File.exists?('/Developer/usr/bin/packagemaker')
+          File.exists?(PKGBUILD)
 
         make_directory_tree
         pack_source

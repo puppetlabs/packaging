@@ -15,7 +15,10 @@ INSTALL       = '/usr/bin/install'
 DITTO         = '/usr/bin/ditto'
 PACKAGEMAKER  = '/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker'
 PKGBUILD      = '/usr/bin/pkgbuild'
+PRODUCTSIGN   = '/usr/bin/productsign'
+DEVID         = 'Developer ID Installer: PUPPET LABS, INC.'
 SED           = '/usr/bin/sed'
+#SIGN          = 'true'
 
 # Setup task to populate all the variables
 task :setup do
@@ -59,10 +62,7 @@ def make_directory_tree
   @working_tree.each do |key,val|
     mkdir_p(val)
   end
-
-  if File.exists?('ext/osx/postflight.erb')
-    erb 'ext/osx/postflight.erb', "#{@working_tree["scripts"]}/postflight"
-  end
+  
   if File.exists?('ext/osx/prototype.plist.erb')
     erb 'ext/osx/prototype.plist.erb', "#{@scratch}/prototype.plist"
   end
@@ -97,6 +97,13 @@ def build_dmg
          #{@working_tree['payload']}/#{package_file}")
 
 
+  if SIGN == 'true'
+    system("sudo #{PRODUCTSIGN} --sign \"#{DEVID}\" \
+           #{@working_tree['payload']}/#{package_file} \
+           #{@working_tree['payload']}/#{@title}-signed.pkg")
+    system("sudo rm #{@working_tree['payload']}/#{package_file}")
+  end
+
   # Build .dmg file
   system("sudo hdiutil create -volname #{@title} \
     -srcfolder #{@working_tree['payload']} \
@@ -114,6 +121,29 @@ def build_dmg
     mv(dmg_file, "#{pwd}/pkg/apple/#{dmg_file}")
     puts "moved:   #{dmg_file} has been moved to #{pwd}/pkg/apple/#{dmg_file}"
   end
+end
+
+# method:       add_scripts
+# description:  this method generates postinstall/preinstall scripts from ERB 
+#               templates, sets the appropriate permissions, and names them
+#               properly. if no scripts are found, nothing is done.
+
+def add_scripts
+  
+  if File.exists?('ext/osx/postflight.erb')
+    #changes nomenclature to build package with postinstall vs postflight
+    erb 'ext/osx/postflight.erb', "#{@working_tree["scripts"]}/postinstall"
+    chown('root', 'wheel', "#{@working_tree['scripts']}/postinstall")
+    chmod(0755, "#{@working_tree['scripts']}/postinstall")
+  end
+  
+  if File.exists?('ext/osx/preflight.erb')
+    #changes nomenclature to build package with postinstall vs postflight
+    erb 'ext/osx/preflight.erb', "#{@working_tree["scripts"]}/preinstall"
+    chown('root', 'wheel', "#{@working_tree['scripts']}/preinstall")
+    chmod(0755, "#{@working_tree['scripts']}/preinstall")
+  end
+
 end
 
 # method:        pack_source
@@ -143,12 +173,6 @@ def pack_source
         system(cmd)
       end
     end
-  end
-
-  # Setup a postflight from from the erb created earlier
-  if File.exists?("#{@working_tree['scripts']}/postflight")
-    chown('root', 'wheel', "#{@working_tree['scripts']}/postflight")
-    chmod(0755, "#{@working_tree['scripts']}/postflight")
   end
 
   # Do a run through first setting the specified permissions then
@@ -196,6 +220,7 @@ if @build_dmg
           File.exists?(PKGBUILD)
 
         make_directory_tree
+        add_scripts
         pack_source
         build_dmg
         chmod_R(0775, "#{pwd}/pkg")

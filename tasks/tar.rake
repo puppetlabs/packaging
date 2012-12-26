@@ -58,6 +58,17 @@ namespace :package do
     tar_excludes = @tar_excludes.nil? ? [] : @tar_excludes.split(' ')
     tar_excludes << "ext/#{@packaging_repo}"
     Rake::Task["package:template"].invoke(workdir)
+
+    # This is to support packages that only burn-in the version number in the
+    # release artifact, rather than storing it two (or more) times in the
+    # version control system.  Razor is a good example of that; see
+    # https://github.com/puppetlabs/Razor/blob/master/lib/project_razor/version.rb
+    # for an example of that this looks like.
+    #
+    # If you set this the version will only be modified in the temporary copy,
+    # with the intent that it never change the official source tree.
+    ENV['NEW_STYLE_PACKAGE'] and Rake::Task["package:versionbump"].invoke(workdir)
+
     cd "pkg" do
       sh "#{tar} --exclude #{tar_excludes.join(" --exclude ")} -zcf #{@name}-#{@version}.tar.gz #{@name}-#{@version}"
     end

@@ -21,6 +21,8 @@ namespace :package do
     puts "Updating #{old_version} to #{new_version} in #{@version_file}"
     if contents.match("@DEVELOPMENT_VERSION@")
       contents.gsub!("@DEVELOPMENT_VERSION@", version)
+    elsif contents.match('version\s*=\s*[\'"]DEVELOPMENT[\'"]')
+      contents.gsub!(/version\s*=\s*['"]DEVELOPMENT['"]/, "version = '#{version}'")
     elsif contents.match("VERSION = #{old_version}")
       contents.gsub!("VERSION = #{old_version}", "VERSION = #{new_version}")
     elsif contents.match("#{@name.upcase}VERSION = #{old_version}")

@@ -11,7 +11,7 @@
 # pkg/<dist>/<version>/{products,devel,dependencies}/<arch>/*.rpm
 # e.g.,
 # pkg/el/5/products/i386/*.rpm
-# pkg/fedora/f15/products/i386/*.rpm
+# pkg/fedora/f16/products/i386/*.rpm
 #
 # For PE, the directory structure is flatter:
 # pkg/<dist>-<version>-<arch>/*.rpm
@@ -121,7 +121,7 @@ namespace :pl do
       %x{mkdir -p pkg/pe/rpm/el-{5,6}-{i386,x86_64,srpms}}
     else
       %x{mkdir -p pkg/el/{5,6}/{products,devel,dependencies}/{SRPMS,i386,x86_64}}
-      %x{mkdir -p pkg/fedora/{f15,f16,f17}/{products,devel,dependencies}/{SRPMS,i386,x86_64}}
+      %x{mkdir -p pkg/fedora/{f16,f17}/{products,devel,dependencies}/{SRPMS,i386,x86_64}}
     end
   end
 

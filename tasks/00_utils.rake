@@ -387,3 +387,20 @@ def hostname
   require 'socket'
   host = Socket.gethostname
 end
+
+# Loop a shell command up to the number of attempts given, exiting when we receive success
+# or max attempts is reached. Raise an exception unless we've succeeded.
+def loop_shell_command(command, max_attempts = 5)
+  success = FALSE
+  attempts = 0
+  while attempts < max_attempts
+    %x{#{command}}
+    if $?.success?
+      success = TRUE
+      break
+    end
+    attempts += 1
+  end
+  raise "Failed! command was: #{command}" unless success
+end
+

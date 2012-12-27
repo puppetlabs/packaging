@@ -1,9 +1,11 @@
 def sign_el5(rpm)
-  %x{rpm --define '%_gpg_name #{@gpg_name}' --define '%__gpg_sign_cmd %{__gpg} gpg --force-v3-sigs --digest-algo=sha1 --batch --no-verbose --no-armor --passphrase-fd 3 --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm} > /dev/null}
+  # Try this up to 5 times, to allow for incorrect passwords
+  # loop_shell_command will raise an exception unless it recieves success
+  loop_shell_command("rpm --define '%_gpg_name #{@gpg_name}' --define '%__gpg_sign_cmd %{__gpg} gpg --force-v3-sigs --digest-algo=sha1 --batch --no-verbose --no-armor --passphrase-fd 3 --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm} > /dev/null", 5)
 end
 
 def sign_modern(rpm)
-  %x{rpm --define '%_gpg_name #{@gpg_name}' --addsign #{rpm} > /dev/null}
+  loop_shell_command("rpm --define '%_gpg_name #{@gpg_name}' --addsign #{rpm} > /dev/null", 5)
 end
 
 def rpm_has_sig(rpm)

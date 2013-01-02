@@ -13,8 +13,12 @@ TAR           = '/usr/bin/tar'
 CP            = '/bin/cp'
 INSTALL       = '/usr/bin/install'
 DITTO         = '/usr/bin/ditto'
-PACKAGEMAKER  = '/Developer/usr/bin/packagemaker'
+PACKAGEMAKER  = '/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker'
+PKGBUILD      = '/usr/bin/pkgbuild'
+PRODUCTSIGN   = '/usr/bin/productsign'
+DEVID         = 'Developer ID Installer: PUPPET LABS, INC.'
 SED           = '/usr/bin/sed'
+#SIGN          = 'true'
 
 # Setup task to populate all the variables
 task :setup do
@@ -58,9 +62,10 @@ def make_directory_tree
   @working_tree.each do |key,val|
     mkdir_p(val)
   end
-
-  erb 'ext/osx/preflight.erb', "#{@working_tree["scripts"]}/preflight"
-  erb 'ext/osx/prototype.plist.erb', "#{@scratch}/prototype.plist"
+  
+  if File.exists?('ext/osx/prototype.plist.erb')
+    erb 'ext/osx/prototype.plist.erb', "#{@scratch}/prototype.plist"
+  end
 
 end
 
@@ -84,16 +89,20 @@ def build_dmg
   package_target_os = '10.4'
 
   # Build .pkg file
-  system("sudo #{PACKAGEMAKER} --root #{@working_tree['working']} \
-    --id #{@reverse_domain} \
-    --filter DS_Store \
-    --target #{package_target_os} \
-    --title #{@title} \
-    --info #{@scratch}/prototype.plist \
-    --scripts #{@working_tree['scripts']} \
-    --resources #{@working_tree['resources']} \
-    --version #{@version} \
-    #{pm_extra_args} --out #{@working_tree['payload']}/#{package_file}")
+  #build with pkgbuild
+  system("sudo #{PKGBUILD} --root #{@working_tree['working']} \
+         --identifier #{@reverse_domain} \
+         --scripts #{@working_tree['scripts']} \
+         --version #{@version} \
+         #{@working_tree['payload']}/#{package_file}")
+
+
+  if SIGN == 'true'
+    system("sudo #{PRODUCTSIGN} --sign \"#{DEVID}\" \
+           #{@working_tree['payload']}/#{package_file} \
+           #{@working_tree['payload']}/#{@title}-signed.pkg")
+    system("sudo rm #{@working_tree['payload']}/#{package_file}")
+  end
 
   # Build .dmg file
   system("sudo hdiutil create -volname #{@title} \
@@ -112,6 +121,29 @@ def build_dmg
     mv(dmg_file, "#{pwd}/pkg/apple/#{dmg_file}")
     puts "moved:   #{dmg_file} has been moved to #{pwd}/pkg/apple/#{dmg_file}"
   end
+end
+
+# method:       add_scripts
+# description:  this method generates postinstall/preinstall scripts from ERB 
+#               templates, sets the appropriate permissions, and names them
+#               properly. if no scripts are found, nothing is done.
+
+def add_scripts
+  
+  if File.exists?('ext/osx/postflight.erb')
+    #changes nomenclature to build package with postinstall vs postflight
+    erb 'ext/osx/postflight.erb', "#{@working_tree["scripts"]}/postinstall"
+    chown('root', 'wheel', "#{@working_tree['scripts']}/postinstall")
+    chmod(0755, "#{@working_tree['scripts']}/postinstall")
+  end
+  
+  if File.exists?('ext/osx/preflight.erb')
+    #changes nomenclature to build package with postinstall vs postflight
+    erb 'ext/osx/preflight.erb', "#{@working_tree["scripts"]}/preinstall"
+    chown('root', 'wheel', "#{@working_tree['scripts']}/preinstall")
+    chmod(0755, "#{@working_tree['scripts']}/preinstall")
+  end
+
 end
 
 # method:        pack_source
@@ -142,11 +174,6 @@ def pack_source
       end
     end
   end
-
-  # Setup a preflight script and replace variables in the files with
-  # the correct paths.
-  chown('root', 'wheel', "#{@working_tree['scripts']}/preflight")
-  chmod(0644, "#{@working_tree['scripts']}/preflight")
 
   # Do a run through first setting the specified permissions then
   # making sure 755 is set for all directories
@@ -190,9 +217,10 @@ if @build_dmg
         # Test for Root and Packagemaker binary
         raise "Please run rake as root to build Apple Packages" unless Process.uid == 0
         raise "Packagemaker must be installed. Please install XCode Tools" unless \
-          File.exists?('/Developer/usr/bin/packagemaker')
+          File.exists?(PKGBUILD)
 
         make_directory_tree
+        add_scripts
         pack_source
         build_dmg
         chmod_R(0775, "#{pwd}/pkg")

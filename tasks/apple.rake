@@ -207,7 +207,7 @@ if @build_dmg
         # Test for Root and Packagemaker binary
         raise "Please run rake as root to build Apple Packages" unless Process.uid == 0
         raise "Packagemaker must be installed. Please install XCode Tools" unless \
-          File.exists?('/Developer/usr/bin/packagemaker')
+          File.exists?(PACKAGEMAKER)
 
         make_directory_tree
         pack_source

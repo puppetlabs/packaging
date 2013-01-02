@@ -59,8 +59,17 @@ def make_directory_tree
     mkdir_p(val)
   end
 
-  erb 'ext/osx/preflight.erb', "#{@working_tree["scripts"]}/preflight"
-  erb 'ext/osx/prototype.plist.erb', "#{@scratch}/prototype.plist"
+  if File.exists?('ext/osx/postflight.erb')
+    erb 'ext/osx/postflight.erb', "#{@working_tree["scripts"]}/postflight"
+  end
+
+  if File.exists?('ext/osx/preflight.erb')
+    erb 'ext/osx/preflight.erb', "#{@working_tree["scripts"]}/preflight"
+  end
+
+  if File.exists?('ext/osx/prototype.plist.erb')
+    erb 'ext/osx/prototype.plist.erb', "#{@scratch}/prototype.plist"
+  end
 
 end
 
@@ -145,8 +154,16 @@ def pack_source
 
   # Setup a preflight script and replace variables in the files with
   # the correct paths.
-  chown('root', 'wheel', "#{@working_tree['scripts']}/preflight")
-  chmod(0644, "#{@working_tree['scripts']}/preflight")
+  if File.exists?("#{@working_tree['scripts']}/preflight")
+    chown('root', 'wheel', "#{@working_tree['scripts']}/preflight")
+    chmod(0644, "#{@working_tree['scripts']}/preflight")
+  end
+
+  # Setup a postflight from from the erb created earlier
+  if File.exists?("#{@working_tree['scripts']}/postflight")
+    chown('root', 'wheel', "#{@working_tree['scripts']}/postflight")
+    chmod(0755, "#{@working_tree['scripts']}/postflight")
+  end
 
   # Do a run through first setting the specified permissions then
   # making sure 755 is set for all directories

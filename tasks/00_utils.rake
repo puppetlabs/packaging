@@ -404,3 +404,13 @@ def loop_shell_command(command, max_attempts = 5)
   raise "Failed! command was: #{command}" unless success
 end
 
+def deprecate(old_cmd, new_cmd=nil)
+  msg = "!! #{old_cmd} is deprecated."
+  if new_cmd
+    msg << " Please use #{new_cmd} instead."
+  end
+  STDOUT.puts
+  STDOUT.puts(msg)
+  STDOUT.puts
+end
+

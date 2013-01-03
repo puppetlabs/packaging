@@ -9,8 +9,8 @@ namespace :pl do
     end
   end if @build_gem
 
-  desc "Release deb RCs, e.g. package:tar, pl:{deb_all_rc, sign_deb_changes, ship_debs}"
   task :release_deb_rc do
+    deprecate("pl:release_deb_rc", "pl:release_deb")
     load_keychain if has_tool('keychain')
     invoke_task("pl:deb_all_rc")
     invoke_task("pl:sign_deb_changes")
@@ -19,8 +19,8 @@ namespace :pl do
     end
   end
 
-  desc "Release deb FINALs, e.g. package:tar, pl:{deb_all, sign_deb_changes, ship_debs}"
   task :release_deb_final do
+    deprecate("pl:release_deb_final", "pl:release_deb")
     load_keychain if has_tool('keychain')
     invoke_task("pl:deb_all")
     invoke_task("pl:sign_deb_changes")
@@ -29,8 +29,18 @@ namespace :pl do
     end
   end
 
-  desc "Release rpm RCs, e.g. package:tar, pl:{mock_rc, sign_rpms, ship_rpms, update_yum_repo}"
+  desc "Release deb, e.g. package:tar, pl:{deb_all, sign_deb_changes, ship_debs}"
+  task :release_deb do
+    load_keychain if has_tool('keychain')
+    invoke_task("pl:deb_all")
+    invoke_task("pl:sign_deb_changes")
+    if confirm_ship(FileList["pkg/deb/**/*"])
+      invoke_task("pl:ship_debs")
+    end
+  end
+
   task :release_rpm_rc do
+    deprecate("pl:release_rpm_rc", "pl:release_rpm")
     invoke_task("pl:mock_rc")
     invoke_task("pl:sign_rpms")
     if confirm_ship(FileList["pkg/el/**/*", "pkg/fedora/**/*"])
@@ -39,9 +49,19 @@ namespace :pl do
     end
   end
 
-  desc "Release rpm FINALs, e.g. package:tar, pl:{mock_final, sign_rpms, ship_rpms, update_yum_repo}"
   task :release_rpm_final do
+    deprecate("pl:release_rpm_final", "pl:release_rpm")
     invoke_task("pl:mock_final")
+    invoke_task("pl:sign_rpms")
+    if confirm_ship(FileList["pkg/el/**/*", "pkg/fedora/**/*"])
+      invoke_task("pl:ship_rpms")
+      invoke_task("pl:remote_update_yum_repo")
+    end
+  end
+
+  desc "Release rpms, e.g. package:tar, pl:{mock_all, sign_rpms, ship_rpms, update_yum_repo}"
+  task :release_rpm do
+    invoke_task("pl:mock_all")
     invoke_task("pl:sign_rpms")
     if confirm_ship(FileList["pkg/el/**/*", "pkg/fedora/**/*"])
       invoke_task("pl:ship_rpms")

@@ -134,17 +134,24 @@ namespace :pl do
     post_metrics if @benchmark
   end
 
-  desc "Use specified mocks to make final rpms, keyed to PL infrastructure, pass MOCK to specifiy config"
   task :mock_final => [ "package:srpm", "pl:setup_el_dirs" ] do
+    deprecate("pl:mock_final", "pl:mock_all")
     subdir = ENV['subdir'] || 'products'
     build_rpm_with_mock(@final_mocks, FALSE, subdir)
     post_metrics if @benchmark
   end
 
-  desc "Use specified mocks to make RC rpms, keyed to PL infrastructure, pass MOCK to specify config"
   task :mock_rc => [ "package:srpm", "pl:setup_el_dirs" ] do
+    deprecate("pl:mock_rc", "pl:mock_all")
     subdir = 'devel'
     build_rpm_with_mock(@rc_mocks, TRUE, subdir)
+    post_metrics if @benchmark
+  end
+
+  desc "Use specified mocks to make rpms, keyed to PL infrastructure, pass MOCK to specifiy config"
+  task :mock_all => [ "package:srpm", "pl:setup_el_dirs" ] do
+    subdir = ENV['subdir'] || 'products'
+    build_rpm_with_mock(@final_mocks, FALSE, subdir)
     post_metrics if @benchmark
   end
 end

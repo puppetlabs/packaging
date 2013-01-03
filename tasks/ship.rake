@@ -5,11 +5,27 @@ namespace :pl do
     rsync_to('pkg/fedora', @yum_host, @yum_repo_path)
   end
 
-  desc "Update remote rpm repodata on #{@yum_host}"
-  task :remote_update_yum_repo do
-    STDOUT.puts "Really run remote repo update on #{@yum_host}? [y,n]"
-    if ask_yes_or_no
-      remote_ssh_cmd(@yum_host, '/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile mk_repo')
+  namespace :remote do
+    # These hacky bits execute a pre-existing rake task on the @apt_host
+    # The rake task takes packages in a specific directory and freights them
+    # to various target yum and apt repositories based on their specific type
+    # e.g., final vs devel vs PE vs FOSS packages
+
+    desc "Update remote rpm repodata on #{@yum_host}"
+    task :update_yum_repo do
+      STDOUT.puts "Really run remote repo update on #{@yum_host}? [y,n]"
+      if ask_yes_or_no
+        remote_ssh_cmd(@yum_host, '/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile mk_repo')
+      end
+    end
+
+    desc "remote freight packages to repos on #{@apt_host}"
+    task :freight do
+      STDOUT.puts "Really run remote freight command on #{@apt_host}? [y,n]"
+      if ask_yes_or_no
+        override = "OVERRIDE=1" if ENV['OVERRIDE']
+        remote_ssh_cmd(@apt_host, "/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile freight #{override}")
+      end
     end
   end
 
@@ -18,17 +34,7 @@ namespace :pl do
     rsync_to('pkg/deb/', @apt_host, @apt_repo_path)
   end
 
-  # These hacky bits execute a pre-existing rake task on the @apt_host
-  # The rake task takes packages in a specific directory and freights them
-  # to various target apt repositories based on their specific type
-  # e.g., final vs devel vs PE vs FOSS packages
-  desc "remote freight packages to repos on #{@apt_host}"
-  task :remote_freight do
-    STDOUT.puts "Really run remote freight command on #{@apt_host}? [y,n]"
-    if ask_yes_or_no
-      override = "OVERRIDE=1" if ENV['OVERRIDE']
-      remote_ssh_cmd(@apt_host, "/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile freight #{override}")
-    end
+  namespace :remote do
   end
 
   desc "Update remote ips repository on #{@ips_host}"

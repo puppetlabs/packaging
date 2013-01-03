@@ -45,7 +45,7 @@ namespace :pl do
     invoke_task("pl:sign_rpms")
     if confirm_ship(FileList["pkg/el/**/*", "pkg/fedora/**/*"])
       invoke_task("pl:ship_rpms")
-      invoke_task("pl:remote_update_yum_repo")
+      invoke_task("pl:remote:update_yum_repo")
     end
   end
 
@@ -55,7 +55,7 @@ namespace :pl do
     invoke_task("pl:sign_rpms")
     if confirm_ship(FileList["pkg/el/**/*", "pkg/fedora/**/*"])
       invoke_task("pl:ship_rpms")
-      invoke_task("pl:remote_update_yum_repo")
+      invoke_task("pl:remote:update_yum_repo")
     end
   end
 
@@ -65,7 +65,7 @@ namespace :pl do
     invoke_task("pl:sign_rpms")
     if confirm_ship(FileList["pkg/el/**/*", "pkg/fedora/**/*"])
       invoke_task("pl:ship_rpms")
-      invoke_task("pl:remote_update_yum_repo")
+      invoke_task("pl:remote:update_yum_repo")
     end
   end
 

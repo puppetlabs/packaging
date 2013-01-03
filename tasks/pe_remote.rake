@@ -9,34 +9,34 @@ if @build_pe
     task :deb => ['pl:fetch', 'pl:load_extras'] do
       ENV['PE_VER'] ||= @pe_version
       check_var('PE_VER', ENV['PE_VER'])
-      Rake::Task["pl:remote_build"].reenable
-      Rake::Task["pl:remote_build"].invoke(@deb_build_host, 'HEAD', "pe:local_deb TEAM=#{@team} PE_VER=#{ENV['PE_VER']}")
+      Rake::Task["pl:remote:build"].reenable
+      Rake::Task["pl:remote:build"].invoke(@deb_build_host, 'HEAD', "pe:local_deb TEAM=#{@team} PE_VER=#{ENV['PE_VER']}")
     end
 
     desc "Execute remote debian build using ALL cows on builder and retrieve packages"
     task :deb_all => ['pl:fetch', 'pl:load_extras'] do
       ENV['PE_VER'] ||= @pe_version
       check_var('PE_VER', ENV['PE_VER'])
-      Rake::Task["pl:remote_build"].reenable
-      Rake::Task["pl:remote_build"].invoke(@deb_build_host, 'HEAD', "pe:local_deb_all TEAM=#{@team} PE_VER=#{ENV['PE_VER']}")
+      Rake::Task["pl:remote:build"].reenable
+      Rake::Task["pl:remote:build"].invoke(@deb_build_host, 'HEAD', "pe:local_deb_all TEAM=#{@team} PE_VER=#{ENV['PE_VER']}")
     end
 
     desc "Execute remote rpm build using default mock on builder and retrieve package"
     task :mock => ['pl:fetch', 'pl:load_extras'] do
-      Rake::Task["pl:remote_build"].reenable
-      Rake::Task["pl:remote_build"].invoke(@rpm_build_host, 'HEAD', "pe:local_mock TEAM=#{@team}")
+      Rake::Task["pl:remote:build"].reenable
+      Rake::Task["pl:remote:build"].invoke(@rpm_build_host, 'HEAD', "pe:local_mock TEAM=#{@team}")
     end
 
     desc "Execute remote rpm build with ALL mocks on builder and retrieve packages"
     task :mock_all => ['pl:fetch', 'pl:load_extras'] do
-      Rake::Task["pl:remote_build"].reenable
-      Rake::Task["pl:remote_build"].invoke(@rpm_build_host, 'HEAD', "pe:local_mock_final TEAM=#{@team}")
+      Rake::Task["pl:remote:build"].reenable
+      Rake::Task["pl:remote:build"].invoke(@rpm_build_host, 'HEAD', "pe:local_mock_final TEAM=#{@team}")
     end
 
     desc "Execute remote sles rpm build and retrieve package"
     task :sles => ['pl:fetch', 'pl:load_extras'] do
-      Rake::Task["pl:remote_build"].reenable
-      Rake::Task["pl:remote_build"].invoke(@sles_build_host, 'HEAD', "pe:local_sles TEAM=#{@team}")
+      Rake::Task["pl:remote:build"].reenable
+      Rake::Task["pl:remote:build"].invoke(@sles_build_host, 'HEAD', "pe:local_sles TEAM=#{@team}")
     end
 
     desc "Execute remote debian, el, and sles builds, sign, and ship pkgs"

@@ -87,8 +87,8 @@ namespace :pl do
     post_metrics if @benchmark
   end
 
-  desc "Create an RC deb from this repo using the default cow #{@default_cow}."
   task :deb_rc => "package:tar" do
+    STDOUT.puts "pl:deb_rc is deprecated. Please use pl:deb instead."
     Rake::Task[:build_deb].invoke('pdebuild', @default_cow, 'devel')
     post_metrics if @benchmark
   end
@@ -104,8 +104,8 @@ namespace :pl do
     post_metrics if @benchmark
   end
 
-  desc "Create RC debs from this git repository using all cows specified in build_defaults yaml"
   task :deb_all_rc do
+    STDOUT.puts "pl:deb_all_rc is deprecated. Please use pl:deb_all instead."
     @cows.split(' ').each do |cow|
       Rake::Task["package:tar"].invoke
       Rake::Task[:build_deb].reenable

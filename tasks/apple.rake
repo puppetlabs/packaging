@@ -16,9 +16,22 @@ DITTO         = '/usr/bin/ditto'
 PACKAGEMAKER  = '/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker'
 PKGBUILD      = '/usr/bin/pkgbuild'
 PRODUCTSIGN   = '/usr/bin/productsign'
-DEVID         = 'Developer ID Installer: PUPPET LABS, INC.'
+#DEVID         = 'Developer ID Installer: PUPPET LABS, INC.'
 SED           = '/usr/bin/sed'
-#SIGN          = 'true'
+#SIGN          = 'false'
+
+if ENV.has_key?('SIGN_PACKAGES')
+  puts "Signing Packages"
+  SIGN = ENV["SIGN_PACKAGES"]
+else
+  SIGN = 'false'
+end
+
+if ENV.has_key?('DEVELOPER_ID')
+  DEVID = ENV["DEVELOPER_ID"]
+else
+  DEVID = 'Developer ID Installer: PUPPET LABS, INC.'
+end
 
 # Setup task to populate all the variables
 task :setup do
@@ -138,7 +151,7 @@ def add_scripts
   end
   
   if File.exists?('ext/osx/preflight.erb')
-    #changes nomenclature to build package with postinstall vs postflight
+    #changes nomenclature to build package with preinstall vs preflight
     erb 'ext/osx/preflight.erb', "#{@working_tree["scripts"]}/preinstall"
     chown('root', 'wheel', "#{@working_tree['scripts']}/preinstall")
     chmod(0755, "#{@working_tree['scripts']}/preinstall")

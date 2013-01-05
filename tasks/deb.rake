@@ -88,7 +88,7 @@ namespace :pl do
   end
 
   task :deb_rc => "package:tar" do
-    STDOUT.puts "pl:deb_rc is deprecated. Please use pl:deb instead."
+    deprecate("pl:deb_rc", "pl:deb")
     Rake::Task[:build_deb].invoke('pdebuild', @default_cow, 'devel')
     post_metrics if @benchmark
   end
@@ -105,7 +105,7 @@ namespace :pl do
   end
 
   task :deb_all_rc do
-    STDOUT.puts "pl:deb_all_rc is deprecated. Please use pl:deb_all instead."
+    deprecate("pl:deb_all_rc", "pl:deb_all")
     @cows.split(' ').each do |cow|
       Rake::Task["package:tar"].invoke
       Rake::Task[:build_deb].reenable

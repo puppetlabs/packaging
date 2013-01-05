@@ -427,7 +427,7 @@ end
 # '0.7.0-rc1-63'
 # '0.7.0-rc1-63-dirty'
 def is_rc?
-  return TRUE if get_dash_version =~ /^[\d]+\.[\d]+\.[\d]+-*rc[\d]+/
+  return TRUE if get_dash_version =~ /^\d+\.\d+\.\d+-*rc\d+/
   FALSE
 end
 

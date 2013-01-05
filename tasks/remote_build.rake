@@ -40,13 +40,19 @@ if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
         Rake::Task["pl:remote:build"].invoke(@deb_build_host, 'HEAD', "pl:deb_all COW='#{@cows}'")
       end
 
-      desc "Execute deb_all on remote debian build host (no signing)"
+      desc "Execute pl:deb (single default cow deb package) on remote debian build host (no signing)"
+      task :deb => ['pl:fetch', 'pl:load_extras'] do
+        Rake::Task["pl:remote:build"].reenable
+        Rake::Task["pl:remote:build"].invoke(@deb_build_host, 'HEAD', "pl:deb")
+      end
+
+      desc "Execute pl:deb_all on remote debian build host (no signing)"
       task :deb_all => ['pl:fetch', 'pl:load_extras'] do
         Rake::Task["pl:remote:build"].reenable
         Rake::Task["pl:remote:build"].invoke(@deb_build_host, 'HEAD', "pl:deb_all COW='#{@cows}'")
       end
 
-      desc "Execute remote release_deb_all full build set on remote debian build host"
+      desc "Execute remote pl:release_deb_all full build set on remote debian build host"
       task :release_deb => ['pl:fetch', 'pl:load_extras']  do
         Rake::Task["pl:remote:build"].reenable
         Rake::Task["pl:remote:build"].invoke(@deb_build_host, 'HEAD', "pl:release_deb COW='#{@cows}'")
@@ -70,7 +76,7 @@ if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
         Rake::Task["pl:remote:build"].invoke(@rpm_build_host, 'HEAD', "pl:release_rpm_final MOCK='#{@final_mocks}'")
       end
 
-      desc "Execute remote release_rpm full build set on remote rpm build host"
+      desc "Execute remote pl:release_rpm full build set on remote rpm build host"
       task :release_rpm => ['pl:fetch', 'pl:load_extras'] do
         Rake::Task["pl:remote:build"].reenable
         Rake::Task["pl:remote:build"].invoke(@rpm_build_host, 'HEAD', "pl:release_rpm MOCK='#{@final_mocks}'")
@@ -82,7 +88,13 @@ if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
         Rake::Task["pl:remote:build"].invoke(@rpm_build_host, 'HEAD', "pl:mock_final MOCK='#{@final_mocks}'")
       end
 
-      desc "Execute mock_all on remote rpm build host (no signing)"
+      desc "Execute pl:mock (single default mock package) on remote rpm build host (no signing)"
+      task :mock => ['pl:fetch', 'pl:load_extras'] do
+        Rake::Task["pl:remote:build"].reenable
+        Rake::Task["pl:remote:build"].invoke(@rpm_build_host, 'HEAD', "pl:mock")
+      end
+
+      desc "Execute pl:mock_all on remote rpm build host (no signing)"
       task :mock_all => ['pl:fetch', 'pl:load_extras'] do
         Rake::Task["pl:remote:build"].reenable
         Rake::Task["pl:remote:build"].invoke(@rpm_build_host, 'HEAD', "pl:mock_all MOCK='#{@final_mocks}'")

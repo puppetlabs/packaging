@@ -89,7 +89,7 @@ namespace :pl do
 
   task :deb_rc => "package:tar" do
     deprecate("pl:deb_rc", "pl:deb")
-    Rake::Task[:build_deb].invoke('pdebuild', @default_cow, 'devel')
+    Rake::Task[:build_deb].invoke('pdebuild', @default_cow, 'true')
     post_metrics if @benchmark
   end
 
@@ -109,7 +109,7 @@ namespace :pl do
     @cows.split(' ').each do |cow|
       Rake::Task["package:tar"].invoke
       Rake::Task[:build_deb].reenable
-      Rake::Task[:build_deb].invoke('pdebuild', cow, 'devel')
+      Rake::Task[:build_deb].invoke('pdebuild', cow, 'true')
     end
   end
   post_metrics if @benchmark

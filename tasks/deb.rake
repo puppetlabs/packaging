@@ -16,7 +16,7 @@ def pdebuild args
 end
 
 def update_cow(cow, is_rc = nil)
-  ENV['FOSS_DEVEL'] = is_rc
+  ENV['FOSS_DEVEL'] = is_rc.to_s
   ENV['PATH'] = "/usr/sbin:#{ENV['PATH']}"
   set_cow_envs(cow)
   begin
@@ -83,13 +83,13 @@ namespace :pl do
   desc "Create a deb from this repo using the default cow #{@default_cow}."
   task :deb => "package:tar"  do
     check_var('PE_VER', ENV['PE_VER']) if @build_pe
-    Rake::Task[:build_deb].invoke('pdebuild', @default_cow)
+    Rake::Task[:build_deb].invoke('pdebuild', @default_cow, is_rc?)
     post_metrics if @benchmark
   end
 
-  desc "Create an RC deb from this repo using the default cow #{@default_cow}."
   task :deb_rc => "package:tar" do
-    Rake::Task[:build_deb].invoke('pdebuild', @default_cow, 'devel')
+    deprecate("pl:deb_rc", "pl:deb")
+    Rake::Task[:build_deb].invoke('pdebuild', @default_cow, 'true')
     post_metrics if @benchmark
   end
 
@@ -99,17 +99,17 @@ namespace :pl do
     @cows.split(' ').each do |cow|
       Rake::Task["package:tar"].invoke
       Rake::Task[:build_deb].reenable
-      Rake::Task[:build_deb].invoke('pdebuild', cow)
+      Rake::Task[:build_deb].invoke('pdebuild', cow, is_rc?)
     end
     post_metrics if @benchmark
   end
 
-  desc "Create RC debs from this git repository using all cows specified in build_defaults yaml"
   task :deb_all_rc do
+    deprecate("pl:deb_all_rc", "pl:deb_all")
     @cows.split(' ').each do |cow|
       Rake::Task["package:tar"].invoke
       Rake::Task[:build_deb].reenable
-      Rake::Task[:build_deb].invoke('pdebuild', cow, 'devel')
+      Rake::Task[:build_deb].invoke('pdebuild', cow, 'true')
     end
   end
   post_metrics if @benchmark

@@ -404,3 +404,30 @@ def loop_shell_command(command, max_attempts = 5)
   raise "Failed! command was: #{command}" unless success
 end
 
+def deprecate(old_cmd, new_cmd=nil)
+  msg = "!! #{old_cmd} is deprecated."
+  if new_cmd
+    msg << " Please use #{new_cmd} instead."
+  end
+  STDOUT.puts
+  STDOUT.puts(msg)
+  STDOUT.puts
+end
+
+# Determines if this package is an rc package via the version
+# returned by get_dash_version method.
+# Assumes version strings in the formats:
+# final:
+# '0.7.0'
+# '0.7.0-63'
+# '0.7.0-63-dirty'
+# rc:
+# '0.7.0rc1 (we don't actually use this format anymore, but once did)
+# '0.7.0-rc1'
+# '0.7.0-rc1-63'
+# '0.7.0-rc1-63-dirty'
+def is_rc?
+  return TRUE if get_dash_version =~ /^\d+\.\d+\.\d+-*rc\d+/
+  FALSE
+end
+

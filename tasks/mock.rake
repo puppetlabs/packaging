@@ -57,11 +57,12 @@ def mock_arch(mock_config)
   end
 end
 
-def build_rpm_with_mock(mocks, is_rc, subdir)
+def build_rpm_with_mock(mocks, is_rc)
   mocks.split(' ').each do |mock_config|
     family  = mock_el_family(mock_config)
     version = mock_el_ver(mock_config)
     arch    = mock_arch(mock_config)
+    subdir  = is_rc ? 'devel' : 'products'
     bench = Benchmark.realtime do
       result  = "/var/lib/mock/#{mock_config}/result/*.rpm"
       mock(mock_config, srpm_file)
@@ -129,22 +130,25 @@ namespace :pl do
   task :mock => [ "package:srpm", "pl:setup_el_dirs" ] do
     # If default mock isn't specified, just take the first one in the @final_mocks list
     @default_mock ||= @final_mocks.split(' ')[0]
-    subdir = ENV['subdir'] || 'products'
-    build_rpm_with_mock(@default_mock, FALSE, subdir)
+    build_rpm_with_mock(@default_mock, is_rc?)
     post_metrics if @benchmark
   end
 
-  desc "Use specified mocks to make final rpms, keyed to PL infrastructure, pass MOCK to specifiy config"
   task :mock_final => [ "package:srpm", "pl:setup_el_dirs" ] do
-    subdir = ENV['subdir'] || 'products'
-    build_rpm_with_mock(@final_mocks, FALSE, subdir)
+    deprecate("pl:mock_final", "pl:mock_all")
+    build_rpm_with_mock(@final_mocks, FALSE)
     post_metrics if @benchmark
   end
 
-  desc "Use specified mocks to make RC rpms, keyed to PL infrastructure, pass MOCK to specify config"
   task :mock_rc => [ "package:srpm", "pl:setup_el_dirs" ] do
-    subdir = 'devel'
-    build_rpm_with_mock(@rc_mocks, TRUE, subdir)
+    deprecate("pl:mock_rc", "pl:mock_all")
+    build_rpm_with_mock(@rc_mocks, TRUE)
+    post_metrics if @benchmark
+  end
+
+  desc "Use specified mocks to make rpms, keyed to PL infrastructure, pass MOCK to specifiy config"
+  task :mock_all => [ "package:srpm", "pl:setup_el_dirs" ] do
+    build_rpm_with_mock(@final_mocks, is_rc?)
     post_metrics if @benchmark
   end
 end

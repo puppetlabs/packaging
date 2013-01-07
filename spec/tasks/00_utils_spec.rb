@@ -12,6 +12,7 @@ describe "00_utils" do
       :get_debversion             => '0.7.0-1puppetlabs1',
       :get_rpmversion             => '0.7.0',
       :get_rpmrelease             => '1',
+      :is_rc?                     => false,
     },
     '0.7.0rc1'                    => {
       :git_describe_version       => %w{0.7.0rc1},
@@ -21,6 +22,7 @@ describe "00_utils" do
       :get_debversion             => '0.7.0-0.1rc1puppetlabs1',
       :get_rpmversion             => '0.7.0',
       :get_rpmrelease             => '0.1rc1',
+      :is_rc?                     => true,
     },
     '0.7.0-rc1'                   => {
       :git_describe_version       => %w{0.7.0 rc1},
@@ -30,6 +32,7 @@ describe "00_utils" do
       :get_debversion             => '0.7.0-0.1rc1puppetlabs1',
       :get_rpmversion             => '0.7.0',
       :get_rpmrelease             => '0.1rc1',
+      :is_rc?                     => true,
     },
     '0.7.0-rc1-63-ge391f55'       => {
       :git_describe_version       => %w{0.7.0 rc1 63},
@@ -39,6 +42,7 @@ describe "00_utils" do
       :get_debversion             => '0.7.0-0.1rc1.63puppetlabs1',
       :get_rpmversion             => '0.7.0',
       :get_rpmrelease             => '0.1rc1.63',
+      :is_rc?                     => true,
     },
     '0.7.0-rc1-63-ge391f55-dirty' => {
       :git_describe_version       => %w{0.7.0 rc1 63 dirty},
@@ -48,6 +52,7 @@ describe "00_utils" do
       :get_debversion             => '0.7.0-0.1rc1.63dirtypuppetlabs1',
       :get_rpmversion             => '0.7.0',
       :get_rpmrelease             => '0.1rc1.63dirty',
+      :is_rc?                     => true,
 
     },
     '0.7.0-63-ge391f55'           => {
@@ -58,6 +63,7 @@ describe "00_utils" do
       :get_debversion             => '0.7.0.63-1puppetlabs1',
       :get_rpmversion             => '0.7.0.63',
       :get_rpmrelease             => '1',
+      :is_rc?                     => false,
 
     },
     '0.7.0-63-ge391f55-dirty'     => {
@@ -68,6 +74,7 @@ describe "00_utils" do
       :get_debversion             => '0.7.0.63.dirty-1puppetlabs1',
       :get_rpmversion             => '0.7.0.63.dirty',
       :get_rpmrelease             => '1',
+      :is_rc?                     => false,
     },
   }
 

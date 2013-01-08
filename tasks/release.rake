@@ -69,7 +69,7 @@ namespace :pl do
     end
   end
 
-  if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
+  if File.exist?("#{ENV['HOME']}/.packaging")
     desc "Release tarball, e.g. package:tar, pl:{sign_tar, ship_tar}"
     task :release_tar => ['pl:fetch', 'pl:load_extras'] do
       invoke_task("package:tar")

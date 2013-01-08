@@ -45,7 +45,7 @@ namespace :pl do
     remote_ssh_cmd(@ips_host, "/usr/sbin/svcadm restart svc:/application/pkg/server")
   end if @build_ips
 
-  if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
+  if File.exist?("#{ENV['HOME']}/.packaging")
     desc "Upload ips p5p packages to downloads"
     task :ship_ips => [ 'pl:fetch', 'pl:load_extras' ] do
       if Dir['pkg/ips/pkgs/**/*'].empty?
@@ -61,7 +61,7 @@ namespace :pl do
     ship_gem("pkg/#{@name}-#{@gemversion}.gem")
   end if @build_gem
 
-  if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
+  if File.exist?("#{ENV['HOME']}/.packaging")
     desc "ship apple dmg to #{@yum_host}"
     task :ship_dmg => ['pl:fetch', 'pl:load_extras'] do
       rsync_to('pkg/apple/*.dmg', @yum_host, @dmg_path)

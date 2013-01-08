@@ -1,6 +1,6 @@
 # Tasks for remote building on builder hosts
 
-if File.exist?("#{ENV['HOME']}/.packaging/#{@builder_data_file}")
+if File.exist?("#{ENV['HOME']}/.packaging")
   namespace 'pl' do
     namespace :remote do
       task :build, :host, :treeish, :task, :tar do |t, args|

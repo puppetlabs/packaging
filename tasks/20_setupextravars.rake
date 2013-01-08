@@ -49,6 +49,6 @@ end
 
 # Starting with puppetdb, we'll maintain two separate build-data files, one for PE and the other for FOSS
 # This is the start to maintaining both PE and FOSS packaging in one source repo
-if @pe_name
+unless @pe_name.nil?
   @name = @pe_name
 end

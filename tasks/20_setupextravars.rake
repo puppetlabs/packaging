@@ -37,7 +37,8 @@ namespace :pl do
       @final_mocks      = (ENV['MOCK']     || @project_data['final_mocks']) if @project_data['final_mocks']
       @packager         = (ENV['PACKAGER'] || @team_data['packager'])    if @team_data['packager']
     rescue => e
-      STDERR.puts "There was an error loading the builder data from #{ENV['HOME']}/.packaging/#{@builder_data_file}. Try rake pl:fetch to download the current extras builder data.\n" + e
+      STDERR.puts "There was an error loading the builder data from #{ENV['HOME']}/.packaging/#{@builder_data_file}. Try rake pl:fetch to download the current extras builder data.\n" + e.message
+      STDERR.puts e.backtrace
       exit 1
     end
   end

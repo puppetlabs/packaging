@@ -23,20 +23,23 @@ if @build_pe
 
     desc "Execute remote rpm build using default mock on builder and retrieve package"
     task :mock => ['pl:fetch', 'pl:load_extras'] do
+      ENV['PE_VER'] ||= @pe_version
       Rake::Task["pl:remote:build"].reenable
-      Rake::Task["pl:remote:build"].invoke(@rpm_build_host, 'HEAD', "pe:local_mock PE_BUILD=#{@build_pe} TEAM=#{@team}")
+      Rake::Task["pl:remote:build"].invoke(@rpm_build_host, 'HEAD', "pe:local_mock PE_BUILD=#{@build_pe} TEAM=#{@team} PE_VER=#{ENV['PE_VER']}")
     end
 
     desc "Execute remote rpm build with ALL mocks on builder and retrieve packages"
     task :mock_all => ['pl:fetch', 'pl:load_extras'] do
+      ENV['PE_VER'] ||= @pe_version
       Rake::Task["pl:remote:build"].reenable
-      Rake::Task["pl:remote:build"].invoke(@rpm_build_host, 'HEAD', "pe:local_mock_final PE_BUILD=#{@build_pe} TEAM=#{@team}")
+      Rake::Task["pl:remote:build"].invoke(@rpm_build_host, 'HEAD', "pe:local_mock_final PE_BUILD=#{@build_pe} TEAM=#{@team} PE_VER=#{ENV['PE_VER']}")
     end
 
     desc "Execute remote sles rpm build and retrieve package"
     task :sles => ['pl:fetch', 'pl:load_extras'] do
+      ENV['PE_VER'] ||= @pe_version
       Rake::Task["pl:remote:build"].reenable
-      Rake::Task["pl:remote:build"].invoke(@sles_build_host, 'HEAD', "pe:local_sles PE_BUILD=#{@build_pe} TEAM=#{@team}")
+      Rake::Task["pl:remote:build"].invoke(@sles_build_host, 'HEAD', "pe:local_sles PE_BUILD=#{@build_pe} TEAM=#{@team} PE_VER=#{ENV['PE_VER']}")
     end
 
     desc "Execute remote debian, el, and sles builds, sign, and ship pkgs"

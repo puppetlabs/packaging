@@ -9,8 +9,8 @@ project_data_branch = @name
 team_data_branch = @team
 
 if @build_pe
-  project_data_branch = 'pe-' + project_data_branch
-  team_data_branch = 'pe-' + team_data_branch
+  project_data_branch = 'pe-' + project_data_branch unless project_data_branch =~ /^pe-/
+  team_data_branch = 'pe-' + team_data_branch unless team_data_branch =~ /^pe-/
 end
 
 project_data_url = data_repo + '/' + project_data_branch

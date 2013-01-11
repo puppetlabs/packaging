@@ -33,8 +33,7 @@ def mock_el_family(mock_config)
   if @build_pe
     family = mock_config.split('-')[2][/[a-z]+/]
   else
-    family = mock_config.split('-')[0]
-    family = 'el' if family == 'pl'
+    family = mock_config.split('-')[0] == 'pl' ? mock_config.split('-')[1] : mock_config.split('-')[0]
   end
   family
 end
@@ -43,8 +42,10 @@ def mock_el_ver(mock_config)
   if @build_pe
     version = mock_config.split('-')[2][/[0-9]+/]
   else
-    version = mock_config.split('-')[1]
-    version = "f#{version}" if mock_config.split('-')[0] == 'fedora'
+    version = mock_config.split('-')[0] == 'pl' ? mock_config.split('-')[2] : mock_config.split('-')[1]
+    if (mock_config.split('-')[0] == 'fedora' || mock_config.split('-')[1] == 'fedora')
+      version = "f#{version}"
+    end
   end
   version
 end

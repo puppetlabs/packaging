@@ -34,7 +34,7 @@ begin
   @build_dmg       = boolean_value( ENV['DMG']      || @pkg_defaults['build_dmg'] )
   @build_ips       = boolean_value( ENV['IPS']      || @pkg_defaults['build_ips'] )
   @build_doc       = boolean_value( ENV['DOC']      || @pkg_defaults['build_doc'] )
-  @build_pe        = boolean_value( ENV['PE']       || @pkg_defaults['build_pe'] )
+  @build_pe        = boolean_value( ENV['PE_BUILD'] || @pkg_defaults['build_pe'] )
   @default_cow     = ENV['COW']          || @pkg_defaults['default_cow']
   @cows            = ENV['COW']          || @pkg_defaults['cows']
   @pbuild_conf     = ENV['PBUILDCONF']   || @pkg_defaults['pbuild_conf']
@@ -46,11 +46,11 @@ begin
   @gpg_key         = ENV['GPG_KEY']      || @pkg_defaults['gpg_key']
   @certificate_pem = ENV['CERT_PEM']     || @pkg_defaults['certificate_pem']
   @privatekey_pem  = ENV['PRIVATE_PEM']  || @pkg_defaults['privatekey_pem']
-  @yum_host        = @pkg_defaults['yum_host']
-  @yum_repo_path   = @pkg_defaults['yum_repo_path']
-  @apt_host        = @pkg_defaults['apt_host']
+  @yum_host        = ENV['YUM_HOST']     || @pkg_defaults['yum_host']
+  @yum_repo_path   = ENV['YUM_REPO']     || @pkg_defaults['yum_repo_path']
+  @apt_host        = ENV['APT_HOST']     || @pkg_defaults['apt_host']
+  @apt_repo_path   = ENV['APT_REPO']     || @pkg_defaults['apt_repo_path']
   @apt_repo_url    = @pkg_defaults['apt_repo_url']
-  @apt_repo_path   = @pkg_defaults['apt_repo_path']
   @ips_repo        = @pkg_defaults['ips_repo']
   @ips_store       = @pkg_defaults['ips_store']
   @ips_host        = @pkg_defaults['ips_host']
@@ -70,4 +70,4 @@ end
 @rpmrelease        ||= get_rpmrelease
 @keychain_loaded   ||= FALSE
 @builder_data_file ||= 'builder_data.yaml'
-@team              ||= ENV['TEAM'] || 'pe'
+@team              ||= ENV['TEAM'] || 'dev'

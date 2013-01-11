@@ -30,7 +30,7 @@ namespace :pl do
       @privatekey_pem   = @team_data['privatekey_pem']   if @team_data['privatekey_pem']
       @ips_inter_cert   = @team_data['ips_inter_cert']   if @team_data['ips_inter_cert']
       # Overrideable
-      @build_pe         = (boolean_value( ENV['PE'] || @team_data['build_pe'])) if @team_data['build_pe']
+      @build_pe         = (boolean_value( ENV['PE_BUILD'] || @team_data['build_pe'])) if @team_data['build_pe']
       @cows             = (ENV['COW']      || @project_data['cows'])        if @project_data['cows']
       @final_mocks      = (ENV['MOCK']     || @project_data['final_mocks']) if @project_data['final_mocks']
       @packager         = (ENV['PACKAGER'] || @team_data['packager'])    if @team_data['packager']

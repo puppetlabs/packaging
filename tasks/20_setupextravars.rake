@@ -31,6 +31,8 @@ namespace :pl do
       @ips_inter_cert   = @team_data['ips_inter_cert']   if @team_data['ips_inter_cert']
       # Overrideable
       @build_pe         = (boolean_value( ENV['PE_BUILD'] || @team_data['build_pe'])) if @team_data['build_pe']
+      # right now, puppetdb is the only one to override these, because it needs
+      # two sets of cows, one for PE and the other for FOSS
       @cows             = (ENV['COW']      || @project_data['cows'])        if @project_data['cows']
       @final_mocks      = (ENV['MOCK']     || @project_data['final_mocks']) if @project_data['final_mocks']
       @packager         = (ENV['PACKAGER'] || @team_data['packager'])    if @team_data['packager']

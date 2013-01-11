@@ -10,7 +10,6 @@ namespace :pl do
     begin
       @team_data = YAML.load_file("#{ENV['HOME']}/.packaging/team/#{@builder_data_file}")
       @project_data = YAML.load_file("#{ENV['HOME']}/.packaging/project/#{@builder_data_file}")
-      @pe_version       = @project_data['pe_version']    if @project_data['pe_version']
       @pe_name          = @project_data['pe_name']       if @project_data['pe_name']
       @tarball_path     = @project_data['tarball_path']  if @project_data['tarball_path']
       @rpm_build_host   = @team_data['rpm_build_host']   if @team_data['rpm_build_host']
@@ -36,6 +35,8 @@ namespace :pl do
       @cows             = (ENV['COW']      || @project_data['cows'])        if @project_data['cows']
       @final_mocks      = (ENV['MOCK']     || @project_data['final_mocks']) if @project_data['final_mocks']
       @packager         = (ENV['PACKAGER'] || @team_data['packager'])    if @team_data['packager']
+      @pe_version       ||= ENV['PE_VER']  || (@project_data['pe_version']    if @project_data['pe_version'])
+
     rescue => e
       STDERR.puts "There was an error loading the builder data from #{ENV['HOME']}/.packaging/#{@builder_data_file}. Try rake pl:fetch to download the current extras builder data.\n" + e.message
       STDERR.puts e.backtrace

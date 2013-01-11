@@ -266,6 +266,10 @@ def ln(target, name)
   FileUtils.ln(name, target, :force => true, :verbose => true)
 end
 
+def ln_sfT(src, dest)
+  sh "ln -sfT #{src} #{dest}"
+end
+
 def git_commit_file(file, message=nil)
   if has_tool('git') and File.exist?('.git')
     message ||= "changes"

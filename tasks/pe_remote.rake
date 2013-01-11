@@ -32,7 +32,7 @@ if @build_pe
     task :mock_all => ['pl:fetch', 'pl:load_extras'] do
       ENV['PE_VER'] ||= @pe_version
       Rake::Task["pl:remote:build"].reenable
-      Rake::Task["pl:remote:build"].invoke(@rpm_build_host, 'HEAD', "pe:local_mock_final PE_BUILD=#{@build_pe} TEAM=#{@team} PE_VER=#{ENV['PE_VER']}")
+      Rake::Task["pl:remote:build"].invoke(@rpm_build_host, 'HEAD', "pe:local_mock_all PE_BUILD=#{@build_pe} TEAM=#{@team} PE_VER=#{ENV['PE_VER']}")
     end
 
     desc "Execute remote sles rpm build and retrieve package"

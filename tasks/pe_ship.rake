@@ -5,7 +5,12 @@ if @build_pe
       if empty_dir?("pkg/pe/rpm")
         STDERR.puts "The 'pkg/pe/rpm' directory has no packages. Did you run rake pe:deb?"
       else
-        rsync_to('pkg/pe/rpm/', @yum_host, "#{@yum_repo_path}/#{@pe_version}/repos/")
+        if @team == 'release'
+          target_path = "#{@yum_repo_path}/#{@pe_version}/repos/"
+        else
+          target_path = "#{@yum_repo_path}"
+        end
+        rsync_to('pkg/pe/rpm/', @yum_host, target_path)
         Rake::Task["pe:remote:update_yum_repo"].invoke
       end
     end

@@ -1,8 +1,12 @@
 def build_rpm(buildarg = "-bs")
   check_tool('rpmbuild')
   temp = get_temp
-  dist = find_dist_version
-  rpm_define = "#{dist} --define \"%_topdir  #{temp}\" "
+  if dist = el_version
+    if dist.to_i < 6
+      dist_string = "--define \"%dist .el#{dist}"
+    end
+  end
+  rpm_define = "#{dist_string} --define \"%_topdir  #{temp}\" "
   rpm_old_version = '--define "_source_filedigest_algorithm 1" --define "_binary_filedigest_algorithm 1" \
      --define "_binary_payload w9.gzdio" --define "_source_payload w9.gzdio" \
      --define "_default_patch_fuzz 2"'
@@ -29,18 +33,6 @@ def build_rpm(buildarg = "-bs")
   output.each do | line |
     puts line
   end
-end
-
-def find_dist_version()
-   if File.exists?('/etc/fedora-release')
-      nil
-   elsif File.exists?('/etc/redhat-release')
-      dist = %x{rpm -q --qf \"%{VERSION}\" $(rpm -q --whatprovides /etc/redhat-release )}
-      unless dist.to_i > 5
-        return "--define \"%dist .el#{dist}\""
-      end
-      nil
-   end
 end
 
 namespace :package do

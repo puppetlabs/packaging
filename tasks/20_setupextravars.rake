@@ -18,7 +18,6 @@ namespace :pl do
       @ips_build_host   = @team_data['ips_build_host']   if @team_data['ips_build_host']
       @dmg_path         = @team_data['dmg_path']         if @team_data['dmg_path']
       @team             = @team_data['team']             if @team_data['team']
-      @apt_repo_path    = @team_data['apt_repo_path']    if @team_data['apt_repo_path']
       @freight_conf     = @team_data['freight_conf']     if @team_data['freight_conf']
       @sles_build_host  = @team_data['sles_build_host']  if @team_data['sles_build_host']
       @sles_arch_repos  = @team_data['sles_arch_repos']  if @team_data['sles_arch_repos']
@@ -33,11 +32,14 @@ namespace :pl do
       @build_pe         = (boolean_value( ENV['PE_BUILD'] || @team_data['build_pe'])) if @team_data['build_pe']
       # right now, puppetdb is the only one to override these, because it needs
       # two sets of cows, one for PE and the other for FOSS
-      @cows             = (ENV['COW']      || @project_data['cows'])        if @project_data['cows']
-      @final_mocks      = (ENV['MOCK']     || @project_data['final_mocks']) if @project_data['final_mocks']
-      @packager         = (ENV['PACKAGER'] || @team_data['packager'])    if @team_data['packager']
+      @cows             = (ENV['COW']      || @project_data['cows'])          if @project_data['cows']
+      @final_mocks      = (ENV['MOCK']     || @project_data['final_mocks'])   if @project_data['final_mocks']
+      @packager         = (ENV['PACKAGER'] || @team_data['packager'])         if @team_data['packager']
       @pe_version       ||= ENV['PE_VER']  || (@project_data['pe_version']    if @project_data['pe_version'])
       @yum_repo_path    = (ENV['YUM_REPO'] || @team_data['yum_repo_path'])    if @team_data['yum_repo_path']
+      @yum_host         = (ENV['YUM_HOST'] || @team_data['yum_host'])         if @team_data['yum_host']
+      @apt_host         = (ENV['APT_HOST'] || @team_data['apt_host'])         if @team_data['apt_host']
+      @apt_repo_path    = (ENV['APT_REPO'] || @team_data['apt_repo_path'])    if @team_data['apt_repo_path']
 
     rescue => e
       STDERR.puts "There was an error loading the builder data from #{ENV['HOME']}/.packaging/#{@builder_data_file}. Try rake pl:fetch to download the current extras builder data.\n" + e.message

@@ -7,7 +7,9 @@ if @build_pe
       else
         target_path = ENV['YUM_REPO'] ? ENV['YUM_REPO'] : "#{@yum_repo_path}/#{@pe_version}/repos/"
         rsync_to('pkg/pe/rpm/', @yum_host, target_path)
-        Rake::Task["pe:remote:update_yum_repo"].invoke
+        if @team == 'release'
+          Rake::Task["pe:remote:update_yum_repo"].invoke
+        end
       end
     end
 

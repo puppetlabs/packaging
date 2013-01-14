@@ -28,8 +28,13 @@ namespace :pl do
     rm_rf "#{ENV['HOME']}/.packaging"
     mkdir_pr("#{ENV['HOME']}/.packaging/team", "#{ENV['HOME']}/.packaging/project")
     begin
-      sh "curl #{project_data_url}/#{@builder_data_file} > #{ENV['HOME']}/.packaging/project/#{@builder_data_file}"
-      sh "curl #{team_data_url}/#{@builder_data_file} > #{ENV['HOME']}/.packaging/team/#{@builder_data_file}"
+      if dist = el_version
+        if dist.to_i < 6
+          flag = "-k"
+        end
+      end
+      sh "curl #{flag} #{project_data_url}/#{@builder_data_file} > #{ENV['HOME']}/.packaging/project/#{@builder_data_file}"
+      sh "curl #{flag} #{team_data_url}/#{@builder_data_file} > #{ENV['HOME']}/.packaging/team/#{@builder_data_file}"
     rescue
       STDERR.puts "There was an error fetching the builder extras data."
       exit 1

@@ -4,14 +4,13 @@ if @build_pe
     task :ship_rpms => ["pl:load_extras"] do
       if empty_dir?("pkg/pe/rpm")
         STDERR.puts "The 'pkg/pe/rpm' directory has no packages. Did you run rake pe:deb?"
+        exit 1
       else
-        if @team == 'release'
-          target_path = "#{@yum_repo_path}/#{@pe_version}/repos/"
-        else
-          target_path = "#{@yum_repo_path}"
-        end
+        target_path = ENV['YUM_REPO'] ? ENV['YUM_REPO'] : "#{@yum_repo_path}/#{@pe_version}/repos/"
         rsync_to('pkg/pe/rpm/', @yum_host, target_path)
-        Rake::Task["pe:remote:update_yum_repo"].invoke
+        if @team == 'release'
+          Rake::Task["pe:remote:update_yum_repo"].invoke
+        end
       end
     end
 
@@ -20,9 +19,13 @@ if @build_pe
       dist = @default_cow.split('-')[1]
       if empty_dir?("pkg/pe/deb/#{dist}")
         STDERR.puts "The 'pkg/pe/deb/#{dist}' directory has no packages. Did you run rake pe:deb?"
+        exit 1
       else
-        rsync_to("pkg/pe/deb/#{dist}/", @apt_host, "#{@apt_repo_path}/#{@pe_version}/repos/incoming/unified/")
-        Rake::Task["pe:remote:freight"].invoke
+        target_path = ENV['APT_REPO'] ? ENV['APT_REPO'] : "#{@apt_repo_path}/#{@pe_version}/repos/incoming/disparate/"
+        rsync_to("pkg/pe/deb/", @apt_host, target_path)
+        if @team == 'release'
+          Rake::Task["pe:remote:freight"].invoke
+        end
       end
     end
 

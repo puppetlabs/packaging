@@ -52,7 +52,7 @@ def mock_el_ver(mock_config)
     version = mock_config.split('-')[2][/[0-9]+/]
   else
     first, second, third = mock_config.split('-')
-    if (first == 'el' || first == 'fedora') || (first == 'pl' && second.match(/i^\d+$/))
+    if (first == 'el' || first == 'fedora') || (first == 'pl' && second.match(/^\d+$/))
       version = second
     else
       version = third

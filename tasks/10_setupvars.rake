@@ -61,6 +61,7 @@ rescue => e
 end
 
 @build_root        ||= Dir.pwd
+@release           ||= get_release
 @version           ||= get_dash_version
 @gemversion        ||= get_dot_version
 @ipsversion        ||= get_ips_version

@@ -180,16 +180,16 @@ def get_base_pkg_version
   if dash.include?("rc")
     # Grab the rc number
     rc_num = dash.match(/rc(\d)+/)[1]
-    ver = dash.sub(/-?rc[0-9]+/, "-0.1rc#{rc_num}").gsub(/(rc[0-9]+)-(\d+)?-?/, '\1.\2')
+    ver = dash.sub(/-?rc[0-9]+/, "-0.#{@release}rc#{rc_num}").gsub(/(rc[0-9]+)-(\d+)?-?/, '\1.\2')
   else
-    ver = dash.gsub('-','.') + "-1"
+    ver = dash.gsub('-','.') + "-#{@release}"
   end
 
   ver.split('-')
 end
 
 def get_debversion
-  get_base_pkg_version.join('-') << "#{@packager}#{get_debrelease}"
+  get_base_pkg_version.join('-') << "#{@packager}#{get_release}"
 end
 
 def get_origversion
@@ -200,12 +200,12 @@ def get_rpmversion
   get_base_pkg_version[0]
 end
 
-def get_debrelease
+def get_release
   ENV['RELEASE'] || '1'
 end
 
 def get_rpmrelease
-  ENV['RELEASE'] || get_base_pkg_version[1]
+  get_base_pkg_version[1]
 end
 
 def load_keychain

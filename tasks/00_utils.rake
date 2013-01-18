@@ -189,7 +189,7 @@ def get_base_pkg_version
 end
 
 def get_debversion
-  get_base_pkg_version.join('-') << "#{@packager}#{get_release}"
+  get_base_pkg_version.join('-') << "#{@packager}1"
 end
 
 def get_origversion

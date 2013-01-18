@@ -86,6 +86,7 @@ describe "00_utils" do
           # We have to call the `stub!` alias because we are trying to stub on
           # `self`, and in the scope of an rspec block that is overridden to
           # return a new double, not to stub a method!
+          @release = "1"
 
           if method.to_s.include?("deb")
             self.should_receive(:run_git_describe_internal).and_return(input)

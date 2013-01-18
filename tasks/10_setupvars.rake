@@ -61,6 +61,7 @@ rescue => e
 end
 
 @build_root        ||= Dir.pwd
+@release           ||= get_release
 @version           ||= get_dash_version
 @gemversion        ||= get_dot_version
 @ipsversion        ||= get_ips_version
@@ -69,5 +70,8 @@ end
 @rpmversion        ||= get_rpmversion
 @rpmrelease        ||= get_rpmrelease
 @keychain_loaded   ||= FALSE
+@deb_env            = "COW='#{@cows}' RELEASE='#{@release}'"
+@mockf_env          = "MOCK='#{@final_mocks}' RELEASE='#{@release}'"
+@mockrc_env         = "MOCK='#{@rc_mocks}' RELEASE='#{@release}'"
 @builder_data_file ||= 'builder_data.yaml'
 @team              = ENV['TEAM'] || 'dev'

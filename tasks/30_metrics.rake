@@ -7,7 +7,7 @@ if @benchmark
     @metrics << {
       :bench      => args[:bench],
       :dist       => ( args[:dist]        || ENV['DIST']  ),
-      :pkg        => ( args[:pkg]         || @name        ),
+      :pkg        => ( args[:pkg]         || @project     ),
       :version    => ( args[:version]     || @version     ),
       :pe_version => ( args[:pe_version]  || @pe_version  ),
       :date       => ( args[:date]        || timestamp    ),

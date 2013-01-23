@@ -17,11 +17,11 @@ def build_rpm(buildarg = "-bs")
   end
   if @sign_tar
     Rake::Task["pl:sign_tar"].invoke
-    cp_p "pkg/#{@name}-#{@version}.tar.gz.asc", "#{temp}/SOURCES"
+    cp_p "pkg/#{@project}-#{@version}.tar.gz.asc", "#{temp}/SOURCES"
   end
-  cp_p "pkg/#{@name}-#{@version}.tar.gz", "#{temp}/SOURCES"
-  erb "ext/redhat/#{@name}.spec.erb", "#{temp}/SPECS/#{@name}.spec"
-  sh "rpmbuild #{args} #{buildarg} --nodeps #{temp}/SPECS/#{@name}.spec"
+  cp_p "pkg/#{@project}-#{@version}.tar.gz", "#{temp}/SOURCES"
+  erb "ext/redhat/#{@project}.spec.erb", "#{temp}/SPECS/#{@project}.spec"
+  sh "rpmbuild #{args} #{buildarg} --nodeps #{temp}/SPECS/#{@project}.spec"
   mv FileList["#{temp}/SRPMS/*.rpm"], "pkg/srpm"
   if buildarg == '-ba'
     mv FileList["#{temp}/RPMS/*/*.rpm"], "pkg/rpm"

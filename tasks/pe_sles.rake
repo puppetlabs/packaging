@@ -7,14 +7,14 @@
 if @build_pe
   def prep_sles_dir
     temp = get_temp
-    check_file("pkg/#{@name}-#{@version}.tar.gz")
+    check_file("pkg/#{@project}-#{@version}.tar.gz")
     mkdir_pr temp, "#{temp}/SOURCES", "#{temp}/SPECS"
     if @sign_tar
       Rake::Task["pl:sign_tar"].invoke
-      cp_p "pkg/#{@name}-#{@version}.tar.gz.asc", "#{temp}/SOURCES"
+      cp_p "pkg/#{@project}-#{@version}.tar.gz.asc", "#{temp}/SOURCES"
     end
-    cp_p "pkg/#{@name}-#{@version}.tar.gz", "#{temp}/SOURCES"
-    erb "ext/redhat/#{@name}.spec.erb", "#{temp}/SPECS/#{@name}.spec"
+    cp_p "pkg/#{@project}-#{@version}.tar.gz", "#{temp}/SOURCES"
+    erb "ext/redhat/#{@project}.spec.erb", "#{temp}/SPECS/#{@project}.spec"
     temp
   end
 
@@ -44,7 +44,7 @@ if @build_pe
       work_dir          = prep_sles_dir
       build_source_dir  = "#{work_dir}/SOURCES"
       build_spec_dir    = "#{work_dir}/SPECS"
-      build_spec        = "#{build_spec_dir}/#{@name}.spec"
+      build_spec        = "#{build_spec_dir}/#{@project}.spec"
       build_dest_dir    = "usr/src/packages"
       noarch            = FALSE
       build_dep_dir     = @sles_build_deps_dir

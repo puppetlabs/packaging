@@ -1,4 +1,4 @@
-# Title:        Rake task to build Apple packages for #{@name}.
+# Title:        Rake task to build Apple packages for #{@project}.
 # Author:       Gary Larizza
 # Date:         05/18/2012
 # Description:  This task will create a DMG-encapsulated package that will
@@ -25,8 +25,8 @@ task :setup do
     STDERR.puts "Could not load Apple file mappings from 'ext/osx/file_mapping.yaml'"
     exit 1
   end
-  @package_name          = @name
-  @title                 = "#{@name}-#{@version}"
+  @package_name          = @project
+  @title                 = "#{@project}-#{@version}"
   @reverse_domain        = "com.#{@packager}.#{@package_name}"
   @package_major_version = @version.split('.')[0]
   @package_minor_version = @version.split('.')[1] +
@@ -75,10 +75,10 @@ end
 
 # method:        build_dmg
 # description:   This method builds a package from the directory structure in
-#                /tmp/#{@name} and puts it in the
-#                /tmp/#{@name}/#{@name}-#{version}/payload directory. A DMG is
+#                /tmp/#{@project} and puts it in the
+#                /tmp/#{@project}/#{@project}-#{version}/payload directory. A DMG is
 #                created, using hdiutil, based on the contents of the
-#                /tmp/#{@name}/#{@name}-#{version}/payload directory. The resultant
+#                /tmp/#{@project}/#{@project}-#{version}/payload directory. The resultant
 #                DMG is placed in the pkg/apple directory.
 #
 def build_dmg
@@ -124,10 +124,10 @@ def build_dmg
 end
 
 # method:        pack_source
-# description:   This method copies the #{@name} source into a directory
-#                structure in /tmp/#{@name}/#{@name}-#{version}/root mirroring the
+# description:   This method copies the #{@project} source into a directory
+#                structure in /tmp/#{@project}/#{@project}-#{version}/root mirroring the
 #                structure on the target system for which the package will be
-#                installed. Anything installed into /tmp/#{@name}/root will be
+#                installed. Anything installed into /tmp/#{@project}/root will be
 #                installed as the package's payload.
 #
 def pack_source

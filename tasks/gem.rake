@@ -25,7 +25,7 @@ if @build_gem
   end
 
   spec = Gem::Specification.new do |s|
-    s.name = @name                                        unless @name.nil?
+    s.name = @project                                     unless @project.nil?
     s.name = @gem_name                                    unless @gem_name.nil?
     s.version = @gemversion                               unless @gemversion.nil?
     s.author = @author                                    unless @author.nil?
@@ -63,7 +63,7 @@ if @build_gem
       bench = Benchmark.realtime do
         gem_task.define
         Rake::Task[:gem].invoke
-        rm_rf "pkg/#{@name}-#{@gemversion}"
+        rm_rf "pkg/#{@project}-#{@gemversion}"
       end
       if @benchmark
         add_metrics({ :dist => 'gem', :bench => bench })

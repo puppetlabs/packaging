@@ -7,7 +7,7 @@ if @build_ips
       repo = workdir + '/repo'
       pkgs = 'pkg/ips/pkgs'
       repouri = 'file://' + Dir.pwd + '/' + repo
-      artifact = pkgs + "/#{@name}@#{@ipsversion}.p5p"
+      artifact = pkgs + "/#{@project}@#{@ipsversion}.p5p"
 
       # Create a source repo
       # We dont clean the base pkg directory only ips work dir.
@@ -27,34 +27,34 @@ if @build_ips
 
       # Process templates and write the initial manifest
       task :prototmpl do
-        erb("ext/ips/#{@name}.p5m.erb", workdir + '/' + @name + '.p5m.x')
+        erb("ext/ips/#{@project}.p5m.erb", workdir + '/' + @project + '.p5m.x')
       end
 
       # Update manifest to include the installation image information.
       task :protogen => :prototmpl do
-        sh "pkgsend generate #{proto} >> #{workdir}/#{@name}.p5m.x"
+        sh "pkgsend generate #{proto} >> #{workdir}/#{@project}.p5m.x"
       end
 
       # Generate and resolve dependency list
       task :protodeps => :protogen do
-        sh "pkgdepend generate -d #{proto} #{workdir}/#{@name}.p5m.x > #{workdir}/#{@name}.depends"
-        sh "pkgdepend resolve -m #{workdir}/#{@name}.depends"
-        sh "cat #{workdir}/#{@name}.depends.res >> #{workdir}/#{@name}.p5m.x"
+        sh "pkgdepend generate -d #{proto} #{workdir}/#{@project}.p5m.x > #{workdir}/#{@project}.depends"
+        sh "pkgdepend resolve -m #{workdir}/#{@project}.depends"
+        sh "cat #{workdir}/#{@project}.depends.res >> #{workdir}/#{@project}.p5m.x"
       end
 
       # Mogrify manifest to remove unncecessary info, and other kinds of transforms.
       task :protomogrify => :protodeps do
-        sh "pkgmogrify ./ext/ips/transforms ./#{workdir}/#{@name}.p5m.x| pkgfmt >> #{workdir}/#{@name}.p5m"
+        sh "pkgmogrify ./ext/ips/transforms ./#{workdir}/#{@project}.p5m.x| pkgfmt >> #{workdir}/#{@project}.p5m"
       end
 
       # Generate and resolve dependency list
       task :license => :protomogrify do
-        cp 'LICENSE', "#{proto}/#{@name}.license"
+        cp 'LICENSE', "#{proto}/#{@project}.license"
       end
 
       # Ensure that our manifest is sane.
       task :lint => :license do
-        print %x{pkglint #{workdir}/#{@name}.p5m}
+        print %x{pkglint #{workdir}/#{@project}.p5m}
       end
 
       task :package => [:clean_pkgs, :clean, :prepare, :lint] do
@@ -71,18 +71,18 @@ if @build_ips
       # Send a created package to the local IPS repository
       task :send do
         check_tool('pkgsend')
-        sh "pkgsend -s #{repouri} publish -d #{proto} --fmri-in-manifest #{workdir}/#{@name}.p5m"
+        sh "pkgsend -s #{repouri} publish -d #{proto} --fmri-in-manifest #{workdir}/#{@project}.p5m"
       end
 
       # Retrieve the package from the remote repository in .p5p archive format
       task :receive do
         check_tool('pkgrecv')
-        sh "pkgrecv -s #{repouri} -a -d #{artifact} #{@name}@#{@ipsversion}"
+        sh "pkgrecv -s #{repouri} -a -d #{artifact} #{@project}@#{@ipsversion}"
       end
 
 
       task :dry_install do
-        sh "pkg install -nv -g #{artifact} #{@name}@#{@ipsversion}"
+        sh "pkg install -nv -g #{artifact} #{@project}@#{@ipsversion}"
       end
 
       task :p5p, :sign_ips do |t, args|
@@ -100,7 +100,7 @@ if @build_ips
         # publish the package to the repository
         Rake::Task['package:ips:send'].invoke
         # signing the package occurs remotely in the repository
-        Rake::Task['pl:sign_ips'].invoke(repouri,"#{@name}@#{@ipsversion}") if sign_ips
+        Rake::Task['pl:sign_ips'].invoke(repouri,"#{@project}@#{@ipsversion}") if sign_ips
         # retrieve the signed package in a .p5p archive file format
         Rake::Task['package:ips:receive'].invoke
         # clean up the workdir area

@@ -40,7 +40,7 @@ namespace :pl do
   desc "Update remote ips repository on #{@ips_host}"
   task :update_ips_repo do
     rsync_to('pkg/ips/pkgs/', @ips_host, @ips_store)
-    remote_ssh_cmd(@ips_host, "pkgrecv -s #{@ips_store}/pkgs/#{@name}@#{@ipsversion}.p5p -d #{@ips_repo} \\*")
+    remote_ssh_cmd(@ips_host, "pkgrecv -s #{@ips_store}/pkgs/#{@project}@#{@ipsversion}.p5p -d #{@ips_repo} \\*")
     remote_ssh_cmd(@ips_host, "pkgrepo refresh -s #{@ips_repo}")
     remote_ssh_cmd(@ips_host, "/usr/sbin/svcadm restart svc:/application/pkg/server")
   end if @build_ips
@@ -58,7 +58,7 @@ namespace :pl do
 
   desc "Ship built gem to rubygems"
   task :ship_gem do
-    ship_gem("pkg/#{@name}-#{@gemversion}.gem")
+    ship_gem("pkg/#{@project}-#{@gemversion}.gem")
   end if @build_gem
 
   if File.exist?("#{ENV['HOME']}/.packaging")
@@ -69,7 +69,7 @@ namespace :pl do
 
     desc "ship tarball and signature to #{@yum_host}"
     task :ship_tar => ['pl:fetch', 'pl:load_extras'] do
-      rsync_to("pkg/#{@name}-#{@version}.tar.gz*", @yum_host, @tarball_path)
+      rsync_to("pkg/#{@project}-#{@version}.tar.gz*", @yum_host, @tarball_path)
     end
 
     desc "UBER ship: ship all the things in pkg"

@@ -29,18 +29,18 @@ def debuild args
   begin
     sh "debuild --no-lintian -uc -us"
   rescue
-    STDERR.puts "Something went wrong. Hopefully the backscroll or #{results_dir}/#{@name}_#{@debversion}.build file has a clue."
+    STDERR.puts "Something went wrong. Hopefully the backscroll or #{results_dir}/#{@project}_#{@debversion}.build file has a clue."
     exit 1
   end
 end
 
 task :prep_deb_tars, :work_dir do |t,args|
   work_dir = args.work_dir
-  cp_p "pkg/#{@name}-#{@version}.tar.gz", work_dir
+  cp_p "pkg/#{@project}-#{@version}.tar.gz", work_dir
   cd work_dir do
-    sh "tar zxf #{@name}-#{@version}.tar.gz"
-    mv "#{@name}-#{@version}", "#{@name}-#{@debversion}"
-    mv "#{@name}-#{@version}.tar.gz", "#{@name}_#{@origversion}.orig.tar.gz"
+    sh "tar zxf #{@project}-#{@version}.tar.gz"
+    mv "#{@project}-#{@version}", "#{@project}-#{@debversion}"
+    mv "#{@project}-#{@version}.tar.gz", "#{@project}_#{@origversion}.orig.tar.gz"
   end
 end
 
@@ -57,11 +57,11 @@ task :build_deb, :deb_command, :cow, :devel do |t,args|
     deb_args  = { :work_dir => work_dir, :cow => cow, :devel => devel}
     Rake::Task[:prep_deb_tars].reenable
     Rake::Task[:prep_deb_tars].invoke(work_dir)
-    cd "#{work_dir}/#{@name}-#{@debversion}" do
+    cd "#{work_dir}/#{@project}-#{@debversion}" do
       mv 'ext/debian', '.'
       send(deb_build, deb_args)
       cp FileList["#{work_dir}/*.deb", "#{work_dir}/*.dsc", "#{work_dir}/*.changes", "#{work_dir}/*.debian.tar.gz", "#{work_dir}/*.orig.tar.gz"], dest_dir
-      rm_rf "#{work_dir}/#{@name}-#{@debversion}"
+      rm_rf "#{work_dir}/#{@project}-#{@debversion}"
       rm_rf work_dir
     end
   end

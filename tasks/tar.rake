@@ -3,7 +3,7 @@ namespace :package do
   task :tar => [ :clean ] do
     Rake::Task["package:doc"].invoke if @build_doc
     tar = ENV['TAR'] || 'tar'
-    workdir = "pkg/#{@name}-#{@version}"
+    workdir = "pkg/#{@project}-#{@version}"
     mkdir_p(workdir)
 
     # The list of files to install in the tarball
@@ -70,10 +70,10 @@ namespace :package do
     ENV['NEW_STYLE_PACKAGE'] and Rake::Task["package:versionbump"].invoke(workdir)
 
     cd "pkg" do
-      sh "#{tar} --exclude #{tar_excludes.join(" --exclude ")} -zcf #{@name}-#{@version}.tar.gz #{@name}-#{@version}"
+      sh "#{tar} --exclude #{tar_excludes.join(" --exclude ")} -zcf #{@project}-#{@version}.tar.gz #{@project}-#{@version}"
     end
     rm_rf(workdir)
     puts
-    puts "Wrote #{`pwd`.strip}/pkg/#{@name}-#{@version}.tar.gz"
+    puts "Wrote #{`pwd`.strip}/pkg/#{@project}-#{@version}.tar.gz"
   end
 end

@@ -339,12 +339,12 @@ end
 def git_bundle(treeish)
   temp = get_temp
   appendix = rand_string
-  sh "git bundle create #{temp}/#{@name}-#{@version}-#{appendix} #{treeish} --tags"
+  sh "git bundle create #{temp}/#{@project}-#{@version}-#{appendix} #{treeish} --tags"
   cd temp do
-    sh "tar -czf #{@name}-#{@version}-#{appendix}.tar.gz #{@name}-#{@version}-#{appendix}"
-    rm_rf "#{@name}-#{@version}-#{appendix}"
+    sh "tar -czf #{@project}-#{@version}-#{appendix}.tar.gz #{@project}-#{@version}-#{appendix}"
+    rm_rf "#{@project}-#{@version}-#{appendix}"
   end
-  "#{temp}/#{@name}-#{@version}-#{appendix}.tar.gz"
+  "#{temp}/#{@project}-#{@version}-#{appendix}.tar.gz"
 end
 
 # We take a tar argument for cases where `tar` isn't best, e.g. Solaris
@@ -356,8 +356,8 @@ def remote_bootstrap(host, treeish, tar_cmd=nil)
   tarball_name = File.basename(tarball).gsub('.tar.gz','')
   rsync_to(tarball, host, '/tmp')
   appendix = rand_string
-  sh "ssh -t #{host} '#{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone --recursive /tmp/#{tarball_name} /tmp/#{@name}-#{appendix} ; cd /tmp/#{@name}-#{appendix} ; rake package:bootstrap'"
-  "/tmp/#{@name}-#{appendix}"
+  sh "ssh -t #{host} '#{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone --recursive /tmp/#{tarball_name} /tmp/#{@project}-#{appendix} ; cd /tmp/#{@project}-#{appendix} ; rake package:bootstrap'"
+  "/tmp/#{@project}-#{appendix}"
 end
 
 def is_git_repo

@@ -11,7 +11,7 @@ if @build_doc
   namespace :package do
     RDoc::Task.new(:doc) do |rdoc|
       rdoc.rdoc_dir = 'doc'
-      rdoc.title = "#{@name} version #{@version}"
+      rdoc.title = "#{@project} version #{@version}"
       @gem_rdoc_options.each do |option|
         rdoc.options << option
       end unless @gem_rdoc_options.nil?

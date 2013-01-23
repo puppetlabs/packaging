@@ -5,7 +5,7 @@
 # both PE and not PE, it has two files, one for PE, and the other for FOSS
 #
 data_repo = 'https://raw.github.com/puppetlabs/build-data'
-project_data_branch = @name
+project_data_branch = @project
 team_data_branch = @team
 
 if @build_pe

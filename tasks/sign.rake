@@ -1,23 +1,23 @@
 def sign_el5(rpm)
   # Try this up to 5 times, to allow for incorrect passwords
   retry_on_fail(:times => 5) do
-    sh "rpm --define '%_gpg_name #{@gpg_name}' --define '%__gpg_sign_cmd %{__gpg} gpg --force-v3-sigs --digest-algo=sha1 --batch --no-verbose --no-armor --passphrase-fd 3 --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm} > /dev/null"
+    sh "rpm --define '%_gpg_name #{@build.gpg_name}' --define '%__gpg_sign_cmd %{__gpg} gpg --force-v3-sigs --digest-algo=sha1 --batch --no-verbose --no-armor --passphrase-fd 3 --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm} > /dev/null"
   end
 end
 
 def sign_modern(rpm)
   retry_on_fail(:times => 5) do
-    sh "rpm --define '%_gpg_name #{@gpg_name}' --addsign #{rpm} > /dev/null"
+    sh "rpm --define '%_gpg_name #{@build.gpg_name}' --addsign #{rpm} > /dev/null"
   end
 end
 
 def rpm_has_sig(rpm)
-  %x{rpm -Kv #{rpm} | grep "#{@gpg_key.downcase}" &> /dev/null}
+  %x{rpm -Kv #{rpm} | grep "#{@build.gpg_key.downcase}" &> /dev/null}
   $?.success?
 end
 
 def sign_deb_changes(file)
-  %x{debsign --re-sign -k#{@gpg_key} #{file}}
+  %x{debsign --re-sign -k#{@build.gpg_key} #{file}}
 end
 
 # requires atleast a self signed prvate key and certificate pair
@@ -26,18 +26,18 @@ end
 # technically this can be any ips-compliant package identifier, e.g. application/facter
 # repo_uri is the path to the repo currently containing the package
 def sign_ips(fmri, repo_uri)
-  %x{pkgsign -s #{repo_uri}  -k #{@privatekey_pem} -c #{@certificate_pem} -i #{@ips_inter_cert} #{fmri}}
+  %x{pkgsign -s #{repo_uri}  -k #{@build.privatekey_pem} -c #{@build.certificate_pem} -i #{@build.ips_inter_cert} #{fmri}}
 end
 
 namespace :pl do
   desc "Sign the tarball, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_tar do
-    unless File.exist? "pkg/#{@project}-#{@version}.tar.gz"
+    unless File.exist? "pkg/#{@build.project}-#{@build.version}.tar.gz"
       STDERR.puts "No tarball exists. Try rake package:tar?"
       exit 1
     end
     load_keychain if has_tool('keychain')
-    gpg_sign_file "pkg/#{@project}-#{@version}.tar.gz"
+    gpg_sign_file "pkg/#{@build.project}-#{@build.version}.tar.gz"
   end
 
   desc "Sign mocked rpms, Defaults to PL Key, pass KEY to override"
@@ -61,7 +61,7 @@ namespace :pl do
     fmri      = args.fmri
     puts "Signing ips packages..."
     sign_ips(fmri, repo_uri)
-  end if @build_ips
+  end if @build.build_ips
 
   desc "Check if all rpms are signed"
   task :check_rpm_sigs do

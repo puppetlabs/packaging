@@ -25,12 +25,12 @@ task :setup do
     STDERR.puts "Could not load Apple file mappings from 'ext/osx/file_mapping.yaml'"
     exit 1
   end
-  @package_name          = @project
-  @title                 = "#{@project}-#{@version}"
-  @reverse_domain        = "com.#{@packager}.#{@package_name}"
-  @package_major_version = @version.split('.')[0]
-  @package_minor_version = @version.split('.')[1] +
-                           @version.split('.')[2].split('-')[0].split('rc')[0]
+  @package_name          = @build.project
+  @title                 = "#{@build.project}-#{@build.version}"
+  @reverse_domain        = "com.#{@build.packager}.#{@package_name}"
+  @package_major_version = @build.version.split('.')[0]
+  @package_minor_version = @build.version.split('.')[1] +
+                           @build.version.split('.')[2].split('-')[0].split('rc')[0]
   @pm_restart            = 'None'
   @build_date            = Time.new.strftime("%Y-%m-%dT%H:%M:%SZ")
   @apple_bindir          = '/usr/bin'
@@ -199,7 +199,7 @@ def pack_source
   end
 end
 
-if @build_dmg
+if @build.build_dmg
   namespace :package do
     desc "Task for building an Apple Package"
     task :apple => [:setup] do
@@ -214,7 +214,7 @@ if @build_dmg
         build_dmg
         chmod_R(0775, "#{pwd}/pkg")
       end
-      if @benchmark
+      if @build.benchmark
         add_metrics({ :dist => 'osx', :bench => bench })
         post_metrics
       end

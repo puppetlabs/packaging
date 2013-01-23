@@ -1,7 +1,7 @@
 # Most projects set rdoc options in the context of gem building. However, mcollective
-# generates its own rdoc package. We can reuse the @gem_rdoc_options here
+# generates its own rdoc package. We can reuse the @build.gem_rdoc_options here
 
-if @build_doc
+if @build.build_doc
   begin
     require 'rdoc/task'
   rescue LoadError
@@ -11,10 +11,10 @@ if @build_doc
   namespace :package do
     RDoc::Task.new(:doc) do |rdoc|
       rdoc.rdoc_dir = 'doc'
-      rdoc.title = "#{@project} version #{@version}"
-      @gem_rdoc_options.each do |option|
+      rdoc.title = "#{@build.project} version #{@build.version}"
+      @build.gem_rdoc_options.each do |option|
         rdoc.options << option
-      end unless @gem_rdoc_options.nil?
+      end unless @build.gem_rdoc_options.nil?
     end
   end
 end

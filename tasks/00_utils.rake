@@ -180,20 +180,20 @@ def get_base_pkg_version
   if dash.include?("rc")
     # Grab the rc number
     rc_num = dash.match(/rc(\d)+/)[1]
-    ver = dash.sub(/-?rc[0-9]+/, "-0.#{@release}rc#{rc_num}").gsub(/(rc[0-9]+)-(\d+)?-?/, '\1.\2')
+    ver = dash.sub(/-?rc[0-9]+/, "-0.#{@build.release}rc#{rc_num}").gsub(/(rc[0-9]+)-(\d+)?-?/, '\1.\2')
   else
-    ver = dash.gsub('-','.') + "-#{@release}"
+    ver = dash.gsub('-','.') + "-#{@build.release}"
   end
 
   ver.split('-')
 end
 
 def get_debversion
-  get_base_pkg_version.join('-') << "#{@packager}1"
+  get_base_pkg_version.join('-') << "#{@build.packager}1"
 end
 
 def get_origversion
-  @debversion.split('-')[0]
+  @build.debversion.split('-')[0]
 end
 
 def get_rpmversion
@@ -221,7 +221,7 @@ def kill_keychain
 end
 
 def start_keychain
-  keychain = %x{/usr/bin/keychain -q --agents gpg --eval #{@gpg_key}}.chomp
+  keychain = %x{/usr/bin/keychain -q --agents gpg --eval #{@build.gpg_key}}.chomp
   new_env = keychain.match(/(GPG_AGENT_INFO)=([^;]*)/)
   ENV[new_env[1]] = new_env[2]
 end
@@ -230,7 +230,7 @@ def gpg_sign_file(file)
   gpg ||= find_tool('gpg')
 
   if gpg
-    sh "#{gpg} --armor --detach-sign -u #{@gpg_key} #{file}"
+    sh "#{gpg} --armor --detach-sign -u #{@build.gpg_key} #{file}"
   else
     STDERR.puts "No gpg available. Cannot sign #{file}. Exiting..."
     exit 1
@@ -324,7 +324,7 @@ end
 
 def git_tag(version)
   begin
-    sh "git tag -s -u #{@gpg_key} -m '#{version}' #{version}"
+    sh "git tag -s -u #{@build.gpg_key} -m '#{version}' #{version}"
   rescue Exception => e
     STDERR.puts e
     STDERR.puts "Unable to tag repo at #{version}"
@@ -339,12 +339,12 @@ end
 def git_bundle(treeish)
   temp = get_temp
   appendix = rand_string
-  sh "git bundle create #{temp}/#{@project}-#{@version}-#{appendix} #{treeish} --tags"
+  sh "git bundle create #{temp}/#{@build.project}-#{@build.version}-#{appendix} #{treeish} --tags"
   cd temp do
-    sh "tar -czf #{@project}-#{@version}-#{appendix}.tar.gz #{@project}-#{@version}-#{appendix}"
-    rm_rf "#{@project}-#{@version}-#{appendix}"
+    sh "tar -czf #{@build.project}-#{@build.version}-#{appendix}.tar.gz #{@build.project}-#{@build.version}-#{appendix}"
+    rm_rf "#{@build.project}-#{@build.version}-#{appendix}"
   end
-  "#{temp}/#{@project}-#{@version}-#{appendix}.tar.gz"
+  "#{temp}/#{@build.project}-#{@build.version}-#{appendix}.tar.gz"
 end
 
 # We take a tar argument for cases where `tar` isn't best, e.g. Solaris
@@ -356,8 +356,8 @@ def remote_bootstrap(host, treeish, tar_cmd=nil)
   tarball_name = File.basename(tarball).gsub('.tar.gz','')
   rsync_to(tarball, host, '/tmp')
   appendix = rand_string
-  sh "ssh -t #{host} '#{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone --recursive /tmp/#{tarball_name} /tmp/#{@project}-#{appendix} ; cd /tmp/#{@project}-#{appendix} ; rake package:bootstrap'"
-  "/tmp/#{@project}-#{appendix}"
+  sh "ssh -t #{host} '#{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone --recursive /tmp/#{tarball_name} /tmp/#{@build.project}-#{appendix} ; cd /tmp/#{@build.project}-#{appendix} ; rake package:bootstrap'"
+  "/tmp/#{@build.project}-#{appendix}"
 end
 
 def is_git_repo

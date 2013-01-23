@@ -1,9 +1,9 @@
 namespace :package do
   desc "Create a source tar archive"
   task :tar => [ :clean ] do
-    Rake::Task["package:doc"].invoke if @build_doc
+    Rake::Task["package:doc"].invoke if @build.build_doc
     tar = ENV['TAR'] || 'tar'
-    workdir = "pkg/#{@project}-#{@version}"
+    workdir = "pkg/#{@build.project}-#{@build.version}"
     mkdir_p(workdir)
 
     # The list of files to install in the tarball
@@ -13,13 +13,13 @@ namespace :package do
     # to support a mode where a space-separated string was used.  Support both
     # to allow a gentle migration to a modern style...
     patterns =
-      case @files
+      case @build.files
       when String
         STDERR.puts "warning: `files` should be an array, not a string"
-        @files.split(' ')
+        @build.files.split(' ')
 
       when Array
-        @files
+        @build.files
 
       else
         raise "`files` must be a string or an array!"
@@ -55,8 +55,8 @@ namespace :package do
       end
     end
 
-    tar_excludes = @tar_excludes.nil? ? [] : @tar_excludes.split(' ')
-    tar_excludes << "ext/#{@packaging_repo}"
+    tar_excludes = @build.tar_excludes.nil? ? [] : @build.tar_excludes.split(' ')
+    tar_excludes << "ext/#{@build.packaging_repo}"
     Rake::Task["package:template"].invoke(workdir)
 
     # This is to support packages that only burn-in the version number in the
@@ -70,10 +70,10 @@ namespace :package do
     ENV['NEW_STYLE_PACKAGE'] and Rake::Task["package:versionbump"].invoke(workdir)
 
     cd "pkg" do
-      sh "#{tar} --exclude #{tar_excludes.join(" --exclude ")} -zcf #{@project}-#{@version}.tar.gz #{@project}-#{@version}"
+      sh "#{tar} --exclude #{tar_excludes.join(" --exclude ")} -zcf #{@build.project}-#{@build.version}.tar.gz #{@build.project}-#{@build.version}"
     end
     rm_rf(workdir)
     puts
-    puts "Wrote #{`pwd`.strip}/pkg/#{@project}-#{@version}.tar.gz"
+    puts "Wrote #{`pwd`.strip}/pkg/#{@build.project}-#{@build.version}.tar.gz"
   end
 end

@@ -451,3 +451,14 @@ def el_version()
   end
 end
 
+def data_from_yaml(file)
+  file = File.expand_path(file)
+  begin
+    input_data = YAML.load_file(file) || {}
+  rescue => e
+    puts "There was an error loading data from #{file}."
+    puts e.backtrace.join("\n")
+    exit 1
+  end
+  input_data
+end

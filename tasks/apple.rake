@@ -20,7 +20,7 @@ SED           = '/usr/bin/sed'
 task :setup do
   # Read the Apple file-mappings
   begin
-    @source_files        = YAML.load_file('ext/osx/file_mapping.yaml')
+    @source_files        = data_from_yaml('ext/osx/file_mapping.yaml')
   rescue
     STDERR.puts "Could not load Apple file mappings from 'ext/osx/file_mapping.yaml'"
     exit 1

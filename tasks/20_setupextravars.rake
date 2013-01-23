@@ -8,8 +8,8 @@
 namespace :pl do
   task :load_extras do
     begin
-      @team_data = YAML.load_file("#{ENV['HOME']}/.packaging/team/#{@builder_data_file}") || {}
-      @project_data = YAML.load_file("#{ENV['HOME']}/.packaging/project/#{@builder_data_file}") || {}
+      @team_data = data_from_yaml("#{ENV['HOME']}/.packaging/team/#{@builder_data_file}") || {}
+      @project_data = data_from_yaml("#{ENV['HOME']}/.packaging/project/#{@builder_data_file}") || {}
       @pe_name          = @project_data['pe_name']       if @project_data['pe_name']
       @tarball_path     = @project_data['tarball_path']  if @project_data['tarball_path']
       @rpm_build_host   = @team_data['rpm_build_host']   if @team_data['rpm_build_host']

@@ -3,7 +3,7 @@ require 'erb'
 require 'benchmark'
 
 begin
-  @project_specs            ||= YAML.load_file('ext/project_data.yaml')
+  @project_specs            ||= data_from_yaml('ext/project_data.yaml')
   @name                     = @project_specs['project']
   @author                   = @project_specs['author']
   @email                    = @project_specs['email']
@@ -28,7 +28,7 @@ rescue => e
 end
 
 begin
-  @pkg_defaults    ||= YAML.load_file('ext/build_defaults.yaml')
+  @pkg_defaults    ||= data_from_yaml('ext/build_defaults.yaml')
   @sign_tar        = boolean_value( ENV['SIGN_TAR'] || @pkg_defaults['sign_tar']  )
   @build_gem       = boolean_value( ENV['GEM']      || @pkg_defaults['build_gem'] )
   @build_dmg       = boolean_value( ENV['DMG']      || @pkg_defaults['build_dmg'] )

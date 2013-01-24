@@ -3,6 +3,7 @@ require 'erb'
 require 'benchmark'
 require File.expand_path('../build.rb', __FILE__)
 
+##
 # Where we get the data for our project depends on if a PARAMS_FILE environment
 # variable is passed with the rake call. PARAMS_FILE should be a path to a yaml
 # file containing all of the build parameters for a project, which are read
@@ -11,9 +12,11 @@ require File.expand_path('../build.rb', __FILE__)
 # project_data.yaml. This also applies to the pl:fetch and pl:load_extras
 # tasks, which are supplementary means of gathering data. These two are not
 # used if a PARAMS_FILE is passed.
-#
+
+##
 # Create our BuildInstance object, which will contain all the data about our
 # proposed build
+#
 @build = Build::BuildInstance.new
 
 if ENV['PARAMS_FILE'] && ENV['PARAMS_FILE'] != ''
@@ -24,7 +27,9 @@ else
   @build.set_params_from_file('ext/project_data.yaml') if File.readable?('ext/project_data.yaml')
   @build.set_params_from_file('ext/build_defaults.yaml') if File.readable?('ext/build_defaults.yaml')
 
-  # Allow environment variables to override the settings we just read in
+  # Allow environment variables to override the settings we just read in. These
+  # variables are called out specifically because they are likely to require
+  # overriding in at least some cases.
   #
   @build.sign_tar        = boolean_value(ENV['SIGN_TAR']) if ENV['SIGN_TAR']
   @build.build_gem       = boolean_value(ENV['GEM'])      if ENV['GEM']
@@ -50,6 +55,11 @@ else
   @build.apt_repo_path   = ENV['APT_REPO']                if ENV['APT_REPO']
 end
 
+##
+# These parameters are either generated dynamically by the project, or aren't
+# sufficiently generic/multi-purpose enough to justify being in
+# build_defaults.yaml or project_data.yaml.
+#
 @build.release           ||= get_release
 @build.version           ||= get_dash_version
 @build.gemversion        ||= get_dot_version
@@ -62,11 +72,19 @@ end
 @build.team              = ENV['TEAM'] || 'dev'
 @keychain_loaded         ||= FALSE
 @build_root              ||= Dir.pwd
+##
+# For backwards compatibilty, we set build:@name to build:@project. @name was
+# renamed to @project in an effort to align the variable names with what has
+# been supported for parameter names in the params files.
+#
+@build.name = @build.project
 
 if @build.debug
   @build.print_params
 end
 
+##
+# MM 1-22-2013
 # We have long made all of the variables available to erb templates in the
 # various projects. The problem is now that we've switched to encapsulating all
 # of this inside a build object, that information is no longer available. This

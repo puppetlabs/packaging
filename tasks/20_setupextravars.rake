@@ -29,18 +29,27 @@ if @build.team == 'release'
   @build.benchmark = TRUE
 end
 
-# Starting with puppetdb, we'll maintain two separate build-data files, one for PE and the other for FOSS
-# This is the start to maintaining both PE and FOSS packaging in one source repo
+##
+# Starting with puppetdb, we'll maintain two separate build-data files, one for
+# PE and the other for FOSS. This is the start to maintaining both PE and FOSS
+# packaging in one source repo. As is done in 10_setupvars.rake, the @name
+# variable is set to the value of @project, for backwards compatibility.
+#
 unless @build.pe_name.nil?
   @build.project = @build.pe_name
+  @build.name    = @build.project
 end
 
+##
+# MM 1-22-2013
 # We have long made all of the variables available to erb templates in the
 # various projects. The problem is now that we've switched to encapsulating all
 # of this inside a build object, that information is no longer available. This
 # section is for backwards compatibility only. It sets an instance variable
 # for all of the parameters inside the build object. This is repeated in
-# 10_setupvars.rake
+# 10_setupvars.rake. Note that the intention is to eventually abolish this
+# behavior, and access the parameters via the build object only.
+#
 @build.params.each do |param, value|
   self.instance_variable_set("@#{param}", value)
 end

@@ -66,3 +66,17 @@ end
 if @build.debug
   @build.print_params
 end
+
+# We have long made all of the variables available to erb templates in the
+# various projects. The problem is now that we've switched to encapsulating all
+# of this inside a build object, that information is no longer available. This
+# section is for backwards compatibility only. It sets an instance variable
+# for all of the parameters inside the build object. This is repeated in
+# 20_setupextrasvars.rake. Note: The intention is to eventually abolish this
+# behavior. We want to access information from the build object, not in what
+# are essentially globally available rake variables.
+#
+@build.params.each do |param, value|
+  self.instance_variable_set("@#{param}", value)
+end
+

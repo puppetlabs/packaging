@@ -131,7 +131,7 @@ module Build
     # the path to the file and return it as a string.
     #
     def params_to_yaml
-      params_file = File.join(get_temp, 'params.yaml')
+      params_file = File.join(get_temp, "params-#{rand_string}.yaml")
       File.open(params_file, 'w') do |f|
         f.puts params.to_yaml
       end

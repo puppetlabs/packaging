@@ -360,6 +360,15 @@ def remote_bootstrap(host, treeish, tar_cmd=nil)
   "/tmp/#{@build.project}-#{appendix}"
 end
 
+# Given a BuildInstance object and a host, send its params to the host. Return
+# the remote path to the params.
+def remote_buildparams(host, build)
+  params_file = build.params_to_yaml
+  params_file_name = File.basename(params_file)
+  rsync_to(params_file, host, '/tmp')
+  "/tmp/#{params_file_name}"
+end
+
 def is_git_repo
   %x{git rev-parse --git-dir > /dev/null 2>&1}
   return $?.success?

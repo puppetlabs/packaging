@@ -57,9 +57,6 @@ end
 @build.origversion       ||= get_origversion
 @build.rpmversion        ||= get_rpmversion
 @build.rpmrelease        ||= get_rpmrelease
-@build.deb_env            = "COW='#{@build.cows}' RELEASE='#{@build.release}'"
-@build.mockf_env          = "MOCK='#{@build.final_mocks}' RELEASE='#{@build.release}'"
-@build.mockrc_env         = "MOCK='#{@build.rc_mocks}' RELEASE='#{@build.release}'"
 @build.builder_data_file ||= 'builder_data.yaml'
 @build.team              = ENV['TEAM'] || 'dev'
 @keychain_loaded         ||= FALSE

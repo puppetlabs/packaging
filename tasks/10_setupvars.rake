@@ -32,6 +32,7 @@ else
   @build.build_ips       = boolean_value(ENV['IPS'])      if ENV['IPS']
   @build.build_doc       = boolean_value(ENV['DOC'])      if ENV['DOC']
   @build.build_pe        = boolean_value(ENV['PE_BUILD']) if ENV['PE_BUILD']
+  @build.debug           = boolean_value(ENV['DEBUG'])    if ENV['DEBUG']
   @build.default_cow     = ENV['COW']                     if ENV['COW']
   @build.cows            = ENV['COW']                     if ENV['COW']
   @build.pbuild_conf     = ENV['PBUILDCONF']              if ENV['PBUILDCONF']
@@ -61,3 +62,7 @@ end
 @build.team              = ENV['TEAM'] || 'dev'
 @keychain_loaded         ||= FALSE
 @build_root              ||= Dir.pwd
+
+if @build.debug
+  @build.print_params
+end

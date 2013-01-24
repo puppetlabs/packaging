@@ -22,6 +22,7 @@ module Build
                       :db_table,
                       :deb_build_host,
                       :debversion,
+                      :debug,
                       :default_cow,
                       :default_mock,
                       :description,

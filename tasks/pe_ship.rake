@@ -21,8 +21,8 @@ if @build_pe
         STDERR.puts "The 'pkg/pe/deb/#{dist}' directory has no packages. Did you run rake pe:deb?"
         exit 1
       else
-        target_path = ENV['APT_REPO'] ? ENV['APT_REPO'] : "#{@apt_repo_path}/#{@pe_version}/repos/incoming/disparate/"
-        rsync_to("pkg/pe/deb/", @apt_host, target_path)
+        target_path = ENV['APT_REPO'] ? ENV['APT_REPO'] : "#{@apt_repo_path}/#{@pe_version}/repos/incoming/unified/"
+        rsync_to("pkg/pe/deb/#{dist}/", @apt_host, target_path)
         if @team == 'release'
           Rake::Task["pe:remote:freight"].invoke
         end

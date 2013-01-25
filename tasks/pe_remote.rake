@@ -44,7 +44,7 @@ if @build_pe
 
     desc "Execute remote debian, el, and sles builds, sign, and ship pkgs"
     task :all => ['clean', 'pl:fetch', 'pl:load_extras'] do
-      ['pe:deb', 'pe:mock_all', 'pe:sles', 'pe:ship_rpms', 'pe:ship_debs'].each do |task|
+      ['pe:deb_all', 'pe:mock_all', 'pe:sles', 'pe:ship_rpms', 'pe:ship_debs'].each do |task|
         Rake::Task[task].execute
       end
     end

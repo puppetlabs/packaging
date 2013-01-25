@@ -47,8 +47,6 @@ if @build.build_pe
       build_spec        = "#{build_spec_dir}/#{@build.project}.spec"
       build_dest_dir    = "usr/src/packages"
       noarch            = FALSE
-      build_dep_dir     = @build.sles_build_deps_dir
-      build_os_dep_dir  = @build.sles_build_iso_dir
       built_arch        = ''
       @build.sles_arch_repos.each do |arch, deps_repo|
         if noarch == FALSE

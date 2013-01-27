@@ -5,8 +5,8 @@ require 'rake'
 
 SPECDIR = Pathname(__FILE__).dirname
 
-def require_task(name)
+def load_task(name)
   return false if (@loaded ||= {})[name]
-  load SPECDIR + '..' + 'tasks' + "#{name}.rake"
+  load File.join(SPECDIR, '..', 'tasks', name)
   @loaded[name] = true
 end

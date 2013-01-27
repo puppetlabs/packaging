@@ -1,6 +1,6 @@
 # -*- ruby -*-
 require 'spec_helper'
-require_task '00_utils'
+load_task '00_utils.rake'
 
 describe "00_utils" do
   TestVersions = {

@@ -1,6 +1,7 @@
 # -*- ruby -*-
 require 'spec_helper'
 load_task '00_utils.rake'
+load_task 'build.rake'
 
 describe "00_utils" do
   TestVersions = {
@@ -78,6 +79,10 @@ describe "00_utils" do
     },
   }
 
+  before :all do
+    @build = Build::BuildInstance.new
+  end
+
   TestVersions.keys.sort.each do |input|
     describe "Versioning based on #{input}" do
       results = TestVersions[input]
@@ -86,11 +91,11 @@ describe "00_utils" do
           # We have to call the `stub!` alias because we are trying to stub on
           # `self`, and in the scope of an rspec block that is overridden to
           # return a new double, not to stub a method!
-          @release = "1"
+          @build.release = "1"
 
           if method.to_s.include?("deb")
             self.should_receive(:run_git_describe_internal).and_return(input)
-            @packager = "puppetlabs"
+            @build.packager = "puppetlabs"
           elsif method.to_s.include?("rpm")
             self.should_receive(:run_git_describe_internal).and_return(input)
           else

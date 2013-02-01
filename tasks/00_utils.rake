@@ -392,20 +392,24 @@ def hostname
   host = Socket.gethostname
 end
 
-# Loop a shell command up to the number of attempts given, exiting when we receive success
+# Loop a block up to the number of attempts given, exiting when we receive success
 # or max attempts is reached. Raise an exception unless we've succeeded.
-def loop_shell_command(command, max_attempts = 5)
+def retry_on_fail(args)
   success = FALSE
-  attempts = 0
-  while attempts < max_attempts
-    %x{#{command}}
-    if $?.success?
-      success = TRUE
-      break
+  if args[:times].respond_to?('times')
+    args[:times].times do |i|
+      begin
+        yield
+        success = TRUE
+        break
+      rescue
+        puts "An error was encountered evaluating block. Retrying.."
+      end
     end
-    attempts += 1
+  else
+    raise "retry_on_fail requires and arg (:times => x) where x is an Integer/Fixnum"
   end
-  raise "Failed! command was: #{command}" unless success
+  raise "Block failed maximum of #{args[:times]} tries. Exiting.." unless success
 end
 
 def deprecate(old_cmd, new_cmd=nil)

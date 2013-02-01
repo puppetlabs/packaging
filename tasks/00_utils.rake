@@ -394,12 +394,12 @@ end
 
 # Loop a block up to the number of attempts given, exiting when we receive success
 # or max attempts is reached. Raise an exception unless we've succeeded.
-def retry_on_fail(args)
+def retry_on_fail(args, &blk)
   success = FALSE
-  if args[:times].respond_to?('times')
+  if args[:times].respond_to?('times') and block_given?
     args[:times].times do |i|
       begin
-        yield
+        blk.call
         success = TRUE
         break
       rescue
@@ -407,7 +407,7 @@ def retry_on_fail(args)
       end
     end
   else
-    raise "retry_on_fail requires and arg (:times => x) where x is an Integer/Fixnum"
+    raise "retry_on_fail requires and arg (:times => x) where x is an Integer/Fixnum, and a block to execute"
   end
   raise "Block failed maximum of #{args[:times]} tries. Exiting.." unless success
 end

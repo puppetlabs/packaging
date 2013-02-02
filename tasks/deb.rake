@@ -19,11 +19,8 @@ def update_cow(cow, is_rc = nil)
   ENV['FOSS_DEVEL'] = is_rc.to_s
   ENV['PATH'] = "/usr/sbin:#{ENV['PATH']}"
   set_cow_envs(cow)
-  begin
+  retry_on_fail(:times => 3) do
     sh "sudo -E /usr/sbin/cowbuilder --update --override-config --configfile #{@pbuild_conf} --basepath /var/cache/pbuilder/#{cow} --distribution #{ENV['DIST']} --architecture #{ENV['ARCH']}"
-  rescue
-    STDERR.puts "Couldn't update the cow #{cow}. Perhaps you don't have sudo?"
-    exit 1
   end
 end
 

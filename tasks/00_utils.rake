@@ -396,7 +396,7 @@ end
 # or max attempts is reached. Raise an exception unless we've succeeded.
 def retry_on_fail(args, &blk)
   success = FALSE
-  if args[:times].respond_to?('times') and block_given?
+  if args[:times].respond_to?(:times) and block_given?
     args[:times].times do |i|
       begin
         blk.call

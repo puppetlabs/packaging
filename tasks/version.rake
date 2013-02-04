@@ -52,5 +52,12 @@ namespace :package do
     Rake::Task["package:versionbump"].invoke
     git_commit_file(@version_file, "update to #{ENV['VERSION']}")
   end
+
+  # A set of tasks for printing the version
+  [:version, :rpmversion, :rpmrelease, :debversion, :release].each do |task|
+    task "#{task}" do
+      STDOUT.puts self.instance_variable_get("@#{task}")
+    end
+  end
 end
 

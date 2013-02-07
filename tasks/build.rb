@@ -83,6 +83,7 @@ module Build
                       :summary,
                       :tar_excludes,
                       :tarball_path,
+                      :task,
                       :team,
                       :version,
                       :version_file,
@@ -91,6 +92,10 @@ module Build
 
     @@build_params.each do |v|
       attr_accessor v
+    end
+
+    def initialize
+      @task = $*
     end
 
     ##

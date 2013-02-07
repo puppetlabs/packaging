@@ -7,12 +7,17 @@
 #
 namespace :pl do
   ##
-  # Utility rake task that will dump all current build parameters and
-  # variables to a yaml file to a temporary location and print the path. Given
-  # the environment variable 'OUTPUT_DIR', output file at 'OUTPUT_DIR'.
+  # Utility rake task that will dump all current build parameters and variables
+  # to a yaml file to a temporary location and print the path. Given the
+  # environment variable 'OUTPUT_DIR', output file at 'OUTPUT_DIR'. The
+  # environment variable TASK sets the task instance variable of the build to the
+  # supplied args, allowing us to use this file for later builds.
   #
   desc "Write all package build parameters to a yaml file, pass OUTPUT_DIR to specify outut location"
   task :write_build_params do
+    if ENV['TASK']
+      @build.task = ENV['TASK'].split(' ')
+    end
     @build.params_to_yaml(ENV['OUTPUT_DIR'])
   end
 

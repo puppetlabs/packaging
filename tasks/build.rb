@@ -160,3 +160,13 @@ module Build
   end
 end
 
+# Perform a build exclusively from a build params file. Requires that the build
+# params file include a setting for task, which is an array of the arguments
+# given to rake originally, including, first, the task name.
+namespace :pl do
+  desc "Build from a build params file"
+  task :build_from_params do
+    check_var('PARAMS_FILE', ENV['PARAMS_FILE'])
+    Rake::Task[@task[0]].invoke(@task[1..-1])
+  end
+end

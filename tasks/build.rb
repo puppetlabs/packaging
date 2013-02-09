@@ -26,6 +26,7 @@ module Build
                       :default_cow,
                       :default_mock,
                       :description,
+                      :distribution_server,
                       :dmg_path,
                       :email,
                       :files,
@@ -75,6 +76,7 @@ module Build
                       :rpm_build_host,
                       :rpmrelease,
                       :rpmversion,
+                      :sha,
                       :sign_tar,
                       :sles_build_host,
                       :sles_repo_path,
@@ -96,6 +98,7 @@ module Build
 
     def initialize
       @task = $*
+      @sha = git_sha
     end
 
     ##
@@ -162,11 +165,13 @@ end
 
 # Perform a build exclusively from a build params file. Requires that the build
 # params file include a setting for task, which is an array of the arguments
-# given to rake originally, including, first, the task name.
+# given to rake originally, including, first, the task name. The params file is
+# always loaded when passed, so these variables are accessible immediately.
 namespace :pl do
   desc "Build from a build params file"
   task :build_from_params do
     check_var('PARAMS_FILE', ENV['PARAMS_FILE'])
-    Rake::Task[@task[0]].invoke(@task[1..-1])
+    git_co(@build.sha)
+    Rake::Task[@build.task[0]].invoke(@build.task[1..-1])
   end
 end

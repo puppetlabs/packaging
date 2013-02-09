@@ -68,6 +68,11 @@ def git_co(ref)
   end
 end
 
+# return the sha of HEAD on the current branch
+def git_sha
+  %x{git rev-parse HEAD}
+end
+
 def get_temp
   temp = `mktemp -d -t tmpXXXXXX`.strip
 end

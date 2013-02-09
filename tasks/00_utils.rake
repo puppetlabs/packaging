@@ -60,10 +60,10 @@ def mv_f(src, dest, options={})
   mv(src, dest, options.merge(mandatory))
 end
 
-def git_co(dist)
-  %x{git reset --hard ; git checkout #{dist}}
+def git_co(ref)
+  %x{git reset --hard ; git checkout #{ref}}
   unless $?.success?
-    STDERR.puts 'Could not checkout #{dist} git branch to build package from...exiting'
+    STDERR.puts "Could not checkout #{ref} git branch to build package from...exiting"
     exit 1
   end
 end

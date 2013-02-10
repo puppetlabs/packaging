@@ -220,5 +220,10 @@ if @build.build_dmg
       end
     end
   end
+
+  # An alias task to simplify our remote logic in jenkins.rake
+  namespace :pl do
+    task :dmg => "package:apple"
+  end
 end
 

@@ -71,4 +71,9 @@ if @build.build_gem
       end
     end
   end
+
+  # An alias task to simplify our remote logic in jenkins.rake
+  namespace :pl do
+    task :gem => "package:gem"
+  end
 end

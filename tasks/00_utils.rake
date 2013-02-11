@@ -465,6 +465,8 @@ def el_version()
   end
 end
 
+# Given the path to a yaml file, load the yaml file into an object and return
+# the object.
 def data_from_yaml(file)
   file = File.expand_path(file)
   begin

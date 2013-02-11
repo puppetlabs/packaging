@@ -86,5 +86,24 @@ namespace :pl do
     sign_deb_changes("pkg/deb/*/*.changes") unless Dir["pkg/deb/*/*.changes"].empty?
     sign_deb_changes("pkg/deb/*.changes") unless Dir["pkg/deb/*.changes"].empty?
   end
+
+  ##
+  # This crazy piece of work establishes a remote repo on the distribution
+  # server, ships our packages out to it, signs them, and brings them back.
+  #
+  namespace :jenkins do
+    desc "Sign all locally staged packages on #{@build.distribution_server}"
+    task :sign_all => ["pl:fetch", "pl:load_extras"] do
+      sign_tasks   = ["pl:sign_tar", "pl:sign_rpms", "pl:sign_deb_changes"]
+      remote_repo  = remote_bootstrap(@build.distribution_server, 'HEAD')
+      build_params = remote_buildparams(@build.distribution_server, @build)
+      rsync_to('pkg', @build.distribution_server, remote_repo)
+      remote_ssh_cmd(@build.distribution_server, "cd #{remote_repo} ; rake #{sign_tasks.join(' ')} PARAMS_FILE=#{build_params}")
+      rsync_from("#{remote_repo}/pkg/", @build.distribution_server, "pkg/")
+      remote_ssh_cmd(@build.distribution_server, "rm -rf #{remote_repo}")
+      remote_ssh_cmd(@build.distribution_server, "rm #{build_params}")
+      puts "Signed packages staged in 'pkg/ directory"
+    end
+  end
 end
 

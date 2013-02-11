@@ -81,6 +81,7 @@ namespace :pl do
         Rake::Task["pl:ship_debs"].invoke
         Rake::Task["pl:ship_dmg"].execute if @build.build_dmg
         Rake::Task["pl:ship_tar"].execute
+        Rake::Task["pl:jenkins:ship"].invoke("shipped")
       end
     end
   end

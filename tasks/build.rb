@@ -141,7 +141,8 @@ module Build
     ##
     # Write all build parameters to a yaml file in a temporary location. Print
     # the path to the file and return it as a string. Accept an argument for
-    # the write target directory.
+    # the write target directory. The name of the params file is the current
+    # git commit sha.
     #
     def params_to_yaml(output_dir=nil)
       dir = output_dir.nil? ? get_temp : output_dir
@@ -149,7 +150,7 @@ module Build
         warn "#{dir} does not exist or is not writable, skipping build params write. Exiting.."
         exit 1
       end
-      params_file = File.join(dir, "params-#{rand_string}.yaml")
+      params_file = File.join(dir, "#{git_sha.strip}.yaml")
       File.open(params_file, 'w') do |f|
         f.puts params.to_yaml
       end

@@ -32,12 +32,12 @@ end
 namespace :pl do
   desc "Sign the tarball, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_tar do
-    unless File.exist? "pkg/#{@build.project}-#{@build.version}.tar.gz"
+    if File.exist? "pkg/#{@build.project}-#{@build.version}.tar.gz"
+      load_keychain if has_tool('keychain')
+      gpg_sign_file "pkg/#{@build.project}-#{@build.version}.tar.gz"
+    else
       STDERR.puts "No tarball exists. Try rake package:tar?"
-      exit 1
     end
-    load_keychain if has_tool('keychain')
-    gpg_sign_file "pkg/#{@build.project}-#{@build.version}.tar.gz"
   end
 
   desc "Sign mocked rpms, Defaults to PL Key, pass KEY to override"

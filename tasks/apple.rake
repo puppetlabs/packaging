@@ -114,11 +114,11 @@ def build_dmg
     #{dmg_file}")
 
   if File.directory?("#{pwd}/pkg/apple")
-    mv("#{pwd}/#{dmg_file}", "#{pwd}/pkg/apple/#{dmg_file}")
+    sh "sudo mv #{pwd}/#{dmg_file} #{pwd}/pkg/apple/#{dmg_file}"
     puts "moved:   #{dmg_file} has been moved to #{pwd}/pkg/apple/#{dmg_file}"
   else
     mkdir_p("#{pwd}/pkg/apple")
-    mv(dmg_file, "#{pwd}/pkg/apple/#{dmg_file}")
+    sh "sudo mv #{pwd}/#{dmg_file} #{pwd}/pkg/apple/#{dmg_file}"
     puts "moved:   #{dmg_file} has been moved to #{pwd}/pkg/apple/#{dmg_file}"
   end
 end
@@ -155,14 +155,14 @@ def pack_source
   # Setup a preflight script and replace variables in the files with
   # the correct paths.
   if File.exists?("#{@working_tree['scripts']}/preflight")
-    chown('root', 'wheel', "#{@working_tree['scripts']}/preflight")
     chmod(0644, "#{@working_tree['scripts']}/preflight")
+    sh "sudo chown root:wheel #{@working_tree['scripts']}/preflight"
   end
 
   # Setup a postflight from from the erb created earlier
   if File.exists?("#{@working_tree['scripts']}/postflight")
-    chown('root', 'wheel', "#{@working_tree['scripts']}/postflight")
     chmod(0755, "#{@working_tree['scripts']}/postflight")
+    sh "sudo chown root:wheel #{@working_tree['scripts']}/postflight"
   end
 
   # Do a run through first setting the specified permissions then
@@ -173,12 +173,42 @@ def pack_source
       group = params['group']
       perms = params['perms']
       path  = params['path']
-      chmod_R(Integer(perms), "#{work}/#{path}")
-      chown_R(owner, group, "#{work}/#{path}")
-      chmod(0755, "#{work}/#{path}")
+      ##
+      # Before setting our default permissions for all subdirectories/files of
+      # each directory listed in directories, we have to get a list of the
+      # directories. Otherwise, when we set the default perms (most likely
+      # 0644) we'll lose traversal on subdirectories, and later when we want to
+      # ensure they're 755 we won't be able to find them.
+      #
+      directories = []
       Dir["#{work}/#{path}/**/*"].each do |file|
-        chmod(0755, file) if File.directory?(file)
+        directories << file if File.directory?(file)
       end
+
+      ##
+      # Here we're setting the default permissions for all files as described
+      # in file_mapping.yaml. Since we have a listing of directories, it
+      # doesn't matter if we remove executable permission on directories, we'll
+      # reset it later.
+      #
+      sh "sudo chmod -R #{perms} #{work}/#{path}"
+
+      ##
+      # We know at least one directory, the one listed in file_mapping.yaml, so
+      # we set it executable.
+      #
+      sh "sudo chmod 0755 #{work}/#{path}"
+
+      ##
+      # Now that default perms are set, we go in and reset executable perms on
+      # directories
+      #
+      directories.each { |d| sh "sudo chmod 0755 #{d}" }
+
+      ##
+      # Finally we set the owner/group as described in file_mapping.yaml
+      #
+      sh "sudo chown -R #{owner}:#{group} #{work}/#{path}"
     end
   end
 
@@ -190,8 +220,8 @@ def pack_source
       perms = params['perms']
       dest  = params['path']
       # Allow for regexs like [A-Z]*
-      FileList[file].each do |file|
-        cmd = "#{INSTALL} -o #{owner} -g #{group} -m #{perms} #{source}/#{file} #{work}/#{dest}"
+      FileList[file].each do |f|
+        cmd = "sudo #{INSTALL} -o #{owner} -g #{group} -m #{perms} #{source}/#{f} #{work}/#{dest}"
         puts cmd
         system(cmd)
       end
@@ -204,15 +234,13 @@ if @build.build_dmg
     desc "Task for building an Apple Package"
     task :apple => [:setup] do
       bench = Benchmark.realtime do
-        # Test for Root and Packagemaker binary
-        raise "Please run rake as root to build Apple Packages" unless Process.uid == 0
+        # Test for Packagemaker binary
         raise "Packagemaker must be installed. Please install XCode Tools" unless \
           File.exists?(PACKAGEMAKER)
 
         make_directory_tree
         pack_source
         build_dmg
-        chmod_R(0775, "#{pwd}/pkg")
       end
       if @build.benchmark
         add_metrics({ :dist => 'osx', :bench => bench })

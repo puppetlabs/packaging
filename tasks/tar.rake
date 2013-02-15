@@ -77,3 +77,8 @@ namespace :package do
     puts "Wrote #{`pwd`.strip}/pkg/#{@build.project}-#{@build.version}.tar.gz"
   end
 end
+
+namespace :pl do
+  task :tar => ["package:tar"]
+end
+

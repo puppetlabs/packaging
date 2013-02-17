@@ -85,5 +85,33 @@ namespace :pl do
       end
     end
   end
+
+  # It is odd to namespace this ship task under :jenkins, but this task is
+  # intended to be a component of the jenkins-based build workflow even if it
+  # doesn't interact with jenkins directly. The :target argument is so that we
+  # can invoke this task with a subdirectory of the standard distribution
+  # server path. That way we can separate out built artifacts from
+  # signed/actually shipped artifacts e.g. $path/shipped/ or $path/artifacts.
+  namespace :jenkins do
+    desc "Ship pkg directory contents to distribution server"
+    task :ship, :target do |t, args|
+      invoke_task("pl:fetch")
+      invoke_task("pl:load_extras")
+      target = args.target || "artifacts"
+      artifact_dir = "#{@build.jenkins_repo_path}/#{@build.project}/#{git_sha.strip}/#{target}"
+      remote_ssh_cmd(@build.distribution_server, "mkdir -p #{artifact_dir}")
+      rsync_to("pkg/", @build.distribution_server, "#{artifact_dir}/ --exclude repo_configs")
+      # If this is an artifacts ship, we're going to create apt and yum
+      # repositories as a part of shipping. This will also create repo config
+      # files under pkg/repo_configs for these builds.
+      if File.exist?("pkg/deb")
+        Rake::Task["pl:jenkins:deb_repos"].invoke
+      end
+
+      if File.exist?("pkg/el") or File.exist?("pkg/fedora")
+        Rake::Task["pl:jenkins:rpm_repos"].invoke
+      end
+    end
+  end
 end
 

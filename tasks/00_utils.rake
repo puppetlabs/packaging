@@ -478,3 +478,38 @@ def data_from_yaml(file)
   end
   input_data
 end
+
+# This is fairly absurd. We're implementing curl by shelling out. What do I
+# wish we were doing? Using a sweet ruby wrapper around curl, such as Curb or
+# Curb-fu. However, because we're using clean build systems and trying to
+# make this portable with minimal system requirements, we can't very well
+# depend on libraries that aren't in the ruby standard libaries. We could
+# also do this using Net::HTTP but that set of libraries is a rabbit hole to
+# go down when what we're trying to accomplish is posting multi-part form
+# data that includes file uploads to jenkins. It gets hairy fairly quickly,
+# but, as they say, pull requests accepted.
+#
+# This method takes two arguments
+# 1) String - the URL to post to
+# 2) Array  - Ordered array of name=VALUE curl form parameters
+def curl_form_data(uri, form_data=[])
+  unless curl = find_tool("curl")
+    warn "Couldn't find curl. Curl is required for posting jenkins to trigger a build. Please install curl and try again."
+    exit 1
+  end
+  #
+  # Begin constructing the post string.
+  # First, assemble the form_data arguments
+  #
+  post_string = "-i "
+  form_data.each do |param|
+    post_string << "#{param} "
+  end
+
+  # Add the uri and we're off
+  post_string << "#{uri}"
+  sh "#{curl} #{post_string}"
+  return $?.success?
+end
+
+

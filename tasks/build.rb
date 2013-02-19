@@ -17,6 +17,7 @@ module Build
                       :build_ips,
                       :build_pe,
                       :builder_data_file,
+                      :builds_server,
                       :certificate_pem,
                       :cows,
                       :db_table,

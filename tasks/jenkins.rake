@@ -78,7 +78,7 @@ namespace :pl do
     # It expects a the following arguments
     # 1. :build_task => The lower-level pl: or pe: task we're executing, e.g. pl:deb_all
     #
-    task :post, :build_task do |t, args|
+    task :post_build, :build_task do |t, args|
       # We use JSON for parsing the json part of the submission to JSON
       begin
         require 'json'
@@ -87,10 +87,6 @@ namespace :pl do
         exit 1
       end
 
-      unless curl = find_tool('curl')
-        warn "curl is required for posting to jenkins to trigger a build. Please install curl and try again."
-        exit 1
-      end
       build_task = args.build_task
       ##
       # We set @:task of @build manually with our task data so the remote
@@ -127,9 +123,9 @@ namespace :pl do
       #
       args =  [
       "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
-      "-Fname=PROJECT_BUNDLE"   , "-Ffile1=@#{bundle}",
-      "-Fname=PROJECT"          , "-Fvalue=#{@build.project}",
-      "-Fname=BUILD_TYPE"       , "-Fvalue=#{build_type}",
+      "-Fname=PROJECT_BUNDLE"  , "-Ffile1=@#{bundle}",
+      "-Fname=PROJECT"         , "-Fvalue=#{@build.project}",
+      "-Fname=BUILD_TYPE"      , "-Fvalue=#{build_type}",
       "-FSubmit=Build",
       "-Fjson=#{json.to_json}",
       ]
@@ -165,7 +161,7 @@ namespace :pl do
     tasks.each do |build_task|
       desc "Queue pl:#{build_task} build on jenkins builder"
       task build_task => [ "pl:fetch", "pl:load_extras" ] do
-        invoke_task("pl:jenkins:post", "pl:#{build_task}")
+        invoke_task("pl:jenkins:post_build", "pl:#{build_task}")
       end
     end
 
@@ -201,7 +197,7 @@ if @build.build_pe
         desc "Queue pe:#{build_task} build on jenkins builder"
         task build_task => ["pl:fetch", "pl:load_extras"] do
           check_var("PE_VER", @build.pe_version)
-          invoke_task("pl:jenkins:post", "pe:local_#{build_task}")
+          invoke_task("pl:jenkins:post_build", "pe:local_#{build_task}")
         end
       end
 
@@ -224,3 +220,62 @@ if @build.build_pe
     end
   end
 end
+
+##
+# This task allows the packaging repo to post to an arbitrary jenkins job but
+# it is very limited in that it does not model well the key => value format
+# used when submitting form data on websites. This is primarily because rake
+# does not allow us to elegantly pass arbitrary key => value pairs on the
+# command line and have any idea how to reference them inside rake. We can pass
+# KEY=VALUE along with our invokation, but unless KEY is statically coded into
+# our task, we won't know how to reference it. Thus, this task will only take
+# one argument, the uri of the jenkins job to post to. This can be passed
+# either as an argument directly or as an environment variable "JOB" with the
+# uri as the value. The argument is required. The second requirement is that
+# the job to be called accept a string parameter with the name SHA. This will
+# be the SHA of the commit of the project source code HEAD, and should be used
+# by the job to check out this specific ref. To maintain the abstraction of the
+# jenkins jobs, this specific task passes on no information about the build
+# itself. The assumption is that the upstream jobs know about their project,
+# and so do the downstream jobs, but packaging itself has no business knowing
+# about it.
+#
+namespace :pl do
+  namespace :jenkins do
+    desc "Trigger a jenkins uri with SHA of HEAD as a string param, requires \"URI\""
+    task :post, :uri do |t, args|
+      uri = args.uri || ENV['URI']
+      raise "pl:jenkins:post requires a URI, either via URI= or pl:jenkin:post[URI]" if uri.nil?
+
+      # We use JSON for parsing the json part of the submission.
+      begin
+        require 'json'
+      rescue LoadError
+        warn "Couldn't require 'json'. JSON is required for sanely generating the string we curl to Jenkins."
+        exit 1
+      end
+
+      # Assemble the JSON string for the JSON parameter
+      json = JSON.generate("parameter" => [{ "name" => "SHA", "value"  => "#{git_sha.strip}" }])
+
+      # Assemble our arguments to the post
+      args = [
+      "-Fname=SHA", "-Fvalue=#{git_sha.strip}",
+      "-Fjson=#{json.to_json}",
+      "-FSubmit=Build"
+      ]
+
+      if curl_form_data(uri, args)
+        puts "Job triggered at #{uri}."
+      else
+        puts "An error occurred attempting to trigger the job at #{uri}. Please see the preceding http response for more info."
+      end
+    end
+  end
+end
+
+
+
+
+
+

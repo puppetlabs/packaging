@@ -30,46 +30,41 @@
 # label "deb" or "rpm," etc. The actual build itself is accomplished via a
 # shell build task. The contents of the task are:
 #
-#   # The build properties file is named $SHA.yaml where $SHA is the commit
-#   # hash of the current build.
-#   SHA=$(echo $BUILD_PROPERTIES | cut -d '.' -f1)
+#################
 #
-#   echo #############################
-#   echo "Build type: $BUILD_TYPE"
-#   echo #############################
-#   ### Create a local clone of the git-bundle that was passed
-#   # The bundle is a tarball, and since this is a project-agnostic
-#   # job, we don't actually know what's in it, just that it's a
-#   # git bundle.
-#   #
+#  SHA=$(echo $BUILD_PROPERTIES | cut -d '.' -f1)
 #
-#   [ -f "PROJECT_BUNDLE" ] || exit 1
-#   mkdir project && tar -xzf PROJECT_BUNDLE -C project/
+#  echo "Build type: $BUILD_TYPE"
 #
-#   cd project
-#   git clone --recursive $(ls) git_repo
+# ### Create a local clone of the git-bundle that was passed
+# The bundle is a tarball, and since this is a project-agnostic
+# job, we don't actually know what's in it, just that it's a
+# git bundle.
 #
-#   cd git_repo
 #
-#   ### Clone the packaging repo
-#   rake package:bootstrap && rake pl:fetch
+#  [ -f "PROJECT_BUNDLE" ] || exit 1
+#  mkdir project && tar -xzf PROJECT_BUNDLE -C project/
 #
-#   ### Perform the build
-#   rake pl:load_extras pl:build_from_params PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
+#  cd project
+#    git clone --recursive $(ls) git_repo
 #
-#   ### Create the results directory
-#   ssh neptune.puppetlabs.lan "mkdir -p /opt/jenkins-builds/$PROJECT/$SHA"
+#    cd git_repo
 #
-#   ### Chgrp to appropriate users can immediately access and create subdirectories
-#   ssh neptune.puppetlabs.lan "chgrp release /opt/jenkins-builds/$PROJECT/$SHA"
+#      ### Clone the packaging repo
+#      rake package:bootstrap && rake pl:fetch
 #
-#   ### Send the results
-#   rake pl:jenkins:ship
+#      ### Perform the build
+#      rake pl:load_extras pl:build_from_params PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
 #
-#   # Clean up
-#   cd $WORKSPACE && rm -r *
+#      ### Send the results
+#      rake pl:jenkins:ship["artifacts"]
 #
-##################
+#      ### If a downstream job was passed, trigger it now
+#      if [ -n "$DOWNSTREAM_JOB" ] ; then
+#        rake pl:jenkins:post["$DOWNSTREAM_JOB"]
+#      fi
+#
+#################
 
 namespace :pl do
   namespace :jenkins do

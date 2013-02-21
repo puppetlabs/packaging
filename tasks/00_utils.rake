@@ -370,8 +370,9 @@ end
 def remote_buildparams(host, build)
   params_file = build.params_to_yaml
   params_file_name = File.basename(params_file)
-  rsync_to(params_file, host, '/tmp')
-  "/tmp/#{params_file_name}"
+  params_dir = rand_string
+  rsync_to(params_file, host, "/tmp/#{params_dir}/")
+  "/tmp/#{params_dir}/#{params_file_name}"
 end
 
 def is_git_repo

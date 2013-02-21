@@ -18,6 +18,7 @@ Several Puppet Labs projects are using the packaging repo. They are:
 * puppet-dashboard
 * hiera
 * puppetdb
+* razor
 
 as well as several closed-source projects, including
 * live-management
@@ -43,91 +44,103 @@ repo, do a `rake package:rpm`. To build a deb, use `rake package:deb`.
 
 ## `pl:` tasks
 `pl:` namespaced tasks rely on a slighly more complex toolchain for packaging
-inside clean chroot environments for the various operating systems and
-versions that Puppet Labs supports. On the rpm side, this is done with
+inside clean chroot environments for the various operating systems and versions
+that Puppet Labs supports. On the rpm side, this is done with
 [mock](http://fedoraproject.org/wiki/Projects/Mock) and for debs, we use
 pdebuild and [cowbuilder](http://wiki.debian.org/cowbuilder). For the most
 part, these tasks are keyed to puppetlabs infrastructure, and are used by the
 Release Engineering team to create release packages. However, they can
 certainly be modified to suit other environments, and much effort went into
 making tasks as modular and reusable as possible. Several Puppet Labs-specific
-tasks are only available if the file '~/.packaging' is present.
-This file is created by the `pl:fetch` task, which curls two yaml files into 'team' and 'project' subdirectories.
-from a [separate build data repository](https://github.com/puppetlabs/build-data),
-which contains additional settings/data specific to Puppet Labs release
-infrastructure. The goal in separating these data and tasks out is to refrain
-from presenting by default yet more Puppet Labs-specific tasks that aren't
-generally consumable by everyone. To build a deb from a local repository using
-a `pl` task, ssh into a builder (e.g., one stood up using the modules detailed
-below) and clone the source repo, e.g. puppet. Then, run `rake package:bootstrap`
-and `rake pl:deb` to create a deb, and `rake pl:mock` to make an rpm (on a debian
-or redhat host, respectively).
+tasks are only available if the file '~/.packaging' is present.  This file is
+created by the `pl:fetch` task, which curls two yaml files into 'team' and
+'project' subdirectories.  from a [separate build data
+repository](https://github.com/puppetlabs/build-data), which contains
+additional settings/data specific to Puppet Labs release infrastructure. The
+goal in separating these data and tasks out is to refrain from presenting by
+default yet more Puppet Labs-specific tasks that aren't generally consumable by
+everyone. To build a deb from a local repository using a `pl` task, ssh into a
+builder (e.g., one stood up using the modules detailed below) and clone the
+source repo, e.g. puppet. Then, run `rake package:bootstrap` and `rake pl:deb`
+to create a deb, and `rake pl:mock` to make an rpm (on a debian or redhat host,
+respectively).
 
-## `pe:` tasks
-There is also a `pe:` namespace, for the building of Puppet Labs' Puppet
-Enterprise packages that have been converted to using this repo. The `pe:`
-tasks rely heavily on PL internal infrastructure, and are not generally useful
-outside of this environment. To create packages, in the source repository run
-`rake package:bootstrap`, followed by `rake pl:fetch`. These two commands
-bootstrap the packaging environment and pull in the additional data needed for
-PE building (see `pl:fetch` notes above).
-Then, to make a debian package, run `rake pe:deb`, and to make an rpm, run
-`rake pe:mock`. There are also `pe:deb_all` and `pe:mock_all` tasks, which build
-packages against all shipped debian/redhat targets. The `pe:deb_all` task is not
-generally necessary for developer use for building test packages; the `pe:deb`
-task creates a package that will work against virtually all supported PE debian
-versions. The same is generally true for PE internal rpms, but because of variances
-in build macros for rpm, rpms should generally be built with `pe:mock_all`, and
-then the desired version installed, or by building only for a specific target.
-This is accomplished by passing MOCK=<mock> to the rake call, e.g. `rake pe:mock MOCK=<mock>`.
-The available mocks are listed in `ext/build_defaults.yaml` after `final_mocks:`.
-For PE, the mocks are formatted as `pupent-<peversion>-<distversion>-<arch>`, e.g.
-`pupent-2.7-el5-i386`. To build for a specific target, set `MOCK=<mock>` to the mock
-that matches the target. The `pe:deb` and `pe:mock` tasks work by using the `:remote` tasks for building on a
-remote builder using the current committed state of the source repository. To forego
-remote building and build on the local station (e.g., by ssh-ing into a remote
-builder first), the tasks `pe:local_mock` and `pe:local_deb` build using the
-local host.
+## `pe:` tasks There is also a `pe:` namespace, for the building of Puppet
+Labs' Puppet Enterprise packages that have been converted to using this repo.
+The `pe:` tasks rely heavily on PL internal infrastructure, and are not
+generally useful outside of this environment. To create packages, in the source
+repository run `rake package:bootstrap`, followed by `rake pl:fetch`. These two
+commands bootstrap the packaging environment and pull in the additional data
+needed for PE building (see `pl:fetch` notes above).  Then, to make a debian
+package, run `rake pe:deb`, and to make an rpm, run `rake pe:mock`. There are
+also `pe:deb_all` and `pe:mock_all` tasks, which build packages against all
+shipped debian/redhat targets. The `pe:deb_all` task is not generally necessary
+for developer use for building test packages; the `pe:deb` task creates a
+  package that will work against virtually all supported PE debian versions.
+  The same is generally true for PE internal rpms, but because of variances in
+  build macros for rpm, rpms should generally be built with `pe:mock_all`, and
+  then the desired version installed, or by building only for a specific
+  target.  This is accomplished by passing MOCK=<mock> to the rake call, e.g.
+  `rake pe:mock MOCK=<mock>`.  The available mocks are listed in
+  `ext/build_defaults.yaml` after `final_mocks:`.  For PE, the mocks are
+  formatted as `pupent-<peversion>-<distversion>-<arch>`, e.g.
+  `pupent-2.7-el5-i386`. To build for a specific target, set `MOCK=<mock>` to
+  the mock that matches the target. The `pe:deb` and `pe:mock` tasks work by
+  using the `:remote` tasks for building on a remote builder using the current
+  committed state of the source repository. To forego remote building and build
+  on the local station (e.g., by ssh-ing into a remote builder first), the
+  tasks `pe:local_mock` and `pe:local_deb` build using the local host.
 
-## `:remote:` tasks
-There are also sub-namespaces of `:pl` and `:pe` that are worth noting. First, the `:remote` namespace. Tasks under `:remote` perform builds remotely on internal builders from your local workstation. How they work:
+## `:remote:` tasks There are also sub-namespaces of `:pl` and `:pe` that are
+worth noting. First, the `:remote` namespace. Tasks under `:remote` perform
+builds remotely on internal builders from your local workstation. How they
+work:
 
-1) Run `pl:fetch` to obtain extra data from the build-data repo. The data includes the hostnames of builders to use for packaging.
+1) Run `pl:fetch` to obtain extra data from the build-data repo. The data
+includes the hostnames of builders to use for packaging.
 
 2) Create a git bundle of the local workspace and tar it up.
 
-3) Create a build parameters file. The params file includes all the information about the build, including any values overridden with env vars, and the actual task to run, e.g. `rake pl:deb`.
+3) Create a build parameters file. The params file includes all the information
+about the build, including any values overridden with env vars, and the actual
+task to run, e.g. `rake pl:deb`.
 
-4) scp the git bundle and build parameters file to a temporary directory on the builder hostname assigned to that particular package build type.
+4) scp the git bundle and build parameters file to a temporary directory on the
+builder hostname assigned to that particular package build type.
 
-5) ssh into the builder, untar the git bundle, clone it, and run `rake package:bootstrap`.
+5) ssh into the builder, untar the git bundle, clone it, and run `rake
+package:bootstrap`.
 
-6) ssh into the builder, cd into the cloned repo, and run `rake pl:build_from_params PARAMS_FILE=/path/to/previously/sent/file`.
+6) ssh into the builder, cd into the cloned repo, and run `rake
+pl:build_from_params PARAMS_FILE=/path/to/previously/sent/file`.
 
-7) Maintain the ssh connection until the build finishes, and rsync the packages from the builder to the local workstation.
+7) Maintain the ssh connection until the build finishes, and rsync the packages
+from the builder to the local workstation.
 
-## `:jenkins:` tasks
-Jenkins tasks are similar to the `:remote:` tasks, but they do not require ssh access to the builders.
-The jenkins tasks enable the packaging repo to kick off packaging builds on a
-remote jenkins slave. They work in a similar way to the :remote tasks, but
-with a few key differences. The jenkins tasks transmit information to a
-jenkins coordinator, which handles the rest. The data passed are the
-following:
+## `:jenkins:` tasks Jenkins tasks are similar to the `:remote:` tasks, but
+they do not require ssh access to the builders.  The jenkins tasks enable the
+packaging repo to kick off packaging builds on a remote jenkins slave. They
+work in a similar way to the :remote tasks, but with a few key differences. The
+jenkins tasks transmit information to a jenkins coordinator, which handles the
+rest. The data passed are the following:
 
 1) $PROJECT\_BUNDLE - a tar.gz of a git-bundle from HEAD of the current
-   project, which is cloned on the builder to set up a duplicate of this
-    environment
+project, which is cloned on the builder to set up a duplicate of this
+environment
 
-2) $BUILD\_PROPERTIES - a build parameters file, containing all information about the build
+2) $BUILD\_PROPERTIES - a build parameters file, containing all information
+about the build
 
-3) $BUILD\_TYPE - the "type" of build, e.g. rpm, deb, gem, etc The jenkins url and job name
-   are obtained via the team build-data file from
-   [the build data repository](https://github.com/puppetlabs/build-data)
+3) $BUILD\_TYPE - the "type" of build, e.g. rpm, deb, gem, etc The jenkins url
+and job name are obtained via the team build-data file from [the build data
+repository](https://github.com/puppetlabs/build-data)
 
-4) $PROJECT - the project we're building, e.g. facter, puppet. This is used later in
-   determining the target for the build artifacts on the distribution server
+4) $PROJECT - the project we're building, e.g. facter, puppet. This is used
+later in determining the target for the build artifacts on the distribution
+server
 
-5) $DOWNSTREAM\_JOB - The URL of a downstream job that jenkins should post to upon success. This is obtained via the DOWNSTREAM\_JOB environment variable.
+5) $DOWNSTREAM\_JOB - The URL of a downstream job that jenkins should post to
+upon success. This is obtained via the DOWNSTREAM\_JOB environment variable.
 
 
 On the Jenkins end, the job is a parameterized job that accepts five
@@ -369,11 +382,15 @@ For basic mac packaging, add an osx directory in ext containing the following fi
 </dict>
 </plist>
 ```
-A file_mapping.yaml file that specifies a set of files and a set of directories from the source to install, with destinations, ownership, and permissions. The directories are top level directories in the source to install. The files are files somewhere in the source to install. This is the one from puppet 3.x:
+A file_mapping.yaml file that specifies a set of files and a set of directories
+from the source to install, with destinations, ownership, and permissions. The
+directories are top level directories in the source to install. The files are
+files somewhere in the source to install. This is the one from puppet 3.x:
 ```yaml
 ---
 directories:
-# this will take the contents of lib, e.g. puppet/lib/\* and place them in /usr/lib/ruby/site\_ruby/1.8
+# this will take the contents of lib, e.g. puppet/lib/\* and place them in
+# /usr/lib/ruby/site\_ruby/1.8
   lib:
     path: 'usr/lib/ruby/site_ruby/1.8'
     owner: 'root'
@@ -390,7 +407,8 @@ directories:
     group: 'wheel'
     perms: '0755'
 files:
-# this will take the file puppet/conf/auth.conf and place it in /private/etc/puppet/, creating the directory if not present
+# this will take the file puppet/conf/auth.conf and place it in
+# /private/etc/puppet/, creating the directory if not present
   'conf/auth.conf':
     path: 'private/etc/puppet'
     owner: 'root'

@@ -102,7 +102,7 @@ module Build
 
     def initialize
       @task = $*
-      @sha = git_sha
+      @sha = git_sha.strip
     end
 
     ##

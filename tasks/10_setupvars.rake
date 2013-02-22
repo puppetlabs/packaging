@@ -1,7 +1,7 @@
 require 'yaml'
 require 'erb'
 require 'benchmark'
-require File.expand_path('../build.rb', __FILE__)
+load File.expand_path('../build.rake', __FILE__)
 
 ##
 # Where we get the data for our project depends on if a PARAMS_FILE environment

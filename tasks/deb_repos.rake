@@ -16,7 +16,7 @@ namespace :pl do
       # First, we test that artifacts exist and set up the repos directory
       artifact_directory = File.join(@build.jenkins_repo_path, @build.project, git_sha.strip)
 
-      cmd = "echo \" Checking for deb build artifacts. Will exit if not found..\" ; "
+      cmd = 'echo " Checking for deb build artifacts. Will exit if not found.." ; '
       cmd << "[ -d #{artifact_directory}/artifacts/deb ] || exit 0 ; "
       cmd << "pushd #{artifact_directory} ; "
       cmd << "rsync -avxl artifacts/ repos/ && pushd repos ; "
@@ -28,18 +28,18 @@ namespace :pl do
       # We do one more check here to make sure we actually have distributions
       # to build for. If deb is empty we want to just exit.
       #
-      cmd << "[ -n \"$dists\" ] || exit 0 ; "
+      cmd << '[ -n "$dists" ] || exit 0 ; '
 
       # Make the conf directory and write out our configuration file
       cmd << "rm -rf apt && mkdir -p apt/conf && pushd apt ; "
-      cmd << "for dist in $dists ; do
-      echo \"
+      cmd << 'for dist in $dists ; do
+      echo "
 Origin: Puppet Labs
 Label: Puppet Labs
 Codename: $dist
 Architectures: i386 amd64
 Components: main
-Description: Apt repository for acceptance testing\" >> conf/distributions ; done ; "
+Description: Apt repository for acceptance testing" >> conf/distributions ; done ; '
 
       # Create the repositories using reprepro. Since these are for acceptance
       # testing only, we'll just add the debs and ignore source files for now.

@@ -89,8 +89,8 @@ namespace :pl do
       # a PE build, so we always this along as an environment variable task
       # argument if its the case.
       #
-      @build.task = ["#{build_task}"]
-      @build.task << "PE_BUILD=true" if @build_pe
+      @build.task = { :task => "#{build_task}", :args => nil }
+      @build.task[:args] = ["PE_BUILD=true"] if @build_pe
       #
       # Determine the type of build we're doing to inform jenkins
       build_type = case build_task

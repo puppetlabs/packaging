@@ -101,7 +101,7 @@ module Build
     end
 
     def initialize
-      @task = $*
+      @task = { :task => $*[0], :args => $*[1..-1] }
       @sha = git_sha.strip
     end
 
@@ -177,6 +177,6 @@ namespace :pl do
   task :build_from_params do
     check_var('PARAMS_FILE', ENV['PARAMS_FILE'])
     git_co(@build.sha)
-    Rake::Task[@build.task[0]].invoke(@build.task[1..-1])
+    Rake::Task[@build.task[:task]].invoke(@build.task[:args])
   end
 end

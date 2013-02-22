@@ -16,7 +16,8 @@ namespace :pl do
   desc "Write all package build parameters to a yaml file, pass OUTPUT_DIR to specify outut location"
   task :write_build_params do
     if ENV['TASK']
-      @build.task = ENV['TASK'].split(' ')
+      task_args = ENV['TASK'].split(' ')
+      @build.task = { :task => task_args[0], :args => task_args[1..-1] }
     end
     @build.params_to_yaml(ENV['OUTPUT_DIR'])
   end

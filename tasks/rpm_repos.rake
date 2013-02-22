@@ -78,7 +78,7 @@ namespace :pl do
       if File.exist?(File.join("pkg", "rpm_configs"))
         mkdir_p File.join("pkg","repo_configs","rpm")
 
-        # Parse the rpm configs file to generate rpository configs. Each line in
+        # Parse the rpm configs file to generate repository configs. Each line in
         # the rpm_configs file corresponds with a repo directory on the
         # distribution server.
         #

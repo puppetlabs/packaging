@@ -262,7 +262,9 @@ def set_cow_envs(cow)
     end
     arch = arch.split('.')[0] if arch.include?('.')
   end
-
+  if @build.build_pe
+    ENV['PE_VER'] = @build.pe_version
+  end
   ENV['DIST'] = dist
   ENV['ARCH'] = arch
 end

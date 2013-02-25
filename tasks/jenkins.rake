@@ -214,7 +214,7 @@ if @build.build_pe
       end
 
       desc "Queue builds of all PE packages for this project in Jenkins"
-      task :uber_build do
+      task :uber_build  => ["pl:fetch", "pl:load_extras"] do
         check_var("PE_VER", @build.pe_version)
         ["deb_all", "mock_all", "sles"].each do |task|
           invoke_task("pe:jenkins:#{task}")

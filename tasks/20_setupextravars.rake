@@ -17,7 +17,7 @@ namespace :pl do
       @build.cows             = ENV['COW']      if ENV['COW']
       @build.final_mocks      = ENV['MOCK']     if ENV['MOCK']
       @build.packager         = ENV['PACKAGER'] if ENV['PACKAGER']
-      @build.pe_version       ||= ENV['PE_VER'] if ENV['PE_VER']
+      @build.pe_version       = ENV['PE_VER']   if ENV['PE_VER']
       @build.yum_repo_path    = ENV['YUM_REPO'] if ENV['YUM_REPO']
       @build.yum_host         = ENV['YUM_HOST'] if ENV['YUM_HOST']
       @build.apt_host         = ENV['APT_HOST'] if ENV['APT_HOST']

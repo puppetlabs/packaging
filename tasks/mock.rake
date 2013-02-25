@@ -19,8 +19,29 @@
 # pkg/el-5-i386/*.rpm
 
 def mock(mock_config, srpm)
-  check_tool('mock')
-  sh "mock -r #{mock_config} #{srpm}"
+  unless mock = find_tool('mock')
+    warn "mock is required for building rpms with mock. Please install mock and try again."
+    exit 1
+  end
+  if @build.random_mockroot
+    basedir = get_temp
+    chown("#{ENV['USER']}", "mock", basedir)
+    # Mock requires the sticky bit be set on the basedir
+    chmod(02775, basedir)
+    mockfile = File.join('/', 'etc', 'mock', "#{mock_config}.cfg")
+    puts "Setting mock basedir to #{basedir}"
+    config = mock_with_basedir(mockfile, basedir)
+    configdir = setup_mock_config_dir(config)
+    # Clean up the new mock config
+    rm_r  File.dirname(config)
+    configdir_arg = " --configdir #{configdir}"
+    mock << configdir_arg
+  end
+  sh "#{mock} -r #{mock_config} #{srpm}"
+  # Clean up the configdir
+  rm_r configdir
+
+  basedir
 end
 
 def srpm_file
@@ -79,8 +100,8 @@ def build_rpm_with_mock(mocks, is_rc)
     arch    = mock_arch(mock_config)
     subdir  = is_rc ? 'devel' : 'products'
     bench = Benchmark.realtime do
-      result  = "/var/lib/mock/#{mock_config}/result/*.rpm"
-      mock(mock_config, srpm_file)
+      resultdir = mock(mock_config, srpm_file)
+      result  = "#{resultdir}/#{mock_config}/result/*.rpm"
 
       Dir[result].each do |rpm|
         rpm.strip!
@@ -126,11 +147,47 @@ def build_rpm_with_mock(mocks, is_rc)
           end
         end
       end
+      # To avoid filling up the system with our random mockroots, we should
+      # clean up.
+      rm_rf resultdir if @build.random_mockroot
     end
     add_metrics({ :dist => "#{family}-#{version}", :bench => bench }) if @build.benchmark
   end
 end
 
+# With the advent of using Jenkins to parallelize builds, it becomes critical
+# that we be able to use the same mock at the same time for > 1 builds without
+# clobbering the mock root every time. Here we add a method that takes the full
+# path to a mock configuration and a path, and adds a base directory
+# configuration directive to the mock to use the path as the directory for the
+# mock build root. The new mock config is written to a temporary space, and its
+# location is returned.  This allows us to create mock configs with randomized
+# temporary mock roots.
+#
+def mock_with_basedir(mock, basedir)
+  config = IO.readlines(mock)
+  basedir = "config_opts['basedir'] = '#{basedir}'"
+  config.insert(0, basedir)
+  tempdir = get_temp
+  newmock = File.join(tempdir, File.basename(mock))
+  File.open(newmock, 'w') { |f| f.puts config }
+  newmock
+end
+
+# Mock accepts an alternate configuration directory to /etc/mock for mock
+# configs, but the directory has to include both site-defaults.cfg and
+# logging.ini. This is a simple utility method to set a mock configuration dir
+# by copying a mock and the required defaults to a temporary directory and
+# returning that directory. This method takes the full path to a mock
+# configuration file and returns the path to the new configuration dir.
+#
+def setup_mock_config_dir(mock)
+  tempdir = get_temp
+  cp File.join('/', 'etc', 'mock', 'site-defaults.cfg'), tempdir
+  cp File.join('/', 'etc', 'mock', 'logging.ini'), tempdir
+  cp mock, tempdir
+  tempdir
+end
 
 namespace :pl do
   desc "Use default mock to make a final rpm, keyed to PL infrastructure, pass MOCK to specify config"

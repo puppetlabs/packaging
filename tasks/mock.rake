@@ -137,7 +137,7 @@ namespace :pl do
       %x{mkdir -p pkg/pe/rpm/el-{5,6}-{i386,x86_64,srpms}}
     else
       %x{mkdir -p pkg/el/{5,6}/{products,devel,dependencies}/{SRPMS,i386,x86_64}}
-      %x{mkdir -p pkg/fedora/{f16,f17}/{products,devel,dependencies}/{SRPMS,i386,x86_64}}
+      %x{mkdir -p pkg/fedora/{f16,f17,f18}/{products,devel,dependencies}/{SRPMS,i386,x86_64}}
     end
   end
 

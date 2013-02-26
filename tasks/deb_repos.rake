@@ -18,25 +18,24 @@ namespace :pl do
 
       cmd = 'echo " Checking for deb build artifacts. Will exit if not found.." ; '
       cmd << "[ -d #{artifact_directory}/artifacts/deb ] || exit 0 ; "
+      # Descend into the deb directory and obtain the list of distributions
+      # we'll be building repos for
+      cmd << "pushd #{artifact_directory}/artifacts/deb && dists=$(ls) && popd; "
+      # We do one more check here to make sure we actually have distributions
+      # to build for. If deb is empty we want to just exit.
+      #
+      cmd << '[ -n "$dists" ] || exit 0 ; '
       cmd << "pushd #{artifact_directory} ; "
+
       cmd << 'echo "Checking for running repo creation. Will wait if detected." ; '
       cmd << "while [ -f .lock ] ; do sleep 1 ; echo -n '.' ; done ; "
       cmd << 'echo "Setting lock" ; '
       cmd << "touch .lock ; "
       cmd << "rsync -avxl artifacts/ repos/ ; pushd repos ; "
 
-      # Descend into the deb directory and obtain the list of distributions
-      # we'll be building repos for
-      cmd << "pushd deb && dists=$(ls) && popd; "
-
-      # We do one more check here to make sure we actually have distributions
-      # to build for. If deb is empty we want to just exit.
-      #
-      cmd << '[ -n "$dists" ] || exit 0 ; '
-
       # Make the conf directory and write out our configuration file
-      cmd << "rm -rf apt && mkdir -p apt && pushd apt ; "
-      cmd << 'for dist in $dists ; do mkdir -p $dist/conf && pushd $dist ;
+      cmd << "rm -rf apt && mkdir -p apt ; pushd apt ; "
+      cmd << 'for dist in $dists ; do mkdir -p $dist/conf ; pushd $dist ;
       echo "
 Origin: Puppet Labs
 Label: Puppet Labs

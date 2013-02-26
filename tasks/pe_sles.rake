@@ -35,9 +35,8 @@ if @build_pe
       end
     end
 
-    # pl:setup_el_dirs is defined in mock.rake
     desc "Build a sles rpm from this repo"
-    task :local_sles => ['package:tar', 'pl:setup_el_dirs', 'pl:fetch', 'pl:load_extras', 'pe:retrieve_sles_deps'] do
+    task :local_sles => ['package:tar', 'pl:fetch', 'pl:load_extras', 'pe:retrieve_sles_deps'] do
       check_tool('build')
       check_tool('linux32')
       check_tool('linux64')
@@ -69,6 +68,7 @@ if @build_pe
               exit 1
             end
             built_arch = arch
+            %x{mkdir -p pkg/pe/rpm/sles-11-{srpms,#{arch}}}
             cp(rpms, "pkg/pe/rpm/sles-11-#{arch}")
             cp(srpms, "pkg/pe/rpm/sles-11-srpms")
             noarch = rpms.exclude(/noarch/).empty?
@@ -80,6 +80,7 @@ if @build_pe
         else
           arches_to_copy_to = @sles_arch_repos.keys - [ built_arch ]
           arches_to_copy_to.each do |other_arch|
+            %x{mkdir -p pkg/pe/rpm/sles-11-#{other_arch}}
             cp(FileList["pkg/pe/rpm/sles-11-#{built_arch}/*"], "pkg/pe/rpm/sles-11-#{other_arch}")
           end
         end

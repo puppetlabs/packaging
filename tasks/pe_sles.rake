@@ -69,8 +69,8 @@ if @build_pe
               exit 1
             end
             built_arch = arch
-            cp rpms, "pkg/pe/rpm/sles-11-#{arch}"
-            cp srpms, "pkg/pe/rpm/sles-11-srpms"
+            cp(rpms, "pkg/pe/rpm/sles-11-#{arch}")
+            cp(srpms, "pkg/pe/rpm/sles-11-srpms")
             noarch = rpms.exclude(/noarch/).empty?
             rm_rf build_root
             rm_rf work_dir
@@ -80,7 +80,7 @@ if @build_pe
         else
           arches_to_copy_to = @sles_arch_repos.keys - [ built_arch ]
           arches_to_copy_to.each do |other_arch|
-            cp FileList["pkg/pe/rpm/sles-11-#{built_arch}/*"], "pkg/pe/rpm/sles-11-#{other_arch}"
+            cp(FileList["pkg/pe/rpm/sles-11-#{built_arch}/*"], "pkg/pe/rpm/sles-11-#{other_arch}")
           end
         end
       end

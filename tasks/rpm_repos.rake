@@ -70,9 +70,17 @@ namespace :pl do
       cmd << '[ -n "$(find repos -name "*.rpm")" ] || exit 0 ; '
       cmd << "pushd repos ; "
 
-      cmd << 'for repo in $(find -name "*.rpm") ; do dirname $repo >> rpm_configs ; done'
+      cmd << 'for repo in $(find -name "repodata") ; do dirname $repo >> rpm_configs ; done'
 
       remote_ssh_cmd(@build.distribution_server, cmd)
+
+      # There's a chance there were simply no rpms to make repos for. If so, we
+      # don't want to proceed.
+      %x{ssh -t #{@build.distribution_server} 'ls #{artifact_directory}/repos/rpm_configs'}
+      unless $?.success?
+        warn "No repos were found to generate configs from. Exiting.."
+        exit 0
+      end
       mkdir_p "pkg"
       rsync_from("#{artifact_directory}/repos/rpm_configs", @build.distribution_server, "pkg")
 

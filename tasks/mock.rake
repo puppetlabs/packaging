@@ -95,6 +95,7 @@ def build_rpm_with_mock(mocks, is_rc)
         end
 
         if @build_pe
+          %x{mkdir -p pkg/pe/rpm/#{family}-#{version}-{srpms,i386,x86_64}}
           case File.basename(rpm)
             when /debuginfo/
               rm_rf(rpm)
@@ -109,6 +110,7 @@ def build_rpm_with_mock(mocks, is_rc)
               ln("pkg/pe/rpm/#{family}-#{version}-i386/#{File.basename(rpm)}", "pkg/pe/rpm/#{family}-#{version}-x86_64/")
           end
         else
+          %x{mkdir -p pkg/#{family}/#{version}/#{subdir}/{SRPMS,i386,x86_64}}
           case File.basename(rpm)
             when /debuginfo/
               rm_rf(rpm)
@@ -131,38 +133,28 @@ end
 
 
 namespace :pl do
-  task :setup_el_dirs do
-    if @build_pe
-      %x{mkdir -p pkg/pe/rpm/sles-11-{i586,x86_64,srpms}}
-      %x{mkdir -p pkg/pe/rpm/el-{5,6}-{i386,x86_64,srpms}}
-    else
-      %x{mkdir -p pkg/el/{5,6}/{products,devel,dependencies}/{SRPMS,i386,x86_64}}
-      %x{mkdir -p pkg/fedora/{f16,f17,f18}/{products,devel,dependencies}/{SRPMS,i386,x86_64}}
-    end
-  end
-
   desc "Use default mock to make a final rpm, keyed to PL infrastructure, pass MOCK to specify config"
-  task :mock => [ "package:srpm", "pl:setup_el_dirs" ] do
+  task :mock => [ "package:srpm" ] do
     # If default mock isn't specified, just take the first one in the @final_mocks list
     @default_mock ||= @final_mocks.split(' ')[0]
     build_rpm_with_mock(@default_mock, is_rc?)
     post_metrics if @benchmark
   end
 
-  task :mock_final => [ "package:srpm", "pl:setup_el_dirs" ] do
+  task :mock_final => [ "package:srpm" ] do
     deprecate("pl:mock_final", "pl:mock_all")
     build_rpm_with_mock(@final_mocks, FALSE)
     post_metrics if @benchmark
   end
 
-  task :mock_rc => [ "package:srpm", "pl:setup_el_dirs" ] do
+  task :mock_rc => [ "package:srpm" ] do
     deprecate("pl:mock_rc", "pl:mock_all")
     build_rpm_with_mock(@rc_mocks, TRUE)
     post_metrics if @benchmark
   end
 
   desc "Use specified mocks to make rpms, keyed to PL infrastructure, pass MOCK to specifiy config"
-  task :mock_all => [ "package:srpm", "pl:setup_el_dirs" ] do
+  task :mock_all => [ "package:srpm" ] do
     build_rpm_with_mock(@final_mocks, is_rc?)
     post_metrics if @benchmark
   end

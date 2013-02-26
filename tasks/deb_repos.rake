@@ -19,7 +19,7 @@ namespace :pl do
       cmd = 'echo " Checking for deb build artifacts. Will exit if not found.." ; '
       cmd << "[ -d #{artifact_directory}/artifacts/deb ] || exit 0 ; "
       cmd << "pushd #{artifact_directory} ; "
-      cmd << "rsync -avxl artifacts/ repos/ && pushd repos ; "
+      cmd << "rsync -avxl artifacts/ repos/ ; pushd repos ; "
 
       # Descend into the deb directory and obtain the list of distributions
       # we'll be building repos for
@@ -31,22 +31,21 @@ namespace :pl do
       cmd << '[ -n "$dists" ] || exit 0 ; '
 
       # Make the conf directory and write out our configuration file
-      cmd << "rm -rf apt && mkdir -p apt/conf && pushd apt ; "
-      cmd << 'for dist in $dists ; do
+      cmd << "rm -rf apt && mkdir -p apt && pushd apt ; "
+      cmd << 'for dist in $dists ; do mkdir -p $dist/conf && pushd $dist ;
       echo "
 Origin: Puppet Labs
 Label: Puppet Labs
 Codename: $dist
 Architectures: i386 amd64
 Components: main
-Description: Apt repository for acceptance testing" >> conf/distributions ; done ; '
+Description: Apt repository for acceptance testing" >> conf/distributions ; '
 
       # Create the repositories using reprepro. Since these are for acceptance
       # testing only, we'll just add the debs and ignore source files for now.
       #
       cmd << "reprepro=$(which reprepro) ; "
-      cmd << "for dist in $dists ; do "
-      cmd << "$reprepro includedeb $dist ../deb/$dist/*.deb ; done"
+      cmd << "$reprepro includedeb $dist ../../deb/$dist/*.deb ; popd ; done"
 
       remote_ssh_cmd(@build.distribution_server, cmd)
 
@@ -72,7 +71,13 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; done
 
       # We obtain the list of distributions in the debian repository with some hackery.
       #
-      dists = %x{ssh -t #{@build.distribution_server} 'ls #{artifact_directory}/repos/apt/dists'}.split
+      %x{ssh -t #{@build.distribution_server} 'ls #{artifact_directory}/repos/apt'}
+      if $?.success?
+        dists = %x{ssh -t #{@build.distribution_server} 'ls #{artifact_directory}/repos/apt'}.split
+      else
+        warn "No repos were found to generate configs from. Exiting.."
+        exit 0
+      end
 
       # Create apt sources.list files that can be added to hosts for installing
       # these packages. We use the list of distributions to create a config
@@ -81,7 +86,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; done
       mkdir_p File.join("pkg", "repo_configs", "deb")
       dists.each do |dist|
         repoconfig = ["# Packages for #{@build.project} built from commit #{git_sha.strip}",
-                      "deb http://#{@build.builds_server}/#{@build.project}/#{git_sha.strip}/repos/apt #{dist} main"]
+                      "deb http://#{@build.builds_server}/#{@build.project}/#{git_sha.strip}/repos/apt/#{dist} #{dist} main"]
         config = File.join("pkg", "repo_configs", "deb", "pl-#{@build.project}-#{git_sha.strip}-#{dist}.list")
         File.open(config, 'w') { |f| f.puts repoconfig }
       end

@@ -22,18 +22,22 @@ namespace :pl do
       # Test that the artifacts directory exists on the distribution server.
       # This will give us some more helpful output.
       #
-      cmd = "echo \"Checking for build artifacts. Will exit if not found.\" ; "
+      cmd = 'echo "Checking for build artifacts. Will exit if not found." ; '
       cmd << "[ -d #{artifact_directory}/artifacts ] || exit 0 ; "
 
       ##
       # Enter the directory containing the build artifacts and create repos.
       #
       cmd << "pushd #{artifact_directory} ; "
-      cmd << "[ -d artifacts ] && rsync -avxl artifacts/ repos/ && pushd repos ; "
+      cmd << 'echo "Checking for running repo creation. Will wait if detected." ; '
+      cmd << "while [ -f .lock ] ; do sleep 1 ; echo -n '.' ; done ; "
+      cmd << 'echo "Setting lock" ; '
+      cmd << "touch .lock ; "
+      cmd << "rsync -avxl artifacts/ repos/ ; pushd repos ; "
       cmd << "createrepo=$(which createrepo) ; "
       cmd << 'for repodir in $(find ./ -name "*.rpm" | xargs -I {} dirname {}) ; do '
       cmd << "pushd $repodir && $createrepo -d --update . && popd ; "
-      cmd << "done"
+      cmd << "done ; popd ; rm .lock"
 
       remote_ssh_cmd(@build.distribution_server, cmd)
 
@@ -62,11 +66,11 @@ namespace :pl do
       # Descend into the artifacts directory and test if we have any repos
       #
       cmd << "pushd #{artifact_directory} ; "
-      cmd << "echo \"Checking if rpm repos exists, will exit if not..\" ; "
-      cmd << "[ -n \"$(find repos -name \"*.rpm\")\" ] || exit 0 ; "
+      cmd << 'echo "Checking if rpm repos exists, will exit if not.." ; '
+      cmd << '[ -n "$(find repos -name "*.rpm")" ] || exit 0 ; '
       cmd << "pushd repos ; "
 
-      cmd << "for repo in $(find -name \"*.rpm\") ; do dirname $repo >> rpm_configs ; done"
+      cmd << 'for repo in $(find -name "*.rpm") ; do dirname $repo >> rpm_configs ; done'
 
       remote_ssh_cmd(@build.distribution_server, cmd)
       mkdir_p "pkg"

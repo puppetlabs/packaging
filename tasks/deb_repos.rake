@@ -19,6 +19,10 @@ namespace :pl do
       cmd = 'echo " Checking for deb build artifacts. Will exit if not found.." ; '
       cmd << "[ -d #{artifact_directory}/artifacts/deb ] || exit 0 ; "
       cmd << "pushd #{artifact_directory} ; "
+      cmd << 'echo "Checking for running repo creation. Will wait if detected." ; '
+      cmd << "while [ -f .lock ] ; do sleep 1 ; echo -n '.' ; done ; "
+      cmd << 'echo "Setting lock" ; '
+      cmd << "touch .lock ; "
       cmd << "rsync -avxl artifacts/ repos/ ; pushd repos ; "
 
       # Descend into the deb directory and obtain the list of distributions
@@ -45,7 +49,8 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
       # testing only, we'll just add the debs and ignore source files for now.
       #
       cmd << "reprepro=$(which reprepro) ; "
-      cmd << "$reprepro includedeb $dist ../../deb/$dist/*.deb ; popd ; done"
+      cmd << "$reprepro includedeb $dist ../../deb/$dist/*.deb ; popd ; done ; "
+      cmd << "popd ; popd ; rm .lock"
 
       remote_ssh_cmd(@build.distribution_server, cmd)
 

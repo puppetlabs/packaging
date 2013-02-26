@@ -101,16 +101,6 @@ namespace :pl do
       artifact_dir = "#{@build.jenkins_repo_path}/#{@build.project}/#{git_sha.strip}/#{target}"
       remote_ssh_cmd(@build.distribution_server, "mkdir -p #{artifact_dir}")
       rsync_to("pkg/", @build.distribution_server, "#{artifact_dir}/ --exclude repo_configs")
-      # If this is an artifacts ship, we're going to create apt and yum
-      # repositories as a part of shipping. This will also create repo config
-      # files under pkg/repo_configs for these builds.
-      if File.exist?("pkg/deb")
-        Rake::Task["pl:jenkins:deb_repos"].invoke
-      end
-
-      if File.exist?("pkg/el") or File.exist?("pkg/fedora")
-        Rake::Task["pl:jenkins:rpm_repos"].invoke
-      end
     end
   end
 end

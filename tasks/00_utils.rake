@@ -221,6 +221,10 @@ def load_keychain
   end
 end
 
+def source_dirty?
+  git_describe_version.include?('dirty')
+end
+
 def kill_keychain
   %x{keychain -k mine}
 end

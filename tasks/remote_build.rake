@@ -4,6 +4,10 @@ if File.exist?("#{ENV['HOME']}/.packaging")
   namespace 'pl' do
     namespace :remote do
       task :build, :host, :treeish, :task, :tar do |t, args|
+        if source_dirty?
+          warn "The source tree is dirty, e.g. there are uncommited changes. Please commit/discard changes and try again."
+          exit 1
+        end
         host                    = args.host
         treeish                 = args.treeish
         task                    = args.task

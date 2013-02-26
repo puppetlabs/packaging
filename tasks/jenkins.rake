@@ -74,6 +74,12 @@ namespace :pl do
     # 1. :build_task => The lower-level pl: or pe: task we're executing, e.g. pl:deb_all
     #
     task :post_build, :build_task do |t, args|
+      # Check for a dirty tree before allowing a remote build that is doomed to unexpected results
+      if source_dirty?
+        warn "The source tree is dirty, e.g. there are uncommited changes. Please commit/discard changes and try again."
+        exit 1
+      end
+
       # We use JSON for parsing the json part of the submission to JSON
       begin
         require 'json'

@@ -94,6 +94,10 @@ namespace :pl do
   namespace :jenkins do
     desc "Sign all locally staged packages on #{@build.distribution_server}"
     task :sign_all => ["pl:fetch", "pl:load_extras"] do
+      if Dir["pkg/*"].empty?
+        warn "There were files found in pkg/. Maybe you wanted to build/retrieve something first?"
+        exit 1
+      end
       sign_tasks   = ["pl:sign_tar", "pl:sign_rpms", "pl:sign_deb_changes"]
       remote_repo  = remote_bootstrap(@build.distribution_server, 'HEAD')
       build_params = remote_buildparams(@build.distribution_server, @build)

@@ -4,24 +4,24 @@
 # directories/files set up for building an rpm.
 # return the directory
 
-if @build_pe
+if @build.build_pe
   def prep_sles_dir
     temp = get_temp
-    check_file("pkg/#{@name}-#{@version}.tar.gz")
+    check_file("pkg/#{@build.project}-#{@build.version}.tar.gz")
     mkdir_pr temp, "#{temp}/SOURCES", "#{temp}/SPECS"
-    if @sign_tar
+    if @build.sign_tar
       Rake::Task["pl:sign_tar"].invoke
-      cp_p "pkg/#{@name}-#{@version}.tar.gz.asc", "#{temp}/SOURCES"
+      cp_p "pkg/#{@build.project}-#{@build.version}.tar.gz.asc", "#{temp}/SOURCES"
     end
-    cp_p "pkg/#{@name}-#{@version}.tar.gz", "#{temp}/SOURCES"
-    erb "ext/redhat/#{@name}.spec.erb", "#{temp}/SPECS/#{@name}.spec"
+    cp_p "pkg/#{@build.project}-#{@build.version}.tar.gz", "#{temp}/SOURCES"
+    erb "ext/redhat/#{@build.project}.spec.erb", "#{temp}/SPECS/#{@build.project}.spec"
     temp
   end
 
   namespace :pe do
     # Temporary task to pull down pe dependencies until this is NFS-mounted
     task :retrieve_sles_deps => 'pl:load_extras' do
-      rsync_from("#{@sles_repo_path}/#{@pe_version}/repos/sles-*", @sles_repo_host, "#{ENV['HOME']}/package_repos/")
+      rsync_from("#{@build.sles_repo_path}/#{@build.pe_version}/repos/sles-*", @build.sles_repo_host, "#{ENV['HOME']}/package_repos/")
       FileList["#{ENV['HOME']}/package_repos/*"].each do |f|
         update_rpm_repo(f) if File.directory?(f)
       end
@@ -44,13 +44,11 @@ if @build_pe
       work_dir          = prep_sles_dir
       build_source_dir  = "#{work_dir}/SOURCES"
       build_spec_dir    = "#{work_dir}/SPECS"
-      build_spec        = "#{build_spec_dir}/#{@name}.spec"
+      build_spec        = "#{build_spec_dir}/#{@build.project}.spec"
       build_dest_dir    = "usr/src/packages"
       noarch            = FALSE
-      build_dep_dir     = @sles_build_deps_dir
-      build_os_dep_dir  = @sles_build_iso_dir
       built_arch        = ''
-      @sles_arch_repos.each do |arch, deps_repo|
+      @build.sles_arch_repos.each do |arch, deps_repo|
         if noarch == FALSE
           bench = Benchmark.realtime do
             linux_cmd = arch == 'i586' ? 'linux32' : 'linux64'
@@ -76,16 +74,16 @@ if @build_pe
             rm_rf work_dir
           end
           # See 30_metrics.rake to see what this is doing
-          add_metrics({ :dist => 'sles', :bench => bench }) if @benchmark
+          add_metrics({ :dist => 'sles', :bench => bench }) if @build.benchmark
         else
-          arches_to_copy_to = @sles_arch_repos.keys - [ built_arch ]
+          arches_to_copy_to = @build.sles_arch_repos.keys - [ built_arch ]
           arches_to_copy_to.each do |other_arch|
             %x{mkdir -p pkg/pe/rpm/sles-11-#{other_arch}}
             cp(FileList["pkg/pe/rpm/sles-11-#{built_arch}/*"], "pkg/pe/rpm/sles-11-#{other_arch}")
           end
         end
       end
-      post_metrics if @benchmark
+      post_metrics if @build.benchmark
       cd 'pkg/pe/rpm' do
         if File.exist?('sles-11-i586')
           mkdir_p 'sles-11-i386'
@@ -93,7 +91,7 @@ if @build_pe
           rm_rf 'sles-11-i586'
         end
       end
-      if @team == 'release'
+      if @build.team == 'release'
         Rake::Task["pe:sign_rpms"].invoke
       end
     end

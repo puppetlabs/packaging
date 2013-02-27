@@ -1,77 +1,100 @@
 require 'yaml'
 require 'erb'
 require 'benchmark'
+load File.expand_path('../build.rake', __FILE__)
 
-begin
-  @project_specs            ||= YAML.load_file('ext/project_data.yaml')
-  @name                     = @project_specs['project']
-  @author                   = @project_specs['author']
-  @email                    = @project_specs['email']
-  @homepage                 = @project_specs['homepage']
-  @summary                  = @project_specs['summary']
-  @description              = @project_specs['description']
-  @files                    = @project_specs['files']
-  @tar_excludes             = @project_specs['tar_excludes']
-  @version_file             = @project_specs['version_file']
-  @gem_files                = @project_specs['gem_files']
-  @gem_require_path         = @project_specs['gem_require_path']
-  @gem_test_files           = @project_specs['gem_test_files']
-  @gem_executables          = @project_specs['gem_executables']
-  @gem_runtime_dependencies = @project_specs['gem_runtime_dependencies']
-  @gem_devel_dependencies   = @project_specs['gem_devel_dependencies']
-  @gem_rdoc_options         = @project_specs['gem_rdoc_options']
-  @gem_forge_project        = @project_specs['gem_forge_project']
-  @gem_excludes             = @project_specs['gem_excludes']
-rescue => e
-  STDERR.puts "There was an error loading the project specifications from the 'ext/project_data.yaml' file.\n" + e
-  exit 1
+##
+# Where we get the data for our project depends on if a PARAMS_FILE environment
+# variable is passed with the rake call. PARAMS_FILE should be a path to a yaml
+# file containing all of the build parameters for a project, which are read
+# into our BuildInstance object. If no build parameters file is specified, we
+# assume input via the original methods of build_data.yaml and
+# project_data.yaml. This also applies to the pl:fetch and pl:load_extras
+# tasks, which are supplementary means of gathering data. These two are not
+# used if a PARAMS_FILE is passed.
+
+##
+# Create our BuildInstance object, which will contain all the data about our
+# proposed build
+#
+@build = Build::BuildInstance.new
+
+if ENV['PARAMS_FILE'] && ENV['PARAMS_FILE'] != ''
+  @build.set_params_from_file(ENV['PARAMS_FILE'])
+else
+  # Load information about the project from the default params files
+  #
+  @build.set_params_from_file('ext/project_data.yaml') if File.readable?('ext/project_data.yaml')
+  @build.set_params_from_file('ext/build_defaults.yaml') if File.readable?('ext/build_defaults.yaml')
+
+  # Allow environment variables to override the settings we just read in. These
+  # variables are called out specifically because they are likely to require
+  # overriding in at least some cases.
+  #
+  @build.sign_tar        = boolean_value(ENV['SIGN_TAR']) if ENV['SIGN_TAR']
+  @build.build_gem       = boolean_value(ENV['GEM'])      if ENV['GEM']
+  @build.build_dmg       = boolean_value(ENV['DMG'])      if ENV['DMG']
+  @build.build_ips       = boolean_value(ENV['IPS'])      if ENV['IPS']
+  @build.build_doc       = boolean_value(ENV['DOC'])      if ENV['DOC']
+  @build.build_pe        = boolean_value(ENV['PE_BUILD']) if ENV['PE_BUILD']
+  @build.debug           = boolean_value(ENV['DEBUG'])    if ENV['DEBUG']
+  @build.default_cow     = ENV['COW']                     if ENV['COW']
+  @build.cows            = ENV['COW']                     if ENV['COW']
+  @build.pbuild_conf     = ENV['PBUILDCONF']              if ENV['PBUILDCONF']
+  @build.packager        = ENV['PACKAGER']                if ENV['PACKAGER']
+  @build.default_mock    = ENV['MOCK']                    if ENV['MOCK']
+  @build.final_mocks     = ENV['MOCK']                    if ENV['MOCK']
+  @build.rc_mocks        = ENV['MOCK']                    if ENV['MOCK']
+  @build.gpg_name        = ENV['GPG_NAME']                if ENV['GPG_NAME']
+  @build.gpg_key         = ENV['GPG_KEY']                 if ENV['GPG_KEY']
+  @build.certificate_pem = ENV['CERT_PEM']                if ENV['CERT_PEM']
+  @build.privatekey_pem  = ENV['PRIVATE_PEM']             if ENV['PRIVATE_PEM']
+  @build.yum_host        = ENV['YUM_HOST']                if ENV['YUM_HOST']
+  @build.yum_repo_path   = ENV['YUM_REPO']                if ENV['YUM_REPO']
+  @build.apt_host        = ENV['APT_HOST']                if ENV['APT_HOST']
+  @build.apt_repo_path   = ENV['APT_REPO']                if ENV['APT_REPO']
 end
 
-begin
-  @pkg_defaults    ||= YAML.load_file('ext/build_defaults.yaml')
-  @sign_tar        = boolean_value( ENV['SIGN_TAR'] || @pkg_defaults['sign_tar']  )
-  @build_gem       = boolean_value( ENV['GEM']      || @pkg_defaults['build_gem'] )
-  @build_dmg       = boolean_value( ENV['DMG']      || @pkg_defaults['build_dmg'] )
-  @build_ips       = boolean_value( ENV['IPS']      || @pkg_defaults['build_ips'] )
-  @build_doc       = boolean_value( ENV['DOC']      || @pkg_defaults['build_doc'] )
-  @build_pe        = boolean_value( ENV['PE_BUILD'] || @pkg_defaults['build_pe'] )
-  @default_cow     = ENV['COW']          || @pkg_defaults['default_cow']
-  @cows            = ENV['COW']          || @pkg_defaults['cows']
-  @pbuild_conf     = ENV['PBUILDCONF']   || @pkg_defaults['pbuild_conf']
-  @packager        = ENV['PACKAGER']     || @pkg_defaults['packager']
-  @default_mock    = ENV['MOCK']         || @pkg_defaults['default_mock']
-  @final_mocks     = ENV['MOCK']         || @pkg_defaults['final_mocks']
-  @rc_mocks        = ENV['MOCK']         || @pkg_defaults['rc_mocks']
-  @gpg_name        = ENV['GPG_NAME']     || @pkg_defaults['gpg_name']
-  @gpg_key         = ENV['GPG_KEY']      || @pkg_defaults['gpg_key']
-  @certificate_pem = ENV['CERT_PEM']     || @pkg_defaults['certificate_pem']
-  @privatekey_pem  = ENV['PRIVATE_PEM']  || @pkg_defaults['privatekey_pem']
-  @yum_host        = ENV['YUM_HOST']     || @pkg_defaults['yum_host']
-  @yum_repo_path   = ENV['YUM_REPO']     || @pkg_defaults['yum_repo_path']
-  @apt_host        = ENV['APT_HOST']     || @pkg_defaults['apt_host']
-  @apt_repo_path   = ENV['APT_REPO']     || @pkg_defaults['apt_repo_path']
-  @apt_repo_url    = @pkg_defaults['apt_repo_url']
-  @ips_repo        = @pkg_defaults['ips_repo']
-  @ips_store       = @pkg_defaults['ips_store']
-  @ips_host        = @pkg_defaults['ips_host']
-  @ips_inter_cert  = @pkg_defaults['ips_inter_cert']
-rescue => e
-  STDERR.puts "There was an error loading the packaging defaults from the 'ext/build_defaults.yaml' file.\n" + e
-  exit 1
+##
+# These parameters are either generated dynamically by the project, or aren't
+# sufficiently generic/multi-purpose enough to justify being in
+# build_defaults.yaml or project_data.yaml.
+#
+@build.release           ||= get_release
+@build.version           ||= get_dash_version
+@build.gemversion        ||= get_dot_version
+@build.ipsversion        ||= get_ips_version
+@build.debversion        ||= get_debversion
+@build.origversion       ||= get_origversion
+@build.rpmversion        ||= get_rpmversion
+@build.rpmrelease        ||= get_rpmrelease
+@build.builder_data_file ||= 'builder_data.yaml'
+@build.team              = ENV['TEAM'] || 'dev'
+@keychain_loaded         ||= FALSE
+@build_root              ||= Dir.pwd
+##
+# For backwards compatibilty, we set build:@name to build:@project. @name was
+# renamed to @project in an effort to align the variable names with what has
+# been supported for parameter names in the params files.
+#
+@build.name = @build.project
+
+if @build.debug
+  @build.print_params
 end
 
-@build_root        ||= Dir.pwd
-@release           ||= get_release
-@version           ||= get_dash_version
-@gemversion        ||= get_dot_version
-@ipsversion        ||= get_ips_version
-@debversion        ||= get_debversion
-@origversion       ||= get_origversion
-@rpmversion        ||= get_rpmversion
-@rpmrelease        ||= get_rpmrelease
-@keychain_loaded   ||= FALSE
-@deb_env            = "COW='#{@cows}' RELEASE='#{@release}'"
-@mockf_env          = "MOCK='#{@final_mocks}' RELEASE='#{@release}'"
-@mockrc_env         = "MOCK='#{@rc_mocks}' RELEASE='#{@release}'"
-@builder_data_file ||= 'builder_data.yaml'
-@team              = ENV['TEAM'] || 'dev'
+##
+# MM 1-22-2013
+# We have long made all of the variables available to erb templates in the
+# various projects. The problem is now that we've switched to encapsulating all
+# of this inside a build object, that information is no longer available. This
+# section is for backwards compatibility only. It sets an instance variable
+# for all of the parameters inside the build object. This is repeated in
+# 20_setupextrasvars.rake. Note: The intention is to eventually abolish this
+# behavior. We want to access information from the build object, not in what
+# are essentially globally available rake variables.
+#
+@build.params.each do |param, value|
+  self.instance_variable_set("@#{param}", value)
+end
+

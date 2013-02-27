@@ -5,10 +5,10 @@
 # both PE and not PE, it has two files, one for PE, and the other for FOSS
 #
 data_repo = 'https://raw.github.com/puppetlabs/build-data'
-project_data_branch = @name
-team_data_branch = @team
+project_data_branch = @build.project
+team_data_branch = @build.team
 
-if @build_pe
+if @build.build_pe
   project_data_branch = 'pe-' + project_data_branch unless project_data_branch =~ /^pe-/
   team_data_branch = 'pe-' + team_data_branch unless team_data_branch =~ /^pe-/
 end
@@ -22,7 +22,7 @@ team_data_url = data_repo + '/' + team_data_branch
 # defaults specified in the source project repo, e.g. in ext/build_defaults.yaml
 #
 # It uses curl to download the file, and places it in a hidden directory in the home
-# directory, e.g. ~/.packaging/@builder_data_file
+# directory, e.g. ~/.packaging/@build.builder_data_file
 namespace :pl do
   task :fetch do
     rm_rf "#{ENV['HOME']}/.packaging"
@@ -33,8 +33,8 @@ namespace :pl do
           flag = "-k"
         end
       end
-      sh "curl #{flag} #{project_data_url}/#{@builder_data_file} > #{ENV['HOME']}/.packaging/project/#{@builder_data_file}"
-      sh "curl #{flag} #{team_data_url}/#{@builder_data_file} > #{ENV['HOME']}/.packaging/team/#{@builder_data_file}"
+      sh "curl #{flag} #{project_data_url}/#{@build.builder_data_file} > #{ENV['HOME']}/.packaging/project/#{@build.builder_data_file}"
+      sh "curl #{flag} #{team_data_url}/#{@build.builder_data_file} > #{ENV['HOME']}/.packaging/team/#{@build.builder_data_file}"
     rescue
       STDERR.puts "There was an error fetching the builder extras data."
       exit 1

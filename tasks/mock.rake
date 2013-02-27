@@ -30,7 +30,7 @@ def srpm_file
 end
 
 def mock_el_family(mock_config)
-  if @build_pe
+  if @build.build_pe
     family = mock_config.split('-')[2][/[a-z]+/]
   else
     first, second = mock_config.split('-')
@@ -48,7 +48,7 @@ def mock_el_family(mock_config)
 end
 
 def mock_el_ver(mock_config)
-  if @build_pe
+  if @build.build_pe
     version = mock_config.split('-')[2][/[0-9]+/]
   else
     first, second, third = mock_config.split('-')
@@ -65,7 +65,7 @@ def mock_el_ver(mock_config)
 end
 
 def mock_arch(mock_config)
-  if @build_pe
+  if @build.build_pe
     arch = mock_config.split('-')[3]
   else
     arch = mock_config.split('-')[2]
@@ -94,7 +94,7 @@ def build_rpm_with_mock(mocks, is_rc)
           end
         end
 
-        if @build_pe
+        if @build.build_pe
           %x{mkdir -p pkg/pe/rpm/#{family}-#{version}-{srpms,i386,x86_64}}
           case File.basename(rpm)
             when /debuginfo/
@@ -127,35 +127,35 @@ def build_rpm_with_mock(mocks, is_rc)
         end
       end
     end
-    add_metrics({ :dist => "#{family}-#{version}", :bench => bench }) if @benchmark
+    add_metrics({ :dist => "#{family}-#{version}", :bench => bench }) if @build.benchmark
   end
 end
 
 
 namespace :pl do
   desc "Use default mock to make a final rpm, keyed to PL infrastructure, pass MOCK to specify config"
-  task :mock => [ "package:srpm" ] do
-    # If default mock isn't specified, just take the first one in the @final_mocks list
-    @default_mock ||= @final_mocks.split(' ')[0]
-    build_rpm_with_mock(@default_mock, is_rc?)
-    post_metrics if @benchmark
+  task :mock => "package:srpm" do
+    # If default mock isn't specified, just take the first one in the @build.final_mocks list
+    @build.default_mock ||= @build.final_mocks.split(' ')[0]
+    build_rpm_with_mock(@build.default_mock, is_rc?)
+    post_metrics if @build.benchmark
   end
 
-  task :mock_final => [ "package:srpm" ] do
+  task :mock_final => "package:srpm" do
     deprecate("pl:mock_final", "pl:mock_all")
-    build_rpm_with_mock(@final_mocks, FALSE)
-    post_metrics if @benchmark
+    build_rpm_with_mock(@build.final_mocks, FALSE)
+    post_metrics if @build.benchmark
   end
 
-  task :mock_rc => [ "package:srpm" ] do
+  task :mock_rc => "package:srpm" do
     deprecate("pl:mock_rc", "pl:mock_all")
-    build_rpm_with_mock(@rc_mocks, TRUE)
-    post_metrics if @benchmark
+    build_rpm_with_mock(@build.rc_mocks, TRUE)
+    post_metrics if @build.benchmark
   end
 
   desc "Use specified mocks to make rpms, keyed to PL infrastructure, pass MOCK to specifiy config"
-  task :mock_all => [ "package:srpm" ] do
-    build_rpm_with_mock(@final_mocks, is_rc?)
-    post_metrics if @benchmark
+  task :mock_all => "package:srpm" do
+    build_rpm_with_mock(@build.final_mocks, is_rc?)
+    post_metrics if @build.benchmark
   end
 end

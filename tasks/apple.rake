@@ -1,4 +1,4 @@
-# Title:        Rake task to build Apple packages for #{@name}.
+# Title:        Rake task to build Apple packages for #{@project}.
 # Author:       Gary Larizza
 # Date:         05/18/2012
 # Description:  This task will create a DMG-encapsulated package that will
@@ -20,17 +20,17 @@ SED           = '/usr/bin/sed'
 task :setup do
   # Read the Apple file-mappings
   begin
-    @source_files        = YAML.load_file('ext/osx/file_mapping.yaml')
+    @source_files        = data_from_yaml('ext/osx/file_mapping.yaml')
   rescue
     STDERR.puts "Could not load Apple file mappings from 'ext/osx/file_mapping.yaml'"
     exit 1
   end
-  @package_name          = @name
-  @title                 = "#{@name}-#{@version}"
-  @reverse_domain        = "com.#{@packager}.#{@package_name}"
-  @package_major_version = @version.split('.')[0]
-  @package_minor_version = @version.split('.')[1] +
-                           @version.split('.')[2].split('-')[0].split('rc')[0]
+  @package_name          = @build.project
+  @title                 = "#{@build.project}-#{@build.version}"
+  @reverse_domain        = "com.#{@build.packager}.#{@package_name}"
+  @package_major_version = @build.version.split('.')[0]
+  @package_minor_version = @build.version.split('.')[1] +
+                           @build.version.split('.')[2].split('-')[0].split('rc')[0]
   @pm_restart            = 'None'
   @build_date            = Time.new.strftime("%Y-%m-%dT%H:%M:%SZ")
   @apple_bindir          = '/usr/bin'
@@ -75,10 +75,10 @@ end
 
 # method:        build_dmg
 # description:   This method builds a package from the directory structure in
-#                /tmp/#{@name} and puts it in the
-#                /tmp/#{@name}/#{@name}-#{version}/payload directory. A DMG is
+#                /tmp/#{@project} and puts it in the
+#                /tmp/#{@project}/#{@project}-#{version}/payload directory. A DMG is
 #                created, using hdiutil, based on the contents of the
-#                /tmp/#{@name}/#{@name}-#{version}/payload directory. The resultant
+#                /tmp/#{@project}/#{@project}-#{version}/payload directory. The resultant
 #                DMG is placed in the pkg/apple directory.
 #
 def build_dmg
@@ -114,20 +114,20 @@ def build_dmg
     #{dmg_file}")
 
   if File.directory?("#{pwd}/pkg/apple")
-    mv("#{pwd}/#{dmg_file}", "#{pwd}/pkg/apple/#{dmg_file}")
+    sh "sudo mv #{pwd}/#{dmg_file} #{pwd}/pkg/apple/#{dmg_file}"
     puts "moved:   #{dmg_file} has been moved to #{pwd}/pkg/apple/#{dmg_file}"
   else
     mkdir_p("#{pwd}/pkg/apple")
-    mv(dmg_file, "#{pwd}/pkg/apple/#{dmg_file}")
+    sh "sudo mv #{pwd}/#{dmg_file} #{pwd}/pkg/apple/#{dmg_file}"
     puts "moved:   #{dmg_file} has been moved to #{pwd}/pkg/apple/#{dmg_file}"
   end
 end
 
 # method:        pack_source
-# description:   This method copies the #{@name} source into a directory
-#                structure in /tmp/#{@name}/#{@name}-#{version}/root mirroring the
+# description:   This method copies the #{@project} source into a directory
+#                structure in /tmp/#{@project}/#{@project}-#{version}/root mirroring the
 #                structure on the target system for which the package will be
-#                installed. Anything installed into /tmp/#{@name}/root will be
+#                installed. Anything installed into /tmp/#{@project}/root will be
 #                installed as the package's payload.
 #
 def pack_source
@@ -155,14 +155,14 @@ def pack_source
   # Setup a preflight script and replace variables in the files with
   # the correct paths.
   if File.exists?("#{@working_tree['scripts']}/preflight")
-    chown('root', 'wheel', "#{@working_tree['scripts']}/preflight")
     chmod(0644, "#{@working_tree['scripts']}/preflight")
+    sh "sudo chown root:wheel #{@working_tree['scripts']}/preflight"
   end
 
   # Setup a postflight from from the erb created earlier
   if File.exists?("#{@working_tree['scripts']}/postflight")
-    chown('root', 'wheel', "#{@working_tree['scripts']}/postflight")
     chmod(0755, "#{@working_tree['scripts']}/postflight")
+    sh "sudo chown root:wheel #{@working_tree['scripts']}/postflight"
   end
 
   # Do a run through first setting the specified permissions then
@@ -173,12 +173,42 @@ def pack_source
       group = params['group']
       perms = params['perms']
       path  = params['path']
-      chmod_R(Integer(perms), "#{work}/#{path}")
-      chown_R(owner, group, "#{work}/#{path}")
-      chmod(0755, "#{work}/#{path}")
+      ##
+      # Before setting our default permissions for all subdirectories/files of
+      # each directory listed in directories, we have to get a list of the
+      # directories. Otherwise, when we set the default perms (most likely
+      # 0644) we'll lose traversal on subdirectories, and later when we want to
+      # ensure they're 755 we won't be able to find them.
+      #
+      directories = []
       Dir["#{work}/#{path}/**/*"].each do |file|
-        chmod(0755, file) if File.directory?(file)
+        directories << file if File.directory?(file)
       end
+
+      ##
+      # Here we're setting the default permissions for all files as described
+      # in file_mapping.yaml. Since we have a listing of directories, it
+      # doesn't matter if we remove executable permission on directories, we'll
+      # reset it later.
+      #
+      sh "sudo chmod -R #{perms} #{work}/#{path}"
+
+      ##
+      # We know at least one directory, the one listed in file_mapping.yaml, so
+      # we set it executable.
+      #
+      sh "sudo chmod 0755 #{work}/#{path}"
+
+      ##
+      # Now that default perms are set, we go in and reset executable perms on
+      # directories
+      #
+      directories.each { |d| sh "sudo chmod 0755 #{d}" }
+
+      ##
+      # Finally we set the owner/group as described in file_mapping.yaml
+      #
+      sh "sudo chown -R #{owner}:#{group} #{work}/#{path}"
     end
   end
 
@@ -190,8 +220,8 @@ def pack_source
       perms = params['perms']
       dest  = params['path']
       # Allow for regexs like [A-Z]*
-      FileList[file].each do |file|
-        cmd = "#{INSTALL} -o #{owner} -g #{group} -m #{perms} #{source}/#{file} #{work}/#{dest}"
+      FileList[file].each do |f|
+        cmd = "sudo #{INSTALL} -o #{owner} -g #{group} -m #{perms} #{source}/#{f} #{work}/#{dest}"
         puts cmd
         system(cmd)
       end
@@ -199,26 +229,29 @@ def pack_source
   end
 end
 
-if @build_dmg
+if @build.build_dmg
   namespace :package do
     desc "Task for building an Apple Package"
     task :apple => [:setup] do
       bench = Benchmark.realtime do
-        # Test for Root and Packagemaker binary
-        raise "Please run rake as root to build Apple Packages" unless Process.uid == 0
+        # Test for Packagemaker binary
         raise "Packagemaker must be installed. Please install XCode Tools" unless \
           File.exists?(PACKAGEMAKER)
 
         make_directory_tree
         pack_source
         build_dmg
-        chmod_R(0775, "#{pwd}/pkg")
       end
-      if @benchmark
+      if @build.benchmark
         add_metrics({ :dist => 'osx', :bench => bench })
         post_metrics
       end
     end
+  end
+
+  # An alias task to simplify our remote logic in jenkins.rake
+  namespace :pl do
+    task :dmg => "package:apple"
   end
 end
 

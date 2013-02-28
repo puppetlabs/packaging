@@ -32,37 +32,53 @@
 #
 #################
 #
-#  SHA=$(echo $BUILD_PROPERTIES | cut -d '.' -f1)
+# #!/bin/bash
 #
-#  echo "Build type: $BUILD_TYPE"
+# SHA=$(echo $BUILD_PROPERTIES | cut -d '.' -f1)
+#
+# echo "Build type: $BUILD_TYPE"
 #
 # ### Create a local clone of the git-bundle that was passed
-# The bundle is a tarball, and since this is a project-agnostic
-# job, we don't actually know what's in it, just that it's a
-# git bundle.
+# # The bundle is a tarball, and since this is a project-agnostic
+# # job, we don't actually know what's in it, just that it's a
+# # git bundle.
+# #
 #
+# [ -f "PROJECT_BUNDLE" ] || exit 1
+# mkdir project && tar -xzf PROJECT_BUNDLE -C project/
 #
-#  [ -f "PROJECT_BUNDLE" ] || exit 1
-#  mkdir project && tar -xzf PROJECT_BUNDLE -C project/
+# pushd project
+#   git clone --recursive $(ls) git_repo
 #
-#  cd project
-#    git clone --recursive $(ls) git_repo
+#     pushd git_repo
 #
-#    cd git_repo
+#     ### Clone the packaging repo
+#     rake package:bootstrap
 #
-#      ### Clone the packaging repo
-#      rake package:bootstrap
+#     ### Perform the build
+#     rake pl:build_from_params PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
 #
-#      ### Perform the build
-#      rake pl:fetch pl:build_from_params PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
+#     ### Send the results
+#     rake pl:jenkins:ship["artifacts"] PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
 #
-#      ### Send the results
-#      rake pl:jenkins:ship["artifacts"]
+#   popd
+# popd
 #
-#      ### If a downstream job was passed, trigger it now
-#      if [ -n "$DOWNSTREAM_JOB" ] ; then
-#        rake pl:jenkins:post["$DOWNSTREAM_JOB"]
-#      fi
+# ### Create the repositories from our project by trigger a downstream job
+# ### Because we can't trigger downstream with a File Parameter, we use curl
+# if [ "$BUILD_TYPE" = "rpm" ] || [ "$BUILD_TYPE" = "deb" ] ; then
+#   curl -i -Fname=PROJECT_BUNDLE -Ffile0=@PROJECT_BUNDLE -FSubmit=Build -Fjson="{\"parameter\":[{\"name\":\"PROJECT_BUNDLE\",\"file\":\"file0\"}]}" \
+#   http://jenkins-release.delivery.puppetlabs.net/job/puppetlabs-packaging-repo-creation/build
+# fi
+#
+# ### If a downstream job was passed, trigger it now
+# if [ -n "$DOWNSTREAM_JOB" ] ; then
+#   pushd project
+#     pushd git_repo
+#       rake pl:jenkins:post["$DOWNSTREAM_JOB"] PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
+#     popd
+#   popd
+# fi
 #
 #################
 

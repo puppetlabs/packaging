@@ -1,4 +1,4 @@
-if @benchmark
+if @build.benchmark
   @metrics          = []
   @pg_major_version = nil
   @db_table         = 'metrics'
@@ -6,13 +6,13 @@ if @benchmark
   def add_metrics args
     @metrics << {
       :bench      => args[:bench],
-      :dist       => ( args[:dist]        || ENV['DIST']  ),
-      :pkg        => ( args[:pkg]         || @name        ),
-      :version    => ( args[:version]     || @version     ),
-      :pe_version => ( args[:pe_version]  || @pe_version  ),
-      :date       => ( args[:date]        || timestamp    ),
-      :who        => ( args[:who]         || ENV['USER']  ),
-      :where      => ( args[:where]       || hostname     )
+      :dist       => ( args[:dist]        || ENV['DIST']       ),
+      :pkg        => ( args[:pkg]         || @build.project    ),
+      :version    => ( args[:version]     || @build.version    ),
+      :pe_version => ( args[:pe_version]  || @build.pe_version ),
+      :date       => ( args[:date]        || timestamp         ),
+      :who        => ( args[:who]         || ENV['USER']       ),
+      :where      => ( args[:where]       || hostname          )
     }
   end
 

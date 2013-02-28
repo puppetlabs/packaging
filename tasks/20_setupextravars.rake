@@ -7,53 +7,49 @@
 # PL Release team
 namespace :pl do
   task :load_extras do
-    begin
-      @team_data = YAML.load_file("#{ENV['HOME']}/.packaging/team/#{@builder_data_file}") || {}
-      @project_data = YAML.load_file("#{ENV['HOME']}/.packaging/project/#{@builder_data_file}") || {}
-      @pe_name          = @project_data['pe_name']       if @project_data['pe_name']
-      @tarball_path     = @project_data['tarball_path']  if @project_data['tarball_path']
-      @rpm_build_host   = @team_data['rpm_build_host']   if @team_data['rpm_build_host']
-      @deb_build_host   = @team_data['deb_build_host']   if @team_data['deb_build_host']
-      @osx_build_host   = @team_data['osx_build_host']   if @team_data['osx_build_host']
-      @ips_build_host   = @team_data['ips_build_host']   if @team_data['ips_build_host']
-      @dmg_path         = @team_data['dmg_path']         if @team_data['dmg_path']
-      @team             = @team_data['team']             if @team_data['team']
-      @freight_conf     = @team_data['freight_conf']     if @team_data['freight_conf']
-      @sles_build_host  = @team_data['sles_build_host']  if @team_data['sles_build_host']
-      @sles_arch_repos  = @team_data['sles_arch_repos']  if @team_data['sles_arch_repos']
-      @sles_repo_path   = @team_data['sles_repo_path']   if @team_data['sles_repo_path']
-      @sles_repo_host   = @team_data['sles_repo_host']   if @team_data['sles_repo_host']
-      @ips_path         = @team_data['ips_path']         if @team_data['ips_path']
-      @ips_package_host = @team_data['ips_package_host'] if @team_data['ips_package_host']
-      @certificate_pem  = @team_data['certificate_pem']  if @team_data['certificate_pem']
-      @privatekey_pem   = @team_data['privatekey_pem']   if @team_data['privatekey_pem']
-      @ips_inter_cert   = @team_data['ips_inter_cert']   if @team_data['ips_inter_cert']
+    unless ENV['PARAMS_FILE'] && ENV['PARAMS_FILE'] != ''
+      @build.set_params_from_file("#{ENV['HOME']}/.packaging/team/#{@build.builder_data_file}")
+      @build.set_params_from_file("#{ENV['HOME']}/.packaging/project/#{@build.builder_data_file}")
       # Overrideable
-      @build_pe         = (boolean_value( ENV['PE_BUILD'] || @team_data['build_pe'])) if @team_data['build_pe']
+      @build.build_pe   = boolean_value(ENV['PE_BUILD']) if ENV['PE_BUILD']
       # right now, puppetdb is the only one to override these, because it needs
       # two sets of cows, one for PE and the other for FOSS
-      @cows             = (ENV['COW']      || @project_data['cows'])          if @project_data['cows']
-      @final_mocks      = (ENV['MOCK']     || @project_data['final_mocks'])   if @project_data['final_mocks']
-      @packager         = (ENV['PACKAGER'] || @team_data['packager'])         if @team_data['packager']
-      @pe_version       ||= ENV['PE_VER']  || (@project_data['pe_version']    if @project_data['pe_version'])
-      @yum_repo_path    = (ENV['YUM_REPO'] || @team_data['yum_repo_path'])    if @team_data['yum_repo_path']
-      @yum_host         = (ENV['YUM_HOST'] || @team_data['yum_host'])         if @team_data['yum_host']
-      @apt_host         = (ENV['APT_HOST'] || @team_data['apt_host'])         if @team_data['apt_host']
-      @apt_repo_path    = (ENV['APT_REPO'] || @team_data['apt_repo_path'])    if @team_data['apt_repo_path']
-
-    rescue => e
-      STDERR.puts "There was an error loading the builder data from #{ENV['HOME']}/.packaging/#{@builder_data_file}. Try rake pl:fetch to download the current extras builder data.\n" + e.message
-      STDERR.puts e.backtrace
-      exit 1
+      @build.cows             = ENV['COW']      if ENV['COW']
+      @build.final_mocks      = ENV['MOCK']     if ENV['MOCK']
+      @build.packager         = ENV['PACKAGER'] if ENV['PACKAGER']
+      @build.pe_version       = ENV['PE_VER']   if ENV['PE_VER']
+      @build.yum_repo_path    = ENV['YUM_REPO'] if ENV['YUM_REPO']
+      @build.yum_host         = ENV['YUM_HOST'] if ENV['YUM_HOST']
+      @build.apt_host         = ENV['APT_HOST'] if ENV['APT_HOST']
+      @build.apt_repo_path    = ENV['APT_REPO'] if ENV['APT_REPO']
     end
   end
 end
-if @team == 'release'
-  @benchmark = TRUE
+if @build.team == 'release'
+  @build.benchmark = TRUE
 end
 
-# Starting with puppetdb, we'll maintain two separate build-data files, one for PE and the other for FOSS
-# This is the start to maintaining both PE and FOSS packaging in one source repo
-unless @pe_name.nil?
-  @name = @pe_name
+##
+# Starting with puppetdb, we'll maintain two separate build-data files, one for
+# PE and the other for FOSS. This is the start to maintaining both PE and FOSS
+# packaging in one source repo. As is done in 10_setupvars.rake, the @name
+# variable is set to the value of @project, for backwards compatibility.
+#
+unless @build.pe_name.nil?
+  @build.project = @build.pe_name
+  @build.name    = @build.project
+end
+
+##
+# MM 1-22-2013
+# We have long made all of the variables available to erb templates in the
+# various projects. The problem is now that we've switched to encapsulating all
+# of this inside a build object, that information is no longer available. This
+# section is for backwards compatibility only. It sets an instance variable
+# for all of the parameters inside the build object. This is repeated in
+# 10_setupvars.rake. Note that the intention is to eventually abolish this
+# behavior, and access the parameters via the build object only.
+#
+@build.params.each do |param, value|
+  self.instance_variable_set("@#{param}", value)
 end

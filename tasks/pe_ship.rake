@@ -1,46 +1,46 @@
-if @build_pe
+if @build.build_pe
   namespace :pe do
-    desc "ship PE rpms to #{@yum_host}"
+    desc "ship PE rpms to #{@build.yum_host}"
     task :ship_rpms => ["pl:load_extras"] do
       if empty_dir?("pkg/pe/rpm")
         STDERR.puts "The 'pkg/pe/rpm' directory has no packages. Did you run rake pe:deb?"
         exit 1
       else
-        target_path = ENV['YUM_REPO'] ? ENV['YUM_REPO'] : "#{@yum_repo_path}/#{@pe_version}/repos/"
-        rsync_to('pkg/pe/rpm/', @yum_host, target_path)
-        if @team == 'release'
+        target_path = ENV['YUM_REPO'] ? ENV['YUM_REPO'] : "#{@build.yum_repo_path}/#{@build.pe_version}/repos/"
+        rsync_to('pkg/pe/rpm/', @build.yum_host, target_path)
+        if @build.team == 'release'
           Rake::Task["pe:remote:update_yum_repo"].invoke
         end
       end
     end
 
-    desc "Ship PE debs to #{@apt_host}"
+    desc "Ship PE debs to #{@build.apt_host}"
     task :ship_debs => "pl:load_extras" do
-      dist = @default_cow.split('-')[1]
+      dist = @build.default_cow.split('-')[1]
       if empty_dir?("pkg/pe/deb/#{dist}")
         STDERR.puts "The 'pkg/pe/deb/#{dist}' directory has no packages. Did you run rake pe:deb?"
         exit 1
       else
-        target_path = ENV['APT_REPO'] ? ENV['APT_REPO'] : "#{@apt_repo_path}/#{@pe_version}/repos/incoming/unified/"
-        rsync_to("pkg/pe/deb/#{dist}/", @apt_host, target_path)
-        if @team == 'release'
+        target_path = ENV['APT_REPO'] ? ENV['APT_REPO'] : "#{@build.apt_repo_path}/#{@build.pe_version}/repos/incoming/unified/"
+        rsync_to("pkg/pe/deb/#{dist}/", @build.apt_host, target_path)
+        if @build.team == 'release'
           Rake::Task["pe:remote:freight"].invoke
         end
       end
     end
 
     namespace :remote do
-      desc "Update remote rpm repodata for PE on #{@yum_host}"
+      desc "Update remote rpm repodata for PE on #{@build.yum_host}"
       task :update_yum_repo => "pl:load_extras" do
-        remote_ssh_cmd(@yum_host, "for dir in  $(find #{@apt_repo_path}/#{@pe_version}/repos/el* -type d | grep -v repodata | grep -v cache | xargs)  ; do   pushd $dir; sudo rm -rf repodata; createrepo -q -d .; popd &> /dev/null ; done; sync")
+        remote_ssh_cmd(@build.yum_host, "for dir in  $(find #{@build.apt_repo_path}/#{@build.pe_version}/repos/el* -type d | grep -v repodata | grep -v cache | xargs)  ; do   pushd $dir; sudo rm -rf repodata; createrepo -q -d .; popd &> /dev/null ; done; sync")
       end
 
-      # This is particularly hacky. The 'pe-the-things' script resides on the @apt_host and takes packages placed
+      # This is particularly hacky. The 'pe-the-things' script resides on the @build.apt_host and takes packages placed
       # in the directory/structure shown in the rsync target of pe:ship_debs and adds them to the remote PE
       # freight repository and updates the apt repo metadata
-      desc "remote freight PE packages to #{@apt_host}"
+      desc "remote freight PE packages to #{@build.apt_host}"
       task :freight => "pl:load_extras" do
-        remote_ssh_cmd(@apt_host, "sudo pe-the-things #{@pe_version} #{@apt_repo_path} #{@freight_conf}")
+        remote_ssh_cmd(@build.apt_host, "sudo pe-the-things #{@build.pe_version} #{@build.apt_repo_path} #{@build.freight_conf}")
       end
     end
   end

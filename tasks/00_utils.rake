@@ -60,12 +60,17 @@ def mv_f(src, dest, options={})
   mv(src, dest, options.merge(mandatory))
 end
 
-def git_co(dist)
-  %x{git reset --hard ; git checkout #{dist}}
+def git_co(ref)
+  %x{git reset --hard ; git checkout #{ref}}
   unless $?.success?
-    STDERR.puts 'Could not checkout #{dist} git branch to build package from...exiting'
+    STDERR.puts "Could not checkout #{ref} git branch to build package from...exiting"
     exit 1
   end
+end
+
+# return the sha of HEAD on the current branch
+def git_sha
+  %x{git rev-parse HEAD}
 end
 
 def get_temp
@@ -180,20 +185,20 @@ def get_base_pkg_version
   if dash.include?("rc")
     # Grab the rc number
     rc_num = dash.match(/rc(\d)+/)[1]
-    ver = dash.sub(/-?rc[0-9]+/, "-0.#{@release}rc#{rc_num}").gsub(/(rc[0-9]+)-(\d+)?-?/, '\1.\2')
+    ver = dash.sub(/-?rc[0-9]+/, "-0.#{@build.release}rc#{rc_num}").gsub(/(rc[0-9]+)-(\d+)?-?/, '\1.\2')
   else
-    ver = dash.gsub('-','.') + "-#{@release}"
+    ver = dash.gsub('-','.') + "-#{@build.release}"
   end
 
   ver.split('-')
 end
 
 def get_debversion
-  get_base_pkg_version.join('-') << "#{@packager}1"
+  get_base_pkg_version.join('-') << "#{@build.packager}1"
 end
 
 def get_origversion
-  @debversion.split('-')[0]
+  @build.debversion.split('-')[0]
 end
 
 def get_rpmversion
@@ -216,12 +221,16 @@ def load_keychain
   end
 end
 
+def source_dirty?
+  git_describe_version.include?('dirty')
+end
+
 def kill_keychain
   %x{keychain -k mine}
 end
 
 def start_keychain
-  keychain = %x{/usr/bin/keychain -q --agents gpg --eval #{@gpg_key}}.chomp
+  keychain = %x{/usr/bin/keychain -q --agents gpg --eval #{@build.gpg_key}}.chomp
   new_env = keychain.match(/(GPG_AGENT_INFO)=([^;]*)/)
   ENV[new_env[1]] = new_env[2]
 end
@@ -230,7 +239,7 @@ def gpg_sign_file(file)
   gpg ||= find_tool('gpg')
 
   if gpg
-    sh "#{gpg} --armor --detach-sign -u #{@gpg_key} #{file}"
+    sh "#{gpg} --armor --detach-sign -u #{@build.gpg_key} #{file}"
   else
     STDERR.puts "No gpg available. Cannot sign #{file}. Exiting..."
     exit 1
@@ -257,7 +266,9 @@ def set_cow_envs(cow)
     end
     arch = arch.split('.')[0] if arch.include?('.')
   end
-
+  if @build.build_pe
+    ENV['PE_VER'] = @build.pe_version
+  end
   ENV['DIST'] = dist
   ENV['ARCH'] = arch
 end
@@ -324,7 +335,7 @@ end
 
 def git_tag(version)
   begin
-    sh "git tag -s -u #{@gpg_key} -m '#{version}' #{version}"
+    sh "git tag -s -u #{@build.gpg_key} -m '#{version}' #{version}"
   rescue Exception => e
     STDERR.puts e
     STDERR.puts "Unable to tag repo at #{version}"
@@ -339,12 +350,12 @@ end
 def git_bundle(treeish)
   temp = get_temp
   appendix = rand_string
-  sh "git bundle create #{temp}/#{@name}-#{@version}-#{appendix} #{treeish} --tags"
+  sh "git bundle create #{temp}/#{@build.project}-#{@build.version}-#{appendix} #{treeish} --tags"
   cd temp do
-    sh "tar -czf #{@name}-#{@version}-#{appendix}.tar.gz #{@name}-#{@version}-#{appendix}"
-    rm_rf "#{@name}-#{@version}-#{appendix}"
+    sh "tar -czf #{@build.project}-#{@build.version}-#{appendix}.tar.gz #{@build.project}-#{@build.version}-#{appendix}"
+    rm_rf "#{@build.project}-#{@build.version}-#{appendix}"
   end
-  "#{temp}/#{@name}-#{@version}-#{appendix}.tar.gz"
+  "#{temp}/#{@build.project}-#{@build.version}-#{appendix}.tar.gz"
 end
 
 # We take a tar argument for cases where `tar` isn't best, e.g. Solaris
@@ -356,8 +367,18 @@ def remote_bootstrap(host, treeish, tar_cmd=nil)
   tarball_name = File.basename(tarball).gsub('.tar.gz','')
   rsync_to(tarball, host, '/tmp')
   appendix = rand_string
-  sh "ssh -t #{host} '#{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone --recursive /tmp/#{tarball_name} /tmp/#{@name}-#{appendix} ; cd /tmp/#{@name}-#{appendix} ; rake package:bootstrap'"
-  "/tmp/#{@name}-#{appendix}"
+  sh "ssh -t #{host} '#{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone --recursive /tmp/#{tarball_name} /tmp/#{@build.project}-#{appendix} ; cd /tmp/#{@build.project}-#{appendix} ; rake package:bootstrap'"
+  "/tmp/#{@build.project}-#{appendix}"
+end
+
+# Given a BuildInstance object and a host, send its params to the host. Return
+# the remote path to the params.
+def remote_buildparams(host, build)
+  params_file = build.params_to_yaml
+  params_file_name = File.basename(params_file)
+  params_dir = rand_string
+  rsync_to(params_file, host, "/tmp/#{params_dir}/")
+  "/tmp/#{params_dir}/#{params_file_name}"
 end
 
 def is_git_repo
@@ -450,4 +471,52 @@ def el_version()
     return %x{rpm -q --qf \"%{VERSION}\" $(rpm -q --whatprovides /etc/redhat-release )}
   end
 end
+
+# Given the path to a yaml file, load the yaml file into an object and return
+# the object.
+def data_from_yaml(file)
+  file = File.expand_path(file)
+  begin
+    input_data = YAML.load_file(file) || {}
+  rescue => e
+    puts "There was an error loading data from #{file}."
+    puts e.backtrace.join("\n")
+    exit 1
+  end
+  input_data
+end
+
+# This is fairly absurd. We're implementing curl by shelling out. What do I
+# wish we were doing? Using a sweet ruby wrapper around curl, such as Curb or
+# Curb-fu. However, because we're using clean build systems and trying to
+# make this portable with minimal system requirements, we can't very well
+# depend on libraries that aren't in the ruby standard libaries. We could
+# also do this using Net::HTTP but that set of libraries is a rabbit hole to
+# go down when what we're trying to accomplish is posting multi-part form
+# data that includes file uploads to jenkins. It gets hairy fairly quickly,
+# but, as they say, pull requests accepted.
+#
+# This method takes two arguments
+# 1) String - the URL to post to
+# 2) Array  - Ordered array of name=VALUE curl form parameters
+def curl_form_data(uri, form_data=[])
+  unless curl = find_tool("curl")
+    warn "Couldn't find curl. Curl is required for posting jenkins to trigger a build. Please install curl and try again."
+    exit 1
+  end
+  #
+  # Begin constructing the post string.
+  # First, assemble the form_data arguments
+  #
+  post_string = "-i "
+  form_data.each do |param|
+    post_string << "#{param} "
+  end
+
+  # Add the uri and we're off
+  post_string << "#{uri}"
+  sh "#{curl} #{post_string}"
+  return $?.success?
+end
+
 

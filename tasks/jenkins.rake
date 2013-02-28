@@ -51,10 +51,10 @@
 #    cd git_repo
 #
 #      ### Clone the packaging repo
-#      rake package:bootstrap && rake pl:fetch
+#      rake package:bootstrap
 #
 #      ### Perform the build
-#      rake pl:load_extras pl:build_from_params PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
+#      rake pl:fetch pl:build_from_params PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
 #
 #      ### Send the results
 #      rake pl:jenkins:ship["artifacts"]
@@ -178,7 +178,7 @@ namespace :pl do
   namespace :jenkins do
     tasks.each do |build_task|
       desc "Queue pl:#{build_task} build on jenkins builder"
-      task build_task => [ "pl:fetch", "pl:load_extras" ] do
+      task build_task => "pl:fetch" do
         invoke_task("pl:jenkins:post_build", "pl:#{build_task}")
       end
     end
@@ -192,7 +192,7 @@ namespace :pl do
     end
 
     desc "Retrieve packages built by jenkins, sign, and ship all!"
-    task :uber_ship => ["pl:fetch", "pl:load_extras"] do
+    task :uber_ship => "pl:fetch" do
       uber_tasks = ["jenkins:retrieve", "jenkins:sign_all", "uber_ship", "remote:freight", "remote:update_yum_repo" ]
       uber_tasks.map { |t| "pl:#{t}" }.each { |t| Rake::Task[t].invoke }
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
@@ -213,14 +213,14 @@ if @build.build_pe
       tasks << "sles"
       tasks.each do |build_task|
         desc "Queue pe:#{build_task} build on jenkins builder"
-        task build_task => ["pl:fetch", "pl:load_extras"] do
+        task build_task => "pl:fetch" do
           check_var("PE_VER", @build.pe_version)
           invoke_task("pl:jenkins:post_build", "pe:local_#{build_task}")
         end
       end
 
       desc "Queue builds of all PE packages for this project in Jenkins"
-      task :uber_build  => ["pl:fetch", "pl:load_extras"] do
+      task :uber_build  => "pl:fetch" do
         check_var("PE_VER", @build.pe_version)
         ["deb_all", "mock_all", "sles"].each do |task|
           invoke_task("pe:jenkins:#{task}")
@@ -228,7 +228,7 @@ if @build.build_pe
       end
 
       desc "Retrieve PE packages built by jenkins, sign, and ship all!"
-      task :uber_ship => ["pl:fetch", "pl:load_extras"] do
+      task :uber_ship => "pl:fetch" do
         check_var("PE_VER", @build.pe_version)
         ["pl:jenkins:retrieve", "pe:ship_rpms", "pe:ship_debs"].each do |task|
           Rake::Task[task].invoke

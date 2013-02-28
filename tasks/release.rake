@@ -71,7 +71,7 @@ namespace :pl do
 
   if File.exist?("#{ENV['HOME']}/.packaging")
     desc "Release tarball, e.g. package:tar, pl:{sign_tar, ship_tar}"
-    task :release_tar => ['pl:fetch', 'pl:load_extras'] do
+    task :release_tar => 'pl:fetch' do
       invoke_task("package:tar")
       invoke_task("pl:sign_tar")
       if confirm_ship(FileList["pkg/*tar.gz*"])
@@ -80,7 +80,7 @@ namespace :pl do
     end
 
     desc "Release dmg, e.g. package:apple, pl:ship_dmg"
-    task :release_dmg => ['pl:fetch', 'pl:load_extras'] do
+    task :release_dmg => 'pl:fetch' do
       sh "rvmsudo rake package:apple"
       if confirm_ship(FileList["pkg/apple/*.dmg"])
         Rake::Task["pl:ship_dmg"].execute
@@ -88,7 +88,7 @@ namespace :pl do
     end if @build.build_dmg
 
     desc "Release ips, e.g. pl:ips, pl:ship_ips"
-    task :release_ips => ['pl:fetch', 'pl:load_extras'] do
+    task :release_ips => 'pl:fetch' do
       Rake::Task['pl:ips'].invoke
       Rake::Task['pl:ship_ips'].invoke
     end

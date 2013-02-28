@@ -17,24 +17,30 @@ project_data_url = data_repo + '/' + project_data_branch
 team_data_url = data_repo + '/' + team_data_branch
 
 
-# The pl:fetch task pulls down a file from the build-data repo that contains additional
+# The pl:fetch task pulls down two files from the build-data repo that contain additional
 # data specific to Puppet Labs release infrastructure intended to augment/override any
 # defaults specified in the source project repo, e.g. in ext/build_defaults.yaml
 #
-# It uses curl to download the file, and places it in a hidden directory in the home
-# directory, e.g. ~/.packaging/@build.builder_data_file
+# It uses curl to download the files, and places them in a temporary
+# directory, e.g. /tmp/somedirectory/{project,team}/@build.builder_data_file
 namespace :pl do
   task :fetch do
-    rm_rf "#{ENV['HOME']}/.packaging"
-    mkdir_pr("#{ENV['HOME']}/.packaging/team", "#{ENV['HOME']}/.packaging/project")
+    # Remove .packaging directory from old-style extras loading
+    rm_rf "#{ENV['HOME']}/.packaging" if File.directory?("#{ENV['HOME']}/.packaging")
+    # Touch the .packaging file which is allows packaging to present remote tasks
+    touch "#{ENV['HOME']}/.packaging"
+    tempdir = get_temp
+    mkdir_pr("#{tempdir}/team", "#{tempdir}/project")
     begin
       if dist = el_version
         if dist.to_i < 6
           flag = "-k"
         end
       end
-      sh "curl #{flag} #{project_data_url}/#{@build.builder_data_file} > #{ENV['HOME']}/.packaging/project/#{@build.builder_data_file}"
-      sh "curl #{flag} #{team_data_url}/#{@build.builder_data_file} > #{ENV['HOME']}/.packaging/team/#{@build.builder_data_file}"
+      sh "curl #{flag} #{project_data_url}/#{@build.builder_data_file} > #{tempdir}/project/#{@build.builder_data_file}"
+      sh "curl #{flag} #{team_data_url}/#{@build.builder_data_file} > #{tempdir}/team/#{@build.builder_data_file}"
+      invoke_task("pl:load_extras", tempdir)
+      rm_rf(tempdir)
     rescue
       STDERR.puts "There was an error fetching the builder extras data."
       exit 1

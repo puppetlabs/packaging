@@ -6,7 +6,7 @@
 if @build.build_pe
   namespace :pe do
     desc "Execute remote debian build using default cow on builder and retrieve package"
-    task :deb => ['pl:fetch', 'pl:load_extras'] do
+    task :deb => 'pl:fetch' do
       ENV['PE_VER'] ||= @build.pe_version
       check_var('PE_VER', ENV['PE_VER'])
       Rake::Task["pl:remote:build"].reenable
@@ -14,7 +14,7 @@ if @build.build_pe
     end
 
     desc "Execute remote debian build using ALL cows on builder and retrieve packages"
-    task :deb_all => ['pl:fetch', 'pl:load_extras'] do
+    task :deb_all => 'pl:fetch' do
       ENV['PE_VER'] ||= @build.pe_version
       check_var('PE_VER', ENV['PE_VER'])
       Rake::Task["pl:remote:build"].reenable
@@ -22,28 +22,28 @@ if @build.build_pe
     end
 
     desc "Execute remote rpm build using default mock on builder and retrieve package"
-    task :mock => ['pl:fetch', 'pl:load_extras'] do
+    task :mock => 'pl:fetch' do
       ENV['PE_VER'] ||= @build.pe_version
       Rake::Task["pl:remote:build"].reenable
       Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pe:local_mock PE_BUILD=#{@build.build_pe} TEAM=#{@build.team} PE_VER=#{ENV['PE_VER']}")
     end
 
     desc "Execute remote rpm build with ALL mocks on builder and retrieve packages"
-    task :mock_all => ['pl:fetch', 'pl:load_extras'] do
+    task :mock_all => 'pl:fetch' do
       ENV['PE_VER'] ||= @build.pe_version
       Rake::Task["pl:remote:build"].reenable
       Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pe:local_mock_all PE_BUILD=#{@build.build_pe} MOCK='#{@build.final_mocks}' TEAM=#{@build.team} PE_VER=#{ENV['PE_VER']}")
     end
 
     desc "Execute remote sles rpm build and retrieve package"
-    task :sles => ['pl:fetch', 'pl:load_extras'] do
+    task :sles => 'pl:fetch' do
       ENV['PE_VER'] ||= @build.pe_version
       Rake::Task["pl:remote:build"].reenable
       Rake::Task["pl:remote:build"].invoke(@build.sles_build_host, 'HEAD', "pe:local_sles PE_BUILD=#{@build.build_pe} TEAM=#{@build.team} PE_VER=#{ENV['PE_VER']}")
     end
 
     desc "Execute remote debian, el, and sles builds, sign, and ship pkgs"
-    task :all => ['clean', 'pl:fetch', 'pl:load_extras'] do
+    task :all => ['clean', 'pl:fetch'] do
       ['pe:deb', 'pe:mock_all', 'pe:sles', 'pe:ship_rpms', 'pe:ship_debs'].each do |task|
         Rake::Task[task].execute
       end

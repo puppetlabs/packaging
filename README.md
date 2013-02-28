@@ -65,7 +65,8 @@ source repo, e.g. puppet. Then, run `rake package:bootstrap` and `rake pl:deb`
 to create a deb, and `rake pl:mock` to make an rpm (on a debian or redhat host,
 respectively).
 
-## `pe:` tasks There is also a `pe:` namespace, for the building of Puppet
+## `pe:` tasks
+There is also a `pe:` namespace, for the building of Puppet
 Labs' Puppet Enterprise packages that have been converted to using this repo.
 The `pe:` tasks rely heavily on PL internal infrastructure, and are not
 generally useful outside of this environment. To create packages, in the source
@@ -91,7 +92,8 @@ for developer use for building test packages; the `pe:deb` task creates a
   on the local station (e.g., by ssh-ing into a remote builder first), the
   tasks `pe:local_mock` and `pe:local_deb` build using the local host.
 
-## `:remote:` tasks There are also sub-namespaces of `:pl` and `:pe` that are
+## `:remote:` tasks
+There are also sub-namespaces of `:pl` and `:pe` that are
 worth noting. First, the `:remote` namespace. Tasks under `:remote` perform
 builds remotely on internal builders from your local workstation. How they
 work:
@@ -117,7 +119,8 @@ pl:build_from_params PARAMS_FILE=/path/to/previously/sent/file`.
 7) Maintain the ssh connection until the build finishes, and rsync the packages
 from the builder to the local workstation.
 
-## `:jenkins:` tasks Jenkins tasks are similar to the `:remote:` tasks, but
+## `:jenkins:` tasks
+Jenkins tasks are similar to the `:remote:` tasks, but
 they do not require ssh access to the builders.  The jenkins tasks enable the
 packaging repo to kick off packaging builds on a remote jenkins slave. They
 work in a similar way to the :remote tasks, but with a few key differences. The

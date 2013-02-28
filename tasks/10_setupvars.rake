@@ -70,6 +70,7 @@ end
 @build.rpmrelease        ||= get_rpmrelease
 @build.builder_data_file ||= 'builder_data.yaml'
 @build.team              = ENV['TEAM'] || 'dev'
+@build.random_mockroot   = ENV['RANDOM_MOCKROOT'] ? boolean_value(ENV['RANDOM_MOCKROOT']) : true
 @keychain_loaded         ||= FALSE
 @build_root              ||= Dir.pwd
 ##

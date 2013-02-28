@@ -75,6 +75,7 @@ module Build
                       :pe_version,
                       :pg_major_version,
                       :privatekey_pem,
+                      :random_mockroot,
                       :rc_mocks,
                       :release,
                       :rpm_build_host,

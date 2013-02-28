@@ -167,7 +167,7 @@ end
 def mock_with_basedir(mock, basedir)
   config = IO.readlines(mock)
   basedir = "config_opts['basedir'] = '#{basedir}'"
-  config.insert(0, basedir)
+  config.unshift(basedir)
   tempdir = get_temp
   newmock = File.join(tempdir, File.basename(mock))
   File.open(newmock, 'w') { |f| f.puts config }

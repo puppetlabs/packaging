@@ -11,7 +11,7 @@
 namespace :pl do
   namespace :jenkins do
     desc "Create apt repositories of build DEB packages for this SHA on the distributions erver"
-    task :deb_repos => ["pl:fetch", "pl:load_extras"] do
+    task :deb_repos => "pl:fetch" do
 
       # First, we test that artifacts exist and set up the repos directory
       artifact_directory = File.join(@build.jenkins_repo_path, @build.project, git_sha.strip)
@@ -66,7 +66,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
     # enable clients to install these packages.
     #
     desc "Create apt repository configs for package repos for this sha on the distribution server"
-    task :deb_repo_configs => ["pl:fetch", "pl:load_extras"] do
+    task :deb_repo_configs => "pl:fetch" do
 
       # This is the standard path to all build artifacts on the distribution
       # server for this commit

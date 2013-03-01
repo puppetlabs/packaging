@@ -14,7 +14,7 @@ namespace :pl do
     desc "Retrieve packages from the distribution server\. Check out commit to retrieve"
     task :retrieve, :target do |t, args|
       target = args.target || "artifacts"
-      ["pl:fetch", "pl:load_extras" ].each { |t| invoke_task(t) }
+      invoke_task("pl:fetch")
       mkdir_p 'pkg'
       rsync_from("#{@build.jenkins_repo_path}/#{@build.project}/#{git_sha.strip}/#{target}/", @build.distribution_server, "pkg/")
       puts "Packages staged in pkg"

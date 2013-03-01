@@ -47,7 +47,7 @@ namespace :pl do
 
   if File.exist?("#{ENV['HOME']}/.packaging")
     desc "Upload ips p5p packages to downloads"
-    task :ship_ips => [ 'pl:fetch', 'pl:load_extras' ] do
+    task :ship_ips => 'pl:fetch' do
       if Dir['pkg/ips/pkgs/**/*'].empty?
         STDOUT.puts "There aren't any p5p packages in pkg/ips/pkgs. Maybe something went wrong?"
       else
@@ -63,17 +63,17 @@ namespace :pl do
 
   if File.exist?("#{ENV['HOME']}/.packaging")
     desc "ship apple dmg to #{@build.yum_host}"
-    task :ship_dmg => ['pl:fetch', 'pl:load_extras'] do
+    task :ship_dmg => 'pl:fetch' do
       rsync_to('pkg/apple/*.dmg', @build.yum_host, @build.dmg_path)
     end if @build.build_dmg
 
     desc "ship tarball and signature to #{@build.yum_host}"
-    task :ship_tar => ['pl:fetch', 'pl:load_extras'] do
+    task :ship_tar => 'pl:fetch' do
       rsync_to("pkg/#{@build.project}-#{@build.version}.tar.gz*", @build.yum_host, @build.tarball_path)
     end
 
     desc "UBER ship: ship all the things in pkg"
-    task :uber_ship => ['pl:fetch', 'pl:load_extras'] do
+    task :uber_ship => 'pl:fetch' do
       if confirm_ship(FileList["pkg/**/*"])
         ENV['ANSWER_OVERRIDE'] = 'yes'
         Rake::Task["pl:ship_gem"].invoke if @build.build_gem
@@ -96,7 +96,6 @@ namespace :pl do
     desc "Ship pkg directory contents to distribution server"
     task :ship, :target do |t, args|
       invoke_task("pl:fetch")
-      invoke_task("pl:load_extras")
       target = args.target || "artifacts"
       artifact_dir = "#{@build.jenkins_repo_path}/#{@build.project}/#{git_sha.strip}/#{target}"
       remote_ssh_cmd(@build.distribution_server, "mkdir -p #{artifact_dir}")

@@ -1,7 +1,7 @@
 if @build.build_pe
   namespace :pe do
     desc "ship PE rpms to #{@build.yum_host}"
-    task :ship_rpms => ["pl:load_extras"] do
+    task :ship_rpms => "pl:fetch" do
       if empty_dir?("pkg/pe/rpm")
         STDERR.puts "The 'pkg/pe/rpm' directory has no packages. Did you run rake pe:deb?"
         exit 1
@@ -15,7 +15,7 @@ if @build.build_pe
     end
 
     desc "Ship PE debs to #{@build.apt_host}"
-    task :ship_debs => "pl:load_extras" do
+    task :ship_debs => "pl:fetch" do
       dist = @build.default_cow.split('-')[1]
       if empty_dir?("pkg/pe/deb/#{dist}")
         STDERR.puts "The 'pkg/pe/deb/#{dist}' directory has no packages. Did you run rake pe:deb?"
@@ -31,7 +31,7 @@ if @build.build_pe
 
     namespace :remote do
       desc "Update remote rpm repodata for PE on #{@build.yum_host}"
-      task :update_yum_repo => "pl:load_extras" do
+      task :update_yum_repo => "pl:fetch" do
         remote_ssh_cmd(@build.yum_host, "for dir in  $(find #{@build.apt_repo_path}/#{@build.pe_version}/repos/el* -type d | grep -v repodata | grep -v cache | xargs)  ; do   pushd $dir; sudo rm -rf repodata; createrepo -q -d .; popd &> /dev/null ; done; sync")
       end
 
@@ -39,7 +39,7 @@ if @build.build_pe
       # in the directory/structure shown in the rsync target of pe:ship_debs and adds them to the remote PE
       # freight repository and updates the apt repo metadata
       desc "remote freight PE packages to #{@build.apt_host}"
-      task :freight => "pl:load_extras" do
+      task :freight => "pl:fetch" do
         remote_ssh_cmd(@build.apt_host, "sudo pe-the-things #{@build.pe_version} #{@build.apt_repo_path} #{@build.freight_conf}")
       end
     end

@@ -115,7 +115,7 @@ if @build_ips
 
   namespace :pl do
     desc "Create and sign a p5p archive package from this repository"
-    task :ips => ['pl:fetch', 'pl:load_extras'] do
+    task :ips => 'pl:fetch' do
       Rake::Task['package:ips:p5p'].reenable
       Rake::Task['package:ips:p5p'].invoke(TRUE)
     end

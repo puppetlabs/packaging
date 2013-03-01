@@ -6,10 +6,12 @@
 # generic tasks with data not generally useful outside the
 # PL Release team
 namespace :pl do
-  task :load_extras do
+  task :load_extras, :tempdir do |t, args|
     unless ENV['PARAMS_FILE'] && ENV['PARAMS_FILE'] != ''
-      @build.set_params_from_file("#{ENV['HOME']}/.packaging/team/#{@build.builder_data_file}")
-      @build.set_params_from_file("#{ENV['HOME']}/.packaging/project/#{@build.builder_data_file}")
+      tempdir = args.tempdir
+      raise "pl:load_extras requires a directory containing extras data" if tempdir.nil?
+      @build.set_params_from_file("#{tempdir}/team/#{@build.builder_data_file}")
+      @build.set_params_from_file("#{tempdir}/project/#{@build.builder_data_file}")
       # Overrideable
       @build.build_pe   = boolean_value(ENV['PE_BUILD']) if ENV['PE_BUILD']
       # right now, puppetdb is the only one to override these, because it needs

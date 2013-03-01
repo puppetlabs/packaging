@@ -12,7 +12,7 @@
 namespace :pl do
   namespace :jenkins do
     desc "Create yum repositories of built RPM packages for this SHA on the distribution server"
-    task :rpm_repos => ["pl:fetch", "pl:load_extras"] do
+    task :rpm_repos => "pl:fetch" do
       # Formulate our command string, which will just find directories with rpms
       # and create and update repositories.
       #
@@ -54,7 +54,7 @@ namespace :pl do
     # clients to install these packages.
     #
     desc "Create yum repository configs for package repos for this sha on the distribution server"
-    task :rpm_repo_configs => ["pl:fetch", "pl:load_extras"] do
+    task :rpm_repo_configs => "pl:fetch" do
 
       # This is the standard path to all build artifacts on the distribution
       # server for this commit

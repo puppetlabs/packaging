@@ -2,6 +2,54 @@
 
 if File.exist?("#{ENV['HOME']}/.packaging")
   namespace 'pl' do
+    task :remote_deb_rc => ['pl:fetch', 'pl:load_extras'] do
+      deprecate("pl:remote_deb_rc", "pl:remote:release_deb")
+      Rake::Task["pl:remote:build"].reenable
+      Rake::Task["pl:remote:build"].invoke(@build.deb_build_host, 'HEAD', "pl:release_deb_rc")
+    end
+
+    task :remote_deb_rc_build => ['pl:fetch', 'pl:load_extras'] do
+      deprecate("pl:remote_deb_rc_build", "pl:remote:deb_all")
+      Rake::Task["pl:remote:build"].reenable
+      Rake::Task["pl:remote:build"].invoke(@build.deb_build_host, 'HEAD', "pl:deb_all_rc")
+    end
+
+    task :remote_deb_final => ['pl:fetch', 'pl:load_extras'] do
+      deprecate("pl:remote_deb_final", "pl:remote:release_deb")
+      Rake::Task["pl:remote:build"].reenable
+      Rake::Task["pl:remote:build"].invoke(@build.deb_build_host, 'HEAD', "pl:release_deb_final")
+    end
+
+    task :remote_deb_final_build => ['pl:fetch', 'pl:load_extras'] do
+      deprecate("pl:remote_deb_final_build", "pl:remote:deb_all")
+      Rake::Task["pl:remote:build"].reenable
+      Rake::Task["pl:remote:build"].invoke(@build.deb_build_host, 'HEAD', "pl:deb_all")
+    end
+
+    task :remote_rpm_rc => ['pl:fetch', 'pl:load_extras'] do
+      deprecate("pl:remote_rpm_rc", "pl:remote:release_rpm")
+      Rake::Task["pl:remote:build"].reenable
+      Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pl:release_rpm_rc")
+    end
+
+    task :remote_rpm_rc_build => ['pl:fetch', 'pl:load_extras'] do
+      deprecate("pl:remote_rpm_rc_build", "pl:remote:mock_all")
+      Rake::Task["pl:remote:build"].reenable
+      Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pl:mock_rc")
+    end
+
+    task :remote_rpm_final => ['pl:fetch', 'pl:load_extras'] do
+      deprecate("pl:remote_rpm_final", "pl:remote:release_rpm")
+      Rake::Task["pl:remote:build"].reenable
+      Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pl:release_rpm_final")
+    end
+
+    task :remote_mock_final => ['pl:fetch', 'pl:load_extras'] do
+      deprecate("pl:remote_mock_final", "pl:remote:mock_all")
+      Rake::Task["pl:remote:build"].reenable
+      Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pl:mock_final")
+    end
+
     namespace :remote do
       task :build, :host, :treeish, :task, :tar do |t, args|
         if source_dirty?
@@ -22,30 +70,6 @@ if File.exist?("#{ENV['HOME']}/.packaging")
         STDOUT.puts "packages from #{host} staged in pkg/ directory"
       end
 
-      task :remote_deb_rc => ['pl:fetch', 'pl:load_extras'] do
-        deprecate("pl:remote_deb_rc", "pl:remote:release_deb")
-        Rake::Task["pl:remote:build"].reenable
-        Rake::Task["pl:remote:build"].invoke(@build.deb_build_host, 'HEAD', "pl:release_deb_rc")
-      end
-
-      task :remote_deb_rc_build => ['pl:fetch', 'pl:load_extras'] do
-        deprecate("pl:remote_deb_rc_build", "pl:remote:deb_all")
-        Rake::Task["pl:remote:build"].reenable
-        Rake::Task["pl:remote:build"].invoke(@build.deb_build_host, 'HEAD', "pl:deb_all_rc")
-      end
-
-      task :remote_deb_final => ['pl:fetch', 'pl:load_extras'] do
-        deprecate("pl:remote_deb_final", "pl:remote:release_deb")
-        Rake::Task["pl:remote:build"].reenable
-        Rake::Task["pl:remote:build"].invoke(@build.deb_build_host, 'HEAD', "pl:release_deb_final")
-      end
-
-      task :remote_deb_final_build => ['pl:fetch', 'pl:load_extras'] do
-        deprecate("pl:remote_deb_final_build", "pl:remote:deb_all")
-        Rake::Task["pl:remote:build"].reenable
-        Rake::Task["pl:remote:build"].invoke(@build.deb_build_host, 'HEAD', "pl:deb_all")
-      end
-
       desc "Execute pl:deb (single default cow deb package) on remote debian build host (no signing)"
       task :deb => ['pl:fetch', 'pl:load_extras'] do
         Rake::Task["pl:remote:build"].reenable
@@ -64,35 +88,12 @@ if File.exist?("#{ENV['HOME']}/.packaging")
         Rake::Task["pl:remote:build"].invoke(@build.deb_build_host, 'HEAD', "pl:release_deb")
       end
 
-      task :remote_rpm_rc => ['pl:fetch', 'pl:load_extras'] do
-        deprecate("pl:remote_rpm_rc", "pl:remote:release_rpm")
-        Rake::Task["pl:remote:build"].reenable
-        Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pl:release_rpm_rc")
-      end
-
-      task :remote_rpm_rc_build => ['pl:fetch', 'pl:load_extras'] do
-        deprecate("pl:remote_rpm_rc_build", "pl:remote:mock_all")
-        Rake::Task["pl:remote:build"].reenable
-        Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pl:mock_rc")
-      end
-
-      task :remote_rpm_final => ['pl:fetch', 'pl:load_extras'] do
-        deprecate("pl:remote_rpm_final", "pl:remote:release_rpm")
-        Rake::Task["pl:remote:build"].reenable
-        Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pl:release_rpm_final")
-      end
-
       desc "Execute remote pl:release_rpm full build set on remote rpm build host"
       task :release_rpm => ['pl:fetch', 'pl:load_extras'] do
         Rake::Task["pl:remote:build"].reenable
         Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pl:release_rpm")
       end
 
-      task :remote_mock_final => ['pl:fetch', 'pl:load_extras'] do
-        deprecate("pl:remote_mock_final", "pl:remote:mock_all")
-        Rake::Task["pl:remote:build"].reenable
-        Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pl:mock_final")
-      end
 
       desc "Execute pl:mock (single default mock package) on remote rpm build host (no signing)"
       task :mock => ['pl:fetch', 'pl:load_extras'] do

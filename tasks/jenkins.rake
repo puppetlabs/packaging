@@ -186,7 +186,7 @@ end
 # A task listing for creating jenkins tasks for our various pl: and pe: build
 # tasks. We can assume deb, mock, but not gem/dmg.
 #
-tasks = ["deb", "deb_all", "mock", "mock_all", "tar"]
+tasks = ["deb", "mock", "tar"]
 tasks << "gem" if @build.build_gem and ! @build.build_pe
 tasks << "dmg" if @build.build_dmg and ! @build.build_pe
 
@@ -196,6 +196,29 @@ namespace :pl do
       desc "Queue pl:#{build_task} build on jenkins builder"
       task build_task => "pl:fetch" do
         invoke_task("pl:jenkins:post_build", "pl:#{build_task}")
+      end
+    end
+
+    # While pl:remote:deb_all does all cows in serially, with jenkins we
+    # parallelize them. This breaks the cows up and posts a build for all of
+    # them. We have to sleep 5 because jenkins drops the builds when we're
+    # DOSing it with our packaging.
+    desc "Queue pl:deb_all on jenkins builder"
+    task :deb_all => "pl:fetch" do
+      @build.cows.split(' ').each do |cow|
+        @build.default_cow = cow
+        invoke_task("pl:jenkins:post_build", "pl:deb")
+        sleep 5
+      end
+    end
+
+    # This does the mocks in parallel
+    desc "Queue pl:mock-all on jenkins builder"
+    task :mock_all => "pl:fetch" do
+      @build.final_mocks.split(' ').each do |mock|
+        @build.default_mock = mock
+        invoke_task("pl:jenkins:post_build", "pl:mock")
+        sleep 5
       end
     end
 

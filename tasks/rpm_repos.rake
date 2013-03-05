@@ -37,9 +37,12 @@ namespace :pl do
       cmd << "createrepo=$(which createrepo) ; "
       cmd << 'for repodir in $(find ./ -name "*.rpm" | xargs -I {} dirname {}) ; do '
       cmd << "pushd $repodir && $createrepo -d --update . && popd ; "
-      cmd << "done ; popd ; rm .lock"
+      cmd << "done ; popd "
 
       remote_ssh_cmd(@build.distribution_server, cmd)
+
+      # Always remove the lock file, even if we've failed
+      remote_ssh_cmd(@build.distribution_server, "rm -f #{artifact_directory}/.lock")
 
       # Now that we've created our repositories, we can create the configs for
       # them

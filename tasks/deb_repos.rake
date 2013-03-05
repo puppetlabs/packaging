@@ -49,9 +49,12 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
       #
       cmd << "reprepro=$(which reprepro) ; "
       cmd << "$reprepro includedeb $dist ../../deb/$dist/*.deb ; popd ; done ; "
-      cmd << "popd ; popd ; rm .lock"
+      cmd << "popd ; popd "
 
       remote_ssh_cmd(@build.distribution_server, cmd)
+
+      # Always remove the lock file, even if we've failed
+      remote_ssh_cmd(@build.distribution_server, "rm -f #{artifact_directory}/.lock")
 
       # Now that we've created our package repositories, we can generate repo
       # configurations for use with downstream jobs, acceptance clients, etc.

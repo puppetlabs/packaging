@@ -16,7 +16,7 @@ namespace :pl do
       # Formulate our command string, which will just find directories with rpms
       # and create and update repositories.
       #
-      artifact_directory = File.join(@build.jenkins_repo_path, @build.project, git_sha.strip)
+      artifact_directory = File.join(@build.jenkins_repo_path, @build.project, @build.ref)
 
       ##
       # Test that the artifacts directory exists on the distribution server.
@@ -56,13 +56,13 @@ namespace :pl do
     # pl-$project-$sha.conf, and can be placed in /etc/yum.repos.d to enable
     # clients to install these packages.
     #
-    desc "Create yum repository configs for package repos for this sha on the distribution server"
+    desc "Create yum repository configs for package repos for this sha/tag on the distribution server"
     task :rpm_repo_configs => "pl:fetch" do
 
       # This is the standard path to all build artifacts on the distribution
       # server for this commit
       #
-      artifact_directory = File.join(@build.jenkins_repo_path, @build.project, git_sha.strip)
+      artifact_directory = File.join(@build.jenkins_repo_path, @build.project, @build.ref)
       # First check if the artifacts directory exists
       #
       cmd = "[ -d #{artifact_directory} ] || exit 0 ; "
@@ -108,19 +108,19 @@ namespace :pl do
 
           # Create an array of lines that will become our yum config
           #
-          config = ["[pl-#{@build.project}-#{git_sha.strip}]"]
-          config << ["name=PL Repo for #{@build.project} at commit #{git_sha.strip}"]
-          config << ["baseurl=http://#{@build.builds_server}/#{@build.project}/#{git_sha.strip}/repos/#{dist}/#{version}/#{subdir}/#{arch}"]
+          config = ["[pl-#{@build.project}-#{@build.ref}]"]
+          config << ["name=PL Repo for #{@build.project} at commit #{@build.ref}"]
+          config << ["baseurl=http://#{@build.builds_server}/#{@build.project}/#{@build.ref}/repos/#{dist}/#{version}/#{subdir}/#{arch}"]
           config << ["enabled=1"]
           config << ["gpgcheck=0"]
 
           # Write the new config to a file under our repo configs dir
           #
-          config_file = File.join("pkg", "repo_configs", "rpm", "pl-#{@build.project}-#{git_sha.strip}-#{dist}-#{version}-#{arch}-#{subdir}.repo")
+          config_file = File.join("pkg", "repo_configs", "rpm", "pl-#{@build.project}-#{@build.ref}-#{dist}-#{version}-#{arch}-#{subdir}.repo")
           File.open(config_file, 'w') { |f| f.puts config }
         end
         rm File.join("pkg","rpm_configs")
-        puts "Wrote yum configuration files for #{@build.project} at #{git_sha.strip} to pkg/repo_configs/rpm"
+        puts "Wrote yum configuration files for #{@build.project} at #{@build.ref} to pkg/repo_configs/rpm"
       end
     end
   end

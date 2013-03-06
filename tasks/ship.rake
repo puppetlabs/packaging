@@ -97,7 +97,7 @@ namespace :pl do
     task :ship, :target do |t, args|
       invoke_task("pl:fetch")
       target = args.target || "artifacts"
-      artifact_dir = "#{@build.jenkins_repo_path}/#{@build.project}/#{git_sha.strip}/#{target}"
+      artifact_dir = "#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}/#{target}"
       remote_ssh_cmd(@build.distribution_server, "mkdir -p #{artifact_dir}")
       rsync_to("pkg/", @build.distribution_server, "#{artifact_dir}/ --exclude repo_configs")
     end

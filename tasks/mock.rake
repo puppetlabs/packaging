@@ -148,8 +148,16 @@ def build_rpm_with_mock(mocks, is_rc)
         end
       end
       # To avoid filling up the system with our random mockroots, we should
-      # clean up.
-      rm_rf resultdir if @build.random_mockroot
+      # clean up. However, this requires sudo. If we don't have sudo, we'll
+      # just fail and not clean up, but warn the user about it.
+      if @build.random_mockroot
+        %x{sudo -n echo 'Cleaning build root.'}
+        if $?.success?
+          sh "sudo -n rm -r #{resultdir}" unless resultdir.nil?
+        else
+          warn "Couldn't clean #{resultdir} without sudo. Leaving."
+        end
+      end
     end
     add_metrics({ :dist => "#{family}-#{version}", :bench => bench }) if @build.benchmark
   end

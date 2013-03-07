@@ -68,9 +68,27 @@ def git_co(ref)
   end
 end
 
+def git_describe
+  %x{git describe}.strip
+end
+
 # return the sha of HEAD on the current branch
 def git_sha
-  %x{git rev-parse HEAD}
+  %x{git rev-parse HEAD}.strip
+end
+
+# Return the ref type of HEAD on the current branch
+def git_ref_type
+  %x{git cat-file -t #{git_describe}}.strip
+end
+
+# If HEAD is a tag, return the tag. Otherwise return the sha of HEAD.
+def git_sha_or_tag
+  if git_ref_type == "tag"
+    git_describe
+  else
+    git_sha
+  end
 end
 
 def get_temp

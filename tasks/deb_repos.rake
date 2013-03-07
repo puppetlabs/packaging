@@ -14,7 +14,7 @@ namespace :pl do
     task :deb_repos => "pl:fetch" do
 
       # First, we test that artifacts exist and set up the repos directory
-      artifact_directory = File.join(@build.jenkins_repo_path, @build.project, git_sha.strip)
+      artifact_directory = File.join(@build.jenkins_repo_path, @build.project, @build.ref)
 
       cmd = 'echo " Checking for deb build artifacts. Will exit if not found.." ; '
       cmd << "[ -d #{artifact_directory}/artifacts/deb ] || exit 0 ; "
@@ -68,13 +68,13 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
     # pl-$project-$sha.list, and can be placed in /etc/apt/sources.list.d to
     # enable clients to install these packages.
     #
-    desc "Create apt repository configs for package repos for this sha on the distribution server"
+    desc "Create apt repository configs for package repos for this sha/tag on the distribution server"
     task :deb_repo_configs => "pl:fetch" do
 
       # This is the standard path to all build artifacts on the distribution
       # server for this commit
       #
-      artifact_directory = File.join(@build.jenkins_repo_path, @build.project, git_sha.strip)
+      artifact_directory = File.join(@build.jenkins_repo_path, @build.project, @build.ref)
 
       # We obtain the list of distributions in the debian repository with some hackery.
       #
@@ -92,12 +92,12 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
       #
       mkdir_p File.join("pkg", "repo_configs", "deb")
       dists.each do |dist|
-        repoconfig = ["# Packages for #{@build.project} built from commit #{git_sha.strip}",
-                      "deb http://#{@build.builds_server}/#{@build.project}/#{git_sha.strip}/repos/apt/#{dist} #{dist} main"]
-        config = File.join("pkg", "repo_configs", "deb", "pl-#{@build.project}-#{git_sha.strip}-#{dist}.list")
+        repoconfig = ["# Packages for #{@build.project} built from ref #{@build.ref}",
+                      "deb http://#{@build.builds_server}/#{@build.project}/#{@build.ref}/repos/apt/#{dist} #{dist} main"]
+        config = File.join("pkg", "repo_configs", "deb", "pl-#{@build.project}-#{@build.ref}-#{dist}.list")
         File.open(config, 'w') { |f| f.puts repoconfig }
       end
-      puts "Wrote apt repo configs for #{@build.project} at #{git_sha.strip} to pkg/repo_configs/deb."
+      puts "Wrote apt repo configs for #{@build.project} at #{@build.ref} to pkg/repo_configs/deb."
     end
   end
 end

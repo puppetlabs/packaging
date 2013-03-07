@@ -78,7 +78,7 @@ describe Build::BuildInstance do
                   :rpm_build_host,
                   :rpmrelease,
                   :rpmversion,
-                  :sha,
+                  :ref,
                   :sign_tar,
                   :sles_build_host,
                   :sles_repo_path,

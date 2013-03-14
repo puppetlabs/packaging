@@ -2,6 +2,7 @@
 require 'spec_helper'
 load_task '00_utils.rake'
 load_task 'build.rake'
+require 'yaml'
 
 describe Build::BuildInstance do
   Build_Params = [:apt_host,

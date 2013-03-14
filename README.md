@@ -54,10 +54,13 @@ certainly be modified to suit other environments, and much effort went into
 making tasks as modular and reusable as possible. Several Puppet Labs-specific
 tasks are only available if the file '~/.packaging' is present.  This file is
 created by the `pl:fetch` task, which curls two yaml files into 'team' and
-'project' subdirectories.  from a [separate build data
+'project' subdirectories from a [separate build data
 repository](https://github.com/puppetlabs/build-data), which contains
-additional settings/data specific to Puppet Labs release infrastructure. The
-goal in separating these data and tasks out is to refrain from presenting by
+additional settings/data specific to Puppet Labs release infrastructure. By
+default, the team data file is pulled from the 'dev' branch of the repo, and
+the project data file is pulled from a branch named after the project (e.g. for
+puppet, there is a branch named puppet with a build data file). The goal in
+separating these data and tasks out is to refrain from presenting by
 default yet more Puppet Labs-specific tasks that aren't generally consumable by
 everyone. To build a deb from a local repository using a `pl` task, ssh into a
 builder (e.g., one stood up using the modules detailed below) and clone the
@@ -119,9 +122,16 @@ pl:build_from_params PARAMS_FILE=/path/to/previously/sent/file`.
 7) Maintain the ssh connection until the build finishes, and rsync the packages
 from the builder to the local workstation.
 
+Note that these tasks require ssh access to the builder hosts that are
+specified in the build-data file, and appropriate membership in the build
+groups, e.g. to use mock on the builder, membership in the mock group. This is
+a major hurdle, and is resolved with the `jenkins` tasks below.
+
 ## `:jenkins:` tasks
-Jenkins tasks are similar to the `:remote:` tasks, but
-they do not require ssh access to the builders.  The jenkins tasks enable the
+Jenkins tasks are similar to the `:remote:` tasks, but they do not require ssh
+access to the builders. They do require being on the local network - the
+jenkins instance that performs package builds is an internal server only,
+accessible when connected via VPN or on-site.  The jenkins tasks enable the
 packaging repo to kick off packaging builds on a remote jenkins slave. They
 work in a similar way to the :remote tasks, but with a few key differences. The
 jenkins tasks transmit information to a jenkins coordinator, which handles the
@@ -155,8 +165,12 @@ Parameter Plugin, as described above. When the pl:jenkins:\* task triggers a
 build, it passes values for all of these parameters. The Label parameter is
 associated with the build type. This way we can queue the job on a builder with
 the appropriate capabilities just by assigning a builder the label "deb" or
-"rpm," etc. The actual build itself is accomplished via a shell build task. The
-contents of the task are:
+"rpm," etc. The job allows parallel execution of jobs - in this way, we can
+queue many package jobs on the jenkins instance, which will farm them out to
+builders that are slaves of that jenkins instance. This also allows us to scale
+building capacity simply by adding builders as slaves to the jenkins instance.
+The actual build itself is accomplished via a shell build task. The contents of
+the task are:
 
 ```bash
 #################
@@ -169,7 +183,6 @@ contents of the task are:
  # The bundle is a tarball, and since this is a project-agnostic
  # job, we don't actually know what's in it, just that it's a
  # git bundle.
-
 
   [ -f "PROJECT_BUNDLE" ] || exit 1
   mkdir project && tar -xzf PROJECT_BUNDLE -C project/
@@ -195,6 +208,11 @@ contents of the task are:
 
 #################
 ```
+
+## Task Explanations
+For a listing of all available tasks and their functions, see the [Task
+Dictionary](https://github.com/MosesMendoza/packaging/tree/more_documentation#task-dictionary)
+at the end of this README.
 
 ## Modules
 
@@ -428,3 +446,463 @@ files:
     group: 'wheel'
     perms: '0644'
 ```
+
+## Task Dictionary
+
+* **package:apple**
+
+    Use `PackageMaker` to create a pkg package inside a dmg. Requires 'sudo'
+    privileges. `build_dmg: TRUE` must be set in `ext/build_defaults.yaml`.
+    Packages are staged in ./pkg/apple. See the Mac packaging section of
+    [Setting up projects for the Packaging
+    Repo](https://github.com/MosesMendoza/packaging/tree/more_documentation#setting-up-projects-for-the-packaging-repo).
+
+* **package:bootstrap**
+
+    Clone the packaging repo into this project. This task isn't actually in the
+    packaging repo itself, but resides in the project. See [Setting up projects
+    for the Packaging
+      Repo](https://github.com/puppetlabs/packaging#setting-up-projects-for-the-packaging-repo).
+
+* **package:deb**
+
+    Use `debbuild` to create a deb package and associated debian package
+    artifacts from the repository. Requires all build dependencies be satisfied
+    locally. Packages are staged in ./pkg/deb.
+
+* **package:gem**
+    Use the `rubygems/package_task` library to create a rubygem from the
+    repository. Requires `build_gem: TRUE` and gem-related parameters be set in
+    `ext/build_defaults.yaml` and `ext/project\_data.yaml`. The gem is staged
+    in `./pkg`.
+
+* **package:implode**
+
+    Remove the packaging repo entirely from the project. This task isn't
+    actually in the packaging repo itself, but resides in the project. See
+    [Setting up projects for the Packaging
+    Repo](https://github.com/puppetlabs/packaging#setting-up-projects-for-the-packaging-repo).
+
+* **package:ips**
+
+    Use Solaris 11 pkg* tools to create a IPS package from the project.
+    Packages are staged in `./pkg/ips/pkgs`. Requires all `pkg`, `pkgdepend`,
+    `pkgsend`, `pkglint`, and `pkgmogrify`. Currently only puppet, facter, and
+    hiera have this capability.
+
+* **package:rpm**
+
+    Use `rpmbuild` to create an rpm of the project. This will also make a
+    source rpm. Requires all build dependencies by satisfied locally. Packages
+    are staged in `./pkg/rpm`.
+
+* **package:srpm**
+
+    Use `rpmbuild` to create a source rpm of the project. Source rpm is staged
+    in `./pkg/srpm`.
+
+* **package:tar**
+
+    Create a source tarball of the project. The tarball is staged in `./pkg`.
+
+* **package:update**
+
+    Update the clone of the packaging repo by pulling from origin.
+
+* **pl:build_from_params**
+
+    Invoke a build from a build parameters yaml file. The parameters file
+    should be created with `rake pl:write_build_params`. The settings in the
+    build parameters file will override all values contained in
+    `./ext/build_defaults.yaml` and `./ext/project_data.yaml`.
+
+* **pl:deb**
+
+    Use pdebuild with cowbuilder to create a debian package and associated
+    source artifacts from the default "cow", currently Debian Squeeze i386.
+    Requires that pbuilder/cowbuilder be installed and set up with a Debian
+    Squeeze cow. See the
+    [puppetlabs-debbuilder](https://github.com/puppetlabs/puppetlabs-debbuilder)
+    module for an easy way to set up a host for building with cows. The deb and
+    source artifacts are staged in `./pkg/deb/squeeze`.
+
+* **pl:deb_all***
+
+    The same as `rake pl:deb`, but a package is built for every cow listed in
+    `ext/build_defaults.yaml` on the line `cows:<cows>`. The packages and
+    associated source artifacts are staged in `./pkg/deb/$distribution`, where
+    $distribution is the Debian/Ubuntu codename of the cow that was used to
+    build the package, e.g. "wheezy" or "precise."
+
+* **pl:ips**
+
+    Invoke package:ips, but do so after pl:fetch and pl:load_extras, which load
+    signing/certificate information. The resulting packages are signed. IPS
+    packages are staged in `./pkg/ips/pkgs`
+
+* **pl:jenkins:deb**
+
+    Perform `pl:deb` by posting a jenkins build, as described above. Once the
+    build is complete, run `pl:jenkins:retrieve` to retrieve the built
+    packages.
+
+* **pl:jenkins:deb_all**
+
+    Perform what is a effectively a `pl:deb_all` but in a different fashion.
+    `pl:deb_all` performs debian cow builds in serial with every cow listed in
+    ext/build_defaults.yaml. `pl:jenkins:deb_all` splits the cows listed, and
+    posts a separate `pl:jenkins:deb` job for every cow listed to the jenkins
+    server, allowing jenkins to parallelize the building of packages for every
+    cow. Execute `pl:jenkins:retrieve` to retrieve all packages.
+
+* **pl:jenkins:deb_repo_configs**
+
+    On the distribution server generate a listing of all debian repositories
+    that exist for the current SHA/ref of HEAD of the project repository. Then
+    generate debian apt client configuration files for every existing
+    repository. The distribution server is a web server, so the client
+    configurations can be placed on a debian client in /etc/apt/sources.list.d/
+    and the client will be able to install the built packages via apt. Requires
+    SSH access to the distribution server.
+
+* **pl:jenkins:deb_repos**
+
+    On the distribution server, generate debian apt repositories for every
+    distribution containing any packages that are stored that match the current
+    SHA/ref of HEAD of the project repository. Requires SSH access to the
+    distribution server.
+
+* **pl:jenkins:dmg**
+
+    Perform `package:apple` by posting a jenkins build. Run
+    `pl:jenkins:retrieve` to retrieve the built packages.
+
+* **pl:jenkins:gem**
+
+    Perform `package:gem` by posting a jenkins build. Run `pl:jenkins:retrieve`
+    to retrieve the built packages.
+
+* **pl:jenkins:mock**
+
+    Perform `pl:mock` by posting a jenkins build. Run `pl:jenkins:retrieve` to
+    retrieve the built packages.
+
+* **pl:jenkins:mock_all**
+
+    Perform what is effectively a `pl:mock_all` but in a different fashion.
+    `pl:mock_all` performs mock builds in serial with every mock listed in
+    ext/build_defaults.yaml. `pl:jenkins:mock_all` splits the mocks listed, and
+    posts a separate `pl:jenkins:mock` job for every mock to the jenkins
+    server, allowing jenkins to parallelize the building of packages for every
+    mock configuration. The mock build root is randomized by the packaging
+    repo, avoiding conflicts with existing builds of the same mock
+    configuration. To retrieve built packages, call `pl:jenkins:retrieve`.
+
+* **pl:jenkins:post[uri]**
+
+    Post to the jenkins server as specified in the team build_extras.yaml file,
+    with the job uri specified.
+
+* **pl:jenkins:retrieve[target]**
+
+    Retrieve packages stored on the distribution server that have been built
+    from the current SHA/ref of HEAD of the project repository. Optionally pass
+    [target] to override the default, which is to retrieve the contents of the
+    "artifacts" subdirectory. Other targets are "repos" and "shipped".
+
+* **pl:jenkins:rpm_repo_configs**
+
+    On the distribution server generate a listing of all yum rpm package
+    repositories that exist for the current SHA/ref of HEAD of the project
+    repository. Then generate yum client configuration files for every existing
+    repository. The distribution server is a web server, so the client
+    configurations can be placed on a redhat client in /etc/yum.repos.d/ and
+    the client will be able to install the packages via yum install. Requires
+    SSH access to the distribution server.
+
+* **pl:jenkins:rpm_repos**
+
+    On the distribution server, generate yum rpm repositories for every
+    distribution containing any packages that are stored that match the current
+    SHA/ref of HEAD of the project repository. Requires SSH access to the
+    distribution server. The yum repos are created in a "repos" subdirectory of
+    the standard builds location, e.g.
+    /opt/jenkins-builds/$project/${SHA|ref}/repos, using everything currently
+    in the "artifacts" subdirectory of the same location.
+
+* **pl:jenkins:ship[target]**
+
+    Take the packages staged in pkg/ and ship them to locations partially
+    specified by data in the project build_extras.yaml file. The current
+    paradigm is to ship the files to a subdirectory of /opt/jenkins-builds on
+    the distribution server. The subdirectory is constructed with the project
+    and SHA or ref of HEAD of the project repository. That is, if project HEAD
+    is currently at the tag "1.2.3", then the directory that packages will be
+    shipped to is /opt/jenkins-builds/$project/1.2.3/. If HEAD is a git SHA,
+    then "1.2.3" will instead be that SHA. By default, all artifacts in pkg/
+    will be shipped to a "artifacts" subdirectory of the standard target. E.g.
+    /opt/jenkins-builds/$project/1.2.3/artifacts. When a final shipping occurs,
+    e.g. when shipping signed artifacts into production, a second subdirectory
+    is created - "shipped" - and all artifacts that are shipped to production
+    are also shipped here. This allows a historical archive of all shipped
+    artifacts.
+
+* **pl:jenkins:sign_all**
+
+    Take all packages staged in pkg/ and sign them via the various signing
+    tasks. All signing occurs on the distribution server:
+    * create a git-bundle of the project and rsync it to the distribution
+    * server ssh to the distribution server and clone the git-bundle, and clone
+    * the packaging repository rsync the contents of the local pkg/ directory
+    * into the pkg/ directory of the remote git project ssh to the distribution
+    * server and execute the following rake tasks:
+      - pl:sign_tar
+      - pl:sign_rpms
+      - pl:sign_deb_changes
+    * rsync the remote pkg/ directory contents to the local pkg/ directory
+
+* **pl:jenkins:tar**
+
+    Perform `package:tar` by posting a jenkins build. Run `pl:jenkins:retrieve` to
+    retrieve the built packages.
+
+* **pl:jenkins:uber_build**
+
+    An aggregate of build tasks. These include `jenkins:deb_all`,
+    `pl:jenkins:mock_all`, `pl:jenkins:tar`, `pl:jenkins:dmg`, and `pl:jenkins:gem`. Each
+    task is a separate job that is posted to the jenkins build server,
+    separated by a 5 second sleep.
+
+* **pl:jenkins:uber_ship**
+
+    An aggregate of retrieval, signing, and shipping tasks. Execute
+    `pl:jenkins:retrieve` to retrieve any packages on the distribution server
+    that were built from the SHA/ref of HEAD. Then `pl:jenkins:sign_all` to
+    sign all packages. Finally, `pl:uber_ship`, `pl:remote:freight`, and
+    `pl:remote:update_yum_repo`. `pl:jenkins:uber_build` combined with
+    `pl:jenkins:uber_ship` performs the entire build and release process for a
+    project.
+
+* **pl:mock**
+
+    Use `mock` to build an rpm package using the default mock distribution,
+    Redhat Linux 5, i386. Requires that the `mock` package be installed. See
+    the
+    [puppetlabs-rpmbuilder](https://github.com/puppetlabs/puppetlabs-rpmbuilder)
+    module for an easy way to set up a host for building with mock. Resulting
+    rpm is staged in `./pkg/el/rpm/5/(products | devel)/(i386 | SRPMS)`. The
+    placement into the "products" or "devel" subdirectories is determined by
+    the name of the package. If the package has a Release Candidate version, it
+    is placed in "devel". Otherwise it is placed in "products". A Release
+    Candidate is determined by parsing the `git describe` string, and searching
+    for `rc` after the version numbers.
+
+* **pl:mock_all**
+
+    The same as `rake pl:mock`, but a package is built for every mock listed in
+    `ext/build_defaults.yaml` on the line `mocks:<mocks>`. Packages are staged
+    in `./pkg/(el | fedora)/$version/(products | devel)/(i386 | x86_64 |
+    SRPMS)`. The subdirectories are dependent on the mock that is used. The
+    task assumes that the mock configurations are the standard Puppet Labs mock
+    configurations that are generated by the
+    [puppetlabs-rpmbuilder](https://github.com/puppetlabs/puppetlabs-rpmbuilder)
+    module.
+
+* **pl:print_build_params**
+
+    Print all build parameters to STDOUT as they would be used in a package
+    build. This prints data that is loaded from `ext/build_defaults.yaml` and
+    `ext/project_data.yaml`, as well as whatever is overridden with environment
+    variables. Useful for debugging problems with parameter values.
+
+* **pl:release_deb**
+
+    A composite task of `package:tar`, `pl:deb_all`, `pl:sign_deb_changes`, and
+    `pl:ship_debs`
+
+* **pl:release_dmg**
+
+    A composite task of `package:apple`, and `pl:ship_dmg`
+
+* **pl:release_gem**
+
+    A composite task of `package:gem`, and `pl:ship_gem`
+
+* **pl:release_ips**
+
+    A composite task of `pl:ips`, and `pl:ship_ips`
+
+* **pl:release_rpm**
+
+    A composite task of `pl:mock_all`, `pl:sign_rpms`, `pl:ship_rpms`, and
+    `pl:remote:update_yum_repo`
+
+* **pl:release_tar**
+
+    A composes task of `package:tar`, `pl:sign_tar`, and `pl:ship_tar`
+
+* **pl:remote:deb**
+
+    As described above, this is a remote task, which means that the task is
+    performed remotely on the debian build host as specified in team
+    build_data.yaml retrieved from github.com/puppetlabs/build-data. This task
+    performs a `pl:deb` remotely on the builder
+
+* **pl:remote:deb_all**
+
+    Perform `pl:deb_all` on the remote debian build host as specified in the
+    team build_data.yaml file
+
+* **pl:remote:dmg**
+
+
+    Perform `package:apple` on the remote Mac build host as specified in the
+    team build_data.yaml file
+
+* **pl:remote:freight**
+
+    Performs an ssh call to the package server that calls a server-side rake
+    task. The rake task takes the debian packages that have (presumably) been
+    shipped via `pl:ship_debs` and invokes
+    [freight](https://github.com/rcrowley/freight) with them, which places them
+    in the apt repository.
+
+* **pl:remote:ips**
+
+    Perform `pl:ips` on the remote IPS build host as specified in the team
+    build_data.yaml file
+
+* **pl:remote:mock**
+
+    Perform `pl:mock` on the remote RPM build host as specified in the team
+    build_data.yaml file
+
+* **pl:remote:mock_all**
+
+    Perform `pl:mock_all` on the remote RPM build host as specified in the team
+    build_data.yaml file
+
+* **pl:remote:release_deb**
+
+    Perform `pl:release_deb` on the remote debian build host. The caveat is
+    that while performing a `pl:release:deb` locally will prompt you to confirm
+    shipping the resulting debian packages, `pl:remote:release_deb` overrides
+    this and just retrieves the packages, to be staged locally under pkg/deb.
+
+* **pl:remote:release_rpm**
+
+    Perform `pl:release_rpm` on the remote RPM build host. The same caveat
+    applies as for `pl:remote:release_deb` - Packages aren't shipped into
+    production, but rather retrieved from the remote builder and staged locally
+    under pkg/el and pkg/fedora.
+
+* **pl:remote:update_yum_repo**
+
+    As with `pl:remote:freight`, this task performs an ssh call to the yum RPM
+    package server, and invokes an existing server-side rake task. The task
+    iterates through the `el` and `fedora` directories of the yum repository
+    and re-creates package server metadata for rpms in the subdirectories.
+
+* **pl:ship_debs**
+
+    Rsync pkg/deb/* to the "incoming" directory on the debian apt package
+    repository server. Note: this task does not place the packages into
+    production - it is more accurate to consider the packages "staged" on the
+    repository server rather than actually shipped. The `pl:remote:freight`
+    task takes the packages in the "incoming" directory and actually places
+    them in the apt server.
+
+* **pl:ship_gem**
+
+    Takes the built gem in pkg/ and pushes it to rubygems.com. This task assumes
+    you have the appropriate rubygems.com access and config to push the gem.
+
+* **pl:ship_ips**
+
+    Takes the IPS packages in pkg/ips/pkgs/ and rsyncs them to a holding
+    directory on a package download server. This is not a true IPS server yet,
+    but just a basic file server. Eventually the goal is to have a true IPS
+    package repository running.
+
+* **pl:ship_rpms**
+
+    Rsyncs the contents of pkg/el and pkg/fedora into the yum repository
+    server. While these packages are available immediately for download by
+    browsing the yum server directories directly, the yum repodata metadata has
+    not been updated, and thus the packages are not available to yum clients.
+    The `pl:remote:update_yum_repo` task updates the metadata, after which the
+    packages will be available to yum clients.
+
+* **pl:sign_rpms**
+
+    Sign the rpms staged locally under pkg/ with the gpg key user ID (e.g.
+    email) specified in ext/build_defaults.yaml as `gpg_name`. This value can
+    be overridden by passing GPG_NAME as an environment variable to the rake
+    task.
+
+* **pl:sign_tar**
+
+    Use gpg to create a detached signature of the tarball. By default this uses
+    the gpg_key value specified in ext/build_defaults.yaml in the project. This
+    can be overridden by passing GPG_KEY as an environment variable to the rake
+    task.
+
+* **pl:tag**
+
+    Create a signed, annotated git tag of the current repository. Requires TAG
+    be passed as an environment variable to the rake task, which is the value
+    that will be used as both the tag message and the name of the tag. The gpg
+    key that is used for signing is assumed from gpg_key in
+    ext/build_defaults.yaml. This can be overridden by passing GPG_KEY as an
+    environment variable to the rake task.
+
+* **pl:uber_release**
+
+    A composite task that performs the following tasks:  
+    `package:gem` (if build_gem is "true" in build_defaults.yaml)  
+    `pl:remote:release_deb`  
+    `pl:remote:release_rpm`  
+    `pl:remote:dmg` (if build_dmg is "true" in build_defaults.yaml)  
+    `package:tar`  
+    `pl:sign_tar`  
+    `pl:uber_ship`  
+    `pl:remote:freight`  
+    `pl:remote:update_yum_repo`  
+    This is essentially a complete build from start to finish. Gem and tarball
+    are generated locally, and other packages (deb, rpm, dmg) are all created
+    remotely. Assumes ssh access and appropriate build tool access on all
+    respective build hosts.
+
+* **pl:uber_ship**
+
+    A composite task that performs the following tasks:  
+    `pl:ship_gem`  
+    `pl:ship_rpms`  
+    `pl:ship_debs`  
+    `pl:ship_dmgs`  
+    `pl:ship_tar`  
+    `pl:jenkins:ship`  
+    This is essentially a "ship all the things" task, but it is important to
+    note that it does not update either yum or apt repo metadata on these
+    respective servers - this has to be done via `pl:remote:update_yum_repo`
+    and `pl:remote:freight`.
+
+* **pl:update_ips_repo**
+
+    Take the packages in pkg/ips/pkg and rsync them to the IPS repository
+    server specified in the build_extras.yaml file. Via ssh commands, call
+    pkgrecv, pkgrepo, svcadm on the IPS repository server. Via ssh, restart the
+    IPS repository service.
+
+* **pl:write_build_params**
+
+    Generate a yaml file with all the build properties that have been loaded
+    from build_defaults.yaml, project_data.yaml, (optionally)
+    build_extras.yaml(s) via `pl:fetch`, and any environment variables. This
+    file can be used by the packaging repo as a single source of truth for
+    build data via `pl:build_from_params`. By default it is written to a
+    temporary location and its location is printed to STDOUT. To override the
+    destination, pass OUTPUT_DIR as a environment variable to the task. By
+    default, the name of the file will be either the git tag, if HEAD of the
+    project repository is a tag, or the git sha of HEAD.
+

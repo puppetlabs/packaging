@@ -16,7 +16,17 @@ namespace :pl do
       target = args.target || "artifacts"
       invoke_task("pl:fetch")
       mkdir_p 'pkg'
-      rsync_from("#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}/#{target}/", @build.distribution_server, "pkg/")
+      package_url = "http://#{@build.builds_server}/#{@build.project}/#{@build.ref}/#{target}"
+      if wget=find_tool("wget")
+        sh "#{wget} -r -np -nH --cut-dirs 3 -P pkg --reject 'index*' #{package_url}/"
+      else
+        warn "Could not find `wget` tool. Falling back to rsyncing from #{@build.distribution_server}"
+        begin
+          rsync_from("#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}/#{target}/", @build.distribution_server, "pkg/")
+        rescue
+          puts "Couldn't download packages from distribution server. Try installing wget!"
+        end
+      end
       puts "Packages staged in pkg"
     end
   end

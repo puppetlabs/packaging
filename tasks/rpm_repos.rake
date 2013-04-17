@@ -59,69 +59,71 @@ namespace :pl do
     desc "Create yum repository configs for package repos for this sha/tag on the distribution server"
     task :rpm_repo_configs => "pl:fetch" do
 
+      # We have a hard requirement on wget because of all the download magicks
+      # we have to do
+      #
+      unless wget = find_tool("wget")
+        warn "Could not find `wget` tool. This is needed for composing the yum repo configurations. Install `wget` and try again."
+        exit 0
+      end
+
       # This is the standard path to all build artifacts on the distribution
       # server for this commit
       #
-      artifact_directory = File.join(@build.jenkins_repo_path, @build.project, @build.ref)
+      base_url = "http://#{@build.builds_server}/#{@build.project}/#{@build.ref}/repos/"
+
       # First check if the artifacts directory exists
       #
-      cmd = "[ -d #{artifact_directory} ] || exit 0 ; "
-      # Descend into the artifacts directory and test if we have any repos
+
+      # We have to do two checks here - first that there are directories with
+      # repodata folders in them, and second that those same directories also
+      # contain rpms
       #
-      cmd << "pushd #{artifact_directory} ; "
-      cmd << 'echo "Checking if rpm repos exists, will exit if not.." ; '
-      cmd << '[ -n "$(find repos -name "*.rpm")" ] || exit 0 ; '
-      cmd << "pushd repos ; "
+      repo_urls = %x{#{wget} --spider -r -l 5 --no-parent #{base_url} 2>&1}.split.uniq.reject{ |x| x =~ /\?|index/ }.select{|x| x =~ /http:.*repodata\/$/}
 
-      cmd << 'for repo in $(find -name "repodata") ; do dirname $repo >> rpm_configs ; done'
+      # RPMs will always exist at the same directory level as the repodata
+      # folder, which means if we go up a level we should find rpms
+      #
+      yum_repos = []
+      repo_urls.map{|x| x.chomp('repodata/')}.each do |url|
+        unless %x{#{wget} --spider -r -l 1 --no-parent #{url} 2>&1}.split.uniq.reject{ |x| x =~ /\?|index/ }.select{|x| x =~ /http:.*\.rpm$/}.empty?
+          yum_repos << url
+        end
+      end
 
-      remote_ssh_cmd(@build.distribution_server, cmd)
-
-      # There's a chance there were simply no rpms to make repos for. If so, we
-      # don't want to proceed.
-      %x{ssh -t #{@build.distribution_server} 'ls #{artifact_directory}/repos/rpm_configs'}
-      unless $?.success?
-        warn "No repos were found to generate configs from. Exiting.."
+      if yum_repos.empty?
+        puts "No rpm repos were found to generate configs from. Exiting.."
         exit 0
       end
-      mkdir_p "pkg"
-      rsync_from("#{artifact_directory}/repos/rpm_configs", @build.distribution_server, "pkg")
 
-      # Clean up the remote configs file
-      remote_ssh_cmd(@build.distribution_server, "rm #{artifact_directory}/repos/rpm_configs")
+      mkdir_p File.join("pkg","repo_configs","rpm")
 
-      if File.exist?(File.join("pkg", "rpm_configs"))
-        mkdir_p File.join("pkg","repo_configs","rpm")
+      # Parse the rpm configs file to generate repository configs. Each line in
+      # the rpm_configs file corresponds with a repo directory on the
+      # distribution server.
+      #
+      yum_repos.each do |url|
+        # We ship a base 'srpm' that gets turned into a repo, but we want to
+        # ignore this one because its an extra
+        next if url == "#{base_url}srpm/"
+        elements = url.split('/')
 
-        # Parse the rpm configs file to generate repository configs. Each line in
-        # the rpm_configs file corresponds with a repo directory on the
-        # distribution server.
+        dist,version,subdir,arch = url.split('/')[-4..-1]
+
+        # Create an array of lines that will become our yum config
         #
-        lines = IO.readlines(File.join("pkg","rpm_configs")).map{ |l| l.chomp }.uniq
-        lines.each do |repo|
-          dist,version,subdir,arch = repo.split('/')[1..4]
+        config = ["[pl-#{@build.project}-#{@build.ref}]"]
+        config << ["name=PL Repo for #{@build.project} at commit #{@build.ref}"]
+        config << ["baseurl=#{url}"]
+        config << ["enabled=1"]
+        config << ["gpgcheck=0"]
 
-          # Skip any paths that don't have everything we're looking for, e.g.
-          # the top-level srpms directory that contains the original srpm from
-          # packaging
-          next if dist.nil? or version.nil? or subdir.nil? or arch.nil?
-
-          # Create an array of lines that will become our yum config
-          #
-          config = ["[pl-#{@build.project}-#{@build.ref}]"]
-          config << ["name=PL Repo for #{@build.project} at commit #{@build.ref}"]
-          config << ["baseurl=http://#{@build.builds_server}/#{@build.project}/#{@build.ref}/repos/#{dist}/#{version}/#{subdir}/#{arch}"]
-          config << ["enabled=1"]
-          config << ["gpgcheck=0"]
-
-          # Write the new config to a file under our repo configs dir
-          #
-          config_file = File.join("pkg", "repo_configs", "rpm", "pl-#{@build.project}-#{@build.ref}-#{dist}-#{version}-#{arch}-#{subdir}.repo")
-          File.open(config_file, 'w') { |f| f.puts config }
-        end
-        rm File.join("pkg","rpm_configs")
-        puts "Wrote yum configuration files for #{@build.project} at #{@build.ref} to pkg/repo_configs/rpm"
+        # Write the new config to a file under our repo configs dir
+        #
+        config_file = File.join("pkg", "repo_configs", "rpm", "pl-#{@build.project}-#{@build.ref}-#{dist}-#{version}-#{arch}-#{subdir}.repo")
+        File.open(config_file, 'w') { |f| f.puts config }
       end
+      puts "Wrote yum configuration files for #{@build.project} at #{@build.ref} to pkg/repo_configs/rpm"
     end
   end
 end

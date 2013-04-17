@@ -82,9 +82,8 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
       if wget = find_tool("wget")
         # First test if the directory even exists
         #
-        %x{#{wget} --spider -r -l 1 --no-parent #{base_url} 2>&1}
+        wget_results = %x{#{wget} --spider -r -l 1 --no-parent #{base_url} 2>&1}
         if $?.success?
-          wget_results = %x{#{wget} --spider -r -l 1 --no-parent #{base_url} 2>&1}
           # We want to exclude index and robots files and only include the http: prefixed elements
           repo_urls = wget_results.split.uniq.reject{|x| x=~ /\?|index|robots/}.select{|x| x =~ /http:/}.map{|x| x.chomp('/')}
         else

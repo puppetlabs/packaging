@@ -71,18 +71,28 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
     desc "Create apt repository configs for package repos for this sha/tag on the distribution server"
     task :deb_repo_configs => "pl:fetch" do
 
-      # This is the standard path to all build artifacts on the distribution
-      # server for this commit
+      # This is the standard path to all debian build artifact repositories on
+      # the distribution server for this commit
       #
-      artifact_directory = File.join(@build.jenkins_repo_path, @build.project, @build.ref)
+      base_url = "http://#{@build.builds_server}/#{@build.project}/#{@build.ref}/repos/apt/"
 
-      # We obtain the list of distributions in the debian repository with some hackery.
+      # We use wget to obtain a directory listing of what are presumably our deb repos
       #
-      %x{ssh -t #{@build.distribution_server} 'ls #{artifact_directory}/repos/apt'}
-      if $?.success?
-        dists = %x{ssh -t #{@build.distribution_server} 'ls #{artifact_directory}/repos/apt'}.split
+      repo_urls = []
+      if wget = find_tool("wget")
+        # First test if the directory even exists
+        #
+        %x{#{wget} --spider -r -l 1 --no-parent #{base_url} 2>&1}
+        if $?.success?
+          wget_results = %x{#{wget} --spider -r -l 1 --no-parent #{base_url} 2>&1}
+          # We want to exclude index and robots files and only include the http: prefixed elements
+          repo_urls = wget_results.split.uniq.reject{|x| x=~ /\?|index|robots/}.select{|x| x =~ /http:/}.map{|x| x.chomp('/')}
+        else
+          puts "No debian repos available for #{@build.project} at #{@build.ref}."
+          exit 0
+        end
       else
-        warn "No repos were found to generate configs from. Exiting.."
+        warn "Could not find `wget` tool. This is needed for composing the debian repo configurations. Install `wget` and try again."
         exit 0
       end
 
@@ -91,9 +101,12 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
       # file for every distribution.
       #
       mkdir_p File.join("pkg", "repo_configs", "deb")
-      dists.each do |dist|
+      repo_urls.each do |url|
+        # We want to skip the base_url, which wget returns as one of the results
+        next if "#{url}/" == base_url
+        dist = url.split('/').last
         repoconfig = ["# Packages for #{@build.project} built from ref #{@build.ref}",
-                      "deb http://#{@build.builds_server}/#{@build.project}/#{@build.ref}/repos/apt/#{dist} #{dist} main"]
+                      "deb #{url} #{dist} main"]
         config = File.join("pkg", "repo_configs", "deb", "pl-#{@build.project}-#{@build.ref}-#{dist}.list")
         File.open(config, 'w') { |f| f.puts repoconfig }
       end

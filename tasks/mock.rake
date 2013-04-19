@@ -19,6 +19,7 @@
 # pkg/el-5-i386/*.rpm
 
 def mock(mock_config, srpm)
+  configdir = nil
   unless mock = find_tool('mock')
     warn "mock is required for building rpms with mock. Please install mock and try again."
     exit 1
@@ -39,7 +40,7 @@ def mock(mock_config, srpm)
   end
   sh "#{mock} -r #{mock_config} #{srpm}"
   # Clean up the configdir
-  rm_r configdir
+  rm_r configdir unless configdir.nil?
 
   basedir
 end

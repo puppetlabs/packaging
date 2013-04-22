@@ -4,6 +4,7 @@ if @build.pre_tar_task = "package:vendor_gems"
   namespace :package do
     desc "vendor gems required by project"
     task :vendor_gems do
+      check_tool("bundle")
       sh "bundle install --without development test"
       sh "bundle package"
     end

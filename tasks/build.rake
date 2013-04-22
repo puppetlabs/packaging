@@ -74,6 +74,7 @@ module Build
                       :pe_name,
                       :pe_version,
                       :pg_major_version,
+                      :pre_tar_task,
                       :privatekey_pem,
                       :random_mockroot,
                       :rc_mocks,

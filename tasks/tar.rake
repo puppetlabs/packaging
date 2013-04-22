@@ -1,6 +1,11 @@
 namespace :package do
   desc "Create a source tar archive"
   task :tar => [ :clean ] do
+
+    if @build.pre_tar_task
+      invoke_task(@build.pre_tar_task)
+    end
+
     Rake::Task["package:doc"].invoke if @build.build_doc
     tar = ENV['TAR'] || 'tar'
     workdir = "pkg/#{@build.project}-#{@build.version}"

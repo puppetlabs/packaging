@@ -313,6 +313,16 @@ apt_repo_path: '/opt/repository/incoming'
 # Whether to present the gem and apple tasks
 build_gem: TRUE
 build_dmg: TRUE
+# Whether to execute the rdoc rake tasks prior to composing the tarball
+build_doc: FALSE
+# Whether to present the Solaris 11 IPS packaging tasks
+# This requires suitable IPS packaging artifacts in the project in ext/ips
+build_ips: FALSE
+# Whether this project is a PE project or not
+build_pe: FALSE
+# An optional task to execute pre-tarball composition. See the tasks in
+# the 'pretasks' directory
+pre_tar_task: 'package:vendor_gems'
 ```
 This is the sample project_data.yaml file:
 ```yaml

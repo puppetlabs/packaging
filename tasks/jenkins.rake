@@ -252,7 +252,8 @@ end
 if @build.build_pe
   namespace :pe do
     namespace :jenkins do
-      tasks << "sles"
+      tasks << "sles" << "deb_all" << "mock_all"
+
       tasks.each do |build_task|
         desc "Queue pe:#{build_task} build on jenkins builder"
         task build_task => "pl:fetch" do

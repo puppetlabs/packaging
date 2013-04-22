@@ -12,15 +12,16 @@ namespace :pl do
   namespace :jenkins do
     desc "Create apt repositories of build DEB packages for this SHA on the distributions erver"
     task :deb_repos => "pl:fetch" do
+      prefix = @build.build_pe ? "pe/" : ""
 
       # First, we test that artifacts exist and set up the repos directory
       artifact_directory = File.join(@build.jenkins_repo_path, @build.project, @build.ref)
 
       cmd = 'echo " Checking for deb build artifacts. Will exit if not found.." ; '
-      cmd << "[ -d #{artifact_directory}/artifacts/deb ] || exit 0 ; "
+      cmd << "[ -d #{artifact_directory}/artifacts/#{prefix}deb ] || exit 0 ; "
       # Descend into the deb directory and obtain the list of distributions
       # we'll be building repos for
-      cmd << "pushd #{artifact_directory}/artifacts/deb && dists=$(ls) && popd; "
+      cmd << "pushd #{artifact_directory}/artifacts/#{prefix}deb && dists=$(ls) && popd; "
       # We do one more check here to make sure we actually have distributions
       # to build for. If deb is empty we want to just exit.
       #
@@ -48,7 +49,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
       # testing only, we'll just add the debs and ignore source files for now.
       #
       cmd << "reprepro=$(which reprepro) ; "
-      cmd << "$reprepro includedeb $dist ../../deb/$dist/*.deb ; popd ; done ; "
+      cmd << "$reprepro includedeb $dist ../../#{prefix}deb/$dist/*.deb ; popd ; done ; "
       cmd << "popd ; popd "
 
       remote_ssh_cmd(@build.distribution_server, cmd)

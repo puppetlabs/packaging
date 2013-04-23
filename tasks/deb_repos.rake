@@ -59,7 +59,10 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
 
       # Now that we've created our package repositories, we can generate repo
       # configurations for use with downstream jobs, acceptance clients, etc.
-      Rake::Task["pl:jenkins:deb_repo_configs"].execute
+      Rake::Task["pl:jenkins:generate_deb_repo_configs"].execute
+
+      # Now that we've created the repo configs, we can ship them
+      Rake::Task["pl:jenkins:ship_repo_configs"].execute
     end
 
     # Generate apt configuration files that point to the repositories created

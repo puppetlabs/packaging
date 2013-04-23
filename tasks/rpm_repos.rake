@@ -46,7 +46,10 @@ namespace :pl do
 
       # Now that we've created our repositories, we can create the configs for
       # them
-      Rake::Task["pl:jenkins:rpm_repo_configs"].invoke
+      Rake::Task["pl:jenkins:generate_rpm_repo_configs"].execute
+
+      # And once they're created, we can ship them
+      Rake::Task["pl:jenkins:ship_repo_configs"].execute
     end
 
     # Generate yum configuration files that point to the repositories created

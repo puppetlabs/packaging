@@ -178,6 +178,10 @@ namespace :pl do
       else
         warn "An error occurred submitting the job to jenkins. Take a look at the preceding http response for more info."
       end
+
+      # Clean up after ourselves
+      rm bundle
+      rm properties
     end
   end
 end

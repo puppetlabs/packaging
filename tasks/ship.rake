@@ -101,6 +101,18 @@ namespace :pl do
       remote_ssh_cmd(@build.distribution_server, "mkdir -p #{artifact_dir}")
       rsync_to("pkg/", @build.distribution_server, "#{artifact_dir}/ --exclude repo_configs")
     end
+
+    desc "Ship generated repository configs to the distribution server"
+    task :ship_repo_configs do
+      if empty_dir?("pkg/repo_configs")
+        warn "No repo configs have been generated! Try pl:deb_repo_configs or pl:rpm_repo_configs"
+        exit 1
+      end
+      invoke_task("pl:fetch")
+      repo_dir = "#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}/repo_configs"
+      remote_ssh_cmd(@build.distribution_server, "mkdir -p #{repo_dir}")
+      rsync_to("pkg/repo_configs/", @build.distribution_server, repo_dir)
+    end
   end
 end
 

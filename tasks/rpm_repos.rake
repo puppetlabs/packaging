@@ -46,7 +46,10 @@ namespace :pl do
 
       # Now that we've created our repositories, we can create the configs for
       # them
-      Rake::Task["pl:jenkins:rpm_repo_configs"].invoke
+      Rake::Task["pl:jenkins:generate_rpm_repo_configs"].execute
+
+      # And once they're created, we can ship them
+      Rake::Task["pl:jenkins:ship_repo_configs"].execute
     end
 
     # Generate yum configuration files that point to the repositories created
@@ -57,7 +60,7 @@ namespace :pl do
     # clients to install these packages.
     #
     desc "Create yum repository configs for package repos for this sha/tag on the distribution server"
-    task :rpm_repo_configs => "pl:fetch" do
+    task :generate_rpm_repo_configs => "pl:fetch" do
 
       # We have a hard requirement on wget because of all the download magicks
       # we have to do
@@ -124,6 +127,23 @@ namespace :pl do
         File.open(config_file, 'w') { |f| f.puts config }
       end
       puts "Wrote yum configuration files for #{@build.project} at #{@build.ref} to pkg/repo_configs/rpm"
+    end
+
+    desc "Retrieve rpm yum repository configs from distribution server"
+    task :rpm_repo_configs => "pl:fetch" do
+      if wget = find_tool("wget")
+        mkdir_p "pkg/repo_configs"
+        config_url = "#{@build.builds_server}/#{@build.project}/#{@build.ref}/repo_configs/rpm/"
+        begin
+          sh "#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{config_url}"
+        rescue
+          warn "Couldn't retrieve rpm yum repo configs. See preceding http response for more info."
+          exit 1
+        end
+      else
+        warn "Could not find `wget` tool! wget is required to download the repository configs."
+        exit 1
+      end
     end
   end
 end

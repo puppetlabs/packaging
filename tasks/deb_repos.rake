@@ -59,7 +59,10 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
 
       # Now that we've created our package repositories, we can generate repo
       # configurations for use with downstream jobs, acceptance clients, etc.
-      Rake::Task["pl:jenkins:deb_repo_configs"].execute
+      Rake::Task["pl:jenkins:generate_deb_repo_configs"].execute
+
+      # Now that we've created the repo configs, we can ship them
+      Rake::Task["pl:jenkins:ship_repo_configs"].execute
     end
 
     # Generate apt configuration files that point to the repositories created
@@ -70,7 +73,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
     # enable clients to install these packages.
     #
     desc "Create apt repository configs for package repos for this sha/tag on the distribution server"
-    task :deb_repo_configs => "pl:fetch" do
+    task :generate_deb_repo_configs => "pl:fetch" do
 
       # This is the standard path to all debian build artifact repositories on
       # the distribution server for this commit
@@ -111,6 +114,23 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
         File.open(config, 'w') { |f| f.puts repoconfig }
       end
       puts "Wrote apt repo configs for #{@build.project} at #{@build.ref} to pkg/repo_configs/deb."
+    end
+
+    desc "Retrieve debian apt repository configs for this sha"
+    task :deb_repo_configs => "pl:fetch" do
+      if wget = find_tool("wget")
+        mkdir_p "pkg/repo_configs"
+        config_url = "#{@build.builds_server}/#{@build.project}/#{@build.ref}/repo_configs/deb/"
+        begin
+          sh "#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{config_url}"
+        rescue
+          warn "Couldn't retrieve deb apt repo configs. See preceding http response for more info."
+          exit 1
+        end
+      else
+        warn "Could not find `wget` tool! wget is required to download the repository configs."
+        exit 1
+      end
     end
   end
 end

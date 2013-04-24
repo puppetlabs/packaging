@@ -95,6 +95,10 @@ def get_temp
   temp = `mktemp -d -t tmpXXXXXX`.strip
 end
 
+def random_string length
+  rand(36**length).to_s(36)
+end
+
 def remote_ssh_cmd target, command
   check_tool('ssh')
   puts "Executing '#{command}' on #{target}"

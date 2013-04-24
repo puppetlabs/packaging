@@ -237,6 +237,30 @@ namespace :pl do
       end
     end
 
+    tasks.each do |build_task|
+      desc "Queue pl:#{build_task} build on jenkins builder, but only call DOWNSTREAM_JOB once all builds are complete"
+      make_managed_task build_task do
+        1 # each of these is a single job on Jenkins
+      end
+    end
+
+    desc "Queue pl:deb_all on jenkins builder, but only call DOWNSTREAM_JOB once all builds are complete"
+    make_managed_task :deb_all do
+      @build.cows.split(' ').count
+    end
+
+    desc "Queue pl:mock_all on jenkins builder, but only call DOWNSTREAM_JOB once all builds are complete"
+    make_managed_task :mock_all do
+      @build.final_mocks.split(' ').count
+    end
+
+    desc "Jenkins UBER build: build all the things with jenkins, but only call DOWNSTREAM_JOB once all builds are complete"
+    make_managed_task :uber_build do
+      @build.cows.split(' ').count +
+        @build.final_mocks.split(' ').count +
+        (tasks.count - 2) # deb and rpm are subsumed by the above two lines, so this covers tar + gem/dmg if needed.
+    end
+
     desc "Retrieve packages built by jenkins, sign, and ship all!"
     task :uber_ship => "pl:fetch" do
       uber_tasks = ["jenkins:retrieve", "jenkins:sign_all", "uber_ship", "remote:freight", "remote:update_yum_repo" ]
@@ -304,6 +328,28 @@ if @build.build_pe
           Rake::Task[task].invoke
         end
         Rake::Task["pl:jenkins:ship"].invoke("shipped")
+      end
+
+      desc "Queue builds of all PE packages for this project in Jenkins, but only call DOWNSTREAM_JOB once all builds are complete"
+      make_managed_task :uber_build do
+        @build.final_mocks.split(' ').count +
+          @build.cows.split(' ').count +
+          1 # because SLES
+      end
+
+      desc "Queue pe:deb_all on jenkins builder, but only call DOWNSTREAM_JOB once all builds are complete"
+      make_managed_task :deb_all do
+        @build.cows.split(' ').count
+      end
+
+      desc "Queue pe:mock-all on jenkins builder, but only call DOWNSTREAM_JOB once all builds are complete"
+      make_managed_task :mock_all do
+        @build.final_mocks.split(' ').count
+      end
+
+      desc "Queue pe:sles on jenkins builder, but only call DOWNSTREAM_JOB once all builds are complete"
+      make_managed_task :sles do
+        1 # We only target a single sles platform
       end
     end
   end

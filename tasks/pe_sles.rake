@@ -37,7 +37,7 @@ if @build.build_pe
     end
 
     desc "Build a sles rpm from this repo"
-    task :local_sles => ['package:tar', 'pl:fetch', 'pe:retrieve_sles_deps'] do
+    manageable_task :local_sles => ['package:tar', 'pl:fetch', 'pe:retrieve_sles_deps'] do
       check_tool('build')
       check_tool('linux32')
       check_tool('linux64')

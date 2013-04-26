@@ -10,6 +10,7 @@ if @build.pre_tar_task == "package:vendor_gems"
       require 'rubygems/gem_runner'
 
       without = [:development, :test]
+      platforms = ["ruby", "x86_64-linux", "x86-linux"]
 
       runner = Gem::GemRunner.new
       definition = Bundler::Definition.build('Gemfile', 'Gemfile.lock', nil)
@@ -21,7 +22,9 @@ if @build.pre_tar_task == "package:vendor_gems"
       cd 'vendor/cache' do
 
         lazy_specs.each do |spec|
-          runner.run ['fetch', spec.name, '-v', spec.version.to_s]
+          platforms.each do |platform|
+            runner.run ['fetch', spec.name, '-v', spec.version.to_s, '--platform', platform]
+          end
         end
       end
     end

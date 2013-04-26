@@ -18,10 +18,11 @@ if @build.pre_tar_task == "package:vendor_gems"
       lazy_specs = resolver.for(definition.dependencies.reject {|d| (d.groups - without).empty?}, [], false, true).to_a.uniq
 
       mkdir_p 'vendor/cache'
-      cd 'vendor/cache'
+      cd 'vendor/cache' do
 
-      lazy_specs.each do |spec|
-        runner.run ['fetch', spec.name, '-v', spec.version.to_s]
+        lazy_specs.each do |spec|
+          runner.run ['fetch', spec.name, '-v', spec.version.to_s]
+        end
       end
     end
   end

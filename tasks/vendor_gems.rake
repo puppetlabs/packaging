@@ -9,13 +9,11 @@ if @build.pre_tar_task == "package:vendor_gems"
       require 'rubygems'
       require 'rubygems/gem_runner'
 
-      without = [:development, :test]
-
       runner = Gem::GemRunner.new
       definition = Bundler::Definition.build('Gemfile', 'Gemfile.lock', nil)
       resolver = definition.resolve
 
-      lazy_specs = resolver.for(definition.dependencies.reject {|d| (d.groups - without).empty?}, [], false, true).to_a.uniq
+      lazy_specs = resolver.for(definition.dependencies, [], false, true).to_a.uniq
 
       mkdir_p 'vendor/cache'
       cd 'vendor/cache' do

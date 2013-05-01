@@ -271,6 +271,7 @@ if @build.build_pe
       # DOSing it with our packaging.
       desc "Queue pe:deb_all on jenkins builder"
       task :deb_all => "pl:fetch" do
+        check_var("PE_VER", @build.pe_version)
         @build.cows.split(' ').each do |cow|
           @build.default_cow = cow
           invoke_task("pl:jenkins:post_build", "pe:local_deb")

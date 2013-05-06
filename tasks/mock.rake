@@ -125,7 +125,7 @@ def build_rpm_with_mock(mocks, is_rc)
               cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-srpms")
             when /i.?86/
               cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-i386")
-            when /x66_64/
+            when /x86_64/
               cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-x86_64")
             when /noarch/
               cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-i386")

@@ -40,15 +40,15 @@ if @build.build_pe
       check_tool('build')
       check_tool('linux32')
       check_tool('linux64')
-      build_root        = get_temp
-      work_dir          = prep_sles_dir
-      build_source_dir  = "#{work_dir}/SOURCES"
-      build_spec_dir    = "#{work_dir}/SPECS"
-      build_spec        = "#{build_spec_dir}/#{@build.project}.spec"
       build_dest_dir    = "usr/src/packages"
       noarch            = FALSE
       built_arch        = ''
       @build.sles_arch_repos.each do |arch, deps_repo|
+        build_root        = get_temp
+        work_dir          = prep_sles_dir
+        build_source_dir  = "#{work_dir}/SOURCES"
+        build_spec_dir    = "#{work_dir}/SPECS"
+        build_spec        = "#{build_spec_dir}/#{@build.project}.spec"
         if noarch == FALSE
           bench = Benchmark.realtime do
             linux_cmd = arch == 'i586' ? 'linux32' : 'linux64'
@@ -70,8 +70,6 @@ if @build.build_pe
             cp(rpms, "pkg/pe/rpm/sles-11-#{arch}")
             cp(srpms, "pkg/pe/rpm/sles-11-srpms")
             noarch = rpms.exclude(/noarch/).empty?
-            rm_rf build_root
-            rm_rf work_dir
           end
           # See 30_metrics.rake to see what this is doing
           add_metrics({ :dist => 'sles', :bench => bench }) if @build.benchmark
@@ -82,6 +80,8 @@ if @build.build_pe
             cp(FileList["pkg/pe/rpm/sles-11-#{built_arch}/*"], "pkg/pe/rpm/sles-11-#{other_arch}")
           end
         end
+        rm_rf build_root
+        rm_rf work_dir
       end
       post_metrics if @build.benchmark
       cd 'pkg/pe/rpm' do

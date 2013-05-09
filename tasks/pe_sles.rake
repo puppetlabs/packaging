@@ -21,6 +21,7 @@ if @build.build_pe
   namespace :pe do
     # Temporary task to pull down pe dependencies until this is NFS-mounted
     task :retrieve_sles_deps => 'pl:fetch' do
+      rm_rf FileList["#{ENV['HOME']}/package_repos/*"]
       rsync_from("#{@build.sles_repo_path}/#{@build.pe_version}/repos/sles-*", @build.sles_repo_host, "#{ENV['HOME']}/package_repos/")
       FileList["#{ENV['HOME']}/package_repos/*"].each do |f|
         update_rpm_repo(f) if File.directory?(f)

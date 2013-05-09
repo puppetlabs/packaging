@@ -92,7 +92,7 @@ def git_sha_or_tag
 end
 
 def get_temp
-  temp = `mktemp -d -t tmpXXXXXX`.strip
+  temp = `mktemp -d -t pkgXXXXXX`.strip
 end
 
 def remote_ssh_cmd target, command

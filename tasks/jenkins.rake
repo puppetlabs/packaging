@@ -301,7 +301,7 @@ if @build.build_pe
       desc "Retrieve PE packages built by jenkins, sign, and ship all!"
       task :uber_ship => "pl:fetch" do
         check_var("PE_VER", @build.pe_version)
-        ["pl:jenkins:retrieve", "pe:ship_rpms", "pe:ship_debs"].each do |task|
+        ["pl:jenkins:retrieve", "pl:jenkins:sign_all", "pe:ship_rpms", "pe:ship_debs"].each do |task|
           Rake::Task[task].invoke
         end
         Rake::Task["pl:jenkins:ship"].invoke("shipped")

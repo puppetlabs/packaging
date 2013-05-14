@@ -27,6 +27,7 @@ def check_var(varname,var=nil)
     STDERR.puts "Requires #{varname} be set...exiting"
     exit 3
   end
+  var
 end
 
 def check_host(host)

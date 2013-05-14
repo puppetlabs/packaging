@@ -1,9 +1,9 @@
 # -*- ruby -*-
 require 'spec_helper'
-load_task '00_utils.rake'
+load_task '01_utils.rake'
 load_task 'build.rake'
 
-describe "00_utils" do
+describe "01_utils" do
   TestVersions = {
     '0.7.0'                       => {
       :git_describe_version       => %w{0.7.0},

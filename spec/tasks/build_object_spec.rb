@@ -1,6 +1,6 @@
 # -*- ruby -*-
 require 'spec_helper'
-load_task '00_utils.rake'
+load_task '01_utils.rake'
 load_task 'build.rake'
 require 'yaml'
 

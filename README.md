@@ -209,6 +209,35 @@ the task are:
 #################
 ```
 
+## :jenkins:managed_* Tasks
+
+These tasks are similar to the `:jenkins:` tasks above, except they
+interact with the
+[Build Manager](https://github.com/puppetlabs/build-manager). The
+Build Manager ensures that the job specified in the DOWNSTREAM\_JOB
+environment variable is only called once all individual builds have
+completed successfully.
+
+When using the managed tasks, you must also set a STATUS\_JOB
+variable. The build manager will call this job with the following
+parameters:
+
+1) $SHA - the git sha (or tag) of the package that was built
+
+2) $status - the build status string. This will be "All Builds
+Succeeded" for a successful build, or a string containing information
+on failed jobs.
+
+The recommended code for the status job is below:
+
+```bash
+#!/bin/bash -e
+
+echo "${SHA} completed!"
+echo "${status}"
+[[ $status == "All Builds Succeeded" ]]
+```
+
 ## Task Explanations
 For a listing of all available tasks and their functions, see the [Task
 Dictionary](https://github.com/MosesMendoza/packaging/tree/more_documentation#task-dictionary)

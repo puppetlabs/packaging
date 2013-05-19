@@ -6,7 +6,7 @@ module TaskOrchestration
 
     TIMEOUT=1800 # 30 minutes (in seconds)
 
-    attr_accessor :job_id, :timeout, :count, :ref, :downstream_job, :status_job, :server
+    attr_accessor :job_id, :timeout, :ref, :downstream_job, :status_job, :server
 
     def initialize
       @timeout = TIMEOUT
@@ -14,10 +14,10 @@ module TaskOrchestration
     end
 
     # Post to the management server to notify of a pending build
-    def post_managed_build_start(status_job)
+    def post_managed_build_start(status_job, task_count)
       curl_args = [
       "-Fname=#{@job_id}",
-      "-Fcount=#{@count}",
+      "-Fcount=#{task_count}",
       "-Fdownstream=#{@downstream_job}",
       "-Fstatus=#{status_job}",
       "-Ftimeout=#{@timeout}",

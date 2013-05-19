@@ -54,7 +54,7 @@ You set 'managed build' to true but have not supplied a management server via th
 
     # Insert the managed build trigger before the existing execution blocks
     task.unshift do
-      manager.post_managed_build_start(status_job)
+      manager.post_managed_build_start(status_job, task.count)
     end
   end
 

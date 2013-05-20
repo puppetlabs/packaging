@@ -217,7 +217,7 @@ namespace :pl do
     end
 
     # This does the mocks in parallel
-    desc "Queue pl:mock-all on jenkins builder"
+    desc "Queue pl:mock_all on jenkins builder"
     task :mock_all => "pl:fetch" do
       @build.final_mocks.split(' ').each do |mock|
         @build.default_mock = mock
@@ -237,29 +237,9 @@ namespace :pl do
       end
     end
 
-    tasks.each do |build_task|
-      desc "Queue pl:#{build_task} build on jenkins builder, but only call DOWNSTREAM_JOB once all builds are complete"
-      make_managed_task build_task do
-        1 # each of these is a single job on Jenkins
-      end
-    end
-
-    desc "Queue pl:deb_all on jenkins builder, but only call DOWNSTREAM_JOB once all builds are complete"
-    make_managed_task :deb_all do
-      @build.cows.split(' ').count
-    end
-
-    desc "Queue pl:mock_all on jenkins builder, but only call DOWNSTREAM_JOB once all builds are complete"
-    make_managed_task :mock_all do
-      @build.final_mocks.split(' ').count
-    end
-
-    desc "Jenkins UBER build: build all the things with jenkins, but only call DOWNSTREAM_JOB once all builds are complete"
-    make_managed_task :uber_build do
-      @build.cows.split(' ').count +
-        @build.final_mocks.split(' ').count +
-        (tasks.count - 2) # deb and rpm are subsumed by the above two lines, so this covers tar + gem/dmg if needed.
-    end
+    # Now that we've defined our uber_build build task, we can set its count
+    # attribute
+    RakeUtils.find_task("pl:jenkins:uber_build").count = target_count(:uber_build)
 
     desc "Retrieve packages built by jenkins, sign, and ship all!"
     task :uber_ship => "pl:fetch" do
@@ -306,7 +286,7 @@ if @build.build_pe
       RakeUtils.find_task("pl:jenkins:deb_all").count = count
 
       # This does the mocks in parallel
-      desc "Queue pe:mock-all on jenkins builder"
+      desc "Queue pe:mock_all on jenkins builder"
       task :mock_all => "pl:fetch" do
         @build.final_mocks.split(' ').each do |mock|
           @build.default_mock = mock
@@ -328,6 +308,10 @@ if @build.build_pe
       # ( 1 for sles)
       count = 1 + @build.final_mocks.split(' ').count + @build.cows.split(' ').count
       RakeUtils.find_task("pl:jenkins:uber_build").count =  count
+
+      # Now that we've defined our aggregate uber_build task, we can set its
+      # count attribute
+      RakeUtils.find_task("pl:jenkins:uber_build").count = target_count(:uber_build)
 
       desc "Retrieve PE packages built by jenkins, sign, and ship all!"
       task :uber_ship => "pl:fetch" do

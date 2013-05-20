@@ -302,6 +302,8 @@ if @build.build_pe
           sleep 5
         end
       end
+      count = @build.cows.split(' ').count
+      RakeUtils.find_task("pl:jenkins:deb_all").count = count
 
       # This does the mocks in parallel
       desc "Queue pe:mock-all on jenkins builder"
@@ -312,6 +314,8 @@ if @build.build_pe
           sleep 5
         end
       end
+      count = @build.final_mocks.split(' ').count
+      RakeUtils.find_task("pl:jenkins:mock_all").count = count
 
       desc "Queue builds of all PE packages for this project in Jenkins"
       task :uber_build  => "pl:fetch" do
@@ -321,6 +325,9 @@ if @build.build_pe
           sleep 5
         end
       end
+      # ( 1 for sles)
+      count = 1 + @build.final_mocks.split(' ').count + @build.cows.split(' ').count
+      RakeUtils.find_task("pl:jenkins:uber_build").count =  count
 
       desc "Retrieve PE packages built by jenkins, sign, and ship all!"
       task :uber_ship => "pl:fetch" do
@@ -329,28 +336,6 @@ if @build.build_pe
           Rake::Task[task].invoke
         end
         Rake::Task["pl:jenkins:ship"].invoke("shipped")
-      end
-
-      desc "Queue builds of all PE packages for this project in Jenkins, but only call DOWNSTREAM_JOB once all builds are complete"
-      make_managed_task :uber_build do
-        @build.final_mocks.split(' ').count +
-          @build.cows.split(' ').count +
-          1 # because SLES
-      end
-
-      desc "Queue pe:deb_all on jenkins builder, but only call DOWNSTREAM_JOB once all builds are complete"
-      make_managed_task :deb_all do
-        @build.cows.split(' ').count
-      end
-
-      desc "Queue pe:mock-all on jenkins builder, but only call DOWNSTREAM_JOB once all builds are complete"
-      make_managed_task :mock_all do
-        @build.final_mocks.split(' ').count
-      end
-
-      desc "Queue pe:sles on jenkins builder, but only call DOWNSTREAM_JOB once all builds are complete"
-      make_managed_task :sles do
-        1 # We only target a single sles platform
       end
     end
   end

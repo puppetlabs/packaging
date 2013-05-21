@@ -542,4 +542,17 @@ def curl_form_data(uri, form_data=[])
   return $?.success?
 end
 
-
+def target_count(target_type)
+  case target_type
+  when :deb_all
+    @build.cows.split(' ').count
+  when :mock_all
+    @build.final_mocks.split(' ').count
+  when :uber_build
+    c = target_count(:deb_all) + target_count(:mock_all)
+    c += 1 # Add one for the package:tar tarball task
+    c += 1 if @build.build_gem # Add one if we're building a gem
+    c += 1 if @build.build_dmg # Add one if we're building a dmg
+    c += 1 if @build.build_pe  # Add one for SLES if we're building PE
+  end
+end

@@ -98,9 +98,15 @@ namespace :pl do
         warn "There were files found in pkg/. Maybe you wanted to build/retrieve something first?"
         exit 1
       end
-      sign_tasks   = ["pl:sign_tar", "pl:sign_rpms", "pl:sign_deb_changes"]
-      remote_repo  = remote_bootstrap(@build.distribution_server, 'HEAD')
-      build_params = remote_buildparams(@build.distribution_server, @build)
+      # Because rpms and debs are laid out differently in PE under pkg/ they
+      # have a different sign task to address this. Rather than create a whole
+      # extra :jenkins task for signing PE, we determine which sign task to use
+      # based on if we're building PE
+      rpm_sign_task = @build.build_pe ? "pe:sign_rpms" : "pl:sign_rpms"
+      deb_sign_task = @build.build_pe ? "pe:sign_deb_changes" : "pl:sign_deb_changes"
+      sign_tasks    = ["pl:sign_tar", rpm_sign_task, deb_sign_task]
+      remote_repo   = remote_bootstrap(@build.distribution_server, 'HEAD')
+      build_params  = remote_buildparams(@build.distribution_server, @build)
       rsync_to('pkg', @build.distribution_server, remote_repo)
       remote_ssh_cmd(@build.distribution_server, "cd #{remote_repo} ; rake #{sign_tasks.join(' ')} PARAMS_FILE=#{build_params}")
       rsync_from("#{remote_repo}/pkg/", @build.distribution_server, "pkg/")

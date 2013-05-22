@@ -24,5 +24,13 @@ if @build.build_pe
       sign_el5(old_rpms) unless old_rpms.empty?
       sign_modern(modern_rpms) unless modern_rpms.empty?
     end
+    # This is essentially a duplicate of the logic in pl:sign_deb_changes, but
+    # since the plan is eventually to rip out the PE work, it'll be easier if
+    # this is a separate task we can pull out later.
+    desc "Sign all debian changes files staged in pkg/pe"
+    task :sign_deb_changes do
+      load_keychain if has_tool('keychain')
+      sign_deb_changes("pkg/pe/deb/*/*.changes") unless Dir["pkg/pe/deb/*/*.changes"].empty?
+    end
   end
 end

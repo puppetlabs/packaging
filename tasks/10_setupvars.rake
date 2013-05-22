@@ -78,8 +78,14 @@ end
 # For backwards compatibilty, we set build:@name to build:@project. @name was
 # renamed to @project in an effort to align the variable names with what has
 # been supported for parameter names in the params files.
-#
 @build.name = @build.project
+# We also set @tar_host to @yum_host if @tar_host is not set. This is in
+# another effort to fix dumb mistakes. Early on, we just assumed tarballs would
+# go to @yum_host (why? probably just laziness) but this is not ideal and does
+# not make any sense when looking at the code. Now there's a @tar_host
+# variable, but for backwards compatibility, we'll default back to @yum_host if
+# @tar_host isn't set.
+@build.tar_host ||= @build.yum_host
 
 if @build.debug
   @build.print_params

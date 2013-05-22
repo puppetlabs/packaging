@@ -67,9 +67,9 @@ namespace :pl do
       rsync_to('pkg/apple/*.dmg', @build.yum_host, @build.dmg_path)
     end if @build.build_dmg
 
-    desc "ship tarball and signature to #{@build.yum_host}"
+    desc "ship tarball and signature to #{@build.tar_host}"
     task :ship_tar => 'pl:fetch' do
-      rsync_to("pkg/#{@build.project}-#{@build.version}.tar.gz*", @build.yum_host, @build.tarball_path)
+      rsync_to("pkg/#{@build.project}-#{@build.version}.tar.gz*", @build.tar_host, @build.tarball_path)
     end
 
     desc "UBER ship: ship all the things in pkg"

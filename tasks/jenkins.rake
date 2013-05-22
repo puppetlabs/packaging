@@ -292,7 +292,7 @@ if @build.build_pe
       desc "Queue builds of all PE packages for this project in Jenkins"
       task :uber_build  => "pl:fetch" do
         check_var("PE_VER", @build.pe_version)
-        ["deb_all", "mock_all", "sles"].each do |task|
+        ["tar", "deb_all", "mock_all", "sles"].each do |task|
           invoke_task("pe:jenkins:#{task}")
           sleep 5
         end

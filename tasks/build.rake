@@ -90,6 +90,7 @@ module Build
                       :sles_arch_repos,
                       :summary,
                       :tar_excludes,
+                      :tar_host,
                       :tarball_path,
                       :task,
                       :team,

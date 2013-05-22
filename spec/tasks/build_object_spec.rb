@@ -88,6 +88,7 @@ describe Build::BuildInstance do
                   :sles_arch_repos,
                   :summary,
                   :tar_excludes,
+                  :tar_host,
                   :tarball_path,
                   :team,
                   :version,

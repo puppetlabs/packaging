@@ -232,7 +232,7 @@ end
 if @build.build_dmg
   namespace :package do
     desc "Task for building an Apple Package"
-    manageable_task :apple => [:setup] do
+    task :apple => [:setup] do
       bench = Benchmark.realtime do
         # Test for Packagemaker binary
         raise "Packagemaker must be installed. Please install XCode Tools" unless \

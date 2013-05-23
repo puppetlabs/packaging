@@ -59,7 +59,7 @@ if @build.build_gem
   namespace :package do
     gem_task = Gem::PackageTask.new(spec)
     desc "Build a gem"
-    manageable_task :gem => [ "clean" ] do
+    task :gem => [ "clean" ] do
       bench = Benchmark.realtime do
         gem_task.define
         Rake::Task[:gem].invoke

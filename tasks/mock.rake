@@ -200,7 +200,7 @@ end
 
 namespace :pl do
   desc "Use default mock to make a final rpm, keyed to PL infrastructure, pass MOCK to specify config"
-  manageable_task :mock => "package:srpm" do
+  task :mock => "package:srpm" do
     # If default mock isn't specified, just take the first one in the @build.final_mocks list
     @build.default_mock ||= @build.final_mocks.split(' ')[0]
     build_rpm_with_mock(@build.default_mock, is_rc?)

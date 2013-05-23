@@ -209,17 +209,20 @@ the task are:
 #################
 ```
 
-## :jenkins:managed_* Tasks
+## Using Managed jenkins:uber\_build tasks
 
-These tasks are similar to the `:jenkins:` tasks above, except they
-interact with the
-[Build Manager](https://github.com/puppetlabs/build-manager). The
-Build Manager ensures that the job specified in the DOWNSTREAM\_JOB
-environment variable is only called once all individual builds have
-completed successfully.
+## [ Experimental ] ##
 
-When using the managed tasks, you must also set a STATUS\_JOB
-variable. The build manager will call this job with the following
+By passing MANAGED=true on the command line to either pe:jenkins:uber_build or
+pl:jenkins:uber_build, you can invoke the "Managed Build" feature of these
+tasks. The managed build feature redefines tasks to interact with the [Build
+Manager](https://github.com/puppetlabs/build-manager). The Build Manager
+ensures that the job specified in the DOWNSTREAM\_JOB environment variable is
+only called once all individual builds have
+completed successfully in a jenkins:uber_build.
+
+When using the managed task feature, you must also set a STATUS\_JOB
+environment variable. The build manager will call this job with the following
 parameters:
 
 1) $SHA - the git sha (or tag) of the package that was built
@@ -237,6 +240,8 @@ echo "${SHA} completed!"
 echo "${status}"
 [[ $status == "All Builds Succeeded" ]]
 ```
+This will enable a status indicator on the health of your packaging jobs, in
+addition to merely not kicking off the downstream job.
 
 ## Task Explanations
 For a listing of all available tasks and their functions, see the [Task

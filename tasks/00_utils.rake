@@ -202,7 +202,7 @@ def get_base_pkg_version
   dash = get_dash_version
   if dash.include?("rc")
     # Grab the rc number
-    rc_num = dash.match(/rc(\d)+/)[1]
+    rc_num = dash.match(/rc(\d+)/)[1]
     ver = dash.sub(/-?rc[0-9]+/, "-0.#{@build.release}rc#{rc_num}").gsub(/(rc[0-9]+)-(\d+)?-?/, '\1.\2')
   else
     ver = dash.gsub('-','.') + "-#{@build.release}"

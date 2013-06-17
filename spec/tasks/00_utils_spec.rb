@@ -15,14 +15,14 @@ describe "00_utils" do
       :get_rpmrelease             => '1',
       :is_rc?                     => false,
     },
-    '0.7.0rc1'                    => {
-      :git_describe_version       => %w{0.7.0rc1},
-      :get_dash_version           => '0.7.0rc1',
-      :get_ips_version            => '0.7.0rc1,3.14159-0',
-      :get_dot_version            => '0.7.0rc1',
-      :get_debversion             => '0.7.0-0.1rc1puppetlabs1',
+    '0.7.0rc10'                    => {
+      :git_describe_version       => %w{0.7.0rc10},
+      :get_dash_version           => '0.7.0rc10',
+      :get_ips_version            => '0.7.0rc10,3.14159-0',
+      :get_dot_version            => '0.7.0rc10',
+      :get_debversion             => '0.7.0-0.1rc10puppetlabs1',
       :get_rpmversion             => '0.7.0',
-      :get_rpmrelease             => '0.1rc1',
+      :get_rpmrelease             => '0.1rc10',
       :is_rc?                     => true,
     },
     '0.7.0-rc1'                   => {

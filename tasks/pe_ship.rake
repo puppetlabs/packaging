@@ -34,12 +34,12 @@ if @build.build_pe
         remote_ssh_cmd(@build.yum_host, "for dir in  $(find #{@build.apt_repo_path}/#{@build.pe_version}/repos/el* -type d | grep -v repodata | grep -v cache | xargs)  ; do   pushd $dir; sudo rm -rf repodata; createrepo -q -d .; popd &> /dev/null ; done; sync")
       end
 
-      # This is particularly hacky. The 'pe-the-things' script resides on the @build.apt_host and takes packages placed
+      # This is hacky. The freight.rb script resides on the @build.apt_host and takes packages placed
       # in the directory/structure shown in the rsync target of pe:ship_debs and adds them to the remote PE
       # freight repository and updates the apt repo metadata
       desc "remote freight PE packages to #{@build.apt_host}"
       task :freight => "pl:fetch" do
-        remote_ssh_cmd(@build.apt_host, "sudo pe-the-things #{@build.pe_version} #{@build.apt_repo_path} #{@build.freight_conf}")
+        remote_ssh_cmd(@build.apt_host, "ruby /opt/enterprise/bin/freight.rb --version #{@build.pe_version} --basedir #{@build.apt_repo_path} --config /etc/freight.conf.d/#{@build.freight_conf}")
       end
     end
   end

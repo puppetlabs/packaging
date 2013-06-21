@@ -538,7 +538,8 @@ def curl_form_data(uri, form_data=[])
 
   # Add the uri and we're off
   post_string << "#{uri}"
-  sh "#{curl} #{post_string}"
+  puts "#{curl} #{post_string}"
+  %x{#{curl} #{post_string}}
   return $?.success?
 end
 

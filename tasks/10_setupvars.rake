@@ -56,6 +56,8 @@ else
   @build.apt_repo_path     = ENV['APT_REPO']                if ENV['APT_REPO']
   @build.pe_version        = ENV['PE_VER']                  if ENV['PE_VER']
   @build.management_server = ENV['MANAGEMENT_SERVER']       if ENV['MANAGEMENT_SERVER']
+  @build.downstream_job    = ENV['DOWNSTREAM_JOB']          if ENV['DOWNSTREAM_JOB']
+  @build.status_job        = ENV['STATUS_JOB']              if ENV['STATUS_JOB']
 end
 
 ##

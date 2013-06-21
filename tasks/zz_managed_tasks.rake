@@ -19,8 +19,8 @@ if @build.managed
 You set 'managed build' to true but have not supplied a management server via the 'management_server' key in project_data.yaml or by passing MANAGEMENT_SERVER=<server> to rake"
   end
 
-  downstream_job = check_var("DOWNSTREAM_JOB=<url>", ENV['DOWNSTREAM_JOB'])
-  status_job = check_var("STATUS_JOB=<url>", ENV['STATUS_JOB'])
+  downstream_job = check_var("DOWNSTREAM_JOB=<url>", @build.downstream_job)
+  status_job = check_var("STATUS_JOB=<url>", @build.status_job)
 
   @build.job_id ||= random_string(64)
   manager = TaskOrchestration::BuildManager.new do |m|

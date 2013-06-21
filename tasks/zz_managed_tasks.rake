@@ -35,11 +35,11 @@ You set 'managed build' to true but have not supplied a management server via th
   core_managed_task_names = ["package:tar", "package:gem", "pl:deb", "pl:mock", "pl:dmg"]
 
   core_managed_task_names.each do |name|
-    task = RakeUtils.find_task(name.to_s)
-
-    # Append the status post to the server to the list of execution blocks
-    task.enhance do
-      manager.post_managed_build_result(:success)
+    if task = RakeUtils.find_task(name.to_s)
+      # Append the status post to the server to the list of execution blocks
+      task.enhance do
+        manager.post_managed_build_result(:success)
+      end
     end
   end
 
@@ -50,11 +50,12 @@ You set 'managed build' to true but have not supplied a management server via th
   aggregate_managed_task_names = ["pl:jenkins:uber_build", "pe:jenkins:uber_build"]
 
   aggregate_managed_task_names.each do |name|
-    task = RakeUtils.find_task(name.to_s)
+    if task = RakeUtils.find_task(name.to_s)
 
-    # Insert the managed build trigger before the existing execution blocks
-    task.unshift do
-      manager.post_managed_build_start(status_job, task.count)
+      # Insert the managed build trigger before the existing execution blocks
+      task.unshift do
+        manager.post_managed_build_start(status_job, task.count)
+      end
     end
   end
 

@@ -106,3 +106,13 @@ end
   self.instance_variable_set("@#{param}", value)
 end
 
+##
+# Issue a deprecation warning if the packaging repo wasn't loaded by the loader
+unless @using_loader
+  warn "
+  DEPRECATED: The packaging repo tasks are now loaded by 'packaging.rake'.
+  Please update your Rakefile or loading task to load
+  'ext/packaging/packaging.rake' instead of 'ext/packaging/tasks/*' (25-Jun-2013).
+  "
+end
+

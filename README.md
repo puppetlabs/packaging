@@ -148,6 +148,17 @@ about the build
 and job name are obtained via the team build-data file from [the build data
 repository](https://github.com/puppetlabs/build-data)
 
+The data from this repository can be used to edit any of these parameters,
+including the Jenkins url and job for which to kick off the build. In order
+to do this, a new branch must be pushed to the repo with altered parameters,
+and the local TEAM environment variable must be set to the name of the new
+branch before invoking the Jenkins task.
+
+This is especially useful for redirecting builds to a test instance of
+a Jenkins job, simply by altering the jenkins_build_host and
+jenkins_packaging_job parameters to reflect the location of the new
+Jenkins job.
+
 4) $PROJECT - the project we're building, e.g. facter, puppet. This is used
 later in determining the target for the build artifacts on the distribution
 server

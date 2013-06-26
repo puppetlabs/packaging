@@ -537,4 +537,18 @@ def curl_form_data(uri, form_data=[])
   return $?.success?
 end
 
+def random_string length
+  rand(36**length).to_s(36)
+end
+
+# Use the vendored jenkins_api_client to create a jenkins job from a valid XML
+# configuration file
+def create_jenkins_job(name, xml)
+  $: << File.join(File.dirname(__FILE__), '..', 'vendor', 'jenkins_api_client/lib')
+  require 'jenkins_api_client'
+  client = JenkinsApi::Client.new(:server_url => @build.jenkins_build_host)
+  job = JenkinsApi::Client::Job.new(client)
+  job.create(name, xml)
+end
+
 

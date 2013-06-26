@@ -1,6 +1,6 @@
 # -*- ruby -*-
 require 'spec_helper'
-load_task '00_utils.rake'
+load_task '01_utils.rake'
 load_task 'build.rake'
 require 'yaml'
 
@@ -27,6 +27,7 @@ describe Build::BuildInstance do
                   :default_mock,
                   :description,
                   :dmg_path,
+                  :downstream_job,
                   :email,
                   :files,
                   :final_mocks,
@@ -60,6 +61,9 @@ describe Build::BuildInstance do
                   :jenkins_build_host,
                   :jenkins_packaging_job,
                   :jenkins_repo_path,
+                  :job_id,
+                  :managed,
+                  :management_server,
                   :metrics,
                   :name,
                   :project,
@@ -86,6 +90,7 @@ describe Build::BuildInstance do
                   :sles_repo_path,
                   :sles_repo_host,
                   :sles_arch_repos,
+                  :status_job,
                   :summary,
                   :tar_excludes,
                   :tar_host,

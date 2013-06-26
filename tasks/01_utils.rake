@@ -27,6 +27,7 @@ def check_var(varname,var=nil)
     STDERR.puts "Requires #{varname} be set...exiting"
     exit 3
   end
+  var
 end
 
 def check_host(host)
@@ -93,6 +94,10 @@ end
 
 def get_temp
   temp = `mktemp -d -t pkgXXXXXX`.strip
+end
+
+def random_string length
+  rand(36**length).to_s(36)
 end
 
 def remote_ssh_cmd target, command
@@ -533,8 +538,22 @@ def curl_form_data(uri, form_data=[])
 
   # Add the uri and we're off
   post_string << "#{uri}"
-  sh "#{curl} #{post_string}"
+  puts "#{curl} #{post_string}"
+  %x{#{curl} #{post_string}}
   return $?.success?
 end
 
-
+def target_count(target_type)
+  case target_type
+  when :deb_all
+    @build.cows.split(' ').count
+  when :mock_all
+    @build.final_mocks.split(' ').count
+  when :uber_build
+    c = target_count(:deb_all) + target_count(:mock_all)
+    c += 1 # Add one for the package:tar tarball task
+    c += 1 if @build.build_gem # Add one if we're building a gem
+    c += 1 if @build.build_dmg # Add one if we're building a dmg
+    c += 1 if @build.build_pe  # Add one for SLES if we're building PE
+  end
+end

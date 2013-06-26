@@ -217,7 +217,7 @@ namespace :pl do
     end
 
     # This does the mocks in parallel
-    desc "Queue pl:mock-all on jenkins builder"
+    desc "Queue pl:mock_all on jenkins builder"
     task :mock_all => "pl:fetch" do
       @build.final_mocks.split(' ').each do |mock|
         @build.default_mock = mock
@@ -236,6 +236,10 @@ namespace :pl do
         sleep 5
       end
     end
+
+    # Now that we've defined our uber_build build task, we can set its count
+    # attribute
+    RakeUtils.find_task("pl:jenkins:uber_build").count = target_count(:uber_build)
 
     desc "Retrieve packages built by jenkins, sign, and ship all!"
     task :uber_ship => "pl:fetch" do
@@ -278,9 +282,11 @@ if @build.build_pe
           sleep 5
         end
       end
+      count = @build.cows.split(' ').count
+      RakeUtils.find_task("pl:jenkins:deb_all").count = count
 
       # This does the mocks in parallel
-      desc "Queue pe:mock-all on jenkins builder"
+      desc "Queue pe:mock_all on jenkins builder"
       task :mock_all => "pl:fetch" do
         @build.final_mocks.split(' ').each do |mock|
           @build.default_mock = mock
@@ -288,6 +294,8 @@ if @build.build_pe
           sleep 5
         end
       end
+      count = @build.final_mocks.split(' ').count
+      RakeUtils.find_task("pl:jenkins:mock_all").count = count
 
       desc "Queue builds of all PE packages for this project in Jenkins"
       task :uber_build  => "pl:fetch" do
@@ -297,6 +305,13 @@ if @build.build_pe
           sleep 5
         end
       end
+      # ( 1 for sles)
+      count = 1 + @build.final_mocks.split(' ').count + @build.cows.split(' ').count
+      RakeUtils.find_task("pl:jenkins:uber_build").count =  count
+
+      # Now that we've defined our aggregate uber_build task, we can set its
+      # count attribute
+      RakeUtils.find_task("pl:jenkins:uber_build").count = target_count(:uber_build)
 
       desc "Retrieve PE packages built by jenkins, sign, and ship all!"
       task :uber_ship => "pl:fetch" do

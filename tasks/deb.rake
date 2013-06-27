@@ -1,9 +1,8 @@
 def pdebuild args
   results_dir = args[:work_dir]
   cow         = args[:cow]
-  devel_repo  = args[:devel]
   set_cow_envs(cow)
-  update_cow(cow, devel_repo)
+  update_cow(cow)
   begin
     sh "pdebuild  --configfile #{@build.pbuild_conf} \
                   --buildresult #{results_dir} \
@@ -15,8 +14,7 @@ def pdebuild args
   end
 end
 
-def update_cow(cow, is_rc = nil)
-  ENV['FOSS_DEVEL'] = is_rc.to_s
+def update_cow(cow)
   ENV['PATH'] = "/usr/sbin:#{ENV['PATH']}"
   set_cow_envs(cow)
   retry_on_fail(:times => 3) do
@@ -44,17 +42,16 @@ task :prep_deb_tars, :work_dir do |t,args|
   end
 end
 
-task :build_deb, :deb_command, :cow, :devel do |t,args|
+task :build_deb, :deb_command, :cow do |t,args|
   bench = Benchmark.realtime do
     deb_build = args.deb_command
     cow       = args.cow
-    devel     = args.devel
     work_dir  = get_temp
     subdir    = 'pe/' if @build.build_pe
     dest_dir  = "#{@build_root}/pkg/#{subdir}deb/#{cow.split('-')[1] unless cow.nil?}"
     check_tool(deb_build)
     mkdir_p dest_dir
-    deb_args  = { :work_dir => work_dir, :cow => cow, :devel => devel}
+    deb_args  = { :work_dir => work_dir, :cow => cow}
     Rake::Task[:prep_deb_tars].reenable
     Rake::Task[:prep_deb_tars].invoke(work_dir)
     cd "#{work_dir}/#{@build.project}-#{@build.debversion}" do
@@ -80,13 +77,13 @@ namespace :pl do
   desc "Create a deb from this repo using the default cow #{@build.default_cow}."
   task :deb => "package:tar"  do
     check_var('PE_VER', @build.pe_version) if @build.build_pe
-    Rake::Task[:build_deb].invoke('pdebuild', @build.default_cow, is_rc?)
+    Rake::Task[:build_deb].invoke('pdebuild', @build.default_cow)
     post_metrics if @build.benchmark
   end
 
   task :deb_rc => "package:tar" do
     deprecate("pl:deb_rc", "pl:deb")
-    Rake::Task[:build_deb].invoke('pdebuild', @build.default_cow, 'true')
+    Rake::Task[:build_deb].invoke('pdebuild', @build.default_cow)
     post_metrics if @build.benchmark
   end
 
@@ -96,7 +93,7 @@ namespace :pl do
     @build.cows.split(' ').each do |cow|
       Rake::Task["package:tar"].invoke
       Rake::Task[:build_deb].reenable
-      Rake::Task[:build_deb].invoke('pdebuild', cow, is_rc?)
+      Rake::Task[:build_deb].invoke('pdebuild', cow)
     end
     post_metrics if @build.benchmark
   end
@@ -106,7 +103,7 @@ namespace :pl do
     @build.cows.split(' ').each do |cow|
       Rake::Task["package:tar"].invoke
       Rake::Task[:build_deb].reenable
-      Rake::Task[:build_deb].invoke('pdebuild', cow, 'true')
+      Rake::Task[:build_deb].invoke('pdebuild', cow)
     end
   end
   post_metrics if @build.benchmark

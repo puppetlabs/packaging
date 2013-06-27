@@ -19,6 +19,7 @@ namespace :pl do
         url = create_jenkins_job(job_name, xml)
         puts "Jenkins job created at #{url}"
       end
+      rm_r work_dir
     end
   end
 end

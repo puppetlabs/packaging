@@ -8,7 +8,7 @@ namespace :pl do
       # The uber_build.xml.erb file is an XML erb template that will define a
       # job in Jenkins with all of the appropriate tasks
       work_dir = get_temp
-      template = File.join('..', 'templates', 'uber_build.xml.erb')
+      template = File.join(File.dirname(__FILE__), '..', 'templates', 'uber_build.xml.erb')
       xml_file = File.join(work_dir, 'uber_build.xml')
       xml = IO.read(erb(template, xml))
       create_jenkins_job("#{@build.project}-#{random_string 32}", xml)

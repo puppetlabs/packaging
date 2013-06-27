@@ -10,8 +10,15 @@ namespace :pl do
       work_dir = get_temp
       template = File.join(File.dirname(__FILE__), '..', 'templates', 'uber_build.xml.erb')
       xml_file = File.join(work_dir, 'uber_build.xml')
-      xml = IO.read(erb(template, xml))
-      create_jenkins_job("#{@build.project}-#{random_string 32}", xml)
+      erb(template, xml_file)
+      xml = IO.read(xml_file)
+      job_name = "#{@build.project}-#{timestamp('-')}-#{@build.ref}"
+      if jenkins_job_exists?(job_name)
+        raise "Job #{job_name} already exists on #{@build.jenkins_build_server}"
+      else
+        url = create_jenkins_job(job_name, xml)
+        puts "Jenkins job created at #{url}"
+      end
     end
   end
 end

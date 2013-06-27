@@ -541,14 +541,34 @@ def random_string length
   rand(36**length).to_s(36)
 end
 
-# Use the vendored jenkins_api_client to create a jenkins job from a valid XML
-# configuration file
-def create_jenkins_job(name, xml)
-  $: << File.join(File.dirname(__FILE__), '..', 'vendor', 'jenkins_api_client/lib')
-  require 'jenkins_api_client'
-  client = JenkinsApi::Client.new(:server_url => @build.jenkins_build_host)
-  job = JenkinsApi::Client::Job.new(client)
-  job.create(name, xml)
+# Load the jenkins API and return a default client object
+#
+def load_jenkins_api
+  unless defined? JenkinsApi::Client::VERSION
+    $: << File.join(File.dirname(__FILE__), '..', 'vendor', 'jenkins_api_client/lib')
+    require 'jenkins_api_client'
+  end
+  JenkinsApi::Client.new(:server_url => "http://#{@build.jenkins_build_host}")
 end
 
+# Create a jenkins API job object for interfacing with jobs
+def jenkins_api_job
+  client = load_jenkins_api
+  JenkinsApi::Client::Job.new(client)
+end
 
+# Use the vendored jenkins_api_client to create a jenkins job from a valid XML
+# configuration file.
+# Returns the URL to the job
+def create_jenkins_job(name, xml)
+  job = jenkins_api_job
+  job.create(name, xml)
+  "http://#{@build.jenkins_build_host}/job/#{name}"
+end
+
+# Use the vendored jenkins_api_client to check of a named job is defined on the
+# jenkins server
+def jenkins_job_exists?(name)
+  job = jenkins_api_job
+  job.exists?(name)
+end

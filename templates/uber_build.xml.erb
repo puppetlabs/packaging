@@ -5,8 +5,8 @@
   <keepDependencies>false</keepDependencies>
   <properties>
     <jp.ikedam.jenkins.plugins.groovy__label__assignment.GroovyLabelAssignmentProperty plugin="groovy-label-assignment@1.0.0">
-      <groovyScript>def labelMap = [<% @build.cows.each do |cow| %>
-        &quot;package:deb COW=<%= cow %>&quot;: &quot;deb&quot;,<% end %><% @build.mocks.each do |mock| %>
+      <groovyScript>def labelMap = [<% @build.cows.split(' ').each do |cow| %>
+        &quot;pl:deb COW=<%= cow %>&quot;: &quot;deb&quot;,<% end %><% @build.final_mocks.split(' ').each do |mock| %>
         &quot;pl:mock MOCK=<%= mock %>&quot;: &quot;rpm&quot;,<% end %>
         &quot;package:tar&quot;: &quot;rpm&quot;,
         <% if @build.build_gem %>&quot;package:gem&quot;: &quot;gem&quot;,<% end %>
@@ -25,7 +25,7 @@ return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScr
       <hudson.plugins.git.UserRemoteConfig>
         <name></name>
         <refspec></refspec>
-        <url>git@github.com:puppetlabs/facter.git</url>
+        <url>git://github.com/puppetlabs/facter.git</url>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
@@ -65,8 +65,8 @@ return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScr
   <axes>
     <hudson.matrix.TextAxis>
       <name>command</name>
-      <values><% @build.cow.each_key do |text| %>
-        <string>package:deb COW=<%= text %></string><% end %><% @build.mock.each_key do |text| %>
+      <values><% @build.cows.split(' ').each do |text| %>
+        <string>pl:deb COW=<%= text %></string><% end %><% @build.final_mocks.split(' ').each do |text| %>
         <string>pl:mock MOCK=<%= text %></string><% end %>
         <string>package:tar</string>
         <% if @build.build_gem %><string>package:gem</string><% end %>

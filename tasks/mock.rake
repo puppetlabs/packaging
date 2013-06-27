@@ -86,19 +86,10 @@ def mock_el_ver(mock_config)
   version
 end
 
-def mock_arch(mock_config)
-  if @build.build_pe
-    arch = mock_config.split('-')[3]
-  else
-    arch = mock_config.split('-')[2]
-  end
-end
-
 def build_rpm_with_mock(mocks, is_rc)
   mocks.split(' ').each do |mock_config|
     family  = mock_el_family(mock_config)
     version = mock_el_ver(mock_config)
-    arch    = mock_arch(mock_config)
     subdir  = is_rc ? 'devel' : 'products'
     bench = Benchmark.realtime do
       resultdir = mock(mock_config, srpm_file)

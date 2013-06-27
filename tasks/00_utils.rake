@@ -129,8 +129,13 @@ def scp_file_to(host,path,file)
   %x{scp #{@tempdir}/#{file} #{host}:#{path}}
 end
 
-def timestamp
-  Time.now.strftime("%Y-%m-%d %H:%M:%S")
+def timestamp(separator=nil)
+  if s = separator
+    format = "%Y#{s}%m#{s}%d#{s}%H#{s}%M#{s}%S"
+  else
+    format = "%Y-%m-%d %H:%M:%S"
+  end
+  Time.now.strftime(format)
 end
 
 # Return information about the current tree, using `git describe`, ready for

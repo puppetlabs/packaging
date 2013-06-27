@@ -4,7 +4,7 @@
 namespace :pl do
   namespace :jenkins do
     desc "Dynamic Jenkins UBER build: Build all the things with ONE job"
-    task :uber_build_dynamic do
+    task :uber_build_dynamic => "pl:fetch" do
       # The uber_build.xml.erb file is an XML erb template that will define a
       # job in Jenkins with all of the appropriate tasks
       work_dir = get_temp

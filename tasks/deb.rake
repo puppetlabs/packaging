@@ -81,12 +81,6 @@ namespace :pl do
     post_metrics if @build.benchmark
   end
 
-  task :deb_rc => "package:tar" do
-    deprecate("pl:deb_rc", "pl:deb")
-    Rake::Task[:build_deb].invoke('pdebuild', @build.default_cow)
-    post_metrics if @build.benchmark
-  end
-
   desc "Create debs from this git repository using all cows specified in build_defaults yaml"
   task :deb_all do
     check_var('PE_VER', @build.pe_version) if @build.build_pe
@@ -97,14 +91,4 @@ namespace :pl do
     end
     post_metrics if @build.benchmark
   end
-
-  task :deb_all_rc do
-    deprecate("pl:deb_all_rc", "pl:deb_all")
-    @build.cows.split(' ').each do |cow|
-      Rake::Task["package:tar"].invoke
-      Rake::Task[:build_deb].reenable
-      Rake::Task[:build_deb].invoke('pdebuild', cow)
-    end
-  end
-  post_metrics if @build.benchmark
 end

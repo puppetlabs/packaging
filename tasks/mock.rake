@@ -86,20 +86,11 @@ def mock_el_ver(mock_config)
   version
 end
 
-def mock_arch(mock_config)
-  if @build.build_pe
-    arch = mock_config.split('-')[3]
-  else
-    arch = mock_config.split('-')[2]
-  end
-end
-
-def build_rpm_with_mock(mocks, is_rc)
+def build_rpm_with_mock(mocks)
   mocks.split(' ').each do |mock_config|
     family  = mock_el_family(mock_config)
     version = mock_el_ver(mock_config)
-    arch    = mock_arch(mock_config)
-    subdir  = is_rc ? 'devel' : 'products'
+    subdir  = is_rc? ? 'devel' : 'products'
     bench = Benchmark.realtime do
       resultdir = mock(mock_config, srpm_file)
       result  = "#{resultdir}/#{mock_config}/result/*.rpm"
@@ -107,10 +98,10 @@ def build_rpm_with_mock(mocks, is_rc)
       Dir[result].each do |rpm|
         rpm.strip!
         unless ENV['RC_OVERRIDE'] == '1'
-          if is_rc == FALSE and rpm =~ /[0-9]+rc[0-9]+\./
+          if is_rc? == FALSE and rpm =~ /[0-9]+rc[0-9]+\./
             puts "It looks like you might be trying to ship an RC to the production repos. Leaving rpm in #{result}. Pass RC_OVERRIDE=1 to override."
             next
-          elsif is_rc and rpm !~ /[0-9]+rc[0-9]+\./
+          elsif is_rc? and rpm !~ /[0-9]+rc[0-9]+\./
             puts "It looks like you might be trying to ship a production release to the development repos. Leaving rpm in #{result}. Pass RC_OVERRIDE=1 to override."
             next
           end
@@ -203,25 +194,13 @@ namespace :pl do
   task :mock => "package:srpm" do
     # If default mock isn't specified, just take the first one in the @build.final_mocks list
     @build.default_mock ||= @build.final_mocks.split(' ')[0]
-    build_rpm_with_mock(@build.default_mock, is_rc?)
-    post_metrics if @build.benchmark
-  end
-
-  task :mock_final => "package:srpm" do
-    deprecate("pl:mock_final", "pl:mock_all")
-    build_rpm_with_mock(@build.final_mocks, FALSE)
-    post_metrics if @build.benchmark
-  end
-
-  task :mock_rc => "package:srpm" do
-    deprecate("pl:mock_rc", "pl:mock_all")
-    build_rpm_with_mock(@build.rc_mocks, TRUE)
+    build_rpm_with_mock(@build.default_mock)
     post_metrics if @build.benchmark
   end
 
   desc "Use specified mocks to make rpms, keyed to PL infrastructure, pass MOCK to specifiy config"
   task :mock_all => "package:srpm" do
-    build_rpm_with_mock(@build.final_mocks, is_rc?)
+    build_rpm_with_mock(@build.final_mocks)
     post_metrics if @build.benchmark
   end
 end

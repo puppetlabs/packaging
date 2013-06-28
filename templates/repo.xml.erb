@@ -107,7 +107,7 @@ rake pl:jenkins:deb_repos
   </builders><% if ENV['DOWNSTREAM_JOB'] %>
   <publishers>
     <hudson.tasks.BuildTrigger>
-      <childProjects><%= "#{@build.project}-downstream-#{@build_date}-#{@build.ref}" %></childProjects>
+      <childProjects><%= "#{@build.project}-downstream-#{@build.build_date}-#{@build.ref}" %></childProjects>
       <threshold>
         <name>SUCCESS</name>
         <ordinal>0</ordinal>

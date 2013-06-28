@@ -10,6 +10,7 @@ module Build
                       :apt_repo_url,
                       :author,
                       :benchmark,
+                      :build_date,
                       :build_defaults,
                       :build_dmg,
                       :build_doc,

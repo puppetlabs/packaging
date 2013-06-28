@@ -143,7 +143,7 @@ PROJECT=$PROJECT&quot; &gt; build.properties</command>
               <propertiesFile>build.properties</propertiesFile>
             </hudson.plugins.parameterizedtrigger.FileBuildParameters>
           </configs>
-          <projects><%= "#{@build.project}-repo-#{@build_date}-#{@build.ref}" %>, </projects>
+          <projects><%= "#{@build.project}-repo-#{@build.build_date}-#{@build.ref}" %>, </projects>
           <condition>SUCCESS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
         </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>

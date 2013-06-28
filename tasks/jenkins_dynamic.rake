@@ -17,11 +17,11 @@ namespace :pl do
     task :uber_build_dynamic => "pl:fetch" do
       # The uber_build.xml.erb file is an XML erb template that will define a
       # job in Jenkins with all of the appropriate tasks
-      @build_date   = timestamp('-')
-      work_dir     = get_temp
-      template_dir = File.join(File.dirname(__FILE__), '..', 'templates')
-      templates    = ['packaging.xml.erb', 'repo.xml.erb']
-      templates    << 'downstream.xml.erb' if ENV['DOWNSTREAM_JOB']
+      @build.build_date  = timestamp('-')
+      work_dir           = get_temp
+      template_dir       = File.join(File.dirname(__FILE__), '..', 'templates')
+      templates          = ['packaging.xml.erb', 'repo.xml.erb']
+      templates          << 'downstream.xml.erb' if ENV['DOWNSTREAM_JOB']
 
       # Generate an XML file for every job configuration erb and attempt to
       # create a jenkins job from that XML config
@@ -32,7 +32,7 @@ namespace :pl do
 
         xml = IO.read(xml_file)
 
-        job_name = "#{@build.project}-#{t.gsub('.xml.erb','')}-#{@build_date}-#{@build.ref}"
+        job_name = "#{@build.project}-#{t.gsub('.xml.erb','')}-#{@build.build_date}-#{@build.ref}"
         if jenkins_job_exists?(job_name)
           raise "Job #{job_name} already exists on #{@build.jenkins_build_server}"
         else

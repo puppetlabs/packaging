@@ -28,8 +28,8 @@ namespace :pl do
       @build.build_date  = timestamp('-')
       work_dir           = get_temp
       template_dir       = File.join(File.dirname(__FILE__), '..', 'templates')
-      templates          = ['packaging.xml.erb', 'repo.xml.erb']
-      templates          << 'downstream.xml.erb' if ENV['DOWNSTREAM_JOB']
+      templates          = ['repo.xml.erb', 'packaging.xml.erb']
+      templates.unshift('downstream.xml.erb') if ENV['DOWNSTREAM_JOB']
 
       # Generate an XML file for every job configuration erb and attempt to
       # create a jenkins job from that XML config

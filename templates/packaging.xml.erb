@@ -121,16 +121,15 @@ pushd project
     rake package:bootstrap
 
     ### Perform the build
-    rake $command PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES --trace
+    rake $command PARAMS_FILE=&quot;$WORKSPACE/BUILD_PROPERTIES&quot; --trace
 
     ### Send the results
-    rake pl:jenkins:ship[&quot;artifacts&quot;] PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES --trace
+    rake pl:jenkins:ship[&quot;artifacts&quot;] PARAMS_FILE=&quot;$WORKSPACE/BUILD_PROPERTIES&quot; --trace
     
   popd
 popd
 
-echo &quot;
-REF=$SHA
+echo &quot;REF=$SHA
 PROJECT=$PROJECT&quot; &gt; build.properties</command>
     </hudson.tasks.Shell>
   </builders>
@@ -144,7 +143,7 @@ PROJECT=$PROJECT&quot; &gt; build.properties</command>
             </hudson.plugins.parameterizedtrigger.FileBuildParameters>
           </configs>
           <projects><%= "#{@build.project}-repo-#{@build.build_date}-#{@build.ref}" %>, </projects>
-          <condition>SUCCESS</condition>
+          <condition>UNSTABLE_OR_BETTER</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
         </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
       </configs>

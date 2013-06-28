@@ -248,6 +248,14 @@ def source_dirty?
   git_describe_version.include?('dirty')
 end
 
+def fail_on_dirty_source
+  if source_dirty?
+    raise "
+The source tree is dirty, e.g. there are uncommited changes. Please
+commit/discard changes and try again."
+  end
+end
+
 def kill_keychain
   %x{keychain -k mine}
 end

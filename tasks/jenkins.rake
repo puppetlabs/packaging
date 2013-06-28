@@ -91,10 +91,7 @@ namespace :pl do
     #
     task :post_build, :build_task do |t, args|
       # Check for a dirty tree before allowing a remote build that is doomed to unexpected results
-      if source_dirty?
-        warn "The source tree is dirty, e.g. there are uncommited changes. Please commit/discard changes and try again."
-        exit 1
-      end
+      fail_on_dirty_source
 
       # We use JSON for parsing the json part of the submission to JSON
       begin

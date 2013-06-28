@@ -94,12 +94,7 @@ namespace :pl do
       fail_on_dirty_source
 
       # We use JSON for parsing the json part of the submission to JSON
-      begin
-        require 'json'
-      rescue LoadError
-        warn "Couldn't require 'json'. JSON is required for sanely generating the string we curl to Jenkins."
-        exit 1
-      end
+      require_library_or_fail 'json'
 
       build_task = args.build_task
       ##

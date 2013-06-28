@@ -585,3 +585,11 @@ def jenkins_job_exists?(name)
   job = jenkins_api_job
   job.exists?(name)
 end
+
+def require_library_or_fail(library)
+  begin
+    require library
+  rescue LoadError
+    raise "Could not load #{library}. #{library} is required by the packaging repo for this task"
+  end
+end

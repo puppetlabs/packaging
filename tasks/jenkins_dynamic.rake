@@ -15,6 +15,14 @@ namespace :pl do
   namespace :jenkins do
     desc "Dynamic Jenkins UBER build: Build all the things with ONE job"
     task :uber_build_dynamic => "pl:fetch" do
+      # If we have a dirty source, bail, because changes won't get reflected in
+      # the package builds
+      fail_on_dirty_source
+
+      # Use JSON to parse the json part of the submission, so we want to fail
+      # here also if JSON isn't available
+      require_library_or_fail 'json'
+
       # The uber_build.xml.erb file is an XML erb template that will define a
       # job in Jenkins with all of the appropriate tasks
       @build.build_date  = timestamp('-')
@@ -41,6 +49,55 @@ namespace :pl do
         end
       end
       rm_r work_dir
+      packaging_name = "#{@build.project}-packaging-#{@build.build_date}-#{@build.ref}"
+      invoke_task("pl:jenkins:trigger_dynamic_job", packaging_name)
+    end
+
+    # Task to trigger the jenkins job we just created. This uses a lot of the
+    # same logic in jenkins.rake, with different parameters.
+    # TODO make all this replicated code a better, more abstract method
+    task :trigger_dynamic_job, :name do |t, args|
+      name = args.name
+
+      properties = @build.params_to_yaml
+      bundle = git_bundle('HEAD')
+
+      # Construct the parameters, which is an array of hashes we turn into JSON
+      parameters = [{ "name" => "BUILD_PROPERTIES", "file"  => "file0" },
+                    { "name" => "PROJECT_BUNDLE",   "file"  => "file1" },
+                    { "name" => "PROJECT",          "value" => "#{@build.project}" }]
+
+      # Initialize the args array that will hold all of the arguments we pass
+      # to the curl utility method.
+      args = []
+
+      # Contruct the json string
+      json = JSON.generate("parameter" => parameters)
+
+      args <<  [
+      "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
+      "-Fname=PROJECT_BUNDLE"  , "-Ffile1=@#{bundle}",
+      "-Fname=PROJECT"         , "-Fvalue=#{@build.project}",
+      "-FSubmit=Build",
+      "-Fjson=#{json.to_json}",
+      ]
+
+      # We have several arrays inside args, so flatten it up
+      args.flatten!
+
+      # Contstruct the job url
+      trigger_url = "#{@build.jenkins_build_host}/job/#{name}/build"
+
+      if curl_form_data(trigger_url, args)
+        puts "Build submitted. To view your build results, go to #{trigger_url}"
+        puts "Your packages will be available at #{@build.distribution_server}:#{@build.    jenkins_repo_path}/#{@build.project}/#{@build.ref}"
+      else
+        warn "An error occurred submitting the job to jenkins. Take a look at the preced    ing http response for more info."
+      end
+
+      # Clean up after ourselves
+      rm bundle
+      rm properties
     end
   end
 end

@@ -75,6 +75,11 @@ return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScr
           <description></description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REF</name>
+          <description></description>
+          <defaultValue><%= @build.ref %></defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -109,6 +114,7 @@ SHA=$(echo $BUILD_PROPERTIES | cut -d &apos;.&apos; -f1)
 # git bundle.
 #
 
+
 [ -f &quot;PROJECT_BUNDLE&quot; ] || exit 1
 mkdir project &amp;&amp; tar -xzf PROJECT_BUNDLE -C project/
 
@@ -127,10 +133,7 @@ pushd project
     rake pl:jenkins:ship[&quot;artifacts&quot;] PARAMS_FILE=&quot;$WORKSPACE/BUILD_PROPERTIES&quot; --trace
     
   popd
-popd
-
-echo &quot;REF=$SHA
-PROJECT=$PROJECT&quot; &gt; build.properties</command>
+popd</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
@@ -138,11 +141,9 @@ PROJECT=$PROJECT&quot; &gt; build.properties</command>
       <configs>
         <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
           <configs>
-            <hudson.plugins.parameterizedtrigger.FileBuildParameters>
-              <propertiesFile>build.properties</propertiesFile>
-            </hudson.plugins.parameterizedtrigger.FileBuildParameters>
+            <hudson.plugins.parameterizedtrigger.CurrentBuildParameters/>
           </configs>
-          <projects><%= "#{@build.project}-repo-#{@build.build_date}-#{@build.ref}" %>, </projects>
+          <projects><%= "#{@build.project}-repo-#{@build.build_date}-#{@build.ref}" %></projects>
           <condition>UNSTABLE_OR_BETTER</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
         </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>

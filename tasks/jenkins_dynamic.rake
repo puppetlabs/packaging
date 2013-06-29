@@ -65,7 +65,8 @@ namespace :pl do
       # Construct the parameters, which is an array of hashes we turn into JSON
       parameters = [{ "name" => "BUILD_PROPERTIES", "file"  => "file0" },
                     { "name" => "PROJECT_BUNDLE",   "file"  => "file1" },
-                    { "name" => "PROJECT",          "value" => "#{@build.project}" }]
+                    { "name" => "PROJECT",          "value" => "#{@build.project}" },
+                    { "name" => "REF",              "value" => "#{@build.ref}"}]
 
       # Initialize the args array that will hold all of the arguments we pass
       # to the curl utility method.
@@ -78,6 +79,7 @@ namespace :pl do
       "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
       "-Fname=PROJECT_BUNDLE"  , "-Ffile1=@#{bundle}",
       "-Fname=PROJECT"         , "-Fvalue=#{@build.project}",
+      "-Fname=REF"             , "-Fvalue=#{@build.ref}",
       "-FSubmit=Build",
       "-Fjson=#{json.to_json}",
       ]

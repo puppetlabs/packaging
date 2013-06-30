@@ -129,11 +129,25 @@ namespace :pl do
       properties = @build.params_to_yaml
       bundle = git_bundle('HEAD')
 
+      # Create a string of metrics to send to Jenkins for data analysis
+      @build.pe_version = "N/A" if @build.pe_version == nil
+      dist = case build_type
+        when /deb/ then @build.default_cow.split('-')[1]
+        when /rpm/ then @build.default_mock != nil ? @build.default_mock.split('-')[1..2].join("") : @build.final_mocks.split(' ')[0].split('-')[1..2].join("")
+        when /dmg/ then "apple"
+        when /gem/ then "gem"
+        when /sles/ then "sles"
+        else raise "Could not determine build type for #{build_task}"
+      end
+
+      metrics = "#{ENV['USER']}~#{@build.version}~#{@build.pe_version}~#{dist}"
+
       # Construct the parameters, which is an array of hashes we turn into JSON
       parameters = [{ "name" => "BUILD_PROPERTIES", "file"  => "file0" },
                     { "name" => "PROJECT_BUNDLE",   "file"  => "file1" },
                     { "name" => "PROJECT",          "value" => "#{@build.project}" },
-                    { "name" => "BUILD_TYPE",       "label" => "#{build_type}" }]
+                    { "name" => "BUILD_TYPE",       "label" => "#{build_type}" },
+                    { "name" => "METRICS",          "value" => "#{metrics}"}]
 
       # Initialize the args array that will hold all of the arguments we pass
       # to the curl utility method.
@@ -158,6 +172,7 @@ namespace :pl do
       "-Fname=PROJECT_BUNDLE"  , "-Ffile1=@#{bundle}",
       "-Fname=PROJECT"         , "-Fvalue=#{@build.project}",
       "-Fname=BUILD_TYPE"      , "-Fvalue=#{build_type}",
+      "-Fname=METRICS"         , "-Fvalue=#{metrics}",
       "-FSubmit=Build",
       "-Fjson=#{json.to_json}",
       ]

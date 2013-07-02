@@ -132,10 +132,12 @@ Jenkins tasks are similar to the `:remote:` tasks, but they do not require ssh
 access to the builders. They do require being on the local network - the
 jenkins instance that performs package builds is an internal server only,
 accessible when connected via VPN or on-site.  The jenkins tasks enable the
-packaging repo to kick off packaging builds on a remote jenkins slave. They
-work in a similar way to the :remote tasks, but with a few key differences. The
-jenkins tasks transmit information to a jenkins coordinator, which handles the
-rest. The data passed are the following:
+packaging repo to kick off packaging builds on a remote jenkins slave.
+There are two workflows of jenkins tasks in the packaging repo. The first
+workflow, which is used for creating individual platform packages on jenkins
+(e.g. creating a deb with pl:jenkins:deb) relies on a job that exists on a
+remote jenkins server. The tasks transmit information to the jenkins job, which
+handles the rest. The data passed are the following:
 
 1) $PROJECT\_BUNDLE - a tar.gz of a git-bundle from HEAD of the current
 project, which is cloned on the builder to set up a duplicate of this
@@ -208,10 +210,59 @@ the task are:
 
 #################
 ```
+The second, more recent, jenkins-based workflow is for initiating the
+"uber_build", or a package build for all of our target platforms. This workflow
+doesn't actually use a static job on the jenkins-server. Instead it _creates_
+the jenkins jobs for you, on-demand. Specifically, it creates two jenkins-jobs,
+and can create an optional third.
+
+The first job is a matrix job, the cells of which are individual package tasks
+for all of the build targets. This job takes four parameters:
+
+1) $PROJECT\_BUNDLE - a tar.gz of a git-bundle from HEAD of the current
+project, which is cloned on the builder to set up a duplicate of this
+environment
+
+2) $BUILD\_PROPERTIES - a build parameters file, containing all information
+about the build
+
+3) $PROJECT - the project we're building, e.g. facter, puppet. This is used
+later in determining the target for the build artifacts on the distribution
+server
+
+4) $REF - the git ref of your current local git repository
+
+This first job clones the git bundle passed in as a parameter, then clones the
+packaging repo (rake package:bootstrap) and for every cell in its matrix
+performs a package build for a specific target (e.g. rake pl:deb
+COW=base-lucid-i386.cow). If all cells in the matrix complete successfully (if
+all packages build), this job automatically triggers the second of the new jobs
+as a downstream job.
+
+The second job is an automatic repository creation task for this git repo.
+Specifically, the job copies the git bundle from the packaging job and clones
+it, and uses the git information in the git bundle to clone the packaging repo
+and invoke the repository creation jobs `pl:jenkins:rpm_repos` and
+`pl:jenkins:deb_repos`.
+
+The third job is only created _if_ the environment variable
+`DOWNSTREAM_JOB=<job_url>` was passed to the initial "pl:jenkins:uber_build"
+invocation. This third job takes the value assigned to `DOWNSTREAM_JOB` and
+creates a proxy jenkins job with a single build step, a curl call to this
+value, presumably a url to a jenkins job to trigger programmatically.
+Once the repos have successfully been created by the second job, the third job
+will automatically trigger as a downstream job.
+
+All 3 jobs are configured by default for removal by jenkins after 3 days, to
+avoid clutter.
+
+The goal is to move toward migrating all of the jenkins tasks from the first
+workflow, using a static job that is called many times per package, to this
+second workflow of creating the jobs on demand.
 
 ## Task Explanations
 For a listing of all available tasks and their functions, see the [Task
-Dictionary](https://github.com/MosesMendoza/packaging/tree/more_documentation#task-dictionary)
+Dictionary](https://github.com/puppetlabs/packaging/tree/more_documentation#task-dictionary)
 at the end of this README.
 
 ## Modules
@@ -678,10 +729,11 @@ files:
 
 * **pl:jenkins:uber_build**
 
-    An aggregate of build tasks. These include `jenkins:deb_all`,
-    `pl:jenkins:mock_all`, `pl:jenkins:tar`, `pl:jenkins:dmg`, and `pl:jenkins:gem`. Each
-    task is a separate job that is posted to the jenkins build server,
-    separated by a 5 second sleep.
+    Create a jenkins job on the fly that performs an aggregate of build tasks.
+    These include all the debian builds using `pl:deb COW=<cow>`, rpm builds
+    with `pl:mock MOCKS=<mock>`, `package:tar`, `pl:dmg`, and `package:gem` if applicable.
+    See [jenkins-tasks](https://github.com/puppetlabs/packaging#jenkins-tasks)
+    above for more detail.
 
 * **pl:jenkins:uber_ship**
 

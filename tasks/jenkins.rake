@@ -218,17 +218,6 @@ namespace :pl do
       end
     end
 
-    desc "Jenkins UBER build: build all the things with jenkins"
-    task :uber_build do
-      uber_tasks = ["jenkins:deb_all", "jenkins:mock_all", "jenkins:tar"]
-      uber_tasks << "jenkins:dmg" if @build.build_dmg
-      uber_tasks << "jenkins:gem" if @build.build_gem
-      uber_tasks.map { |t| "pl:#{t}" }.each do |t|
-        invoke_task(t)
-        sleep 5
-      end
-    end
-
     desc "Retrieve packages built by jenkins, sign, and ship all!"
     task :uber_ship => "pl:fetch" do
       uber_tasks = ["jenkins:retrieve", "jenkins:sign_all", "uber_ship", "remote:freight", "remote:update_yum_repo" ]

@@ -14,7 +14,7 @@
 namespace :pl do
   namespace :jenkins do
     desc "Dynamic Jenkins UBER build: Build all the things with ONE job"
-    task :uber_build_dynamic => "pl:fetch" do
+    task :uber_build => "pl:fetch" do
       # If we have a dirty source, bail, because changes won't get reflected in
       # the package builds
       fail_on_dirty_source

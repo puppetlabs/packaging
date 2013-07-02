@@ -88,70 +88,81 @@ end
 
 def build_rpm_with_mock(mocks)
   mocks.split(' ').each do |mock_config|
-    family  = mock_el_family(mock_config)
-    version = mock_el_ver(mock_config)
-    subdir  = is_rc? ? 'devel' : 'products'
-    bench = Benchmark.realtime do
-      resultdir = mock(mock_config, srpm_file)
-      result  = "#{resultdir}/#{mock_config}/result/*.rpm"
+    begin
+      family  = mock_el_family(mock_config)
+      version = mock_el_ver(mock_config)
+      subdir  = is_rc? ? 'devel' : 'products'
+      @dist   = case family
+        when /el/ then "#{family}#{version}"
+        when /fedora/ then "#{version}"
+      end
+      @build_success = true
+      bench = Benchmark.realtime do
+        resultdir = mock(mock_config, srpm_file)
+        result  = "#{resultdir}/#{mock_config}/result/*.rpm"
 
-      Dir[result].each do |rpm|
-        rpm.strip!
-        unless ENV['RC_OVERRIDE'] == '1'
-          if is_rc? == FALSE and rpm =~ /[0-9]+rc[0-9]+\./
-            puts "It looks like you might be trying to ship an RC to the production repos. Leaving rpm in #{result}. Pass RC_OVERRIDE=1 to override."
-            next
-          elsif is_rc? and rpm !~ /[0-9]+rc[0-9]+\./
-            puts "It looks like you might be trying to ship a production release to the development repos. Leaving rpm in #{result}. Pass RC_OVERRIDE=1 to override."
-            next
+        Dir[result].each do |rpm|
+          rpm.strip!
+          unless ENV['RC_OVERRIDE'] == '1'
+            if is_rc? == FALSE and rpm =~ /[0-9]+rc[0-9]+\./
+              puts "It looks like you might be trying to ship an RC to the production repos. Leaving rpm in #{result}. Pass RC_OVERRIDE=1 to override."
+              next
+            elsif is_rc? and rpm !~ /[0-9]+rc[0-9]+\./
+              puts "It looks like you might be trying to ship a production release to the development repos. Leaving rpm in #{result}. Pass RC_OVERRIDE=1 to override."
+              next
+            end
+          end
+
+          if @build.build_pe
+            %x{mkdir -p pkg/pe/rpm/#{family}-#{version}-{srpms,i386,x86_64}}
+            case File.basename(rpm)
+              when /debuginfo/
+                rm_rf(rpm)
+              when /src\.rpm/
+                cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-srpms")
+              when /i.?86/
+                cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-i386")
+              when /x86_64/
+                cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-x86_64")
+              when /noarch/
+                cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-i386")
+                ln("pkg/pe/rpm/#{family}-#{version}-i386/#{File.basename(rpm)}", "pkg/pe/rpm/#{family}-#{version}-x86_64/")
+            end
+          else
+            %x{mkdir -p pkg/#{family}/#{version}/#{subdir}/{SRPMS,i386,x86_64}}
+            case File.basename(rpm)
+              when /debuginfo/
+                rm_rf(rpm)
+              when /src\.rpm/
+                cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/SRPMS")
+              when /i.?86/
+                cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/i386")
+              when /x86_64/
+                cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/x86_64")
+              when /noarch/
+                cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/i386")
+                ln("pkg/#{family}/#{version}/#{subdir}/i386/#{File.basename(rpm)}", "pkg/#{family}/#{version}/#{subdir}/x86_64/")
+            end
           end
         end
-
-        if @build.build_pe
-          %x{mkdir -p pkg/pe/rpm/#{family}-#{version}-{srpms,i386,x86_64}}
-          case File.basename(rpm)
-            when /debuginfo/
-              rm_rf(rpm)
-            when /src\.rpm/
-              cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-srpms")
-            when /i.?86/
-              cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-i386")
-            when /x86_64/
-              cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-x86_64")
-            when /noarch/
-              cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-i386")
-              ln("pkg/pe/rpm/#{family}-#{version}-i386/#{File.basename(rpm)}", "pkg/pe/rpm/#{family}-#{version}-x86_64/")
-          end
-        else
-          %x{mkdir -p pkg/#{family}/#{version}/#{subdir}/{SRPMS,i386,x86_64}}
-          case File.basename(rpm)
-            when /debuginfo/
-              rm_rf(rpm)
-            when /src\.rpm/
-              cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/SRPMS")
-            when /i.?86/
-              cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/i386")
-            when /x86_64/
-              cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/x86_64")
-            when /noarch/
-              cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/i386")
-              ln("pkg/#{family}/#{version}/#{subdir}/i386/#{File.basename(rpm)}", "pkg/#{family}/#{version}/#{subdir}/x86_64/")
+        # To avoid filling up the system with our random mockroots, we should
+        # clean up. However, this requires sudo. If we don't have sudo, we'll
+        # just fail and not clean up, but warn the user about it.
+        if @build.random_mockroot
+          %x{sudo -n echo 'Cleaning build root.'}
+          if $?.success?
+            sh "sudo -n rm -r #{resultdir}" unless resultdir.nil?
+          else
+            warn "Couldn't clean #{resultdir} without sudo. Leaving."
           end
         end
       end
-      # To avoid filling up the system with our random mockroots, we should
-      # clean up. However, this requires sudo. If we don't have sudo, we'll
-      # just fail and not clean up, but warn the user about it.
-      if @build.random_mockroot
-        %x{sudo -n echo 'Cleaning build root.'}
-        if $?.success?
-          sh "sudo -n rm -r #{resultdir}" unless resultdir.nil?
-        else
-          warn "Couldn't clean #{resultdir} without sudo. Leaving."
-        end
-      end
+    rescue Exception => e
+      puts e
+      @build_success = false
+      add_metrics({ :dist => "#{@dist}", :bench => "N/A", :success => @build_success, :log => ''}) if @build.benchmark
     end
-    add_metrics({ :dist => "#{family}-#{version}", :bench => bench }) if @build.benchmark
+    add_metrics({ :dist => "#{@dist}", :bench => bench, :success => @build_success, :log => '' }) if @build.benchmark and @build_success != false
   end
 end
 

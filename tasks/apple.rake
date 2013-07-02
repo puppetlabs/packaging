@@ -233,17 +233,22 @@ if @build.build_dmg
   namespace :package do
     desc "Task for building an Apple Package"
     task :apple => [:setup] do
-      bench = Benchmark.realtime do
-        # Test for Packagemaker binary
-        raise "Packagemaker must be installed. Please install XCode Tools" unless \
-          File.exists?(PACKAGEMAKER)
+      begin
+        @build_success = true
+        bench = Benchmark.realtime do
+          # Test for Packagemaker binary
+          raise "Packagemaker must be installed. Please install XCode Tools" unless \
+            File.exists?(PACKAGEMAKER)
 
-        make_directory_tree
-        pack_source
-        build_dmg
+          make_directory_tree
+          pack_source
+          build_dmg
+        end
+      rescue Exception => e
+        @build_success = false
       end
       if @build.benchmark
-        add_metrics({ :dist => 'osx', :bench => bench })
+        add_metrics({ :dist => 'osx', :bench => bench, :success => @build_success, :log => '' })
         post_metrics
       end
     end

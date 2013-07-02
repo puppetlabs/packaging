@@ -10,6 +10,7 @@ def pdebuild args
                   --basepath /var/cache/pbuilder/#{cow}/"
   rescue Exception => e
     puts e
+    @build_success = false
     handle_method_failure('pdebuild', args)
   end
 end
@@ -28,6 +29,7 @@ def debuild args
     sh "debuild --no-lintian -uc -us"
   rescue
     STDERR.puts "Something went wrong. Hopefully the backscroll or #{results_dir}/#{@build.project}_#{@build.debversion}.build file has a clue."
+    @build_success = false
     exit 1
   end
 end
@@ -44,6 +46,7 @@ end
 
 task :build_deb, :deb_command, :cow do |t,args|
   bench = Benchmark.realtime do
+    @build_success = true
     deb_build = args.deb_command
     cow       = args.cow
     work_dir  = get_temp
@@ -63,13 +66,14 @@ task :build_deb, :deb_command, :cow do |t,args|
     end
   end
   # See 30_metrics.rake to see what this is doing
-  add_metrics({ :dist => ENV['DIST'], :bench => bench }) if @build.benchmark
+  add_metrics({ :dist => ENV['DIST'], :bench => bench, :success => @build_success, :log => '' }) if @build.benchmark
 end
 
 namespace :package do
   desc "Create a deb from this repo, using debuild (all builddeps must be installed)"
   task :deb => :tar do
     Rake::Task[:build_deb].invoke('debuild')
+    post_metrics if @build.benchmark
   end
 end
 

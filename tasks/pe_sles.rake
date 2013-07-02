@@ -52,6 +52,7 @@ if @build.build_pe
         build_spec        = "#{build_spec_dir}/#{@build.project}.spec"
         if noarch == FALSE
           bench = Benchmark.realtime do
+            @build.success = true
             linux_cmd = arch == 'i586' ? 'linux32' : 'linux64'
             sh "yes | sudo #{linux_cmd} build \
               --rpms        #{deps_repo}:#{ENV['HOME']}/package_repos/sles-11-#{arch} \
@@ -64,6 +65,7 @@ if @build.build_pe
             srpms = FileList["#{build_root}/#{arch}/#{build_dest_dir}/SRPMS/**/*.rpm"]
             if rpms.empty?
               STDERR.puts "No RPMS were built. Perhaps an error occurred?"
+              @build.success = false
               exit 1
             end
             built_arch = arch
@@ -73,7 +75,7 @@ if @build.build_pe
             noarch = rpms.exclude(/noarch/).empty?
           end
           # See 30_metrics.rake to see what this is doing
-          add_metrics({ :dist => 'sles', :bench => bench }) if @build.benchmark
+          add_metrics({ :dist => 'sles', :package_type => 'rpm', :bench => bench, :success => @build.success, :log => '' }) if @build.benchmark
         else
           arches_to_copy_to = @build.sles_arch_repos.keys - [ built_arch ]
           arches_to_copy_to.each do |other_arch|

@@ -27,7 +27,7 @@ namespace :pl do
     end
   end
 end
-if @build.team == 'release'
+if @build.team == 'release' or @build.team == 'dev'
   @build.benchmark = TRUE
 end
 

@@ -60,13 +60,19 @@ if @build.build_gem
     gem_task = Gem::PackageTask.new(spec)
     desc "Build a gem"
     task :gem => [ "clean" ] do
-      bench = Benchmark.realtime do
-        gem_task.define
-        Rake::Task[:gem].invoke
-        rm_rf "pkg/#{@build.project}-#{@build.gemversion}"
+      begin
+        @build_success = true
+        bench = Benchmark.realtime do
+          gem_task.define
+          Rake::Task[:gem].invoke
+          rm_rf "pkg/#{@build.project}-#{@build.gemversion}"
+        end
+      rescue Exception => e
+        puts e
+        @build_success = false
       end
       if @build.benchmark
-        add_metrics({ :dist => 'gem', :bench => bench })
+        add_metrics({ :dist => 'gem', :package_type => 'gem', :bench => bench, :success => @build_success })
         post_metrics
       end
     end

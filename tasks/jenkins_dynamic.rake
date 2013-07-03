@@ -92,9 +92,11 @@ namespace :pl do
 
       if curl_form_data(trigger_url, args)
         puts "\n////////////////////////////////////////////////////////////////////////////////////
-        Build submitted. To view your build results, go to
-        #{trigger_url}
-        ////////////////////////////////////////////////////////////////////////////////////\n\n"
+
+Build submitted. To view your build progress, go to
+#{@build.jenkins_build_host}/job/#{name}
+
+////////////////////////////////////////////////////////////////////////////////////\n\n"
         puts "Your packages will be available at #{@build.distribution_server}:#{@build.    jenkins_repo_path}/#{@build.project}/#{@build.ref}"
       else
         warn "An error occurred submitting the job to jenkins. Take a look at the preced    ing http response for more info."

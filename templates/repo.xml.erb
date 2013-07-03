@@ -9,7 +9,7 @@ This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed 
 &lt;/p&gt;&#xd;
 </description>
   <logRotator class="hudson.tasks.LogRotator">
-    <daysToKeep>1</daysToKeep>
+    <daysToKeep>3</daysToKeep>
     <numToKeep>-1</numToKeep>
     <artifactDaysToKeep>-1</artifactDaysToKeep>
     <artifactNumToKeep>-1</artifactNumToKeep>
@@ -81,9 +81,6 @@ popd
   </publishers><% else %>
   <publishers/><% end %>
   <buildWrappers>
-    <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.12">
-      <deleteDirs>false</deleteDirs>
-    </hudson.plugins.ws__cleanup.PreBuildCleanup>
     <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.3.1">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>

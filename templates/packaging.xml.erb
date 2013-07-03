@@ -21,7 +21,7 @@ current state of the project to be packaged&#xd;
 This job will be triggered automatically after generation by the packaging&#xd;
 repo.&#xd;
 &lt;br&gt;&#xd;
-To trigger a downstream job after completion, pass DOWNSTREAM_JOB=$URI with the invokation, e.g.&#xd;
+To trigger a downstream job after completion, pass DOWNSTREAM_JOB=$URI with the invocation, e.g.&#xd;
 &lt;/br&gt;&#xd;
 &lt;p&gt;&#xd;
 pl:jenkins:deb DOWNSTREAM_JOB=http://jenkins-release.delivery.puppetlabs.net/job/puppetlabs-packaging-downstream-test/build&#xd;
@@ -39,7 +39,7 @@ pl:jenkins:deb DOWNSTREAM_JOB=http://jenkins-release.delivery.puppetlabs.net/job
   &#xd;
 </description>
   <logRotator class="hudson.tasks.LogRotator">
-    <daysToKeep>1</daysToKeep>
+    <daysToKeep>3</daysToKeep>
     <numToKeep>-1</numToKeep>
     <artifactDaysToKeep>-1</artifactDaysToKeep>
     <artifactNumToKeep>-1</artifactNumToKeep>
@@ -75,11 +75,6 @@ return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScr
           <description></description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>REF</name>
-          <description></description>
-          <defaultValue><%= @build.ref %></defaultValue>
-        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -106,23 +101,18 @@ return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScr
     <hudson.tasks.Shell>
       <command>#!/bin/bash
 
-SHA=$(echo $BUILD_PROPERTIES | cut -d &apos;.&apos; -f1)
-
 ### Create a local clone of the git-bundle that was passed
-# The bundle is a tarball, and since this is a project-agnostic
-# job, we don&apos;t actually know what&apos;s in it, just that it&apos;s a
-# git bundle.
-#
-
+# The bundle is wrapped in a tarball. We don't need to know the project that is
+# in the git bundle.
 
 [ -f &quot;PROJECT_BUNDLE&quot; ] || exit 1
 mkdir project &amp;&amp; tar -xzf PROJECT_BUNDLE -C project/
 
 pushd project
   git clone --recursive $(ls) git_repo
-  
+
   pushd git_repo
-    
+
     ### Clone the packaging repo
     rake package:bootstrap
 
@@ -131,12 +121,17 @@ pushd project
 
     ### Send the results
     rake pl:jenkins:ship[&quot;artifacts&quot;] PARAMS_FILE=&quot;$WORKSPACE/BUILD_PROPERTIES&quot; --trace
-    
+
   popd
 popd</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>**/PROJECT_BUNDLE</artifacts>
+      <latestOnly>false</latestOnly>
+      <allowEmptyArchive>false</allowEmptyArchive>
+    </hudson.tasks.ArtifactArchiver>
     <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.16">
       <configs>
         <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
@@ -152,7 +147,7 @@ popd</command>
   </publishers>
   <buildWrappers>
     <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.11">
-      <timeoutMinutes>30</timeoutMinutes>
+      <timeoutMinutes>45</timeoutMinutes>
       <failBuild>false</failBuild>
       <writingDescription>false</writingDescription>
       <timeoutPercentage>0</timeoutPercentage>

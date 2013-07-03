@@ -54,6 +54,7 @@ else
   @build.apt_host        = ENV['APT_HOST']                if ENV['APT_HOST']
   @build.apt_repo_path   = ENV['APT_REPO']                if ENV['APT_REPO']
   @build.pe_version      = ENV['PE_VER']                  if ENV['PE_VER']
+  @build.notify          = ENV['NOTIFY']                  if ENV['NOTIFY']
 end
 
 ##

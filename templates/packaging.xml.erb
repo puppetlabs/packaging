@@ -20,11 +20,18 @@ current state of the project to be packaged&#xd;
 &lt;p&gt;&#xd;
 This job will be triggered automatically after generation by the packaging&#xd;
 repo.&#xd;
+&lt;/p&gt;&#xd;
 &lt;br&gt;&#xd;
-To trigger a downstream job after completion, pass DOWNSTREAM_JOB=$URI with the invocation, e.g.&#xd;
+To trigger another downstream job after completion of this and the downstream repo creation job, pass DOWNSTREAM_JOB=$URI with the invocation, e.g.&#xd;
 &lt;/br&gt;&#xd;
 &lt;p&gt;&#xd;
-pl:jenkins:deb DOWNSTREAM_JOB=http://jenkins-release.delivery.puppetlabs.net/job/puppetlabs-packaging-downstream-test/build&#xd;
+pl:jenkins:uber_build DOWNSTREAM_JOB=http://jenkins-release.delivery.puppetlabs.net/job/puppetlabs-packaging-downstream-test/build&#xd;
+&lt;/p&gt;&#xd;
+&lt;p&gt;&#xd;
+To get notified of the failure of this packaging job, pass NOTIFY= with the invocation, e.g.&#xd;
+&lt;/p&gt;&#xd;
+&lt;p&gt;&#xd;
+pl:jenkins:uber_build NOTIFY=foo@puppetlabs.com&#xd;
 &lt;/p&gt;&#xd;
 &lt;p&gt;&#xd;
   Successful completion of packaging will result in the automatic creation of&#xd;
@@ -131,7 +138,12 @@ popd</command>
       <artifacts>**/PROJECT_BUNDLE</artifacts>
       <latestOnly>false</latestOnly>
       <allowEmptyArchive>false</allowEmptyArchive>
-    </hudson.tasks.ArtifactArchiver>
+    </hudson.tasks.ArtifactArchiver><% if @build.notify %>
+    <hudson.tasks.Mailer plugin="mailer@1.4">
+      <recipients><%= "#{@build.notify}" %></recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer><% end %>
     <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.16">
       <configs>
         <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>

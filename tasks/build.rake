@@ -65,6 +65,7 @@ module Build
                       :jenkins_repo_path,
                       :metrics,
                       :name,
+                      :notify,
                       :project,
                       :origversion,
                       :osx_build_host,

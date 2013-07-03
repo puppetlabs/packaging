@@ -230,14 +230,18 @@ about the build
 later in determining the target for the build artifacts on the distribution
 server
 
-4) $REF - the git ref of your current local git repository
-
 This first job clones the git bundle passed in as a parameter, then clones the
 packaging repo (rake package:bootstrap) and for every cell in its matrix
 performs a package build for a specific target (e.g. rake pl:deb
 COW=base-lucid-i386.cow). If all cells in the matrix complete successfully (if
 all packages build), this job automatically triggers the second of the new jobs
 as a downstream job.
+
+To receive an email notification from jenkins about the status of the packaging
+job, pass NOTIFY=<recipient> as an environment variable to the uber_build
+invocation, e.g.:
+
+rake pl:jenkins:uber_build NOTIFY="foo@puppetlabs.com bar@puppetlabs.com"
 
 The second job is an automatic repository creation task for this git repo.
 Specifically, the job copies the git bundle from the packaging job and clones

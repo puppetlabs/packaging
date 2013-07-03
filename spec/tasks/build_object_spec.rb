@@ -63,6 +63,7 @@ describe Build::BuildInstance do
                   :jenkins_repo_path,
                   :metrics,
                   :name,
+                  :notify,
                   :project,
                   :origversion,
                   :osx_build_host,

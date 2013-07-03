@@ -137,6 +137,7 @@ namespace :pl do
         when /dmg/ then "apple"
         when /gem/ then "gem"
         when /sles/ then "sles"
+        when /tar/ then "tar"
         else raise "Could not determine build type for #{build_task}"
       end
 

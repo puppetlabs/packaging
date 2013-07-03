@@ -217,7 +217,7 @@ the jenkins jobs for you, on-demand. Specifically, it creates two jenkins-jobs,
 and can create an optional third.
 
 The first job is a matrix job, the cells of which are individual package tasks
-for all of the build targets. This job takes four parameters:
+for all of the build targets. This job takes three parameters:
 
 1) $PROJECT\_BUNDLE - a tar.gz of a git-bundle from HEAD of the current
 project, which is cloned on the builder to set up a duplicate of this

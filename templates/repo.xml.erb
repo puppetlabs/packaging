@@ -2,20 +2,11 @@
 <project>
   <actions/>
   <description>&lt;p&gt;&#xd;
-Dynamically created job to generate apt and yum repos from packages built by jenkins&#xd;
+Dynamically created job to generate apt and yum repos from packages built by jenkins. It uses the git archive from the package:tar cell in the upstream package matrix to determine which repos to create.&#xd;
 &lt;/p&gt;&#xd;
 &lt;p&gt;&#xd;
 This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed to rake in the upstream invocation.&#xd;
 &lt;/p&gt;&#xd;
-&lt;p&gt;&#xd;
-  Takes 2 parameters:&#xd;
-&lt;/p&gt;&#xd;
-&lt;br&gt;&#xd;
-1) REF - The ref of the project that has been packaged that will have repos created for it&#xd;
-&lt;/br&gt;&#xd;
-&lt;br&gt;&#xd;
-2) PROJECT - the project that has been packaged that will have repos created for it&#xd;
-&lt;/br&gt;&#xd;
 </description>
   <logRotator class="hudson.tasks.LogRotator">
     <daysToKeep>1</daysToKeep>
@@ -29,58 +20,8 @@ This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed 
       <room></room>
       <startNotification>false</startNotification>
     </jenkins.plugins.hipchat.HipChatNotifier_-HipChatJobProperty>
-    <hudson.model.ParametersDefinitionProperty>
-      <parameterDefinitions>
-        <hudson.model.StringParameterDefinition>
-          <name>REF</name>
-          <description></description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-        <hudson.model.StringParameterDefinition>
-          <name>PROJECT</name>
-          <description></description>
-          <defaultValue></defaultValue>
-        </hudson.model.StringParameterDefinition>
-      </parameterDefinitions>
-    </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@1.2.0">
-    <configVersion>2</configVersion>
-    <userRemoteConfigs>
-      <hudson.plugins.git.UserRemoteConfig>
-        <name></name>
-        <refspec></refspec>
-        <url>git://github.com/puppetlabs/$PROJECT.git</url>
-      </hudson.plugins.git.UserRemoteConfig>
-    </userRemoteConfigs>
-    <branches>
-      <hudson.plugins.git.BranchSpec>
-        <name></name>
-      </hudson.plugins.git.BranchSpec>
-    </branches>
-    <disableSubmodules>false</disableSubmodules>
-    <recursiveSubmodules>false</recursiveSubmodules>
-    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
-    <authorOrCommitter>false</authorOrCommitter>
-    <clean>false</clean>
-    <wipeOutWorkspace>false</wipeOutWorkspace>
-    <pruneBranches>false</pruneBranches>
-    <remotePoll>false</remotePoll>
-    <ignoreNotifyCommit>false</ignoreNotifyCommit>
-    <useShallowClone>false</useShallowClone>
-    <buildChooser class="hudson.plugins.git.util.DefaultBuildChooser"/>
-    <gitTool>Default</gitTool>
-    <submoduleCfg class="list"/>
-    <relativeTargetDir></relativeTargetDir>
-    <reference></reference>
-    <excludedRegions></excludedRegions>
-    <excludedUsers></excludedUsers>
-    <gitConfigName></gitConfigName>
-    <gitConfigEmail></gitConfigEmail>
-    <skipTag>true</skipTag>
-    <includedRegions></includedRegions>
-    <scmName></scmName>
-  </scm>
+  <scm class="hudson.scm.NullSCM"/>
   <assignedNode>deb||rpm</assignedNode>
   <canRoam>false</canRoam>
   <disabled>false</disabled>
@@ -89,21 +30,42 @@ This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed 
   <triggers class="vector"/>
   <concurrentBuild>false</concurrentBuild>
   <builders>
+    <hudson.plugins.copyartifact.CopyArtifact plugin="copyartifact@1.25">
+      <projectName><%= "#{@build.project}-packaging-#{@build.build_date}-#{@build.ref}" %>/command=package:tar</projectName>
+      <filter>**/PROJECT_BUNDLE</filter>
+      <target></target>
+      <selector class="hudson.plugins.copyartifact.TriggeredBuildSelector">
+        <fallbackToLastSuccessful>true</fallbackToLastSuccessful>
+      </selector>
+      <flatten>true</flatten>
+    </hudson.plugins.copyartifact.CopyArtifact>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
 
-echo $REF
+### We've retrieved the git bundle from the tarball build, so now we clone it
+### and use it to trigger our repo creation
+#
+# PROJECT_BUNDLE is a tarball containing a bundle file and git_repo is the
+# directory that will contain the git repository. First we untar the tarball
+# and then clone the git_bundle
 
-### Check out the REF passed as an argument
-git checkout $REF
+[ -f &quot;PROJECT_BUNDLE&quot; ] || exit 1
+mkdir project &amp;&amp; tar -xzf PROJECT_BUNDLE -C project/
 
-### Clone the packaging repo
-rake package:bootstrap
+pushd project
+  git clone --recursive $(ls) git_repo
 
-### Run repo creation
-rake pl:jenkins:rpm_repos
-rake pl:jenkins:deb_repos
+  pushd git_repo
 
+    ### Clone the packaging repo
+    rake package:bootstrap --trace
+
+    ### Run repo creation
+    rake pl:jenkins:rpm_repos --trace
+    rake pl:jenkins:deb_repos --trace
+
+  popd
+popd
 </command>
     </hudson.tasks.Shell>
   </builders><% if ENV['DOWNSTREAM_JOB'] %>

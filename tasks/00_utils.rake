@@ -36,11 +36,15 @@ def check_host(host)
   end
 end
 
+def erb_string(erbfile)
+  template  = File.read(erbfile)
+  message   = ERB.new(template, nil, "-")
+  message.result(binding)
+end
+
 def erb(erbfile,  outfile)
-  template         = File.read(erbfile)
-  message          = ERB.new(template, nil, "-")
   message.filename = erbfile
-  output           = message.result(binding)
+  output           = erb_string(erbfile)
   File.open(outfile, 'w') { |f| f.write output }
   puts "Generated: #{outfile}"
 end

@@ -735,8 +735,9 @@ files:
 
     Create a jenkins job on the fly that performs an aggregate of build tasks.
     These include all the debian builds using `pl:deb COW=<cow>`, rpm builds
-    with `pl:mock MOCKS=<mock>`, `package:tar`, `pl:dmg`, and `package:gem` if applicable.
-    See [jenkins-tasks](https://github.com/puppetlabs/packaging#jenkins-tasks)
+    with `pl:mock MOCKS=<mock>`, `package:tar`, `package:apple`, and
+    `package:gem` if applicable. See
+    [jenkins-tasks](https://github.com/puppetlabs/packaging#jenkins-tasks)
     above for more detail.
 
 * **pl:jenkins:uber_ship**
@@ -924,16 +925,16 @@ files:
 
 * **pl:uber_release**
 
-    A composite task that performs the following tasks:  
-    `package:gem` (if build_gem is "true" in build_defaults.yaml)  
-    `pl:remote:release_deb`  
-    `pl:remote:release_rpm`  
-    `pl:remote:dmg` (if build_dmg is "true" in build_defaults.yaml)  
-    `package:tar`  
-    `pl:sign_tar`  
-    `pl:uber_ship`  
-    `pl:remote:freight`  
-    `pl:remote:update_yum_repo`  
+    A composite task that performs the following tasks:
+    `package:gem` (if build_gem is "true" in build_defaults.yaml)
+    `pl:remote:release_deb`
+    `pl:remote:release_rpm`
+    `pl:remote:dmg` (if build_dmg is "true" in build_defaults.yaml)
+    `package:tar`
+    `pl:sign_tar`
+    `pl:uber_ship`
+    `pl:remote:freight`
+    `pl:remote:update_yum_repo`
     This is essentially a complete build from start to finish. Gem and tarball
     are generated locally, and other packages (deb, rpm, dmg) are all created
     remotely. Assumes ssh access and appropriate build tool access on all
@@ -941,13 +942,13 @@ files:
 
 * **pl:uber_ship**
 
-    A composite task that performs the following tasks:  
-    `pl:ship_gem`  
-    `pl:ship_rpms`  
-    `pl:ship_debs`  
-    `pl:ship_dmgs`  
-    `pl:ship_tar`  
-    `pl:jenkins:ship`  
+    A composite task that performs the following tasks:
+    `pl:ship_gem`
+    `pl:ship_rpms`
+    `pl:ship_debs`
+    `pl:ship_dmgs`
+    `pl:ship_tar`
+    `pl:jenkins:ship`
     This is essentially a "ship all the things" task, but it is important to
     note that it does not update either yum or apt repo metadata on these
     respective servers - this has to be done via `pl:remote:update_yum_repo`

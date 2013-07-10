@@ -75,6 +75,7 @@ end
 @build.random_mockroot   = ENV['RANDOM_MOCKROOT'] ? boolean_value(ENV['RANDOM_MOCKROOT']) : true
 @keychain_loaded         ||= FALSE
 @build_root              ||= Dir.pwd
+@build.build_date        ||= timestamp('-')
 ##
 # For backwards compatibilty, we set build:@name to build:@project. @name was
 # renamed to @project in an effort to align the variable names with what has

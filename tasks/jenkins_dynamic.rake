@@ -11,6 +11,15 @@
 # 3) (optional) a job to proxy the downstream job passed in via DOWNSTREAM_JOB
 #
 
+def print_url_info(url_string)
+        puts "\n////////////////////////////////////////////////////////////////////////////////////
+
+Build submitted. To view your build progress, go to
+#{url_string}
+
+////////////////////////////////////////////////////////////////////////////////////\n\n"
+end
+
 namespace :pl do
   namespace :jenkins do
     desc "Dynamic Jenkins UBER build: Build all the things with ONE job"
@@ -25,7 +34,6 @@ namespace :pl do
 
       # The uber_build.xml.erb file is an XML erb template that will define a
       # job in Jenkins with all of the appropriate tasks
-      @build.build_date  = timestamp('-')
       work_dir           = get_temp
       template_dir       = File.join(File.dirname(__FILE__), '..', 'templates')
       templates          = ['repo.xml.erb', 'packaging.xml.erb']
@@ -36,9 +44,7 @@ namespace :pl do
       templates.each do |t|
         erb_file = File.join(template_dir, t)
         xml_file = File.join(work_dir, t.gsub('.erb', ''))
-        erb(erb_file, xml_file)
-
-        xml = IO.read(xml_file)
+        xml = erb_string(erb_file)
 
         job_name = "#{@build.project}-#{t.gsub('.xml.erb','')}-#{@build.build_date}-#{@build.ref}"
         if jenkins_job_exists?(job_name)
@@ -67,14 +73,12 @@ namespace :pl do
                     { "name" => "PROJECT_BUNDLE",   "file"  => "file1" },
                     { "name" => "PROJECT",          "value" => "#{@build.project}" }]
 
-      # Initialize the args array that will hold all of the arguments we pass
-      # to the curl utility method.
-      args = []
-
       # Contruct the json string
       json = JSON.generate("parameter" => parameters)
 
-      args <<  [
+      # The args array that holds  all of the arguments we pass
+      # to the curl utility method.
+      curl_args =  [
       "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
       "-Fname=PROJECT_BUNDLE"  , "-Ffile1=@#{bundle}",
       "-Fname=PROJECT"         , "-Fvalue=#{@build.project}",
@@ -82,22 +86,14 @@ namespace :pl do
       "-Fjson=#{json.to_json}",
       ]
 
-      # We have several arrays inside args, so flatten it up
-      args.flatten!
-
       # Contstruct the job url
       trigger_url = "#{@build.jenkins_build_host}/job/#{name}/build"
 
-      if curl_form_data(trigger_url, args)
-        puts "\n////////////////////////////////////////////////////////////////////////////////////
-
-Build submitted. To view your build progress, go to
-#{@build.jenkins_build_host}/job/#{name}
-
-////////////////////////////////////////////////////////////////////////////////////\n\n"
-        puts "Your packages will be available at #{@build.distribution_server}:#{@build.    jenkins_repo_path}/#{@build.project}/#{@build.ref}"
+      if curl_form_data(trigger_url, curl_args)
+        print_url_info(#{@build.jenkins_build_host}/job/#{name})
+        puts "Your packages will be available at #{@build.bution_server}:#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}"
       else
-        warn "An error occurred submitting the job to jenkins. Take a look at the preced    ing http response for more info."
+        warn "An error occurred submitting the job to jenkins. Take a look at the preceding http response for more info."
       end
 
       # Clean up after ourselves

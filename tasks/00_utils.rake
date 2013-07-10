@@ -597,3 +597,11 @@ def require_library_or_fail(library)
     raise "Could not load #{library}. #{library} is required by the packaging repo for this task"
   end
 end
+
+# Use the provided URL string to print important information with
+# ASCII emphasis
+def print_url_info(url_string)
+puts "\n////////////////////////////////////////////////////////////////////////////////\n\n
+  Build submitted. To view your build progress, go to\n#{url_string}\n\n
+////////////////////////////////////////////////////////////////////////////////\n\n"
+end

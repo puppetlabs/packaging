@@ -11,15 +11,6 @@
 # 3) (optional) a job to proxy the downstream job passed in via DOWNSTREAM_JOB
 #
 
-def print_url_info(url_string)
-        puts "\n////////////////////////////////////////////////////////////////////////////////////
-
-Build submitted. To view your build progress, go to
-#{url_string}
-
-////////////////////////////////////////////////////////////////////////////////////\n\n"
-end
-
 namespace :pl do
   namespace :jenkins do
     desc "Dynamic Jenkins UBER build: Build all the things with ONE job"
@@ -42,11 +33,9 @@ namespace :pl do
       # Generate an XML file for every job configuration erb and attempt to
       # create a jenkins job from that XML config
       templates.each do |t|
-        erb_file = File.join(template_dir, t)
-        xml_file = File.join(work_dir, t.gsub('.erb', ''))
-        xml = erb_string(erb_file)
-
-        job_name = "#{@build.project}-#{t.gsub('.xml.erb','')}-#{@build.build_date}-#{@build.ref}"
+        erb_file  = File.join(template_dir, t)
+        xml       = erb_string(erb_file)
+        job_name  = "#{@build.project}-#{t.gsub('.xml.erb','')}-#{@build.build_date}-#{@build.ref}"
         if jenkins_job_exists?(job_name)
           raise "Job #{job_name} already exists on #{@build.jenkins_build_server}"
         else
@@ -90,8 +79,8 @@ namespace :pl do
       trigger_url = "#{@build.jenkins_build_host}/job/#{name}/build"
 
       if curl_form_data(trigger_url, curl_args)
-        print_url_info(#{@build.jenkins_build_host}/job/#{name})
-        puts "Your packages will be available at #{@build.bution_server}:#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}"
+        print_url_info("#{@build.jenkins_build_host}/job/#{name}")
+        puts "Your packages will be available at #{@build.distribution_server}:#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}"
       else
         warn "An error occurred submitting the job to jenkins. Take a look at the preceding http response for more info."
       end

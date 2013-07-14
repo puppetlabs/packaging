@@ -533,7 +533,7 @@ end
 # This method takes two arguments
 # 1) String - the URL to post to
 # 2) Array  - Ordered array of name=VALUE curl form parameters
-def curl_form_data(uri, form_data=[])
+def curl_form_data(uri, form_data=[], options={})
   unless curl = find_tool("curl")
     warn "Couldn't find curl. Curl is required for posting jenkins to trigger a build. Please install curl and try again."
     exit 1
@@ -547,9 +547,15 @@ def curl_form_data(uri, form_data=[])
     post_string << "#{param} "
   end
 
-  # Add the uri and we're off
+  # Add the uri
   post_string << "#{uri}"
-  sh "#{curl} #{post_string}"
+
+  # If this is quiet, we're going to silence all output
+  if options[:quiet]
+    post_string << " >/dev/null 2>&1"
+  end
+
+  %x{#{curl} #{post_string}}
   return $?.success?
 end
 
@@ -557,36 +563,24 @@ def random_string length
   rand(36**length).to_s(36)
 end
 
-# Load the jenkins API and return a default client object
-#
-def load_jenkins_api
-  unless defined? JenkinsApi::Client::VERSION
-    $: << File.join(File.dirname(__FILE__), '..', 'vendor', 'jenkins_api_client/lib')
-    require 'jenkins_api_client'
-  end
-  JenkinsApi::Client.new(:server_url => "http://#{@build.jenkins_build_host}")
-end
-
-# Create a jenkins API job object for interfacing with jobs
-def jenkins_api_job
-  client = load_jenkins_api
-  JenkinsApi::Client::Job.new(client)
-end
-
-# Use the vendored jenkins_api_client to create a jenkins job from a valid XML
+# Use the curl to create a jenkins job from a valid XML
 # configuration file.
 # Returns the URL to the job
-def create_jenkins_job(name, xml)
-  job = jenkins_api_job
-  job.create(name, xml)
+def create_jenkins_job(name, xml_file)
+  create_url = "http://#{@build.jenkins_build_host}/createItem?name=#{name}"
+  form_args = ["-H", '"Content-Type: application/xml"', "--data-binary", "@#{xml_file}"]
+  curl_form_data(create_url, form_args)
   "http://#{@build.jenkins_build_host}/job/#{name}"
 end
 
-# Use the vendored jenkins_api_client to check of a named job is defined on the
-# jenkins server
+# Use the curl to check of a named job is defined on the jenkins server.  We
+# curl the config file rather than just checking if the job exists by curling
+# the job url and passing --head because jenkins will mistakenly return 200 OK
+# if you issue multiple very fast requests just requesting the header.
 def jenkins_job_exists?(name)
-  job = jenkins_api_job
-  job.exists?(name)
+  job_url = "http://#{@build.jenkins_build_host}/job/#{name}/config.xml"
+  form_args = ["--silent", "--fail"]
+  curl_form_data(job_url, form_args, :quiet => true)
 end
 
 def require_library_or_fail(library)

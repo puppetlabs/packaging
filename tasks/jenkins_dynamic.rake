@@ -34,12 +34,14 @@ namespace :pl do
       # create a jenkins job from that XML config
       templates.each do |t|
         erb_file  = File.join(template_dir, t)
-        xml       = erb_string(erb_file)
+        xml_file = File.join(work_dir, t.gsub('.erb', ''))
+        erb(erb_file, xml_file)
         job_name  = "#{@build.project}-#{t.gsub('.xml.erb','')}-#{@build.build_date}-#{@build.ref}"
+        puts "Checking for existence of #{job_name}..."
         if jenkins_job_exists?(job_name)
-          raise "Job #{job_name} already exists on #{@build.jenkins_build_server}"
+          raise "Job #{job_name} already exists on #{@build.jenkins_build_host}"
         else
-          url = create_jenkins_job(job_name, xml)
+          url = create_jenkins_job(job_name, xml_file)
           puts "Jenkins job created at #{url}"
         end
       end

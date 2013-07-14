@@ -43,7 +43,6 @@ def erb_string(erbfile)
 end
 
 def erb(erbfile,  outfile)
-  message.filename = erbfile
   output           = erb_string(erbfile)
   File.open(outfile, 'w') { |f| f.write output }
   puts "Generated: #{outfile}"

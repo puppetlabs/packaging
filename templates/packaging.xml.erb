@@ -1,0 +1,176 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<matrix-project>
+  <actions/>
+  <description>&lt;p&gt;&#xd;
+Dynamically Created Packaging Job for a packaging repo-compatible project.&#xd;
+Intended to be triggered from within a project with the packaging repo&#xd;
+bootstrapped.&#xd;
+&lt;/p&gt;&#xd;
+&lt;p&gt;&#xd;
+Three parameters are expected:&#xd;
+&lt;/p&gt;&#xd;
+1) File: A build parameters file that describes information about the build state&#xd;
+&lt;br&gt;&#xd;
+2) File: A tar.gz of a git bundle, created by the packaging repo, of the&#xd;
+current state of the project to be packaged&#xd;
+&lt;/br&gt;&#xd;
+&lt;br&gt;&#xd;
+3) String: The project, e.g. facter, puppet&#xd;
+&lt;/br&gt;&#xd;
+&lt;p&gt;&#xd;
+This job will be triggered automatically after generation by the packaging&#xd;
+repo.&#xd;
+&lt;/p&gt;&#xd;
+&lt;br&gt;&#xd;
+To trigger another downstream job after completion of this and the downstream repo creation job, pass DOWNSTREAM_JOB=$URI with the invocation, e.g.&#xd;
+&lt;/br&gt;&#xd;
+&lt;p&gt;&#xd;
+pl:jenkins:uber_build DOWNSTREAM_JOB=http://jenkins-release.delivery.puppetlabs.net/job/puppetlabs-packaging-downstream-test/build&#xd;
+&lt;/p&gt;&#xd;
+&lt;p&gt;&#xd;
+To get notified of the failure of this packaging job, pass NOTIFY= with the invocation, e.g.&#xd;
+&lt;/p&gt;&#xd;
+&lt;p&gt;&#xd;
+pl:jenkins:uber_build NOTIFY=foo@puppetlabs.com&#xd;
+&lt;/p&gt;&#xd;
+&lt;p&gt;&#xd;
+  Successful completion of packaging will result in the automatic creation of&#xd;
+  apt/yum repositories on the distribution server with the built packages.  To&#xd;
+  generate client apt/yum repository config files for accessing these packages,&#xd;
+  check out the ref of the git sha that was packaged, and run `rake&#xd;
+  pl:jenkins:(deb|rpm)_repo_configs`. Configuration files will be generated and&#xd;
+  deposited locally in pkg/repo_configs.&#xd;
+&lt;/p&gt;&#xd;
+&#xd;
+&#xd;
+  &#xd;
+</description>
+  <logRotator class="hudson.tasks.LogRotator">
+    <daysToKeep>3</daysToKeep>
+    <numToKeep>-1</numToKeep>
+    <artifactDaysToKeep>-1</artifactDaysToKeep>
+    <artifactNumToKeep>-1</artifactNumToKeep>
+  </logRotator>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jp.ikedam.jenkins.plugins.groovy__label__assignment.GroovyLabelAssignmentProperty plugin="groovy-label-assignment@1.0.0">
+      <groovyScript>def labelMap = [
+        <% @build.cows.split(' ').each do |cow| %>&quot;pl:deb COW=<%= cow %>&quot;: &quot;deb&quot;,<% end %>
+        <% @build.final_mocks.split(' ').each do |mock| %>&quot;pl:mock MOCK=<%= mock %>&quot;: &quot;rpm&quot;,<% end %>
+        &quot;package:tar&quot;: &quot;rpm&quot;,
+        <% if @build.build_gem then %>&quot;package:gem&quot;: &quot;gem&quot;,<% end %>
+        <% if @build.build_dmg then %>&quot;package:apple&quot;: &quot;dmg&quot;,<% end %>
+];
+return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScript>
+    </jp.ikedam.jenkins.plugins.groovy__label__assignment.GroovyLabelAssignmentProperty>
+    <jenkins.plugins.hipchat.HipChatNotifier_-HipChatJobProperty plugin="hipchat-plugin@0.1.0">
+      <room></room>
+      <startNotification>false</startNotification>
+    </jenkins.plugins.hipchat.HipChatNotifier_-HipChatJobProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.FileParameterDefinition>
+          <name>BUILD_PROPERTIES</name>
+          <description></description>
+        </hudson.model.FileParameterDefinition>
+        <hudson.model.FileParameterDefinition>
+          <name>PROJECT_BUNDLE</name>
+          <description></description>
+        </hudson.model.FileParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>PROJECT</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers class="vector"/>
+  <concurrentBuild>false</concurrentBuild>
+  <axes>
+    <hudson.matrix.TextAxis>
+      <name>command</name>
+      <values>
+        <% @build.cows.split(' ').each do |cow| %><string>pl:deb COW=<%= cow %></string><% end %>
+        <% @build.final_mocks.split(' ').each do |mock| %><string>pl:mock MOCK=<%= mock %></string><% end %>
+        <string>package:tar</string>
+        <% if @build.build_gem then %><string>package:gem</string><% end %>
+        <% if @build.build_dmg then %><string>package:apple</string><% end %>
+      </values>
+    </hudson.matrix.TextAxis>
+  </axes>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+
+### Create a local clone of the git-bundle that was passed
+# The bundle is wrapped in a tarball. We don't need to know the project that is
+# in the git bundle.
+
+[ -f &quot;PROJECT_BUNDLE&quot; ] || exit 1
+mkdir project &amp;&amp; tar -xzf PROJECT_BUNDLE -C project/
+
+pushd project
+  git clone --recursive $(ls) git_repo
+
+  pushd git_repo
+
+    ### Clone the packaging repo
+    rake package:bootstrap
+
+    ### Perform the build
+    rake $command PARAMS_FILE=&quot;$WORKSPACE/BUILD_PROPERTIES&quot; --trace
+
+    ### Send the results
+    rake pl:jenkins:ship[&quot;artifacts&quot;] PARAMS_FILE=&quot;$WORKSPACE/BUILD_PROPERTIES&quot; --trace
+
+  popd
+popd</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>**/PROJECT_BUNDLE</artifacts>
+      <latestOnly>false</latestOnly>
+      <allowEmptyArchive>false</allowEmptyArchive>
+    </hudson.tasks.ArtifactArchiver><% if @build.notify %>
+    <hudson.tasks.Mailer plugin="mailer@1.4">
+      <recipients><%= "#{@build.notify}" %></recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer><% end %>
+    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.16">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.CurrentBuildParameters/>
+          </configs>
+          <projects><%= "#{@build.project}-repo-#{@build.build_date}-#{@build.ref}" %></projects>
+          <condition>UNSTABLE_OR_BETTER</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+        </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.BuildTrigger>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.11">
+      <timeoutMinutes>45</timeoutMinutes>
+      <failBuild>false</failBuild>
+      <writingDescription>false</writingDescription>
+      <timeoutPercentage>0</timeoutPercentage>
+      <timeoutType>absolute</timeoutType>
+      <timeoutMinutesElasticDefault>3</timeoutMinutesElasticDefault>
+    </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.3.1">
+      <colorMapName>xterm</colorMapName>
+    </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+  </buildWrappers>
+  <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
+    <runSequentially>false</runSequentially>
+  </executionStrategy>
+</matrix-project>

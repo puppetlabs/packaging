@@ -36,11 +36,14 @@ def check_host(host)
   end
 end
 
+def erb_string(erbfile)
+  template  = File.read(erbfile)
+  message   = ERB.new(template, nil, "-")
+  message.result(binding)
+end
+
 def erb(erbfile,  outfile)
-  template         = File.read(erbfile)
-  message          = ERB.new(template, nil, "-")
-  message.filename = erbfile
-  output           = message.result(binding)
+  output           = erb_string(erbfile)
   File.open(outfile, 'w') { |f| f.write output }
   puts "Generated: #{outfile}"
 end
@@ -129,8 +132,13 @@ def scp_file_to(host,path,file)
   %x{scp #{@tempdir}/#{file} #{host}:#{path}}
 end
 
-def timestamp
-  Time.now.strftime("%Y-%m-%d %H:%M:%S")
+def timestamp(separator=nil)
+  if s = separator
+    format = "%Y#{s}%m#{s}%d#{s}%H#{s}%M#{s}%S"
+  else
+    format = "%Y-%m-%d %H:%M:%S"
+  end
+  Time.now.strftime(format)
 end
 
 # Return information about the current tree, using `git describe`, ready for
@@ -241,6 +249,14 @@ end
 
 def source_dirty?
   git_describe_version.include?('dirty')
+end
+
+def fail_on_dirty_source
+  if source_dirty?
+    raise "
+The source tree is dirty, e.g. there are uncommited changes. Please
+commit/discard changes and try again."
+  end
 end
 
 def kill_keychain
@@ -517,7 +533,7 @@ end
 # This method takes two arguments
 # 1) String - the URL to post to
 # 2) Array  - Ordered array of name=VALUE curl form parameters
-def curl_form_data(uri, form_data=[])
+def curl_form_data(uri, form_data=[], options={})
   unless curl = find_tool("curl")
     warn "Couldn't find curl. Curl is required for posting jenkins to trigger a build. Please install curl and try again."
     exit 1
@@ -531,10 +547,54 @@ def curl_form_data(uri, form_data=[])
     post_string << "#{param} "
   end
 
-  # Add the uri and we're off
+  # Add the uri
   post_string << "#{uri}"
-  sh "#{curl} #{post_string}"
+
+  # If this is quiet, we're going to silence all output
+  if options[:quiet]
+    post_string << " >/dev/null 2>&1"
+  end
+
+  %x{#{curl} #{post_string}}
   return $?.success?
 end
 
+def random_string length
+  rand(36**length).to_s(36)
+end
 
+# Use the curl to create a jenkins job from a valid XML
+# configuration file.
+# Returns the URL to the job
+def create_jenkins_job(name, xml_file)
+  create_url = "http://#{@build.jenkins_build_host}/createItem?name=#{name}"
+  form_args = ["-H", '"Content-Type: application/xml"', "--data-binary", "@#{xml_file}"]
+  curl_form_data(create_url, form_args)
+  "http://#{@build.jenkins_build_host}/job/#{name}"
+end
+
+# Use the curl to check of a named job is defined on the jenkins server.  We
+# curl the config file rather than just checking if the job exists by curling
+# the job url and passing --head because jenkins will mistakenly return 200 OK
+# if you issue multiple very fast requests just requesting the header.
+def jenkins_job_exists?(name)
+  job_url = "http://#{@build.jenkins_build_host}/job/#{name}/config.xml"
+  form_args = ["--silent", "--fail"]
+  curl_form_data(job_url, form_args, :quiet => true)
+end
+
+def require_library_or_fail(library)
+  begin
+    require library
+  rescue LoadError
+    raise "Could not load #{library}. #{library} is required by the packaging repo for this task"
+  end
+end
+
+# Use the provided URL string to print important information with
+# ASCII emphasis
+def print_url_info(url_string)
+puts "\n////////////////////////////////////////////////////////////////////////////////\n\n
+  Build submitted. To view your build progress, go to\n#{url_string}\n\n
+////////////////////////////////////////////////////////////////////////////////\n\n"
+end

@@ -91,18 +91,10 @@ namespace :pl do
     #
     task :post_build, :build_task do |t, args|
       # Check for a dirty tree before allowing a remote build that is doomed to unexpected results
-      if source_dirty?
-        warn "The source tree is dirty, e.g. there are uncommited changes. Please commit/discard changes and try again."
-        exit 1
-      end
+      fail_on_dirty_source
 
       # We use JSON for parsing the json part of the submission to JSON
-      begin
-        require 'json'
-      rescue LoadError
-        warn "Couldn't require 'json'. JSON is required for sanely generating the string we curl to Jenkins."
-        exit 1
-      end
+      require_library_or_fail 'json'
 
       build_task = args.build_task
       ##
@@ -222,17 +214,6 @@ namespace :pl do
       @build.final_mocks.split(' ').each do |mock|
         @build.default_mock = mock
         invoke_task("pl:jenkins:post_build", "pl:mock")
-        sleep 5
-      end
-    end
-
-    desc "Jenkins UBER build: build all the things with jenkins"
-    task :uber_build do
-      uber_tasks = ["jenkins:deb_all", "jenkins:mock_all", "jenkins:tar"]
-      uber_tasks << "jenkins:dmg" if @build.build_dmg
-      uber_tasks << "jenkins:gem" if @build.build_gem
-      uber_tasks.map { |t| "pl:#{t}" }.each do |t|
-        invoke_task(t)
         sleep 5
       end
     end

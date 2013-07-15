@@ -20,6 +20,7 @@ PACKAGING_PATH = File.join(File.dirname(__FILE__), 'tasks')
   'gem.rake',
   'ips.rake',
   'jenkins.rake',
+  'jenkins_dynamic.rake',
   'mock.rake',
   'pe_deb.rake',
   'pe_remote.rake',

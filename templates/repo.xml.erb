@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>&lt;p&gt;&#xd;
+Dynamically created job to generate apt and yum repos from packages built by jenkins. It uses the git archive from the package:tar cell in the upstream package matrix to determine which repos to create.&#xd;
+&lt;/p&gt;&#xd;
+&lt;p&gt;&#xd;
+This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed to rake in the upstream invocation.&#xd;
+&lt;/p&gt;&#xd;
+</description>
+  <logRotator class="hudson.tasks.LogRotator">
+    <daysToKeep>3</daysToKeep>
+    <numToKeep>-1</numToKeep>
+    <artifactDaysToKeep>-1</artifactDaysToKeep>
+    <artifactNumToKeep>-1</artifactNumToKeep>
+  </logRotator>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.plugins.hipchat.HipChatNotifier_-HipChatJobProperty plugin="hipchat-plugin@0.1.0">
+      <room></room>
+      <startNotification>false</startNotification>
+    </jenkins.plugins.hipchat.HipChatNotifier_-HipChatJobProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <assignedNode>deb||rpm</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers class="vector"/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.plugins.copyartifact.CopyArtifact plugin="copyartifact@1.25">
+      <projectName><%= "#{@build.project}-packaging-#{@build.build_date}-#{@build.ref}" %>/command=package:tar</projectName>
+      <filter>**/PROJECT_BUNDLE</filter>
+      <target></target>
+      <selector class="hudson.plugins.copyartifact.TriggeredBuildSelector">
+        <fallbackToLastSuccessful>true</fallbackToLastSuccessful>
+      </selector>
+      <flatten>true</flatten>
+    </hudson.plugins.copyartifact.CopyArtifact>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+
+### We've retrieved the git bundle from the tarball build, so now we clone it
+### and use it to trigger our repo creation
+#
+# PROJECT_BUNDLE is a tarball containing a bundle file and git_repo is the
+# directory that will contain the git repository. First we untar the tarball
+# and then clone the git_bundle
+
+[ -f &quot;PROJECT_BUNDLE&quot; ] || exit 1
+mkdir project &amp;&amp; tar -xzf PROJECT_BUNDLE -C project/
+
+pushd project
+  git clone --recursive $(ls) git_repo
+
+  pushd git_repo
+
+    ### Clone the packaging repo
+    rake package:bootstrap --trace
+
+    ### Run repo creation
+    rake pl:jenkins:rpm_repos --trace
+    rake pl:jenkins:deb_repos --trace
+
+  popd
+popd
+</command>
+    </hudson.tasks.Shell>
+  </builders><% if ENV['DOWNSTREAM_JOB'] %>
+  <publishers>
+    <hudson.tasks.BuildTrigger>
+      <childProjects><%= "#{@build.project}-downstream-#{@build.build_date}-#{@build.ref}" %></childProjects>
+      <threshold>
+        <name>SUCCESS</name>
+        <ordinal>0</ordinal>
+        <color>BLUE</color>
+      </threshold>
+    </hudson.tasks.BuildTrigger>
+  </publishers><% else %>
+  <publishers/><% end %>
+  <buildWrappers>
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.3.1">
+      <colorMapName>xterm</colorMapName>
+    </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+  </buildWrappers>
+</project>

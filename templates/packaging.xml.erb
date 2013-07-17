@@ -55,11 +55,11 @@ pl:jenkins:uber_build NOTIFY=foo@puppetlabs.com&#xd;
   <properties>
     <jp.ikedam.jenkins.plugins.groovy__label__assignment.GroovyLabelAssignmentProperty plugin="groovy-label-assignment@1.0.0">
       <groovyScript>def labelMap = [
-        <% @build.cows.split(' ').each do |cow| %>&quot;pl:deb COW=<%= cow %>&quot;: &quot;deb&quot;,<% end %>
-        <% @build.final_mocks.split(' ').each do |mock| %>&quot;pl:mock MOCK=<%= mock %>&quot;: &quot;rpm&quot;,<% end %>
-        &quot;package:tar&quot;: &quot;rpm&quot;,
-        <% if @build.build_gem then %>&quot;package:gem&quot;: &quot;gem&quot;,<% end %>
-        <% if @build.build_dmg then %>&quot;package:apple&quot;: &quot;dmg&quot;,<% end %>
+        <% @build.cows.split(' ').each do |cow| %>&quot;pl_deb COW=<%= cow %>&quot;: &quot;deb&quot;,<% end %>
+        <% @build.final_mocks.split(' ').each do |mock| %>&quot;pl_mock MOCK=<%= mock %>&quot;: &quot;rpm&quot;,<% end %>
+        &quot;package_tar&quot;: &quot;rpm&quot;,
+        <% if @build.build_gem then %>&quot;package_gem&quot;: &quot;gem&quot;,<% end %>
+        <% if @build.build_dmg then %>&quot;package_apple&quot;: &quot;dmg&quot;,<% end %>
 ];
 return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScript>
     </jp.ikedam.jenkins.plugins.groovy__label__assignment.GroovyLabelAssignmentProperty>
@@ -96,11 +96,11 @@ return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScr
     <hudson.matrix.TextAxis>
       <name>command</name>
       <values>
-        <% @build.cows.split(' ').each do |cow| %><string>pl:deb COW=<%= cow %></string><% end %>
-        <% @build.final_mocks.split(' ').each do |mock| %><string>pl:mock MOCK=<%= mock %></string><% end %>
-        <string>package:tar</string>
-        <% if @build.build_gem then %><string>package:gem</string><% end %>
-        <% if @build.build_dmg then %><string>package:apple</string><% end %>
+        <% @build.cows.split(' ').each do |cow| %><string>pl_deb COW=<%= cow %></string><% end %>
+        <% @build.final_mocks.split(' ').each do |mock| %><string>pl_mock MOCK=<%= mock %></string><% end %>
+        <string>package_tar</string>
+        <% if @build.build_gem then %><string>package_gem</string><% end %>
+        <% if @build.build_dmg then %><string>package_apple</string><% end %>
       </values>
     </hudson.matrix.TextAxis>
   </axes>
@@ -111,6 +111,12 @@ return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScr
 ### Create a local clone of the git-bundle that was passed
 # The bundle is wrapped in a tarball. We don't need to know the project that is
 # in the git bundle.
+
+# Swap out _ for : in the command - lein cannot handle : in paths, and jenkins
+# automatically makes directories with the names of the matrix cell (in this
+# case $command) if https://github.com/technomancy/leiningen/issues/891 is ever
+# resolved, this dirty hack can be removed.
+command=$(echo $command | sed 's/_/:/g')
 
 [ -f &quot;PROJECT_BUNDLE&quot; ] || exit 1
 mkdir project &amp;&amp; tar -xzf PROJECT_BUNDLE -C project/

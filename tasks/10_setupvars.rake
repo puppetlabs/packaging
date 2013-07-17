@@ -26,36 +26,36 @@ else
   #
   @build.set_params_from_file('ext/project_data.yaml') if File.readable?('ext/project_data.yaml')
   @build.set_params_from_file('ext/build_defaults.yaml') if File.readable?('ext/build_defaults.yaml')
-
-  # Allow environment variables to override the settings we just read in. These
-  # variables are called out specifically because they are likely to require
-  # overriding in at least some cases.
-  #
-  @build.sign_tar        = boolean_value(ENV['SIGN_TAR']) if ENV['SIGN_TAR']
-  @build.build_gem       = boolean_value(ENV['GEM'])      if ENV['GEM']
-  @build.build_dmg       = boolean_value(ENV['DMG'])      if ENV['DMG']
-  @build.build_ips       = boolean_value(ENV['IPS'])      if ENV['IPS']
-  @build.build_doc       = boolean_value(ENV['DOC'])      if ENV['DOC']
-  @build.build_pe        = boolean_value(ENV['PE_BUILD']) if ENV['PE_BUILD']
-  @build.debug           = boolean_value(ENV['DEBUG'])    if ENV['DEBUG']
-  @build.default_cow     = ENV['COW']                     if ENV['COW']
-  @build.cows            = ENV['COW']                     if ENV['COW']
-  @build.pbuild_conf     = ENV['PBUILDCONF']              if ENV['PBUILDCONF']
-  @build.packager        = ENV['PACKAGER']                if ENV['PACKAGER']
-  @build.default_mock    = ENV['MOCK']                    if ENV['MOCK']
-  @build.final_mocks     = ENV['MOCK']                    if ENV['MOCK']
-  @build.rc_mocks        = ENV['MOCK']                    if ENV['MOCK']
-  @build.gpg_name        = ENV['GPG_NAME']                if ENV['GPG_NAME']
-  @build.gpg_key         = ENV['GPG_KEY']                 if ENV['GPG_KEY']
-  @build.certificate_pem = ENV['CERT_PEM']                if ENV['CERT_PEM']
-  @build.privatekey_pem  = ENV['PRIVATE_PEM']             if ENV['PRIVATE_PEM']
-  @build.yum_host        = ENV['YUM_HOST']                if ENV['YUM_HOST']
-  @build.yum_repo_path   = ENV['YUM_REPO']                if ENV['YUM_REPO']
-  @build.apt_host        = ENV['APT_HOST']                if ENV['APT_HOST']
-  @build.apt_repo_path   = ENV['APT_REPO']                if ENV['APT_REPO']
-  @build.pe_version      = ENV['PE_VER']                  if ENV['PE_VER']
-  @build.notify          = ENV['NOTIFY']                  if ENV['NOTIFY']
 end
+
+# Allow environment variables to override the settings we just read in. These
+# variables are called out specifically because they are likely to require
+# overriding in at least some cases.
+#
+@build.sign_tar        = boolean_value(ENV['SIGN_TAR']) if ENV['SIGN_TAR']
+@build.build_gem       = boolean_value(ENV['GEM'])      if ENV['GEM']
+@build.build_dmg       = boolean_value(ENV['DMG'])      if ENV['DMG']
+@build.build_ips       = boolean_value(ENV['IPS'])      if ENV['IPS']
+@build.build_doc       = boolean_value(ENV['DOC'])      if ENV['DOC']
+@build.build_pe        = boolean_value(ENV['PE_BUILD']) if ENV['PE_BUILD']
+@build.debug           = boolean_value(ENV['DEBUG'])    if ENV['DEBUG']
+@build.default_cow     = ENV['COW']                     if ENV['COW']
+@build.cows            = ENV['COW']                     if ENV['COW']
+@build.pbuild_conf     = ENV['PBUILDCONF']              if ENV['PBUILDCONF']
+@build.packager        = ENV['PACKAGER']                if ENV['PACKAGER']
+@build.default_mock    = ENV['MOCK']                    if ENV['MOCK']
+@build.final_mocks     = ENV['MOCK']                    if ENV['MOCK']
+@build.rc_mocks        = ENV['MOCK']                    if ENV['MOCK']
+@build.gpg_name        = ENV['GPG_NAME']                if ENV['GPG_NAME']
+@build.gpg_key         = ENV['GPG_KEY']                 if ENV['GPG_KEY']
+@build.certificate_pem = ENV['CERT_PEM']                if ENV['CERT_PEM']
+@build.privatekey_pem  = ENV['PRIVATE_PEM']             if ENV['PRIVATE_PEM']
+@build.yum_host        = ENV['YUM_HOST']                if ENV['YUM_HOST']
+@build.yum_repo_path   = ENV['YUM_REPO']                if ENV['YUM_REPO']
+@build.apt_host        = ENV['APT_HOST']                if ENV['APT_HOST']
+@build.apt_repo_path   = ENV['APT_REPO']                if ENV['APT_REPO']
+@build.pe_version      = ENV['PE_VER']                  if ENV['PE_VER']
+@build.notify          = ENV['NOTIFY']                  if ENV['NOTIFY']
 
 ##
 # These parameters are either generated dynamically by the project, or aren't

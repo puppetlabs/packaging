@@ -113,7 +113,6 @@ namespace :pl do
         when /dmg|apple/ then "dmg"
         when /gem/ then "gem"
         when /tar/ then "tar"
-        when /sles/ then "sles"
         else raise "Could not determine build type for #{build_task}"
       end
       #
@@ -209,7 +208,7 @@ namespace :pl do
     end
 
     # This does the mocks in parallel
-    desc "Queue pl:mock-all on jenkins builder"
+    desc "Queue pl:mock_all on jenkins builder"
     task :mock_all => "pl:fetch" do
       @build.final_mocks.split(' ').each do |mock|
         @build.default_mock = mock
@@ -231,13 +230,11 @@ end
 # If this is a PE project, we want PE tasks as well. However, because the
 # PE tasks use :remote as their default (e.g., not namespaced under remote)
 # we have to explicily use the "local" tasks, since these will be local
-# builds on jenkins agents. Also, we support building on SLES for PE, so we
-# add a sles task.
+# builds on jenkins agents.
 #
 if @build.build_pe
   namespace :pe do
     namespace :jenkins do
-      tasks << "sles"
       tasks.each do |build_task|
         desc "Queue pe:#{build_task} build on jenkins builder"
         task build_task => "pl:fetch" do
@@ -273,7 +270,7 @@ if @build.build_pe
       desc "Queue builds of all PE packages for this project in Jenkins"
       task :uber_build  => "pl:fetch" do
         check_var("PE_VER", @build.pe_version)
-        ["tar", "deb_all", "mock_all", "sles"].each do |task|
+        ["tar", "deb_all", "mock_all"].each do |task|
           invoke_task("pe:jenkins:#{task}")
           sleep 5
         end

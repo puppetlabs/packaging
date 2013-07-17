@@ -126,7 +126,7 @@ def build_rpm_with_mock(mocks)
     bench = Benchmark.realtime do
       # Set up the rpmbuild dir in a temp space, with our tarball and spec
       workdir = prep_rpm_build_dir
-      spec = Dir[File.join(workdir, "SPECS", "*.spec")][0]
+      spec = Dir.glob(File.join(workdir, "SPECS", "*.spec"))[0]
       sources = File.join(workdir, "SOURCES")
       defines = mock_defines(mock_config)
 

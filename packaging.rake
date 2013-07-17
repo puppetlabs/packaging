@@ -27,7 +27,6 @@ PACKAGING_PATH = File.join(File.dirname(__FILE__), 'tasks')
   'pe_rpm.rake',
   'pe_ship.rake',
   'pe_sign.rake',
-  'pe_sles.rake',
   'pe_tar.rake',
   'pre_tasks.rake',
   'release.rake',

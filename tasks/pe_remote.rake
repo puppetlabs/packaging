@@ -35,16 +35,9 @@ if @build.build_pe
       Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pe:local_mock_all PE_BUILD=#{@build.build_pe} MOCK='#{@build.final_mocks}' TEAM=#{@build.team} PE_VER=#{ENV['PE_VER']}")
     end
 
-    desc "Execute remote sles rpm build and retrieve package"
-    task :sles => 'pl:fetch' do
-      ENV['PE_VER'] ||= @build.pe_version
-      Rake::Task["pl:remote:build"].reenable
-      Rake::Task["pl:remote:build"].invoke(@build.sles_build_host, 'HEAD', "pe:local_sles PE_BUILD=#{@build.build_pe} TEAM=#{@build.team} PE_VER=#{ENV['PE_VER']}")
-    end
-
-    desc "Execute remote debian, el, and sles builds, sign, and ship pkgs"
+    desc "Execute remote debian, and el builds, sign, and ship pkgs"
     task :all => ['clean', 'pl:fetch'] do
-      ['pe:deb_all', 'pe:mock_all', 'pe:sles', 'pe:ship_rpms', 'pe:ship_debs'].each do |task|
+      ['pe:deb_all', 'pe:mock_all', 'pe:ship_rpms', 'pe:ship_debs'].each do |task|
         Rake::Task[task].execute
       end
     end

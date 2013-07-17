@@ -75,7 +75,7 @@ namespace :package do
     ENV['NEW_STYLE_PACKAGE'] and Rake::Task["package:versionbump"].invoke(workdir)
 
     cd "pkg" do
-      sh "#{tar} --exclude #{tar_excludes.join(" --exclude ")} -zcf #{@build.project}-#{@build.version}.tar.gz #{@build.project}-#{@build.version}"
+      sh "#{tar} --exclude #{tar_excludes.join(" --exclude ")} -zcf '#{@build.project}-#{@build.version}.tar.gz' #{@build.project}-#{@build.version}"
     end
     rm_rf(workdir)
     puts

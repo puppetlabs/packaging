@@ -116,7 +116,7 @@ return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScr
 # automatically makes directories with the names of the matrix cell (in this
 # case $command) if https://github.com/technomancy/leiningen/issues/891 is ever
 # resolved, this dirty hack can be removed.
-command=$(echo $command | sed 's/_/:/g')
+command=$(echo $command | sed 's/_/:/1')
 
 [ -f &quot;PROJECT_BUNDLE&quot; ] || exit 1
 mkdir project &amp;&amp; tar -xzf PROJECT_BUNDLE -C project/

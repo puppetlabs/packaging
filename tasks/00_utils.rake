@@ -2,8 +2,7 @@
 
 def check_tool(tool)
   return true if has_tool(tool)
-  STDERR.puts "#{tool} tool not found...exiting"
-  exit 1
+  fail "#{tool} tool not found...exiting"
 end
 
 def find_tool(tool)
@@ -16,24 +15,15 @@ end
 alias :has_tool :find_tool
 
 def check_file(file)
-  unless File.exist?(file)
-    STDERR.puts "#{file} file not found...exiting"
-    exit 2
-  end
+  File.exist?(file) or fail "#{file} file not found!"
 end
 
 def check_var(varname,var=nil)
-  if var.nil?
-    STDERR.puts "Requires #{varname} be set...exiting"
-    exit 3
-  end
+  var.nil? and fail "Requires #{varname} be set!"
 end
 
 def check_host(host)
-  unless host == %x{hostname}.chomp!
-    STDERR.puts "Requires host to be #{host}...exiting"
-    exit 5
-  end
+  host == %x{hostname}.chomp! or fail "Requires host to be #{host}!"
 end
 
 def erb_string(erbfile)
@@ -59,16 +49,13 @@ def cp_p(src, dest, options={})
 end
 
 def mv_f(src, dest, options={})
-  force = {:force => true}
+  mandatory = {:force => true}
   mv(src, dest, options.merge(mandatory))
 end
 
 def git_co(ref)
   %x{git reset --hard ; git checkout #{ref}}
-  unless $?.success?
-    STDERR.puts "Could not checkout #{ref} git branch to build package from...exiting"
-    exit 1
-  end
+  $?.success? or fail "Could not checkout #{ref} git branch to build package from...exiting"
 end
 
 def git_describe
@@ -95,7 +82,7 @@ def git_sha_or_tag
 end
 
 def get_temp
-  temp = `mktemp -d -t pkgXXXXXX`.strip
+  `mktemp -d -t pkgXXXXXX`.strip
 end
 
 def remote_ssh_cmd target, command
@@ -253,7 +240,7 @@ end
 
 def fail_on_dirty_source
   if source_dirty?
-    raise "
+    fail "
 The source tree is dirty, e.g. there are uncommited changes. Please
 commit/discard changes and try again."
   end
@@ -275,8 +262,7 @@ def gpg_sign_file(file)
   if gpg
     sh "#{gpg} --armor --detach-sign -u #{@build.gpg_key} #{file}"
   else
-    STDERR.puts "No gpg available. Cannot sign #{file}. Exiting..."
-    exit 1
+    fail "No gpg available. Cannot sign #{file}."
   end
 end
 
@@ -289,14 +275,12 @@ end
 def set_cow_envs(cow)
   elements = cow.split('-')
   if elements.size != 3
-    STDERR.puts "Expecting a cow name split on hyphens, e.g. 'base-squeeze-i386'"
-    exit 1
+    fail "Expecting a cow name split on hyphens, e.g. 'base-squeeze-i386'"
   else
     dist = elements[1]
     arch = elements[2]
     if dist.nil? or arch.nil?
-      STDERR.puts "Couldn't get the arg and dist from cow name. Expecting something like 'base-dist-arch'"
-      exit 1
+      fail "Couldn't get the arg and dist from cow name. Expecting something like 'base-dist-arch'"
     end
     arch = arch.split('.')[0] if arch.include?('.')
   end
@@ -368,13 +352,8 @@ def boolean_value(var)
 end
 
 def git_tag(version)
-  begin
-    sh "git tag -s -u #{@build.gpg_key} -m '#{version}' #{version}"
-  rescue Exception => e
-    STDERR.puts e
-    STDERR.puts "Unable to tag repo at #{version}"
-    exit 1
-  end
+  sh "git tag -s -u #{@build.gpg_key} -m '#{version}' #{version}"
+  $?.success or fail "Unable to tag repo at #{version}"
 end
 
 def rand_string
@@ -444,7 +423,7 @@ end
 
 def hostname
   require 'socket'
-  host = Socket.gethostname
+  Socket.gethostname
 end
 
 # Loop a block up to the number of attempts given, exiting when we receive success
@@ -462,9 +441,9 @@ def retry_on_fail(args, &blk)
       end
     end
   else
-    raise "retry_on_fail requires and arg (:times => x) where x is an Integer/Fixnum, and a block to execute"
+    fail "retry_on_fail requires and arg (:times => x) where x is an Integer/Fixnum, and a block to execute"
   end
-  raise "Block failed maximum of #{args[:times]} tries. Exiting.." unless success
+  fail "Block failed maximum of #{args[:times]} tries. Exiting.." unless success
 end
 
 def deprecate(old_cmd, new_cmd=nil)
@@ -513,9 +492,8 @@ def data_from_yaml(file)
   begin
     input_data = YAML.load_file(file) || {}
   rescue => e
-    puts "There was an error loading data from #{file}."
-    puts e.backtrace.join("\n")
-    exit 1
+    STDERR.puts "There was an error loading data from #{file}."
+    fail e.backtrace.join("\n")
   end
   input_data
 end
@@ -534,10 +512,7 @@ end
 # 1) String - the URL to post to
 # 2) Array  - Ordered array of name=VALUE curl form parameters
 def curl_form_data(uri, form_data=[], options={})
-  unless curl = find_tool("curl")
-    warn "Couldn't find curl. Curl is required for posting jenkins to trigger a build. Please install curl and try again."
-    exit 1
-  end
+  curl = find_tool("curl") or fail "Couldn't find curl. Curl is required for posting jenkins to trigger a build. Please install curl and try again."
   #
   # Begin constructing the post string.
   # First, assemble the form_data arguments
@@ -587,7 +562,7 @@ def require_library_or_fail(library)
   begin
     require library
   rescue LoadError
-    raise "Could not load #{library}. #{library} is required by the packaging repo for this task"
+    fail "Could not load #{library}. #{library} is required by the packaging repo for this task"
   end
 end
 

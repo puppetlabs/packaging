@@ -42,8 +42,7 @@ namespace :pl do
       invoke_task("pl:load_extras", tempdir)
       rm_rf(tempdir)
     rescue
-      STDERR.puts "There was an error fetching the builder extras data."
-      exit 1
+      fail "There was an error fetching the builder extras data."
     end
   end
 end

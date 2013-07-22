@@ -45,7 +45,7 @@ def mock_srpm(mock_config, spec, sources, defines=nil)
   srpms = mock_artifact(mock_config, cmd_args)
 
   unless srpms.size == 1
-    raise "#{srpms} contains an unexpected number of artifacts."
+    fail "#{srpms} contains an unexpected number of artifacts."
   end
   srpms[0]
 end

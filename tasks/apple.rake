@@ -22,8 +22,7 @@ task :setup do
   begin
     @source_files        = data_from_yaml('ext/osx/file_mapping.yaml')
   rescue
-    STDERR.puts "Could not load Apple file mappings from 'ext/osx/file_mapping.yaml'"
-    exit 1
+    fail "Could not load Apple file mappings from 'ext/osx/file_mapping.yaml'"
   end
   @package_name          = @build.project
   @title                 = "#{@build.project}-#{@build.version}"
@@ -235,7 +234,7 @@ if @build.build_dmg
     task :apple => [:setup] do
       bench = Benchmark.realtime do
         # Test for Packagemaker binary
-        raise "Packagemaker must be installed. Please install XCode Tools" unless \
+        fail "Packagemaker must be installed. Please install XCode Tools" unless \
           File.exists?(PACKAGEMAKER)
 
         make_directory_tree

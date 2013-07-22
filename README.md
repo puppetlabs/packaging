@@ -89,11 +89,7 @@ for developer use for building test packages; the `pe:deb` task creates a
   `ext/build_defaults.yaml` after `final_mocks:`.  For PE, the mocks are
   formatted as `pupent-<peversion>-<distversion>-<arch>`, e.g.
   `pupent-2.7-el5-i386`. To build for a specific target, set `MOCK=<mock>` to
-  the mock that matches the target. The `pe:deb` and `pe:mock` tasks work by
-  using the `:remote` tasks for building on a remote builder using the current
-  committed state of the source repository. To forego remote building and build
-  on the local station (e.g., by ssh-ing into a remote builder first), the
-  tasks `pe:local_mock` and `pe:local_deb` build using the local host.
+  the mock that matches the target.
 
 ## `:remote:` tasks
 There are also sub-namespaces of `:pl` and `:pe` that are

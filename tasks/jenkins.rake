@@ -227,10 +227,7 @@ namespace :pl do
 end
 
 ##
-# If this is a PE project, we want PE tasks as well. However, because the
-# PE tasks use :remote as their default (e.g., not namespaced under remote)
-# we have to explicily use the "local" tasks, since these will be local
-# builds on jenkins agents.
+# If this is a PE project, we want PE tasks as well.
 #
 if @build.build_pe
   namespace :pe do
@@ -239,7 +236,7 @@ if @build.build_pe
         desc "Queue pe:#{build_task} build on jenkins builder"
         task build_task => "pl:fetch" do
           check_var("PE_VER", @build.pe_version)
-          invoke_task("pl:jenkins:post_build", "pe:local_#{build_task}")
+          invoke_task("pl:jenkins:post_build", "pe:#{build_task}")
         end
       end
 
@@ -252,7 +249,7 @@ if @build.build_pe
         check_var("PE_VER", @build.pe_version)
         @build.cows.split(' ').each do |cow|
           @build.default_cow = cow
-          invoke_task("pl:jenkins:post_build", "pe:local_deb")
+          invoke_task("pl:jenkins:post_build", "pe:deb")
           sleep 5
         end
       end
@@ -262,7 +259,7 @@ if @build.build_pe
       task :mock_all => "pl:fetch" do
         @build.final_mocks.split(' ').each do |mock|
           @build.default_mock = mock
-          invoke_task("pl:jenkins:post_build", "pe:local_mock")
+          invoke_task("pl:jenkins:post_build", "pe:mock")
           sleep 5
         end
       end

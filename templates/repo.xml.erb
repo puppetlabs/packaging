@@ -31,7 +31,7 @@ This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed 
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.plugins.copyartifact.CopyArtifact plugin="copyartifact@1.25">
-      <projectName><%= "#{@build.project}-packaging-#{@build.build_date}-#{@build.ref}" %>/command=package:tar</projectName>
+      <projectName><%= "#{@build.project}-packaging-#{@build.build_date}-#{@build.ref}" %>/command=package_tar</projectName>
       <filter>**/PROJECT_BUNDLE</filter>
       <target></target>
       <selector class="hudson.plugins.copyartifact.TriggeredBuildSelector">

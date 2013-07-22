@@ -255,20 +255,11 @@ if @build.build_pe
       end
 
       # This does the mocks in parallel
-      desc "Queue pe:mock-all on jenkins builder"
+      desc "Queue pe:mock_all on jenkins builder"
       task :mock_all => "pl:fetch" do
         @build.final_mocks.split(' ').each do |mock|
           @build.default_mock = mock
           invoke_task("pl:jenkins:post_build", "pe:mock")
-          sleep 5
-        end
-      end
-
-      desc "Queue builds of all PE packages for this project in Jenkins"
-      task :uber_build  => "pl:fetch" do
-        check_var("PE_VER", @build.pe_version)
-        ["tar", "deb_all", "mock_all"].each do |task|
-          invoke_task("pe:jenkins:#{task}")
           sleep 5
         end
       end

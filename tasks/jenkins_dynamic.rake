@@ -94,3 +94,12 @@ namespace :pl do
   end
 end
 
+namespace :pe do
+  namespace :jenkins do
+    desc "Dynamic Jenkins UBER build: Build all the things with ONE job"
+    task :uber_build do
+      check_var("PE_VER", @build.pe_version)
+      invoke_task("pl:jenkins:uber_build")
+    end
+  end
+end

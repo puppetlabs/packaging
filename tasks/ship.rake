@@ -45,44 +45,40 @@ namespace :pl do
     remote_ssh_cmd(@build.ips_host, "/usr/sbin/svcadm restart svc:/application/pkg/server")
   end if @build.build_ips
 
-  if File.exist?("#{ENV['HOME']}/.packaging")
-    desc "Upload ips p5p packages to downloads"
-    task :ship_ips => 'pl:fetch' do
-      if Dir['pkg/ips/pkgs/**/*'].empty?
-        STDOUT.puts "There aren't any p5p packages in pkg/ips/pkgs. Maybe something went wrong?"
-      else
-        rsync_to('pkg/ips/pkgs/', @build.ips_package_host, @build.ips_path)
-      end
-    end if @build.build_ips
-  end
+  desc "Upload ips p5p packages to downloads"
+  task :ship_ips => 'pl:fetch' do
+    if Dir['pkg/ips/pkgs/**/*'].empty?
+      STDOUT.puts "There aren't any p5p packages in pkg/ips/pkgs. Maybe something went wrong?"
+    else
+      rsync_to('pkg/ips/pkgs/', @build.ips_package_host, @build.ips_path)
+    end
+  end if @build.build_ips
 
   desc "Ship built gem to rubygems"
   task :ship_gem do
     ship_gem("pkg/#{@build.project}-#{@build.gemversion}.gem")
   end if @build.build_gem
 
-  if File.exist?("#{ENV['HOME']}/.packaging")
-    desc "ship apple dmg to #{@build.yum_host}"
-    task :ship_dmg => 'pl:fetch' do
-      rsync_to('pkg/apple/*.dmg', @build.yum_host, @build.dmg_path)
-    end if @build.build_dmg
+  desc "ship apple dmg to #{@build.yum_host}"
+  task :ship_dmg => 'pl:fetch' do
+    rsync_to('pkg/apple/*.dmg', @build.yum_host, @build.dmg_path)
+  end if @build.build_dmg
 
-    desc "ship tarball and signature to #{@build.tar_host}"
-    task :ship_tar => 'pl:fetch' do
-      rsync_to("pkg/#{@build.project}-#{@build.version}.tar.gz*", @build.tar_host, @build.tarball_path)
-    end
+  desc "ship tarball and signature to #{@build.tar_host}"
+  task :ship_tar => 'pl:fetch' do
+    rsync_to("pkg/#{@build.project}-#{@build.version}.tar.gz*", @build.tar_host, @build.tarball_path)
+  end
 
-    desc "UBER ship: ship all the things in pkg"
-    task :uber_ship => 'pl:fetch' do
-      if confirm_ship(FileList["pkg/**/*"])
-        ENV['ANSWER_OVERRIDE'] = 'yes'
-        Rake::Task["pl:ship_gem"].invoke if @build.build_gem
-        Rake::Task["pl:ship_rpms"].invoke
-        Rake::Task["pl:ship_debs"].invoke
-        Rake::Task["pl:ship_dmg"].execute if @build.build_dmg
-        Rake::Task["pl:ship_tar"].execute
-        Rake::Task["pl:jenkins:ship"].invoke("shipped")
-      end
+  desc "UBER ship: ship all the things in pkg"
+  task :uber_ship => 'pl:fetch' do
+    if confirm_ship(FileList["pkg/**/*"])
+      ENV['ANSWER_OVERRIDE'] = 'yes'
+      Rake::Task["pl:ship_gem"].invoke if @build.build_gem
+      Rake::Task["pl:ship_rpms"].invoke
+      Rake::Task["pl:ship_debs"].invoke
+      Rake::Task["pl:ship_dmg"].execute if @build.build_dmg
+      Rake::Task["pl:ship_tar"].execute
+      Rake::Task["pl:jenkins:ship"].invoke("shipped")
     end
   end
 
@@ -104,10 +100,7 @@ namespace :pl do
 
     desc "Ship generated repository configs to the distribution server"
     task :ship_repo_configs do
-      if empty_dir?("pkg/repo_configs")
-        warn "No repo configs have been generated! Try pl:deb_repo_configs or pl:rpm_repo_configs"
-        exit 1
-      end
+      empty_dir?("pkg/repo_configs") and fail "No repo configs have been generated! Try pl:deb_repo_configs or pl:rpm_repo_configs"
       invoke_task("pl:fetch")
       repo_dir = "#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}/repo_configs"
       remote_ssh_cmd(@build.distribution_server, "mkdir -p #{repo_dir}")

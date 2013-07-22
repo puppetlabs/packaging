@@ -148,10 +148,7 @@ module Build
     #
     def params_to_yaml(output_dir=nil)
       dir = output_dir.nil? ? get_temp : output_dir
-      unless File.writable?(dir)
-        warn "#{dir} does not exist or is not writable, skipping build params write. Exiting.."
-        exit 1
-      end
+      File.writable?(dir) or fail "#{dir} does not exist or is not writable, skipping build params write. Exiting.."
       params_file = File.join(dir, "#{self.ref}.yaml")
       File.open(params_file, 'w') do |f|
         f.puts params.to_yaml

@@ -3,15 +3,11 @@ def pdebuild args
   cow         = args[:cow]
   set_cow_envs(cow)
   update_cow(cow)
-  begin
-    sh "pdebuild  --configfile #{@build.pbuild_conf} \
-                  --buildresult #{results_dir} \
-                  --pbuilder cowbuilder -- \
-                  --basepath /var/cache/pbuilder/#{cow}/"
-  rescue Exception => e
-    puts e
-    handle_method_failure('pdebuild', args)
-  end
+  sh "pdebuild  --configfile #{@build.pbuild_conf} \
+                --buildresult #{results_dir} \
+                --pbuilder cowbuilder -- \
+                --basepath /var/cache/pbuilder/#{cow}/"
+  $?.success? or fail "Failed to build deb with #{cow}!"
 end
 
 def update_cow(cow)
@@ -27,8 +23,7 @@ def debuild args
   begin
     sh "debuild --no-lintian -uc -us"
   rescue
-    STDERR.puts "Something went wrong. Hopefully the backscroll or #{results_dir}/#{@build.project}_#{@build.debversion}.build file has a clue."
-    exit 1
+    fail "Something went wrong. Hopefully the backscroll or #{results_dir}/#{@build.project}_#{@build.debversion}.build file has a clue."
   end
 end
 

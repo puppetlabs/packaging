@@ -107,7 +107,7 @@ return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScr
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
-
+set -e
 ### Create a local clone of the git-bundle that was passed
 # The bundle is wrapped in a tarball. We don't need to know the project that is
 # in the git bundle.

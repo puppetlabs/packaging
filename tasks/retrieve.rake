@@ -24,7 +24,7 @@ namespace :pl do
         begin
           rsync_from("#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}/#{target}/", @build.distribution_server, "pkg/")
         rescue
-          puts "Couldn't download packages from distribution server. Try installing wget!"
+          fail "Couldn't download packages from distribution server. Try installing wget!"
         end
       end
       puts "Packages staged in pkg"

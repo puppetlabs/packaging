@@ -41,7 +41,7 @@ This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed 
     </hudson.plugins.copyartifact.CopyArtifact>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
-
+set -e
 ### We've retrieved the git bundle from the tarball build, so now we clone it
 ### and use it to trigger our repo creation
 #
@@ -66,6 +66,11 @@ pushd project
 
   popd
 popd
+
+# Delete the upstream project now that repos have been created. This is largely
+# to avoid clutter and reclaim space
+#
+curl -i -X POST <%= "http://#{@build.jenkins_build_host}/job/#{@build.project}-packaging-#{@build.build_date}-#{@build.ref}" %>/doDelete
 </command>
     </hudson.tasks.Shell>
   </builders><% if ENV['DOWNSTREAM_JOB'] %>

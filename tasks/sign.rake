@@ -32,12 +32,9 @@ end
 namespace :pl do
   desc "Sign the tarball, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_tar do
-    if File.exist? "pkg/#{@build.project}-#{@build.version}.tar.gz"
-      load_keychain if has_tool('keychain')
-      gpg_sign_file "pkg/#{@build.project}-#{@build.version}.tar.gz"
-    else
-      STDERR.puts "No tarball exists. Try rake package:tar?"
-    end
+    File.exist?("pkg/#{@build.project}-#{@build.version}.tar.gz") or fail "No tarball exists. Try rake package:tar?"
+    load_keychain if has_tool('keychain')
+    gpg_sign_file "pkg/#{@build.project}-#{@build.version}.tar.gz"
   end
 
   desc "Sign mocked rpms, Defaults to PL Key, pass KEY to override"
@@ -76,7 +73,7 @@ namespace :pl do
         signed = FALSE
       end
     end
-    exit 1 unless signed
+    fail unless signed
     puts "All rpms signed"
   end
 
@@ -98,10 +95,8 @@ namespace :pl do
   namespace :jenkins do
     desc "Sign all locally staged packages on #{@build.distribution_server}"
     task :sign_all => "pl:fetch" do
-      if Dir["pkg/*"].empty?
-        warn "There were files found in pkg/. Maybe you wanted to build/retrieve something first?"
-        exit 1
-      end
+      Dir["pkg/*"].empty? and fail "There were files found in pkg/. Maybe you wanted to build/retrieve something first?"
+
       # Because rpms and debs are laid out differently in PE under pkg/ they
       # have a different sign task to address this. Rather than create a whole
       # extra :jenkins task for signing PE, we determine which sign task to use

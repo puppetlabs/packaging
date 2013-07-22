@@ -4,10 +4,7 @@ if File.exist?("#{ENV['HOME']}/.packaging")
   namespace 'pl' do
     namespace :remote do
       task :build, :host, :treeish, :task, :tar do |t, args|
-        if source_dirty?
-          warn "The source tree is dirty, e.g. there are uncommited changes. Please commit/discard changes and try again."
-          exit 1
-        end
+        fail_on_dirty_source
         host                    = args.host
         treeish                 = args.treeish
         task                    = args.task
@@ -46,19 +43,16 @@ if File.exist?("#{ENV['HOME']}/.packaging")
         Rake::Task["pl:remote:build"].invoke(@build.deb_build_host, 'HEAD', "pl:deb_all")
       end
 
-      desc "Execute pl:deb (single default cow deb package) on remote debian build host (no signing)"
       task :deb => 'pl:fetch' do
         Rake::Task["pl:remote:build"].reenable
         Rake::Task["pl:remote:build"].invoke(@build.deb_build_host, 'HEAD', "pl:deb")
       end
 
-      desc "Execute pl:deb_all on remote debian build host (no signing)"
       task :deb_all => 'pl:fetch' do
         Rake::Task["pl:remote:build"].reenable
         Rake::Task["pl:remote:build"].invoke(@build.deb_build_host, 'HEAD', "pl:deb_all")
       end
 
-      desc "Execute remote pl:release_deb_all full build set on remote debian build host"
       task :release_deb => 'pl:fetch'  do
         Rake::Task["pl:remote:build"].reenable
         Rake::Task["pl:remote:build"].invoke(@build.deb_build_host, 'HEAD', "pl:release_deb")
@@ -82,7 +76,6 @@ if File.exist?("#{ENV['HOME']}/.packaging")
         Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pl:release_rpm_final")
       end
 
-      desc "Execute remote pl:release_rpm full build set on remote rpm build host"
       task :release_rpm => 'pl:fetch' do
         Rake::Task["pl:remote:build"].reenable
         Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pl:release_rpm")
@@ -94,25 +87,21 @@ if File.exist?("#{ENV['HOME']}/.packaging")
         Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pl:mock_final")
       end
 
-      desc "Execute pl:mock (single default mock package) on remote rpm build host (no signing)"
       task :mock => 'pl:fetch' do
         Rake::Task["pl:remote:build"].reenable
         Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pl:mock")
       end
 
-      desc "Execute pl:mock_all on remote rpm build host (no signing)"
       task :mock_all => 'pl:fetch' do
         Rake::Task["pl:remote:build"].reenable
         Rake::Task["pl:remote:build"].invoke(@build.rpm_build_host, 'HEAD', "pl:mock_all")
       end
 
-      desc "Execute pl:ips on remote ips build host"
       task :ips => 'pl:fetch' do
         Rake::Task["pl:remote:build"].reenable
         Rake::Task["pl:remote:build"].invoke(@build.ips_build_host, 'HEAD', 'pl:ips', 'gtar')
       end if @build.build_ips
 
-      desc "Execute package:apple on remote apple build host"
       task :dmg => 'pl:fetch' do
         # Because we use rvmsudo for apple, we end up replicating the :remote_build task
         host                    = @build.osx_build_host
@@ -154,7 +143,6 @@ if File.exist?("#{ENV['HOME']}/.packaging")
       Rake::Task["pl:remote:update_yum_repo"].invoke
     end
 
-    desc "UBER build: build, sign and ship tar, gem (as applicable), remote dmg, remote deb, remote rpm"
     task :uber_release do
       Rake::Task["package:gem"].invoke if @build.build_gem
       Rake::Task["pl:remote:release_deb"].invoke

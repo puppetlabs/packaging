@@ -90,7 +90,7 @@ namespace :pl do
         print_url_info("#{@build.jenkins_build_host}/job/#{name}")
         puts "Your packages will be available at #{@build.distribution_server}:#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}"
       else
-        warn "An error occurred submitting the job to jenkins. Take a look at the preceding http response for more info."
+        fail "An error occurred submitting the job to jenkins. Take a look at the preceding http response for more info."
       end
 
       # Clean up after ourselves

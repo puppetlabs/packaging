@@ -93,7 +93,7 @@ end
 
 def rsync_to *args
   check_tool('rsync')
-  flags = "-Havxl -O --no-perms --no-owner --no-group"
+  flags = "-rHlv -O --no-perms --no-owner --no-group"
   source  = args[0]
   target  = args[1]
   dest    = args[2]
@@ -103,7 +103,7 @@ end
 
 def rsync_from *args
   check_tool('rsync')
-  flags = "-Havxl -O --no-perms --no-owner --no-group"
+  flags = "-rHlv -O --no-perms --no-owner --no-group"
   source  = args[0]
   target  = args[1]
   dest    = args[2]

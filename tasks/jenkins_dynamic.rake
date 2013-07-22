@@ -41,8 +41,14 @@ namespace :pl do
         if jenkins_job_exists?(job_name)
           raise "Job #{job_name} already exists on #{@build.jenkins_build_host}"
         else
-          url = create_jenkins_job(job_name, xml_file)
-          puts "Jenkins job created at #{url}"
+          retry_on_fail(:times => 3) do
+            url = create_jenkins_job(job_name, xml_file)
+            puts "Verifying job created successfully..."
+            unless jenkins_job_exists?(job_name)
+              raise "Unable to verify Jenkins job, trying again..."
+            end
+            puts "Jenkins job created at #{url}"
+          end
         end
       end
       rm_r work_dir

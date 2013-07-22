@@ -24,7 +24,7 @@ When DOWNSTREAM_JOB is passed to the packaging repo, this job is created to wrap
       <command>#!/bin/bash
 set -e
 # This URI was passed in as an argument to the original rake package call
-curl -i <%= escape_html(ENV['DOWNSTREAM_JOB']) %></command>
+curl -i &apos;<%= escape_html(ENV['DOWNSTREAM_JOB']) %>&apos;</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

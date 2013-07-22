@@ -1,7 +1,6 @@
 # These tasks are "release" chains that couple as much of the release process for a package as possible
 
 namespace :pl do
-  desc "Release gem, e.g. package:gem, pl:ship_gem"
   task :release_gem do
     invoke_task("package:gem")
     if confirm_ship(FileList["pkg/*.gem"])
@@ -29,7 +28,6 @@ namespace :pl do
     end
   end
 
-  desc "Release deb, e.g. package:tar, pl:{deb_all, sign_deb_changes, ship_debs}"
   task :release_deb do
     load_keychain if has_tool('keychain')
     invoke_task("pl:deb_all")
@@ -59,7 +57,6 @@ namespace :pl do
     end
   end
 
-  desc "Release rpms, e.g. package:tar, pl:{mock_all, sign_rpms, ship_rpms, update_yum_repo}"
   task :release_rpm do
     invoke_task("pl:mock_all")
     invoke_task("pl:sign_rpms")
@@ -70,7 +67,6 @@ namespace :pl do
   end
 
   if File.exist?("#{ENV['HOME']}/.packaging")
-    desc "Release tarball, e.g. package:tar, pl:{sign_tar, ship_tar}"
     task :release_tar => 'pl:fetch' do
       invoke_task("package:tar")
       invoke_task("pl:sign_tar")
@@ -79,7 +75,6 @@ namespace :pl do
       end
     end
 
-    desc "Release dmg, e.g. package:apple, pl:ship_dmg"
     task :release_dmg => 'pl:fetch' do
       sh "rvmsudo rake package:apple"
       if confirm_ship(FileList["pkg/apple/*.dmg"])
@@ -87,7 +82,6 @@ namespace :pl do
       end
     end if @build.build_dmg
 
-    desc "Release ips, e.g. pl:ips, pl:ship_ips"
     task :release_ips => 'pl:fetch' do
       Rake::Task['pl:ips'].invoke
       Rake::Task['pl:ship_ips'].invoke

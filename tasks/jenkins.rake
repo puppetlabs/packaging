@@ -163,16 +163,18 @@ namespace :pl do
 
       # Call out to the curl_form_data utility method in 00_utils.rake
       #
-      if curl_form_data(trigger_url, args)
-        puts "Build submitted. To view your build results, go to #{job_url}"
-        puts "Your packages will be available at #{@build.distribution_server}:#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}"
-      else
-        warn "An error occurred submitting the job to jenkins. Take a look at the preceding http response for more info."
+      begin
+        if curl_form_data(trigger_url, args)
+          puts "Build submitted. To view your build results, go to #{job_url}"
+          puts "Your packages will be available at #{@build.distribution_server}:#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}"
+        else
+          fail "An error occurred submitting the job to jenkins. Take a look at the preceding http response for more info."
+        end
+      ensure
+        # Clean up after ourselves
+        rm bundle
+        rm properties
       end
-
-      # Clean up after ourselves
-      rm bundle
-      rm properties
     end
   end
 end
@@ -299,15 +301,13 @@ namespace :pl do
   namespace :jenkins do
     desc "Trigger a jenkins uri with SHA of HEAD as a string param, requires \"URI\""
     task :post, :uri do |t, args|
-      uri = args.uri || ENV['URI']
-      raise "pl:jenkins:post requires a URI, either via URI= or pl:jenkin:post[URI]" if uri.nil?
+      uri = (args.uri or ENV['URI']) or fail "pl:jenkins:post requires a URI, either via URI= or pl:jenkin:post[URI]"
 
       # We use JSON for parsing the json part of the submission.
       begin
         require 'json'
       rescue LoadError
-        warn "Couldn't require 'json'. JSON is required for sanely generating the string we curl to Jenkins."
-        exit 1
+        fail "Couldn't require 'json'. JSON is required for sanely generating the string we curl to Jenkins."
       end
 
       # Assemble the JSON string for the JSON parameter
@@ -323,7 +323,7 @@ namespace :pl do
       if curl_form_data(uri, args)
         puts "Job triggered at #{uri}."
       else
-        puts "An error occurred attempting to trigger the job at #{uri}. Please see the preceding http response for more info."
+        fail "An error occurred attempting to trigger the job at #{uri}. Please see the preceding http response for more info."
       end
     end
   end

@@ -41,7 +41,7 @@ This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed 
     </hudson.plugins.copyartifact.CopyArtifact>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
-
+set -e
 ### We've retrieved the git bundle from the tarball build, so now we clone it
 ### and use it to trigger our repo creation
 #

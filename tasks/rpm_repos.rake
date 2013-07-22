@@ -13,43 +13,44 @@ namespace :pl do
   namespace :jenkins do
     desc "Create yum repositories of built RPM packages for this SHA on the distribution server"
     task :rpm_repos => "pl:fetch" do
-      # Formulate our command string, which will just find directories with rpms
-      # and create and update repositories.
-      #
-      artifact_directory = File.join(@build.jenkins_repo_path, @build.project, @build.ref)
+      begin
+        # Formulate our command string, which will just find directories with rpms
+        # and create and update repositories.
+        #
+        artifact_directory = File.join(@build.jenkins_repo_path, @build.project, @build.ref)
 
-      ##
-      # Test that the artifacts directory exists on the distribution server.
-      # This will give us some more helpful output.
-      #
-      cmd = 'echo "Checking for build artifacts. Will exit if not found." ; '
-      cmd << "[ -d #{artifact_directory}/artifacts ] || exit 0 ; "
+        ##
+        # Test that the artifacts directory exists on the distribution server.
+        # This will give us some more helpful output.
+        #
+        cmd = 'echo "Checking for build artifacts. Will exit if not found." ; '
+        cmd << "[ -d #{artifact_directory}/artifacts ] || exit 1 ; "
 
-      ##
-      # Enter the directory containing the build artifacts and create repos.
-      #
-      cmd << "pushd #{artifact_directory} ; "
-      cmd << 'echo "Checking for running repo creation. Will wait if detected." ; '
-      cmd << "while [ -f .lock ] ; do sleep 1 ; echo -n '.' ; done ; "
-      cmd << 'echo "Setting lock" ; '
-      cmd << "touch .lock ; "
-      cmd << "rsync -avxl artifacts/ repos/ ; pushd repos ; "
-      cmd << "createrepo=$(which createrepo) ; "
-      cmd << 'for repodir in $(find ./ -name "*.rpm" | xargs -I {} dirname {}) ; do '
-      cmd << "pushd $repodir && $createrepo -d --update . && popd ; "
-      cmd << "done ; popd "
+        ##
+        # Enter the directory containing the build artifacts and create repos.
+        #
+        cmd << "pushd #{artifact_directory} ; "
+        cmd << 'echo "Checking for running repo creation. Will wait if detected." ; '
+        cmd << "while [ -f .lock ] ; do sleep 1 ; echo -n '.' ; done ; "
+        cmd << 'echo "Setting lock" ; '
+        cmd << "touch .lock ; "
+        cmd << "rsync -avxl artifacts/ repos/ ; pushd repos ; "
+        cmd << "createrepo=$(which createrepo) ; "
+        cmd << 'for repodir in $(find ./ -name "*.rpm" | xargs -I {} dirname {}) ; do '
+        cmd << "pushd $repodir && $createrepo -d --update . && popd ; "
+        cmd << "done ; popd "
 
-      remote_ssh_cmd(@build.distribution_server, cmd)
+        remote_ssh_cmd(@build.distribution_server, cmd)
+        # Now that we've created our repositories, we can create the configs for
+        # them
+        Rake::Task["pl:jenkins:generate_rpm_repo_configs"].execute
 
-      # Always remove the lock file, even if we've failed
-      remote_ssh_cmd(@build.distribution_server, "rm -f #{artifact_directory}/.lock")
-
-      # Now that we've created our repositories, we can create the configs for
-      # them
-      Rake::Task["pl:jenkins:generate_rpm_repo_configs"].execute
-
-      # And once they're created, we can ship them
-      Rake::Task["pl:jenkins:ship_repo_configs"].execute
+        # And once they're created, we can ship them
+        Rake::Task["pl:jenkins:ship_repo_configs"].execute
+      ensure
+        # Always remove the lock file, even if we've failed
+        remote_ssh_cmd(@build.distribution_server, "rm -f #{artifact_directory}/.lock")
+      end
     end
 
     # Generate yum configuration files that point to the repositories created
@@ -65,10 +66,7 @@ namespace :pl do
       # We have a hard requirement on wget because of all the download magicks
       # we have to do
       #
-      unless wget = find_tool("wget")
-        warn "Could not find `wget` tool. This is needed for composing the yum repo configurations. Install `wget` and try again."
-        exit 0
-      end
+      wget = find_tool("wget") or fail "Could not find `wget` tool. This is needed for composing the yum repo configurations. Install `wget` and try again."
 
       # This is the standard path to all build artifacts on the distribution
       # server for this commit
@@ -94,10 +92,7 @@ namespace :pl do
         end
       end
 
-      if yum_repos.empty?
-        puts "No rpm repos were found to generate configs from. Exiting.."
-        exit 0
-      end
+      yum_repos.empty? and fail "No rpm repos were found to generate configs from!"
 
       mkdir_p File.join("pkg","repo_configs","rpm")
 
@@ -109,7 +104,6 @@ namespace :pl do
         # We ship a base 'srpm' that gets turned into a repo, but we want to
         # ignore this one because its an extra
         next if url == "#{base_url}srpm/"
-        elements = url.split('/')
 
         dist,version,subdir,arch = url.split('/')[-4..-1]
 
@@ -131,18 +125,13 @@ namespace :pl do
 
     desc "Retrieve rpm yum repository configs from distribution server"
     task :rpm_repo_configs => "pl:fetch" do
-      if wget = find_tool("wget")
-        mkdir_p "pkg/repo_configs"
-        config_url = "#{@build.builds_server}/#{@build.project}/#{@build.ref}/repo_configs/rpm/"
-        begin
-          sh "#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{config_url}"
-        rescue
-          warn "Couldn't retrieve rpm yum repo configs. See preceding http response for more info."
-          exit 1
-        end
-      else
-        warn "Could not find `wget` tool! wget is required to download the repository configs."
-        exit 1
+      wget = find_tool("wget") or fail "Could not find `wget` tool! wget is required to download the repository configs."
+      mkdir_p "pkg/repo_configs"
+      config_url = "#{@build.builds_server}/#{@build.project}/#{@build.ref}/repo_configs/rpm/"
+      begin
+        sh "#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{config_url}"
+      rescue
+        fail "Couldn't retrieve rpm yum repo configs. See preceding http response for more info."
       end
     end
   end

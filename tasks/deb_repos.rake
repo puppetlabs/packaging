@@ -18,14 +18,14 @@ namespace :pl do
       artifact_directory = File.join(@build.jenkins_repo_path, @build.project, @build.ref)
 
       cmd = 'echo " Checking for deb build artifacts. Will exit if not found.." ; '
-      cmd << "[ -d #{artifact_directory}/artifacts/#{prefix}deb ] || exit 0 ; "
+      cmd << "[ -d #{artifact_directory}/artifacts/#{prefix}deb ] || exit 1 ; "
       # Descend into the deb directory and obtain the list of distributions
       # we'll be building repos for
       cmd << "pushd #{artifact_directory}/artifacts/#{prefix}deb && dists=$(ls) && popd; "
       # We do one more check here to make sure we actually have distributions
       # to build for. If deb is empty we want to just exit.
       #
-      cmd << '[ -n "$dists" ] || exit 0 ; '
+      cmd << '[ -n "$dists" ] || exit 1 ; '
       cmd << "pushd #{artifact_directory} ; "
 
       cmd << 'echo "Checking for running repo creation. Will wait if detected." ; '
@@ -52,17 +52,19 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
       cmd << "$reprepro includedeb $dist ../../#{prefix}deb/$dist/*.deb ; popd ; done ; "
       cmd << "popd ; popd "
 
-      remote_ssh_cmd(@build.distribution_server, cmd)
+      begin
+        remote_ssh_cmd(@build.distribution_server, cmd)
+        # Now that we've created our package repositories, we can generate repo
+        # configurations for use with downstream jobs, acceptance clients, etc.
+        Rake::Task["pl:jenkins:generate_deb_repo_configs"].execute
 
-      # Always remove the lock file, even if we've failed
-      remote_ssh_cmd(@build.distribution_server, "rm -f #{artifact_directory}/.lock")
+        # Now that we've created the repo configs, we can ship them
+        Rake::Task["pl:jenkins:ship_repo_configs"].execute
+      ensure
+        # Always remove the lock file, even if we've failed
+        remote_ssh_cmd(@build.distribution_server, "rm -f #{artifact_directory}/.lock")
+      end
 
-      # Now that we've created our package repositories, we can generate repo
-      # configurations for use with downstream jobs, acceptance clients, etc.
-      Rake::Task["pl:jenkins:generate_deb_repo_configs"].execute
-
-      # Now that we've created the repo configs, we can ship them
-      Rake::Task["pl:jenkins:ship_repo_configs"].execute
     end
 
     # Generate apt configuration files that point to the repositories created
@@ -83,20 +85,15 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
       # We use wget to obtain a directory listing of what are presumably our deb repos
       #
       repo_urls = []
-      if wget = find_tool("wget")
-        # First test if the directory even exists
-        #
-        wget_results = %x{#{wget} --spider -r -l 1 --no-parent #{base_url} 2>&1}
-        if $?.success?
-          # We want to exclude index and robots files and only include the http: prefixed elements
-          repo_urls = wget_results.split.uniq.reject{|x| x=~ /\?|index|robots/}.select{|x| x =~ /http:/}.map{|x| x.chomp('/')}
-        else
-          puts "No debian repos available for #{@build.project} at #{@build.ref}."
-          exit 0
-        end
+      wget = find_tool("wget") or fail "Could not find `wget` tool. This is needed for composing the debian repo configurations. Install `wget` and try again."
+      # First test if the directory even exists
+      #
+      wget_results = %x{#{wget} --spider -r -l 1 --no-parent #{base_url} 2>&1}
+      if $?.success?
+        # We want to exclude index and robots files and only include the http: prefixed elements
+        repo_urls = wget_results.split.uniq.reject{|x| x=~ /\?|index|robots/}.select{|x| x =~ /http:/}.map{|x| x.chomp('/')}
       else
-        warn "Could not find `wget` tool. This is needed for composing the debian repo configurations. Install `wget` and try again."
-        exit 0
+        fail "No debian repos available for #{@build.project} at #{@build.ref}."
       end
 
       # Create apt sources.list files that can be added to hosts for installing
@@ -118,18 +115,13 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
 
     desc "Retrieve debian apt repository configs for this sha"
     task :deb_repo_configs => "pl:fetch" do
-      if wget = find_tool("wget")
-        mkdir_p "pkg/repo_configs"
-        config_url = "#{@build.builds_server}/#{@build.project}/#{@build.ref}/repo_configs/deb/"
-        begin
-          sh "#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{config_url}"
-        rescue
-          warn "Couldn't retrieve deb apt repo configs. See preceding http response for more info."
-          exit 1
-        end
-      else
-        warn "Could not find `wget` tool! wget is required to download the repository configs."
-        exit 1
+      wget = find_tool("wget") or fail "Could not find `wget` tool. This is needed for composing the debian repo configurations. Install `wget` and try again."
+      mkdir_p "pkg/repo_configs"
+      config_url = "#{@build.builds_server}/#{@build.project}/#{@build.ref}/repo_configs/deb/"
+      begin
+        sh "#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{config_url}"
+      rescue
+        fail "Couldn't retrieve deb apt repo configs. See preceding http response for more info."
       end
     end
   end

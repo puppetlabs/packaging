@@ -4,7 +4,9 @@ if @build.build_pe
     task :ship_rpms => "pl:fetch" do
       empty_dir?("pkg/pe/rpm") and fail "The 'pkg/pe/rpm' directory has no packages. Did you run rake pe:deb?"
       target_path = ENV['YUM_REPO'] ? ENV['YUM_REPO'] : "#{@build.yum_repo_path}/#{@build.pe_version}/repos/"
-      rsync_to('pkg/pe/rpm/', @build.yum_host, target_path)
+      retry_on_fail(:times => 3) do
+        rsync_to('pkg/pe/rpm/', @build.yum_host, target_path)
+      end
       if @build.team == 'release'
         Rake::Task["pe:remote:update_yum_repo"].invoke
       end
@@ -14,7 +16,9 @@ if @build.build_pe
     task :ship_debs => "pl:fetch" do
       empty_dir?("pkg/pe/deb") and fail "The 'pkg/pe/deb' directory has no packages!"
       target_path = ENV['APT_REPO'] ? ENV['APT_REPO'] : "#{@build.apt_repo_path}/#{@build.pe_version}/repos/incoming/disparate/"
-      rsync_to("pkg/pe/deb/", @build.apt_host, target_path)
+      retry_on_fail(:times => 3) do
+        rsync_to("pkg/pe/deb/", @build.apt_host, target_path)
+      end
       if @build.team == 'release'
         Rake::Task["pe:remote:freight"].invoke
       end

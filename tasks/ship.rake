@@ -1,8 +1,12 @@
 namespace :pl do
   desc "Ship mocked rpms to #{@build.yum_host}"
   task :ship_rpms do
-    rsync_to('pkg/el', @build.yum_host, @build.yum_repo_path)
-    rsync_to('pkg/fedora', @build.yum_host, @build.yum_repo_path)
+    retry_on_fail(:times => 3) do
+      rsync_to('pkg/el', @build.yum_host, @build.yum_repo_path)
+    end
+    retry_on_fail(:times => 3) do
+      rsync_to('pkg/fedora', @build.yum_host, @build.yum_repo_path)
+    end
   end
 
   namespace :remote do
@@ -31,7 +35,9 @@ namespace :pl do
 
   desc "Ship cow-built debs to #{@build.apt_host}"
   task :ship_debs do
-    rsync_to('pkg/deb/', @build.apt_host, @build.apt_repo_path)
+    retry_on_fail(:times => 3) do
+      rsync_to('pkg/deb/', @build.apt_host, @build.apt_repo_path)
+    end
   end
 
   namespace :remote do
@@ -61,12 +67,16 @@ namespace :pl do
 
   desc "ship apple dmg to #{@build.yum_host}"
   task :ship_dmg => 'pl:fetch' do
-    rsync_to('pkg/apple/*.dmg', @build.yum_host, @build.dmg_path)
+    retry_on_fail(:times => 3) do
+      rsync_to('pkg/apple/*.dmg', @build.yum_host, @build.dmg_path)
+    end
   end if @build.build_dmg
 
   desc "ship tarball and signature to #{@build.tar_host}"
   task :ship_tar => 'pl:fetch' do
-    rsync_to("pkg/#{@build.project}-#{@build.version}.tar.gz*", @build.tar_host, @build.tarball_path)
+    retry_on_fail(:times => 3) do
+      rsync_to("pkg/#{@build.project}-#{@build.version}.tar.gz*", @build.tar_host, @build.tarball_path)
+    end
   end
 
   desc "UBER ship: ship all the things in pkg"
@@ -94,8 +104,12 @@ namespace :pl do
       invoke_task("pl:fetch")
       target = args.target || "artifacts"
       artifact_dir = "#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}/#{target}"
-      remote_ssh_cmd(@build.distribution_server, "mkdir -p #{artifact_dir}")
-      rsync_to("pkg/", @build.distribution_server, "#{artifact_dir}/ --exclude repo_configs")
+      retry_on_fail(:times => 3) do
+        remote_ssh_cmd(@build.distribution_server, "mkdir -p #{artifact_dir}")
+      end
+      retry_on_fail(:times => 3) do
+        rsync_to("pkg/", @build.distribution_server, "#{artifact_dir}/ --exclude repo_configs")
+      end
     end
 
     desc "Ship generated repository configs to the distribution server"
@@ -104,7 +118,9 @@ namespace :pl do
       invoke_task("pl:fetch")
       repo_dir = "#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}/repo_configs"
       remote_ssh_cmd(@build.distribution_server, "mkdir -p #{repo_dir}")
-      rsync_to("pkg/repo_configs/", @build.distribution_server, repo_dir)
+      retry_on_fail(:times => 3) do
+        rsync_to("pkg/repo_configs/", @build.distribution_server, repo_dir)
+      end
     end
   end
 end

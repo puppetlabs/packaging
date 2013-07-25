@@ -97,17 +97,6 @@ def build_dmg
     --ownership preserve \
     #{@working_tree['payload']}/#{package_file}")
 
-  # system("sudo #{PACKAGEMAKER} --root #{@working_tree['working']} \
-  #   --id #{@reverse_domain} \
-  #   --filter DS_Store \
-  #   --target #{package_target_os} \
-  #   --title #{@title} \
-  #   --info #{@scratch}/prototype.plist \
-  #   --scripts #{@working_tree['scripts']} \
-  #   --resources #{@working_tree['resources']} \
-  #   --version #{@version} \
-  #   #{pm_extra_args} --out #{@working_tree['payload']}/#{package_file}")
-
   # Build .dmg file
   system("sudo hdiutil create -volname #{@title} \
     -srcfolder #{@working_tree['payload']} \

@@ -148,7 +148,7 @@ def pack_source
   # Setup a preinstall script and replace variables in the files with
   # the correct paths.
   if File.exists?("#{@working_tree['scripts']}/preinstall")
-    chmod(0644, "#{@working_tree['scripts']}/preinstall")
+    chmod(0755, "#{@working_tree['scripts']}/preinstall")
     sh "sudo chown root:wheel #{@working_tree['scripts']}/preinstall"
   end
 

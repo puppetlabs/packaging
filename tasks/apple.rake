@@ -9,12 +9,10 @@
 #
 
 # Path to Binaries (Constants)
-TAR           = '/usr/bin/tar'
 CP            = '/bin/cp'
 INSTALL       = '/usr/bin/install'
 DITTO         = '/usr/bin/ditto'
-PACKAGEMAKER  = '/Developer/usr/bin/packagemaker'
-SED           = '/usr/bin/sed'
+PKGBUILD      = '/usr/bin/pkgbuild'
 
 # Setup task to populate all the variables
 task :setup do
@@ -59,11 +57,11 @@ def make_directory_tree
   end
 
   if File.exists?('ext/osx/postflight.erb')
-    erb 'ext/osx/postflight.erb', "#{@working_tree["scripts"]}/postflight"
+    erb 'ext/osx/postflight.erb', "#{@working_tree["scripts"]}/postinstall"
   end
 
   if File.exists?('ext/osx/preflight.erb')
-    erb 'ext/osx/preflight.erb', "#{@working_tree["scripts"]}/preflight"
+    erb 'ext/osx/preflight.erb', "#{@working_tree["scripts"]}/preinstall"
   end
 
   if File.exists?('ext/osx/prototype.plist.erb')
@@ -88,20 +86,16 @@ def build_dmg
   dmg_format        = "#{dmg_format_code} #{dmg_format_option}"
   dmg_file          = "#{@title}.dmg"
   package_file      = "#{@title}.pkg"
-  pm_extra_args     = '--verbose --no-recommend --no-relocate'
   package_target_os = '10.4'
 
   # Build .pkg file
-  system("sudo #{PACKAGEMAKER} --root #{@working_tree['working']} \
-    --id #{@reverse_domain} \
-    --filter DS_Store \
-    --target #{package_target_os} \
-    --title #{@title} \
-    --info #{@scratch}/prototype.plist \
+  system("sudo #{PKGBUILD} --root #{@working_tree['working']} \
     --scripts #{@working_tree['scripts']} \
-    --resources #{@working_tree['resources']} \
+    --identifier #{@reverse_domain} \
     --version #{@version} \
-    #{pm_extra_args} --out #{@working_tree['payload']}/#{package_file}")
+    --install-location / \
+    --ownership preserve \
+    #{@working_tree['payload']}/#{package_file}")
 
   # Build .dmg file
   system("sudo hdiutil create -volname #{@title} \
@@ -151,17 +145,17 @@ def pack_source
     end
   end
 
-  # Setup a preflight script and replace variables in the files with
+  # Setup a preinstall script and replace variables in the files with
   # the correct paths.
-  if File.exists?("#{@working_tree['scripts']}/preflight")
-    chmod(0644, "#{@working_tree['scripts']}/preflight")
-    sh "sudo chown root:wheel #{@working_tree['scripts']}/preflight"
+  if File.exists?("#{@working_tree['scripts']}/preinstall")
+    chmod(0755, "#{@working_tree['scripts']}/preinstall")
+    sh "sudo chown root:wheel #{@working_tree['scripts']}/preinstall"
   end
 
-  # Setup a postflight from from the erb created earlier
-  if File.exists?("#{@working_tree['scripts']}/postflight")
-    chmod(0755, "#{@working_tree['scripts']}/postflight")
-    sh "sudo chown root:wheel #{@working_tree['scripts']}/postflight"
+  # Setup a postinstall from from the erb created earlier
+  if File.exists?("#{@working_tree['scripts']}/postinstall")
+    chmod(0755, "#{@working_tree['scripts']}/postinstall")
+    sh "sudo chown root:wheel #{@working_tree['scripts']}/postinstall"
   end
 
   # Do a run through first setting the specified permissions then
@@ -233,9 +227,9 @@ if @build.build_dmg
     desc "Task for building an Apple Package"
     task :apple => [:setup] do
       bench = Benchmark.realtime do
-        # Test for Packagemaker binary
-        fail "Packagemaker must be installed. Please install XCode Tools" unless \
-          File.exists?(PACKAGEMAKER)
+        # Test for pkgbuild binary
+        fail "pkgbuild must be installed." unless \
+          File.exists?(PKGBUILD)
 
         make_directory_tree
         pack_source

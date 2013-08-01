@@ -7,6 +7,9 @@ if @build.build_pe
     task :sign_rpms do
       old_rpms = FileList.new
       modern_rpms = FileList.new
+      # Find x86_64 noarch rpms that have been created as hard links and remove them
+      rm_r Dir["pkg/pe/rpm/*-*-x86_64/*.noarch.rpm"]
+      # We'll sign the remaining noarch
       sign_dists = 'el5', 'el6', 'sles11'
       ['i386', 'x86_64'].each do |arch|
         sign_dists.each do |dist|
@@ -23,6 +26,14 @@ if @build.build_pe
       end
       sign_el5(old_rpms) unless old_rpms.empty?
       sign_modern(modern_rpms) unless modern_rpms.empty?
+      # Now we hardlink them back in
+      Dir["pkg/pe/rpm/*-*-i386/*.noarch.rpm"].each do |rpm|
+        dir = rpm.split('/')[-2]
+        family, version, _arch = dir.split('-')
+        cd File.dirname(rpm) do
+          ln File.basename(rpm), File.join('..', "#{family}-#{version}-x86_64")
+        end
+      end
     end
     # This is essentially a duplicate of the logic in pl:sign_deb_changes, but
     # since the plan is eventually to rip out the PE work, it'll be easier if

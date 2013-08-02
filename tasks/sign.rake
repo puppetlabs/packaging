@@ -39,6 +39,9 @@ namespace :pl do
 
   desc "Sign mocked rpms, Defaults to PL Key, pass KEY to override"
   task :sign_rpms do
+    # Find x86_64 noarch rpms that have been created as hard links and remove them
+    rm_r Dir["pkg/*/*/*/x86_64/*.noarch.rpm"]
+    # We'll sign the remaining noarch
     el5_rpms    = Dir["pkg/el/5/**/*.rpm"].join(' ')
     modern_rpms = (Dir["pkg/el/6/**/*.rpm"] + Dir["pkg/fedora/**/*.rpm"]).join(' ')
     unless el5_rpms.empty?
@@ -49,6 +52,12 @@ namespace :pl do
     unless modern_rpms.empty?
       puts "Signing el6 and fedora rpms..."
       sign_modern(modern_rpms)
+    end
+    # Now we hardlink them back in
+    Dir["pkg/*/*/*/i386/*.noarch.rpm"].each do |rpm|
+      cd File.dirname(rpm) do
+        ln rpm, File.join("..","x86_64")
+      end
     end
   end
 

@@ -82,6 +82,11 @@ return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScr
           <description></description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>METRICS</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -140,6 +145,140 @@ popd</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
+    <org.jvnet.hudson.plugins.groovypostbuild.GroovyPostbuildRecorder plugin="groovy-postbuild@1.8">
+      <groovyScript>
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+import java.net.HttpURLConnection
+import java.util.Date;
+
+def get_jenkins_build_time() {
+    start_time  = manager.build.getStartTimeInMillis()
+    end_time    = new Date().getTime()
+    return String.valueOf((end_time - start_time)/1000)
+}
+
+// Assemble metrics to post to build metrics server
+
+app_server    = <%= "'#{@build.metrics_server}'" %>
+task_metrics  = manager.build.getEnvironment(manager.listener)[&apos;METRICS&apos;]
+charset       = &quot;UTF-8&quot;
+
+// Maintain backwards compatibility
+if ( task_metrics == null) {
+    build_user  = &quot;N/A&quot;
+    version     = &quot;N/A&quot;
+    pe_version  = &quot;N/A&quot;
+} else {
+    build_user  = task_metrics.split(&quot;~&quot;)[0]
+    version     = task_metrics.split(&quot;~&quot;)[1]
+    pe_version  = task_metrics.split(&quot;~&quot;)[2]
+}
+
+matcher = manager.getLogMatcher(/(?:Finished building in:) ([\d]+\.?[\d]*)/)
+if (matcher != null) {
+  package_build_time = matcher[0][1]
+} else {
+  package_build_time = &quot;N/A&quot;
+}
+
+cmd_string  = manager.build.getEnvironment(manager.listener)[&apos;command&apos;]
+if(cmd_string =~ /deb/) {
+  package_type = 'deb'
+} else if(cmd_string =~ /rpm|mock/) {
+  package_type = 'rpm'
+} else if(cmd_string =~ /gem/) {
+  package_type = 'gem'
+} else if(cmd_string =~ /apple/) {
+  package_type = 'dmg'
+} else if(cmd_string =~ /tar/) {
+  package_type = 'tar'
+}  else {
+  package_type = 'N/A'
+}
+
+switch (package_type) {
+  case 'deb':
+    dist = cmd_string.split('-')[1]
+    break
+  case 'rpm':
+    if(pe_version != 'N/A') {
+      dist = cmd_string.split('-')[2]
+    } else {
+      dist = cmd_string.split('-')[1] + cmd_string.split('-')[2]
+    }
+    break
+  case 'gem':
+    dist = 'gem'
+    break
+  case 'dmg':
+    dist = 'apple'
+    break
+  case 'tar':
+    dist = 'tar'
+    break
+  default:
+    dist = 'N/A'
+}
+
+jenkins_build_time  = get_jenkins_build_time()
+package_name        = manager.build.getEnvironment(manager.listener)[&apos;PROJECT&apos;]
+build_loc           = manager.build.getEnvironment(manager.listener)[&apos;NODE_NAME&apos;]
+build_log           = &quot;${manager.build.getEnvironment(manager.listener)[&apos;BUILD_URL&apos;]}&quot; + &quot;consoleText&quot;
+success             = String.valueOf(manager.build.result)
+
+String query = String.format(&quot;package_name=%s&amp;dist=%s&amp;package_type=%s&amp;build_user=%s&amp;build_loc=%s&amp;version=%s&amp;pe_version=%s&amp;success=%s&amp;build_log=%s&amp;jenkins_build_time=%s&amp;package_build_time=%s&quot;,
+     URLEncoder.encode(package_name, charset),
+     URLEncoder.encode(dist, charset),
+     URLEncoder.encode(package_type, charset),
+     URLEncoder.encode(build_user, charset),
+     URLEncoder.encode(build_loc, charset),
+     URLEncoder.encode(version, charset),
+     URLEncoder.encode(pe_version, charset),
+     URLEncoder.encode(success, charset),
+     URLEncoder.encode(build_log, charset),
+     URLEncoder.encode(jenkins_build_time, charset),
+     URLEncoder.encode(package_build_time, charset))
+
+// Make sure the server is listening before attempting to post data
+
+URLConnection connection = null
+serverAlive = false
+try {
+    URL u       = new URL(app_server);
+    connection  = (HttpURLConnection) u.openConnection();
+    connection.setRequestMethod(&quot;GET&quot;);
+    int code    = connection.getResponseCode();
+    serverAlive = true
+    connection.disconnect();
+
+} catch (MalformedURLException e) {
+    serverAlive = false
+    e.printStackTrace()
+
+} catch (IOException e) {
+    serverAlive = false
+    e.printStackTrace()
+
+} finally {
+    if (serverAlive == true) {
+        connection = new URL(app_server).openConnection()
+        connection.setDoOutput(true) // Triggers POST.
+        connection.setRequestProperty(&quot;Accept-Charset&quot;, charset);
+        connection.setRequestProperty(&quot;Content-Type&quot;, &quot;application/x-www-form-urlencoded;charset=&quot; + charset);
+        OutputStream output = null;
+
+        try {
+             output = connection.getOutputStream()
+             output.write(query.getBytes(charset))
+             InputStream response = connection.getInputStream()
+        } finally {
+             if (output != null) try { output.close(); } catch (IOException logOrIgnore) {}
+        }
+    }
+}     </groovyScript>
+      <behavior>0</behavior>
+    </org.jvnet.hudson.plugins.groovypostbuild.GroovyPostbuildRecorder>
     <hudson.tasks.ArtifactArchiver>
       <artifacts>**/PROJECT_BUNDLE</artifacts>
       <latestOnly>false</latestOnly>

@@ -239,6 +239,7 @@ if @build.build_dmg
         add_metrics({ :dist => 'osx', :bench => bench })
         post_metrics
       end
+      puts "Finished building in: #{bench}"
     end
   end
 

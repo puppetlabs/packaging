@@ -27,9 +27,9 @@ namespace :pl do
     end
   end
 end
-if @build.team == 'release'
-  @build.benchmark = TRUE
-end
+
+@build.benchmark        = TRUE
+@build.metrics_server   = 'http://dagr.delivery.puppetlabs.net:4567/overview/metrics'
 
 ##
 # Starting with puppetdb, we'll maintain two separate build-data files, one for

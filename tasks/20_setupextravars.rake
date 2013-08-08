@@ -29,6 +29,7 @@ namespace :pl do
 end
 
 @build.benchmark        = TRUE
+@build.is_jenkins_build = false
 @build.metrics_server   = 'http://dagr.delivery.puppetlabs.net:4567/overview/metrics'
 
 ##

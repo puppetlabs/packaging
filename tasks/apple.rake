@@ -236,8 +236,8 @@ if @build.build_dmg
         build_dmg
       end
       if @build.benchmark
-        add_metrics({ :dist => 'osx', :bench => bench })
-        post_metrics
+        add_metrics({ :dist => 'apple', :package_type => 'dmg', :package_build_time => bench }) if @build.is_jenkins_build == false
+        post_metrics if @build.is_jenkins_build == false
       end
       puts "Finished building in: #{bench}"
     end

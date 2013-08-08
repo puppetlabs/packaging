@@ -23,6 +23,8 @@ def debuild args
   begin
     sh "debuild --no-lintian -uc -us"
   rescue
+    add_metrics({ :package_type => 'deb', :package_build_time => bench, :success => false }) if @build.is_jenkins_build == false
+    post_metrics if @build.is_jenkins_build == false
     fail "Something went wrong. Hopefully the backscroll or #{results_dir}/#{@build.project}_#{@build.debversion}.build file has a clue."
   end
 end
@@ -58,7 +60,8 @@ task :build_deb, :deb_command, :cow do |t,args|
     end
   end
   # See 30_metrics.rake to see what this is doing
-  add_metrics({ :dist => ENV['DIST'], :bench => bench }) if @build.benchmark
+  add_metrics({ :package_type => 'deb', :package_build_time => bench }) if @build.is_jenkins_build == false
+  post_metrics if @build.is_jenkins_build == false
   puts "Finished building in: #{bench}"
 end
 
@@ -74,7 +77,7 @@ namespace :pl do
   task :deb => "package:tar"  do
     check_var('PE_VER', @build.pe_version) if @build.build_pe
     Rake::Task[:build_deb].invoke('pdebuild', @build.default_cow)
-    post_metrics if @build.benchmark
+    post_metrics if @build.is_jenkins_build == false
   end
 
   desc "Create debs from this git repository using all cows specified in build_defaults yaml"
@@ -85,6 +88,5 @@ namespace :pl do
       Rake::Task[:build_deb].reenable
       Rake::Task[:build_deb].invoke('pdebuild', cow)
     end
-    post_metrics if @build.benchmark
   end
 end

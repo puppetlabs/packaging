@@ -60,6 +60,7 @@ module Build
                       :ips_repo,
                       :ips_store,
                       :ipsversion,
+                      :is_jenkins_build,
                       :jenkins_build_host,
                       :jenkins_packaging_job,
                       :jenkins_repo_path,

@@ -5,37 +5,51 @@ if @build.benchmark
 
   def add_metrics args
     @metrics << {
-      :bench      => args[:bench],
-      :dist       => ( args[:dist]        || ENV['DIST']       ),
-      :pkg        => ( args[:pkg]         || @build.project    ),
-      :version    => ( args[:version]     || @build.version    ),
-      :pe_version => ( args[:pe_version]  || @build.pe_version ),
-      :date       => ( args[:date]        || timestamp         ),
-      :who        => ( args[:who]         || ENV['USER']       ),
-      :where      => ( args[:where]       || hostname          )
+      :date               => ( args[:date]                || timestamp         ),
+      :package            => ( args[:package]             || @build.project    ),
+      :dist               => ( args[:dist]                || ENV['DIST']       ),
+      :package_type       => ( args[:package_type]        || ENV['DIST']       ),
+      :package_build_time => ( args[:package_build_time]                       ),
+      :version            => ( args[:version]             || @build.version    ),
+      :pe_version         => ( args[:pe_version]          || @build.pe_version ),
+      :who                => ( args[:who]                 || ENV['USER']       ),
+      :where              => ( args[:where]               || hostname          ),
+      :success            => ( args[:success]             || true              ),
+      :log                => ( args[:log]                 || "Not available"   )
     }
   end
 
   def post_metrics
-    if psql = find_tool('psql')
-      ENV["PGCONNECT_TIMEOUT"]="10"
-
       @metrics.each do |metric|
-        date        = metric[:date]
-        pkg         = metric[:pkg]
-        dist        = metric[:dist]
-        bench       = metric[:bench]
-        who         = metric[:who]
-        where       = metric[:where]
-        version     = metric[:version]
-        pe_version  = metric[:pe_version]
-        @pg_major_version ||= %x{/usr/bin/psql --version}.match(/psql \(PostgreSQL\) (\d)\..*/)[1].to_i
-        no_pass_fail = "-w" if @pg_major_version > 8
-        %x{#{psql} #{no_pass_fail} -c "INSERT INTO #{@db_table} \
-        (date, package, dist, build_time, build_user, build_loc, version, pe_version) \
-        VALUES ('#{date}', '#{pkg}', '#{dist}', #{bench}, '#{who}', '#{where}', '#{version}', '#{pe_version}')"}
-      end
-      @metrics = []
+        date               = metric[:date]
+        package            = metric[:package]
+        dist               = metric[:dist]
+        package_type       = metric[:package_type]
+        package_build_time = metric[:package_build_time]
+        who                = metric[:who]
+        where              = metric[:where]
+        version            = metric[:version]
+        pe_version         = metric[:pe_version]
+        success            = metric[:success]
+        log                = metric[:log]
+
+      uri = URI(@build.metrics_server)
+      res = Net::HTTP.post_form(
+        uri,
+        {
+          'date'                => Time.now.to_s,
+          'package_name'        => package,
+          'dist'                => dist,
+          'package_type'        => package_type,
+          'package_build_time'  => package_build_time,
+          'build_user'          => who,
+          'build_loc'           => where,
+          'version'             => version,
+          'pe_version'          => pe_version,
+          'success'             => success,
+          'build_log'           => log,
+        })
     end
+    @metrics = []
   end
 end

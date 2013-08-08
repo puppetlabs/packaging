@@ -90,6 +90,7 @@ namespace :pl do
     # 1. :build_task => The lower-level pl: or pe: task we're executing, e.g. pl:deb_all
     #
     task :post_build, :build_task do |t, args|
+      @build.is_jenkins_build = true
       # Check for a dirty tree before allowing a remote build that is doomed to unexpected results
       fail_on_dirty_source
 

@@ -352,15 +352,17 @@ sign_tar: FALSE
 # a space separated list of mock configs. These are the rpm distributions to package for. If a noarch package, only one arch of each is needed.
 final_mocks: 'pl-el-5-i386 pl-el-5-x86_64 pl-el-6-i386 pl-el-6-x86_64 pl-fedora-16-i386 pl-fedora-16-x86_64 pl-fedora-17-i386 pl-fedora-17-x86_64'
 # The host that contains the yum repository to ship to
-yum_host: 'burji.puppetlabs.com'
+yum_host: 'yum.puppetlabs.com'
 # The remote path the repository on the yum\_host
 yum_repo_path: '/some/repo/'
 # The host that contains the apt repository to ship to
-apt_host: 'burji.puppetlabs.com'
+apt_host: 'apt.puppetlabs.com'
 # The URL to use for the apt dependencies in cow building
 apt_repo_url: 'http://apt.puppetlabs.com'
 # The path on the remote apt host that debs should ship to
 apt_repo_path: '/opt/repository/incoming'
+# The host that stores the tarballs for downloading
+tar_host: 'downloads.puppetlabs.com'
 # Whether to present the gem and apple tasks
 build_gem: TRUE
 build_dmg: TRUE

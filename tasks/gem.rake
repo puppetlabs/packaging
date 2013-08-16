@@ -66,9 +66,10 @@ if @build.build_gem
         rm_rf "pkg/#{@build.project}-#{@build.gemversion}"
       end
       if @build.benchmark
-        add_metrics({ :dist => 'gem', :bench => bench })
-        post_metrics
+        add_metrics({ :dist => 'gem', :package_type => 'gem', :package_build_time => bench }) if @build.is_jenkins_build == false
+        post_metrics if @build.is_jenkins_build == false
       end
+      puts "Finished building in: #{bench}"
     end
   end
 

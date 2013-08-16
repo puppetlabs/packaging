@@ -7,37 +7,41 @@ def prep_rpm_build_dir
 end
 
 def build_rpm(buildarg = "-bs")
-  check_tool('rpmbuild')
-  workdir = prep_rpm_build_dir
-  if dist = el_version
-    if dist.to_i < 6
-      dist_string = "--define \"%dist .el#{dist}"
+  bench = Benchmark.realtime do
+    check_tool('rpmbuild')
+    workdir = prep_rpm_build_dir
+    if dist = el_version
+      if dist.to_i < 6
+        dist_string = "--define \"%dist .el#{dist}"
+      end
+    end
+    rpm_define = "#{dist_string} --define \"%_topdir  #{workdir}\" "
+    rpm_old_version = '--define "_source_filedigest_algorithm 1" --define "_binary_filedigest_algorithm 1" \
+       --define "_binary_payload w9.gzdio" --define "_source_payload w9.gzdio" \
+       --define "_default_patch_fuzz 2"'
+    args = rpm_define + ' ' + rpm_old_version
+    mkdir_pr 'pkg/srpm'
+    if buildarg == '-ba'
+      mkdir_p 'pkg/rpm'
+    end
+    if @build.sign_tar
+      Rake::Task["pl:sign_tar"].invoke
+    end
+    sh "rpmbuild #{args} #{buildarg} --nodeps #{workdir}/SPECS/#{@build.project}.spec"
+    mv FileList["#{workdir}/SRPMS/*.rpm"], "pkg/srpm"
+    if buildarg == '-ba'
+      mv FileList["#{workdir}/RPMS/*/*.rpm"], "pkg/rpm"
+    end
+    rm_rf workdir
+    puts
+    output = FileList['pkg/*/*.rpm']
+    puts "Wrote:"
+    output.each do | line |
+      puts line
     end
   end
-  rpm_define = "#{dist_string} --define \"%_topdir  #{workdir}\" "
-  rpm_old_version = '--define "_source_filedigest_algorithm 1" --define "_binary_filedigest_algorithm 1" \
-     --define "_binary_payload w9.gzdio" --define "_source_payload w9.gzdio" \
-     --define "_default_patch_fuzz 2"'
-  args = rpm_define + ' ' + rpm_old_version
-  mkdir_pr 'pkg/srpm'
-  if buildarg == '-ba'
-    mkdir_p 'pkg/rpm'
-  end
-  if @build.sign_tar
-    Rake::Task["pl:sign_tar"].invoke
-  end
-  sh "rpmbuild #{args} #{buildarg} --nodeps #{workdir}/SPECS/#{@build.project}.spec"
-  mv FileList["#{workdir}/SRPMS/*.rpm"], "pkg/srpm"
-  if buildarg == '-ba'
-    mv FileList["#{workdir}/RPMS/*/*.rpm"], "pkg/rpm"
-  end
-  rm_rf workdir
-  puts
-  output = FileList['pkg/*/*.rpm']
-  puts "Wrote:"
-  output.each do | line |
-    puts line
-  end
+  add_metrics({ :package_type => 'rpm', :package_build_time => bench }) if @build.is_jenkins_build == false
+  post_metrics if @build.is_jenkins_build == false
 end
 
 namespace :package do

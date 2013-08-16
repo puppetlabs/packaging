@@ -194,7 +194,9 @@ def build_rpm_with_mock(mocks)
         end
       end
     end
-    add_metrics({ :dist => "#{family}-#{version}", :bench => bench }) if @build.benchmark
+    add_metrics({ :dist => "#{family}#{version}", :package_type => 'rpm', :package_build_time => bench }) if @build.is_jenkins_build == false
+    post_metrics if @build.is_jenkins_build == false
+    puts "Finished building in: #{bench}"
   end
 end
 
@@ -261,12 +263,12 @@ namespace :pl do
     # If default mock isn't specified, just take the first one in the @build.final_mocks list
     @build.default_mock ||= @build.final_mocks.split(' ')[0]
     build_rpm_with_mock(@build.default_mock)
-    post_metrics if @build.benchmark
+    post_metrics if @build.is_jenkins_build == false
   end
 
   desc "Use specified mocks to make rpms, keyed to PL infrastructure, pass MOCK to specifiy config"
   task :mock_all => "package:tar" do
     build_rpm_with_mock(@build.final_mocks)
-    post_metrics if @build.benchmark
+    post_metrics if @build.is_jenkins_build == false
   end
 end

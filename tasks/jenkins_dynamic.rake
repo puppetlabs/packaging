@@ -15,6 +15,7 @@ namespace :pl do
   namespace :jenkins do
     desc "Dynamic Jenkins UBER build: Build all the things with ONE job"
     task :uber_build => "pl:fetch" do
+      @build.is_jenkins_build = true
       # If we have a dirty source, bail, because changes won't get reflected in
       # the package builds
       fail_on_dirty_source
@@ -65,10 +66,15 @@ namespace :pl do
       properties = @build.params_to_yaml
       bundle = git_bundle('HEAD')
 
+      # Create a string of metrics to send to Jenkins for data analysis
+      @build.pe_version = 'N/A' if @build.pe_version == nil
+      metrics = "#{ENV['USER']}~#{@build.version}~#{@build.pe_version}"
+
       # Construct the parameters, which is an array of hashes we turn into JSON
       parameters = [{ "name" => "BUILD_PROPERTIES", "file"  => "file0" },
                     { "name" => "PROJECT_BUNDLE",   "file"  => "file1" },
-                    { "name" => "PROJECT",          "value" => "#{@build.project}" }]
+                    { "name" => "PROJECT",          "value" => "#{@build.project}" },
+                    { "name" => "METRICS",          "value" => "#{metrics}"}]
 
       # Contruct the json string
       json = JSON.generate("parameter" => parameters)
@@ -79,6 +85,7 @@ namespace :pl do
       "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
       "-Fname=PROJECT_BUNDLE"  , "-Ffile1=@#{bundle}",
       "-Fname=PROJECT"         , "-Fvalue=#{@build.project}",
+      "-Fname=METRICS"         , "-Fvalue=#{metrics}",
       "-FSubmit=Build",
       "-Fjson=#{json.to_json}",
       ]

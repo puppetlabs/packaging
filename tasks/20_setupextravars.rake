@@ -27,9 +27,6 @@ namespace :pl do
     end
   end
 end
-if @build.team == 'release'
-  @build.benchmark = TRUE
-end
 
 ##
 # Starting with puppetdb, we'll maintain two separate build-data files, one for

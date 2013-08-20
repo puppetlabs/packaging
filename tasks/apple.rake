@@ -32,7 +32,8 @@ task :setup do
   @build_date            = Time.new.strftime("%Y-%m-%dT%H:%M:%SZ")
   @apple_bindir          = '/usr/bin'
   @apple_sbindir         = '/usr/sbin'
-  @apple_libdir          = '/usr/lib/ruby/site_ruby/1.8'
+  @apple_libdir          = '/usr/lib/ruby/site_ruby'
+  @apple_old_libdir      = '/usr/lib/ruby/site_ruby/1.8'
   @apple_docdir          = '/usr/share/doc'
 end
 

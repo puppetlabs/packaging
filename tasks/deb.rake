@@ -59,6 +59,7 @@ task :build_deb, :deb_command, :cow do |t,args|
   end
   # See 30_metrics.rake to see what this is doing
   add_metrics({ :dist => ENV['DIST'], :bench => bench }) if @build.benchmark
+  puts "Finished building in: #{bench}"
 end
 
 namespace :package do

@@ -64,6 +64,7 @@ module Build
                       :jenkins_packaging_job,
                       :jenkins_repo_path,
                       :metrics,
+                      :metrics_url,
                       :name,
                       :notify,
                       :project,

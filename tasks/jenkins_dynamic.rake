@@ -65,10 +65,18 @@ namespace :pl do
       properties = @build.params_to_yaml
       bundle = git_bundle('HEAD')
 
+      # Create a string of metrics to send to Jenkins for data analysis
+      if @build.pe_version
+        metrics = "#{ENV['USER']}~#{@build.version}~#{@build.pe_version}"
+      else
+        metrics = "#{ENV['USER']}~#{@build.version}~N/A"
+      end
+
       # Construct the parameters, which is an array of hashes we turn into JSON
       parameters = [{ "name" => "BUILD_PROPERTIES", "file"  => "file0" },
                     { "name" => "PROJECT_BUNDLE",   "file"  => "file1" },
-                    { "name" => "PROJECT",          "value" => "#{@build.project}" }]
+                    { "name" => "PROJECT",          "value" => "#{@build.project}" },
+                    { "name" => "METRICS",          "value" => "#{metrics}"}]
 
       # Contruct the json string
       json = JSON.generate("parameter" => parameters)
@@ -79,6 +87,7 @@ namespace :pl do
       "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
       "-Fname=PROJECT_BUNDLE"  , "-Ffile1=@#{bundle}",
       "-Fname=PROJECT"         , "-Fvalue=#{@build.project}",
+      "-Fname=METRICS"         , "-Fvalue=#{metrics}",
       "-FSubmit=Build",
       "-Fjson=#{json.to_json}",
       ]

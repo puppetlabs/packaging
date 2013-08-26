@@ -195,6 +195,7 @@ def build_rpm_with_mock(mocks)
       end
     end
     add_metrics({ :dist => "#{family}-#{version}", :bench => bench }) if @build.benchmark
+    puts "Finished building in: #{bench}"
   end
 end
 

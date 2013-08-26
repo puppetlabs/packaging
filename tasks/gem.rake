@@ -69,6 +69,7 @@ if @build.build_gem
         add_metrics({ :dist => 'gem', :bench => bench })
         post_metrics
       end
+      puts "Finished building in: #{bench}"
     end
   end
 

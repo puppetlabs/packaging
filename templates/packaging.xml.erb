@@ -160,7 +160,7 @@ def get_jenkins_build_time() {
 
 // Assemble metrics to post to build metrics server
 
-app_server    = <%= @build.metrics_url %>
+app_server    = &quot;<%= @build.metrics_url %>&quot;
 task_metrics  = manager.build.getEnvironment(manager.listener)[&apos;METRICS&apos;]
 charset       = &quot;UTF-8&quot;
 

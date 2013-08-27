@@ -150,6 +150,10 @@ repository](https://github.com/puppetlabs/build-data)
 later in determining the target for the build artifacts on the distribution
 server
 
+4) $METRICS - a string of data points related to the build which are used for
+data analysis. Contents of this string are items which cannot be obtained from
+within the Jenkins job itself.
+
 5) $DOWNSTREAM\_JOB - The URL of a downstream job that jenkins should post to
 upon success. This is obtained via the DOWNSTREAM\_JOB environment variable.
 
@@ -169,6 +173,10 @@ builders that are slaves of that jenkins instance. This also allows us to scale
 building capacity simply by adding builders as slaves to the jenkins instance.
 The actual build itself is accomplished via a shell build task. The contents of
 the task are:
+
+To gather metrics related to a Jenkins build, the Groovy Postbuild plugin is used.
+For tasks carried out on the static Jenkins job, the script must be manually added to the job's
+configuration. The script in its entirety can be seen [here.](https://github.com/Whopper92/build-metrics-server#groovyScript)
 
 ```bash
 #################
@@ -213,7 +221,7 @@ the jenkins jobs for you, on-demand. Specifically, it creates two jenkins-jobs,
 and can create an optional third.
 
 The first job is a matrix job, the cells of which are individual package tasks
-for all of the build targets. This job takes three parameters:
+for all of the build targets. This job takes four parameters:
 
 1) $PROJECT\_BUNDLE - a tar.gz of a git-bundle from HEAD of the current
 project, which is cloned on the builder to set up a duplicate of this
@@ -225,6 +233,11 @@ about the build
 3) $PROJECT - the project we're building, e.g. facter, puppet. This is used
 later in determining the target for the build artifacts on the distribution
 server
+
+4) $METRICS - a string of data points related to the build which are used for data
+analysis. Contents of this string are items which cannot be obtained from within
+the Jenkins job itself. Note that the Groovy postbuild script needed for metrics
+gathering is dynamically passed to each job.
 
 This first job clones the git bundle passed in as a parameter, then clones the
 packaging repo (rake package:bootstrap) and for every cell in its matrix

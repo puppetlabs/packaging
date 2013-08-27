@@ -68,6 +68,10 @@ def make_directory_tree
     erb 'ext/osx/prototype.plist.erb', "#{@scratch}/prototype.plist"
   end
 
+  if File.exists?('ext/packaging/static_artifacts/PackageInfo.plist')
+    cp 'ext/packaging/static_artifacts/PackageInfo.plist', "#{@scratch}/PackageInfo.plist"
+  end
+
 end
 
 # method:        build_dmg
@@ -86,7 +90,6 @@ def build_dmg
   dmg_format        = "#{dmg_format_code} #{dmg_format_option}"
   dmg_file          = "#{@title}.dmg"
   package_file      = "#{@title}.pkg"
-  package_target_os = '10.4'
 
   # Build .pkg file
   system("sudo #{PKGBUILD} --root #{@working_tree['working']} \
@@ -95,6 +98,7 @@ def build_dmg
     --version #{@version} \
     --install-location / \
     --ownership preserve \
+    --info #{@scratch}/PackageInfo.plist \
     #{@working_tree['payload']}/#{package_file}")
 
   # Build .dmg file

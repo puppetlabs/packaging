@@ -67,9 +67,9 @@ namespace :pl do
 
       # Create a string of metrics to send to Jenkins for data analysis
       if @build.pe_version
-        metrics = "#{ENV['USER']}~#{@build.version}~#{@build.pe_version}"
+        metrics = "#{ENV['USER']}~#{@build.version}~#{@build.pe_version}~#{@build.team}"
       else
-        metrics = "#{ENV['USER']}~#{@build.version}~N/A"
+        metrics = "#{ENV['USER']}~#{@build.version}~N/A~#{@build.team}"
       end
 
       # Construct the parameters, which is an array of hashes we turn into JSON

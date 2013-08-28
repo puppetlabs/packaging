@@ -30,7 +30,23 @@ def mock_artifact(mock_config, cmd_args)
     configdir_arg = " --configdir #{configdir}"
   end
 
-  sh "#{mock} -r #{mock_config} #{configdir_arg} #{cmd_args}"
+  begin
+    sh "#{mock} -r #{mock_config} #{configdir_arg} #{cmd_args}"
+  rescue RuntimeError => error
+    build_log = File.join(basedir, mock_config, 'result', 'build.log')
+    root_log  = File.join(basedir, mock_config, 'result', 'root.log')
+    content   = File.read(build_log) if File.readable?(build_log)
+
+    if content and content.lines.count > 2
+      STDERR.puts content
+    else
+      if File.readable?(root_log)
+        STDERR.puts File.read(root_log)
+      end
+    end
+    raise error
+  end
+
   # Clean up the configdir
   rm_r configdir unless configdir.nil?
 

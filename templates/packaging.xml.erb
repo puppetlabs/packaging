@@ -169,10 +169,12 @@ if ( task_metrics == null) {
     build_user  = &quot;N/A&quot;
     version     = &quot;N/A&quot;
     pe_version  = &quot;N/A&quot;
+    build_team  = &quot;N/A&quot;
 } else {
     build_user  = task_metrics.split(&quot;~&quot;)[0]
     version     = task_metrics.split(&quot;~&quot;)[1]
     pe_version  = task_metrics.split(&quot;~&quot;)[2]
+    build_team  = task_metrics.split(&quot;~&quot;)[3]
 }
 
 matcher = manager.getLogMatcher(/(?:Finished building in:) ([\d]+\.?[\d]*)/)
@@ -227,11 +229,12 @@ build_loc           = manager.build.getEnvironment(manager.listener)[&apos;NODE_
 build_log           = &quot;${manager.build.getEnvironment(manager.listener)[&apos;BUILD_URL&apos;]}&quot; + &quot;consoleText&quot;
 success             = String.valueOf(manager.build.result)
 
-String query = String.format(&quot;package_name=%s&amp;dist=%s&amp;package_type=%s&amp;build_user=%s&amp;build_loc=%s&amp;version=%s&amp;pe_version=%s&amp;success=%s&amp;build_log=%s&amp;jenkins_build_time=%s&amp;package_build_time=%s&quot;,
+String query = String.format(&quot;package_name=%s&amp;dist=%s&amp;package_type=%s&amp;build_user=%s&amp;build_team=%s&amp;build_loc=%s&amp;version=%s&amp;pe_version=%s&amp;success=%s&amp;build_log=%s&amp;jenkins_build_time=%s&amp;package_build_time=%s&quot;,
      URLEncoder.encode(package_name, charset),
      URLEncoder.encode(dist, charset),
      URLEncoder.encode(package_type, charset),
      URLEncoder.encode(build_user, charset),
+     URLEncoder.encode(build_team, charset),
      URLEncoder.encode(build_loc, charset),
      URLEncoder.encode(version, charset),
      URLEncoder.encode(pe_version, charset),

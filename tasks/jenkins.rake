@@ -133,9 +133,9 @@ namespace :pl do
       end
 
       if @build.pe_version
-        metrics = "#{ENV['USER']}~#{@build.version}~#{@build.pe_version}~#{dist}"
+        metrics = "#{ENV['USER']}~#{@build.version}~#{@build.pe_version}~#{dist}~#{@build.team}"
       else
-        metrics = "#{ENV['USER']}~#{@build.version}~N/A~#{dist}"
+        metrics = "#{ENV['USER']}~#{@build.version}~N/A~#{dist}~#{@build.team}"
       end
       #
       # Create the data files to send to jenkins

@@ -32,8 +32,11 @@ task :setup do
   @build_date            = Time.new.strftime("%Y-%m-%dT%H:%M:%SZ")
   @apple_bindir          = '/usr/bin'
   @apple_sbindir         = '/usr/sbin'
-  @apple_libdir          = '/usr/lib/ruby/site_ruby/1.8'
+  @apple_libdir          = RbConfig::CONFIG['sitelibdir']
   @apple_docdir          = '/usr/share/doc'
+
+  # substitute the libdir into @source_files
+  @source_files['directories']['lib']['path'] = @apple_libdir
 end
 
 # method:       make_directory_tree

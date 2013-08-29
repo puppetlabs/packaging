@@ -19,7 +19,7 @@ namespace :pl do
     task :update_yum_repo do
       STDOUT.puts "Really run remote repo update on #{@build.yum_host}? [y,n]"
       if ask_yes_or_no
-        remote_ssh_cmd(@build.yum_host, '/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile mk_repo')
+        remote_ssh_cmd(@build.yum_host, 'rake -f /opt/repository/Rakefile mk_repo')
       end
     end
 
@@ -28,7 +28,7 @@ namespace :pl do
       STDOUT.puts "Really run remote freight command on #{@build.apt_host}? [y,n]"
       if ask_yes_or_no
         override = "OVERRIDE=1" if ENV['OVERRIDE']
-        remote_ssh_cmd(@build.apt_host, "/var/lib/gems/1.8/gems/rake-0.9.2.2/bin/rake -f /opt/repository/Rakefile freight #{override}")
+        remote_ssh_cmd(@build.apt_host, "rake -f /opt/repository/Rakefile freight #{override}")
       end
     end
   end

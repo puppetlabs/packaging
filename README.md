@@ -174,10 +174,6 @@ building capacity simply by adding builders as slaves to the jenkins instance.
 The actual build itself is accomplished via a shell build task. The contents of
 the task are:
 
-To gather metrics related to a Jenkins build, the Groovy Postbuild plugin is used.
-For tasks carried out on the static Jenkins job, the script must be manually added to the job's
-configuration. The script in its entirety can be seen [here.](https://github.com/Whopper92/build-metrics-server#groovyScript)
-
 ```bash
 #################
 
@@ -214,6 +210,11 @@ configuration. The script in its entirety can be seen [here.](https://github.com
 
 #################
 ```
+
+To gather metrics related to a Jenkins build, the Groovy Postbuild plugin is used.
+For tasks carried out on the static Jenkins job, the script must be manually added to the job's
+configuration. The script in its entirety can be seen [here.](https://github.com/Whopper92/buildboard#groovyScript)
+
 The second, more recent, jenkins-based workflow is for initiating the
 "uber_build", or a package build for all of our target platforms. This workflow
 doesn't actually use a static job on the jenkins-server. Instead it _creates_

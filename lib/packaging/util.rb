@@ -4,6 +4,7 @@ module Pkg::Util
   require 'packaging/util/file'
   require 'packaging/util/tool'
   require 'packaging/util/version'
+  require 'packaging/util/serialization'
 
   class << self
     def symbolize_hash(hash)

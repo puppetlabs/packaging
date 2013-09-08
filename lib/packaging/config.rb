@@ -12,8 +12,8 @@ module Pkg
         attr_accessor v
       end
 
-      self.task = { :task => $*[0], :args => $*[1..-1] }
-      self.ref = git_sha_or_tag
+      @task = { :task => $*[0], :args => $*[1..-1] }
+      @ref = Pkg::Util.git_sha_or_tag
     end
   end
 

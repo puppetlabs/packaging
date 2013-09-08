@@ -1,7 +1,7 @@
 module Pkg
   class Tar
     $:.unshift(File.expand_path(File.dirname(__FILE__))) unless
-      $:.include?(File.dirname(__FILE__)) || $:.include?(FILE.expand_path(File.dirname(__FILE__)))
+      $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
     require 'util'
     require 'config'
@@ -15,11 +15,11 @@ module Pkg
       Pkg::Config.load_data if Pkg::Config.data.nil?
 
       @tar      = Pkg::Util.find_tool('tar', :required => true)
-      @files    = Pkg::Config.data[:files]
       @project  = Pkg::Config.data[:project]
       @version  = Pkg::Config.data[:version]
+      @files    = Pkg::Config.data[:files]
       @excludes = Pkg::Config.data[:tar_excludes]
-      @target   = File.join("pkg", "#{@project}-#{@version}.tar.gz")
+      @target   = File.join(Pkg::Config::ROOT, "pkg", "#{@project}-#{@version}.tar.gz")
     end
 
     def install_files_to(workdir)
@@ -47,30 +47,35 @@ module Pkg
       # Eventually, when all our projects are migrated to the new standard, we
       # can drop this in favour of just pushing the patterns directly into the
       # FileList and eliminate many lines of code and comment.
-      patterns.each do |pattern|
-        if File.directory?(pattern) and not Pkg::Util.empty_dir?(patterm)
-          install << Dir[pattern + "/**/*"]
-        else
-          install << pattern
+      cd Pkg::Config::ROOT do
+        patterns.each do |pattern|
+          if File.directory?(pattern) and not Pkg::Util.empty_dir?(pattern)
+            install << Dir[pattern + "/**/*"]
+          else
+            install << pattern
+          end
         end
-      end
+        install.flatten!
 
-      # Transfer all the files and symlinks into the working directory...
-      install = install.select { |x| File.file?(x) or File.symlink?(x) or Pkg::Util.empty_dir?(x) }
+        # Transfer all the files and symlinks into the working directory...
+        install = install.select { |x| File.file?(x) or File.symlink?(x) or Pkg::Util.empty_dir?(x) }
 
-      install.each do |file|
-        if Pkg::Util.empty_dir?(file)
-          mkpath(File.join(workdir, file), :verbose => false)
-        else
-          mkpath(File.dirname( File.join(workdir, file) ), :verbose => false)
-          cp_p(file, File.join(workdir, file), :verbose => false)
+        install.each do |file|
+          if Pkg::Util.empty_dir?(file)
+            mkpath(File.join(workdir, file), :verbose => false)
+          else
+            mkpath(File.dirname( File.join(workdir, file) ), :verbose => false)
+            cp(file, File.join(workdir, file), :verbose => false, :preserve => true)
+          end
         end
       end
     end
 
-    def tar_c(target, workdir)
+    def tar(target, workdir)
+      mkpath File.dirname(target)
       Dir.chdir File.dirname(workdir) do
-        %x[#{@tar} --exclude #{@excludes.join(" --exclude ")} -zcf '#{target}' #{File.basename(workdir)}]
+        %x[#{@tar} #{@excludes.map{ |x| (" --exclude #{x}") } if @excludes} -zcf '#{File.basename(target)}' #{File.basename(workdir)}]
+        mv File.basename(target), target
       end
     end
 
@@ -82,28 +87,10 @@ module Pkg
       workdir = File.join(Pkg::Util.mktemp, "#{@project}-#{@version}")
       mkpath workdir
       install_files_to workdir
-      tar_c @target, workdir
-      clean_up
+      tar @target, workdir
+      clean_up workdir
     end
 
   end
-end
-
-namespace :package do
-  desc "Create a source tar archive"
-  task :tar => [ :clean ] do
-
-
-    cd "pkg" do
-      sh "#{tar} --exclude #{tar_excludes.join(" --exclude ")} -zcf '#{@build.project}-#{@build.version}.tar.gz' #{@build.project}-#{@build.version}"
-    end
-    rm_rf(workdir)
-    puts
-    puts "Wrote #{`pwd`.strip}/pkg/#{@build.project}-#{@build.version}.tar.gz"
-  end
-end
-
-namespace :pl do
-  task :tar => ["package:tar"]
 end
 

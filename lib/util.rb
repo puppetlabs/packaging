@@ -27,6 +27,10 @@ module Pkg
         File.exist?(dir) and File.directory?(dir) and Dir["#{dir}/**/*"].empty?
       end
 
+      def symbolize_hash(hash)
+        hash.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
+      end
+
       alias :has_tool :find_tool
       alias :get_temp :mktemp
 

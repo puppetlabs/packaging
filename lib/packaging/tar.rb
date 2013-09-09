@@ -5,16 +5,15 @@ module Pkg
     include FileUtils
 
     attr_accessor :files, :project, :version, :excludes, :target
+    attr_reader :tar
 
     def initialize
-      Pkg::Config.load_data if Pkg::Config.data.nil?
-
       @tar      = Pkg::Util.find_tool('tar', :required => true)
-      @project  = Pkg::Config.data[:project]
-      @version  = Pkg::Config.data[:version]
-      @files    = Pkg::Config.data[:files]
-      @excludes = Pkg::Config.data[:tar_excludes]
-      @target   = File.join(Pkg::Config::ROOT, "pkg", "#{@project}-#{@version}.tar.gz")
+      @project  = Pkg::Config.project
+      @version  = Pkg::Config.version
+      @files    = Pkg::Config.files
+      @excludes = Pkg::Config.tar_excludes
+      @target   = File.join(Pkg::PROJECT_ROOT, "pkg", "#{@project}-#{@version}.tar.gz")
     end
 
     def install_files_to(workdir)
@@ -42,7 +41,7 @@ module Pkg
       # Eventually, when all our projects are migrated to the new standard, we
       # can drop this in favour of just pushing the patterns directly into the
       # FileList and eliminate many lines of code and comment.
-      cd Pkg::Config::ROOT do
+      cd Pkg::PROJECT_ROOT do
         patterns.each do |pattern|
           if File.directory?(pattern) and not Pkg::Util.empty_dir?(pattern)
             install << Dir[pattern + "/**/*"]
@@ -66,10 +65,10 @@ module Pkg
       end
     end
 
-    def tar(target, workdir)
+    def tar(target, source)
       mkpath File.dirname(target)
-      Dir.chdir File.dirname(workdir) do
-        %x[#{@tar} #{@excludes.map{ |x| (" --exclude #{x}") } if @excludes} -zcf '#{File.basename(target)}' #{File.basename(workdir)}]
+      Dir.chdir File.dirname(source) do
+        %x[#{@tar} #{@excludes.map{ |x| (" --exclude #{x}") } if @excludes} -zcf '#{File.basename(target)}' #{File.basename(source)}]
         mv File.basename(target), target
       end
     end

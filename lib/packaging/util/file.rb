@@ -12,6 +12,14 @@ module Pkg::Util
       File.exist?(dir) and File.directory?(dir) and Dir["#{dir}/**/*"].empty?
     end
 
+    def check_file(file, args={:required => false})
+      file_exists = File.exist? file
+      if !file_exists and args[:required]
+        fail "Required file #{file} could not be found"
+      end
+      file_exists
+    end
+
     alias :get_temp :mktemp
 
   end

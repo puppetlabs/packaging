@@ -1,6 +1,6 @@
 module Pkg
   ##
-  # This class is meant to encapsulate all of the data we know about a build invoked with
+  # This module is meant to encapsulate all of the data we know about a build invoked with
   # `rake package:<build>` or `rake pl:<build>`. It can read in this data via a yaml file,
   # have it set via accessors, and serialize it back to yaml for easy transport.
   #
@@ -9,11 +9,14 @@ module Pkg
     require 'yaml'
 
     class << self
+
       Pkg::Config::PARAMS.each do |v|
         attr_accessor v
       end
 
-      @task = { :task => $*[0], :args => $*[1..-1] }
+      # Probably the single most important piece of data about our project,
+      # @ref determines what will eventually be the versioning for every package we can
+      # create. We _always_ set @ref for the Pkg::Config module. Always.
       @ref = Pkg::Util.git_sha_or_tag
 
       ##

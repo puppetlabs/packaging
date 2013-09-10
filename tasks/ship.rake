@@ -110,6 +110,12 @@ namespace :pl do
       retry_on_fail(:times => 3) do
         rsync_to("pkg/", @build.distribution_server, "#{artifact_dir}/ --exclude repo_configs")
       end
+      # If we just shipped a tagged version, we want to make it immutable
+      if git_ref_type == "tag"
+        Dir["pkg/*"].each do |f|
+          remote_ssh_cmd(@build.distribution_server, "sudo chattr -R +i #{artifact_dir}/#{File.basename(f)}")
+        end
+      end
     end
 
     desc "Ship generated repository configs to the distribution server"

@@ -29,20 +29,30 @@ namespace :pl do
     rm_rf "#{ENV['HOME']}/.packaging" if File.directory?("#{ENV['HOME']}/.packaging")
     # Touch the .packaging file which is allows packaging to present remote tasks
     touch "#{ENV['HOME']}/.packaging"
-    tempdir = get_temp
-    mkdir_pr("#{tempdir}/team", "#{tempdir}/project")
-    begin
-      if dist = el_version
-        if dist.to_i < 6
-          flag = "-k"
-        end
+    if dist = el_version
+      if dist.to_i < 6
+        flag = "-k"
       end
-      sh "curl #{flag} #{project_data_url}/#{@build.builder_data_file} > #{tempdir}/project/#{@build.builder_data_file}"
-      sh "curl #{flag} #{team_data_url}/#{@build.builder_data_file} > #{tempdir}/team/#{@build.builder_data_file}"
-      invoke_task("pl:load_extras", tempdir)
-      rm_rf(tempdir)
-    rescue
-      fail "There was an error fetching the builder extras data."
+    end
+    [project_data_url, team_data_url].each do |url|
+      begin
+        tempdir = get_temp
+        %x{curl --fail --silent #{flag} #{url}/#{@build.builder_data_file} > #{tempdir}/#{@build.builder_data_file}}
+        case $?.exitstatus
+        when 0
+          invoke_task("pl:load_extras", tempdir)
+        when 22
+          if url == team_data_url
+            fail "Could not load team extras data from #{url}. This should not normally happen"
+          else
+            puts "No build data file for #{@build.project}, skipping load of extra build data."
+          end
+        else
+          fail "There was an error fetching the builder extras data from #{url}."
+        end
+      ensure
+        rm_rf tempdir
+      end
     end
   end
 end

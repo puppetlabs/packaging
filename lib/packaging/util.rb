@@ -6,10 +6,7 @@ module Pkg::Util
   require 'packaging/util/version'
   require 'packaging/util/serialization'
 
-  class << self
-    def symbolize_hash(hash)
-      hash.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
-    end
-
+  def self.symbolize_hash(hash)
+    hash.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
   end
 end

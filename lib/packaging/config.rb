@@ -1,16 +1,16 @@
 module Pkg
   ##
-  # This module is meant to encapsulate all of the data we know about a build invoked with
+  # This class is meant to encapsulate all of the data we know about a build invoked with
   # `rake package:<build>` or `rake pl:<build>`. It can read in this data via a yaml file,
   # have it set via accessors, and serialize it back to yaml for easy transport.
   #
-  module Config
+  class Config
     require 'packaging/config/params.rb'
     require 'yaml'
 
     class << self
 
-      Pkg::Config::PARAMS.each do |v|
+      Pkg::Params::BUILD_PARAMS.each do |v|
         attr_accessor v
       end
 
@@ -25,7 +25,7 @@ module Pkg
       #
       def params_from_hash(data = {})
         data.each do |param, value|
-          if Pkg::Config::PARAMS.include?(param.to_sym)
+          if Pkg::Params::BUILD_PARAMS.include?(param.to_sym)
             self.instance_variable_set("@#{param}", value)
           else
             warn "Warning - No build data parameter found for '#{param}'. Perhaps you have an erroneous entry in your yaml file?"
@@ -43,7 +43,7 @@ module Pkg
       #
       def params_hash
         data = {}
-        Pkg::Config::PARAMS.each do |param|
+        Pkg::Params::BUILD_PARAMS.each do |param|
           data.store(param, self.instance_variable_get("@#{param}"))
         end
         data

@@ -85,14 +85,25 @@ module Pkg
         self.config_to_hash.each { |k,v| puts "#{k}: #{v}" }
       end
 
-      def load_config
-        if ENV['PARAMS_FILE'] and Pkg::Util.file_exists?(ENV['PARAMS_FILE'], :required => true)
-          self.config_from_yaml(ENV['PARAMS_FILE'])
-        else
-          self.config_from_yaml(self.default_project_data)
-          self.config_from_yaml(self.default_build_defaults)
+      def load_defaults
+        self.config_from_yaml(self.default_project_data)
+        self.config_from_yaml(self.default_build_defaults)
+      end
+
+      # Since we're dealing with rake, much of the parameter override support
+      # is via environment variables passed on the command line to a rake task.
+      def load_envvars
+        Pkg::Params::ENV_VARS.each do |v|
+          if var = ENV[v[:envvar].to_s]
+            if v[:type] == :string
+              self.instance_variable_set("@#{v[:var]}", var)
+            elsif v[:type] == :bool
+              self.instance_variable_set("@#{v[:var]}", Pkg::Util.boolean_value(var))
+            end
+          end
         end
       end
+
     end
   end
 end

@@ -22,4 +22,9 @@ module Pkg
   require 'packaging/config'
   require 'packaging/tar'
 
+  # Load configuration defaults
+  Pkg::Config.load_defaults
+  Pkg::Config.load_envvars
+
 end
+

@@ -105,7 +105,7 @@ namespace :pl do
         # ignore this one because its an extra
         next if url == "#{base_url}srpm/"
 
-        dist,version,subdir,arch = url.split('/')[-4..-1]
+        dist,version,_subdir,arch = url.split('/')[-4..-1]
 
         # Create an array of lines that will become our yum config
         #
@@ -117,7 +117,7 @@ namespace :pl do
 
         # Write the new config to a file under our repo configs dir
         #
-        config_file = File.join("pkg", "repo_configs", "rpm", "pl-#{@build.project}-#{@build.ref}-#{dist}-#{version}-#{arch}-#{subdir}.repo")
+        config_file = File.join("pkg", "repo_configs", "rpm", "pl-#{@build.project}-#{@build.ref}-#{dist}-#{version}-#{arch}.repo")
         File.open(config_file, 'w') { |f| f.puts config }
       end
       puts "Wrote yum configuration files for #{@build.project} at #{@build.ref} to pkg/repo_configs/rpm"

@@ -3,6 +3,8 @@ if @build.build_pe
     desc "ship PE rpms to #{@build.yum_host}"
     task :ship_rpms => "pl:fetch" do
       empty_dir?("pkg/pe/rpm") and fail "The 'pkg/pe/rpm' directory has no packages. Did you run rake pe:deb?"
+      # We don't want to ship pe-puppet-server on el4. So let's blow it away first.
+      rm_rf(FileList["pkg/pe/rpm/el-4-*/pe-puppet-server-*.rpm"]) if @build.project == "pe-puppet"
       target_path = ENV['YUM_REPO'] ? ENV['YUM_REPO'] : "#{@build.yum_repo_path}/#{@build.pe_version}/repos/"
       retry_on_fail(:times => 3) do
         rsync_to('pkg/pe/rpm/', @build.yum_host, target_path)

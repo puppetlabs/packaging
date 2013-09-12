@@ -3,24 +3,30 @@
 module Pkg::Util
   class << self
     def git_co(ref)
-      in_dir Pkg::PROJECT_ROOT do
+      in_project_root do
         %x{#{GIT} reset --hard ; #{GIT} checkout #{ref}}
         $?.success? or fail "Could not checkout #{ref} git branch to build package from...exiting"
       end
     end
 
     def git_describe
-      %x{git describe}.strip
+      in_project_root do
+        %x{#{GIT} describe}.strip
+      end
     end
 
 # return the sha of HEAD on the current branch
     def git_sha
-      %x{git rev-parse HEAD}.strip
+      in_project_root do
+        %x{#{GIT} rev-parse HEAD}.strip
+      end
     end
 
 # Return the ref type of HEAD on the current branch
     def git_ref_type
-      %x{git cat-file -t #{git_describe}}.strip
+      in_project_root do
+        %x{#{GIT} cat-file -t #{git_describe}}.strip
+      end
     end
 
 # If HEAD is a tag, return the tag. Otherwise return the sha of HEAD.
@@ -60,8 +66,10 @@ module Pkg::Util
 
 # This is a stub to ease testing...
     def run_git_describe_internal
-      raw = %x{git describe --tags --dirty 2>/dev/null}
-      $?.success? ? raw : nil
+      in_project_root do
+        raw = %x{#{GIT} describe --tags --dirty 2>/dev/null}
+        $?.success? ? raw : nil
+      end
     end
 
     def get_dash_version
@@ -73,7 +81,8 @@ module Pkg::Util
     end
 
     def uname_r
-      %x{uname -r}.chomp
+      uname = find_tool('uname', :required => true)
+      %x{#{uname} -r}.chomp
     end
 
     def get_ips_version

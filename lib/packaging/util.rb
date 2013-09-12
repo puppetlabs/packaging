@@ -11,8 +11,8 @@ module Pkg::Util
     hash.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
   end
 
-  def in_dir(dir, &blk)
-    Dir.chdir dir do
+  def self.in_project_root(&blk)
+    Dir.chdir Pkg::PROJECT_ROOT do
       blk.call
     end
   end

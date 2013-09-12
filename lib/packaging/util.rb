@@ -1,8 +1,9 @@
 # Utility methods used by the various rake tasks
 
 module Pkg::Util
-  require 'packaging/util/file'
   require 'packaging/util/tool'
+  require 'packaging/util/tools'
+  require 'packaging/util/file'
   require 'packaging/util/version'
   require 'packaging/util/serialization'
 

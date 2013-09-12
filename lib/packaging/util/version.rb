@@ -3,8 +3,10 @@
 module Pkg::Util
   class << self
     def git_co(ref)
-      %x{git reset --hard ; git checkout #{ref}}
-      $?.success? or fail "Could not checkout #{ref} git branch to build package from...exiting"
+      in_dir Pkg::PROJECT_ROOT do
+        %x{#{GIT} reset --hard ; #{GIT} checkout #{ref}}
+        $?.success? or fail "Could not checkout #{ref} git branch to build package from...exiting"
+      end
     end
 
     def git_describe

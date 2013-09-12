@@ -113,9 +113,7 @@ namespace :pl do
       end
       # If we just shipped a tagged version, we want to make it immutable
       if git_ref_type == "tag"
-        Dir["pkg/*"].each do |f|
-          remote_ssh_cmd(@build.distribution_server, "sudo chattr -R +i #{artifact_dir}/#{File.basename(f)}")
-        end
+        remote_ssh_cmd(@build.distribution_server, "find #{artifact_dir} -type f | xargs sudo chattr +i")
       end
     end
 

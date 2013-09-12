@@ -9,4 +9,11 @@ module Pkg::Util
   def self.symbolize_hash(hash)
     hash.inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}
   end
+
+  def in_dir(dir, &blk)
+    Dir.chdir dir do
+      blk.call
+    end
+  end
+
 end

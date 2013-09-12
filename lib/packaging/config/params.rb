@@ -121,6 +121,7 @@ module Pkg::Params
               {:var => :pe_version,      :envvar => :PE_VER,       :type => :string},
               {:var => :privatekey_pem,  :envvar => :PRIVATE_PEM,  :type => :string},
               {:var => :rc_mocks,        :envvar => :MOCK,         :type => :string},
+              {:var => :release,         :envvar => :RELEASE,      :type => :string},
               {:var => :sign_tar,        :envvar => :SIGN_TAR,     :type => :bool},
               {:var => :yum_repo_path,   :envvar => :YUM_REPO,     :type => :string},
               {:var => :yum_host,        :envvar => :YUM_HOST,     :type => :string}]

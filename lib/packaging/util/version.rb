@@ -132,10 +132,6 @@ module Pkg::Util
       get_base_pkg_version[0]
     end
 
-    def get_release
-      ENV['RELEASE'] || '1'
-    end
-
     def get_rpmrelease
       get_base_pkg_version[1]
     end

@@ -1,6 +1,7 @@
 # Utility methods used by the various rake tasks
 
 module Pkg::Util
+  require 'erb'
   require 'packaging/util/tool'
   require 'packaging/util/tools'
   require 'packaging/util/file'

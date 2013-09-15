@@ -30,5 +30,17 @@ module Pkg::Util
 
     alias :get_temp :mktemp
 
+    def erb_string(erbfile, b = binding)
+      template = File.read(erbfile)
+      message  = ERB.new(template, nil, "-")
+      message.result(b)
+    end
+
+    def erb_file(erbfile, outfile)
+      output = erb_string(erbfile)
+      File.open(outfile, 'w') { |f| f.write output }
+      puts "Generated: #{outfile}"
+    end
   end
 end
+

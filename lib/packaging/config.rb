@@ -26,6 +26,12 @@ module Pkg
         attr_accessor v
       end
 
+      #   Return the binding of class context. Used for erb templates.
+      #
+      def get_binding
+        return binding
+      end
+
       ##
       #   Take a hash of Config parameters, and iterate over them, setting the
       #   value for each Config param to the corresponding hash key,value.

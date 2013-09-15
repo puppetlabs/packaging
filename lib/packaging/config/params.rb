@@ -98,33 +98,35 @@ module Pkg::Params
 
   # Environment variable overrides for Pkg::Config parameters
   #
-  #           :ENV_VAR  => :config_param, :type => :variable type
+  #           :var  => :config_param,    :envvar => :environment var :type => :variable type
   #
-  ENV_VARS = [{:var => :apt_host,        :envvar => :APT_HOST,     :type => :string},
-              {:var => :apt_repo_path,   :envvar => :APT_REPO,     :type => :string},
-              {:var => :build_dmg,       :envvar => :DMG,          :type => :bool},
-              {:var => :build_doc,       :envvar => :DOC,          :type => :bool},
-              {:var => :build_gem,       :envvar => :GEM,          :type => :bool},
-              {:var => :build_ips,       :envvar => :IPS,          :type => :bool},
-              {:var => :build_pe,        :envvar => :PE_BUILD,     :type => :bool},
-              {:var => :certificate_pem, :envvar => :CERT_PEM,     :type => :string},
-              {:var => :cows,            :envvar => :COW,          :type => :string},
-              {:var => :debug,           :envvar => :DEBUG,        :type => :bool},
-              {:var => :default_cow,     :envvar => :COW,          :type => :string},
-              {:var => :default_mock,    :envvar => :MOCK,         :type => :string},
-              {:var => :final_mocks,     :envvar => :MOCK,         :type => :string},
-              {:var => :gpg_name,        :envvar => :GPG_NAME,     :type => :string},
-              {:var => :gpg_key,         :envvar => :GPG_KEY,      :type => :string},
-              {:var => :notify,          :envvar => :NOTIFY,       :type => :string},
-              {:var => :packager,        :envvar => :PACKAGER,     :type => :string},
-              {:var => :pbuild_conf,     :envvar => :PBUILDCONF,   :type => :string},
-              {:var => :pe_version,      :envvar => :PE_VER,       :type => :string},
-              {:var => :privatekey_pem,  :envvar => :PRIVATE_PEM,  :type => :string},
-              {:var => :rc_mocks,        :envvar => :MOCK,         :type => :string},
-              {:var => :release,         :envvar => :RELEASE,      :type => :string},
-              {:var => :sign_tar,        :envvar => :SIGN_TAR,     :type => :bool},
-              {:var => :yum_repo_path,   :envvar => :YUM_REPO,     :type => :string},
-              {:var => :yum_host,        :envvar => :YUM_HOST,     :type => :string}]
+  #           Note: :type is assumed :string if not present
+  #
+  ENV_VARS = [{:var => :apt_host,        :envvar => :APT_HOST},
+              {:var => :apt_repo_path,   :envvar => :APT_REPO},
+              {:var => :build_dmg,       :envvar => :DMG, :type => :bool},
+              {:var => :build_doc,       :envvar => :DOC, :type => :bool},
+              {:var => :build_gem,       :envvar => :GEM, :type => :bool},
+              {:var => :build_ips,       :envvar => :IPS, :type => :bool},
+              {:var => :build_pe,        :envvar => :PE_BUILD, :type => :bool},
+              {:var => :certificate_pem, :envvar => :CERT_PEM},
+              {:var => :cows,            :envvar => :COW},
+              {:var => :debug,           :envvar => :DEBUG, :type => :bool},
+              {:var => :default_cow,     :envvar => :COW},
+              {:var => :default_mock,    :envvar => :MOCK},
+              {:var => :final_mocks,     :envvar => :MOCK},
+              {:var => :gpg_name,        :envvar => :GPG_NAME},
+              {:var => :gpg_key,         :envvar => :GPG_KEY},
+              {:var => :notify,          :envvar => :NOTIFY},
+              {:var => :packager,        :envvar => :PACKAGER},
+              {:var => :pbuild_conf,     :envvar => :PBUILDCONF},
+              {:var => :pe_version,      :envvar => :PE_VER},
+              {:var => :privatekey_pem,  :envvar => :PRIVATE_PEM},
+              {:var => :rc_mocks,        :envvar => :MOCK},
+              {:var => :release,         :envvar => :RELEASE},
+              {:var => :sign_tar,        :envvar => :SIGN_TAR, :type => :bool},
+              {:var => :yum_repo_path,   :envvar => :YUM_REPO},
+              {:var => :yum_host,        :envvar => :YUM_HOST}]
 end
 
 

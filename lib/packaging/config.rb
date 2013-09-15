@@ -111,10 +111,10 @@ module Pkg
       def load_envvars
         Pkg::Params::ENV_VARS.each do |v|
           if var = ENV[v[:envvar].to_s]
-            if v[:type] == :string
-              self.instance_variable_set("@#{v[:var]}", var)
-            elsif v[:type] == :bool
+            if v[:type] == :bool
               self.instance_variable_set("@#{v[:var]}", Pkg::Util.boolean_value(var))
+            else
+              self.instance_variable_set("@#{v[:var]}", var)
             end
           end
         end

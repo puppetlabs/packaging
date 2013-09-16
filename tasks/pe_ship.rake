@@ -27,7 +27,7 @@ if @build.build_pe
     namespace :remote do
       desc "Update remote rpm repodata for PE on #{@build.yum_host}"
       task :update_yum_repo => "pl:fetch" do
-        remote_ssh_cmd(@build.yum_host, "for dir in  $(find #{@build.apt_repo_path}/#{@build.pe_version}/repos/el* -type d | grep -v repodata | grep -v cache | xargs)  ; do   pushd $dir; sudo rm -rf repodata; createrepo -q -d .; popd &> /dev/null ; done; sync")
+        remote_ssh_cmd(@build.yum_host, "for dir in  $(find #{@build.apt_repo_path}/#{@build.pe_version}/repos/el* -type d | grep -v repodata | grep -v cache | xargs)  ; do pushd $dir; sudo createrepo -q -d --update .; popd &> /dev/null ; done; sync")
       end
 
       # This is hacky. The freight.rb script resides on the @build.apt_host and takes packages placed

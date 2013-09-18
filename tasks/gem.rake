@@ -65,10 +65,6 @@ if @build.build_gem
         Rake::Task[:gem].invoke
         rm_rf "pkg/#{@build.project}-#{@build.gemversion}"
       end
-      if @build.benchmark
-        add_metrics({ :dist => 'gem', :bench => bench })
-        post_metrics
-      end
       puts "Finished building in: #{bench}"
     end
   end

@@ -578,3 +578,10 @@ def escape_html(uri)
   require 'cgi'
   CGI.escapeHTML(uri)
 end
+
+# Remotely set the immutable bit on a list of files
+#
+def remote_set_immutable(host, files)
+  remote_ssh_cmd(host, "sudo chattr +i #{files.join(" ")}")
+end
+

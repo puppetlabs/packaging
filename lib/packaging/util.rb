@@ -13,9 +13,11 @@ module Pkg::Util
   end
 
   def self.in_project_root(&blk)
-    Dir.chdir Pkg::PROJECT_ROOT do
-      blk.call
+   result = nil
+   Dir.chdir Pkg::PROJECT_ROOT do
+      result = blk.call
     end
+    result
   end
 
 end

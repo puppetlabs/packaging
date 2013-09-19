@@ -240,10 +240,6 @@ if @build.build_dmg
         pack_source
         build_dmg
       end
-      if @build.benchmark
-        add_metrics({ :dist => 'osx', :bench => bench })
-        post_metrics
-      end
     puts "Finished building in: #{bench}"
     end
   end

@@ -1,3 +1,7 @@
+# Load the packaging repo libraries
+
+require File.join(File.dirname(__FILE__), 'lib', 'packaging.rb')
+
 # Load packaging repo tasks
 
 # These are ordered

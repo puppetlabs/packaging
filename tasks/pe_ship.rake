@@ -77,7 +77,7 @@ if @build.build_pe
 
           files = Dir["pkg/pe/deb/#{dist}/pe-*{_#{arch},all}.deb"].map { |f| "#{archive_path}/#{File.basename(f)}" }
 
-          files += Dir["pkg/pe/deb/#{dist}/pe-*"].select { |f| f !~ /^*\.deb$/ }.map { |f| "#{base_path}/#{dist}-source/#{File.basename(f)}" }
+          files += Dir["pkg/pe/deb/#{dist}/pe-*"].select { |f| f !~ /^.*\.deb$/ }.map { |f| "#{base_path}/#{dist}-source/#{File.basename(f)}" }
 
           remote_set_immutable(@build.apt_host, files)
         end

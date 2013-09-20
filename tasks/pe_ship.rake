@@ -37,9 +37,6 @@ if @build.build_pe
         rsync_to("pkg/pe/deb/", @build.apt_host, target_path)
       end
 
-      puts "Cleaning up PE debs in apt repo 'incoming' dir on #{@build.apt_host}"
-      remote_ssh_cmd(@build.apt_host, "rm #{target_path}/*/pe-*.deb")
-
       #   We also ship our PE artifacts to directories for archival purposes and to
       #   ease the gathering of both debs and sources when we do PE compose and ship. For
       #   this case, we ship everything to directories that mirror the legacy rpm
@@ -67,13 +64,13 @@ if @build.build_pe
           archive_path = "#{base_path}/#{dist}-#{arch}"
 
           # Ship arch-specific debs to correct dir, e.g. 'squeeze-i386'
-          rsync_to(@build.apt_host, "#{archive_path}/", "pkg/pe/deb/#{dist}/pe-*_#{arch}.deb --ignore-existing")
+          rsync_to("pkg/pe/deb/#{dist}/pe-*_#{arch}.deb --ignore-existing", @build.apt_host, "#{archive_path}/" )
 
           # Ship all-arch debs to same place
-          rsync_to(@build.apt_host, "#{archive_path}/", "pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing")
+          rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", @build.apt_host, "#{archive_path}/")
 
           # Ship source files to source dir, e.g. 'squeeze-source'
-          rsync_to(@build.apt_host, "#{base_path}/#{dist}-source", "/pkg/pe/deb/#{dist}/pe-* --exclude *.deb --ignore-existing")
+          rsync_to("/pkg/pe/deb/#{dist}/pe-* --exclude *.deb --ignore-existing", @build.apt_host, "#{base_path}/#{dist}-source")
 
           files = Dir["pkg/pe/deb/#{dist}/pe-*{_#{arch},all}.deb"].map { |f| "#{archive_path}/#{File.basename(f)}" }
 
@@ -108,6 +105,10 @@ if @build.build_pe
             --basedir #{@build.apt_repo_path}/#{@build.pe_version}/repos/debian \
             --databasedir /var/lib/reprepro \
             --incomingdir /opt/enterprise/#{@build.pe_version}/repos/incoming")
+
+        puts "Cleaning up PE debs in apt repo 'incoming' dir on #{@build.apt_host}"
+        remote_ssh_cmd(@build.apt_host, "rm #{target_path}/*/pe-*.deb")
+
       end
     end
   end

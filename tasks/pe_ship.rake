@@ -38,7 +38,7 @@ if @build.build_pe
       end
 
       puts "Cleaning up PE debs in apt repo 'incoming' dir on #{@build.apt_host}"
-      remote_ssh_cmd(@build.apt_host, "rm #{target}/*/pe-*.deb")
+      remote_ssh_cmd(@build.apt_host, "rm #{target_path}/*/pe-*.deb")
 
       #   We also ship our PE artifacts to directories for archival purposes and to
       #   ease the gathering of both debs and sources when we do PE compose and ship. For

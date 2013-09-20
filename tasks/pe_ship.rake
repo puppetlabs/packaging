@@ -106,14 +106,15 @@ if @build.build_pe
       #   for debian distributions.
       desc "Remotely add shipped packages to apt repo on #{@build.apt_host}"
       task :apt => "pl:fetch" do
+        incoming_dir = "/opt/enterprise/#{@build.pe_version}/repos/incoming"
         remote_ssh_cmd(@build.apt_host, "/usr/bin/repsimple add_all \
             --confdir /etc/reprepro/#{@build.pe_version} \
             --basedir #{@build.apt_repo_path}/#{@build.pe_version}/repos/debian \
             --databasedir /var/lib/reprepro \
-            --incomingdir /opt/enterprise/#{@build.pe_version}/repos/incoming")
+            --incomingdir #{incoming_dir}")
 
         puts "Cleaning up PE debs in apt repo 'incoming' dir on #{@build.apt_host}"
-        remote_ssh_cmd(@build.apt_host, "rm #{target_path}/*/pe-*.deb")
+        remote_ssh_cmd(@build.apt_host, "rm #{incoming_dir}/*/pe-*.deb")
 
       end
     end

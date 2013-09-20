@@ -70,7 +70,8 @@ if @build.build_pe
 
           # Ship all-arch debs to same place
           unless Dir["pkg/pe/deb/#{dist}/pe-*_all.deb"].empty?
-            rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", @build.apt_host, "#{archive_path}/")
+            rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", @build.apt_host, "#{base_path}/#{dist}-i386/")
+            rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", @build.apt_host, "#{base_path}/#{dist}-amd64/")
           end
 
           unless Dir["pkg/pe/deb/#{dist}/pe-*"].select { |i| i !~ /^.*\.deb$/ }.empty?

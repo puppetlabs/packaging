@@ -34,7 +34,7 @@ if @build.build_pe
       #
       puts "Shipping PE debs to apt repo 'incoming' dir on #{@build.apt_host}"
       retry_on_fail(:times => 3) do
-        rsync_to("pkg/pe/deb/", @build.apt_host, target_path)
+        rsync_to("pkg/pe/deb/*/*.deb", @build.apt_host, target_path)
       end
 
       #   We also ship our PE artifacts to directories for archival purposes and to

@@ -64,13 +64,19 @@ if @build.build_pe
           archive_path = "#{base_path}/#{dist}-#{arch}"
 
           # Ship arch-specific debs to correct dir, e.g. 'squeeze-i386'
-          rsync_to("pkg/pe/deb/#{dist}/pe-*_#{arch}.deb --ignore-existing", @build.apt_host, "#{archive_path}/" )
+          unless Dir["pkg/pe/deb/#{dist}/pe-*_#{arch}.deb"].empty?
+            rsync_to("pkg/pe/deb/#{dist}/pe-*_#{arch}.deb --ignore-existing", @build.apt_host, "#{archive_path}/" )
+          end
 
           # Ship all-arch debs to same place
-          rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", @build.apt_host, "#{archive_path}/")
+          unless Dir["pkg/pe/deb/#{dist}/pe-*_all.deb"].empty?
+            rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", @build.apt_host, "#{archive_path}/")
+          end
 
-          # Ship source files to source dir, e.g. 'squeeze-source'
-          rsync_to("/pkg/pe/deb/#{dist}/pe-* --exclude *.deb --ignore-existing", @build.apt_host, "#{base_path}/#{dist}-source")
+          unless Dir["pkg/pe/deb/#{dist}/pe-*"].select { |i| i !~ /^.*\.deb$/ }.empty?
+            # Ship source files to source dir, e.g. 'squeeze-source'
+            rsync_to("/pkg/pe/deb/#{dist}/pe-* --exclude *.deb --ignore-existing", @build.apt_host, "#{base_path}/#{dist}-source")
+          end
 
           files = Dir["pkg/pe/deb/#{dist}/pe-*{_#{arch},all}.deb"].map { |f| "#{archive_path}/#{File.basename(f)}" }
 

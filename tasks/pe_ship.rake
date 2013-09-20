@@ -37,6 +37,9 @@ if @build.build_pe
         rsync_to("pkg/pe/deb/", @build.apt_host, target_path)
       end
 
+      puts "Cleaning up PE debs in apt repo 'incoming' dir on #{@build.apt_host}"
+      remote_ssh_cmd(@build.apt_host, "rm #{target}/*/pe-*.deb")
+
       #   We also ship our PE artifacts to directories for archival purposes and to
       #   ease the gathering of both debs and sources when we do PE compose and ship. For
       #   this case, we ship everything to directories that mirror the legacy rpm

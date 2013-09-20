@@ -115,7 +115,7 @@ if @build.build_pe
         remote_ssh_cmd(@build.apt_host, "/usr/bin/repsimple add_all \
             --confdir /etc/reprepro/#{@build.pe_version} \
             --basedir #{@build.apt_repo_path}/#{@build.pe_version}/repos/debian \
-            --databasedir /var/lib/reprepro \
+            --databasedir /var/lib/reprepro/#{@build.pe_version} \
             --incomingdir #{incoming_dir}")
 
         puts "Cleaning up PE debs in apt repo 'incoming' dir on #{@build.apt_host}"

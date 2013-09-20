@@ -75,7 +75,7 @@ if @build.build_pe
 
           unless Dir["pkg/pe/deb/#{dist}/pe-*"].select { |i| i !~ /^.*\.deb$/ }.empty?
             # Ship source files to source dir, e.g. 'squeeze-source'
-            rsync_to("/pkg/pe/deb/#{dist}/pe-* --exclude *.deb --ignore-existing", @build.apt_host, "#{base_path}/#{dist}-source")
+            rsync_to("pkg/pe/deb/#{dist}/pe-* --exclude *.deb --ignore-existing", @build.apt_host, "#{base_path}/#{dist}-source")
           end
 
           files = Dir["pkg/pe/deb/#{dist}/pe-*{_#{arch},all}.deb"].map { |f| "#{archive_path}/#{File.basename(f)}" }

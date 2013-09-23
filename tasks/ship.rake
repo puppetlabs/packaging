@@ -106,6 +106,12 @@ namespace :pl do
       invoke_task("pl:fetch")
       target = args.target || "artifacts"
       artifact_dir = "#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}/#{target}"
+
+      # In order to get a snapshot of what this build looked like at the time
+      # of shipping, we also generate and ship the params file
+      #
+      @build.params_to_yaml('pkg')
+
       retry_on_fail(:times => 3) do
         remote_ssh_cmd(@build.distribution_server, "mkdir -p #{artifact_dir}")
       end

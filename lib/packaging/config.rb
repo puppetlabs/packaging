@@ -104,8 +104,13 @@ module Pkg
       end
 
       def load_defaults
-        self.config_from_yaml(self.default_project_data)
-        self.config_from_yaml(self.default_build_defaults)
+        [self.default_project_data, self.default_build_defaults].each do |config|
+          if File.readable? config
+            self.config_from_yaml(config)
+          else
+            puts "Skipping load of expected default config #{config}, cannot read file."
+          end
+        end
       end
 
       ##

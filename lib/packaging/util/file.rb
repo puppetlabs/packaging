@@ -37,7 +37,7 @@ module Pkg::Util
     end
 
     def erb_file(erbfile, outfile=nil, opts = { :remove_orig => false })
-      outfile ||= File.join(mktemp, File.basename(erbfile).sub(/\.erb$/,""))
+      outfile ||= File.join(mktemp, File.basename(erbfile).sub(File.extname(erbfile),""))
       output = erb_string(erbfile)
       File.open(outfile, 'w') { |f| f.write output }
       puts "Generated: #{outfile}"

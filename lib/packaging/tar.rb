@@ -1,10 +1,10 @@
 module Pkg
   class Tar
     require 'fileutils'
-
+    require 'pathname'
     include FileUtils
 
-    attr_accessor :files, :project, :version, :excludes, :target
+    attr_accessor :files, :project, :version, :excludes, :target, :templates
     attr_reader :tar
 
     def initialize
@@ -65,10 +65,27 @@ module Pkg
       end
     end
 
+    # Given the tar object's template files (assumed to be in Pkg::PROJECT_ROOT), transform
+    # them, removing the originals. If workdir is passed, assume Pkg::PROJECT_ROOT
+    # exists in workdir
+    def template(workdir=nil)
+      workdir ||= Pkg::PROJECT_ROOT
+      @templates.each do |t|
+
+        target_file = File.join(File.dirname(t), File.basename(t).sub(File.extname(t),""))
+        root = Pathname.new(Pkg::PROJECT_ROOT)
+
+        rel_path_to_erb = Pathname.new(t).relative_path_from(root)
+        rel_path_to_target = Pathname.new(target_file).relative_path_from(root)
+
+        Pkg::Util.erb_file(File.join(workdir,rel_path_to_erb.to_path), File.join(workdir, rel_path_to_target.to_path), :remove_orig => true)
+      end
+    end
+
     def tar(target, source)
       mkpath File.dirname(target)
       Dir.chdir File.dirname(source) do
-        %x[#{@tar} #{@excludes.map{ |x| (" --exclude #{x}") } if @excludes} -zcf '#{File.basename(target)}' #{File.basename(source)}]
+        %x[#{@tar} #{@excludes.map{ |x| (" --exclude #{x} ") }.join if @excludes} -zcf '#{File.basename(target)}' #{File.basename(source)}]
         mv File.basename(target), target
       end
     end
@@ -80,9 +97,10 @@ module Pkg
     def pkg!
       workdir = File.join(Pkg::Util.mktemp, "#{@project}-#{@version}")
       mkpath workdir
-      install_files_to workdir
-      tar @target, workdir
-      clean_up workdir
+      self.install_files_to workdir
+      self.template(workdir)
+      self.tar(@target, workdir)
+      self.clean_up workdir
     end
 
   end

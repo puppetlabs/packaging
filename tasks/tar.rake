@@ -10,14 +10,7 @@ namespace :package do
 
     tar = Pkg::Tar.new
 
-    templates = Dir[File.join(Pkg::PROJECT_ROOT, 'ext', '**', '*.erb')].select { |i| i !~ /packaging|osx/ }
-
-    templates.each do |e|
-      t = Pkg::Util.erb_file(e, nil, :remove_orig => true)
-      tar.files << t
-      rm t
-    end
-
+    tar.templates = Dir[File.join(Pkg::PROJECT_ROOT, "ext", "**", "*.erb")].select { |i| i !~ /packaging|osx/ }
 
     # This is to support packages that only burn-in the version number in the
     # release artifact, rather than storing it two (or more) times in the
@@ -28,6 +21,8 @@ namespace :package do
     # If you set this the version will only be modified in the temporary copy,
     # with the intent that it never change the official source tree.
     Rake::Task["package:versionbump"].invoke(workdir) if @build.update_version_file
+
+    tar.pkg!
 
     puts "Wrote #{`pwd`.strip}/pkg/#{@build.project}-#{@build.version}.tar.gz"
   end

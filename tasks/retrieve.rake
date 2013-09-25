@@ -31,3 +31,15 @@ namespace :pl do
     end
   end
 end
+
+if @build.build_pe
+  namespace :pe do
+    namespace :jenkins do
+      desc "Retrieve packages from the distribution server\. Check out commit to retrieve"
+      task :retrieve, :target do |t, args|
+        target = args.target || "artifacts"
+        invoke_task("pl:jenkins:retrieve", target)
+      end
+    end
+  end
+end

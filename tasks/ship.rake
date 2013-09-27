@@ -112,6 +112,14 @@ namespace :pl do
       #
       @build.params_to_yaml('pkg')
 
+
+      # Sadly, the packaging repo cannot yet act on its own, without living
+      # inside of a packaging-repo compatible project. This means in order to
+      # use the packaging repo for shipping and signing (things that really
+      # don't require build automation, specifically) we still need the project
+      # clone itself.
+      git_bundle('HEAD', 'signing_bundle', 'pkg')
+
       retry_on_fail(:times => 3) do
         remote_ssh_cmd(@build.distribution_server, "mkdir -p #{artifact_dir}")
       end

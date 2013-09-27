@@ -360,9 +360,9 @@ def rand_string
   rand.to_s.split('.')[1]
 end
 
-def git_bundle(treeish)
-  temp = get_temp
-  appendix = rand_string
+def git_bundle(treeish, appendix=nil, output_dir=nil)
+  temp = output_dir || get_temp
+  appendix ||= rand_string
   sh "git bundle create #{temp}/#{@build.project}-#{@build.version}-#{appendix} #{treeish} --tags"
   cd temp do
     sh "tar -czf #{@build.project}-#{@build.version}-#{appendix}.tar.gz #{@build.project}-#{@build.version}-#{appendix}"
@@ -371,12 +371,14 @@ def git_bundle(treeish)
   "#{temp}/#{@build.project}-#{@build.version}-#{appendix}.tar.gz"
 end
 
-# We take a tar argument for cases where `tar` isn't best, e.g. Solaris
-def remote_bootstrap(host, treeish, tar_cmd=nil)
+# We take a tar argument for cases where `tar` isn't best, e.g. Solaris.  We
+# also take an optional argument of the tarball containing the git bundle to
+# use.
+def remote_bootstrap(host, treeish, tar_cmd=nil, tarball=nil)
   unless tar = tar_cmd
     tar = 'tar'
   end
-  tarball = git_bundle(treeish)
+  tarball ||= git_bundle(treeish)
   tarball_name = File.basename(tarball).gsub('.tar.gz','')
   rsync_to(tarball, host, '/tmp')
   appendix = rand_string

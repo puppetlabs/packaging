@@ -101,6 +101,16 @@ def rsync_to *args
   sh "rsync #{flags} #{source} #{target}:#{dest}"
 end
 
+def rsync_to_ignore_existing *args
+  check_tool('rsync')
+  flags = "-rHlv -O --no-perms --no-owner --no-group --ignore-existing"
+  source  = args[0]
+  target  = args[1]
+  dest    = args[2]
+  puts "rsyncing #{source} to #{target}"
+  sh "rsync #{flags} #{source} #{target}:#{dest}"
+end
+
 def rsync_from *args
   check_tool('rsync')
   flags = "-rHlv -O --no-perms --no-owner --no-group"

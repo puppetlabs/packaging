@@ -5,8 +5,11 @@ if @build.build_pe
       empty_dir?("pkg/pe/rpm") and fail "The 'pkg/pe/rpm' directory has no packages. Did you run rake pe:deb?"
       target_path = ENV['YUM_REPO'] ? ENV['YUM_REPO'] : "#{@build.yum_repo_path}/#{@build.pe_version}/repos/"
       retry_on_fail(:times => 3) do
-        rsync_to('pkg/pe/rpm/', @build.yum_host, target_path)
+        rsync_to_ignore_existing('pkg/pe/rpm/', @build.yum_host, target_path)
       end
+      pkgs = Dir["pkg/pe/rpm/**/*.rpm"]
+      pkgs.map! { |f| "'#{f.gsub("pkg/pe/rpm/", "#{target_path}/")}'" }
+      remote_ssh_command(@build.yum_host, "chattr +i #{pkgs.join(" ")}")
       if @build.team == 'release'
         Rake::Task["pe:remote:update_yum_repo"].invoke
       end

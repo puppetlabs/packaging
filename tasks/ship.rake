@@ -116,13 +116,13 @@ namespace :pl do
         remote_ssh_cmd(@build.distribution_server, "mkdir -p #{artifact_dir}")
       end
       retry_on_fail(:times => 3) do
-        ignore_existing = "--ignore-existing" if git_ref_type == "tag"
+        ignore_existing = "--ignore-existing"
         rsync_to("pkg/", @build.distribution_server, "#{artifact_dir}/ #{ignore_existing} --exclude repo_configs")
       end
       # If we just shipped a tagged version, we want to make it immutable
-      if git_ref_type == "tag"
-        remote_ssh_cmd(@build.distribution_server, "find #{artifact_dir} -type f | xargs sudo chattr +i")
-      end
+      
+      remote_ssh_cmd(@build.distribution_server, "find #{artifact_dir} -type f | xargs sudo chattr +i")
+     
     end
 
     desc "Ship generated repository configs to the distribution server"

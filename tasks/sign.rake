@@ -26,7 +26,7 @@ def sign_rpm(rpm, sign_flags = nil)
 
 end
 
-def sign_el5(rpm)
+def sign_legacy_rpm(rpm)
   sign_rpm(rpm, "--force-v3-sigs --digest-algo=sha1")
 end
 
@@ -65,7 +65,7 @@ namespace :pl do
     modern_rpms = (Dir["pkg/el/6/**/*.rpm"] + Dir["pkg/fedora/**/*.rpm"]).join(' ')
     unless el5_rpms.empty?
       puts "Signing el5 rpms..."
-      sign_el5(el5_rpms)
+      sign_legacy_rpm(el5_rpms)
     end
 
     unless modern_rpms.empty?

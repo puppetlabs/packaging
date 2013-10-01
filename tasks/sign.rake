@@ -1,14 +1,36 @@
-def sign_el5(rpm)
+def sign_rpm(rpm, sign_flags = nil)
+
+  # To enable support for wrappers around rpm and thus support for gpg-agent
+  # rpm signing, we have to be able to tell the packaging repo what binary to
+  # use as the rpm signing tool.
+  #
+  rpm_cmd = ENV['RPM'] || find_tool('rpm')
+
+  # If we're using the gpg agent for rpm signing, we don't want to specify the
+  # input for the passphrase, which is what '--passphrase-fd 3' does. However,
+  # if we're not using the gpg agent, this is required, and is part of the
+  # defaults on modern rpm. The fun part of gpg-agent signing of rpms is
+  # specifying that the gpg check command always return true
+  #
+  if boolean_value(ENV['RPM_GPG_AGENT'])
+    gpg_check_cmd = "--define '%__gpg_check_password_cmd /bin/true'"
+  else
+    input_flag = "--passphrase-fd 3"
+  end
+
   # Try this up to 5 times, to allow for incorrect passwords
   retry_on_fail(:times => 5) do
-    sh "rpm --define '%_gpg_name #{@build.gpg_name}' --define '%__gpg_sign_cmd %{__gpg} gpg --force-v3-sigs --digest-algo=sha1 --batch --no-verbose --no-armor --passphrase-fd 3 --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm} > /dev/null"
+    # This definition of %__gpg_sign_cmd is the default on modern rpm. We
+    # accept extra flags to override certain signing behavior for older
+    # versions of rpm, e.g. specifying V3 signatures instead of V4.
+    #
+    sh "#{rpm_cmd} #{gpg_check_cmd} --define '%_gpg_name #{@build.gpg_name}' --define '%__gpg_sign_cmd %{__gpg} gpg #{sign_flags} #{input_flag} --batch --no-verbose --no-armor --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm}"
   end
+
 end
 
-def sign_modern(rpm)
-  retry_on_fail(:times => 5) do
-    sh "rpm --define '%_gpg_name #{@build.gpg_name}' --addsign #{rpm} > /dev/null"
-  end
+def sign_legacy_rpm(rpm)
+  sign_rpm(rpm, "--force-v3-sigs --digest-algo=sha1")
 end
 
 def rpm_has_sig(rpm)
@@ -46,12 +68,12 @@ namespace :pl do
     modern_rpms = (Dir["pkg/el/6/**/*.rpm"] + Dir["pkg/fedora/**/*.rpm"]).join(' ')
     unless el5_rpms.empty?
       puts "Signing el5 rpms..."
-      sign_el5(el5_rpms)
+      sign_legacy_rpm(el5_rpms)
     end
 
     unless modern_rpms.empty?
       puts "Signing el6 and fedora rpms..."
-      sign_modern(modern_rpms)
+      sign_rpm(modern_rpms)
     end
     # Now we hardlink them back in
     Dir["pkg/*/*/*/i386/*.noarch.rpm"].each do |rpm|

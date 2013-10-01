@@ -1,4 +1,4 @@
-# The sign_el5 and sign_modern methods are defined in sign.rake
+# The sign_legacy_rpm and sign_rpm methods are defined in sign.rake
 # This is just adapted for the 'PE' layout
 
 if @build.build_pe
@@ -24,8 +24,8 @@ if @build.build_pe
           end
         end
       end
-      sign_el5(old_rpms) unless old_rpms.empty?
-      sign_modern(modern_rpms) unless modern_rpms.empty?
+      sign_legacy_rpm(old_rpms) unless old_rpms.empty?
+      sign_rpm(modern_rpms) unless modern_rpms.empty?
       # Now we hardlink them back in
       Dir["pkg/pe/rpm/*-*-i386/*.noarch.rpm"].each do |rpm|
         dir = rpm.split('/')[-2]

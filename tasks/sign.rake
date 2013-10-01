@@ -9,9 +9,12 @@ def sign_rpm(rpm, sign_flags = nil)
   # If we're using the gpg agent for rpm signing, we don't want to specify the
   # input for the passphrase, which is what '--passphrase-fd 3' does. However,
   # if we're not using the gpg agent, this is required, and is part of the
-  # defaults on modern rpm.
+  # defaults on modern rpm. The fun part of gpg-agent signing of rpms is
+  # specifying that the gpg check command always return true
   #
-  unless boolean_value(ENV['RPM_GPG_AGENT'])
+  if boolean_value(ENV['RPM_GPG_AGENT'])
+    gpg_check_cmd = "--define '%__gpg_check_password_cmd /bin/true'"
+  else
     input_flag = "--passphrase-fd 3"
   end
 
@@ -21,7 +24,7 @@ def sign_rpm(rpm, sign_flags = nil)
     # accept extra flags to override certain signing behavior for older
     # versions of rpm, e.g. specifying V3 signatures instead of V4.
     #
-    sh "#{rpm_cmd} --define '%_gpg_name #{@build.gpg_name}' --define '%__gpg_sign_cmd %{__gpg} gpg #{sign_flags} #{input_flag} --batch --no-verbose --no-armor --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm}"
+    sh "#{rpm_cmd} #{gpg_check_cmd} --define '%_gpg_name #{@build.gpg_name}' --define '%__gpg_sign_cmd %{__gpg} gpg #{sign_flags} #{input_flag} --batch --no-verbose --no-armor --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm}"
   end
 
 end

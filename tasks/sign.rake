@@ -131,11 +131,17 @@ namespace :pl do
       # Because rpms and debs are laid out differently in PE under pkg/ they
       # have a different sign task to address this. Rather than create a whole
       # extra :jenkins task for signing PE, we determine which sign task to use
-      # based on if we're building PE
+      # based on if we're building PE.
+      # We also listen in on the environment variable SIGNING_BUNDLE. This is
+      # _NOT_ intended for public use, but rather with the internal promotion
+      # workflow for Puppet Enterprise. SIGNING_BUNDLE is the path to a tarball
+      # containing a git bundle to be used as the environment for the packaging
+      # repo in a signing operation.
+      signing_bundle = ENV['SIGNING_BUNDLE']
       rpm_sign_task = @build.build_pe ? "pe:sign_rpms" : "pl:sign_rpms"
       deb_sign_task = @build.build_pe ? "pe:sign_deb_changes" : "pl:sign_deb_changes"
       sign_tasks    = ["pl:sign_tar", rpm_sign_task, deb_sign_task]
-      remote_repo   = remote_bootstrap(@build.distribution_server, 'HEAD')
+      remote_repo   = remote_bootstrap(@build.distribution_server, 'HEAD', nil, signing_bundle)
       build_params  = remote_buildparams(@build.distribution_server, @build)
       rsync_to('pkg', @build.distribution_server, remote_repo)
       remote_ssh_cmd(@build.distribution_server, "cd #{remote_repo} ; rake #{sign_tasks.join(' ')} PARAMS_FILE=#{build_params}")

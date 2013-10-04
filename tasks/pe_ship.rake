@@ -15,7 +15,16 @@ if @build.build_pe
     desc "Ship PE debs to #{@build.apt_host}"
     task :ship_debs => "pl:fetch" do
       empty_dir?("pkg/pe/deb") and fail "The 'pkg/pe/deb' directory has no packages!"
-      target_path = ENV['APT_REPO'] ? ENV['APT_REPO'] : "#{@build.apt_repo_path}/#{@build.pe_version}/repos/incoming/"
+      target_path = ENV['APT_REPO']
+
+      #   If APT_REPO isn't specified as an environment variable, we use a temporary one
+      #   created for this specific deb ship. This enables us to escape the conflicts
+      #   introduced with simultaneous deb ships.
+      #
+      unless target_path
+        puts "Creating temporary incoming dir on #{@build.apt_host}"
+        target_path = %x{ssh -t #{@build.apt_host} 'mktemp -d -t incoming-XXXXXX'}.chomp
+      end
 
       #   For reprepro, we ship just the debs into an incoming dir. On the remote end,
       #   reprepro will pull these debs in and add them to the repositories based on the
@@ -95,7 +104,7 @@ if @build.build_pe
 
 
       if @build.team == 'release'
-        Rake::Task["pe:remote:apt"].invoke
+        Rake::Task["pe:remote:apt"].invoke(target_path)
       end
     end
 
@@ -112,16 +121,18 @@ if @build.build_pe
       #   Per previous comments, the incoming directory must contain subdirectories named
       #   for debian distributions.
       desc "Remotely add shipped packages to apt repo on #{@build.apt_host}"
-      task :apt => "pl:fetch" do
-        incoming_dir = "/opt/enterprise/#{@build.pe_version}/repos/incoming"
+      task :apt, :incoming do |t, args|
+        incoming_dir = args.incoming
+        incoming_dir or fail "Adding packages to apt repo requires an incoming directory"
+        invoke_task("pl:fetch")
         remote_ssh_cmd(@build.apt_host, "/usr/bin/repsimple add_all \
             --confdir /etc/reprepro/#{@build.pe_version} \
             --basedir #{@build.apt_repo_path}/#{@build.pe_version}/repos/debian \
             --databasedir /var/lib/reprepro/#{@build.pe_version} \
             --incomingdir #{incoming_dir}")
 
-        puts "Cleaning up PE debs in apt repo 'incoming' dir on #{@build.apt_host}"
-        remote_ssh_cmd(@build.apt_host, "rm #{incoming_dir}/*/pe-*.deb")
+        puts "Cleaning up apt repo 'incoming' dir on #{@build.apt_host}"
+        remote_ssh_cmd(@build.apt_host, "rm -r #{incoming_dir}")
 
       end
     end

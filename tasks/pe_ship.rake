@@ -45,7 +45,7 @@ if @build.build_pe
       retry_on_fail(:times => 3) do
         cd "pkg/pe/deb" do
           Dir["**/*.deb"].each do |deb|
-            rsync_to(deb, @build.apt_host, "#{target_path}/#{File.dirname(deb)}")
+            rsync_to(deb, @build.apt_host, "#{target_path}/#{File.dirname(deb)}/")
           end
         end
       end

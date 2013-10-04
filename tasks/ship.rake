@@ -128,9 +128,10 @@ namespace :pl do
         rsync_to("pkg/", @build.distribution_server, "#{artifact_dir}/ #{ignore_existing} --exclude repo_configs")
       end
       # If we just shipped a tagged version, we want to make it immutable
-      
-      remote_ssh_cmd(@build.distribution_server, "find #{artifact_dir} -type f | xargs sudo chattr +i")
-     
+      files = Dir.glob("pkg/**/*").select { |f| File.file?(f) }.map do |file|
+        "#{artifact_dir}/#{file.sub(/^pkg\//,'')}"
+      end
+      remote_set_immutable(@build.distribution_server, files)
     end
 
     desc "Ship generated repository configs to the distribution server"

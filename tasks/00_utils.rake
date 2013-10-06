@@ -228,8 +228,10 @@ end
 
 def load_keychain
   unless @keychain_loaded
-    kill_keychain
-    start_keychain
+    unless ENV['RPM_GPG_AGENT']
+      kill_keychain
+      start_keychain
+    end
     @keychain_loaded = TRUE
   end
 end
@@ -260,7 +262,8 @@ def gpg_sign_file(file)
   gpg ||= find_tool('gpg')
 
   if gpg
-    sh "#{gpg} --armor --detach-sign -u #{@build.gpg_key} #{file}"
+    use_tty = "--no-tty --use-agent" if ENV['RPM_GPG_AGENT']
+    sh "#{gpg} #{use_tty} --armor --detach-sign -u #{@build.gpg_key} #{file}"
   else
     fail "No gpg available. Cannot sign #{file}."
   end

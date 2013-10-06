@@ -39,7 +39,9 @@ def rpm_has_sig(rpm)
 end
 
 def sign_deb_changes(file)
-  %x{debsign --re-sign -k#{@build.gpg_key} #{file}}
+  # Lazy lazy lazy lazy lazy
+  sign_program = "-p'gpg --use-agent --no-tty'" if ENV['RPM_GPG_AGENT']
+  sh "debsign #{sign_program} --re-sign -k#{@build.gpg_key} #{file}"
 end
 
 # requires atleast a self signed prvate key and certificate pair

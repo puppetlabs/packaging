@@ -13,8 +13,8 @@ module Pkg
     #   create. We _always_ set @ref for the Pkg::Config class. Always.
     @ref = Pkg::Util.git_sha_or_tag
 
-    @default_project_data = File.join(Pkg::PROJECT_ROOT, "ext", "project_data.yaml")
-    @default_build_defaults = File.join(Pkg::PROJECT_ROOT, "ext", "build_defaults.yaml")
+    @default_project_data = File.join(Pkg::Config.project_root, "ext", "project_data.yaml")
+    @default_build_defaults = File.join(Pkg::Config.project_root, "ext", "build_defaults.yaml")
 
     class << self
 

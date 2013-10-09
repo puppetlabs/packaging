@@ -13,7 +13,7 @@ module Pkg
       @version  = Pkg::Config.version
       @files    = Pkg::Config.files
       @excludes = Pkg::Config.tar_excludes
-      @target   = File.join(Pkg::PROJECT_ROOT, "pkg", "#{@project}-#{@version}.tar.gz")
+      @target   = File.join(Pkg::Config.project_root, "pkg", "#{@project}-#{@version}.tar.gz")
     end
 
     def install_files_to(workdir)
@@ -41,7 +41,7 @@ module Pkg
       # Eventually, when all our projects are migrated to the new standard, we
       # can drop this in favour of just pushing the patterns directly into the
       # FileList and eliminate many lines of code and comment.
-      cd Pkg::PROJECT_ROOT do
+      cd Pkg::Config.project_root do
         patterns.each do |pattern|
           if File.directory?(pattern) and not Pkg::Util.empty_dir?(pattern)
             install << Dir[pattern + "/**/*"]
@@ -65,15 +65,15 @@ module Pkg
       end
     end
 
-    # Given the tar object's template files (assumed to be in Pkg::PROJECT_ROOT), transform
-    # them, removing the originals. If workdir is passed, assume Pkg::PROJECT_ROOT
+    # Given the tar object's template files (assumed to be in Pkg::Config.project_root), transform
+    # them, removing the originals. If workdir is passed, assume Pkg::Config.project_root
     # exists in workdir
     def template(workdir=nil)
-      workdir ||= Pkg::PROJECT_ROOT
+      workdir ||= Pkg::Config.project_root
       @templates.each do |t|
 
         target_file = File.join(File.dirname(t), File.basename(t).sub(File.extname(t),""))
-        root = Pathname.new(Pkg::PROJECT_ROOT)
+        root = Pathname.new(Pkg::Config.project_root)
 
         rel_path_to_erb = Pathname.new(t).relative_path_from(root)
         rel_path_to_target = Pathname.new(target_file).relative_path_from(root)

@@ -14,7 +14,9 @@ module Pkg::Util
 
   def self.in_project_root(&blk)
    result = nil
-   Dir.chdir Pkg::PROJECT_ROOT do
+   fail "Cannot execute in project root if Pkg::Config.project_root is not set" unless Pkg::Config.project_root
+
+   Dir.chdir Pkg::Config.project_root do
       result = blk.call
     end
     result

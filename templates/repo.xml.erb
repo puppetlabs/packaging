@@ -50,6 +50,9 @@ set -e
 # and then clone the git_bundle
 
 [ -f &quot;PROJECT_BUNDLE&quot; ] || exit 1
+
+[ -d project ] &amp;&amp; rm -rf project
+
 mkdir project &amp;&amp; tar -xzf PROJECT_BUNDLE -C project/
 
 pushd project

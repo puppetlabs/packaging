@@ -106,7 +106,7 @@ module Pkg
         # three subdirectories below $project_root, e.g.,
         # $project_root/ext/packaging/lib/packaging.rb.
         #
-        @project_root = ENV['PROJECT_ROOT'] || File.expand_path(File.join(LIBDIR, "..","..",".."))
+        @project_root ||= ENV['PROJECT_ROOT'] || File.expand_path(File.join(LIBDIR, "..","..",".."))
 
         default_project_data = File.join(@project_root, "ext", "project_data.yaml")
         default_build_defaults = File.join(@project_root, "ext", "build_defaults.yaml")

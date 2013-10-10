@@ -141,10 +141,26 @@ module Pkg
       #   fail if either Pkg::Config.project_root is nil, isn't in a git repo,
       #   or is in a git repo, but there are no tags in the repo, in which case
       #   git-describe will fail.
+      #
+      #   It probably seems odd to load packaging-specific version
+      #   determinations, such as rpmversion here, at the top-level, and it is.
+      #   The reason for this that the creation of the most basic package
+      #   composition, the tarball, includes the generation of many different
+      #   packaging-specific files from templates in the source, and if faced
+      #   with loading rpmversion in the Tar object vs rpmversion in the
+      #   Config, I opt for the latter. It's basically a lose-lose, since it
+      #   really belongs in the Rpm object.
+
       def load_versioning
         if @project_root and Pkg::Util.git_tagged?
-          @ref = Pkg::Util.git_sha_or_tag
-          @version = Pkg::Util.get_dash_version
+          @ref         = Pkg::Util.git_sha_or_tag
+          @version     = Pkg::Util.get_dash_version
+          @gemversion  = Pkg::Util.get_dot_version
+          @ipsversion  = Pkg::Util.get_ips_version
+          @debversion  = Pkg::Util.get_debversion
+          @origversion = Pkg::Util.get_origversion
+          @rpmversion  = Pkg::Util.get_rpmversion
+          @rpmrelease  = Pkg::Util.get_rpmrelease
         else
           puts "Skipping determination of version via git describe, Pkg::Config.project_root is not set to the path of a tagged git repo."
         end

@@ -95,7 +95,7 @@ module Pkg
         self.config_to_hash.each { |k,v| puts "#{k}: #{v}" }
       end
 
-      def load_defaults
+      def default_project_root
         # It is really quite unsafe to assume github.com/puppetlabs/packaging has been
         # cloned into $project_root/ext/packaging even if it has _always_ been the
         # default location. We really don't have much choice as of this moment but to
@@ -106,7 +106,11 @@ module Pkg
         # three subdirectories below $project_root, e.g.,
         # $project_root/ext/packaging/lib/packaging.rb.
         #
-        @project_root ||= ENV['PROJECT_ROOT'] || File.expand_path(File.join(LIBDIR, "..","..",".."))
+        ENV['PROJECT_ROOT'] || File.expand_path(File.join(LIBDIR, "..","..",".."))
+      end
+
+      def load_defaults
+        @project_root ||= default_project_root
 
         default_project_data = File.join(@project_root, "ext", "project_data.yaml")
         default_build_defaults = File.join(@project_root, "ext", "build_defaults.yaml")
@@ -128,10 +132,10 @@ module Pkg
         #   can't determine it
         if @project_root
           @ref = Pkg::Util.git_sha_or_tag
+          self.config
         else
           puts "Skipping determination of version (ref) via git describe, not in a known project root."
         end
-
       end
 
       ##

@@ -9,6 +9,13 @@ module Pkg::Util
       end
     end
 
+    def git_tagged?
+      in_project_root do
+        %x{#{GIT} describe >/dev/null 2>&1}
+        $?.success?
+      end
+    end
+
     def git_describe
       in_project_root do
         %x{#{GIT} describe}.strip

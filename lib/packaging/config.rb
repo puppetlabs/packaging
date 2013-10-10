@@ -18,6 +18,10 @@ module Pkg
         attr_accessor v
       end
 
+      #   Set defaults for certain version-related variables that are rarely
+      #   overridden
+      @release = 1
+
       #   Return the binding of class context. Used for erb templates.
       #
       def get_binding
@@ -126,15 +130,23 @@ module Pkg
             @project_root = nil
           end
         end
-        #   Probably the single most important piece of data about our project,
-        #   @ref determines what will eventually be the versioning for every
-        #   package we can create. However, unles we're in a project root, we
-        #   can't determine it
+
         if @project_root
-          @ref = Pkg::Util.git_sha_or_tag
           self.config
+        end
+      end
+
+      #   Set all aspects of how the package will be versioned. Versioning
+      #   relies exclusively on the git describe of the project, which will
+      #   fail if either Pkg::Config.project_root is nil, isn't in a git repo,
+      #   or is in a git repo, but there are no tags in the repo, in which case
+      #   git-describe will fail.
+      def load_versioning
+        if @project_root and Pkg::Util.git_tagged?
+          @ref = Pkg::Util.git_sha_or_tag
+          @version = Pkg::Util.get_dash_version
         else
-          puts "Skipping determination of version (ref) via git describe, not in a known project root."
+          puts "Skipping determination of version via git describe, Pkg::Config.project_root is not set to the path of a tagged git repo."
         end
       end
 

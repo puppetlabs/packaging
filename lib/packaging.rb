@@ -11,6 +11,7 @@ module Pkg
 
   # Load configuration defaults
   Pkg::Config.load_defaults
+  Pkg::Config.load_versioning
   Pkg::Config.load_envvars
 
 end

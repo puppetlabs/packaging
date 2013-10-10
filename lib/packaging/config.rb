@@ -8,14 +8,6 @@ module Pkg
     require 'packaging/config/params.rb'
     require 'yaml'
 
-    #   Probably the single most important piece of data about our project,
-    #   @ref determines what will eventually be the versioning for every package we can
-    #   create. We _always_ set @ref for the Pkg::Config class. Always.
-    @ref = Pkg::Util.git_sha_or_tag
-
-    @default_project_data = File.join(Pkg::Config.project_root, "ext", "project_data.yaml")
-    @default_build_defaults = File.join(Pkg::Config.project_root, "ext", "build_defaults.yaml")
-
     class << self
 
       #   Every element in Pkg::Params::BUILD_PARAMS is a configurable setting
@@ -104,13 +96,42 @@ module Pkg
       end
 
       def load_defaults
-        [self.default_project_data, self.default_build_defaults].each do |config|
+        # It is really quite unsafe to assume github.com/puppetlabs/packaging has been
+        # cloned into $project_root/ext/packaging even if it has _always_ been the
+        # default location. We really don't have much choice as of this moment but to
+        # assume this directory, or assume the user has passed in the correct one via
+        # ENV['PROJECT_ROOT']. It is critical we have the correct $project_root, because
+        # we get all of the package versioning from the `git-describe` of $project. If we
+        # assume $project/ext/packaging, it means packaging/lib/packaging.rb is
+        # three subdirectories below $project_root, e.g.,
+        # $project_root/ext/packaging/lib/packaging.rb.
+        #
+        @project_root = ENV['PROJECT_ROOT'] || File.expand_path(File.join(LIBDIR, "..","..",".."))
+
+        default_project_data = File.join(@project_root, "ext", "project_data.yaml")
+        default_build_defaults = File.join(@project_root, "ext", "build_defaults.yaml")
+
+        [default_project_data, default_build_defaults].each do |config|
           if File.readable? config
             self.config_from_yaml(config)
           else
             puts "Skipping load of expected default config #{config}, cannot read file."
+            #   Since the default configuration files are not readable, most
+            #   likely not present, at this point we assume the project_root
+            #   isn't what we hoped it would be, and unset it.
+            @project_root = nil
           end
         end
+        #   Probably the single most important piece of data about our project,
+        #   @ref determines what will eventually be the versioning for every
+        #   package we can create. However, unles we're in a project root, we
+        #   can't determine it
+        if @project_root
+          @ref = Pkg::Util.git_sha_or_tag
+        else
+          puts "Skipping determination of version (ref) via git describe, not in a known project root."
+        end
+
       end
 
       ##

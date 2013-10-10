@@ -3,7 +3,6 @@
 module Pkg::Util
   require 'erb'
   require 'packaging/util/tool'
-  require 'packaging/util/tools'
   require 'packaging/util/file'
   require 'packaging/util/version'
   require 'packaging/util/serialization'

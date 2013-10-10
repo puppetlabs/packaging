@@ -2,6 +2,8 @@
 
 module Pkg::Util
 
+  #   Set up utility methods for handling system binaries
+  #
   class << self
     def check_tool(tool)
       return true if has_tool(tool)
@@ -20,4 +22,10 @@ module Pkg::Util
     alias :has_tool :find_tool
 
   end
+
+  #   Set up paths to system tools we use in the packaging repo
+  #   no matter what distribution we're packaging for.
+
+  GIT = Pkg::Util.find_tool('git', :required => :true)
+
 end

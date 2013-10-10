@@ -23,8 +23,6 @@ module Pkg::Params
                   :debug,
                   :default_cow,
                   :default_mock,
-                  :default_project_data,
-                  :default_build_defaults,
                   :description,
                   :distribution_server,
                   :dmg_path,

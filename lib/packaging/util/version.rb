@@ -22,21 +22,21 @@ module Pkg::Util
       end
     end
 
-# return the sha of HEAD on the current branch
+    # return the sha of HEAD on the current branch
     def git_sha
       in_project_root do
         %x{#{GIT} rev-parse HEAD}.strip
       end
     end
 
-# Return the ref type of HEAD on the current branch
+    # Return the ref type of HEAD on the current branch
     def git_ref_type
       in_project_root do
         %x{#{GIT} cat-file -t #{git_describe}}.strip
       end
     end
 
-# If HEAD is a tag, return the tag. Otherwise return the sha of HEAD.
+    # If HEAD is a tag, return the tag. Otherwise return the sha of HEAD.
     def git_sha_or_tag
       if git_ref_type == "tag"
         git_describe
@@ -45,15 +45,23 @@ module Pkg::Util
       end
     end
 
+    # Return true if we're in a git repo, otherwise false
+    def is_git_repo
+      in_project_root do
+        %x{#{GIT} rev-parse --git-dir > /dev/null 2>&1}
+        $?.success?
+      end
+    end
 
-# Return information about the current tree, using `git describe`, ready for
-# further processing.
-#
-# Returns an array of one to four elements, being:
-# * version (three dot-joined numbers, leading `v` stripped)
-# * the string 'rcX' (if the last tag was an rc release, where X is the rc number)
-# * commits (string containing integer, number of commits since that version was tagged)
-# * dirty (string 'dirty' if local changes exist in the repo)
+
+    # Return information about the current tree, using `git describe`, ready for
+    # further processing.
+    #
+    # Returns an array of one to four elements, being:
+    # * version (three dot-joined numbers, leading `v` stripped)
+    # * the string 'rcX' (if the last tag was an rc release, where X is the rc number)
+    # * commits (string containing integer, number of commits since that version was tagged)
+    # * dirty (string 'dirty' if local changes exist in the repo)
     def git_describe_version
       return nil unless is_git_repo and raw = run_git_describe_internal
       # reprocess that into a nice set of output data
@@ -71,7 +79,7 @@ module Pkg::Util
       version_string
     end
 
-# This is a stub to ease testing...
+    # This is a stub to ease testing...
     def run_git_describe_internal
       in_project_root do
         raw = %x{#{GIT} describe --tags --dirty 2>/dev/null}
@@ -155,18 +163,18 @@ module Pkg::Util
       end
     end
 
-# Determines if this package is an rc package via the version
-# returned by get_dash_version method.
-# Assumes version strings in the formats:
-# final:
-# '0.7.0'
-# '0.7.0-63'
-# '0.7.0-63-dirty'
-# rc:
-# '0.7.0rc1 (we don't actually use this format anymore, but once did)
-# '0.7.0-rc1'
-# '0.7.0-rc1-63'
-# '0.7.0-rc1-63-dirty'
+    # Determines if this package is an rc package via the version
+    # returned by get_dash_version method.
+    # Assumes version strings in the formats:
+    # final:
+    # '0.7.0'
+    # '0.7.0-63'
+    # '0.7.0-63-dirty'
+    # rc:
+    # '0.7.0rc1 (we don't actually use this format anymore, but once did)
+    # '0.7.0-rc1'
+    # '0.7.0-rc1-63'
+    # '0.7.0-rc1-63-dirty'
     def is_rc?
       return TRUE if get_dash_version =~ /^\d+\.\d+\.\d+-*rc\d+/
       FALSE

@@ -78,7 +78,7 @@ module Pkg
         rel_path_to_erb = Pathname.new(t).relative_path_from(root)
         rel_path_to_target = Pathname.new(target_file).relative_path_from(root)
 
-        Pkg::Util.erb_file(File.join(workdir,rel_path_to_erb.to_path), File.join(workdir, rel_path_to_target.to_path), :remove_orig => true)
+        Pkg::Util.erb_file(File.join(workdir,rel_path_to_erb.to_path), File.join(workdir, rel_path_to_target.to_path), :remove_orig => true, :binding => Pkg::Config.get_binding)
       end
     end
 

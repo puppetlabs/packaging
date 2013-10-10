@@ -10,7 +10,7 @@ namespace :package do
 
     tar = Pkg::Tar.new
 
-    tar.templates = Dir[File.join(Pkg::PROJECT_ROOT, "ext", "**", "*.erb")].select { |i| i !~ /packaging|osx/ }
+    tar.templates = Dir[File.join(Pkg::Config.project_root, "ext", "**", "*.erb")].select { |i| i !~ /packaging|osx/ }
 
     # This is to support packages that only burn-in the version number in the
     # release artifact, rather than storing it two (or more) times in the

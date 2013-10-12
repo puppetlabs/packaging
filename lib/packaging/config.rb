@@ -47,7 +47,7 @@ module Pkg
       # class instance variables
       #
       def config_from_yaml(file)
-        build_data = Pkg::Util.load_yaml(file)
+        build_data = Pkg::Util::Serialization.load_yaml(file)
         config_from_hash(build_data)
       end
 
@@ -83,8 +83,8 @@ module Pkg
       # the name of the params file is the current git commit sha or tag.
       #
       def config_to_yaml(target=nil)
-        target ||= File.join(Pkg::Util.mktemp, "#{self.ref}.yaml")
-        Pkg::Util.file_writable?(File.dirname(target), :required => true)
+        target ||= File.join(Pkg::Util::File.mktemp, "#{self.ref}.yaml")
+        Pkg::Util::File.file_writable?(File.dirname(target), :required => true)
         File.open(target, 'w') do |f|
           f.puts self.config_to_hash.to_yaml
         end
@@ -152,15 +152,15 @@ module Pkg
       #   really belongs in the Rpm object.
 
       def load_versioning
-        if @project_root and Pkg::Util.git_tagged?
-          @ref         = Pkg::Util.git_sha_or_tag
-          @version     = Pkg::Util.get_dash_version
-          @gemversion  = Pkg::Util.get_dot_version
-          @ipsversion  = Pkg::Util.get_ips_version
-          @debversion  = Pkg::Util.get_debversion
-          @origversion = Pkg::Util.get_origversion
-          @rpmversion  = Pkg::Util.get_rpmversion
-          @rpmrelease  = Pkg::Util.get_rpmrelease
+        if @project_root and Pkg::Util::Version.git_tagged?
+          @ref         = Pkg::Util::Version.git_sha_or_tag
+          @version     = Pkg::Util::Version.get_dash_version
+          @gemversion  = Pkg::Util::Version.get_dot_version
+          @ipsversion  = Pkg::Util::Version.get_ips_version
+          @debversion  = Pkg::Util::Version.get_debversion
+          @origversion = Pkg::Util::Version.get_origversion
+          @rpmversion  = Pkg::Util::Version.get_rpmversion
+          @rpmrelease  = Pkg::Util::Version.get_rpmrelease
         else
           puts "Skipping determination of version via git describe, Pkg::Config.project_root is not set to the path of a tagged git repo."
         end

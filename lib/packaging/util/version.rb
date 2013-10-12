@@ -1,37 +1,40 @@
 # Utility methods used for versioning projects for various kinds of packaging
 
-module Pkg::Util
+module Pkg::Util::Version
   class << self
+
+    GIT = Pkg::Util::Tool::GIT
+
     def git_co(ref)
-      in_project_root do
+      Pkg::Util.in_project_root do
         %x{#{GIT} reset --hard ; #{GIT} checkout #{ref}}
         $?.success? or fail "Could not checkout #{ref} git branch to build package from...exiting"
       end
     end
 
     def git_tagged?
-      in_project_root do
+      Pkg::Util.in_project_root do
         %x{#{GIT} describe >/dev/null 2>&1}
         $?.success?
       end
     end
 
     def git_describe
-      in_project_root do
+      Pkg::Util.in_project_root do
         %x{#{GIT} describe}.strip
       end
     end
 
     # return the sha of HEAD on the current branch
     def git_sha
-      in_project_root do
+      Pkg::Util.in_project_root do
         %x{#{GIT} rev-parse HEAD}.strip
       end
     end
 
     # Return the ref type of HEAD on the current branch
     def git_ref_type
-      in_project_root do
+      Pkg::Util.in_project_root do
         %x{#{GIT} cat-file -t #{git_describe}}.strip
       end
     end
@@ -47,7 +50,7 @@ module Pkg::Util
 
     # Return true if we're in a git repo, otherwise false
     def is_git_repo
-      in_project_root do
+      Pkg::Util.in_project_root do
         %x{#{GIT} rev-parse --git-dir > /dev/null 2>&1}
         $?.success?
       end
@@ -81,7 +84,7 @@ module Pkg::Util
 
     # This is a stub to ease testing...
     def run_git_describe_internal
-      in_project_root do
+      Pkg::Util.in_project_root do
         raw = %x{#{GIT} describe --tags --dirty 2>/dev/null}
         $?.success? ? raw : nil
       end
@@ -96,7 +99,7 @@ module Pkg::Util
     end
 
     def uname_r
-      uname = find_tool('uname', :required => true)
+      uname = Pkg::Util::Tool.find_tool('uname', :required => true)
       %x{#{uname} -r}.chomp
     end
 

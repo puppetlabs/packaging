@@ -1,6 +1,6 @@
 # Utility methods for handling system binaries
 
-module Pkg::Util
+module Pkg::Util::Tool
 
   #   Set up utility methods for handling system binaries
   #
@@ -26,6 +26,6 @@ module Pkg::Util
   #   Set up paths to system tools we use in the packaging repo
   #   no matter what distribution we're packaging for.
 
-  GIT = Pkg::Util.find_tool('git', :required => :true)
+  GIT = Pkg::Util::Tool.find_tool('git', :required => :true)
 
 end

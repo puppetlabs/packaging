@@ -8,7 +8,7 @@ module Pkg
     attr_reader :tar
 
     def initialize
-      @tar      = Pkg::Util.find_tool('tar', :required => true)
+      @tar      = Pkg::Util::Tool.find_tool('tar', :required => true)
       @project  = Pkg::Config.project
       @version  = Pkg::Config.version
       @files    = Pkg::Config.files
@@ -43,7 +43,7 @@ module Pkg
       # FileList and eliminate many lines of code and comment.
       cd Pkg::Config.project_root do
         patterns.each do |pattern|
-          if File.directory?(pattern) and not Pkg::Util.empty_dir?(pattern)
+          if File.directory?(pattern) and not Pkg::Util::File.empty_dir?(pattern)
             install << Dir[pattern + "/**/*"]
           else
             install << pattern
@@ -52,10 +52,10 @@ module Pkg
         install.flatten!
 
         # Transfer all the files and symlinks into the working directory...
-        install = install.select { |x| File.file?(x) or File.symlink?(x) or Pkg::Util.empty_dir?(x) }
+        install = install.select { |x| File.file?(x) or File.symlink?(x) or Pkg::Util::File.empty_dir?(x) }
 
         install.each do |file|
-          if Pkg::Util.empty_dir?(file)
+          if Pkg::Util::File.empty_dir?(file)
             mkpath(File.join(workdir, file), :verbose => false)
           else
             mkpath(File.dirname( File.join(workdir, file) ), :verbose => false)
@@ -78,7 +78,7 @@ module Pkg
         rel_path_to_erb = Pathname.new(t).relative_path_from(root).to_path
         rel_path_to_target = Pathname.new(target_file).relative_path_from(root).to_path
 
-        Pkg::Util.erb_file(File.join(workdir,rel_path_to_erb), File.join(workdir, rel_path_to_target), :remove_orig => true, :binding => Pkg::Config.get_binding)
+        Pkg::Util::File.erb_file(File.join(workdir,rel_path_to_erb), File.join(workdir, rel_path_to_target), :remove_orig => true, :binding => Pkg::Config.get_binding)
       end
     end
 
@@ -95,7 +95,7 @@ module Pkg
     end
 
     def pkg!
-      workdir = File.join(Pkg::Util.mktemp, "#{@project}-#{@version}")
+      workdir = File.join(Pkg::Util::File.mktemp, "#{@project}-#{@version}")
       mkpath workdir
       self.install_files_to workdir
       self.template(workdir)

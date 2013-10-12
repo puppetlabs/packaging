@@ -1,10 +1,10 @@
 # Utility methods for handling files and directories
 
-module Pkg::Util
+module Pkg::Util::File
 
   class << self
     def mktemp
-      mktemp = find_tool('mktemp', :required => true)
+      mktemp = Pkg::Util::Tool.find_tool('mktemp', :required => true)
       `#{mktemp} -d -t pkgXXXXXX`.strip
     end
 
@@ -14,7 +14,7 @@ module Pkg::Util
 
     def file_exists?(file, args={:required => false})
       exists = File.exist? file
-      if !file_exists and args[:required]
+      if !exists and args[:required]
         fail "Required file #{file} could not be found"
       end
       exists

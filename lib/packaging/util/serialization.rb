@@ -1,6 +1,6 @@
 # Utility methods for dealing with serialization of Config params
 
-module Pkg::Util
+module Pkg::Util::Serialization
   class << self
     require 'yaml'
 

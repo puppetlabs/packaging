@@ -75,9 +75,20 @@ module Pkg
         target_file = File.join(File.dirname(t), File.basename(t).sub(File.extname(t),""))
         root = Pathname.new(Pkg::Config.project_root)
 
+        #   We construct paths to the erb template and its proposed target file
+        #   relative to the project root, *not* fully qualified. This allows us
+        #   to, given a temporary workdir containing a copy of the project,
+        #   construct the full path to the erb and target file inside the
+        #   temporary workdir.
+        #
         rel_path_to_erb = Pathname.new(t).relative_path_from(root).to_path
         rel_path_to_target = Pathname.new(target_file).relative_path_from(root).to_path
 
+        #   What we pass to Pkg::util::File.erb_file are the paths to the erb
+        #   and target inside of a temporary project directory. We are, in
+        #   essence, templating "in place." This is why we remove the original
+        #   files - they're not the originals in the authoritative project
+        #   directory, but the originals in the temporary working copy.
         Pkg::Util::File.erb_file(File.join(workdir,rel_path_to_erb), File.join(workdir, rel_path_to_target), :remove_orig => true, :binding => Pkg::Config.get_binding)
       end
     end

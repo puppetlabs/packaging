@@ -75,10 +75,10 @@ module Pkg
         target_file = File.join(File.dirname(t), File.basename(t).sub(File.extname(t),""))
         root = Pathname.new(Pkg::Config.project_root)
 
-        rel_path_to_erb = Pathname.new(t).relative_path_from(root)
-        rel_path_to_target = Pathname.new(target_file).relative_path_from(root)
+        rel_path_to_erb = Pathname.new(t).relative_path_from(root).to_path
+        rel_path_to_target = Pathname.new(target_file).relative_path_from(root).to_path
 
-        Pkg::Util.erb_file(File.join(workdir,rel_path_to_erb.to_path), File.join(workdir, rel_path_to_target.to_path), :remove_orig => true, :binding => Pkg::Config.get_binding)
+        Pkg::Util.erb_file(File.join(workdir,rel_path_to_erb), File.join(workdir, rel_path_to_target), :remove_orig => true, :binding => Pkg::Config.get_binding)
       end
     end
 

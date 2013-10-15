@@ -42,33 +42,44 @@ This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed 
     <hudson.tasks.Shell>
       <command>#!/bin/bash
 set -e
-### We've retrieved the git bundle from the tarball build, so now we clone it
-### and use it to trigger our repo creation
-#
-# PROJECT_BUNDLE is a tarball containing a bundle file and git_repo is the
-# directory that will contain the git repository. First we untar the tarball
-# and then clone the git_bundle
+## We have to check if this has been triggered by a successful package build
+curl -s &quot;http://<%= "#{@build.jenkins_build_host}" %>/job/<%= "#{@build.project}-packaging-#{@build.build_date}-#{@build.ref}" %>/lastBuild/api/json&quot; | grep result\&quot;:\&quot;SUCCESS\&quot; > /dev/null
 
-[ -f &quot;PROJECT_BUNDLE&quot; ] || exit 1
+PACKAGE_BUILD_RESULT=$?
 
-[ -d project ] &amp;&amp; rm -rf project
+if [ $PACKAGE_BUILD_RESULT -eq 0 ] ; then
+  echo &quot;Detected upstream package build success. Building repos.&quot;
+  ### We've retrieved the git bundle from the tarball build, so now we clone it
+  ### and use it to trigger our repo creation
+  #
+  # PROJECT_BUNDLE is a tarball containing a bundle file and git_repo is the
+  # directory that will contain the git repository. First we untar the tarball
+  # and then clone the git_bundle
 
-mkdir project &amp;&amp; tar -xzf PROJECT_BUNDLE -C project/
+  [ -f &quot;PROJECT_BUNDLE&quot; ] || exit 1
 
-pushd project
-  git clone --recursive $(ls) git_repo
+  [ -d project ] &amp;&amp; rm -rf project
 
-  pushd git_repo
+  mkdir project &amp;&amp; tar -xzf PROJECT_BUNDLE -C project/
 
-    ### Clone the packaging repo
-    rake package:bootstrap --trace
+  pushd project
+    git clone --recursive $(ls) git_repo
 
-    ### Run repo creation
-    rake pl:jenkins:rpm_repos --trace
-    rake pl:jenkins:deb_repos --trace
+    pushd git_repo
 
+      ### Clone the packaging repo
+      rake package:bootstrap --trace
+
+      ### Run repo creation
+      rake pl:jenkins:rpm_repos --trace
+      rake pl:jenkins:deb_repos --trace
+
+    popd
   popd
-popd
+else
+  echo &quot;Detected upstream package build failure. Failing repo creation.&quot;
+  exit 1
+fi
 
 </command>
     </hudson.tasks.Shell>

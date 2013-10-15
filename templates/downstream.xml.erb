@@ -23,9 +23,21 @@ When DOWNSTREAM_JOB is passed to the packaging repo, this job is created to wrap
   <builders>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
+## We have to check if this has been triggered by a successful package and repo build
+curl -s &quot;http://<%= "#{@build.jenkins_build_host}" %>/job/<%= "#{@build.project}-repo-#{@build.build_date}-#{@build.ref}" %>/lastBuild/api/json&quot; | grep result\&quot;:\&quot;SUCCESS\&quot; &gt; /dev/null
+
+UPSTREAM_BUILD_STATUS=$?
+
 set -e
+
+if [ $UPSTREAM_BUILD_STATUS -eq 0 ] ; then
+  UPSTREAM_BUILD_STATUS=&quot;success&quot;
+else
+  UPSTREAM_BUILD_STATUS=&quot;failure&quot;
+fi
+
 # This URI was passed in as an argument to the original rake package call
-curl -i &apos;<%= escape_html(ENV['DOWNSTREAM_JOB']) %>&apos;</command>
+curl --fail -i &quot;<%= escape_html(add_param_to_uri(ENV['DOWNSTREAM_JOB'], "PACKAGE_BUILD_STATUS=$UPSTREAM_BUILD_STATUS")) %>&quot;</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

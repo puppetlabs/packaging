@@ -88,9 +88,9 @@ fi
     <hudson.tasks.BuildTrigger>
       <childProjects><%= "#{@build.project}-downstream-#{@build.build_date}-#{@build.ref}" %></childProjects>
       <threshold>
-        <name>SUCCESS</name>
-        <ordinal>0</ordinal>
-        <color>BLUE</color>
+        <name>FAILURE</name>
+        <ordinal>2</ordinal>
+        <color>RED</color>
       </threshold>
     </hudson.tasks.BuildTrigger>
   </publishers><% else %>

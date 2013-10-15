@@ -41,11 +41,12 @@ This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed 
     </hudson.plugins.copyartifact.CopyArtifact>
     <hudson.tasks.Shell>
       <command>#!/bin/bash
-set -e
 ## We have to check if this has been triggered by a successful package build
 curl -s &quot;http://<%= "#{@build.jenkins_build_host}" %>/job/<%= "#{@build.project}-packaging-#{@build.build_date}-#{@build.ref}" %>/lastBuild/api/json&quot; | grep result\&quot;:\&quot;SUCCESS\&quot; > /dev/null
 
 PACKAGE_BUILD_RESULT=$?
+
+set -e
 
 if [ $PACKAGE_BUILD_RESULT -eq 0 ] ; then
   echo &quot;Detected upstream package build success. Building repos.&quot;

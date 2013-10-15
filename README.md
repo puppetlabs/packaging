@@ -123,7 +123,8 @@ specified in the build-data file, and appropriate membership in the build
 groups, e.g. to use mock on the builder, membership in the mock group. This is
 a major hurdle, and is resolved with the `jenkins` tasks below.
 
-## `:jenkins:` tasks
+## legacy `:jenkins:` workflow tasks
+(Deprecated - see "dyamic jenkins task workflow" below)
 Jenkins tasks are similar to the `:remote:` tasks, but they do not require ssh
 access to the builders. They do require being on the local network - the
 jenkins instance that performs package builds is an internal server only,
@@ -215,11 +216,17 @@ To gather metrics related to a Jenkins build, the Groovy Postbuild plugin is use
 For tasks carried out on the static Jenkins job, the script must be manually added to the job's
 configuration. The script in its entirety can be seen [here.](https://github.com/Whopper92/buildboard#groovyScript)
 
-The second, more recent, jenkins-based workflow is for initiating the
-"uber_build", or a package build for all of our target platforms. This workflow
-doesn't actually use a static job on the jenkins-server. Instead it _creates_
-the jenkins jobs for you, on-demand. Specifically, it creates two jenkins-jobs,
-and can create an optional third.
+## dynamic `:jenkins:` task workflow
+
+The recommended and far simpler jenkins-based workflow is for initiating the
+"uber_build", or a package build for all of our target platforms.
+
+The uber_build is invoked as "pl:jenkins:uber_build" or "pe:jenkins:uber_build"
+depending on if this is a FOSS or PE package.
+
+This workflow doesn't actually use a static job on the jenkins-server. Instead
+it _creates_ the jenkins jobs for you, on-demand. Specifically, it creates two
+jenkins-jobs, and can create an optional third.
 
 The first job is a matrix job, the cells of which are individual package tasks
 for all of the build targets. This job takes four parameters:
@@ -243,8 +250,8 @@ gathering is dynamically passed to each job.
 This first job clones the git bundle passed in as a parameter, then clones the
 packaging repo (rake package:bootstrap) and for every cell in its matrix
 performs a package build for a specific target (e.g. rake pl:deb
-COW=base-lucid-i386.cow). If all cells in the matrix complete successfully (if
-all packages build), this job automatically triggers the second of the new jobs
+COW=base-lucid-i386.cow). Once all cells in the matrix complete (either succeed
+or fail), this job automatically triggers the second of the new jobs
 as a downstream job.
 
 To receive an email notification from jenkins about the status of the packaging
@@ -257,15 +264,34 @@ The second job is an automatic repository creation task for this git repo.
 Specifically, the job copies the git bundle from the packaging job and clones
 it, and uses the git information in the git bundle to clone the packaging repo
 and invoke the repository creation jobs `pl:jenkins:rpm_repos` and
-`pl:jenkins:deb_repos`.
+`pl:jenkins:deb_repos`. The job will always be invoked, but will only actually
+create repos if the upstream packaging job actually succeeded.
 
 The third job is only created _if_ the environment variable
 `DOWNSTREAM_JOB=<job_url>` was passed to the initial "pl:jenkins:uber_build"
 invocation. This third job takes the value assigned to `DOWNSTREAM_JOB` and
 creates a proxy jenkins job with a single build step, a curl call to this
 value, presumably a url to a jenkins job to trigger programmatically.
-Once the repos have successfully been created by the second job, the third job
-will automatically trigger as a downstream job.
+
+An important note about `DOWNSTREAM_JOB`: `DOWNSTREAM_JOB` in the dynamic jenkins
+workflow is _always_ invoked if it is passed in as an environment variable.
+However, it is also appended with an additional parameter, `PACKAGE_BUILD_STATUS`,
+which will be the string "success" if package and repo builds succeeded, or
+"failure" if package or repo builds failed. By modifying the actual downstream
+jenkins job to accept a string parameter of `PACKAGE_BUILD_STATUS`, one can
+switch on the success or failure of the packaging job, responding
+  appropriately.
+
+E.g., a job url:
+http://jenkins.example.net/job/downstream/buildWithParameters?FOO=bar
+
+in the success case will be transformed into
+
+http://jenkins.example.net/job/downstream/buildWithParameters?FOO=bar&PACKAGE_BUILD_STATUS=success
+
+and in the failure case transformed into
+
+http://jenkins.example.net/job/downstream/buildWithParameters?FOO=bar&PACKAGE_BUILD_STATUS=failure
 
 All 3 jobs are configured by default for removal by jenkins after 3 days, to
 avoid clutter.
@@ -273,6 +299,7 @@ avoid clutter.
 The goal is to move toward migrating all of the jenkins tasks from the first
 workflow, using a static job that is called many times per package, to this
 second workflow of creating the jobs on demand.
+
 
 ## Task Explanations
 For a listing of all available tasks and their functions, see the [Task

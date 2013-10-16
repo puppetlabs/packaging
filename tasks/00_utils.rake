@@ -93,7 +93,7 @@ end
 
 def rsync_to *args
   check_tool('rsync')
-  flags = "-rHlv -O --no-perms --no-owner --no-group"
+  flags = "-rHlv -O --no-perms --no-owner --no-group --ignore-existing"
   source  = args[0]
   target  = args[1]
   dest    = args[2]

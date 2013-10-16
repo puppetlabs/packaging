@@ -2,10 +2,14 @@ namespace :pl do
   desc "Ship mocked rpms to #{@build.yum_host}"
   task :ship_rpms do
     retry_on_fail(:times => 3) do
+      pkgs = Dir["pkg/el/**/*.rpm"].map { |f|  "'#{f.gsub("pkg/el/", "/opt/repository/yum/el")}'"}
       rsync_to('pkg/el', @build.yum_host, @build.yum_repo_path)
+      remote_set_immutable(@build.yum_host, pkgs)
     end
     retry_on_fail(:times => 3) do
+      pkgs = Dir["pkg/fedora/**/*.rpm"].map { |f|  "'#{f.gsub("pkg/fedora/", "/opt/repository/yum/fedora")}'"}
       rsync_to('pkg/fedora', @build.yum_host, @build.yum_repo_path)
+      remote_set_immutable(@build.yum_host, pkgs)
     end
   end
 

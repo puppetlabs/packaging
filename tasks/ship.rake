@@ -3,7 +3,7 @@ namespace :pl do
   task :ship_rpms do
     ["el", "fedora"].each do |dist|
       retry_on_fail(:times => 3) do
-        pkgs = Dir["pkg/#{dist}/**/*.rpm"].map { |f|  "'#{f.gsub("pkg/#{dist}/", "#{@build.yum_repo_path}/#{dist}/")}'"}
+        pkgs = Dir["pkg/#{dist}/**/*.rpm"].map { |f| "'#{f.gsub("pkg/#{dist}/", "#{@build.yum_repo_path}/#{dist}/")}'"}
         rsync_to("pkg/#{dist}", @build.yum_host, @build.yum_repo_path)
         remote_set_immutable(@build.yum_host, pkgs)
       end

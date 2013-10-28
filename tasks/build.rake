@@ -93,6 +93,7 @@ module Build
                       :tarball_path,
                       :task,
                       :team,
+                      :templates,
                       :version,
                       :version_file,
                       :yum_host,

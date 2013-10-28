@@ -437,6 +437,10 @@ files: '[A-Z]* ext lib bin spec acceptance_tests'
 # 'tar\_excludes' only needs to include any undesired subdirectories/files of the 'files'
 # list to exclude
 tar_excludes: 'ext/packaging lib/some_excluded_file'
+# Array of templates or globs of templates to evaluate
+templates:
+  - ext/redhat/project.spec.erb
+  - ext/templates/**/*.erb
 # files to be packaged into a gem
 gem_files: '{bin,lib}/**/* CHANGELOG COPYING README.md LICENSE'
 # To exclude specific files from inclusion in a gem:

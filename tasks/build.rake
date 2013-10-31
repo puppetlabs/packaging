@@ -97,6 +97,7 @@ module Build
                       :update_version_file,
                       :version,
                       :version_file,
+                      :version_strategy,
                       :yum_host,
                       :yum_repo_path]
 

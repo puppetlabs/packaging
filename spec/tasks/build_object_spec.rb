@@ -94,6 +94,7 @@ describe Build::BuildInstance do
                   :tar_host,
                   :tarball_path,
                   :team,
+                  :templates,
                   :version,
                   :version_file,
                   :yum_host,

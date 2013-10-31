@@ -51,8 +51,12 @@ def mock_artifact(mock_config, cmd_args)
 
     # Any useful info has now been gleaned from the logs in the case of a
     # failure, so we can safely remove basedir if this is a randomized mockroot
-    # build.
-    rm_r basedir if randomize
+    # build. Scarily enough, because of mock permissions, we can't actually
+    # just remove it, we have to sudo remove it.
+
+    if randomize and basedir and File.directory?(basedir)
+      sh "sudo -n rm -r #{basedir}"
+    end
 
     raise error
   ensure

@@ -32,6 +32,10 @@ def mock_artifact(mock_config, cmd_args)
 
   begin
     sh "#{mock} -r #{mock_config} #{configdir_arg} #{cmd_args}"
+
+    # Return a FileList of the build artifacts
+    return FileList[File.join(basedir, mock_config, 'result','*.rpm')]
+
   rescue RuntimeError => error
     build_log = File.join(basedir, mock_config, 'result', 'build.log')
     root_log  = File.join(basedir, mock_config, 'result', 'root.log')
@@ -44,14 +48,20 @@ def mock_artifact(mock_config, cmd_args)
         STDERR.puts File.read(root_log)
       end
     end
+
+    # Any useful info has now been gleaned from the logs in the case of a
+    # failure, so we can safely remove basedir if this is a randomized mockroot
+    # build.
+    rm_r basedir if randomize
+
     raise error
+  ensure
+    # Unlike basedir, which we keep in the success case, we don't need
+    # configdir anymore either way, so we always clean it up if we're using
+    # randomized mockroots.
+    #
+    rm_r configdir if randomize
   end
-
-  # Clean up the configdir
-  rm_r configdir unless configdir.nil?
-
-  # Return a FileList of the build artifacts
-  FileList[File.join(basedir, mock_config, 'result','*.rpm')]
 end
 
 # Use mock to build an SRPM

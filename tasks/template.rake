@@ -15,8 +15,12 @@ namespace :package do
 
     templates.each do |template|
       # process the template, stripping off the ERB extension
-      erb(template, template[0..-5])
-      rm_f(template)
+      if File.extname(template) == ".erb"
+        erb(template, template.gsub(/\.erb$/,""))
+        rm_f(template)
+      else
+        STDERR.puts "Skipping #{template} because it doesn't look like an erb template"
+      end
     end
   end
 end

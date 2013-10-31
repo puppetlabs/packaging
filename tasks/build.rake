@@ -94,6 +94,7 @@ module Build
                       :task,
                       :team,
                       :templates,
+                      :update_version_file,
                       :version,
                       :version_file,
                       :yum_host,

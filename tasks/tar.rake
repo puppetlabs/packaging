@@ -72,7 +72,7 @@ namespace :package do
     #
     # If you set this the version will only be modified in the temporary copy,
     # with the intent that it never change the official source tree.
-    ENV['NEW_STYLE_PACKAGE'] and Rake::Task["package:versionbump"].invoke(workdir)
+    Rake::Task["package:versionbump"].invoke(workdir) if @build.update_version_file
 
     cd "pkg" do
       sh "#{tar} --exclude #{tar_excludes.join(" --exclude ")} -zcf '#{@build.project}-#{@build.version}.tar.gz' #{@build.project}-#{@build.version}"

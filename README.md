@@ -441,6 +441,8 @@ tar_excludes: 'ext/packaging lib/some_excluded_file'
 templates:
   - ext/redhat/project.spec.erb
   - ext/templates/**/*.erb
+# Boolean value of whether or not to automatically update the version file before packaging (defaults to false)
+update_version_file: true
 # files to be packaged into a gem
 gem_files: '{bin,lib}/**/* CHANGELOG COPYING README.md LICENSE'
 # To exclude specific files from inclusion in a gem:

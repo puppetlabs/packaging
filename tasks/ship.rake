@@ -61,10 +61,20 @@ namespace :pl do
     end
   end if @build.build_ips
 
-  desc "Ship built gem to rubygems"
-  task :ship_gem do
-    ship_gem("pkg/#{@build.project}-#{@build.gemversion}.gem")
-  end if @build.build_gem
+  # We want to ship a gem only for projects that build gems
+  if @build.build_gem
+    desc "Ship built gem to rubygems"
+    task :ship_gem do
+      # Even if a project builds a gem, if it uses the odd_even strategy, we only
+      # want to ship final gems because otherwise a development gem would be
+      # preferred over the last final gem
+      if @build.version_strategy != "odd_even" || is_final?
+        ship_gem("pkg/#{@build.project}-#{@build.gemversion}.gem")
+      else
+        STDERR.puts "Not shipping development gem using odd_even strategy for the sake of your users."
+      end
+    end
+  end
 
   desc "ship apple dmg to #{@build.yum_host}"
   task :ship_dmg => 'pl:fetch' do
@@ -90,7 +100,7 @@ namespace :pl do
       Rake::Task["pl:ship_dmg"].execute if @build.build_dmg
       Rake::Task["pl:ship_tar"].execute
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
-      add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => is_rc?) if @build.benchmark
+      add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (! is_final?)) if @build.benchmark
       post_shipped_metrics if @build.benchmark
     end
   end

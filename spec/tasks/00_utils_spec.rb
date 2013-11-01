@@ -14,16 +14,18 @@ describe "00_utils" do
       :get_rpmversion             => '0.7.0',
       :get_rpmrelease             => '1',
       :is_rc?                     => false,
+      :is_odd?                    => true,
     },
-    '0.7.0rc10'                    => {
-      :git_describe_version       => %w{0.7.0rc10},
-      :get_dash_version           => '0.7.0rc10',
-      :get_ips_version            => '0.7.0rc10,3.14159-0',
-      :get_dot_version            => '0.7.0rc10',
-      :get_debversion             => '0.7.0-0.1rc10puppetlabs1',
-      :get_rpmversion             => '0.7.0',
+    '0.8.0rc10'                   => {
+      :git_describe_version       => %w{0.8.0rc10},
+      :get_dash_version           => '0.8.0rc10',
+      :get_ips_version            => '0.8.0rc10,3.14159-0',
+      :get_dot_version            => '0.8.0rc10',
+      :get_debversion             => '0.8.0-0.1rc10puppetlabs1',
+      :get_rpmversion             => '0.8.0',
       :get_rpmrelease             => '0.1rc10',
       :is_rc?                     => true,
+      :is_odd?                    => false,
     },
     '0.7.0-rc1'                   => {
       :git_describe_version       => %w{0.7.0 rc1},
@@ -34,26 +36,29 @@ describe "00_utils" do
       :get_rpmversion             => '0.7.0',
       :get_rpmrelease             => '0.1rc1',
       :is_rc?                     => true,
+      :is_odd?                    => true,
     },
-    '0.7.0-rc1-63-ge391f55'       => {
-      :git_describe_version       => %w{0.7.0 rc1 63},
-      :get_dash_version           => '0.7.0-rc1-63',
-      :get_ips_version            => '0.7.0,3.14159-63',
-      :get_dot_version            => '0.7.0.rc1.63',
-      :get_debversion             => '0.7.0-0.1rc1.63puppetlabs1',
-      :get_rpmversion             => '0.7.0',
+    '0.4.0-rc1-63-ge391f55'       => {
+      :git_describe_version       => %w{0.4.0 rc1 63},
+      :get_dash_version           => '0.4.0-rc1-63',
+      :get_ips_version            => '0.4.0,3.14159-63',
+      :get_dot_version            => '0.4.0.rc1.63',
+      :get_debversion             => '0.4.0-0.1rc1.63puppetlabs1',
+      :get_rpmversion             => '0.4.0',
       :get_rpmrelease             => '0.1rc1.63',
       :is_rc?                     => true,
+      :is_odd?                    => false,
     },
-    '0.7.0-rc1-63-ge391f55-dirty' => {
-      :git_describe_version       => %w{0.7.0 rc1 63 dirty},
-      :get_dash_version           => '0.7.0-rc1-63-dirty',
-      :get_ips_version            => '0.7.0,3.14159-63-dirty',
-      :get_dot_version            => '0.7.0.rc1.63.dirty',
-      :get_debversion             => '0.7.0-0.1rc1.63dirtypuppetlabs1',
-      :get_rpmversion             => '0.7.0',
+    '0.6.0-rc1-63-ge391f55-dirty' => {
+      :git_describe_version       => %w{0.6.0 rc1 63 dirty},
+      :get_dash_version           => '0.6.0-rc1-63-dirty',
+      :get_ips_version            => '0.6.0,3.14159-63-dirty',
+      :get_dot_version            => '0.6.0.rc1.63.dirty',
+      :get_debversion             => '0.6.0-0.1rc1.63dirtypuppetlabs1',
+      :get_rpmversion             => '0.6.0',
       :get_rpmrelease             => '0.1rc1.63dirty',
       :is_rc?                     => true,
+      :is_odd?                    => false,
 
     },
     '0.7.0-63-ge391f55'           => {
@@ -65,6 +70,7 @@ describe "00_utils" do
       :get_rpmversion             => '0.7.0.63',
       :get_rpmrelease             => '1',
       :is_rc?                     => false,
+      :is_odd?                    => true,
 
     },
     '0.7.0-63-ge391f55-dirty'     => {
@@ -76,6 +82,7 @@ describe "00_utils" do
       :get_rpmversion             => '0.7.0.63.dirty',
       :get_rpmrelease             => '1',
       :is_rc?                     => false,
+      :is_odd?                    => true,
     },
   }
 

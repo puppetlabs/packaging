@@ -429,6 +429,12 @@ summary: 'Light weight hierarchical data store'
 description: 'A pluggable data store for hierarcical data'
 # file containing hard coded version information, if present
 version_file: '/lib/hiera.rb'
+# A string indicating the version strategy for the project (one of 'odd_even' or 'rc_final'), defaults to rc_final
+# odd_even is a final release when the minor version is even, and a development release when it is odd
+# rc_final is a final release when there is no rc at the end of the version string, and a development release when there is
+version_strategy: 'rc_final'
+# Boolean value of whether or not to automatically update the version file before packaging (defaults to false)
+update_version_file: true
 # files and gem\_files are space separated lists
 # files to be packaged into a tarball and released with deb/rpm
 files: '[A-Z]* ext lib bin spec acceptance_tests'

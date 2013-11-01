@@ -152,7 +152,7 @@ def build_rpm_with_mock(mocks)
   mocks.split(' ').each do |mock_config|
     family  = mock_el_family(mock_config)
     version = mock_el_ver(mock_config)
-    subdir  = is_rc? ? 'devel' : 'products'
+    subdir  = is_final? ? 'products' : 'devel'
     bench = Benchmark.realtime do
       # Set up the rpmbuild dir in a temp space, with our tarball and spec
       workdir = prep_rpm_build_dir
@@ -168,15 +168,6 @@ def build_rpm_with_mock(mocks)
 
       rpms.each do |rpm|
         rpm.strip!
-        unless ENV['RC_OVERRIDE'] == '1'
-          if is_rc? == FALSE and rpm =~ /[0-9]+rc[0-9]+\./
-            puts "It looks like you might be trying to ship an RC to the production repos. Leaving #{rpm}. Pass RC_OVERRIDE=1 to override."
-            next
-          elsif is_rc? and rpm !~ /[0-9]+rc[0-9]+\./
-            puts "It looks like you might be trying to ship a production release to the development repos. Leaving #{rpm}. Pass RC_OVERRIDE=1 to override."
-            next
-          end
-        end
 
         if @build.build_pe
           %x{mkdir -p pkg/pe/rpm/#{family}-#{version}-{srpms,i386,x86_64}}

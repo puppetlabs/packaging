@@ -62,6 +62,16 @@ if @build.build_gem
     task :gem => [ "clean" ] do
       bench = Benchmark.realtime do
         gem_task.define
+
+        # This is to support packages that only burn-in the version number in the
+        # release artifact, rather than storing it two (or more) times in the
+        # version control system.  Razor is a good example of that; see
+        # https://github.com/puppetlabs/Razor/blob/master/lib/project_razor/version.rb
+        # for an example of that this looks like.
+        #
+        # If you set this the version will only be modified in the temporary copy,
+        # with the intent that it never change the official source tree.
+        Rake::Task["package:versionbump"].invoke(workdir) if @build.update_version_file
         Rake::Task[:gem].invoke
         rm_rf "pkg/#{@build.project}-#{@build.gemversion}"
       end

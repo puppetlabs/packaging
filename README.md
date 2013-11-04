@@ -334,17 +334,20 @@ spec file, and an osx preflight and plist.
 
 The top level Rakefile or a separate task file in the project should have the following added:
 
+(this assumes RAKE\_ROOT is defined in the top-level Rakefile using something like the following)
 ```ruby
-Dir['ext/packaging/tasks/**/*.rake'].sort.each { |t| load t }
+RAKE_ROOT = File.expand_path(File.dirname(__FILE__))
+```
 
-build_defs_file = 'ext/build_defaults.yaml'
+```ruby
+build_defs_file = File.join(RAKE_ROOT, 'ext', 'build_defaults.yaml')
 if File.exist?(build_defs_file)
   begin
     require 'yaml'
     @build_defaults ||= YAML.load_file(build_defs_file)
   rescue Exception => e
     STDERR.puts "Unable to load yaml from #{build_defs_file}:"
-    STDERR.puts e
+    raise e
   end
   @packaging_url  = @build_defaults['packaging_url']
   @packaging_repo = @build_defaults['packaging_repo']
@@ -354,19 +357,24 @@ if File.exist?(build_defs_file)
   namespace :package do
     desc "Bootstrap packaging automation, e.g. clone into packaging repo"
     task :bootstrap do
-      if File.exist?("ext/#{@packaging_repo}")
+      if File.exist?(File.join(RAKE_ROOT, "ext", @packaging_repo))
         puts "It looks like you already have ext/#{@packaging_repo}. If you don't like it, blow it away with package:implode."
       else
-        cd 'ext' do
+        cd File.join(RAKE_ROOT, 'ext') do
           %x{git clone #{@packaging_url}}
         end
       end
     end
     desc "Remove all cloned packaging automation"
     task :implode do
-      rm_rf "ext/#{@packaging_repo}"
+      rm_rf File.join(RAKE_ROOT, "ext", @packaging_repo)
     end
   end
+end
+
+begin
+  load File.join(RAKE_ROOT, 'ext', 'packaging', 'packaging.rake')
+rescue LoadError
 end
 ```
 

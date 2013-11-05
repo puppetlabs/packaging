@@ -317,6 +317,20 @@ try {
     <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.3.1">
       <colorMapName>xterm</colorMapName>
     </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+<% if @build.redis_hostname -%>
+    <jenkins.plugins.logstash.LogstashBuildWrapper plugin="logstash@0.8.0">
+      <redis>
+        <host><%=@build.redis_hostname%></host>
+        <port>6379</port>
+        <numb>1</numb>
+        <pass></pass>
+        <dataType>list</dataType>
+        <key>logstash</key>
+        <type>jenkins</type>
+      </redis>
+      <useRedis>true</useRedis>
+    </jenkins.plugins.logstash.LogstashBuildWrapper>
+<% end -%>
   </buildWrappers>
   <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
     <runSequentially>false</runSequentially>

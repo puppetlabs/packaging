@@ -81,6 +81,7 @@ module Build
                       :privatekey_pem,
                       :random_mockroot,
                       :rc_mocks,
+                      :redis_hostname,
                       :release,
                       :rpm_build_host,
                       :rpmrelease,

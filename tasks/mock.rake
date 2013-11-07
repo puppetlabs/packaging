@@ -41,12 +41,11 @@ def mock_artifact(mock_config, cmd_args)
     root_log  = File.join(basedir, mock_config, 'result', 'root.log')
     content   = File.read(build_log) if File.readable?(build_log)
 
+    if File.readable?(root_log)
+      STDERR.puts File.read(root_log)
+    end
     if content and content.lines.count > 2
       STDERR.puts content
-    else
-      if File.readable?(root_log)
-        STDERR.puts File.read(root_log)
-      end
     end
 
     # Any useful info has now been gleaned from the logs in the case of a

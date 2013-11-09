@@ -43,6 +43,7 @@ module Build
                       :gem_files,
                       :gem_forge_project,
                       :gem_name,
+                      :gem_platform_dependencies,
                       :gem_rdoc_options,
                       :gem_require_path,
                       :gem_runtime_dependencies,

@@ -90,6 +90,20 @@ end
 # @tar_host isn't set.
 @build.tar_host ||= @build.yum_host
 
+# Though undocumented, we had specified gem_devel_dependencies as an allowed
+# parameter for @build, and it was supposed to correspond with
+# gem_development_dependencies in a gem spec. It was dumb to call it 'devel'
+# instead of 'development', which would have been a cleaner mapping. Here, we
+# deprecate this.
+if @build.gem_devel_dependencies
+  @build.gem_development_dependencies = @build.gem_devel_dependencies
+  warn "
+  DEPRECATED, 9-Nov-2013: 'gem_devel_dependencies' has been replaced with
+  'gem_development_dependencies.' Please update this field in your
+  project_data.yaml
+  "
+end
+
 if @build.debug
   @build.print_params
 end

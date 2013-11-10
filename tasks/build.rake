@@ -38,6 +38,7 @@ module Build
                       :gem_dependencies,
                       :gem_description,
                       :gem_devel_dependencies,
+                      :gem_development_dependencies,
                       :gem_excludes,
                       :gem_executables,
                       :gem_files,

@@ -63,9 +63,9 @@ if @build.build_gem
       spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => :runtime)
     end unless @build.gem_runtime_dependencies.nil?
 
-    @build.gem_devel_dependencies.each do |gem, version|
-      spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => :dependency)
-    end unless @build.gem_devel_dependencies.nil?
+    @build.gem_development_dependencies.each do |gem, version|
+      spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => :development)
+    end unless @build.gem_development_dependencies.nil?
     spec
   end
 
@@ -96,7 +96,7 @@ if @build.build_gem
         when "gem_development_dependencies"
           "development"
         else
-          fail "Platform specific gem dependency type must be 'development' or 'runtime', not '#{type}'"
+          fail "Platform specific gem dependency type must be 'gem_runtime_dependencies' or 'gem_development_dependencies', not '#{type}'"
         end
         gems.each do |gem, version|
           spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => t)

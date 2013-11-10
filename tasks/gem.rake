@@ -85,10 +85,19 @@ if @build.build_gem
     create_gem(spec, "#{@build.project}-#{@build.gemversion}")
   end
 
+  def unknown_gems_platform?(platform)
+    return true if platform.os == "unknown"
+    false
+  end
+
   def create_platform_specific_gems
     @build.gem_platform_dependencies.each do |platform, dependency_hash|
       spec = create_default_gem_spec
-      spec.platform = Gem::Platform.new(platform)
+      pf = Gem::Platform.new(platform)
+      fail "
+        Platform: '#{platform}' is not recognized by rubygems.
+        This is probably an erroneous 'gem_platform_dependencies' entry!" if unknown_gems_platform?(pf)
+      spec.platform = pf
       dependency_hash.each do |type, gems|
         t = case type
         when "gem_runtime_dependencies"

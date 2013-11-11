@@ -476,6 +476,19 @@ gem_runtime_dependencies:
   hiera-json:
 gem_development_dependencies:
   facter: '>= 1.6.11'
+# To add gem dependencies which only apply to a specific platform, add the key "gem_platform_dependencies".
+# The first key under the gem_platform_dependencies has to be a value that
+# corresponds to a value of RUBY_PLATFORM. The subkeys are the same as the
+# top-level gem dependency keys:
+gem_platform_dependencies:
+  x86-mingw32:
+    gem_runtime_dependencies:
+      win32process: '~> 0.6.5'
+    gem_development_dependencies:
+      rake: '~> 0.9.0'
+  x86_64-darwin:
+    gem_runtime_dependencies:
+      CFPropertyList: '~> 2.2.4'
 # rdoc options as an array
 gem_rdoc_options:
   - --line-numbers

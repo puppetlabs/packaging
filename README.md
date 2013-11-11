@@ -451,7 +451,9 @@ files: '[A-Z]* ext lib bin spec acceptance_tests'
 # 'tar\_excludes' only needs to include any undesired subdirectories/files of the 'files'
 # list to exclude
 tar_excludes: 'ext/packaging lib/some_excluded_file'
-# Array of templates or globs of templates to evaluate
+# Array of templates or globs of templates to evaluate. Note that without this key, the packaging will
+# default to searching for any files in `ext` with the extension '.erb' and evaluate them. When this
+# key is supplied, its values override the defaults, and all desired erb files must be specified with a path or glob.
 templates:
   - ext/redhat/project.spec.erb
   - ext/templates/**/*.erb

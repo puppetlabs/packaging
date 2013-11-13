@@ -3,11 +3,11 @@ namespace :package do
   task :template, :workdir do |t, args|
     workdir = args.workdir
 
-    if @build.templates
-      if @build.templates.is_a?(Array)
-        templates = FileList[@build.templates.map {|path| File.join(workdir, path)}]
+    if Pkg::Config.templates
+      if Pkg::Config.templates.is_a?(Array)
+        templates = FileList[Pkg::Config.templates.map {|path| File.join(workdir, path)}]
       else
-        STDERR.puts "templates must be an Array, not '#{@build.templates.class}'"
+        STDERR.puts "templates must be an Array, not '#{Pkg::Config.templates.class}'"
       end
     else
       templates = FileList["#{workdir}/ext/**/*.erb"].exclude(/#{workdir}\/ext\/(packaging|osx)/)

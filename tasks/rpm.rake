@@ -1,8 +1,8 @@
 def prep_rpm_build_dir
   temp = Pkg::Util::File.mktemp
   mkdir_pr temp, "#{temp}/SOURCES", "#{temp}/SPECS"
-  cp_pr FileList["pkg/#{@build.project}-#{@build.version}.tar.gz*"], "#{temp}/SOURCES"
-  Pkg::Util::File.erb_file "ext/redhat/#{@build.project}.spec.erb", "#{temp}/SPECS/#{@build.project}.spec", nil, :binding => Pkg::Config.get_binding
+  cp_pr FileList["pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*"], "#{temp}/SOURCES"
+  Pkg::Util::File.erb_file "ext/redhat/#{Pkg::Config.project}.spec.erb", "#{temp}/SPECS/#{Pkg::Config.project}.spec", nil, :binding => Pkg::Config.get_binding
   temp
 end
 
@@ -23,10 +23,10 @@ def build_rpm(buildarg = "-bs")
   if buildarg == '-ba'
     mkdir_p 'pkg/rpm'
   end
-  if @build.sign_tar
+  if Pkg::Config.sign_tar
     Rake::Task["pl:sign_tar"].invoke
   end
-  sh "rpmbuild #{args} #{buildarg} --nodeps #{workdir}/SPECS/#{@build.project}.spec"
+  sh "rpmbuild #{args} #{buildarg} --nodeps #{workdir}/SPECS/#{Pkg::Config.project}.spec"
   mv FileList["#{workdir}/SRPMS/*.rpm"], "pkg/srpm"
   if buildarg == '-ba'
     mv FileList["#{workdir}/RPMS/*/*.rpm"], "pkg/rpm"

@@ -1,6 +1,6 @@
 # This is an optional pre-tar-task, so we only want to present it if we're
 # using it
-if @build.pre_tar_task
+if Pkg::Config.pre_tar_task
   namespace :package do
     desc "vendor gems required by project"
     task :vendor_gems do

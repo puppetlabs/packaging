@@ -16,13 +16,13 @@ namespace :pl do
       target = args.target || "artifacts"
       invoke_task("pl:fetch")
       mkdir_p 'pkg'
-      package_url = "http://#{@build.builds_server}/#{@build.project}/#{@build.ref}/#{target}"
+      package_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}"
       if wget=Pkg::Util::Tool.find_tool("wget")
         sh "#{wget} -r -np -nH --cut-dirs 3 -P pkg --reject 'index*' #{package_url}/"
       else
-        warn "Could not find `wget` tool. Falling back to rsyncing from #{@build.distribution_server}"
+        warn "Could not find `wget` tool. Falling back to rsyncing from #{Pkg::Config.distribution_server}"
         begin
-          rsync_from("#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}/#{target}/", @build.distribution_server, "pkg/")
+          rsync_from("#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}/", Pkg::Config.distribution_server, "pkg/")
         rescue
           fail "Couldn't download packages from distribution server. Try installing wget!"
         end
@@ -32,7 +32,7 @@ namespace :pl do
   end
 end
 
-if @build.build_pe
+if Pkg::Config.build_pe
   namespace :pe do
     namespace :jenkins do
       desc "Retrieve packages from the distribution server\. Check out commit to retrieve"

@@ -6,7 +6,7 @@ namespace :pl do
     if confirm_ship(FileList["pkg/*.gem"])
       invoke_task("pl:ship_gem")
     end
-  end if @build.build_gem
+  end if Pkg::Config.build_gem
 
   task :release_deb_rc do
     deprecate("pl:release_deb_rc", "pl:release_deb")
@@ -80,7 +80,7 @@ namespace :pl do
       if confirm_ship(FileList["pkg/apple/*.dmg"])
         Rake::Task["pl:ship_dmg"].execute
       end
-    end if @build.build_dmg
+    end if Pkg::Config.build_dmg
 
     task :release_ips => 'pl:fetch' do
       Rake::Task['pl:ips'].invoke

@@ -1,10 +1,10 @@
-if @build.build_gem
+if Pkg::Config.build_gem
   require 'rubygems/package_task'
 
   def glob_gem_files
     gem_files = []
     gem_excludes_file_list = []
-    gem_excludes_raw = @build.gem_excludes.nil? ? [] : @build.gem_excludes.split(' ')
+    gem_excludes_raw = Pkg::Config.gem_excludes.nil? ? [] : Pkg::Config.gem_excludes.split(' ')
     gem_excludes_raw << 'ext/packaging'
     gem_excludes_raw.each do |exclude|
       if File.directory?(exclude)
@@ -13,7 +13,7 @@ if @build.build_gem
         gem_excludes_file_list << exclude
       end
     end
-    files = FileList[@build.gem_files.split(' ')]
+    files = FileList[Pkg::Config.gem_files.split(' ')]
     files.each do |file|
       if File.directory?(file)
         gem_files += FileList["#{file}/**/*"]
@@ -39,33 +39,33 @@ if @build.build_gem
 
   def create_default_gem_spec
     spec = Gem::Specification.new do |s|
-      s.name = @build.project                                     unless @build.project.nil?
-      s.name = @build.gem_name                                    unless @build.gem_name.nil?
-      s.version = @build.gemversion                               unless @build.gemversion.nil?
-      s.author = @build.author                                    unless @build.author.nil?
-      s.email = @build.email                                      unless @build.email.nil?
-      s.homepage = @build.homepage                                unless @build.homepage.nil?
-      s.summary = @build.summary                                  unless @build.summary.nil?
-      s.summary = @build.gem_summary                              unless @build.gem_summary.nil?
-      s.description = @build.description                          unless @build.description.nil?
-      s.description = @build.gem_description                      unless @build.gem_description.nil?
+      s.name = Pkg::Config.project                                     unless Pkg::Config.project.nil?
+      s.name = Pkg::Config.gem_name                                    unless Pkg::Config.gem_name.nil?
+      s.version = Pkg::Config.gemversion                               unless Pkg::Config.gemversion.nil?
+      s.author = Pkg::Config.author                                    unless Pkg::Config.author.nil?
+      s.email = Pkg::Config.email                                      unless Pkg::Config.email.nil?
+      s.homepage = Pkg::Config.homepage                                unless Pkg::Config.homepage.nil?
+      s.summary = Pkg::Config.summary                                  unless Pkg::Config.summary.nil?
+      s.summary = Pkg::Config.gem_summary                              unless Pkg::Config.gem_summary.nil?
+      s.description = Pkg::Config.description                          unless Pkg::Config.description.nil?
+      s.description = Pkg::Config.gem_description                      unless Pkg::Config.gem_description.nil?
       s.files = glob_gem_files                                    unless glob_gem_files.nil?
-      s.executables = @build.gem_executables                      unless @build.gem_executables.nil?
-      s.require_path = @build.gem_require_path                    unless @build.gem_require_path.nil?
-      s.test_files = FileList[@build.gem_test_files.split(' ')]   unless @build.gem_test_files.nil?
-      s.rubyforge_project = @build.gem_forge_project              unless @build.gem_forge_project.nil?
-      @build.gem_rdoc_options.each do |option|
+      s.executables = Pkg::Config.gem_executables                      unless Pkg::Config.gem_executables.nil?
+      s.require_path = Pkg::Config.gem_require_path                    unless Pkg::Config.gem_require_path.nil?
+      s.test_files = FileList[Pkg::Config.gem_test_files.split(' ')]   unless Pkg::Config.gem_test_files.nil?
+      s.rubyforge_project = Pkg::Config.gem_forge_project              unless Pkg::Config.gem_forge_project.nil?
+      Pkg::Config.gem_rdoc_options.each do |option|
         s.rdoc_options << option
-      end unless @build.gem_rdoc_options.nil?
+      end unless Pkg::Config.gem_rdoc_options.nil?
     end
 
-    @build.gem_runtime_dependencies.each do |gem, version|
+    Pkg::Config.gem_runtime_dependencies.each do |gem, version|
       spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => :runtime)
-    end unless @build.gem_runtime_dependencies.nil?
+    end unless Pkg::Config.gem_runtime_dependencies.nil?
 
-    @build.gem_development_dependencies.each do |gem, version|
+    Pkg::Config.gem_development_dependencies.each do |gem, version|
       spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => :development)
-    end unless @build.gem_development_dependencies.nil?
+    end unless Pkg::Config.gem_development_dependencies.nil?
     spec
   end
 
@@ -82,7 +82,7 @@ if @build.build_gem
 
   def create_default_gem
     spec = create_default_gem_spec
-    create_gem(spec, "#{@build.gem_name}-#{@build.gemversion}")
+    create_gem(spec, "#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}")
   end
 
   def unknown_gems_platform?(platform)
@@ -91,7 +91,7 @@ if @build.build_gem
   end
 
   def create_platform_specific_gems
-    @build.gem_platform_dependencies.each do |platform, dependency_hash|
+    Pkg::Config.gem_platform_dependencies.each do |platform, dependency_hash|
       spec = create_default_gem_spec
       pf = Gem::Platform.new(platform)
       fail "
@@ -111,7 +111,11 @@ if @build.build_gem
           spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => t)
         end
       end
+<<<<<<< HEAD
       create_gem(spec, "#{@build.gem_name}-#{@build.gemversion}-#{platform}")
+=======
+      create_gem(spec, "#{Pkg::Config.project}-#{Pkg::Config.gemversion}-#{platform}")
+>>>>>>> Replace all occurrences of @build. with Pkg::Config
     end
   end
 
@@ -119,7 +123,7 @@ if @build.build_gem
     desc "Build a gem - All gems if platform specific"
     task :gem => [ "clean" ] do
       create_default_gem
-      if @build.gem_platform_dependencies
+      if Pkg::Config.gem_platform_dependencies
         create_platform_specific_gems
       end
     end

@@ -72,7 +72,7 @@ def kill_keychain
 end
 
 def start_keychain
-  keychain = %x{/usr/bin/keychain -q --agents gpg --eval #{@build.gpg_key}}.chomp
+  keychain = %x{/usr/bin/keychain -q --agents gpg --eval #{Pkg::Config.gpg_key}}.chomp
   new_env = keychain.match(/(GPG_AGENT_INFO)=([^;]*)/)
   ENV[new_env[1]] = new_env[2]
 end
@@ -82,7 +82,7 @@ def gpg_sign_file(file)
 
   if gpg
     use_tty = "--no-tty --use-agent" if ENV['RPM_GPG_AGENT']
-    sh "#{gpg} #{use_tty} --armor --detach-sign -u #{@build.gpg_key} #{file}"
+    sh "#{gpg} #{use_tty} --armor --detach-sign -u #{Pkg::Config.gpg_key} #{file}"
   else
     fail "No gpg available. Cannot sign #{file}."
   end
@@ -106,8 +106,8 @@ def set_cow_envs(cow)
     end
     arch = arch.split('.')[0] if arch.include?('.')
   end
-  if @build.build_pe
-    ENV['PE_VER'] = @build.pe_version
+  if Pkg::Config.build_pe
+    ENV['PE_VER'] = Pkg::Config.pe_version
   end
   ENV['DIST'] = dist
   ENV['ARCH'] = arch
@@ -173,7 +173,7 @@ def confirm_ship(files)
 end
 
 def git_tag(version)
-  sh "git tag -s -u #{@build.gpg_key} -m '#{version}' #{version}"
+  sh "git tag -s -u #{Pkg::Config.gpg_key} -m '#{version}' #{version}"
   $?.success or fail "Unable to tag repo at #{version}"
 end
 
@@ -184,12 +184,12 @@ end
 def git_bundle(treeish, appendix=nil, output_dir=nil)
   temp = output_dir || Pkg::Util::File.mktemp
   appendix ||= rand_string
-  sh "git bundle create #{temp}/#{@build.project}-#{@build.version}-#{appendix} #{treeish} --tags"
+  sh "git bundle create #{temp}/#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix} #{treeish} --tags"
   cd temp do
-    sh "tar -czf #{@build.project}-#{@build.version}-#{appendix}.tar.gz #{@build.project}-#{@build.version}-#{appendix}"
-    rm_rf "#{@build.project}-#{@build.version}-#{appendix}"
+    sh "tar -czf #{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix}.tar.gz #{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix}"
+    rm_rf "#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix}"
   end
-  "#{temp}/#{@build.project}-#{@build.version}-#{appendix}.tar.gz"
+  "#{temp}/#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix}.tar.gz"
 end
 
 # We take a tar argument for cases where `tar` isn't best, e.g. Solaris.  We
@@ -203,8 +203,8 @@ def remote_bootstrap(host, treeish, tar_cmd=nil, tarball=nil)
   tarball_name = File.basename(tarball).gsub('.tar.gz','')
   rsync_to(tarball, host, '/tmp')
   appendix = rand_string
-  sh "ssh -t #{host} '#{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone --recursive /tmp/#{tarball_name} /tmp/#{@build.project}-#{appendix} ; cd /tmp/#{@build.project}-#{appendix} ; rake package:bootstrap'"
-  "/tmp/#{@build.project}-#{appendix}"
+  sh "ssh -t #{host} '#{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone --recursive /tmp/#{tarball_name} /tmp/#{Pkg::Config.project}-#{appendix} ; cd /tmp/#{Pkg::Config.project}-#{appendix} ; rake package:bootstrap'"
+  "/tmp/#{Pkg::Config.project}-#{appendix}"
 end
 
 # Given a BuildInstance object and a host, send its params to the host. Return
@@ -308,10 +308,10 @@ end
 # configuration file.
 # Returns the URL to the job
 def create_jenkins_job(name, xml_file)
-  create_url = "http://#{@build.jenkins_build_host}/createItem?name=#{name}"
+  create_url = "http://#{Pkg::Config.jenkins_build_host}/createItem?name=#{name}"
   form_args = ["-H", '"Content-Type: application/xml"', "--data-binary", "@#{xml_file}"]
   curl_form_data(create_url, form_args)
-  "http://#{@build.jenkins_build_host}/job/#{name}"
+  "http://#{Pkg::Config.jenkins_build_host}/job/#{name}"
 end
 
 # Use the curl to check of a named job is defined on the jenkins server.  We
@@ -319,7 +319,7 @@ end
 # the job url and passing --head because jenkins will mistakenly return 200 OK
 # if you issue multiple very fast requests just requesting the header.
 def jenkins_job_exists?(name)
-  job_url = "http://#{@build.jenkins_build_host}/job/#{name}/config.xml"
+  job_url = "http://#{Pkg::Config.jenkins_build_host}/job/#{name}/config.xml"
   form_args = ["--silent", "--fail"]
   curl_form_data(job_url, form_args, :quiet => true)
 end

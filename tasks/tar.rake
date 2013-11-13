@@ -2,11 +2,11 @@ namespace :package do
   desc "Create a source tar archive"
   task :tar => [ :clean ] do
 
-    if @build.pre_tar_task
-      invoke_task(@build.pre_tar_task)
+    if Pkg::Config.pre_tar_task
+      invoke_task(Pkg::Config.pre_tar_task)
     end
 
-    Rake::Task["package:doc"].invoke if @build.build_doc
+    Rake::Task["package:doc"].invoke if Pkg::Config.build_doc
 
     tar = Pkg::Tar.new
 
@@ -26,11 +26,11 @@ namespace :package do
     #
     # If you set this the version will only be modified in the temporary copy,
     # with the intent that it never change the official source tree.
-    Rake::Task["package:versionbump"].invoke(workdir) if @build.update_version_file
+    Rake::Task["package:versionbump"].invoke(workdir) if Pkg::Config.update_version_file
 
     tar.pkg!
 
-    puts "Wrote #{`pwd`.strip}/pkg/#{@build.project}-#{@build.version}.tar.gz"
+    puts "Wrote #{`pwd`.strip}/pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
   end
 end
 

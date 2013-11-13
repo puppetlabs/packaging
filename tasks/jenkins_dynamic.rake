@@ -36,10 +36,10 @@ namespace :pl do
         erb_template  = File.join(template_dir, t)
         xml_file = File.join(work_dir, t.gsub('.erb', ''))
         Pkg::Util::File.erb_file(erb_template, xml_file, nil, :binding => Pkg::Config.get_binding)
-        job_name  = "#{@build.project}-#{t.gsub('.xml.erb','')}-#{@build.build_date}-#{@build.ref}"
+        job_name  = "#{Pkg::Config.project}-#{t.gsub('.xml.erb','')}-#{Pkg::Config.build_date}-#{Pkg::Config.ref}"
         puts "Checking for existence of #{job_name}..."
         if jenkins_job_exists?(job_name)
-          raise "Job #{job_name} already exists on #{@build.jenkins_build_host}"
+          raise "Job #{job_name} already exists on #{Pkg::Config.jenkins_build_host}"
         else
           retry_on_fail(:times => 3) do
             url = create_jenkins_job(job_name, xml_file)
@@ -52,7 +52,7 @@ namespace :pl do
         end
       end
       rm_r work_dir
-      packaging_name = "#{@build.project}-packaging-#{@build.build_date}-#{@build.ref}"
+      packaging_name = "#{Pkg::Config.project}-packaging-#{Pkg::Config.build_date}-#{Pkg::Config.ref}"
       invoke_task("pl:jenkins:trigger_dynamic_job", packaging_name)
     end
 
@@ -62,20 +62,20 @@ namespace :pl do
     task :trigger_dynamic_job, :name do |t, args|
       name = args.name
 
-      properties = @build.params_to_yaml
+      properties = Pkg::Config.config_to_yaml
       bundle = git_bundle('HEAD')
 
       # Create a string of metrics to send to Jenkins for data analysis
-      if @build.pe_version
-        metrics = "#{ENV['USER']}~#{@build.version}~#{@build.pe_version}~#{@build.team}"
+      if Pkg::Config.pe_version
+        metrics = "#{ENV['USER']}~#{Pkg::Config.version}~#{Pkg::Config.pe_version}~#{Pkg::Config.team}"
       else
-        metrics = "#{ENV['USER']}~#{@build.version}~N/A~#{@build.team}"
+        metrics = "#{ENV['USER']}~#{Pkg::Config.version}~N/A~#{Pkg::Config.team}"
       end
 
       # Construct the parameters, which is an array of hashes we turn into JSON
       parameters = [{ "name" => "BUILD_PROPERTIES", "file"  => "file0" },
                     { "name" => "PROJECT_BUNDLE",   "file"  => "file1" },
-                    { "name" => "PROJECT",          "value" => "#{@build.project}" },
+                    { "name" => "PROJECT",          "value" => "#{Pkg::Config.project}" },
                     { "name" => "METRICS",          "value" => "#{metrics}"}]
 
       # Contruct the json string
@@ -86,18 +86,18 @@ namespace :pl do
       curl_args =  [
       "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
       "-Fname=PROJECT_BUNDLE"  , "-Ffile1=@#{bundle}",
-      "-Fname=PROJECT"         , "-Fvalue=#{@build.project}",
+      "-Fname=PROJECT"         , "-Fvalue=#{Pkg::Config.project}",
       "-Fname=METRICS"         , "-Fvalue=#{metrics}",
       "-FSubmit=Build",
       "-Fjson=#{json.to_json}",
       ]
 
       # Contstruct the job url
-      trigger_url = "#{@build.jenkins_build_host}/job/#{name}/build"
+      trigger_url = "#{Pkg::Config.jenkins_build_host}/job/#{name}/build"
 
       if curl_form_data(trigger_url, curl_args)
-        print_url_info("#{@build.jenkins_build_host}/job/#{name}")
-        puts "Your packages will be available at #{@build.distribution_server}:#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}"
+        print_url_info("#{Pkg::Config.jenkins_build_host}/job/#{name}")
+        puts "Your packages will be available at #{Pkg::Config.distribution_server}:#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
       else
         fail "An error occurred submitting the job to jenkins. Take a look at the preceding http response for more info."
       end
@@ -113,7 +113,7 @@ namespace :pe do
   namespace :jenkins do
     desc "Dynamic Jenkins UBER build: Build all the things with ONE job"
     task :uber_build do
-      check_var("PE_VER", @build.pe_version)
+      check_var("PE_VER", Pkg::Config.pe_version)
       invoke_task("pl:jenkins:uber_build")
     end
   end

@@ -1,7 +1,7 @@
 # The sign_legacy_rpm and sign_rpm methods are defined in sign.rake
 # This is just adapted for the 'PE' layout
 
-if @build.build_pe
+if Pkg::Config.build_pe
   namespace :pe do
     desc "Sign all staged in rpms in pkg"
     task :sign_rpms do

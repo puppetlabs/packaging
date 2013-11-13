@@ -24,7 +24,7 @@ def sign_rpm(rpm, sign_flags = nil)
     # accept extra flags to override certain signing behavior for older
     # versions of rpm, e.g. specifying V3 signatures instead of V4.
     #
-    sh "#{rpm_cmd} #{gpg_check_cmd} --define '%_gpg_name #{@build.gpg_name}' --define '%__gpg_sign_cmd %{__gpg} gpg #{sign_flags} #{input_flag} --batch --no-verbose --no-armor --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm}"
+    sh "#{rpm_cmd} #{gpg_check_cmd} --define '%_gpg_name #{Pkg::Config.gpg_name}' --define '%__gpg_sign_cmd %{__gpg} gpg #{sign_flags} #{input_flag} --batch --no-verbose --no-armor --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm}"
   end
 
 end
@@ -34,14 +34,14 @@ def sign_legacy_rpm(rpm)
 end
 
 def rpm_has_sig(rpm)
-  %x{rpm -Kv #{rpm} | grep "#{@build.gpg_key.downcase}" &> /dev/null}
+  %x{rpm -Kv #{rpm} | grep "#{Pkg::Config.gpg_key.downcase}" &> /dev/null}
   $?.success?
 end
 
 def sign_deb_changes(file)
   # Lazy lazy lazy lazy lazy
   sign_program = "-p'gpg --use-agent --no-tty'" if ENV['RPM_GPG_AGENT']
-  sh "debsign #{sign_program} --re-sign -k#{@build.gpg_key} #{file}"
+  sh "debsign #{sign_program} --re-sign -k#{Pkg::Config.gpg_key} #{file}"
 end
 
 # requires atleast a self signed prvate key and certificate pair
@@ -50,15 +50,15 @@ end
 # technically this can be any ips-compliant package identifier, e.g. application/facter
 # repo_uri is the path to the repo currently containing the package
 def sign_ips(fmri, repo_uri)
-  %x{pkgsign -s #{repo_uri}  -k #{@build.privatekey_pem} -c #{@build.certificate_pem} -i #{@build.ips_inter_cert} #{fmri}}
+  %x{pkgsign -s #{repo_uri}  -k #{Pkg::Config.privatekey_pem} -c #{Pkg::Config.certificate_pem} -i #{Pkg::Config.ips_inter_cert} #{fmri}}
 end
 
 namespace :pl do
   desc "Sign the tarball, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_tar do
-    File.exist?("pkg/#{@build.project}-#{@build.version}.tar.gz") or fail "No tarball exists. Try rake package:tar?"
+    File.exist?("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz") or fail "No tarball exists. Try rake package:tar?"
     load_keychain if has_tool('keychain')
-    gpg_sign_file "pkg/#{@build.project}-#{@build.version}.tar.gz"
+    gpg_sign_file "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
   end
 
   desc "Sign mocked rpms, Defaults to PL Key, pass KEY to override"
@@ -91,7 +91,7 @@ namespace :pl do
     fmri      = args.fmri
     puts "Signing ips packages..."
     sign_ips(fmri, repo_uri)
-  end if @build.build_ips
+  end if Pkg::Config.build_ips
 
   desc "Check if all rpms are signed"
   task :check_rpm_sigs do
@@ -126,7 +126,7 @@ namespace :pl do
   # server, ships our packages out to it, signs them, and brings them back.
   #
   namespace :jenkins do
-    desc "Sign all locally staged packages on #{@build.distribution_server}"
+    desc "Sign all locally staged packages on #{Pkg::Config.distribution_server}"
     task :sign_all => "pl:fetch" do
       Dir["pkg/*"].empty? and fail "There were files found in pkg/. Maybe you wanted to build/retrieve something first?"
 
@@ -140,16 +140,16 @@ namespace :pl do
       # containing a git bundle to be used as the environment for the packaging
       # repo in a signing operation.
       signing_bundle = ENV['SIGNING_BUNDLE']
-      rpm_sign_task = @build.build_pe ? "pe:sign_rpms" : "pl:sign_rpms"
-      deb_sign_task = @build.build_pe ? "pe:sign_deb_changes" : "pl:sign_deb_changes"
+      rpm_sign_task = Pkg::Config.build_pe ? "pe:sign_rpms" : "pl:sign_rpms"
+      deb_sign_task = Pkg::Config.build_pe ? "pe:sign_deb_changes" : "pl:sign_deb_changes"
       sign_tasks    = ["pl:sign_tar", rpm_sign_task, deb_sign_task]
-      remote_repo   = remote_bootstrap(@build.distribution_server, 'HEAD', nil, signing_bundle)
-      build_params  = remote_buildparams(@build.distribution_server, @build)
-      rsync_to('pkg', @build.distribution_server, remote_repo)
-      remote_ssh_cmd(@build.distribution_server, "cd #{remote_repo} ; rake #{sign_tasks.join(' ')} PARAMS_FILE=#{build_params}")
-      rsync_from("#{remote_repo}/pkg/", @build.distribution_server, "pkg/")
-      remote_ssh_cmd(@build.distribution_server, "rm -rf #{remote_repo}")
-      remote_ssh_cmd(@build.distribution_server, "rm #{build_params}")
+      remote_repo   = remote_bootstrap(Pkg::Config.distribution_server, 'HEAD', nil, signing_bundle)
+      build_params  = remote_buildparams(Pkg::Config.distribution_server, @build)
+      rsync_to('pkg', Pkg::Config.distribution_server, remote_repo)
+      remote_ssh_cmd(Pkg::Config.distribution_server, "cd #{remote_repo} ; rake #{sign_tasks.join(' ')} PARAMS_FILE=#{build_params}")
+      rsync_from("#{remote_repo}/pkg/", Pkg::Config.distribution_server, "pkg/")
+      remote_ssh_cmd(Pkg::Config.distribution_server, "rm -rf #{remote_repo}")
+      remote_ssh_cmd(Pkg::Config.distribution_server, "rm #{build_params}")
       puts "Signed packages staged in 'pkg/ directory"
     end
   end

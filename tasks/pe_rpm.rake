@@ -1,4 +1,4 @@
-if @build.build_pe
+if Pkg::Config.build_pe
   namespace :pe do
     desc "Build a PE rpm using rpmbuild (requires all BuildRequires, rpmbuild, etc)"
     task :rpm => "package:rpm"

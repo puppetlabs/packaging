@@ -22,12 +22,12 @@ task :setup do
   rescue
     fail "Could not load Apple file mappings from 'ext/osx/file_mapping.yaml'"
   end
-  @package_name          = @build.project
-  @title                 = "#{@build.project}-#{@build.version}"
-  @reverse_domain        = "com.#{@build.packager}.#{@package_name}"
-  @package_major_version = @build.version.split('.')[0]
-  @package_minor_version = @build.version.split('.')[1] +
-                           @build.version.split('.')[2].split('-')[0].split('rc')[0]
+  @package_name          = Pkg::Config.project
+  @title                 = "#{Pkg::Config.project}-#{Pkg::Config.version}"
+  @reverse_domain        = "com.#{Pkg::Config.packager}.#{@package_name}"
+  @package_major_version = Pkg::Config.version.split('.')[0]
+  @package_minor_version = Pkg::Config.version.split('.')[1] +
+                           Pkg::Config.version.split('.')[2].split('-')[0].split('rc')[0]
   @pm_restart            = 'None'
   @build_date            = Time.new.strftime("%Y-%m-%dT%H:%M:%SZ")
   @apple_bindir          = '/usr/bin'
@@ -242,7 +242,7 @@ def pack_source
   end
 end
 
-if @build.build_dmg
+if Pkg::Config.build_dmg
   namespace :package do
     desc "Task for building an Apple Package"
     task :apple => [:setup] do

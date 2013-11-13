@@ -79,7 +79,8 @@ module Pkg
       # the name of the params file is the current git commit sha or tag.
       #
       def config_to_yaml(target=nil)
-        target ||= File.join(Pkg::Util::File.mktemp, "#{self.ref}.yaml")
+        file = "#{self.ref}.yaml"
+        target = target.nil? ? File.join(Pkg::Util::File.mktemp, "#{self.ref}.yaml") : File.join(target, file)
         Pkg::Util::File.file_writable?(File.dirname(target), :required => true)
         File.open(target, 'w') do |f|
           f.puts self.config_to_hash.to_yaml

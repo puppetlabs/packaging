@@ -110,8 +110,6 @@ module Pkg
       end
 
       def load_default_configs
-        @project_root ||= default_project_root
-
         default_project_data = File.join(@project_root, "ext", "project_data.yaml")
         default_build_defaults = File.join(@project_root, "ext", "build_defaults.yaml")
 
@@ -182,8 +180,14 @@ module Pkg
 
       ##
       #   We supply several values by default, if they haven't been specified
-      #   already by config or environment variable.
+      #   already by config or environment variable. This includes the project
+      #   root as the default project root, which is relative to the
+      #   packaging path
+      #
       def load_defaults
+
+        @project_root ||= default_project_root
+
         Pkg::Params::DEFAULTS.each do |v|
           unless self.instance_variable_get("@#{v[:var]}")
             self.instance_variable_set("@#{v[:var]}", v[:val])
@@ -197,11 +201,18 @@ module Pkg
       #   parameters file that overrides all set values with its data. This has
       #   always been supplied as an environment variable, "PARAMS_FILE." To
       #   honor this, we have a method in config to override values as
-      #   expected.
+      #   expected. There is, however, a twist - it is absolutely essential that
+      #   the overrides do not override the project_root setting, because this is
+      #   environment-specific, and any value in a params file is going to be
+      #   wrong. Thus, if we have a project root before we begin overriding, we
+      #   save it and restore it after overrides.
+      #
       def load_overrides
         if ENV['PARAMS_FILE'] && ENV['PARAMS_FILE'] != ''
           if File.readable?(ENV['PARAMS_FILE'])
+            root = self.instance_variable_get("@project_root")
             self.config_from_yaml(ENV['PARAMS_FILE'])
+            self.instance_variable_set("@project_root", root) if root
           else
             fail "PARAMS_FILE was set, but not to the path to a readable file."
           end

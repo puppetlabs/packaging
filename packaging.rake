@@ -12,7 +12,6 @@ PACKAGING_TASK_DIR = File.join(PACKAGING_ROOT, 'tasks')
 @using_loader = true
 
 [ '00_utils.rake',
-  '10_setupvars.rake',
   '20_setupextravars.rake',
   '30_metrics.rake',
   'apple.rake',

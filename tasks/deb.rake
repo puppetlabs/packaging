@@ -68,7 +68,7 @@ task :build_deb, :deb_command, :cow do |t,args|
     cow       = args.cow
     work_dir  = Pkg::Util::File.mktemp
     subdir    = 'pe/' if Pkg::Config.build_pe
-    dest_dir  = "#{@build_root}/pkg/#{subdir}deb/#{cow.split('-')[1] unless cow.nil?}"
+    dest_dir  = "#{Pkg::Config.project_root}/pkg/#{subdir}deb/#{cow.split('-')[1] unless cow.nil?}"
     Pkg::Util::Tool.check_tool(deb_build)
     mkdir_p dest_dir
     deb_args  = { :work_dir => work_dir, :cow => cow}

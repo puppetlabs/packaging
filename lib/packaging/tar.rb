@@ -89,7 +89,7 @@ module Pkg
         #   essence, templating "in place." This is why we remove the original
         #   files - they're not the originals in the authoritative project
         #   directory, but the originals in the temporary working copy.
-        Pkg::Util::File.erb_file(File.join(workdir,rel_path_to_erb), File.join(workdir, rel_path_to_target), :remove_orig => true, :binding => Pkg::Config.get_binding)
+        Pkg::Util::File.erb_file(File.join(workdir,rel_path_to_erb), File.join(workdir, rel_path_to_target), true, :binding => Pkg::Config.get_binding)
       end
     end
 

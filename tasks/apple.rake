@@ -18,7 +18,7 @@ PKGBUILD      = '/usr/bin/pkgbuild'
 task :setup do
   # Read the Apple file-mappings
   begin
-    @source_files        = data_from_yaml('ext/osx/file_mapping.yaml')
+    @source_files        = Pkg::Util::Serialization.load_yaml('ext/osx/file_mapping.yaml')
   rescue
     fail "Could not load Apple file mappings from 'ext/osx/file_mapping.yaml'"
   end
@@ -43,7 +43,7 @@ end
 #               package-specific options) is built from an ERB template located
 #               in the ext/osx directory.
 def make_directory_tree
-  project_tmp    = "#{get_temp}/#{@package_name}"
+  project_tmp    = "#{Pkg::Util::File.mktemp}/#{@package_name}"
   @scratch       = "#{project_tmp}/#{@title}"
   @working_tree  = {
      'scripts'   => "#{@scratch}/scripts",
@@ -58,15 +58,15 @@ def make_directory_tree
   end
 
   if File.exists?('ext/osx/postflight.erb')
-    erb 'ext/osx/postflight.erb', "#{@working_tree["scripts"]}/postinstall"
+    Pkg::Util::File.erb_file 'ext/osx/postflight.erb', "#{@working_tree["scripts"]}/postinstall"
   end
 
   if File.exists?('ext/osx/preflight.erb')
-    erb 'ext/osx/preflight.erb', "#{@working_tree["scripts"]}/preinstall"
+    Pkg::Util::File.erb_file 'ext/osx/preflight.erb', "#{@working_tree["scripts"]}/preinstall"
   end
 
   if File.exists?('ext/osx/prototype.plist.erb')
-    erb 'ext/osx/prototype.plist.erb', "#{@scratch}/prototype.plist"
+    Pkg::Util::File.erb_file 'ext/osx/prototype.plist.erb', "#{@scratch}/prototype.plist"
   end
 
   if File.exists?('ext/packaging/static_artifacts/PackageInfo.plist')

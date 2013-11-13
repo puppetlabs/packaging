@@ -72,8 +72,8 @@ namespace :pl do
       # Even if a project builds a gem, if it uses the odd_even strategy, we only
       # want to ship final gems because otherwise a development gem would be
       # preferred over the last final gem
-      if @build.version_strategy != "odd_even" || is_final?
-        FileList["pkg/#{@build.gem_name}-#{@build.gemversion}*.gem"].each do |f|
+      if @build.version_strategy != "odd_even" || Pkg::Util::Version.is_final?
+        FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gem_version}*.gem"].each do |f|
           puts "Shipping gem #{f} to rubygems"
           ship_gem(f)
         end
@@ -107,7 +107,7 @@ namespace :pl do
       Rake::Task["pl:ship_dmg"].execute if @build.build_dmg
       Rake::Task["pl:ship_tar"].execute
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
-      add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (! is_final?)) if @build.benchmark
+      add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (! Pkg::Util::Version.is_final?)) if @build.benchmark
       post_shipped_metrics if @build.benchmark
     else
       puts "Ship canceled"
@@ -179,7 +179,7 @@ namespace :pl do
 
     desc "Ship generated repository configs to the distribution server"
     task :ship_repo_configs do
-      empty_dir?("pkg/repo_configs") and fail "No repo configs have been generated! Try pl:deb_repo_configs or pl:rpm_repo_configs"
+      Pkg::Util::File.empty_dir?("pkg/repo_configs") and fail "No repo configs have been generated! Try pl:deb_repo_configs or pl:rpm_repo_configs"
       invoke_task("pl:fetch")
       repo_dir = "#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}/repo_configs"
       remote_ssh_cmd(@build.distribution_server, "mkdir -p #{repo_dir}")

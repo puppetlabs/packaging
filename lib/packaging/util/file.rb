@@ -36,12 +36,12 @@ module Pkg::Util::File
       message.result(b)
     end
 
-    def erb_file(erbfile, outfile=nil, opts = { :remove_orig => false, :binding => binding })
+    def erb_file(erbfile, outfile=nil, remove_orig = false, opts = { :binding => binding })
       outfile ||= File.join(mktemp, File.basename(erbfile).sub(File.extname(erbfile),""))
       output = erb_string(erbfile, opts[:binding])
       File.open(outfile, 'w') { |f| f.write output }
       puts "Generated: #{outfile}"
-      FileUtils.rm_rf erbfile if opts[:remove_orig]
+      FileUtils.rm_rf erbfile if remove_orig
       outfile
     end
   end

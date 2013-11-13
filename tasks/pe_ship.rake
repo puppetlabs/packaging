@@ -2,7 +2,7 @@ if @build.build_pe
   namespace :pe do
     desc "ship PE rpms to #{@build.yum_host}"
     task :ship_rpms => "pl:fetch" do
-      empty_dir?("pkg/pe/rpm") and fail "The 'pkg/pe/rpm' directory has no packages. Did you run rake pe:deb?"
+      Pkg::Util::File.empty_dir?("pkg/pe/rpm") and fail "The 'pkg/pe/rpm' directory has no packages. Did you run rake pe:deb?"
       target_path = ENV['YUM_REPO'] ? ENV['YUM_REPO'] : "#{@build.yum_repo_path}/#{@build.pe_version}/repos/"
       retry_on_fail(:times => 3) do
         rsync_to('pkg/pe/rpm/', @build.yum_host, target_path)
@@ -14,7 +14,7 @@ if @build.build_pe
 
     desc "Ship PE debs to #{@build.apt_host}"
     task :ship_debs => "pl:fetch" do
-      empty_dir?("pkg/pe/deb") and fail "The 'pkg/pe/deb' directory has no packages!"
+      Pkg::Util::File.empty_dir?("pkg/pe/deb") and fail "The 'pkg/pe/deb' directory has no packages!"
       target_path = ENV['APT_REPO']
 
       #   If APT_REPO isn't specified as an environment variable, we use a temporary one
@@ -87,7 +87,7 @@ if @build.build_pe
 
       @build.cows.split(' ').map { |i| i.sub('.cow','') }.each do |cow|
         _base, dist, arch = cow.split('-')
-        unless empty_dir? "pkg/pe/deb/#{dist}"
+        unless Pkg::Util::File.empty_dir? "pkg/pe/deb/#{dist}"
           archive_path = "#{base_path}/#{dist}-#{arch}"
 
           # Ship arch-specific debs to correct dir, e.g. 'squeeze-i386'

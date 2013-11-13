@@ -4,7 +4,7 @@ if File.exist?("#{ENV['HOME']}/.packaging")
   namespace 'pl' do
     namespace :remote do
       task :build, :host, :treeish, :task, :tar do |t, args|
-        fail_on_dirty_source
+        Pkg::Util::Version.fail_on_dirty_source
         host                    = args.host
         treeish                 = args.treeish
         task                    = args.task

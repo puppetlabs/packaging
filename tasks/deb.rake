@@ -66,10 +66,10 @@ task :build_deb, :deb_command, :cow do |t,args|
   bench = Benchmark.realtime do
     deb_build = args.deb_command
     cow       = args.cow
-    work_dir  = get_temp
+    work_dir  = Pkg::Util::File.mktemp
     subdir    = 'pe/' if @build.build_pe
     dest_dir  = "#{@build_root}/pkg/#{subdir}deb/#{cow.split('-')[1] unless cow.nil?}"
-    check_tool(deb_build)
+    Pkg::Util::Tool.check_tool(deb_build)
     mkdir_p dest_dir
     deb_args  = { :work_dir => work_dir, :cow => cow}
     Rake::Task[:prep_deb_tars].reenable

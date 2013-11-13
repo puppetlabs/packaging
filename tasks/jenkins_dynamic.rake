@@ -17,7 +17,7 @@ namespace :pl do
     task :uber_build => "pl:fetch" do
       # If we have a dirty source, bail, because changes won't get reflected in
       # the package builds
-      fail_on_dirty_source
+      Pkg::Util::Version.fail_on_dirty_source
 
       # Use JSON to parse the json part of the submission, so we want to fail
       # here also if JSON isn't available
@@ -25,7 +25,7 @@ namespace :pl do
 
       # The uber_build.xml.erb file is an XML erb template that will define a
       # job in Jenkins with all of the appropriate tasks
-      work_dir           = get_temp
+      work_dir           = Pkg::Util::File.mktemp
       template_dir       = File.join(File.dirname(__FILE__), '..', 'templates')
       templates          = ['repo.xml.erb', 'packaging.xml.erb']
       templates.unshift('downstream.xml.erb') if ENV['DOWNSTREAM_JOB']
@@ -33,9 +33,9 @@ namespace :pl do
       # Generate an XML file for every job configuration erb and attempt to
       # create a jenkins job from that XML config
       templates.each do |t|
-        erb_file  = File.join(template_dir, t)
+        erb_template  = File.join(template_dir, t)
         xml_file = File.join(work_dir, t.gsub('.erb', ''))
-        erb(erb_file, xml_file)
+        Pkg::Util::File.erb_file(erb_template, xml_file, nil, :binding => Pkg::Config.get_binding)
         job_name  = "#{@build.project}-#{t.gsub('.xml.erb','')}-#{@build.build_date}-#{@build.ref}"
         puts "Checking for existence of #{job_name}..."
         if jenkins_job_exists?(job_name)

@@ -24,13 +24,13 @@ def mv_f(src, dest, options={})
 end
 
 def remote_ssh_cmd target, command
-  check_tool('ssh')
+  Pkg::Util::Tool.check_tool('ssh')
   puts "Executing '#{command}' on #{target}"
   sh "ssh -t #{target} '#{command.gsub("'", "'\\\\''")}'"
 end
 
 def rsync_to *args
-  check_tool('rsync')
+  Pkg::Util::Tool.check_tool('rsync')
   flags = "-rHlv -O --no-perms --no-owner --no-group --ignore-existing"
   source  = args[0]
   target  = args[1]
@@ -40,7 +40,7 @@ def rsync_to *args
 end
 
 def rsync_from *args
-  check_tool('rsync')
+  Pkg::Util::Tool.check_tool('rsync')
   flags = "-rHlv -O --no-perms --no-owner --no-group"
   source  = args[0]
   target  = args[1]
@@ -78,7 +78,7 @@ def start_keychain
 end
 
 def gpg_sign_file(file)
-  gpg ||= find_tool('gpg')
+  gpg ||= Pkg::Util::Tool.find_tool('gpg')
 
   if gpg
     use_tty = "--no-tty --use-agent" if ENV['RPM_GPG_AGENT']
@@ -182,7 +182,7 @@ def rand_string
 end
 
 def git_bundle(treeish, appendix=nil, output_dir=nil)
-  temp = output_dir || get_temp
+  temp = output_dir || Pkg::Util::File.mktemp
   appendix ||= rand_string
   sh "git bundle create #{temp}/#{@build.project}-#{@build.version}-#{appendix} #{treeish} --tags"
   cd temp do
@@ -222,7 +222,7 @@ def git_pull(remote, branch)
 end
 
 def update_rpm_repo(dir)
-  check_tool('createrepo')
+  Pkg::Util::Tool.check_tool('createrepo')
   cd dir do
     sh "createrepo --checksum=sha --database --update ."
   end
@@ -278,7 +278,7 @@ end
 # 1) String - the URL to post to
 # 2) Array  - Ordered array of name=VALUE curl form parameters
 def curl_form_data(uri, form_data=[], options={})
-  curl = find_tool("curl") or fail "Couldn't find curl. Curl is required for posting jenkins to trigger a build. Please install curl and try again."
+  curl = Pkg::Util::Tool.find_tool("curl") or fail "Couldn't find curl. Curl is required for posting jenkins to trigger a build. Please install curl and try again."
   #
   # Begin constructing the post string.
   # First, assemble the form_data arguments

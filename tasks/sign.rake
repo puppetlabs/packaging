@@ -4,7 +4,7 @@ def sign_rpm(rpm, sign_flags = nil)
   # rpm signing, we have to be able to tell the packaging repo what binary to
   # use as the rpm signing tool.
   #
-  rpm_cmd = ENV['RPM'] || find_tool('rpm')
+  rpm_cmd = ENV['RPM'] || Pkg::Util::Tool.find_tool('rpm')
 
   # If we're using the gpg agent for rpm signing, we don't want to specify the
   # input for the passphrase, which is what '--passphrase-fd 3' does. However,
@@ -12,7 +12,7 @@ def sign_rpm(rpm, sign_flags = nil)
   # defaults on modern rpm. The fun part of gpg-agent signing of rpms is
   # specifying that the gpg check command always return true
   #
-  if boolean_value(ENV['RPM_GPG_AGENT'])
+  if Pkg::Util.boolean_value(ENV['RPM_GPG_AGENT'])
     gpg_check_cmd = "--define '%__gpg_check_password_cmd /bin/true'"
   else
     input_flag = "--passphrase-fd 3"

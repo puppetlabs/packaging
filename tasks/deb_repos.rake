@@ -85,7 +85,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
       # We use wget to obtain a directory listing of what are presumably our deb repos
       #
       repo_urls = []
-      wget = find_tool("wget") or fail "Could not find `wget` tool. This is needed for composing the debian repo configurations. Install `wget` and try again."
+      wget = Pkg::Util::Tool.find_tool("wget") or fail "Could not find `wget` tool. This is needed for composing the debian repo configurations. Install `wget` and try again."
       # First test if the directory even exists
       #
       wget_results = %x{#{wget} --spider -r -l 1 --no-parent #{base_url} 2>&1}
@@ -115,7 +115,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
 
     desc "Retrieve debian apt repository configs for this sha"
     task :deb_repo_configs => "pl:fetch" do
-      wget = find_tool("wget") or fail "Could not find `wget` tool. This is needed for composing the debian repo configurations. Install `wget` and try again."
+      wget = Pkg::Util::Tool.find_tool("wget") or fail "Could not find `wget` tool. This is needed for composing the debian repo configurations. Install `wget` and try again."
       mkdir_p "pkg/repo_configs"
       config_url = "#{@build.builds_server}/#{@build.project}/#{@build.ref}/repo_configs/deb/"
       begin

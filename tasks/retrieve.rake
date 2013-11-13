@@ -17,7 +17,7 @@ namespace :pl do
       invoke_task("pl:fetch")
       mkdir_p 'pkg'
       package_url = "http://#{@build.builds_server}/#{@build.project}/#{@build.ref}/#{target}"
-      if wget=find_tool("wget")
+      if wget=Pkg::Util::Tool.find_tool("wget")
         sh "#{wget} -r -np -nH --cut-dirs 3 -P pkg --reject 'index*' #{package_url}/"
       else
         warn "Could not find `wget` tool. Falling back to rsyncing from #{@build.distribution_server}"

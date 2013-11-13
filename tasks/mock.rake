@@ -18,7 +18,7 @@
 # e.g.,
 # pkg/el-5-i386/*.rpm
 def mock_artifact(mock_config, cmd_args)
-  unless mock = find_tool('mock')
+  unless mock = Pkg::Util::Tool.find_tool('mock')
     raise "mock is required for building srpms with mock. Please install mock and try again."
   end
   randomize = @build.random_mockroot
@@ -151,7 +151,7 @@ def build_rpm_with_mock(mocks)
   mocks.split(' ').each do |mock_config|
     family  = mock_el_family(mock_config)
     version = mock_el_ver(mock_config)
-    subdir  = is_final? ? 'products' : 'devel'
+    subdir  = Pkg::Util::Version.is_final? ? 'products' : 'devel'
     bench = Benchmark.realtime do
       # Set up the rpmbuild dir in a temp space, with our tarball and spec
       workdir = prep_rpm_build_dir
@@ -231,7 +231,7 @@ def mock_with_basedir(mock, basedir)
   config = IO.readlines(mock)
   basedir = "config_opts['basedir'] = '#{basedir}'"
   config.unshift(basedir)
-  tempdir = get_temp
+  tempdir = Pkg::Util::File.mktemp
   newmock = File.join(tempdir, File.basename(mock))
   File.open(newmock, 'w') { |f| f.puts config }
   newmock
@@ -245,7 +245,7 @@ end
 # configuration file and returns the path to the new configuration dir.
 #
 def setup_mock_config_dir(mock)
-  tempdir = get_temp
+  tempdir = Pkg::Util::File.mktemp
   cp File.join('/', 'etc', 'mock', 'site-defaults.cfg'), tempdir
   cp File.join('/', 'etc', 'mock', 'logging.ini'), tempdir
   cp mock, tempdir
@@ -259,7 +259,7 @@ end
 #
 def randomize_mock_config_dir(mock_config)
   # basedir will be the location of our temporary mock root
-  basedir = get_temp
+  basedir = Pkg::Util::File.mktemp
   chown("#{ENV['USER']}", "mock", basedir)
   # Mock requires the sticky bit be set on the basedir
   chmod(02775, basedir)

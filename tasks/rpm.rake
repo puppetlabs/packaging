@@ -1,15 +1,15 @@
 def prep_rpm_build_dir
-  temp = get_temp
+  temp = Pkg::Util::File.mktemp
   mkdir_pr temp, "#{temp}/SOURCES", "#{temp}/SPECS"
   cp_pr FileList["pkg/#{@build.project}-#{@build.version}.tar.gz*"], "#{temp}/SOURCES"
-  erb "ext/redhat/#{@build.project}.spec.erb", "#{temp}/SPECS/#{@build.project}.spec"
+  Pkg::Util::File.erb_file "ext/redhat/#{@build.project}.spec.erb", "#{temp}/SPECS/#{@build.project}.spec", nil, :binding => Pkg::Config.get_binding
   temp
 end
 
 def build_rpm(buildarg = "-bs")
-  check_tool('rpmbuild')
+  Pkg::Util::Tool.check_tool('rpmbuild')
   workdir = prep_rpm_build_dir
-  if dist = el_version
+  if dist = Pkg::Util::Version.el_version
     if dist.to_i < 6
       dist_string = "--define \"%dist .el#{dist}"
     end

@@ -4,7 +4,7 @@ if @build.pre_tar_task
   namespace :package do
     desc "vendor gems required by project"
     task :vendor_gems do
-      check_tool("bundle")
+      Pkg::Util::Tool.check_tool("bundle")
       require 'bundler'
 
       class UI

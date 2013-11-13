@@ -221,7 +221,7 @@ module Pkg::Util::Version
     # in rpm packaging to define a dist macro, and we use it in the pl:fetch task
     # to disable ssl checking for redhat 5 because it has a certs bundle so old by
     # default that it's useless for our purposes.
-    def el_version()
+    def el_version
       rpm = Pkg::Util::Tool.find_tool('rpm', :required => true)
       if File.exists?('/etc/fedora-release')
         nil

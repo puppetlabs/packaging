@@ -66,7 +66,7 @@ namespace :pl do
       # We have a hard requirement on wget because of all the download magicks
       # we have to do
       #
-      wget = find_tool("wget") or fail "Could not find `wget` tool. This is needed for composing the yum repo configurations. Install `wget` and try again."
+      wget = Pkg::Util::Tool.find_tool("wget") or fail "Could not find `wget` tool. This is needed for composing the yum repo configurations. Install `wget` and try again."
 
       # This is the standard path to all build artifacts on the distribution
       # server for this commit
@@ -125,7 +125,7 @@ namespace :pl do
 
     desc "Retrieve rpm yum repository configs from distribution server"
     task :rpm_repo_configs => "pl:fetch" do
-      wget = find_tool("wget") or fail "Could not find `wget` tool! wget is required to download the repository configs."
+      wget = Pkg::Util::Tool.find_tool("wget") or fail "Could not find `wget` tool! wget is required to download the repository configs."
       mkdir_p "pkg/repo_configs"
       config_url = "#{@build.builds_server}/#{@build.project}/#{@build.ref}/repo_configs/rpm/"
       begin

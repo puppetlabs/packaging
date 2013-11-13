@@ -128,11 +128,10 @@ module Build
     end
 
     ##
-    # Load build parameters from a yaml file. Uses #data_from_yaml in
-    # 00_utils.rake
+    # Load build parameters from a yaml file
     #
     def set_params_from_file(file)
-      build_data = data_from_yaml(file)
+      build_data = Pkg::Util::Serialization.load_yaml(file)
       set_params_from_hash(build_data)
     end
 
@@ -154,7 +153,7 @@ module Build
     # git commit sha or tag.
     #
     def params_to_yaml(output_dir=nil)
-      dir = output_dir.nil? ? get_temp : output_dir
+      dir = output_dir.nil? ? Pkg::Util::File.mktemp : output_dir
       File.writable?(dir) or fail "#{dir} does not exist or is not writable, skipping build params write. Exiting.."
       params_file = File.join(dir, "#{self.ref}.yaml")
       File.open(params_file, 'w') do |f|

@@ -1,5 +1,4 @@
 if @build_ips
-  require 'erb'
   namespace :package do
     namespace :ips do
       workdir = "pkg/ips/workdir"
@@ -27,7 +26,7 @@ if @build_ips
 
       # Process templates and write the initial manifest
       task :prototmpl do
-        erb("ext/ips/#{@build.project}.p5m.erb", workdir + '/' + @build.project + '.p5m.x')
+        Pkg::Util::File.erb_file("ext/ips/#{@build.project}.p5m.erb", workdir + '/' + @build.project + '.p5m.x', nil, :binding => Pkg::Config.get_binding)
       end
 
       # Update manifest to include the installation image information.
@@ -63,20 +62,20 @@ if @build_ips
 
       # Create a local file-based IPS repository
       task :createrepo do
-        check_tool('pkgrepo')
+        Pkg::Util::Tool.check_tool('pkgrepo')
         sh "pkgrepo create #{repo}"
         sh "pkgrepo set -s #{repo} publisher/prefix=puppetlabs.com"
       end
 
       # Send a created package to the local IPS repository
       task :send do
-        check_tool('pkgsend')
+        Pkg::Util::Tool.check_tool('pkgsend')
         sh "pkgsend -s #{repouri} publish -d #{proto} --fmri-in-manifest #{workdir}/#{@build.project}.p5m"
       end
 
       # Retrieve the package from the remote repository in .p5p archive format
       task :receive do
-        check_tool('pkgrecv')
+        Pkg::Util::Tool.check_tool('pkgrecv')
         sh "pkgrecv -s #{repouri} -a -d #{artifact} #{@build.project}@#{@build.ipsversion}"
       end
 
@@ -87,11 +86,11 @@ if @build_ips
 
       task :p5p, :sign_ips do |t, args|
         # make sure our system dependencies are met
-        check_tool('pkg')
-        check_tool('pkgdepend')
-        check_tool('pkgsend')
-        check_tool('pkglint')
-        check_tool('pkgmogrify')
+        Pkg::Util::Tool.check_tool('pkg')
+        Pkg::Util::Tool.check_tool('pkgdepend')
+        Pkg::Util::Tool.check_tool('pkgsend')
+        Pkg::Util::Tool.check_tool('pkglint')
+        Pkg::Util::Tool.check_tool('pkgmogrify')
         sign_ips = args.sign_ips
         # create the package manifest & files (the "package")
         Rake::Task['package:ips:package'].invoke

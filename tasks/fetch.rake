@@ -29,14 +29,14 @@ namespace :pl do
     rm_rf "#{ENV['HOME']}/.packaging" if File.directory?("#{ENV['HOME']}/.packaging")
     # Touch the .packaging file which is allows packaging to present remote tasks
     touch "#{ENV['HOME']}/.packaging"
-    if dist = el_version
+    if dist = Pkg::Util::Version.el_version
       if dist.to_i < 6
         flag = "-k"
       end
     end
     [project_data_url, team_data_url].each do |url|
       begin
-        tempdir = get_temp
+        tempdir = Pkg::Util::File.mktemp
         %x{curl --fail --silent #{flag} #{url}/#{@build.builder_data_file} > #{tempdir}/#{@build.builder_data_file}}
         case $?.exitstatus
         when 0

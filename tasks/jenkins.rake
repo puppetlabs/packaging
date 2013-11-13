@@ -91,7 +91,7 @@ namespace :pl do
     #
     task :post_build, :build_task do |t, args|
       # Check for a dirty tree before allowing a remote build that is doomed to unexpected results
-      fail_on_dirty_source
+      Pkg::Util::Version.fail_on_dirty_source
 
       # We use JSON for parsing the json part of the submission to JSON
       require_library_or_fail 'json'

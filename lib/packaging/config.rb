@@ -18,10 +18,6 @@ module Pkg
         attr_accessor v
       end
 
-      #   Set defaults for certain version-related variables that are rarely
-      #   overridden
-      @release = 1
-
       #   Return the binding of class context. Used for erb templates.
       #
       def get_binding
@@ -113,7 +109,7 @@ module Pkg
         ENV['PROJECT_ROOT'] || File.expand_path(File.join(LIBDIR, "..","..",".."))
       end
 
-      def load_defaults
+      def load_default_configs
         @project_root ||= default_project_root
 
         default_project_data = File.join(@project_root, "ext", "project_data.yaml")
@@ -167,10 +163,10 @@ module Pkg
       end
 
       ##
-      # Since we're dealing with rake, much of the parameter override support
-      # is via environment variables passed on the command line to a rake task.
-      # These override any existing values of Pkg::Config class instance
-      # variables
+      #   Since we're dealing with rake, much of the parameter override support
+      #   is via environment variables passed on the command line to a rake task.
+      #   These override any existing values of Pkg::Config class instance
+      #   variables
       #
       def load_envvars
         Pkg::Params::ENV_VARS.each do |v|
@@ -184,6 +180,41 @@ module Pkg
         end
       end
 
+      ##
+      #   We supply several values by default, if they haven't been specified
+      #   already by config or environment variable.
+      def load_defaults
+        Pkg::Params::DEFAULTS.each do |v|
+          unless self.instance_variable_get("@#{v[:var]}")
+            self.instance_variable_set("@#{v[:var]}", v[:val])
+          end
+        end
+      end
+
+      ##
+      #   We also have renamed various variables as part of deprecations, and
+      #   if any of these are still in use, we want to assign the values to the
+      #   new variables.
+      #
+      def issue_reassignments
+        Pkg::Params::REASSIGNMENTS.each do |v|
+          if val = self.instance_variable_get("@#{v[:oldvar]}")
+            self.instance_variable_set("@#{v[:newvar]}", val)
+          end
+        end
+      end
+
+      ##
+      #   Quite a few variables we also want to issue custom warnings about.
+      #   These are they.
+      #
+      def issue_deprecations
+        Pkg::Params::DEPRECATIONS.each do |v|
+          if self.instance_variable_get("@#{v[:var]}")
+            warn v[:message]
+          end
+        end
+      end
     end
   end
 end

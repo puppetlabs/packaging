@@ -10,9 +10,11 @@ module Pkg
   require 'packaging/tar'
 
   # Load configuration defaults
-  Pkg::Config.load_defaults
+  Pkg::Config.load_default_configs
   Pkg::Config.load_versioning
   Pkg::Config.load_envvars
-
+  Pkg::Config.load_defaults
+  Pkg::Config.issue_reassignments
+  Pkg::Config.issue_deprecations
 end
 

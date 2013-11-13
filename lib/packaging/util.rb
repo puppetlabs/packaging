@@ -2,6 +2,7 @@
 
 module Pkg::Util
   require 'erb'
+  require 'packaging/util/date'
   require 'packaging/util/tool'
   require 'packaging/util/file'
   require 'packaging/util/version'

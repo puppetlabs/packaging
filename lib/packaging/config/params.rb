@@ -128,12 +128,40 @@ module Pkg::Params
               {:var => :pe_version,          :envvar => :PE_VER},
               {:var => :privatekey_pem,      :envvar => :PRIVATE_PEM},
               {:var => :project_root,        :envvar => :PROJECT_ROOT},
+              {:var => :random_mockroot,     :envvar => :RANDOM_MOCKROOT, :type => :bool},
               {:var => :rc_mocks,            :envvar => :MOCK},
               {:var => :release,             :envvar => :RELEASE},
               {:var => :sign_tar,            :envvar => :SIGN_TAR, :type => :bool},
+              {:var => :team,                :envvar => :TEAM},
               {:var => :update_version_file, :envvar => :NEW_STYLE_PACKAGE},
               {:var => :yum_repo_path,       :envvar => :YUM_REPO},
               {:var => :yum_host,            :envvar => :YUM_HOST}]
-end
+  # Default values that are supplied if the user does not supply them
+  #
+  # usage is the same as above
+  #
+  DEFAULTS = [{:var => :builder_data_file, :val => 'builder_data.yaml'},
+              {:var => :team,              :val => 'dev'},
+              {:var => :random_mockroot,   :val => true},
+              {:var => :keychain_loaded,   :val => false},
+              {:var => :build_date,        :val => Pkg::Util::Date.timestamp('-')},
+              {:var => :release,           :val => '1'}]
 
+  # These are variables which, over time, we decided to rename or replace. For
+  # backwards compatibility, we assign the value of the old/deprecated
+  # variables, if set, to the new ones.
+  #
+  REASSIGNMENTS = [{:oldvar => :name,                   :newvar => :project},
+                   {:oldvar => :tar_host,               :newvar => :yum_host},
+                   {:oldvar => :gem_devel_dependencies, :newvar => :gem_development_dependencies}]
+
+  # These are variables that we have deprecated. If they are encountered in a
+  # project's config, we issue deprecations for them.
+  #
+  DEPRECATIONS = [{:var => :gem_devel_dependencies, :message => "
+    DEPRECATED, 9-Nov-2013: 'gem_devel_dependencies' has been replaced with
+    'gem_development_dependencies.' Please update this field in your
+    project_data.yaml"}]
+
+end
 

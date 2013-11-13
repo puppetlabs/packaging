@@ -166,21 +166,55 @@ module Pkg::Util::Version
       end
     end
 
-    # Determines if this package is an rc package via the version
-    # returned by get_dash_version method.
+    # Determines if this package is a final package via the
+    # selected version_strategy.
+    # There are currently two supported version strategies.
+    #
+    # This method calls down to the version strategy indicated, defaulting to the
+    # rc_final strategy. The methods themselves will return false if it is a final
+    # release, so their return values are collected and then inverted before being
+    # returned.
+    def is_final?
+      ret = nil
+      case Pkg::Config.version_strategy
+        when "rc_final"
+          ret = is_rc?
+        when "odd_even"
+          ret = is_odd?
+        when nil
+          ret = is_rc?
+      end
+      return (! ret)
+    end
+
+    # the rc_final strategy (default)
     # Assumes version strings in the formats:
     # final:
     # '0.7.0'
     # '0.7.0-63'
     # '0.7.0-63-dirty'
-    # rc:
+    # development:
     # '0.7.0rc1 (we don't actually use this format anymore, but once did)
     # '0.7.0-rc1'
     # '0.7.0-rc1-63'
     # '0.7.0-rc1-63-dirty'
     def is_rc?
       return TRUE if get_dash_version =~ /^\d+\.\d+\.\d+-*rc\d+/
-      FALSE
+      return FALSE
+    end
+
+    # the odd_even strategy (mcollective)
+    # final:
+    # '0.8.0'
+    # '1.8.0-63'
+    # '0.8.1-63-dirty'
+    # development:
+    # '0.7.0'
+    # '1.7.0-63'
+    # '0.7.1-63-dirty'
+    def is_odd?
+      return TRUE if get_dash_version.match(/^\d+\.(\d+)\.\d+/)[1].to_i.odd?
+      return FALSE
     end
 
     # Utility method to return the dist method if this is a redhat box. We use this

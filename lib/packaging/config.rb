@@ -192,6 +192,23 @@ module Pkg
       end
 
       ##
+      #
+      #   Several workflows rely on being able to supply an optional yaml
+      #   parameters file that overrides all set values with its data. This has
+      #   always been supplied as an environment variable, "PARAMS_FILE." To
+      #   honor this, we have a method in config to override values as
+      #   expected.
+      def load_overrides
+        if ENV['PARAMS_FILE'] && ENV['PARAMS_FILE'] != ''
+          if File.readable?(ENV['PARAMS_FILE'])
+            self.config_from_yaml(ENV['PARAMS_FILE'])
+          else
+            fail "PARAMS_FILE was set, but not to the path to a readable file."
+          end
+        end
+      end
+
+      ##
       #   We also have renamed various variables as part of deprecations, and
       #   if any of these are still in use, we want to assign the values to the
       #   new variables.

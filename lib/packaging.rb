@@ -14,6 +14,7 @@ module Pkg
   Pkg::Config.load_versioning
   Pkg::Config.load_envvars
   Pkg::Config.load_defaults
+  Pkg::Config.load_overrides
   Pkg::Config.issue_reassignments
   Pkg::Config.issue_deprecations
 end

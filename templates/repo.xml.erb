@@ -31,7 +31,7 @@ This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed 
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.plugins.copyartifact.CopyArtifact plugin="copyartifact@1.25">
-      <projectName><%= "#{@build.project}-packaging-#{@build.build_date}-#{@build.ref}" %>/command=package_tar</projectName>
+      <projectName><%= "#{Pkg::Config.project}-packaging-#{Pkg::Config.build_date}-#{Pkg::Config.ref}" %>/command=package_tar</projectName>
       <filter>**/PROJECT_BUNDLE</filter>
       <target></target>
       <selector class="hudson.plugins.copyartifact.TriggeredBuildSelector">
@@ -42,7 +42,7 @@ This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed 
     <hudson.tasks.Shell>
       <command>#!/bin/bash
 ## We have to check if this has been triggered by a successful package build
-curl -s &quot;http://<%= "#{@build.jenkins_build_host}" %>/job/<%= "#{@build.project}-packaging-#{@build.build_date}-#{@build.ref}" %>/lastBuild/api/json&quot; | grep result\&quot;:\&quot;SUCCESS\&quot; > /dev/null
+curl -s &quot;http://<%= "#{Pkg::Config.jenkins_build_host}" %>/job/<%= "#{Pkg::Config.project}-packaging-#{Pkg::Config.build_date}-#{Pkg::Config.ref}" %>/lastBuild/api/json&quot; | grep result\&quot;:\&quot;SUCCESS\&quot; > /dev/null
 
 PACKAGE_BUILD_RESULT=$?
 
@@ -87,7 +87,7 @@ fi
   </builders><% if ENV['DOWNSTREAM_JOB'] %>
   <publishers>
     <hudson.tasks.BuildTrigger>
-      <childProjects><%= "#{@build.project}-downstream-#{@build.build_date}-#{@build.ref}" %></childProjects>
+      <childProjects><%= "#{Pkg::Config.project}-downstream-#{Pkg::Config.build_date}-#{Pkg::Config.ref}" %></childProjects>
       <threshold>
         <name>FAILURE</name>
         <ordinal>2</ordinal>

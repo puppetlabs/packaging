@@ -55,17 +55,17 @@ pl:jenkins:uber_build NOTIFY=foo@puppetlabs.com&#xd;
   <properties>
     <jp.ikedam.jenkins.plugins.groovy__label__assignment.GroovyLabelAssignmentProperty plugin="groovy-label-assignment@1.0.0">
       <groovyScript>def labelMap = [
-        <% @build.cows.split(' ').each do |cow| %>
+        <% Pkg::Config.cows.split(' ').each do |cow| %>
           <% if cow =~ /cumulus/ %>
         &quot;pl_deb COW=<%= cow %>&quot;: &quot;cumulus&quot;,
           <% else %>
         &quot;pl_deb COW=<%= cow %>&quot;: &quot;deb&quot;,
           <% end %>
         <% end %>
-        <% @build.final_mocks.split(' ').each do |mock| %>&quot;pl_mock MOCK=<%= mock %>&quot;: &quot;rpm&quot;,<% end %>
+        <% Pkg::Config.final_mocks.split(' ').each do |mock| %>&quot;pl_mock MOCK=<%= mock %>&quot;: &quot;rpm&quot;,<% end %>
         &quot;package_tar&quot;: &quot;rpm&quot;,
-        <% if @build.build_gem then %>&quot;package_gem&quot;: &quot;gem&quot;,<% end %>
-        <% if @build.build_dmg then %>&quot;package_apple&quot;: &quot;dmg&quot;,<% end %>
+        <% if Pkg::Config.build_gem then %>&quot;package_gem&quot;: &quot;gem&quot;,<% end %>
+        <% if Pkg::Config.build_dmg then %>&quot;package_apple&quot;: &quot;dmg&quot;,<% end %>
 ];
 return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScript>
     </jp.ikedam.jenkins.plugins.groovy__label__assignment.GroovyLabelAssignmentProperty>
@@ -107,11 +107,11 @@ return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScr
     <hudson.matrix.TextAxis>
       <name>command</name>
       <values>
-        <% @build.cows.split(' ').each do |cow| %><string>pl_deb COW=<%= cow %></string><% end %>
-        <% @build.final_mocks.split(' ').each do |mock| %><string>pl_mock MOCK=<%= mock %></string><% end %>
+        <% Pkg::Config.cows.split(' ').each do |cow| %><string>pl_deb COW=<%= cow %></string><% end %>
+        <% Pkg::Config.final_mocks.split(' ').each do |mock| %><string>pl_mock MOCK=<%= mock %></string><% end %>
         <string>package_tar</string>
-        <% if @build.build_gem then %><string>package_gem</string><% end %>
-        <% if @build.build_dmg then %><string>package_apple</string><% end %>
+        <% if Pkg::Config.build_gem then %><string>package_gem</string><% end %>
+        <% if Pkg::Config.build_dmg then %><string>package_apple</string><% end %>
       </values>
     </hudson.matrix.TextAxis>
   </axes>
@@ -166,7 +166,7 @@ def get_jenkins_build_time() {
 
 // Assemble metrics to post to build metrics server
 
-app_server    = &quot;<%= @build.metrics_url %>&quot;
+app_server    = &quot;<%= Pkg::Config.metrics_url %>&quot;
 task_metrics  = manager.build.getEnvironment(manager.listener)[&apos;METRICS&apos;]
 charset       = &quot;UTF-8&quot;
 
@@ -292,9 +292,9 @@ try {
       <artifacts>**/PROJECT_BUNDLE</artifacts>
       <latestOnly>false</latestOnly>
       <allowEmptyArchive>false</allowEmptyArchive>
-    </hudson.tasks.ArtifactArchiver><% if @build.notify %>
+    </hudson.tasks.ArtifactArchiver><% if Pkg::Config.notify %>
     <hudson.tasks.Mailer plugin="mailer@1.4">
-      <recipients><%= "#{@build.notify}" %></recipients>
+      <recipients><%= "#{Pkg::Config.notify}" %></recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer><% end %>
@@ -304,7 +304,7 @@ try {
           <configs>
             <hudson.plugins.parameterizedtrigger.CurrentBuildParameters/>
           </configs>
-          <projects><%= "#{@build.project}-repo-#{@build.build_date}-#{@build.ref}" %></projects>
+          <projects><%= "#{Pkg::Config.project}-repo-#{Pkg::Config.build_date}-#{Pkg::Config.ref}" %></projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
         </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>

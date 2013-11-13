@@ -222,10 +222,10 @@ module Pkg::Util::Version
     # to disable ssl checking for redhat 5 because it has a certs bundle so old by
     # default that it's useless for our purposes.
     def el_version
-      rpm = Pkg::Util::Tool.find_tool('rpm', :required => true)
       if File.exists?('/etc/fedora-release')
         nil
       elsif File.exists?('/etc/redhat-release')
+        rpm = Pkg::Util::Tool.find_tool('rpm', :required => true)
         return %x{#{rpm} -q --qf \"%{VERSION}\" $(#{rpm} -q --whatprovides /etc/redhat-release )}
       end
     end

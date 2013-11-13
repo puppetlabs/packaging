@@ -153,7 +153,8 @@ module Pkg::Params
   #
   REASSIGNMENTS = [{:oldvar => :name,                   :newvar => :project},
                    {:oldvar => :tar_host,               :newvar => :yum_host},
-                   {:oldvar => :gem_devel_dependencies, :newvar => :gem_development_dependencies}]
+                   {:oldvar => :gem_devel_dependencies, :newvar => :gem_development_dependencies},
+                   {:oldvar => :pe_name,                :newvar => :project}]
 
   # These are variables that we have deprecated. If they are encountered in a
   # project's config, we issue deprecations for them.

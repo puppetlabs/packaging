@@ -10,7 +10,13 @@ namespace :package do
 
     tar = Pkg::Tar.new
 
-    tar.templates = Dir[File.join(Pkg::Config.project_root, "ext", "**", "*.erb")].select { |i| i !~ /packaging|osx/ }
+    if Pkg::Config.templates
+      fail "templates must be an array" unless Pkg::Config.templates.is_a?(Array)
+      tar.templates = []
+      Pkg::Config.templates.each { |t| tar.templates << Dir[t] }
+    else
+      tar.templates = Dir[File.join(Pkg::Config.project_root, "ext", "**", "*.erb")].select { |i| i !~ /packaging|osx/ }
+    end
 
     # This is to support packages that only burn-in the version number in the
     # release artifact, rather than storing it two (or more) times in the

@@ -46,7 +46,7 @@ module Pkg
           if File.directory?(pattern) and not Pkg::Util::File.empty_dir?(pattern)
             install << Dir[pattern + "/**/*"]
           else
-            install << pattern
+            install << Dir[pattern]
           end
         end
         install.flatten!

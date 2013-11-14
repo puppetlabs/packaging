@@ -15,7 +15,7 @@ namespace :package do
       tar.templates = []
       Pkg::Config.templates.each { |t| tar.templates << Dir[t] }
     else
-      tar.templates = Dir[File.join(Pkg::Config.project_root, "ext", "**", "*.erb")].select { |i| i !~ /packaging|osx/ }
+      tar.templates = Dir[File.join(Pkg::Config.project_root, "ext", "**", "*.erb")].select { |i| i !~ /ext\/packaging|ext\/osx/ }
     end
 
     # This is to support packages that only burn-in the version number in the

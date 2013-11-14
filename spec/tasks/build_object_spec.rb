@@ -1,10 +1,10 @@
 # -*- ruby -*-
 require 'spec_helper'
-load_task '00_utils.rake'
-load_task 'build.rake'
+load File.join(SPECDIR, '..', 'lib', 'packaging.rb')
+
 require 'yaml'
 
-describe Build::BuildInstance do
+describe Pkg::Config do
   Build_Params = [:apt_host,
                   :apt_repo_path,
                   :apt_repo_url,
@@ -101,27 +101,23 @@ describe Build::BuildInstance do
                   :yum_host,
                   :yum_repo_path]
 
-  before :each do
-    @build = Build::BuildInstance.new
-  end
-
   describe "#new" do
     Build_Params.each do |param|
       it "should have r/w accessors for #{param}" do
-        @build.should respond_to(param)
-        @build.should respond_to("#{param.to_s}=")
+        Pkg::Config.should respond_to(param)
+        Pkg::Config.should respond_to("#{param.to_s}=")
       end
     end
   end
 
-  describe "#set_params_from_hash" do
+  describe "#config_from_hash" do
     good_params = { :yum_host => 'foo', :pe_name => 'bar' }
     context "given a valid params hash #{good_params}" do
       it "should set instance variable values for each param" do
         good_params.each do |param, value|
-          @build.should_receive(:instance_variable_set).with("@#{param}", value)
+          Pkg::Config.should_receive(:instance_variable_set).with("@#{param}", value)
         end
-        @build.set_params_from_hash(good_params)
+        Pkg::Config.config_from_hash(good_params)
       end
     end
 
@@ -129,13 +125,13 @@ describe Build::BuildInstance do
     context "given an invalid params hash #{bad_params}" do
       bad_params.each do |param, value|
         it "should print a warning that param '#{param}' is not valid" do
-          @build.should_receive(:warn).with(/No build data parameter found for '#{param}'/)
-          @build.set_params_from_hash(bad_params)
+          Pkg::Config.should_receive(:warn).with(/No build data parameter found for '#{param}'/)
+          Pkg::Config.config_from_hash(bad_params)
         end
 
         it "should not try to set instance variable @:#{param}" do
-          @build.should_not_receive(:instance_variable_set).with("@#{param}", value)
-          @build.set_params_from_hash(bad_params)
+          Pkg::Config.should_not_receive(:instance_variable_set).with("@#{param}", value)
+          Pkg::Config.config_from_hash(bad_params)
         end
       end
     end
@@ -143,37 +139,37 @@ describe Build::BuildInstance do
     mixed_params = { :sign_tar => TRUE, :baz => 'qux' }
     context "given a hash with both valid and invalid params" do
       it "should set the valid param" do
-        @build.should_receive(:instance_variable_set).with("@sign_tar", TRUE)
-        @build.set_params_from_hash(mixed_params)
+        Pkg::Config.should_receive(:instance_variable_set).with("@sign_tar", TRUE)
+        Pkg::Config.config_from_hash(mixed_params)
       end
 
       it "should issue a warning that the invalid param is not valid" do
-        @build.should_receive(:warn).with(/No build data parameter found for 'baz'/)
-        @build.set_params_from_hash(mixed_params)
+        Pkg::Config.should_receive(:warn).with(/No build data parameter found for 'baz'/)
+        Pkg::Config.config_from_hash(mixed_params)
       end
 
       it "should not try to set instance variable @:baz" do
-        @build.should_not_receive(:instance_variable_set).with("@baz", "qux")
-        @build.set_params_from_hash(mixed_params)
+        Pkg::Config.should_not_receive(:instance_variable_set).with("@baz", "qux")
+        Pkg::Config.config_from_hash(mixed_params)
       end
     end
   end
 
   describe "#params" do
     it "should return a hash containing keys for all build parameters" do
-      params = @build.params
+      params = Pkg::Config.config
       Build_Params.each { |param| params.has_key?(param).should == TRUE }
     end
   end
 
-  describe "#params_to_yaml" do
+  describe "#config_to_yaml" do
     it "should write a valid yaml file" do
       file = mock('file')
       File.should_receive(:open).with(anything(), 'w').and_yield(file)
       file.should_receive(:puts).with(instance_of(String))
       YAML.should_receive(:load_file).with(file)
       expect { YAML.load_file(file) }.to_not raise_error
-      @build.params_to_yaml
+      Pkg::Config.config_to_yaml
     end
   end
 end

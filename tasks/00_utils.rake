@@ -314,6 +314,7 @@ def git_commit_file(file, message=nil)
 end
 
 def ship_gem(file)
+  check_file("#{ENV['HOME']}/.gem/credentials")
   %x{gem push #{file}}
 end
 

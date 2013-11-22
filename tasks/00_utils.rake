@@ -136,7 +136,7 @@ def git_commit_file(file, message=nil)
 end
 
 def ship_gem(file)
-  check_file("#{ENV['HOME']}/.gem/credentials")
+  Pkg::Util::File.file_exists?("#{ENV['HOME']}/.gem/credentials", :required => true)
   %x{gem push #{file}}
 end
 

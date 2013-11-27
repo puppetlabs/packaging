@@ -105,6 +105,9 @@ namespace :pl do
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
       add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (! is_final?)) if @build.benchmark
       post_shipped_metrics if @build.benchmark
+    else
+      puts "Ship canceled"
+      exit
     end
   end
 

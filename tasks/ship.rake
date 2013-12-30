@@ -39,7 +39,9 @@ namespace :pl do
   desc "Ship cow-built debs to #{@build.apt_host}"
   task :ship_debs do
     retry_on_fail(:times => 3) do
-      rsync_to('pkg/deb/', @build.apt_host, @build.apt_repo_path)
+      if File.directory?("pkg/deb")
+        rsync_to('pkg/deb/', @build.apt_host, @build.apt_repo_path)
+      end
     end
   end
 

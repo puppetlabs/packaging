@@ -43,10 +43,14 @@ if @build.build_pe
       #
       puts "Shipping PE debs to apt repo 'incoming' dir on #{@build.apt_host}"
       retry_on_fail(:times => 3) do
-        cd "pkg/pe/deb" do
-          Dir["**/*.deb"].each do |deb|
-            rsync_to(deb, @build.apt_host, "#{target_path}/#{File.dirname(deb)}/")
+        if File.directory?("pkg/pe/deb")
+          cd "pkg/pe/deb" do
+            Dir["**/*.deb"].each do |deb|
+              rsync_to(deb, @build.apt_host, "#{target_path}/#{File.dirname(deb)}/")
+            end
           end
+        else
+          warn "No packages found in 'pkg/pe/deb', skipping ship of debs."
         end
       end
 

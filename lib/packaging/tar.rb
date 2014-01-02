@@ -72,6 +72,8 @@ module Pkg
       workdir ||= Pkg::Config.project_root
       @templates.each do |t|
 
+        t = File.expand_path(t)
+
         target_file = File.join(File.dirname(t), File.basename(t).sub(File.extname(t),""))
         root = Pathname.new(Pkg::Config.project_root)
 

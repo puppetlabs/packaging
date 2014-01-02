@@ -12,12 +12,19 @@ namespace :package do
 
     if Pkg::Config.templates
       fail "templates must be an array" unless Pkg::Config.templates.is_a?(Array)
-      tar.templates = []
-      Pkg::Config.templates.each { |t| tar.templates << Dir[t] }
+      tar.templates = Pkg::Config.templates.dup
     else
       tar.templates = Dir[File.join(Pkg::Config.project_root, "ext", "**", "*.erb")].select { |i| i !~ /ext\/packaging|ext\/osx/ }
     end
 
+    if Pkg::Config.tar_excludes
+      if Pkg::Config.tar_excludes.is_a?(Array)
+        tar.excludes = Pkg::Config.tar_excludes.dup
+      else
+        warn "!! tar_excludes should be an array"
+        tar.excludes = Pkg::Config.tar_excludes.split(' ')
+      end
+    end
     # This is to support packages that only burn-in the version number in the
     # release artifact, rather than storing it two (or more) times in the
     # version control system.  Razor is a good example of that; see

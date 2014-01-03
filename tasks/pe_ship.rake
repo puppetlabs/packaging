@@ -21,37 +21,45 @@ if @build.build_pe
       #   created for this specific deb ship. This enables us to escape the conflicts
       #   introduced with simultaneous deb ships.
       #
-      unless target_path
-        puts "Creating temporary incoming dir on #{@build.apt_host}"
-        target_path = %x{ssh -t #{@build.apt_host} 'mktemp -d -t incoming-XXXXXX'}.chomp
-      end
 
-      #   For reprepro, we ship just the debs into an incoming dir. On the remote end,
-      #   reprepro will pull these debs in and add them to the repositories based on the
-      #   dist, e.g. lucid, architecture notwithstanding.
+      #   We are going to iterate over every set of packages, adding them to
+      #   the repository set by set. This enables us to handle different
+      #   repositories per distribution. "pkg/pe/deb/" contains directories
+      #   named for every distribution, e.g. "lucid," "squeeze," etc.
       #
-      #   The layout that the reprepro library will expect is:
-      #
-      #     incoming_dir/{$dists}/*.deb
-      #
-      #   ex:
-      #     incoming_dir|
-      #                 |_lucid/*.deb
-      #                 |_squeeze/*.deb
-      #                 |_precise/*.deb
-      #                 |_wheezy/*.deb
-      #
-      puts "Shipping PE debs to apt repo 'incoming' dir on #{@build.apt_host}"
-      retry_on_fail(:times => 3) do
-        if File.directory?("pkg/pe/deb")
-          cd "pkg/pe/deb" do
-            Dir["**/*.deb"].each do |deb|
-              rsync_to(deb, @build.apt_host, "#{target_path}/#{File.dirname(deb)}/")
-            end
-          end
-        else
-          warn "No packages found in 'pkg/pe/deb', skipping ship of debs."
+      Dir["pkg/pe/deb/*"].each do |dist|
+        dist = File.basename(dist)
+        unless target_path
+          puts "Creating temporary incoming dir on #{@build.apt_host}"
+          target_path = %x{ssh -t #{@build.apt_host} 'mktemp -d -t incoming-XXXXXX'}.chomp
         end
+
+        #   For reprepro, we ship just the debs into an incoming dir. On the remote end,
+        #   reprepro will pull these debs in and add them to the repositories based on the
+        #   dist, e.g. lucid, architecture notwithstanding.
+        #
+        #   The layout that the reprepro library will expect is:
+        #
+        #     incoming_dir/{$dists}/*.deb
+        #
+        #   ex:
+        #     incoming_dir|
+        #                 |_lucid/*.deb
+        #                 |_squeeze/*.deb
+        #                 |_precise/*.deb
+        #                 |_wheezy/*.deb
+        #
+        puts "Shipping PE debs to apt repo 'incoming' dir on #{@build.apt_host}"
+        retry_on_fail(:times => 3) do
+          Dir["pkg/pe/deb/#{dist}/*.deb"].each do |deb|
+            rsync_to(deb, @build.apt_host, "#{target_path}/#{dist}/#{File.basename(deb)}")
+          end
+        end
+
+        if @build.team == 'release'
+          Rake::Task["pe:remote:apt"].invoke(target_path, dist)
+        end
+
       end
 
       #   We also ship our PE artifacts to directories for archival purposes and to
@@ -85,10 +93,18 @@ if @build.build_pe
             rsync_to("pkg/pe/deb/#{dist}/pe-*_#{arch}.deb --ignore-existing", @build.apt_host, "#{archive_path}/" )
           end
 
-          # Ship all-arch debs to same place
+          # Ship all-arch debs to same dist-location, but to all known
+          # architectures for this distribution.
+          #
+          # I am not proud of this. MM - 1/3/2014.
+
           unless Dir["pkg/pe/deb/#{dist}/pe-*_all.deb"].empty?
-            rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", @build.apt_host, "#{base_path}/#{dist}-i386/")
-            rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", @build.apt_host, "#{base_path}/#{dist}-amd64/")
+            if dist =~ /cumulus/
+              rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", @build.apt_host, "#{base_path}/#{dist}-powerpc/")
+            else
+              rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", @build.apt_host, "#{base_path}/#{dist}-i386/")
+              rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", @build.apt_host, "#{base_path}/#{dist}-amd64/")
+            end
           end
 
           unless Dir["pkg/pe/deb/#{dist}/pe-*"].select { |i| i !~ /^.*\.deb$/ }.empty?
@@ -106,10 +122,6 @@ if @build.build_pe
         end
       end
 
-
-      if @build.team == 'release'
-        Rake::Task["pe:remote:apt"].invoke(target_path)
-      end
     end
 
     namespace :remote do
@@ -125,14 +137,25 @@ if @build.build_pe
       #   Per previous comments, the incoming directory must contain subdirectories named
       #   for debian distributions.
       desc "Remotely add shipped packages to apt repo on #{@build.apt_host}"
-      task :apt, :incoming do |t, args|
+      task :apt, :incoming, :dist do |t, args|
+        dist = args.dist
+        if dist =~ /cumulus/
+          reprepro_confdir = "/etc/reprepro/networking/#{@build.pe_version}/cumulus"
+          reprepro_basedir = "/opt/enterprise/networking/#{@build.pe_version}/cumulus"
+          reprepro_dbdir = "/var/lib/reprepro/networking/#{@build.pe_version}/cumulus"
+        else
+          reprepro_confdir = "/etc/reprepro/#{@build.pe_version}"
+          reprepro_basedir = "#{@build.apt_repo_path}/#{@build.pe_version}/repos/debian"
+          reprepro_dbdir = "/var/lib/reprepro/#{@build.pe_version}"
+        end
+
         incoming_dir = args.incoming
         incoming_dir or fail "Adding packages to apt repo requires an incoming directory"
         invoke_task("pl:fetch")
         remote_ssh_cmd(@build.apt_host, "/usr/bin/repsimple add_all \
-            --confdir /etc/reprepro/#{@build.pe_version} \
-            --basedir #{@build.apt_repo_path}/#{@build.pe_version}/repos/debian \
-            --databasedir /var/lib/reprepro/#{@build.pe_version} \
+            --confdir #{reprepro_confdir} \
+            --basedir #{reprepro_basedir} \
+            --databasedir #{reprepro_dbdir} \
             --incomingdir #{incoming_dir}")
 
         puts "Cleaning up apt repo 'incoming' dir on #{@build.apt_host}"

@@ -55,7 +55,13 @@ pl:jenkins:uber_build NOTIFY=foo@puppetlabs.com&#xd;
   <properties>
     <jp.ikedam.jenkins.plugins.groovy__label__assignment.GroovyLabelAssignmentProperty plugin="groovy-label-assignment@1.0.0">
       <groovyScript>def labelMap = [
-        <% @build.cows.split(' ').each do |cow| %>&quot;pl_deb COW=<%= cow %>&quot;: &quot;deb&quot;,<% end %>
+        <% @build.cows.split(' ').each do |cow| %>
+          <% if cow =~ /cumulus/ %>
+        &quot;pl_deb COW=<%= cow %>&quot;: &quot;cumulus&quot;,
+          <% else %>
+        &quot;pl_deb COW=<%= cow %>&quot;: &quot;deb&quot;,
+          <% end %>
+        <% end %>
         <% @build.final_mocks.split(' ').each do |mock| %>&quot;pl_mock MOCK=<%= mock %>&quot;: &quot;rpm&quot;,<% end %>
         &quot;package_tar&quot;: &quot;rpm&quot;,
         <% if @build.build_gem then %>&quot;package_gem&quot;: &quot;gem&quot;,<% end %>

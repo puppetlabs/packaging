@@ -292,6 +292,9 @@ def set_cow_envs(cow)
   end
   ENV['DIST'] = dist
   ENV['ARCH'] = arch
+  if dist =~ /cumulus/
+    ENV['NETWORK_OS'] = 'cumulus'
+  end
 end
 
 def ln(target, name)

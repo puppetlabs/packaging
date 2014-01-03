@@ -108,7 +108,12 @@ namespace :pl do
       #
       # Determine the type of build we're doing to inform jenkins
       build_type = case build_task
-        when /deb/ then "deb"
+        when /deb/
+          if @build.default_cow.split('-')[1] =~ /cumulus/
+            "cumulus"
+          else
+            "deb"
+          end
         when /mock/ then "rpm"
         when /dmg|apple/ then "dmg"
         when /gem/ then "gem"

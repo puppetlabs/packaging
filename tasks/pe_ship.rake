@@ -52,6 +52,7 @@ if @build.build_pe
         puts "Shipping PE debs to apt repo 'incoming' dir on #{@build.apt_host}"
         retry_on_fail(:times => 3) do
           Dir["pkg/pe/deb/#{dist}/*.deb"].each do |deb|
+            remote_ssh_cmd(@build.apt_host, "mkdir -p '#{target_path}/#{dist}'")
             rsync_to(deb, @build.apt_host, "#{target_path}/#{dist}/#{File.basename(deb)}")
           end
         end

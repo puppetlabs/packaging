@@ -1,3 +1,5 @@
+require 'pathname'
+
 def pdebuild args
   results_dir = args[:work_dir]
   cow         = args[:cow]
@@ -35,6 +37,24 @@ task :prep_deb_tars, :work_dir do |t,args|
     mv "#{@build.project}-#{@build.version}", "#{@build.project}-#{@build.debversion}"
     mv "#{@build.project}-#{@build.version}.tar.gz", "#{@build.project}_#{@build.origversion}.orig.tar.gz"
   end
+
+  pkg_dir = "#{work_dir}/#{@build.project}-#{@build.debversion}"
+
+  # This assumes that work_dir is absolute, which I hope is a safe assumption.
+  cd 'ext' do
+    Pathname('debian').find do |file|
+      case
+      when file.to_s =~ /~$/, file.to_s =~ /^#/
+        next
+      when file.directory?
+        mkdir_p "#{pkg_dir}/#{file}"
+      when file.extname == '.erb'
+        erb file, "#{pkg_dir}/#{file.sub_ext('')}"
+      else
+        cp file, "#{pkg_dir}/#{file}"
+      end
+    end
+  end
 end
 
 task :build_deb, :deb_command, :cow do |t,args|
@@ -50,7 +70,6 @@ task :build_deb, :deb_command, :cow do |t,args|
     Rake::Task[:prep_deb_tars].reenable
     Rake::Task[:prep_deb_tars].invoke(work_dir)
     cd "#{work_dir}/#{@build.project}-#{@build.debversion}" do
-      mv 'ext/debian', '.'
       send(deb_build, deb_args)
       cp FileList["#{work_dir}/*.deb", "#{work_dir}/*.dsc", "#{work_dir}/*.changes", "#{work_dir}/*.debian.tar.gz", "#{work_dir}/*.orig.tar.gz"], dest_dir
       rm_rf "#{work_dir}/#{@build.project}-#{@build.debversion}"

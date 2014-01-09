@@ -82,7 +82,7 @@ if @build.build_gem
 
   def create_default_gem
     spec = create_default_gem_spec
-    create_gem(spec, "#{@build.project}-#{@build.gemversion}")
+    create_gem(spec, "#{@build.gem_name}-#{@build.gemversion}")
   end
 
   def unknown_gems_platform?(platform)
@@ -111,7 +111,7 @@ if @build.build_gem
           spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => t)
         end
       end
-      create_gem(spec, "#{@build.project}-#{@build.gemversion}-#{platform}")
+      create_gem(spec, "#{@build.gem_name}-#{@build.gemversion}-#{platform}")
     end
   end
 

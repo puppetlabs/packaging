@@ -18,6 +18,7 @@ describe Build::BuildInstance do
                   :build_ips,
                   :build_pe,
                   :builder_data_file,
+                  :bundle_platforms,
                   :certificate_pem,
                   :cows,
                   :db_table,

@@ -89,6 +89,13 @@ end
 # variable, but for backwards compatibility, we'll default back to @yum_host if
 # @tar_host isn't set.
 @build.tar_host ||= @build.yum_host
+# In gem packaging, we currently use gem_name conditionally to build a gem of
+# name other than the project name. This makes cleanup challenging, because we
+# may need to cleanup the project name or the gem name depending. This alias
+# allows us to unconditionally clean up the gem_name based directory.
+if @build.build_gem
+  @build.gem_name ||= @build.project
+end
 
 # Though undocumented, we had specified gem_devel_dependencies as an allowed
 # parameter for @build, and it was supposed to correspond with

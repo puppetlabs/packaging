@@ -58,6 +58,7 @@ if @build.build_pe
         end
 
         if @build.team == 'release'
+          Rake::Task["pe:remote:apt"].reenable
           Rake::Task["pe:remote:apt"].invoke(target_path, dist)
         end
 

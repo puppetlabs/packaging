@@ -129,7 +129,18 @@ if @build.build_pe
     namespace :remote do
       desc "Update remote rpm repodata for PE on #{@build.yum_host}"
       task :update_yum_repo => "pl:fetch" do
-        remote_ssh_cmd(@build.yum_host, "for dir in  $(find #{@build.apt_repo_path}/#{@build.pe_version}/repos/{sles,el}* -type d | grep -v repodata | grep -v cache | xargs)  ; do pushd $dir; sudo createrepo -q -d --update .; popd &> /dev/null ; done; sync")
+
+        # This entire command is going to be passed across SSH, but it's unwieldy on a
+        # single line. By breaking it into a series of concatenated strings, we can maintain
+        # a semblance of formatting and structure (nevermind readability).
+        command  = %{for dir in $(find #{@build.apt_repo_path}/#{@build.pe_version}/repos/{sles,el}* -type d | grep -v repodata | grep -v cache | xargs); do}
+        command += %{  pushd $dir; }
+        command += %{  sudo createrepo --checksum=sha --quiet --database --update . ; }
+        command += %{  popd &> /dev/null ; }
+        command += %{done; }
+        command += %{sync}
+
+        remote_ssh_cmd(@build.yum_host, command)
       end
 
       #   the repsimple application is a small wrapper around reprepro, the purpose of

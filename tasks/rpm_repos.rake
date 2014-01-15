@@ -37,7 +37,7 @@ namespace :pl do
         cmd << "rsync -avxl artifacts/ repos/ ; pushd repos ; "
         cmd << "createrepo=$(which createrepo) ; "
         cmd << 'for repodir in $(find ./ -name "*.rpm" | xargs -I {} dirname {}) ; do '
-        cmd << "pushd $repodir && $createrepo -d --update . && popd ; "
+        cmd << "pushd ${repodir} && ${createrepo} --checksum=sha --database --update . && popd ; "
         cmd << "done ; popd "
 
         remote_ssh_cmd(@build.distribution_server, cmd)

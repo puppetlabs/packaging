@@ -415,14 +415,14 @@ end
 def create_rpm_repo(dir)
   check_tool('createrepo')
   cd dir do
-    sh "createrepo -d ."
+    sh "createrepo --database ."
   end
 end
 
 def update_rpm_repo(dir)
   check_tool('createrepo')
   cd dir do
-    sh "createrepo -d --update ."
+    sh "createrepo --database --update ."
   end
 end
 

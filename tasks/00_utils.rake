@@ -412,19 +412,13 @@ def git_pull(remote, branch)
   sh "git pull #{remote} #{branch}"
 end
 
-def create_rpm_repo(dir)
-  check_tool('createrepo')
-  cd dir do
-    sh "createrepo --checksum=sha --database ."
-  end
-end
-
 def update_rpm_repo(dir)
   check_tool('createrepo')
   cd dir do
     sh "createrepo --checksum=sha --database --update ."
   end
 end
+alias :create_rpm_repo :update_rpm_repo
 
 def empty_dir?(dir)
   File.exist?(dir) and File.directory?(dir) and Dir["#{dir}/**/*"].empty?

@@ -75,7 +75,7 @@ if @build.build_gem
       gem_task.define
       Rake::Task[:gem].reenable
       Rake::Task[:gem].invoke
-      rm_r File.join("pkg", gembuilddir)
+      rm_rf File.join("pkg", gembuilddir)
     end
     puts "Finished building in: #{bench}"
   end

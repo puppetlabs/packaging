@@ -225,6 +225,21 @@ def pack_source
       end
     end
   end
+
+  # Hackery here. Our packages were using /usr/bin/env ruby and installing to
+  # system ruby loadpath, which breaks horribly in a multi-ruby (rbenv, etc)
+  # environment. This goes into the workdir and looks for any files dropped in
+  # bin, and "seds" the shebang to /usr/bin/ruby. I would love to be using a
+  # ruby approach to this instead of shelling out to sed, but the problem is
+  # we've already set ownership on these files, almost exclusively to root, and
+  # thus we need to sudo out.
+  if @source_files['directories'] and @source_files['directories']['bin']
+    if bindir = @source_files['directories']['bin']['path']
+      Dir[File.join(work, bindir, '*')].each do |binfile|
+        sh "sudo /usr/bin/sed -E -i '' '1 s,^#![[:space:]]*/usr/bin/env[[:space:]]+ruby$,#!/usr/bin/ruby,' #{binfile}"
+      end
+    end
+  end
 end
 
 if @build.build_dmg

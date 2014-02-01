@@ -141,6 +141,28 @@ namespace :pl do
       # clone itself.
       git_bundle('HEAD', 'signing_bundle', 'pkg')
 
+      # While we're bundling things, let's also make a git bundle of the
+      # packaging repo that we're using when we invoke pl:jenkins:ship. We can
+      # have a reasonable level of confidence, later on, that the git bundle on
+      # the distribution server was, in fact, the git bundle used to create the
+      # associated packages. This is because this ship task is automatically
+      # called upon completion each cell of the pl:jenkins:uber_build, and we
+      # have --ignore-existing set below. As such, the only git bundle that
+      # should possibly be on the distribution is the one used to create the
+      # packages.
+      # We're bundling the packaging repo because it allows us to keep an
+      # archive of the packaging source that was used to create the packages,
+      # so that later on if we need to rebuild an older package to audit it or
+      # for some other reason we're assured that the new package isn't
+      # different by virtue of the packaging automation.
+      if defined?(PACKAGING_ROOT)
+        packaging_bundle = ''
+        cd PACKAGING_ROOT do
+          packaging_bundle = git_bundle('HEAD', 'packaging-bundle')
+        end
+        mv(packaging_bundle, 'pkg')
+      end
+
       retry_on_fail(:times => 3) do
         remote_ssh_cmd(@build.distribution_server, "mkdir -p #{artifact_dir}")
       end

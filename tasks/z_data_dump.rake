@@ -29,5 +29,37 @@ namespace :pl do
   task :print_build_params do
     @build.print_params
   end
+
+  ##
+  # Print a parameter passed as an argument to STDOUT.
+  desc "Print a build parameter"
+  task :print_build_param, :param do |t, args|
+    # We want a string that is the from "@<param name>"
+    if param = args.param
+      getter = param.dup
+      if param[0] == ':'
+        getter = param[1..-1]
+        param[0] = "@"
+      elsif param[0] == "@"
+        getter = param[1..-1]
+      else
+        param.insert(0, "@")
+      end
+
+      # We want to fail if the param passed is bogus, print 'nil' if its not
+      # set, and print the value if its set.
+      if @build.respond_to?(getter)
+        if val = @build.instance_variable_get(param)
+          puts val
+        else
+          puts 'nil'
+        end
+      else
+        fail "Could not locate a build parameter called #{param}. For a list of available parameters, do `rake pl:print_build_params`"
+      end
+    else
+      fail "To print a build parameter, pass the param name as a rake argument. Ex: rake pl:print_build_param[:version]"
+    end
+  end
 end
 

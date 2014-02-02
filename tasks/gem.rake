@@ -111,11 +111,7 @@ if Pkg::Config.build_gem
           spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => t)
         end
       end
-<<<<<<< HEAD
-      create_gem(spec, "#{@build.gem_name}-#{@build.gemversion}-#{platform}")
-=======
-      create_gem(spec, "#{Pkg::Config.project}-#{Pkg::Config.gemversion}-#{platform}")
->>>>>>> Replace all occurrences of @build. with Pkg::Config
+      create_gem(spec, "#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}-#{platform}")
     end
   end
 

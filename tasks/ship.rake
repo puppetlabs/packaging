@@ -73,7 +73,7 @@ namespace :pl do
       # want to ship final gems because otherwise a development gem would be
       # preferred over the last final gem
       if @build.version_strategy != "odd_even" || is_final?
-        FileList["pkg/#{@build.project}-#{@build.gemversion}*.gem"].each do |f|
+        FileList["pkg/#{@build.gem_name}-#{@build.gemversion}*.gem"].each do |f|
           puts "Shipping gem #{f} to rubygems"
           ship_gem(f)
         end

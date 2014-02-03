@@ -44,7 +44,7 @@ task :prep_deb_tars, :work_dir do |t,args|
   # Also, it turns out that invoking 'find' on a directory that doesn't exist
   # will fail in nasty ways, so we only do this if the target exists...
   if Pathname('ext/debian').directory?
-    pkg_dir = "#{work_dir}/#{@build.project}-#{@build.debversion}"
+    pkg_dir = "#{work_dir}/#{Pkg::Config.project}-#{Pkg::Config.debversion}"
     cd 'ext' do
       Pathname('debian').find do |file|
         case
@@ -53,7 +53,7 @@ task :prep_deb_tars, :work_dir do |t,args|
         when file.directory?
           mkdir_p "#{pkg_dir}/#{file}"
         when file.extname == '.erb'
-          erb file, "#{pkg_dir}/#{file.sub_ext('')}"
+          Pkg::Util::File.erb_file(file, "#{pkg_dir}/#{file.sub_ext('')}", false, :binding => Pkg::Config.get_binding)
         else
           cp file, "#{pkg_dir}/#{file}"
         end

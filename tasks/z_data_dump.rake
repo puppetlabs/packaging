@@ -48,8 +48,8 @@ namespace :pl do
 
       # We want to fail if the param passed is bogus, print 'nil' if its not
       # set, and print the value if its set.
-      if @build.respond_to?(getter)
-        if val = @build.instance_variable_get(param)
+      if Pkg::Config.respond_to?(getter)
+        if val = Pkg::Config.instance_variable_get(param)
           puts val
         else
           puts 'nil'

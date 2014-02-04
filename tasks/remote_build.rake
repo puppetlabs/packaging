@@ -10,7 +10,7 @@ if File.exist?("#{ENV['HOME']}/.packaging")
         task                    = args.task
         tar                     = args.tar
         remote_repo             = remote_bootstrap(host, treeish, tar)
-        build_params            = remote_buildparams(host, @build)
+        build_params            = remote_buildparams(host, Pkg::Config)
         STDOUT.puts "Beginning package build on #{host}"
         remote_ssh_cmd(host, "cd #{remote_repo} ; rake #{task} PARAMS_FILE=#{build_params} ANSWER_OVERRIDE=no PGUSER=#{ENV['PGUSER']} PGDATABASE=#{ENV['PGDATABASE']} PGHOST=#{ENV['PGHOST']}")
         rsync_from("#{remote_repo}/pkg/", host, 'pkg/')
@@ -108,7 +108,7 @@ if File.exist?("#{ENV['HOME']}/.packaging")
         treeish                 = 'HEAD'
         task                    = "package:apple"
         remote_repo             = remote_bootstrap(host, treeish)
-        build_params            = remote_buildparams(host, @build)
+        build_params            = remote_buildparams(host, Pkg::Config)
         puts "Beginning package build on #{host}"
         remote_ssh_cmd(host, "cd #{remote_repo} ; rvmsudo rake #{task} PARAMS_FILE=#{build_params} PGUSER=#{ENV['PGUSER']} PGDATABASE=#{ENV['PGDATABASE']} PGHOST=#{ENV['PGHOST']}")
         rsync_from("#{remote_repo}/pkg/apple", host, 'pkg/')

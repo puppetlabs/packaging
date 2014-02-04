@@ -57,7 +57,7 @@ namespace :pl do
   desc "Sign the tarball, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_tar do
     File.exist?("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz") or fail "No tarball exists. Try rake package:tar?"
-    load_keychain if has_tool('keychain')
+    load_keychain if Pkg::Util::Tool.find_tool('keychain', :required => false)
     gpg_sign_file "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
   end
 
@@ -113,7 +113,7 @@ namespace :pl do
   desc "Sign generated debian changes files. Defaults to PL Key, pass KEY to override"
   task :sign_deb_changes do
     begin
-      load_keychain if has_tool('keychain')
+      load_keychain if Pkg::Util::Tool.find_tool('keychain')
       sign_deb_changes("pkg/deb/*/*.changes") unless Dir["pkg/deb/*/*.changes"].empty?
       sign_deb_changes("pkg/deb/*.changes") unless Dir["pkg/deb/*.changes"].empty?
     ensure
@@ -144,7 +144,7 @@ namespace :pl do
       deb_sign_task = Pkg::Config.build_pe ? "pe:sign_deb_changes" : "pl:sign_deb_changes"
       sign_tasks    = ["pl:sign_tar", rpm_sign_task, deb_sign_task]
       remote_repo   = remote_bootstrap(Pkg::Config.distribution_server, 'HEAD', nil, signing_bundle)
-      build_params  = remote_buildparams(Pkg::Config.distribution_server, @build)
+      build_params  = remote_buildparams(Pkg::Config.distribution_server, Pkg::Config)
       rsync_to('pkg', Pkg::Config.distribution_server, remote_repo)
       remote_ssh_cmd(Pkg::Config.distribution_server, "cd #{remote_repo} ; rake #{sign_tasks.join(' ')} PARAMS_FILE=#{build_params}")
       rsync_from("#{remote_repo}/pkg/", Pkg::Config.distribution_server, "pkg/")

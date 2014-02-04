@@ -125,7 +125,7 @@ def ln_sfT(src, dest)
 end
 
 def git_commit_file(file, message=nil)
-  if has_tool('git') and File.exist?('.git')
+  if Pkg::Util::Tool.find_tool('git') and File.exist?('.git')
     message ||= "changes"
     puts "Commiting changes:"
     puts
@@ -210,7 +210,7 @@ end
 # Given a BuildInstance object and a host, send its params to the host. Return
 # the remote path to the params.
 def remote_buildparams(host, build)
-  params_file = build.params_to_yaml
+  params_file = build.config_to_yaml
   params_file_name = File.basename(params_file)
   params_dir = rand_string
   rsync_to(params_file, host, "/tmp/#{params_dir}/")

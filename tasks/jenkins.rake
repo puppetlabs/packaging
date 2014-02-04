@@ -98,7 +98,7 @@ namespace :pl do
 
       build_task = args.build_task
       ##
-      # We set @:task of @build manually with our task data so the remote
+      # We set @:task of Pkg::Config manually with our task data so the remote
       # build knows what to do. Puppetdb needs early knowledge of if this is
       # a PE build, so we always this along as an environment variable task
       # argument if its the case.
@@ -109,7 +109,7 @@ namespace :pl do
       # Determine the type of build we're doing to inform jenkins
       build_type = case build_task
         when /deb/
-          if @build.default_cow.split('-')[1] =~ /cumulus/
+          if Pkg::Config.default_cow.split('-')[1] =~ /cumulus/
             "cumulus"
           else
             "deb"

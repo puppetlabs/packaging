@@ -58,15 +58,15 @@ def make_directory_tree
   end
 
   if File.exists?('ext/osx/postflight.erb')
-    Pkg::Util::File.erb_file 'ext/osx/postflight.erb', "#{@working_tree["scripts"]}/postinstall"
+    Pkg::Util::File.erb_file 'ext/osx/postflight.erb', "#{@working_tree["scripts"]}/postinstall", false, :binding => binding
   end
 
   if File.exists?('ext/osx/preflight.erb')
-    Pkg::Util::File.erb_file 'ext/osx/preflight.erb', "#{@working_tree["scripts"]}/preinstall"
+    Pkg::Util::File.erb_file 'ext/osx/preflight.erb', "#{@working_tree["scripts"]}/preinstall", false, :binding => binding
   end
 
   if File.exists?('ext/osx/prototype.plist.erb')
-    Pkg::Util::File.erb_file 'ext/osx/prototype.plist.erb', "#{@scratch}/prototype.plist"
+    Pkg::Util::File.erb_file 'ext/osx/prototype.plist.erb', "#{@scratch}/prototype.plist", false, :binding => binding
   end
 
   if File.exists?('ext/packaging/static_artifacts/PackageInfo.plist')
@@ -96,7 +96,7 @@ def build_dmg
   system("sudo #{PKGBUILD} --root #{@working_tree['working']} \
     --scripts #{@working_tree['scripts']} \
     --identifier #{@reverse_domain} \
-    --version #{@version} \
+    --version #{Pkg::Config.version} \
     --install-location / \
     --ownership preserve \
     --info #{@scratch}/PackageInfo.plist \

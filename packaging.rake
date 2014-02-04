@@ -2,7 +2,8 @@
 
 # These are ordered
 
-PACKAGING_PATH = File.join(File.dirname(__FILE__), 'tasks')
+PACKAGING_ROOT = File.expand_path(File.dirname(__FILE__))
+PACKAGING_TASK_DIR = File.join(PACKAGING_ROOT, 'tasks')
 
 @using_loader = true
 
@@ -41,5 +42,5 @@ PACKAGING_PATH = File.join(File.dirname(__FILE__), 'tasks')
   'update.rake',
   'vendor_gems.rake',
   'version.rake',
-  'z_data_dump.rake'].each { |t| load File.join(PACKAGING_PATH, t)}
+  'z_data_dump.rake'].each { |t| load File.join(PACKAGING_TASK_DIR, t)}
 

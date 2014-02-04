@@ -223,12 +223,16 @@ module Pkg
       ##
       #   We also have renamed various variables as part of deprecations, and
       #   if any of these are still in use, we want to assign the values to the
-      #   new variables.
+      #   new variables. However, we skip this if they target variable is already
+      #   populated, to avoid overwriting in the case that the user has started
+      #   by populating the new variable name but left the old crufty one behind.
       #
       def issue_reassignments
         Pkg::Params::REASSIGNMENTS.each do |v|
           if val = self.instance_variable_get("@#{v[:oldvar]}")
-            self.instance_variable_set("@#{v[:newvar]}", val)
+            unless self.instance_variable_get("@#{v[:newvar]}")
+              self.instance_variable_set("@#{v[:newvar]}", val)
+            end
           end
         end
       end

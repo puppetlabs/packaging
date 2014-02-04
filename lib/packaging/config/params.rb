@@ -150,12 +150,15 @@ module Pkg::Params
 
   # These are variables which, over time, we decided to rename or replace. For
   # backwards compatibility, we assign the value of the old/deprecated
-  # variables, if set, to the new ones.
+  # variables, if set, to the new ones. We also use this method for accessor
+  # "redirects" - e.g. defaulting the populated value of one parameter for another
+  # in case it is not set.
   #
   REASSIGNMENTS = [{:oldvar => :name,                   :newvar => :project},
                    {:oldvar => :tar_host,               :newvar => :yum_host},
                    {:oldvar => :gem_devel_dependencies, :newvar => :gem_development_dependencies},
-                   {:oldvar => :pe_name,                :newvar => :project}]
+                   {:oldvar => :pe_name,                :newvar => :project},
+                   {:oldvar => :project,                :newvar => :gem_name}]
 
   # These are variables that we have deprecated. If they are encountered in a
   # project's config, we issue deprecations for them.

@@ -15,6 +15,7 @@ module Pkg::Params
                   :build_pe,
                   :builder_data_file,
                   :builds_server,
+                  :bundle_platforms,
                   :certificate_pem,
                   :cows,
                   :db_table,

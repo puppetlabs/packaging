@@ -289,7 +289,7 @@ try {
       <behavior>0</behavior>
     </org.jvnet.hudson.plugins.groovypostbuild.GroovyPostbuildRecorder>
     <hudson.tasks.ArtifactArchiver>
-      <artifacts>**/PROJECT_BUNDLE</artifacts>
+      <artifacts>**/PROJECT_BUNDLE, **/BUILD_PROPERTIES</artifacts>
       <latestOnly>false</latestOnly>
       <allowEmptyArchive>false</allowEmptyArchive>
     </hudson.tasks.ArtifactArchiver><% if Pkg::Config.notify %>

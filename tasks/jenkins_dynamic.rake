@@ -97,6 +97,11 @@ namespace :pl do
 
       if curl_form_data(trigger_url, curl_args)
         print_url_info("#{@build.jenkins_build_host}/job/#{name}")
+        # If you're on a mac, why not open the jenkins job?
+        if ( (RUBY_PLATFORM =~ /darwin/ )  and  (`hostname` !~ /builder/ ) )
+          local_url = "#{@build.jenkins_build_host}/job/#{name}"
+          sh "/usr/bin/open 'http://#{local_url}'"
+        end
         puts "Your packages will be available at #{@build.distribution_server}:#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}"
       else
         fail "An error occurred submitting the job to jenkins. Take a look at the preceding http response for more info."

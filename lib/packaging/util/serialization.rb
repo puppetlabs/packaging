@@ -2,10 +2,10 @@
 
 module Pkg::Util::Serialization
   class << self
-    require 'yaml'
 
     # Given the path to a yaml file, load the yaml file into an object and return the object.
     def load_yaml(file)
+      require 'yaml'
       file = File.expand_path(file)
       begin
         input_data = YAML.load_file(file) || {}

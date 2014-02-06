@@ -49,13 +49,14 @@ module Pkg::Util::Version
     end
 
     # Return true if we're in a git repo, otherwise false
-    def is_git_repo
+    def is_git_repo?
       Pkg::Util.in_project_root do
         %x{#{GIT} rev-parse --git-dir > /dev/null 2>&1}
         $?.success?
       end
     end
 
+    alias :is_git_repo :is_git_repo?
 
     # Return information about the current tree, using `git describe`, ready for
     # further processing.
@@ -229,7 +230,5 @@ module Pkg::Util::Version
         return %x{#{rpm} -q --qf \"%{VERSION}\" $(#{rpm} -q --whatprovides /etc/redhat-release )}
       end
     end
-
-
   end
 end

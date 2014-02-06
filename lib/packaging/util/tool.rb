@@ -6,8 +6,7 @@ module Pkg::Util::Tool
   #
   class << self
     def check_tool(tool)
-      return true if has_tool(tool)
-      fail "#{tool} tool not found...exiting"
+      find_tool(tool, :required => true)
     end
 
     def find_tool(tool, args={:required => false})

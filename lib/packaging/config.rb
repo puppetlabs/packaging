@@ -229,10 +229,10 @@ module Pkg
       #
       def issue_reassignments
         Pkg::Params::REASSIGNMENTS.each do |v|
-          if val = self.instance_variable_get("@#{v[:oldvar]}")
-            unless self.instance_variable_get("@#{v[:newvar]}")
-              self.instance_variable_set("@#{v[:newvar]}", val)
-            end
+          oldval = self.instance_variable_get("@#{v[:oldvar]}")
+          newval = self.instance_variable_get("@#{v[:newvar]}")
+          if newval.nil? and not oldval.nil?
+            self.instance_variable_set("@#{v[:newvar]}", oldval)
           end
         end
       end

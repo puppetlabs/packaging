@@ -99,6 +99,9 @@ module Pkg
       mkpath File.dirname(target)
       Dir.chdir File.dirname(source) do
         %x[#{@tar} #{@excludes.map{ |x| (" --exclude #{x} ") }.join if @excludes} -zcf '#{File.basename(target)}' #{File.basename(source)}]
+        unless $?.success?
+          fail "Failed to create .tar.gz archive with #{@tar}. Please ensure the tar command in your path accepts the flags '-c', '-z', and '-f'"
+        end
         mv File.basename(target), target
       end
     end

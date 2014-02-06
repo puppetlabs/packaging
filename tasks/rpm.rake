@@ -8,8 +8,8 @@ def prep_rpm_build_dir
   # ext/redhat/<project>.spec.erb. If that doesn't exist, we fail. To do this,
   # we have to open the tarball.
   cp_p("pkg/#{tarball}", temp)
-  sh "tar -xf #{File.join(temp, tarball)} -C #{temp}"
-  if File.exists?("#{temp}/#{Pkg::Config.project}-#{Pkg::Config.version}/ext/redhat/#{Pkg::Config.project}.spec")
+  if ex(%Q[tar -tzf #{File.join(temp, tarball)}]).split.grep(/ext\/redhat\/#{Pkg::Config.project}.spec$/)
+    sh "tar -C #{temp} -xzf #{File.join(temp, tarball)} #{Pkg::Config.project}-#{Pkg::Config.version}/ext/redhat/#{Pkg::Config.project}.spec"
     cp("#{temp}/#{Pkg::Config.project}-#{Pkg::Config.version}/ext/redhat/#{Pkg::Config.project}.spec", "#{temp}/SPECS/")
   elsif File.exists?("ext/redhat/#{Pkg::Config.project}.spec.erb")
     Pkg::Util::File.erb_file("ext/redhat/#{Pkg::Config.project}.spec.erb", "#{temp}/SPECS/#{Pkg::Config.project}.spec", nil, :binding => Pkg::Config.get_binding)

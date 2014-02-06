@@ -10,21 +10,18 @@ namespace :package do
 
     tar = Pkg::Tar.new
 
-    if Pkg::Config.templates
-      fail "templates must be an array" unless Pkg::Config.templates.is_a?(Array)
-      tar.templates = Pkg::Config.templates.dup
-    else
-      tar.templates = Dir[File.join(Pkg::Config.project_root, "ext", "**", "*.erb")].select { |i| i !~ /ext\/packaging|ext\/osx/ }
-    end
+    # If the user has specified templates via config file, they will be ack'd
+    # by the tar class. Otherwise, we load what we consider to be the "default"
+    # set, which is default for historical purposes.
+    #
+    tar.templates ||= Dir[File.join(Pkg::Config.project_root, "ext", "**", "*.erb")].select { |i| i !~ /ext\/packaging|ext\/osx/ }
 
-    if Pkg::Config.tar_excludes
-      if Pkg::Config.tar_excludes.is_a?(Array)
-        tar.excludes = Pkg::Config.tar_excludes.dup
-      else
-        warn "!! tar_excludes should be an array"
-        tar.excludes = Pkg::Config.tar_excludes.split(' ')
-      end
-    end
+
+    # If the user has specified things to exclude via config file, they will be
+    # honored by the tar class, but we also always exclude the packaging repo.
+    #
+    tar.excludes << "ext/packaging"
+
     # This is to support packages that only burn-in the version number in the
     # release artifact, rather than storing it two (or more) times in the
     # version control system.  Razor is a good example of that; see

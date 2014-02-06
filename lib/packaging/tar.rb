@@ -12,8 +12,31 @@ module Pkg
       @project  = Pkg::Config.project
       @version  = Pkg::Config.version
       @files    = Pkg::Config.files
-      @excludes = Pkg::Config.tar_excludes
       @target   = File.join(Pkg::Config.project_root, "pkg", "#{@project}-#{@version}.tar.gz")
+
+      # We require that the excludes list be a string (which is space
+      # separated, we hope)(deprecated) or an array.
+      #
+      if Pkg::Config.tar_excludes
+        if Pkg::Config.tar_excludes.is_a?(String)
+          warn "warning: `tar_excludes` should be an array, not a string"
+          @excludes = Pkg::Config.tar_excludes.split(' ')
+        elsif Pkg::Config.tar_excludes.is_a?(Array)
+          @excludes = Pkg::Config.tar_excludes
+        else
+          fail "Tarball excludes must either be an array or a string, not #{@excludes.class}"
+        end
+      else
+        @excludes = []
+      end
+
+      # On the other hand, support for explicit templates started with Arrays,
+      # so that's all we support.
+      #
+      if Pkg::Config.templates
+        @templates = Pkg::Config.templates.dup
+        fail "templates must be an array" unless @templates.is_a?(Array)
+      end
     end
 
     def install_files_to(workdir)

@@ -46,3 +46,4 @@ PACKAGING_TASK_DIR = File.join(PACKAGING_ROOT, 'tasks')
   'version.rake',
   'z_data_dump.rake'].each { |t| load File.join(PACKAGING_TASK_DIR, t)}
 
+Pkg::Util::RakeUtils.evaluate_pre_tasks

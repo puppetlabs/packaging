@@ -77,6 +77,7 @@ module Pkg::Params
                   :pe_version,
                   :pg_major_version,
                   :pre_tar_task,
+                  :pre_tasks,
                   :privatekey_pem,
                   :project_root,
                   :random_mockroot,

@@ -1,5 +1,11 @@
 # Utility methods used by the various rake tasks
 
+def is_windows?
+  !!File::ALT_SEPARATOR
+end
+
+DEVNULL = is_windows? ? 'NUL' : '/dev/null'
+
 def check_tool(tool)
   return true if has_tool(tool)
   fail "#{tool} tool not found...exiting"
@@ -155,7 +161,7 @@ end
 
 # This is a stub to ease testing...
 def run_git_describe_internal
-  raw = %x{git describe --tags --dirty 2>/dev/null}
+  raw = %x{git describe --tags --dirty 2> #{DEVNULL}}
   $?.success? ? raw : nil
 end
 
@@ -190,7 +196,7 @@ def get_dot_version
 end
 
 def get_pwd_version
-  %x{pwd}.strip.split('.')[-1]
+  Dir.pwd.strip.split('.')[-1]
 end
 
 def get_base_pkg_version
@@ -312,7 +318,7 @@ def git_commit_file(file, message=nil)
     puts
     diff = %x{git diff HEAD #{file}}
     puts diff
-    %x{git commit #{file} -m "Commit #{message} in #{file}" &> /dev/null}
+    %x{git commit #{file} -m "Commit #{message} in #{file}" &> #{DEVNULL}}
   end
 end
 
@@ -404,7 +410,7 @@ def remote_buildparams(host, build)
 end
 
 def is_git_repo
-  %x{git rev-parse --git-dir > /dev/null 2>&1}
+  %x{git rev-parse --git-dir > #{DEVNULL} 2>&1}
   return $?.success?
 end
 
@@ -564,7 +570,7 @@ def curl_form_data(uri, form_data=[], options={})
 
   # If this is quiet, we're going to silence all output
   if options[:quiet]
-    post_string << " >/dev/null 2>&1"
+    post_string << " > #{DEVNULL} 2>&1"
   end
 
   %x{#{curl} #{post_string}}

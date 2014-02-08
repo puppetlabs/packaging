@@ -1,6 +1,5 @@
 # -*- ruby -*-
 require 'spec_helper'
-load File.join(SPECDIR,'..', 'lib', 'packaging.rb')
 load_task('00_utils.rake')
 
 describe "00_utils" do

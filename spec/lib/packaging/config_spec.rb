@@ -1,10 +1,9 @@
 # -*- ruby -*-
 require 'spec_helper'
-load File.join(SPECDIR, '..', 'lib', 'packaging.rb')
-
 require 'yaml'
 
-describe Pkg::Config do
+describe "Pkg::Config" do
+
   Build_Params = [:apt_host,
                   :apt_repo_path,
                   :apt_repo_url,
@@ -164,12 +163,142 @@ describe Pkg::Config do
 
   describe "#config_to_yaml" do
     it "should write a valid yaml file" do
-      file = mock('file')
+      file = double('file')
       File.should_receive(:open).with(anything(), 'w').and_yield(file)
       file.should_receive(:puts).with(instance_of(String))
       YAML.should_receive(:load_file).with(file)
       expect { YAML.load_file(file) }.to_not raise_error
       Pkg::Config.config_to_yaml
+    end
+  end
+
+  describe "#get_binding" do
+    it "should return the binding of the Pkg::Config object" do
+      # test by eval'ing using the binding before and after setting a param
+      orig = Pkg::Config.apt_host
+      Pkg::Config.apt_host = "foo"
+      expect(eval("@apt_host", Pkg::Config.get_binding)).to eq("foo")
+      Pkg::Config.apt_host = "bar"
+      expect(eval("@apt_host", Pkg::Config.get_binding)).to eq("bar")
+      Pkg::Config.apt_host = orig
+    end
+  end
+
+  describe "#config_from_yaml" do
+    context "given a yaml file" do
+      it "should, use it to set params" do
+        # apt_host: is set to "foo" in the fixture
+        orig = Pkg::Config.apt_host
+        Pkg::Config.apt_host = "bar"
+        Pkg::Config.config_from_yaml(File.join(FIXTURES, 'config', 'params.yaml'))
+        expect(Pkg::Config.apt_host).to eq("foo")
+        Pkg::Config.apt_host = orig
+      end
+    end
+  end
+
+  describe "#config" do
+    context "given :format => :hash" do
+      it "should call Pkg::Config.config_to_hash" do
+        expect(Pkg::Config).to receive(:config_to_hash)
+        Pkg::Config.config(:target => nil, :format => :hash)
+      end
+    end
+
+    context "given :format => :yaml" do
+      it "should call Pkg::Config.config_to_yaml if given :format => :yaml" do
+        expect(Pkg::Config).to receive(:config_to_yaml)
+        Pkg::Config.config(:target => nil, :format => :yaml)
+      end
+    end
+  end
+
+  describe "#config_to_hash" do
+    it "should return a hash object" do
+      hash = Pkg::Config.config_to_hash
+      hash.should be_a(Hash)
+    end
+
+    it "should return a hash with the current parameters" do
+      Pkg::Config.apt_host = "foo"
+      Pkg::Config.config_to_hash[:apt_host].should eq("foo")
+      Pkg::Config.apt_host = "bar"
+      Pkg::Config.config_to_hash[:apt_host].should eq("bar")
+    end
+  end
+
+  describe "#load_default_configs" do
+    context "given ext/build_defaults.yaml and ext/project_data.yaml are readable" do
+      it "should try to load build_defaults.yaml and project_data.yaml" do
+        orig = Pkg::Config.project_root
+        Pkg::Config.project_root = File.join(FIXTURES, 'config')
+        test_project_data = File.join(FIXTURES, 'config', 'ext', 'project_data.yaml')
+        test_build_defaults = File.join(FIXTURES, 'config', 'ext', 'build_defaults.yaml')
+        expect(Pkg::Config).to receive(:config_from_yaml).with(test_project_data)
+        expect(Pkg::Config).to receive(:config_from_yaml).with(test_build_defaults)
+        Pkg::Config.load_default_configs
+        Pkg::Config.project_root = orig
+      end
+    end
+
+    context "given ext/build_defaults.yaml and ext/project_data.yaml are not readable" do
+      it "should not try to load build_defaults.yaml and project_data.yaml" do
+        orig = Pkg::Config.project_root
+        Pkg::Config.project_root = 'foo'
+        expect(Pkg::Config).to_not receive(:config_from_yaml)
+        Pkg::Config.load_default_configs
+        Pkg::Config.project_root = orig
+      end
+
+      it "should set the project root to nil" do
+        orig = Pkg::Config.project_root
+        Pkg::Config.project_root = 'foo'
+        expect(Pkg::Config).to receive(:project_root=).with(nil)
+        Pkg::Config.load_default_configs
+        Pkg::Config.project_root = orig
+      end
+    end
+  end
+
+  describe "#load_versioning" do
+      # We let the actual version determination testing happen in the version
+      # tests. Here we just test that we try when we should.
+    context "When project root is nil" do
+      it "should not try to load versioning" do
+        Pkg::Config.stub(:project_root) {nil}
+        expect(Pkg::Config).to_not receive(:git_sha_or_tag)
+      end
+    end
+  end
+
+  describe "#load_envvars" do
+    # We're going to pollute the environment with this test, so afterwards we
+    # explicitly set everything to nil to prevent any hazardous effects on
+    # the rest of the tests.
+    after(:all) do
+      Pkg::Params::ENV_VARS.each do |v|
+        ENV[v[:envvar].to_s] = nil
+      end
+    end
+
+    Pkg::Params::ENV_VARS.each do |v|
+      ENV[v[:envvar].to_s] = "FOO"
+      if v[:type] == :bool
+        it "should set boolean value on #{v[:var]} for :type == :bool" do
+          Pkg::Util.stub(:boolean_value) {"FOO"}
+          allow(Pkg::Config).to receive(:instance_variable_set)
+          expect(Pkg::Util).to receive(:boolean_value).with("FOO")
+          expect(Pkg::Config).to receive(:instance_variable_set).with("@#{v[:var]}", "FOO")
+          Pkg::Config.load_envvars
+        end
+      else
+        it "should set Pkg::Config##{v[:var]} to ENV[#{v[:envvar].to_s}]" do
+          Pkg::Util.stub(:boolean_value) {"FOO"}
+          allow(Pkg::Config).to receive(:instance_variable_set)
+          expect(Pkg::Config).to receive(:instance_variable_set).with("@#{v[:var]}", "FOO")
+          Pkg::Config.load_envvars
+        end
+      end
     end
   end
 end

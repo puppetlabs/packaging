@@ -6,11 +6,11 @@ namespace :pl do
     if confirm_ship(FileList["pkg/*.gem"])
       invoke_task("pl:ship_gem")
     end
-  end if @build.build_gem
+  end if Pkg::Config.build_gem
 
   task :release_deb_rc do
     deprecate("pl:release_deb_rc", "pl:release_deb")
-    load_keychain if has_tool('keychain')
+    load_keychain if Pkg::Util::Tool.find_tool('keychain')
     invoke_task("pl:deb_all_rc")
     invoke_task("pl:sign_deb_changes")
     if confirm_ship(FileList["pkg/deb/**/*"])
@@ -20,7 +20,7 @@ namespace :pl do
 
   task :release_deb_final do
     deprecate("pl:release_deb_final", "pl:release_deb")
-    load_keychain if has_tool('keychain')
+    load_keychain if Pkg::Util::Tool.find_tool('keychain')
     invoke_task("pl:deb_all")
     invoke_task("pl:sign_deb_changes")
     if confirm_ship(FileList["pkg/deb/**/*"])
@@ -29,7 +29,7 @@ namespace :pl do
   end
 
   task :release_deb do
-    load_keychain if has_tool('keychain')
+    load_keychain if Pkg::Util::Tool.find_tool('keychain')
     invoke_task("pl:deb_all")
     invoke_task("pl:sign_deb_changes")
     if confirm_ship(FileList["pkg/deb/**/*"])
@@ -80,7 +80,7 @@ namespace :pl do
       if confirm_ship(FileList["pkg/apple/*.dmg"])
         Rake::Task["pl:ship_dmg"].execute
       end
-    end if @build.build_dmg
+    end if Pkg::Config.build_dmg
 
     task :release_ips => 'pl:fetch' do
       Rake::Task['pl:ips'].invoke

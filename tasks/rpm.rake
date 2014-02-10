@@ -1,15 +1,28 @@
 def prep_rpm_build_dir
-  temp = get_temp
+  temp = Pkg::Util::File.mktemp
+  tarball = "#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
   mkdir_pr temp, "#{temp}/SOURCES", "#{temp}/SPECS"
-  cp_pr FileList["pkg/#{@build.project}-#{@build.version}.tar.gz*"], "#{temp}/SOURCES"
-  erb "ext/redhat/#{@build.project}.spec.erb", "#{temp}/SPECS/#{@build.project}.spec"
+  cp_pr FileList["pkg/#{tarball}*"], "#{temp}/SOURCES"
+  # If the file ext/redhat/<project>.spec exists in the tarball, we use it. If
+  # it doesn't we try to 'erb' the file from a predicted template in source,
+  # ext/redhat/<project>.spec.erb. If that doesn't exist, we fail. To do this,
+  # we have to open the tarball.
+  cp_p("pkg/#{tarball}", temp)
+  if ex(%Q[tar -tzf #{File.join(temp, tarball)}]).split.grep(/ext\/redhat\/#{Pkg::Config.project}.spec$/)
+    sh "tar -C #{temp} -xzf #{File.join(temp, tarball)} #{Pkg::Config.project}-#{Pkg::Config.version}/ext/redhat/#{Pkg::Config.project}.spec"
+    cp("#{temp}/#{Pkg::Config.project}-#{Pkg::Config.version}/ext/redhat/#{Pkg::Config.project}.spec", "#{temp}/SPECS/")
+  elsif File.exists?("ext/redhat/#{Pkg::Config.project}.spec.erb")
+    Pkg::Util::File.erb_file("ext/redhat/#{Pkg::Config.project}.spec.erb", "#{temp}/SPECS/#{Pkg::Config.project}.spec", nil, :binding => Pkg::Config.get_binding)
+  else
+    fail "Could not locate redhat spec ext/redhat/#{Pkg::Config.project}.spec or ext/redhat/#{Pkg::Config.project}.spec.erb"
+  end
   temp
 end
 
 def build_rpm(buildarg = "-bs")
-  check_tool('rpmbuild')
+  Pkg::Util::Tool.check_tool('rpmbuild')
   workdir = prep_rpm_build_dir
-  if dist = el_version
+  if dist = Pkg::Util::Version.el_version
     if dist.to_i < 6
       dist_string = "--define \"%dist .el#{dist}"
     end
@@ -23,10 +36,10 @@ def build_rpm(buildarg = "-bs")
   if buildarg == '-ba'
     mkdir_p 'pkg/rpm'
   end
-  if @build.sign_tar
+  if Pkg::Config.sign_tar
     Rake::Task["pl:sign_tar"].invoke
   end
-  sh "rpmbuild #{args} #{buildarg} --nodeps #{workdir}/SPECS/#{@build.project}.spec"
+  sh "rpmbuild #{args} #{buildarg} --nodeps #{workdir}/SPECS/#{Pkg::Config.project}.spec"
   mv FileList["#{workdir}/SRPMS/*.rpm"], "pkg/srpm"
   if buildarg == '-ba'
     mv FileList["#{workdir}/RPMS/*/*.rpm"], "pkg/rpm"

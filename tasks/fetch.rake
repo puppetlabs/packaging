@@ -5,10 +5,10 @@
 # both PE and not PE, it has two files, one for PE, and the other for FOSS
 #
 data_repo = 'https://raw.github.com/puppetlabs/build-data'
-project_data_branch = @build.project
-team_data_branch = @build.team
+project_data_branch = Pkg::Config.project
+team_data_branch = Pkg::Config.team
 
-if @build.build_pe
+if Pkg::Config.build_pe
   project_data_branch = 'pe-' + project_data_branch unless project_data_branch =~ /^pe-/
   team_data_branch = 'pe-' + team_data_branch unless team_data_branch =~ /^pe-/
 end
@@ -22,22 +22,22 @@ team_data_url = data_repo + '/' + team_data_branch
 # defaults specified in the source project repo, e.g. in ext/build_defaults.yaml
 #
 # It uses curl to download the files, and places them in a temporary
-# directory, e.g. /tmp/somedirectory/{project,team}/@build.builder_data_file
+# directory, e.g. /tmp/somedirectory/{project,team}/Pkg::Config.builder_data_file
 namespace :pl do
   task :fetch do
     # Remove .packaging directory from old-style extras loading
     rm_rf "#{ENV['HOME']}/.packaging" if File.directory?("#{ENV['HOME']}/.packaging")
     # Touch the .packaging file which is allows packaging to present remote tasks
     touch "#{ENV['HOME']}/.packaging"
-    if dist = el_version
+    if dist = Pkg::Util::Version.el_version
       if dist.to_i < 6
         flag = "-k"
       end
     end
     [project_data_url, team_data_url].each do |url|
       begin
-        tempdir = get_temp
-        %x{curl --fail --silent #{flag} #{url}/#{@build.builder_data_file} > #{tempdir}/#{@build.builder_data_file}}
+        tempdir = Pkg::Util::File.mktemp
+        %x{curl --fail --silent #{flag} #{url}/#{Pkg::Config.builder_data_file} > #{tempdir}/#{Pkg::Config.builder_data_file}}
         case $?.exitstatus
         when 0
           invoke_task("pl:load_extras", tempdir)
@@ -45,7 +45,7 @@ namespace :pl do
           if url == team_data_url
             fail "Could not load team extras data from #{url}. This should not normally happen"
           else
-            puts "No build data file for #{@build.project}, skipping load of extra build data."
+            puts "No build data file for #{Pkg::Config.project}, skipping load of extra build data."
           end
         else
           fail "There was an error fetching the builder extras data from #{url}."

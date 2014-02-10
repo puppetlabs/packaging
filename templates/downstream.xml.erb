@@ -24,7 +24,7 @@ When DOWNSTREAM_JOB is passed to the packaging repo, this job is created to wrap
     <hudson.tasks.Shell>
       <command>#!/bin/bash
 ## We have to check if this has been triggered by a successful package and repo build
-curl -s &quot;http://<%= "#{@build.jenkins_build_host}" %>/job/<%= "#{@build.project}-repo-#{@build.build_date}-#{@build.ref}" %>/lastBuild/api/json&quot; | grep result\&quot;:\&quot;SUCCESS\&quot; &gt; /dev/null
+curl -s &quot;http://<%= "#{Pkg::Config.jenkins_build_host}" %>/job/<%= "#{Pkg::Config.project}-repo-#{Pkg::Config.build_date}-#{Pkg::Config.ref}" %>/lastBuild/api/json&quot; | grep result\&quot;:\&quot;SUCCESS\&quot; &gt; /dev/null
 
 UPSTREAM_BUILD_STATUS=$?
 

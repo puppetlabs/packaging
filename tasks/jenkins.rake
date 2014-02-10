@@ -91,25 +91,25 @@ namespace :pl do
     #
     task :post_build, :build_task do |t, args|
       # Check for a dirty tree before allowing a remote build that is doomed to unexpected results
-      fail_on_dirty_source
+      Pkg::Util::Version.fail_on_dirty_source
 
       # We use JSON for parsing the json part of the submission to JSON
       require_library_or_fail 'json'
 
       build_task = args.build_task
       ##
-      # We set @:task of @build manually with our task data so the remote
+      # We set @:task of Pkg::Config manually with our task data so the remote
       # build knows what to do. Puppetdb needs early knowledge of if this is
       # a PE build, so we always this along as an environment variable task
       # argument if its the case.
       #
-      @build.task = { :task => "#{build_task}", :args => nil }
-      @build.task[:args] = ["PE_BUILD=true"] if @build_pe
+      Pkg::Config.task = { :task => "#{build_task}", :args => nil }
+      Pkg::Config.task[:args] = ["PE_BUILD=true"] if @build_pe
       #
       # Determine the type of build we're doing to inform jenkins
       build_type = case build_task
         when /deb/
-          if @build.default_cow.split('-')[1] =~ /cumulus/
+          if Pkg::Config.default_cow.split('-')[1] =~ /cumulus/
             "cumulus"
           else
             "deb"
@@ -123,12 +123,12 @@ namespace :pl do
 
       # Create a string of metrics to send to Jenkins for data analysis
       dist = case build_type
-        when /deb/ then @build.default_cow.split('-')[1]
+        when /deb/ then Pkg::Config.default_cow.split('-')[1]
         when /rpm/
-          if @build.pe_version
-            @build.final_mocks.split(' ')[0].split('-')[2]
+          if Pkg::Config.pe_version
+            Pkg::Config.final_mocks.split(' ')[0].split('-')[2]
           else
-            @build.final_mocks.split(' ')[0].split('-')[1..2].join("")
+            Pkg::Config.final_mocks.split(' ')[0].split('-')[1..2].join("")
           end
         when /dmg/ then "apple"
         when /gem/ then "gem"
@@ -137,20 +137,20 @@ namespace :pl do
         else raise "Could not determine build type for #{build_task}"
       end
 
-      if @build.pe_version
-        metrics = "#{ENV['USER']}~#{@build.version}~#{@build.pe_version}~#{dist}~#{@build.team}"
+      if Pkg::Config.pe_version
+        metrics = "#{ENV['USER']}~#{Pkg::Config.version}~#{Pkg::Config.pe_version}~#{dist}~#{Pkg::Config.team}"
       else
-        metrics = "#{ENV['USER']}~#{@build.version}~N/A~#{dist}~#{@build.team}"
+        metrics = "#{ENV['USER']}~#{Pkg::Config.version}~N/A~#{dist}~#{Pkg::Config.team}"
       end
       #
       # Create the data files to send to jenkins
-      properties = @build.params_to_yaml
+      properties = Pkg::Config.config_to_yaml
       bundle = git_bundle('HEAD')
 
       # Construct the parameters, which is an array of hashes we turn into JSON
       parameters = [{ "name" => "BUILD_PROPERTIES", "file"  => "file0" },
                     { "name" => "PROJECT_BUNDLE",   "file"  => "file1" },
-                    { "name" => "PROJECT",          "value" => "#{@build.project}" },
+                    { "name" => "PROJECT",          "value" => "#{Pkg::Config.project}" },
                     { "name" => "BUILD_TYPE",       "label" => "#{build_type}" },
                     { "name" => "METRICS",          "value" => "#{metrics}"}]
 
@@ -175,7 +175,7 @@ namespace :pl do
       args <<  [
       "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
       "-Fname=PROJECT_BUNDLE"  , "-Ffile1=@#{bundle}",
-      "-Fname=PROJECT"         , "-Fvalue=#{@build.project}",
+      "-Fname=PROJECT"         , "-Fvalue=#{Pkg::Config.project}",
       "-Fname=BUILD_TYPE"      , "-Fvalue=#{build_type}",
       "-Fname=METRICS"         , "-Fvalue=#{metrics}",
       "-FSubmit=Build",
@@ -187,7 +187,7 @@ namespace :pl do
 
       # Construct the job url
       #
-      job_url = "#{@build.jenkins_build_host}/job/#{@build.jenkins_packaging_job}"
+      job_url = "#{Pkg::Config.jenkins_build_host}/job/#{Pkg::Config.jenkins_packaging_job}"
       trigger_url = "#{job_url}/build"
 
       # Call out to the curl_form_data utility method in 00_utils.rake
@@ -195,7 +195,7 @@ namespace :pl do
       begin
         if curl_form_data(trigger_url, args)
           puts "Build submitted. To view your build results, go to #{job_url}"
-          puts "Your packages will be available at #{@build.distribution_server}:#{@build.jenkins_repo_path}/#{@build.project}/#{@build.ref}"
+          puts "Your packages will be available at #{Pkg::Config.distribution_server}:#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
         else
           fail "An error occurred submitting the job to jenkins. Take a look at the preceding http response for more info."
         end
@@ -213,8 +213,8 @@ end
 # tasks. We can assume deb, mock, but not gem/dmg.
 #
 tasks = ["deb", "mock", "tar"]
-tasks << "gem" if @build.build_gem and ! @build.build_pe
-tasks << "dmg" if @build.build_dmg and ! @build.build_pe
+tasks << "gem" if Pkg::Config.build_gem and ! Pkg::Config.build_pe
+tasks << "dmg" if Pkg::Config.build_dmg and ! Pkg::Config.build_pe
 
 namespace :pl do
   namespace :jenkins do
@@ -231,8 +231,8 @@ namespace :pl do
     # DOSing it with our packaging.
     desc "Queue pl:deb_all on jenkins builder"
     task :deb_all => "pl:fetch" do
-      @build.cows.split(' ').each do |cow|
-        @build.default_cow = cow
+      Pkg::Config.cows.split(' ').each do |cow|
+        Pkg::Config.default_cow = cow
         invoke_task("pl:jenkins:post_build", "pl:deb")
         sleep 5
       end
@@ -241,8 +241,8 @@ namespace :pl do
     # This does the mocks in parallel
     desc "Queue pl:mock_all on jenkins builder"
     task :mock_all => "pl:fetch" do
-      @build.final_mocks.split(' ').each do |mock|
-        @build.default_mock = mock
+      Pkg::Config.final_mocks.split(' ').each do |mock|
+        Pkg::Config.default_mock = mock
         invoke_task("pl:jenkins:post_build", "pl:mock")
         sleep 5
       end
@@ -260,13 +260,13 @@ end
 ##
 # If this is a PE project, we want PE tasks as well.
 #
-if @build.build_pe
+if Pkg::Config.build_pe
   namespace :pe do
     namespace :jenkins do
       tasks.each do |build_task|
         desc "Queue pe:#{build_task} build on jenkins builder"
         task build_task => "pl:fetch" do
-          check_var("PE_VER", @build.pe_version)
+          check_var("PE_VER", Pkg::Config.pe_version)
           invoke_task("pl:jenkins:post_build", "pe:#{build_task}")
         end
       end
@@ -277,9 +277,9 @@ if @build.build_pe
       # DOSing it with our packaging.
       desc "Queue pe:deb_all on jenkins builder"
       task :deb_all => "pl:fetch" do
-        check_var("PE_VER", @build.pe_version)
-        @build.cows.split(' ').each do |cow|
-          @build.default_cow = cow
+        check_var("PE_VER", Pkg::Config.pe_version)
+        Pkg::Config.cows.split(' ').each do |cow|
+          Pkg::Config.default_cow = cow
           invoke_task("pl:jenkins:post_build", "pe:deb")
           sleep 5
         end
@@ -288,8 +288,8 @@ if @build.build_pe
       # This does the mocks in parallel
       desc "Queue pe:mock_all on jenkins builder"
       task :mock_all => "pl:fetch" do
-        @build.final_mocks.split(' ').each do |mock|
-          @build.default_mock = mock
+        Pkg::Config.final_mocks.split(' ').each do |mock|
+          Pkg::Config.default_mock = mock
           invoke_task("pl:jenkins:post_build", "pe:mock")
           sleep 5
         end
@@ -297,7 +297,7 @@ if @build.build_pe
 
       desc "Retrieve PE packages built by jenkins, sign, and ship all!"
       task :uber_ship => "pl:fetch" do
-        check_var("PE_VER", @build.pe_version)
+        check_var("PE_VER", Pkg::Config.pe_version)
         ["pl:jenkins:retrieve", "pl:jenkins:sign_all", "pe:ship_rpms", "pe:ship_debs"].each do |task|
           Rake::Task[task].invoke
         end
@@ -340,11 +340,11 @@ namespace :pl do
       end
 
       # Assemble the JSON string for the JSON parameter
-      json = JSON.generate("parameter" => [{ "name" => "SHA", "value"  => "#{@build.ref}" }])
+      json = JSON.generate("parameter" => [{ "name" => "SHA", "value"  => "#{Pkg::Config.ref}" }])
 
       # Assemble our arguments to the post
       args = [
-      "-Fname=SHA", "-Fvalue=#{@build.ref}",
+      "-Fname=SHA", "-Fvalue=#{Pkg::Config.ref}",
       "-Fjson=#{json.to_json}",
       "-FSubmit=Build"
       ]

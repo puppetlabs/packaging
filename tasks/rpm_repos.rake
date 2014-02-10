@@ -17,7 +17,7 @@ namespace :pl do
         # Formulate our command string, which will just find directories with rpms
         # and create and update repositories.
         #
-        artifact_directory = File.join(@build.jenkins_repo_path, @build.project, @build.ref)
+        artifact_directory = File.join(Pkg::Config.jenkins_repo_path, Pkg::Config.project, Pkg::Config.ref)
 
         ##
         # Test that the artifacts directory exists on the distribution server.
@@ -40,7 +40,7 @@ namespace :pl do
         cmd << "pushd ${repodir} && ${createrepo} --checksum=sha --database --update . && popd ; "
         cmd << "done ; popd "
 
-        remote_ssh_cmd(@build.distribution_server, cmd)
+        remote_ssh_cmd(Pkg::Config.distribution_server, cmd)
         # Now that we've created our repositories, we can create the configs for
         # them
         Rake::Task["pl:jenkins:generate_rpm_repo_configs"].execute
@@ -49,7 +49,7 @@ namespace :pl do
         Rake::Task["pl:jenkins:ship_repo_configs"].execute
       ensure
         # Always remove the lock file, even if we've failed
-        remote_ssh_cmd(@build.distribution_server, "rm -f #{artifact_directory}/.lock")
+        remote_ssh_cmd(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/.lock")
       end
     end
 
@@ -66,12 +66,12 @@ namespace :pl do
       # We have a hard requirement on wget because of all the download magicks
       # we have to do
       #
-      wget = find_tool("wget") or fail "Could not find `wget` tool. This is needed for composing the yum repo configurations. Install `wget` and try again."
+      wget = Pkg::Util::Tool.find_tool("wget") or fail "Could not find `wget` tool. This is needed for composing the yum repo configurations. Install `wget` and try again."
 
       # This is the standard path to all build artifacts on the distribution
       # server for this commit
       #
-      base_url = "http://#{@build.builds_server}/#{@build.project}/#{@build.ref}/repos/"
+      base_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}/repos/"
 
       # First check if the artifacts directory exists
       #
@@ -109,25 +109,25 @@ namespace :pl do
 
         # Create an array of lines that will become our yum config
         #
-        config = ["[pl-#{@build.project}-#{@build.ref}]"]
-        config << ["name=PL Repo for #{@build.project} at commit #{@build.ref}"]
+        config = ["[pl-#{Pkg::Config.project}-#{Pkg::Config.ref}]"]
+        config << ["name=PL Repo for #{Pkg::Config.project} at commit #{Pkg::Config.ref}"]
         config << ["baseurl=#{url}"]
         config << ["enabled=1"]
         config << ["gpgcheck=0"]
 
         # Write the new config to a file under our repo configs dir
         #
-        config_file = File.join("pkg", "repo_configs", "rpm", "pl-#{@build.project}-#{@build.ref}-#{dist}-#{version}-#{arch}.repo")
+        config_file = File.join("pkg", "repo_configs", "rpm", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}-#{version}-#{arch}.repo")
         File.open(config_file, 'w') { |f| f.puts config }
       end
-      puts "Wrote yum configuration files for #{@build.project} at #{@build.ref} to pkg/repo_configs/rpm"
+      puts "Wrote yum configuration files for #{Pkg::Config.project} at #{Pkg::Config.ref} to pkg/repo_configs/rpm"
     end
 
     desc "Retrieve rpm yum repository configs from distribution server"
     task :rpm_repo_configs => "pl:fetch" do
-      wget = find_tool("wget") or fail "Could not find `wget` tool! wget is required to download the repository configs."
+      wget = Pkg::Util::Tool.find_tool("wget") or fail "Could not find `wget` tool! wget is required to download the repository configs."
       mkdir_p "pkg/repo_configs"
-      config_url = "#{@build.builds_server}/#{@build.project}/#{@build.ref}/repo_configs/rpm/"
+      config_url = "#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}/repo_configs/rpm/"
       begin
         sh "#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{config_url}"
       rescue

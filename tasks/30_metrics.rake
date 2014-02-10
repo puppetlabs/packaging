@@ -2,9 +2,9 @@
 def add_shipped_metrics args
   @metrics << {
     :type         => 'shipped',
-    :package      => ( args[:package]             || @build.project    ),
-    :version      => ( args[:version]             || @build.version    ),
-    :pe_version   => ( args[:pe_version]          || @build.pe_version ),
+    :package      => ( args[:package]             || Pkg::Config.project    ),
+    :version      => ( args[:version]             || Pkg::Config.version    ),
+    :pe_version   => ( args[:pe_version]          || Pkg::Config.pe_version ),
     :is_rc        => ( args[:is_rc]               || false             ),
   }
 end
@@ -18,7 +18,7 @@ def post_shipped_metrics
     pe_version   = metric[:pe_version]
     is_rc        = metric[:is_rc]
 
-    uri = URI(@build.metrics_url)
+    uri = URI(Pkg::Config.metrics_url)
     res = Net::HTTP.post_form(
       uri,
       {

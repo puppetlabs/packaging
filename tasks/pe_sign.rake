@@ -1,7 +1,7 @@
 # The sign_legacy_rpm and sign_rpm methods are defined in sign.rake
 # This is just adapted for the 'PE' layout
 
-if @build.build_pe
+if Pkg::Config.build_pe
   namespace :pe do
     desc "Sign all staged in rpms in pkg"
     task :sign_rpms do
@@ -40,7 +40,7 @@ if @build.build_pe
     # this is a separate task we can pull out later.
     desc "Sign all debian changes files staged in pkg/pe"
     task :sign_deb_changes do
-      load_keychain if has_tool('keychain')
+      load_keychain if Pkg::Util::Tool.find_tool('keychain')
       sign_deb_changes("pkg/pe/deb/*/*.changes") unless Dir["pkg/pe/deb/*/*.changes"].empty?
     end
   end

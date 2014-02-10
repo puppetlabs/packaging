@@ -1,7 +1,6 @@
 # -*- ruby -*-
 require 'spec_helper'
-load_task '00_utils.rake'
-load_task 'build.rake'
+load_task('00_utils.rake')
 
 describe "00_utils" do
   TestVersions = {
@@ -86,31 +85,31 @@ describe "00_utils" do
     },
   }
 
-  before :all do
-    @build = Build::BuildInstance.new
-  end
-
   TestVersions.keys.sort.each do |input|
+    before :all do
+      Pkg::Config.project_root = File.expand_path(File.dirname(__FILE__))
+    end
+
     describe "Versioning based on #{input}" do
       results = TestVersions[input]
       results.keys.sort_by(&:to_s).each do |method|
-        it "using #{method} #{input.inspect} becomes #{results[method].inspect}" do
+        it "using Pkg::Util::Version.#{method} #{input.inspect} becomes #{results[method].inspect}" do
           # We have to call the `stub!` alias because we are trying to stub on
           # `self`, and in the scope of an rspec block that is overridden to
           # return a new double, not to stub a method!
-          @build.release = "1"
+          Pkg::Config.release = "1"
 
           if method.to_s.include?("deb")
-            self.should_receive(:run_git_describe_internal).and_return(input)
-            @build.packager = "puppetlabs"
+            Pkg::Util::Version.should_receive(:run_git_describe_internal).and_return(input)
+            Pkg::Config.packager = "puppetlabs"
           elsif method.to_s.include?("rpm")
-            self.should_receive(:run_git_describe_internal).and_return(input)
+            Pkg::Util::Version.should_receive(:run_git_describe_internal).and_return(input)
           else
-            self.stub!(:uname_r) { "3.14159" }
-            self.stub!(:is_git_repo) { true }
-            self.should_receive(:run_git_describe_internal).and_return(input)
+            Pkg::Util::Version.stub(:uname_r) { "3.14159" }
+            Pkg::Util::Version.stub(:is_git_repo) { true }
+            Pkg::Util::Version.should_receive(:run_git_describe_internal).and_return(input)
           end
-          self.send(method).should == results[method]
+          Pkg::Util::Version.send(method).should == results[method]
         end
       end
     end

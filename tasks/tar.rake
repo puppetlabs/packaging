@@ -2,67 +2,25 @@ namespace :package do
   desc "Create a source tar archive"
   task :tar => [ :clean ] do
 
-    if @build.pre_tar_task
-      invoke_task(@build.pre_tar_task)
+    if Pkg::Config.pre_tar_task
+      invoke_task(Pkg::Config.pre_tar_task)
     end
 
-    Rake::Task["package:doc"].invoke if @build.build_doc
-    tar = ENV['TAR'] || 'tar'
-    workdir = "pkg/#{@build.project}-#{@build.version}"
-    mkdir_p(workdir)
+    Rake::Task["package:doc"].invoke if Pkg::Config.build_doc
 
-    # The list of files to install in the tarball
-    install = FileList.new
+    tar = Pkg::Tar.new
 
-    # It is nice to use arrays in YAML to represent array content, but we used
-    # to support a mode where a space-separated string was used.  Support both
-    # to allow a gentle migration to a modern style...
-    patterns =
-      case @build.files
-      when String
-        STDERR.puts "warning: `files` should be an array, not a string"
-        @build.files.split(' ')
-
-      when Array
-        @build.files
-
-      else
-        raise "`files` must be a string or an array!"
-      end
-
-    # We need to add our list of file patterns from the configuration; this
-    # used to be a list of "things to copy recursively", which would install
-    # editor backup files and other nasty things.
+    # If the user has specified templates via config file, they will be ack'd
+    # by the tar class. Otherwise, we load what we consider to be the "default"
+    # set, which is default for historical purposes.
     #
-    # This handles that case correctly, with a deprecation warning, to augment
-    # our FileList with the right things to put in place.
+    tar.templates ||= Dir[File.join(Pkg::Config.project_root, "ext", "**", "*.erb")].select { |i| i !~ /ext\/packaging|ext\/osx/ }
+
+
+    # If the user has specified things to exclude via config file, they will be
+    # honored by the tar class, but we also always exclude the packaging repo.
     #
-    # Eventually, when all our projects are migrated to the new standard, we
-    # can drop this in favour of just pushing the patterns directly into the
-    # FileList and eliminate many lines of code and comment.
-    patterns.each do |pattern|
-      if File.directory?(pattern) and not Dir[pattern + "/**/*"].empty?
-        install.add(pattern + "/**/*")
-      else
-        install.add(pattern)
-      end
-    end
-
-    # Transfer all the files and symlinks into the working directory...
-    install = install.select { |x| File.file?(x) or File.symlink?(x) or empty_dir?(x) }
-
-    install.each do |file|
-      if empty_dir?(file)
-        mkpath(File.join(workdir,file), :verbose => false)
-      else
-        mkpath(File.dirname( File.join(workdir, file) ), :verbose => false)
-        cp_p(file, File.join(workdir, file), :verbose => false)
-      end
-    end
-
-    tar_excludes = @build.tar_excludes.nil? ? [] : @build.tar_excludes.split(' ')
-    tar_excludes << "ext/#{@build.packaging_repo}"
-    Rake::Task["package:template"].invoke(workdir)
+    tar.excludes << "ext/packaging"
 
     # This is to support packages that only burn-in the version number in the
     # release artifact, rather than storing it two (or more) times in the
@@ -72,14 +30,11 @@ namespace :package do
     #
     # If you set this the version will only be modified in the temporary copy,
     # with the intent that it never change the official source tree.
-    Rake::Task["package:versionbump"].invoke(workdir) if @build.update_version_file
+    Rake::Task["package:versionbump"].invoke(workdir) if Pkg::Config.update_version_file
 
-    cd "pkg" do
-      sh "#{tar} --exclude #{tar_excludes.join(" --exclude ")} -zcf '#{@build.project}-#{@build.version}.tar.gz' #{@build.project}-#{@build.version}"
-    end
-    rm_rf(workdir)
-    puts
-    puts "Wrote #{`pwd`.strip}/pkg/#{@build.project}-#{@build.version}.tar.gz"
+    tar.pkg!
+
+    puts "Wrote #{`pwd`.strip}/pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
   end
 end
 

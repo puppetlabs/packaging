@@ -31,8 +31,8 @@ This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed 
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.plugins.copyartifact.CopyArtifact plugin="copyartifact@1.25">
-      <projectName><%= "#{@build.project}-packaging-#{@build.build_date}-#{@build.ref}" %>/command=package_tar</projectName>
-      <filter>**/PROJECT_BUNDLE</filter>
+      <projectName><%= "#{Pkg::Config.project}-packaging-#{Pkg::Config.build_date}-#{Pkg::Config.ref}" %>/command=package_tar</projectName>
+      <filter>**/PROJECT_BUNDLE, **/BUILD_PROPERTIES</filter>
       <target></target>
       <selector class="hudson.plugins.copyartifact.TriggeredBuildSelector">
         <fallbackToLastSuccessful>true</fallbackToLastSuccessful>
@@ -42,7 +42,7 @@ This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed 
     <hudson.tasks.Shell>
       <command>#!/bin/bash
 ## We have to check if this has been triggered by a successful package build
-curl -s &quot;http://<%= "#{@build.jenkins_build_host}" %>/job/<%= "#{@build.project}-packaging-#{@build.build_date}-#{@build.ref}" %>/lastBuild/api/json&quot; | grep result\&quot;:\&quot;SUCCESS\&quot; > /dev/null
+curl -s &quot;http://<%= "#{Pkg::Config.jenkins_build_host}" %>/job/<%= "#{Pkg::Config.project}-packaging-#{Pkg::Config.build_date}-#{Pkg::Config.ref}" %>/lastBuild/api/json&quot; | grep result\&quot;:\&quot;SUCCESS\&quot; > /dev/null
 
 PACKAGE_BUILD_RESULT=$?
 
@@ -50,7 +50,7 @@ set -e
 
 if [ $PACKAGE_BUILD_RESULT -eq 0 ] ; then
   echo &quot;Detected upstream package build success. Building repos.&quot;
-  ### We've retrieved the git bundle from the tarball build, so now we clone it
+  ### We&apos;ve retrieved the git bundle from the tarball build, so now we clone it
   ### and use it to trigger our repo creation
   #
   # PROJECT_BUNDLE is a tarball containing a bundle file and git_repo is the
@@ -58,6 +58,8 @@ if [ $PACKAGE_BUILD_RESULT -eq 0 ] ; then
   # and then clone the git_bundle
 
   [ -f &quot;PROJECT_BUNDLE&quot; ] || exit 1
+
+  [ -f &quot;BUILD_PROPERTIES&quot; ] || exit 1
 
   [ -d project ] &amp;&amp; rm -rf project
 
@@ -72,8 +74,8 @@ if [ $PACKAGE_BUILD_RESULT -eq 0 ] ; then
       rake package:bootstrap --trace
 
       ### Run repo creation
-      rake pl:jenkins:rpm_repos --trace
-      rake pl:jenkins:deb_repos --trace
+      rake PARAMS_FILE=../../BUILD_PROPERTIES pl:jenkins:rpm_repos --trace
+      rake PARAMS_FILE=../../BUILD_PROPERTIES pl:jenkins:deb_repos --trace
 
     popd
   popd
@@ -87,7 +89,7 @@ fi
   </builders><% if ENV['DOWNSTREAM_JOB'] %>
   <publishers>
     <hudson.tasks.BuildTrigger>
-      <childProjects><%= "#{@build.project}-downstream-#{@build.build_date}-#{@build.ref}" %></childProjects>
+      <childProjects><%= "#{Pkg::Config.project}-downstream-#{Pkg::Config.build_date}-#{Pkg::Config.ref}" %></childProjects>
       <threshold>
         <name>FAILURE</name>
         <ordinal>2</ordinal>

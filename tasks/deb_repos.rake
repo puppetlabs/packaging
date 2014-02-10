@@ -12,10 +12,10 @@ namespace :pl do
   namespace :jenkins do
     desc "Create apt repositories of build DEB packages for this SHA on the distributions erver"
     task :deb_repos => "pl:fetch" do
-      prefix = @build.build_pe ? "pe/" : ""
+      prefix = Pkg::Config.build_pe ? "pe/" : ""
 
       # First, we test that artifacts exist and set up the repos directory
-      artifact_directory = File.join(@build.jenkins_repo_path, @build.project, @build.ref)
+      artifact_directory = File.join(Pkg::Config.jenkins_repo_path, Pkg::Config.project, Pkg::Config.ref)
 
       cmd = 'echo " Checking for deb build artifacts. Will exit if not found.." ; '
       cmd << "[ -d #{artifact_directory}/artifacts/#{prefix}deb ] || exit 1 ; "
@@ -53,7 +53,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
       cmd << "popd ; popd "
 
       begin
-        remote_ssh_cmd(@build.distribution_server, cmd)
+        remote_ssh_cmd(Pkg::Config.distribution_server, cmd)
         # Now that we've created our package repositories, we can generate repo
         # configurations for use with downstream jobs, acceptance clients, etc.
         Rake::Task["pl:jenkins:generate_deb_repo_configs"].execute
@@ -62,7 +62,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
         Rake::Task["pl:jenkins:ship_repo_configs"].execute
       ensure
         # Always remove the lock file, even if we've failed
-        remote_ssh_cmd(@build.distribution_server, "rm -f #{artifact_directory}/.lock")
+        remote_ssh_cmd(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/.lock")
       end
 
     end
@@ -80,12 +80,12 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
       # This is the standard path to all debian build artifact repositories on
       # the distribution server for this commit
       #
-      base_url = "http://#{@build.builds_server}/#{@build.project}/#{@build.ref}/repos/apt/"
+      base_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}/repos/apt/"
 
       # We use wget to obtain a directory listing of what are presumably our deb repos
       #
       repo_urls = []
-      wget = find_tool("wget") or fail "Could not find `wget` tool. This is needed for composing the debian repo configurations. Install `wget` and try again."
+      wget = Pkg::Util::Tool.find_tool("wget") or fail "Could not find `wget` tool. This is needed for composing the debian repo configurations. Install `wget` and try again."
       # First test if the directory even exists
       #
       wget_results = %x{#{wget} --spider -r -l 1 --no-parent #{base_url} 2>&1}
@@ -93,7 +93,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
         # We want to exclude index and robots files and only include the http: prefixed elements
         repo_urls = wget_results.split.uniq.reject{|x| x=~ /\?|index|robots/}.select{|x| x =~ /http:/}.map{|x| x.chomp('/')}
       else
-        fail "No debian repos available for #{@build.project} at #{@build.ref}."
+        fail "No debian repos available for #{Pkg::Config.project} at #{Pkg::Config.ref}."
       end
 
       # Create apt sources.list files that can be added to hosts for installing
@@ -105,19 +105,19 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
         # We want to skip the base_url, which wget returns as one of the results
         next if "#{url}/" == base_url
         dist = url.split('/').last
-        repoconfig = ["# Packages for #{@build.project} built from ref #{@build.ref}",
+        repoconfig = ["# Packages for #{Pkg::Config.project} built from ref #{Pkg::Config.ref}",
                       "deb #{url} #{dist} main"]
-        config = File.join("pkg", "repo_configs", "deb", "pl-#{@build.project}-#{@build.ref}-#{dist}.list")
+        config = File.join("pkg", "repo_configs", "deb", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}.list")
         File.open(config, 'w') { |f| f.puts repoconfig }
       end
-      puts "Wrote apt repo configs for #{@build.project} at #{@build.ref} to pkg/repo_configs/deb."
+      puts "Wrote apt repo configs for #{Pkg::Config.project} at #{Pkg::Config.ref} to pkg/repo_configs/deb."
     end
 
     desc "Retrieve debian apt repository configs for this sha"
     task :deb_repo_configs => "pl:fetch" do
-      wget = find_tool("wget") or fail "Could not find `wget` tool. This is needed for composing the debian repo configurations. Install `wget` and try again."
+      wget = Pkg::Util::Tool.find_tool("wget") or fail "Could not find `wget` tool. This is needed for composing the debian repo configurations. Install `wget` and try again."
       mkdir_p "pkg/repo_configs"
-      config_url = "#{@build.builds_server}/#{@build.project}/#{@build.ref}/repo_configs/deb/"
+      config_url = "#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}/repo_configs/deb/"
       begin
         sh "#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{config_url}"
       rescue

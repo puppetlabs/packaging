@@ -17,9 +17,9 @@ namespace :pl do
   task :write_build_params do
     if ENV['TASK']
       task_args = ENV['TASK'].split(' ')
-      @build.task = { :task => task_args[0], :args => task_args[1..-1] }
+      Pkg::Config.task = { :task => task_args[0], :args => task_args[1..-1] }
     end
-    @build.params_to_yaml(ENV['OUTPUT_DIR'])
+    Pkg::Config.config_to_yaml(ENV['OUTPUT_DIR'])
   end
 
   ##
@@ -27,7 +27,7 @@ namespace :pl do
   #
   desc "Print all package build parameters"
   task :print_build_params do
-    @build.print_params
+    Pkg::Config.print_config
   end
 
   ##
@@ -48,8 +48,8 @@ namespace :pl do
 
       # We want to fail if the param passed is bogus, print 'nil' if its not
       # set, and print the value if its set.
-      if @build.respond_to?(getter)
-        if val = @build.instance_variable_get(param)
+      if Pkg::Config.respond_to?(getter)
+        if val = Pkg::Config.instance_variable_get(param)
           puts val
         else
           puts 'nil'

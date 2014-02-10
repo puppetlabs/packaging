@@ -12,12 +12,12 @@
 # revisiting this task and improving it substantially,
 # and/or standardizing the expected version file format.
 namespace :package do
-  desc "Update the version in #{@build.version_file} to current and commit."
+  desc "Update the version in #{Pkg::Config.version_file} to current and commit."
   task :versionbump, :workdir do |t, args|
-    version = ENV['VERSION'] || @build.version.to_s.strip
+    version = ENV['VERSION'] || Pkg::Config.version.to_s.strip
     new_version = '"' + version + '"'
 
-    version_file = "#{args.workdir ? args.workdir + '/' : ''}#{@build.version_file}"
+    version_file = "#{args.workdir ? args.workdir + '/' : ''}#{Pkg::Config.version_file}"
 
     # Read the previous version file in...
     contents = IO.read(version_file)
@@ -36,21 +36,21 @@ namespace :package do
       contents.gsub!(/version\s*=\s*['"]DEVELOPMENT['"]/, "version = '#{version}'")
     elsif contents.match("VERSION = #{old_version}")
       contents.gsub!("VERSION = #{old_version}", "VERSION = #{new_version}")
-    elsif contents.match("#{@build.project.upcase}VERSION = #{old_version}")
-      contents.gsub!("#{@build.project.upcase}VERSION = #{old_version}", "#{@build.project.upcase}VERSION = #{new_version}")
+    elsif contents.match("#{Pkg::Config.project.upcase}VERSION = #{old_version}")
+      contents.gsub!("#{Pkg::Config.project.upcase}VERSION = #{old_version}", "#{Pkg::Config.project.upcase}VERSION = #{new_version}")
     else
-      contents.gsub!(old_version, @build.version)
+      contents.gsub!(old_version, Pkg::Config.version)
     end
 
     # ...and write it back on out.
     File.open(version_file, 'w') {|f| f.write contents }
   end
 
-  desc "Set and commit the version in #{@build.version_file}, requires VERSION."
+  desc "Set and commit the version in #{Pkg::Config.version_file}, requires VERSION."
   task :versionset do
     check_var('VERSION', ENV['VERSION'])
     Rake::Task["package:versionbump"].invoke
-    git_commit_file(@build.version_file, "update to #{ENV['VERSION']}")
+    git_commit_file(Pkg::Config.version_file, "update to #{ENV['VERSION']}")
   end
 
   # A set of tasks for printing the version

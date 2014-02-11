@@ -66,16 +66,23 @@ namespace :pl do
     # Find x86_64 noarch rpms that have been created as hard links and remove them
     rm_r Dir["pkg/*/*/*/x86_64/*.noarch.rpm"]
     # We'll sign the remaining noarch
-    el5_rpms    = Dir["pkg/el/5/**/*.rpm"].join(' ')
-    modern_rpms = (Dir["pkg/el/6/**/*.rpm"] + Dir["pkg/fedora/**/*.rpm"]).join(' ')
-    unless el5_rpms.empty?
-      puts "Signing el5 rpms..."
-      sign_legacy_rpm(el5_rpms)
+    all_rpms = Dir["pkg/**/*.rpm"]
+    old_rpms    = Dir["pkg/el/4/**/*.rpm"] + Dir["pkg/el/5/**/*.rpm"]
+    modern_rpms = Dir["pkg/el/6/**/*.rpm"] + Dir["pkg/el/7/**/*.rpm"] + Dir["pkg/fedora/**/*.rpm"]
+
+    unsigned_rpms = all_rpms - old_rpms - modern_rpms
+    unless unsigned_rpms.empty?
+      fail "#{unsigned_rpms} are not signed. Please update the automation in the signing task"
+    end
+
+    unless old_rpms.empty?
+      puts "Signing old rpms..."
+      sign_legacy_rpm(old_rpms.join(' '))
     end
 
     unless modern_rpms.empty?
-      puts "Signing el6 and fedora rpms..."
-      sign_rpm(modern_rpms)
+      puts "Signing modern rpms..."
+      sign_rpm(modern_rpms.join(' '))
     end
     # Now we hardlink them back in
     Dir["pkg/*/*/*/i386/*.noarch.rpm"].each do |rpm|
@@ -96,7 +103,7 @@ namespace :pl do
   desc "Check if all rpms are signed"
   task :check_rpm_sigs do
     signed = TRUE
-    rpms = Dir["pkg/el/5/**/*.rpm"] + Dir["pkg/el/6/**/*.rpm"] + Dir["pkg/fedora/**/*.rpm"]
+    rpms = Dir["pkg/**/*.rpm"]
     print 'Checking rpm signatures'
     rpms.each do |rpm|
       if rpm_has_sig rpm

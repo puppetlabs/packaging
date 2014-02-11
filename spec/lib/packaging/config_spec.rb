@@ -78,6 +78,7 @@ describe "Pkg::Config" do
                   :pe_version,
                   :pg_major_version,
                   :pre_tar_task,
+                  :pre_tasks,
                   :privatekey_pem,
                   :random_mockroot,
                   :rc_mocks,
@@ -253,8 +254,8 @@ describe "Pkg::Config" do
       it "should set the project root to nil" do
         orig = Pkg::Config.project_root
         Pkg::Config.project_root = 'foo'
-        expect(Pkg::Config).to receive(:project_root=).with(nil)
         Pkg::Config.load_default_configs
+        expect(Pkg::Config.project_root).to be(nil)
         Pkg::Config.project_root = orig
       end
     end

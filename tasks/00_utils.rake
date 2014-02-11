@@ -141,7 +141,7 @@ def ship_gem(file)
 end
 
 def ask_yes_or_no
-  return boolean_value(ENV['ANSWER_OVERRIDE']) unless ENV['ANSWER_OVERRIDE'].nil?
+  return Pkg::Util.boolean_value(ENV['ANSWER_OVERRIDE']) unless ENV['ANSWER_OVERRIDE'].nil?
   answer = STDIN.gets.downcase.chomp
   return TRUE if answer =~ /^y$|^yes$/
   return FALSE if answer =~ /^n$|^no$/

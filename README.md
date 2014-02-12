@@ -854,6 +854,14 @@ files:
     `ext/project_data.yaml`, as well as whatever is overridden with environment
     variables. Useful for debugging problems with parameter values.
 
+* **pl:print_build_param[param]**
+
+    Print a specific build parameter to STDOUT as it would be used in a package
+    build. This prints data that is loaded from `ext/build_defaults.yaml` and
+    `ext/project_data.yaml`, as well as whatever is overridden with environment
+    variables. Useful for debugging problems with parameter values. param
+    should be the name of the parameter as a symbol, e.g. :ref or :version
+
 * **pl:release_deb**
 
     A composite task of `package:tar`, `pl:deb_all`, `pl:sign_deb_changes`, and

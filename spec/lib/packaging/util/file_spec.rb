@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe "Pkg::Util::File" do
-  let(:source)       { "/tmp/placething.tar.gz" }
-  let(:target)       { "/tmp" }
-  let(:options)      { "--thing-for-tar" }
+  let(:source)  { "/tmp/placething.tar.gz" }
+  let(:target)  { "/tmp" }
+  let(:options) { "--thing-for-tar" }
   let(:tar)     { "/usr/bin/tar" }
 
   describe "#untar_into" do

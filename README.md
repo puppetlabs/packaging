@@ -277,23 +277,32 @@ value, presumably a url to a jenkins job to trigger programmatically.
 
 An important note about `DOWNSTREAM_JOB`: `DOWNSTREAM_JOB` in the dynamic jenkins
 workflow is _always_ invoked if it is passed in as an environment variable.
-However, it is also appended with an additional parameter, `PACKAGE_BUILD_STATUS`,
+However, it is appended with an additional parameter, `PACKAGE_BUILD_STATUS`,
 which will be the string "success" if package and repo builds succeeded, or
 "failure" if package or repo builds failed. By modifying the actual downstream
 jenkins job to accept a string parameter of `PACKAGE_BUILD_STATUS`, one can
 switch on the success or failure of the packaging job, responding
-  appropriately.
+  appropriately. A second parameter, `PACKAGE_BUILD_URL` is also appended to
+  `DOWNSTREAM_JOB`, the value of which is the url of the packaging job itself.
+  This is to assist with tracing failures in a multi-jenkins environment. By
+  modifying the downstream jenkins job to accept a string parameter of
+  `PACKAGE_BUILD_URL`, one can use the value to display the url prominently in
+  case of failure, for example.
 
 E.g., a job url:
 http://jenkins.example.net/job/downstream/buildWithParameters?FOO=bar
 
 in the success case will be transformed into
 
-http://jenkins.example.net/job/downstream/buildWithParameters?FOO=bar&PACKAGE_BUILD_STATUS=success
+http://jenkins.example.net/job/downstream/buildWithParameters?FOO=bar&PACKAGE_BUILD_STATUS=success&PACKAGE_BUILD_URL=http://jenkins.example.net/job/packaging_job
 
 and in the failure case transformed into
 
-http://jenkins.example.net/job/downstream/buildWithParameters?FOO=bar&PACKAGE_BUILD_STATUS=failure
+http://jenkins.example.net/job/downstream/buildWithParameters?FOO=bar&PACKAGE_BUILD_STATUS=failure&PACKAGE_BUILD_URL=http://jenkins.example.net/job/packaging_job
+
+Since jenkins will just drop parameters that are not configured in the job,
+accepting PACKAGE_BUILD_STATUS and PACKAGE_BUILD_URL in the downstream job
+isn't mandatory.
 
 All 3 jobs are configured by default for removal by jenkins after 3 days, to
 avoid clutter.

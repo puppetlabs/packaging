@@ -28,7 +28,7 @@ namespace :pl do
       work_dir           = Pkg::Util::File.mktemp
       template_dir       = File.join(File.dirname(__FILE__), '..', 'templates')
       templates          = ['repo.xml.erb', 'packaging.xml.erb']
-      templates.unshift('downstream.xml.erb') if ENV['DOWNSTREAM_JOB']
+      templates << ('downstream.xml.erb') if ENV['DOWNSTREAM_JOB']
 
       # Generate an XML file for every job configuration erb and attempt to
       # create a jenkins job from that XML config
@@ -43,6 +43,9 @@ namespace :pl do
         else
           retry_on_fail(:times => 3) do
             url = create_jenkins_job(job_name, xml_file)
+            if t == "packaging.xml.erb"
+              ENV["PACKAGE_BUILD_URL"] = url
+            end
             puts "Verifying job created successfully..."
             unless jenkins_job_exists?(job_name)
               raise "Unable to verify Jenkins job, trying again..."

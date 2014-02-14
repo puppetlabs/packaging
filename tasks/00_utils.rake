@@ -1,3 +1,28 @@
+#######################################################################
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#                  !  DO NOT ADD TO THIS FILE  !                      #
+#                                                                     #
+#   Usage of this file to store utilities is deprecated. Any new      #
+#   utilities should be added to new or existing classes in           #
+#   lib/packaging/util. Any modified utilities should be migrated     #
+#   to new or existing classes in lib/packaging/util as well.         #
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#                                                                     #
+#######################################################################
+
+
+
+
+
 # Utility methods used by the various rake tasks
 
 def check_var(varname,var=nil)

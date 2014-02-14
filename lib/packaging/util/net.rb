@@ -12,5 +12,21 @@ module Pkg::Util::Net
         File.open(target, 'w') { |f| f.puts( open(uri).read ) }
       end
     end
+
+    # Get the hostname of the current host
+    def hostname
+      require 'socket'
+      Socket.gethostname
+    end
+
+    # Check that the current host matches the one we think it should
+    def check_host(host, args = { :required => true })
+      if hostname == host
+        return true
+      else
+        fail "#{hostname} does not match #{host}" if args[:required]
+        return nil
+      end
+    end
   end
 end

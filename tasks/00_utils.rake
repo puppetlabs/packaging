@@ -29,10 +29,6 @@ def check_var(varname,var=nil)
   var.nil? and fail "Requires #{varname} be set!"
 end
 
-def check_host(host)
-  host == %x{hostname}.chomp! or fail "Requires host to be #{host}!"
-end
-
 def cp_pr(src, dest, options={})
   mandatory = {:preserve => true}
   cp_r(src, dest, options.merge(mandatory))

@@ -28,5 +28,12 @@ module Pkg::Util::Net
         return nil
       end
     end
+
+    def remote_ssh_cmd(target, command)
+      Pkg::Util::Tool.check_tool('ssh')
+      puts "Executing '#{command}' on #{target}"
+      ex(%Q[ssh -t #{target} '#{command.gsub("'", "'\\\\''")}'])
+    end
+
   end
 end

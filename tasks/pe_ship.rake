@@ -52,7 +52,7 @@ if Pkg::Config.build_pe
         puts "Shipping PE debs to apt repo 'incoming' dir on #{Pkg::Config.apt_host}"
         retry_on_fail(:times => 3) do
           Dir["pkg/pe/deb/#{dist}/*.deb"].each do |deb|
-            remote_ssh_cmd(Pkg::Config.apt_host, "mkdir -p '#{target_path}/#{dist}'")
+            Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "mkdir -p '#{target_path}/#{dist}'")
             rsync_to(deb, Pkg::Config.apt_host, "#{target_path}/#{dist}/#{File.basename(deb)}")
           end
         end
@@ -139,7 +139,7 @@ if Pkg::Config.build_pe
         command += %{done; }
         command += %{sync}
 
-        remote_ssh_cmd(Pkg::Config.yum_host, command)
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, command)
       end
 
       #   the repsimple application is a small wrapper around reprepro, the purpose of
@@ -164,14 +164,14 @@ if Pkg::Config.build_pe
         incoming_dir = args.incoming
         incoming_dir or fail "Adding packages to apt repo requires an incoming directory"
         invoke_task("pl:fetch")
-        remote_ssh_cmd(Pkg::Config.apt_host, "/usr/bin/repsimple add_all \
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "/usr/bin/repsimple add_all \
             --confdir #{reprepro_confdir} \
             --basedir #{reprepro_basedir} \
             --databasedir #{reprepro_dbdir} \
             --incomingdir #{incoming_dir}")
 
         puts "Cleaning up apt repo 'incoming' dir on #{Pkg::Config.apt_host}"
-        remote_ssh_cmd(Pkg::Config.apt_host, "rm -r #{incoming_dir}")
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "rm -r #{incoming_dir}")
 
       end
     end

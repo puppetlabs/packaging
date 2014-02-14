@@ -22,7 +22,7 @@ namespace :pl do
     task :update_yum_repo do
       STDOUT.puts "Really run remote repo update on #{Pkg::Config.yum_host}? [y,n]"
       if ask_yes_or_no
-        remote_ssh_cmd(Pkg::Config.yum_host, 'rake -f /opt/repository/Rakefile mk_repo')
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, 'rake -f /opt/repository/Rakefile mk_repo')
       end
     end
 
@@ -31,7 +31,7 @@ namespace :pl do
       STDOUT.puts "Really run remote freight command on #{Pkg::Config.apt_host}? [y,n]"
       if ask_yes_or_no
         override = "OVERRIDE=1" if ENV['OVERRIDE']
-        remote_ssh_cmd(Pkg::Config.apt_host, "rake -f /opt/repository/Rakefile freight #{override}")
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "rake -f /opt/repository/Rakefile freight #{override}")
       end
     end
   end
@@ -51,9 +51,9 @@ namespace :pl do
   desc "Update remote ips repository on #{Pkg::Config.ips_host}"
   task :update_ips_repo do
     rsync_to('pkg/ips/pkgs/', Pkg::Config.ips_host, Pkg::Config.ips_store)
-    remote_ssh_cmd(Pkg::Config.ips_host, "pkgrecv -s #{Pkg::Config.ips_store}/pkgs/#{Pkg::Config.project}Pkg::Config.#{Pkg::Config.ipsversion}.p5p -d #{Pkg::Config.ips_repo} \\*")
-    remote_ssh_cmd(Pkg::Config.ips_host, "pkgrepo refresh -s #{Pkg::Config.ips_repo}")
-    remote_ssh_cmd(Pkg::Config.ips_host, "/usr/sbin/svcadm restart svc:/application/pkg/server")
+    Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "pkgrecv -s #{Pkg::Config.ips_store}/pkgs/#{Pkg::Config.project}Pkg::Config.#{Pkg::Config.ipsversion}.p5p -d #{Pkg::Config.ips_repo} \\*")
+    Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "pkgrepo refresh -s #{Pkg::Config.ips_repo}")
+    Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "/usr/sbin/svcadm restart svc:/application/pkg/server")
   end if Pkg::Config.build_ips
 
   desc "Upload ips p5p packages to downloads"
@@ -164,7 +164,7 @@ namespace :pl do
       end
 
       retry_on_fail(:times => 3) do
-        remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{artifact_dir}")
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{artifact_dir}")
       end
       retry_on_fail(:times => 3) do
         ignore_existing = "--ignore-existing"
@@ -182,7 +182,7 @@ namespace :pl do
       Pkg::Util::File.empty_dir?("pkg/repo_configs") and fail "No repo configs have been generated! Try pl:deb_repo_configs or pl:rpm_repo_configs"
       invoke_task("pl:fetch")
       repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/repo_configs"
-      remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
+      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
       retry_on_fail(:times => 3) do
         rsync_to("pkg/repo_configs/", Pkg::Config.distribution_server, repo_dir)
       end

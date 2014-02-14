@@ -44,12 +44,6 @@ def mv_f(src, dest, options={})
   mv(src, dest, options.merge(mandatory))
 end
 
-def remote_ssh_cmd target, command
-  Pkg::Util::Tool.check_tool('ssh')
-  puts "Executing '#{command}' on #{target}"
-  sh "ssh -t #{target} '#{command.gsub("'", "'\\\\''")}'"
-end
-
 def rsync_to *args
   Pkg::Util::Tool.check_tool('rsync')
   flags = "-rHlv -O --no-perms --no-owner --no-group --ignore-existing"
@@ -381,7 +375,7 @@ end
 # Remotely set the immutable bit on a list of files
 #
 def remote_set_immutable(host, files)
-  remote_ssh_cmd(host, "sudo chattr +i #{files.join(" ")}")
+  Pkg::Util::Net.remote_ssh_cmd(host, "sudo chattr +i #{files.join(" ")}")
 end
 
 # ex combines the behavior of `%x{cmd}` and rake's `sh "cmd"`. `%x{cmd}` has

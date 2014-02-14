@@ -6,6 +6,7 @@ module Pkg::Util
   require 'packaging/util/date'
   require 'packaging/util/tool'
   require 'packaging/util/file'
+  require 'packaging/util/net'
   require 'packaging/util/version'
   require 'packaging/util/serialization'
   require 'packaging/util/rake_utils'

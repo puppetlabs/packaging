@@ -44,6 +44,17 @@ module Pkg::Util::File
       FileUtils.rm_rf erbfile if remove_orig
       outfile
     end
+
+    def untar_into(source, target = nil, options = "")
+      tar = Pkg::Util::Tool.find_tool('tar', :required => true)
+      # We only accept a writable directory as a target
+      if target and !target.empty? and file_writable?(target) and File.directory?(target)
+        target_opts = "-C #{target}"
+      end
+      if file_exists?(source, :required => true)
+        ex(%Q[#{tar} #{options} #{target_opts} -xf #{source}])
+      end
+    end
   end
 end
 

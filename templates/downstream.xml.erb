@@ -37,7 +37,7 @@ else
 fi
 
 # This URI was passed in as an argument to the original rake package call
-curl --fail -i &quot;<%= escape_html(add_param_to_uri(add_param_to_uri(ENV['DOWNSTREAM_JOB'], "PACKAGE_BUILD_STATUS=$UPSTREAM_BUILD_STATUS"), "PACKAGE_BUILD_URL=#{ENV["PACKAGE_BUILD_URL"]}")) %>&quot;</command>
+curl -v --fail -i &quot;<%= escape_html(add_param_to_uri(add_param_to_uri(ENV['DOWNSTREAM_JOB'], "PACKAGE_BUILD_STATUS=$UPSTREAM_BUILD_STATUS"), "PACKAGE_BUILD_URL=#{ENV["PACKAGE_BUILD_URL"]}")) %>&quot;</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers/>

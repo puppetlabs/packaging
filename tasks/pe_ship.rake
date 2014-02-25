@@ -128,14 +128,14 @@ if Pkg::Config.build_pe
     namespace :remote do
       desc "Update remote rpm repodata for PE on #{Pkg::Config.yum_host}"
       task :update_yum_repo => "pl:fetch" do
+        repo_base_path = File.join(Pkg::Config.yum_repo_path, Pkg::Config.pe_version, "repos")
+        mock_paths = Pkg::Config.final_mocks.split.map {|mock| "#{mock_el_family(mock)}-#{mock_el_ver(mock)}"}
 
         # This entire command is going to be passed across SSH, but it's unwieldy on a
         # single line. By breaking it into a series of concatenated strings, we can maintain
         # a semblance of formatting and structure (nevermind readability).
-        command  = %{for dir in $(find #{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/repos/{sles,el}* -type d | grep -v repodata | grep -v cache | xargs); do}
-        command += %{  pushd $dir; }
-        command += %{  sudo createrepo --checksum=sha --quiet --database --update . ; }
-        command += %{  popd &> /dev/null ; }
+        command  = %{for dir in #{repo_base_path}/{#{mock_paths.join(",")}}-*; do}
+        command += %{  sudo createrepo --checksum=sha --quiet --database --update $dir; }
         command += %{done; }
         command += %{sync}
 

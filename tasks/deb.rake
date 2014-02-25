@@ -53,7 +53,7 @@ task :prep_deb_tars, :work_dir do |t,args|
         when file.directory?
           mkdir_p "#{pkg_dir}/#{file}"
         when file.extname == '.erb'
-          Pkg::Util::File.erb_file(file, "#{pkg_dir}/#{file.sub_ext('')}", false, :binding => Pkg::Config.get_binding)
+          Pkg::Util::File.erb_file(file, "#{pkg_dir}/#{file.sub(/\.[^\.]*$/, '')}", false, :binding => Pkg::Config.get_binding)
         else
           cp file, "#{pkg_dir}/#{file}"
         end

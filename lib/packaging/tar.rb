@@ -106,8 +106,8 @@ module Pkg
         #   construct the full path to the erb and target file inside the
         #   temporary workdir.
         #
-        rel_path_to_template = Pathname.new(template_file).relative_path_from(root).to_path
-        rel_path_to_target = Pathname.new(target_file).relative_path_from(root).to_path
+        rel_path_to_template = Pathname.new(template_file).relative_path_from(root).to_s
+        rel_path_to_target = Pathname.new(target_file).relative_path_from(root).to_s
 
         #   What we pass to Pkg::util::File.erb_file are the paths to the erb
         #   and target inside of a temporary project directory. We are, in

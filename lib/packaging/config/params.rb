@@ -156,7 +156,7 @@ module Pkg::Params
   # in case it is not set.
   #
   REASSIGNMENTS = [{:oldvar => :name,                   :newvar => :project},
-                   {:oldvar => :tar_host,               :newvar => :yum_host},
+                   {:oldvar => :yum_host,               :newvar => :tar_host},
                    {:oldvar => :gem_devel_dependencies, :newvar => :gem_development_dependencies},
                    {:oldvar => :pe_name,                :newvar => :project},
                    {:oldvar => :project,                :newvar => :gem_name}]

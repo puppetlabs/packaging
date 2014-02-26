@@ -214,6 +214,14 @@ describe "Pkg::Config" do
     end
   end
 
+  describe "#issue_reassignments" do
+    it "should set tar_host to yum_host" do
+      Pkg::Config.config_from_hash({ :yum_host => 'foo' })
+      Pkg::Config.issue_reassignments
+      Pkg::Config.tar_host.should eq("foo")
+    end
+  end
+
   describe "#config_to_hash" do
     it "should return a hash object" do
       hash = Pkg::Config.config_to_hash

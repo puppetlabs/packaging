@@ -19,6 +19,10 @@ namespace :package do
     git_commit_file(Pkg::Config.version_file, "update to #{ENV['VERSION']}")
   end
 
+  task :versionbump, :workdir do |t, args|
+    Pkg::Util::Version.versionbump(args.workdir)
+  end
+
   # A set of tasks for printing the version
   [:version, :rpmversion, :rpmrelease, :debversion, :release].each do |task|
     task "#{task}" do

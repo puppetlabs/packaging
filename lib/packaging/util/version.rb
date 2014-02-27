@@ -230,5 +230,38 @@ module Pkg::Util::Version
         return %x{#{rpm} -q --qf \"%{VERSION}\" $(#{rpm} -q --whatprovides /etc/redhat-release )}
       end
     end
+
+    def versionbump(workdir=nil)
+      version = ENV['VERSION'] || Pkg::Config.version.to_s.strip
+      new_version = '"' + version + '"'
+
+      version_file = "#{workdir ? workdir + '/' : ''}#{Pkg::Config.version_file}"
+
+      # Read the previous version file in...
+      contents = IO.read(version_file)
+
+      # Match version files containing 'VERSION = "x.x.x"' and just x.x.x
+      if version_string = contents.match(/VERSION =.*/)
+        old_version = version_string.to_s.split()[-1]
+      else
+        old_version = contents
+      end
+
+      puts "Updating #{old_version} to #{new_version} in #{version_file}"
+      if contents.match("@DEVELOPMENT_VERSION@")
+        contents.gsub!("@DEVELOPMENT_VERSION@", version)
+      elsif contents.match('version\s*=\s*[\'"]DEVELOPMENT[\'"]')
+        contents.gsub!(/version\s*=\s*['"]DEVELOPMENT['"]/, "version = '#{version}'")
+      elsif contents.match("VERSION = #{old_version}")
+        contents.gsub!("VERSION = #{old_version}", "VERSION = #{new_version}")
+      elsif contents.match("#{Pkg::Config.project.upcase}VERSION = #{old_version}")
+        contents.gsub!("#{Pkg::Config.project.upcase}VERSION = #{old_version}", "#{Pkg::Config.project.upcase}VERSION = #{new_version}")
+      else
+        contents.gsub!(old_version, Pkg::Config.version)
+      end
+
+      # ...and write it back on out.
+      File.open(version_file, 'w') {|f| f.write contents }
+    end
   end
 end

@@ -30,7 +30,7 @@ namespace :package do
     #
     # If you set this the version will only be modified in the temporary copy,
     # with the intent that it never change the official source tree.
-    Rake::Task["package:versionbump"].invoke(workdir) if Pkg::Config.update_version_file
+    Pkg::Util::Version.versionbump(workdir) if Pkg::Config.update_version_file
 
     tar.pkg!
 

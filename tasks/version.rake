@@ -12,45 +12,15 @@
 # revisiting this task and improving it substantially,
 # and/or standardizing the expected version file format.
 namespace :package do
-  desc "Update the version in #{Pkg::Config.version_file} to current and commit."
-  task :versionbump, :workdir do |t, args|
-    version = ENV['VERSION'] || Pkg::Config.version.to_s.strip
-    new_version = '"' + version + '"'
-
-    version_file = "#{args.workdir ? args.workdir + '/' : ''}#{Pkg::Config.version_file}"
-
-    # Read the previous version file in...
-    contents = IO.read(version_file)
-
-    # Match version files containing 'VERSION = "x.x.x"' and just x.x.x
-    if version_string = contents.match(/VERSION =.*/)
-      old_version = version_string.to_s.split()[-1]
-    else
-      old_version = contents
-    end
-
-    puts "Updating #{old_version} to #{new_version} in #{version_file}"
-    if contents.match("@DEVELOPMENT_VERSION@")
-      contents.gsub!("@DEVELOPMENT_VERSION@", version)
-    elsif contents.match('version\s*=\s*[\'"]DEVELOPMENT[\'"]')
-      contents.gsub!(/version\s*=\s*['"]DEVELOPMENT['"]/, "version = '#{version}'")
-    elsif contents.match("VERSION = #{old_version}")
-      contents.gsub!("VERSION = #{old_version}", "VERSION = #{new_version}")
-    elsif contents.match("#{Pkg::Config.project.upcase}VERSION = #{old_version}")
-      contents.gsub!("#{Pkg::Config.project.upcase}VERSION = #{old_version}", "#{Pkg::Config.project.upcase}VERSION = #{new_version}")
-    else
-      contents.gsub!(old_version, Pkg::Config.version)
-    end
-
-    # ...and write it back on out.
-    File.open(version_file, 'w') {|f| f.write contents }
-  end
-
   desc "Set and commit the version in #{Pkg::Config.version_file}, requires VERSION."
   task :versionset do
     check_var('VERSION', ENV['VERSION'])
-    Rake::Task["package:versionbump"].invoke
+    Pkg::Util::Version.versionbump
     git_commit_file(Pkg::Config.version_file, "update to #{ENV['VERSION']}")
+  end
+
+  task :versionbump, :workdir do |t, args|
+    Pkg::Util::Version.versionbump(args.workdir)
   end
 
   # A set of tasks for printing the version

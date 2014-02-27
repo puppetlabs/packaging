@@ -22,16 +22,6 @@ namespace :package do
     #
     tar.excludes << "ext/packaging"
 
-    # This is to support packages that only burn-in the version number in the
-    # release artifact, rather than storing it two (or more) times in the
-    # version control system.  Razor is a good example of that; see
-    # https://github.com/puppetlabs/Razor/blob/master/lib/project_razor/version.rb
-    # for an example of that this looks like.
-    #
-    # If you set this the version will only be modified in the temporary copy,
-    # with the intent that it never change the official source tree.
-    Pkg::Util::Version.versionbump(workdir) if Pkg::Config.update_version_file
-
     tar.pkg!
 
     puts "Wrote #{`pwd`.strip}/pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"

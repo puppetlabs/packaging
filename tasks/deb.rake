@@ -79,7 +79,7 @@ task :build_deb, :deb_command, :cow do |t,args|
         mv 'ext/debian', 'debian'
       end
       send(deb_build, deb_args)
-      cp FileList["#{work_dir}/*.deb", "#{work_dir}/*.dsc", "#{work_dir}/*.changes", "#{work_dir}/*.debian.tar.gz", "#{work_dir}/*.orig.tar.gz","${work_dir}/*.diff.gz"], dest_dir
+      cp FileList["#{work_dir}/*.deb", "#{work_dir}/*.dsc", "#{work_dir}/*.changes", "#{work_dir}/*.debian.tar.gz", "#{work_dir}/*.orig.tar.gz", "${work_dir}/*.diff.gz"], dest_dir
       rm_rf "#{work_dir}/#{Pkg::Config.project}-#{Pkg::Config.debversion}"
       rm_rf work_dir
     end

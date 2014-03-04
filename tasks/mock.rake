@@ -182,10 +182,8 @@ def build_rpm_with_mock(mocks)
             when /noarch/
               if family == "el" && version == "7"
                 cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-x86_64")
-                rm_r "pkg/pe/rpm/#{family}-#{version}-i386"
               elsif family == "eos" && version == "4"
                 cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-i386")
-                rm_r "pkg/pe/rpm/#{family}-#{version}-x86_64"
               else
                 cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-i386")
                 ln("pkg/pe/rpm/#{family}-#{version}-i386/#{File.basename(rpm)}", "pkg/pe/rpm/#{family}-#{version}-x86_64/")
@@ -203,8 +201,12 @@ def build_rpm_with_mock(mocks)
             when /x86_64/
               cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/x86_64")
             when /noarch/
-              cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/i386")
-              ln("pkg/#{family}/#{version}/#{subdir}/i386/#{File.basename(rpm)}", "pkg/#{family}/#{version}/#{subdir}/x86_64/")
+              if family == "el" && version == "7"
+                cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/x86_64")
+              else
+                cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/i386")
+                ln("pkg/#{family}/#{version}/#{subdir}/i386/#{File.basename(rpm)}", "pkg/#{family}/#{version}/#{subdir}/x86_64/")
+              end
           end
         end
       end

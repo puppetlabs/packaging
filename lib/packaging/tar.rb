@@ -93,12 +93,12 @@ module Pkg
     # exists in workdir
     def template(workdir=nil)
       workdir ||= Pkg::Config.project_root
+      root = Pathname.new(Pkg::Config.project_root)
       @templates.each do |template_file|
 
         template_file = File.expand_path(template_file)
 
         target_file = template_file.sub(File.extname(template_file),"")
-        root = Pathname.new(Pkg::Config.project_root)
 
         #   We construct paths to the erb template and its proposed target file
         #   relative to the project root, *not* fully qualified. This allows us

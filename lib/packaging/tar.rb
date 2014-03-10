@@ -36,6 +36,7 @@ module Pkg
       if Pkg::Config.templates
         @templates = Pkg::Config.templates.dup
         fail "templates must be an array" unless @templates.is_a?(Array)
+        expand_templates
       end
     end
 
@@ -86,6 +87,16 @@ module Pkg
           end
         end
       end
+    end
+
+    # The templates of a project can include globs, which may expand to an
+    # arbitrary number of files. This method expands all of the templates using
+    # Dir.glob and then filters out any templates that live in the packaging
+    # tools themselves.
+    def expand_templates
+      @templates.map! { |tempfile| Dir.glob(File.join(Pkg::Config::project_root, tempfile)) }
+      @templates.flatten!
+      @templates.reject! { |temp| temp.match(/#{Pkg::Config::packaging_root}/) }
     end
 
     # Given the tar object's template files (assumed to be in Pkg::Config.project_root), transform

@@ -110,6 +110,16 @@ module Pkg
         ENV['PROJECT_ROOT'] || File.expand_path(File.join(LIBDIR, "..","..",".."))
       end
 
+      def default_packaging_root
+        # It is really quite unsafe to assume github.com/puppetlabs/packaging has been
+        # cloned into $project_root/ext/packaging even if it has _always_ been the
+        # default location. Here we use the PACKAGING_ROOT constant defined in
+        # packaging.rake if it is available, or use the parent directory of the
+        # current file as the packaging_root.
+        #
+        defined?(PACKAGING_ROOT) ? File.expand_path(PACKAGING_ROOT) : File.expand_path(File.join(LIBDIR, ".."))
+      end
+
       def load_default_configs
         default_project_data = File.join(@project_root, "ext", "project_data.yaml")
         default_build_defaults = File.join(@project_root, "ext", "build_defaults.yaml")
@@ -186,8 +196,8 @@ module Pkg
       #   packaging path
       #
       def load_defaults
-
-        @project_root ||= default_project_root
+        @project_root   ||= default_project_root
+        @packaging_root ||= default_packaging_root
 
         Pkg::Params::DEFAULTS.each do |v|
           unless self.instance_variable_get("@#{v[:var]}")

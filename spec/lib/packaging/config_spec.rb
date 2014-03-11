@@ -72,6 +72,7 @@ describe "Pkg::Config" do
                   :osx_build_host,
                   :packager,
                   :packaging_repo,
+                  :packaging_root,
                   :packaging_url,
                   :pbuild_conf,
                   :pe_name,

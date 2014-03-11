@@ -36,6 +36,7 @@ module Pkg
       if Pkg::Config.templates
         @templates = Pkg::Config.templates.dup
         fail "templates must be an array" unless @templates.is_a?(Array)
+        expand_templates
       end
     end
 
@@ -88,17 +89,27 @@ module Pkg
       end
     end
 
+    # The templates of a project can include globs, which may expand to an
+    # arbitrary number of files. This method expands all of the templates using
+    # Dir.glob and then filters out any templates that live in the packaging
+    # tools themselves.
+    def expand_templates
+      @templates.map! { |tempfile| Dir.glob(File.join(Pkg::Config::project_root, tempfile)) }
+      @templates.flatten!
+      @templates.reject! { |temp| temp.match(/#{Pkg::Config::packaging_root}/) }
+    end
+
     # Given the tar object's template files (assumed to be in Pkg::Config.project_root), transform
     # them, removing the originals. If workdir is passed, assume Pkg::Config.project_root
     # exists in workdir
     def template(workdir=nil)
       workdir ||= Pkg::Config.project_root
+      root = Pathname.new(Pkg::Config.project_root)
       @templates.each do |template_file|
 
         template_file = File.expand_path(template_file)
 
         target_file = template_file.sub(File.extname(template_file),"")
-        root = Pathname.new(Pkg::Config.project_root)
 
         #   We construct paths to the erb template and its proposed target file
         #   relative to the project root, *not* fully qualified. This allows us

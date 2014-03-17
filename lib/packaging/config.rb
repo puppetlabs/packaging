@@ -212,18 +212,21 @@ module Pkg
       #   parameters file that overrides all set values with its data. This has
       #   always been supplied as an environment variable, "PARAMS_FILE." To
       #   honor this, we have a method in config to override values as
-      #   expected. There is, however, a twist - it is absolutely essential that
-      #   the overrides do not override the project_root setting, because this is
-      #   environment-specific, and any value in a params file is going to be
-      #   wrong. Thus, if we have a project root before we begin overriding, we
-      #   save it and restore it after overrides.
+      #   expected. There is, however, a twist - it is absolutely essential
+      #   that the overrides do not override the project_root or packaging_root
+      #   settings, because this is environment-specific, and any value in a
+      #   params file is going to be wrong. Thus, if we have a project root or
+      #   packaging root before we begin overriding, we save it and restore it
+      #   after overrides.
       #
       def load_overrides
         if ENV['PARAMS_FILE'] && ENV['PARAMS_FILE'] != ''
           if File.readable?(ENV['PARAMS_FILE'])
-            root = self.instance_variable_get("@project_root")
+            project_root = self.instance_variable_get("@project_root")
+            packaging_root = self.instance_variable_get("@packaging_root")
             self.config_from_yaml(ENV['PARAMS_FILE'])
-            self.instance_variable_set("@project_root", root) if root
+            self.instance_variable_set("@project_root", project_root) if project_root
+            self.instance_variable_set("@packaging_root", packaging_root) if packaging_root
           else
             fail "PARAMS_FILE was set, but not to the path to a readable file."
           end

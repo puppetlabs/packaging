@@ -99,7 +99,11 @@ namespace :pl do
 
   desc "UBER ship: ship all the things in pkg"
   task :uber_ship => 'pl:fetch' do
-    if confirm_ship(FileList["pkg/**/*"])
+
+    Pkg::Util::Prompts.confirm_branch or exit
+    Pkg::Util::Prompts.confirm_tag or exit
+
+    if Pkg::Util::Prompts.confirm_ship(FileList["pkg/**/*"])
       ENV['ANSWER_OVERRIDE'] = 'yes'
       Rake::Task["pl:ship_gem"].invoke if Pkg::Config.build_gem
       Rake::Task["pl:ship_rpms"].invoke

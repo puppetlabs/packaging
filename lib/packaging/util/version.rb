@@ -48,6 +48,24 @@ module Pkg::Util::Version
       end
     end
 
+    def git_branch
+      Pkg::Util.in_project_root do
+        branch = %x{#{GIT} rev-parse --abbrev-ref HEAD}.strip
+      end
+    end
+
+    def git_detached?
+      git_branch == 'HEAD'
+    end
+
+    def git_stable?
+      git_branch.downcase == 'stable'
+    end
+
+    def git_master?
+      git_branch.downcase == 'master'
+    end
+
     # Return true if we're in a git repo, otherwise false
     def is_git_repo?
       Pkg::Util.in_project_root do

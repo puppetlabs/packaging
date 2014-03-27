@@ -58,6 +58,13 @@ module Pkg::Util::Version
 
     alias :is_git_repo :is_git_repo?
 
+    # Return the basename of the project repo
+    def git_project_name
+      Pkg::Util.in_project_root do
+        %x{#{GIT} config --get remote.origin.url}.split('/')[-1].chomp(".git").chomp
+      end
+    end
+
     # Return information about the current tree, using `git describe`, ready for
     # further processing.
     #

@@ -1,8 +1,5 @@
 module Pkg::Util::Prompt
   class << self
-    # Are these methods repetitive? Sure.
-    # But let's get the workflow laid out before we put lipstick on this pig.
-
     # This is the most basic prompt, which just asks a user if they want to continue or not
     def ask_yes_or_no
       # Answers can be overridden with an environment variable
@@ -20,13 +17,14 @@ module Pkg::Util::Prompt
 
     def confirm_ship(files)
       $stdout.puts "The following files have been built and are ready to ship:"
-      files.each { |file| STDOUT.puts "\t#{file}\n" unless File.directory?(file) }
-      $stdout.puts "Ship these files?? [y,n]"
+      files.each { |file| $stdout.puts "\t#{file}\n" unless File.directory?(file) }
+      $stdout.puts "Ship these files?"
       ask_yes_or_no
     end
 
-    def confirm_tag
-      $stdout.puts %Q{You've checked out tag "#{Pkg::Util::Version.git_tag}"; is this what you want to ship?}
+    def confirm_tag(tag)
+      $stdout.puts %Q{You've checked out tag "#{tag}".}
+      $stdout.puts %Q{Is this what you want to ship?}
       ask_yes_or_no
     end
   end

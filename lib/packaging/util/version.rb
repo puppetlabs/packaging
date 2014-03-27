@@ -1,4 +1,5 @@
 # Utility methods used for versioning projects for various kinds of packaging
+# To-do: maybe break these down by SCM tool, since this is starting to get unwieldy.
 
 module Pkg::Util::Version
   class << self
@@ -11,14 +12,39 @@ module Pkg::Util::Version
         $?.success? or fail "Could not checkout #{ref} git branch to build package from...exiting"
       end
     end
+    alias :git_checkout :git_co
 
+    # Check if there are any tags
     def git_tagged?
       Pkg::Util.in_project_root do
         %x{#{GIT} describe >/dev/null 2>&1}
         $?.success?
       end
     end
+    alias :git_repo_has_tags? :git_tagged?
 
+    # Check if this git checkout is specifically a tag.
+    # - false if not detached from HEAD
+    # - false if detached from HEAD and untagged
+    # - true if detached from HEAD and tagged (local or remote)
+    def git_tagged_checkout?
+      return false unless git_detached?
+
+      Pkg::Util.in_project_root do
+        %x{#{GIT} describe --exact-match --tags HEAD >/dev/null 2>&1}
+      end
+      $?.success?
+    end
+    alias :git_checkout_is_tag? :git_tagged_checkout?
+
+    def git_tag
+      Pkg::Util.in_project_root do
+        %x{#{GIT} describe --exact-match --tags HEAD}.strip
+      end
+    end
+
+    # Heads up: this doesn't respect local tags,
+    # only remote tags that have been pulled down.
     def git_describe
       Pkg::Util.in_project_root do
         %x{#{GIT} describe}.strip
@@ -33,6 +59,8 @@ module Pkg::Util::Version
     end
 
     # Return the ref type of HEAD on the current branch
+    # Caveat Lector: this does not respect local tags
+    # because git_describe does not respect local tags.
     def git_ref_type
       Pkg::Util.in_project_root do
         %x{#{GIT} cat-file -t #{git_describe}}.strip
@@ -73,7 +101,6 @@ module Pkg::Util::Version
         $?.success?
       end
     end
-
     alias :is_git_repo :is_git_repo?
 
     # Return the basename of the project repo

@@ -32,6 +32,7 @@ PACKAGING_TASK_DIR = File.join(PACKAGING_ROOT, 'tasks')
   'pe_ship.rake',
   'pe_sign.rake',
   'pe_tar.rake',
+  'prompts.rake',
   'release.rake',
   'remote_build.rake',
   'retrieve.rake',

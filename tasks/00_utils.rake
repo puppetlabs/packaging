@@ -171,7 +171,7 @@ def handle_method_failure(method, args)
   STDERR.puts "There was an error running the method #{method} with the arguments:"
   args.each { |param, arg| STDERR.puts "\t#{param} => #{arg}\n" }
   STDERR.puts "The rake session is paused. Would you like to retry #{method} with these args and continue where you left off? [y,n]"
-  if ask_yes_or_no
+  if Pkg::Util::Prompt.ask_yes_or_no
     send(method, args)
   else
     exit 1
@@ -187,7 +187,7 @@ def confirm_ship(files)
   STDOUT.puts "The following files have been built and are ready to ship:"
   files.each { |file| STDOUT.puts "\t#{file}\n" unless File.directory?(file) }
   STDOUT.puts "Ship these files?? [y,n]"
-  ask_yes_or_no
+  Pkg::Util::Prompt.ask_yes_or_no
 end
 
 def git_tag(version)

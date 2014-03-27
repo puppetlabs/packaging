@@ -167,15 +167,6 @@ def ship_gem(file)
   %x{gem push #{file}}
 end
 
-def ask_yes_or_no
-  return Pkg::Util.boolean_value(ENV['ANSWER_OVERRIDE']) unless ENV['ANSWER_OVERRIDE'].nil?
-  answer = STDIN.gets.downcase.chomp
-  return TRUE if answer =~ /^y$|^yes$/
-  return FALSE if answer =~ /^n$|^no$/
-  puts "Nope, try something like yes or no or y or n, etc:"
-  ask_yes_or_no
-end
-
 def handle_method_failure(method, args)
   STDERR.puts "There was an error running the method #{method} with the arguments:"
   args.each { |param, arg| STDERR.puts "\t#{param} => #{arg}\n" }

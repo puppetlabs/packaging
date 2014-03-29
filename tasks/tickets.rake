@@ -1,3 +1,17 @@
+# This rake task creates tickets in jira for a release. Typical usage
+# would start in a clone of a foss project like puppet, and after
+# running 'rake package:bootstrap', tickets could be created like so:
+#
+#    rake pl:tickets BUILDER=melissa DEVELOPER=kylo WRITER=nickf RELEASE=3.5.0-rc4
+#
+# The BUILDER/DEVELOPER/WRITER params are checked against a known list of jira user
+# ids. The Jira project is selected based on the foss project this is run from.
+#
+# A note on authentication: the tickets will be created by the gepetto-bot
+# account. You will need the current password for that account in the environment
+# variable: GEPETTO_BOT_PASSWORD.
+#
+
 def check_for_jira_gem
   begin
     require 'jira'

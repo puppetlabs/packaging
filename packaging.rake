@@ -41,6 +41,7 @@ PACKAGING_TASK_DIR = File.join(PACKAGING_ROOT, 'tasks')
   'sign.rake',
   'tag.rake',
   'tar.rake',
+  'tickets.rake',
   'update.rake',
   'vendor_gems.rake',
   'version.rake',

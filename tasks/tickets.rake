@@ -2,7 +2,10 @@
 # would start in a clone of a foss project like puppet, and after
 # running 'rake package:bootstrap', tickets could be created like so:
 #
-#    rake pl:tickets BUILDER=melissa DEVELOPER=kylo WRITER=nickf RELEASE=3.5.0-rc4 DATE=2014-04-01
+#    rake pl:tickets BUILDER=melissa DEVELOPER=kylo WRITER=nickf RELEASE=3.5.0-rc4 DATE=2014-04-01 JIRA_USER=kylo
+#
+# The JIRA_USER parameter is used to login to jira to create the tickets. You will
+# be prompted for a password. It will not be displayed.
 #
 # The BUILDER/DEVELOPER/WRITER params are checked against a known list of jira user
 # ids. The Jira project is selected based on the foss project this is run from.
@@ -27,13 +30,15 @@ def get_project
   known_git_projects[project]
 end
 
+def get_password(site, user)
+  require 'io/console'
+  puts  "Logging in to #{site} as #{user}"
+  print "Password please: "
+  STDIN.noecho(&:gets).chomp
+end
+
 def get_vars
   vars = {}
-
-  # Jira authentication
-  vars[:username]  = "gepetto-bot"
-  vars[:password]  = Pkg::Util.get_var("GEPETTO_BOT_PASSWORD")
-  vars[:site]      = 'https://tickets.puppetlabs.com'
 
   # roles
   vars[:builder]   = Pkg::Util.get_var("BUILDER")
@@ -66,6 +71,12 @@ def get_vars
   if not known_writers.include? vars[:writer]
     fail "Wordsmith must be one of #{known_writers.join(', ')}"
   end
+
+  # Jira authentication - do this after validating other params, so user doesn't need to
+  # enter password only to find out they typo'd one of the above
+  vars[:site]      = 'https://tickets.puppetlabs.com'
+  vars[:username]  = Pkg::Util.get_var("JIRA_USER")
+  vars[:password]  = get_password(vars[:site], vars[:username])
 
   vars
 end
@@ -221,7 +232,7 @@ namespace :pl do
     vars = get_vars
     puts "Creating tickets based on:"
     require 'pp'
-    pp vars
+    pp vars.select { |k,v| k != :password }
 
     create_tickets(vars)
   end

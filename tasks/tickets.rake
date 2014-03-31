@@ -31,6 +31,7 @@ def get_project
 
   known_git_projects = {
     "puppet"     => "PUP",
+    "puppetdb"   => "PDB",
     "facter"     => "FACT",
     "hiera"      => "HI",
     "classifier" => "NC"
@@ -57,8 +58,8 @@ def get_vars
   vars[:project]   = ENV["PROJECT"] || get_project
 
   # validate the parameters where we have known lists
-  known_projects = ['FACT', 'HI', 'PUP', 'NC']
-  known_devs     = ['adrien', 'andy', 'dan.lidral-porter', 'ethan', 'henrik.lindberg', 'josh', 'joshua.partlow', 'kylo', 'patrick', 'peter.huene', 'rob']
+  known_projects = ['FACT', 'HI', 'PDB', 'PUP', 'NC']
+  known_devs     = ['adrien', 'andy', 'dan.lidral-porter', 'ethan', 'henrik.lindberg', 'josh', 'joshua.partlow', 'ken', 'kylo', 'patrick', 'peter.huene', 'rob', 'ryan.senior']
   known_builders = ['matthaus', 'melissa', 'ryan.mckern']
   known_writers  = ['justin.holguin', 'nickf']
 

@@ -117,7 +117,7 @@ def create_tickets(vars)
     },
     {
       :summary     => 'Tag the release and create packages',
-      :description => 'Developer provides the SHA',
+      :description => 'Developer provides the SHA. For puppet, don\'t forget the msi packages.',
       :assignee    => vars[:builder]
     },
     {

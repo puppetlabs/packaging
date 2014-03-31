@@ -27,6 +27,7 @@
 
 def check_var(varname,var=nil)
   var.nil? and fail "Requires #{varname} be set!"
+  var
 end
 
 def check_host(host)

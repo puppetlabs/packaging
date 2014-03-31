@@ -12,11 +12,6 @@
 # variable: GEPETTO_BOT_PASSWORD.
 #
 
-def get_var(var)
-  check_var(var, ENV[var])
-  ENV[var]
-end
-
 def get_project
   # get name of the git repository that packaging is cloned within
   project = Pkg::Util::Version.git_project_name
@@ -37,18 +32,18 @@ def get_vars
 
   # Jira authentication
   vars[:username]  = "gepetto-bot"
-  vars[:password]  = get_var("GEPETTO_BOT_PASSWORD")
+  vars[:password]  = Pkg::Util.get_var("GEPETTO_BOT_PASSWORD")
   vars[:site]      = 'https://tickets.puppetlabs.com'
 
   # roles
-  vars[:builder]   = get_var("BUILDER")
-  vars[:developer] = get_var("DEVELOPER")
-  vars[:writer]    = get_var("WRITER")
+  vars[:builder]   = Pkg::Util.get_var("BUILDER")
+  vars[:developer] = Pkg::Util.get_var("DEVELOPER")
+  vars[:writer]    = Pkg::Util.get_var("WRITER")
 
   # project and release
-  vars[:release]   = get_var("RELEASE")
+  vars[:release]   = Pkg::Util.get_var("RELEASE")
   vars[:project]   = ENV["PROJECT"] || get_project
-  vars[:date]      = get_var("DATE")
+  vars[:date]      = Pkg::Util.get_var("DATE")
 
   # validate the parameters where we have known lists
   known_projects = ['FACT', 'HI', 'PDB', 'PUP', 'NC']

@@ -26,4 +26,9 @@ module Pkg::Util
     result
   end
 
+  def self.get_var(var)
+    check_var(var, ENV[var])
+    ENV[var]
+  end
+
 end

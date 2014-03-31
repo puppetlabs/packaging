@@ -12,14 +12,6 @@
 # variable: GEPETTO_BOT_PASSWORD.
 #
 
-def check_for_jira_gem
-  begin
-    require 'jira'
-  rescue LoadError
-    fail "Be sure to 'gem install jira-ruby' to use this rake task"
-  end
-end
-
 def get_var(var)
   check_var(var, ENV[var])
   ENV[var]
@@ -221,7 +213,7 @@ end
 namespace :pl do
   desc "Make release tickets in jira for this project"
   task :tickets do
-    check_for_jira_gem
+    require_library_or_fail('jira', 'jira-ruby')
 
     vars = get_vars
     puts "Creating tickets based on:"

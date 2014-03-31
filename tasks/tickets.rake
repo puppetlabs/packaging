@@ -145,6 +145,12 @@ def create_tickets(vars)
       :assignee    => 'eric.sorenson'
     },
     {
+      :projects    => ['PDB'],  # Only PDB has this step
+      :summary     => 'Update dujour to notify users to use #{vars[:release]}',
+      :description => '',
+      :assignee    => vars[:developer]
+    },
+    {
       :summary     => 'Close all resolved tickets in Jira',
       :description => '',
       :assignee    => vars[:developer]
@@ -185,6 +191,8 @@ def create_tickets(vars)
   # Create subtasks for each step of the release process
   subticket_idx = 1
   subtickets.each { |subticket|
+
+    next if subticket[:projects] && !subticket[:projects].include?(vars[:project])
 
     issue2 = client.Issue.build
 

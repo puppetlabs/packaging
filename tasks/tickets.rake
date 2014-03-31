@@ -54,7 +54,7 @@ def get_vars
   known_projects = ['FACT', 'HI', 'PDB', 'PUP', 'NC']
   known_devs     = ['adrien', 'andy', 'dan.lidral-porter', 'ethan', 'henrik.lindberg', 'josh', 'joshua.partlow', 'ken', 'kylo', 'patrick', 'peter.huene', 'rob', 'ryan.senior']
   known_builders = ['matthaus', 'melissa', 'ryan.mckern']
-  known_writers  = ['justin.holguin', 'nickf']
+  known_writers  = ['justin.holguin', 'nick.fagerlund']
 
   if not known_projects.include? vars[:project]
     fail "Project #{vars[:project]}? Never heard of it. Must be one of #{known_projects.join(', ')}"

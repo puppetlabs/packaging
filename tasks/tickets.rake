@@ -2,7 +2,7 @@
 # would start in a clone of a foss project like puppet, and after
 # running 'rake package:bootstrap', tickets could be created like so:
 #
-#    rake pl:tickets BUILDER=melissa DEVELOPER=kylo WRITER=nickf RELEASE=3.5.0-rc4
+#    rake pl:tickets BUILDER=melissa DEVELOPER=kylo WRITER=nickf RELEASE=3.5.0-rc4 DATE=2014-04-01
 #
 # The BUILDER/DEVELOPER/WRITER params are checked against a known list of jira user
 # ids. The Jira project is selected based on the foss project this is run from.
@@ -56,6 +56,7 @@ def get_vars
   # project and release
   vars[:release]   = get_var("RELEASE")
   vars[:project]   = ENV["PROJECT"] || get_project
+  vars[:date]      = ENV["DATE"]
 
   # validate the parameters where we have known lists
   known_projects = ['FACT', 'HI', 'PDB', 'PUP', 'NC']
@@ -179,7 +180,7 @@ def create_tickets(vars)
   projects = client.Project.all
   project_name = projects.find { |p| p.key == vars[:project]  }
   name = project_name.name
-  summary = "#{name} #{vars[:release]}"
+  summary = "#{name} #{vars[:release]} #{vars[:date]}"
 
   # Create the main ticket
   issue = client.Issue.build

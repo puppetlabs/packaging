@@ -56,7 +56,7 @@ def get_vars
   # project and release
   vars[:release]   = get_var("RELEASE")
   vars[:project]   = ENV["PROJECT"] || get_project
-  vars[:date]      = ENV["DATE"]
+  vars[:date]      = get_var("DATE")
 
   # validate the parameters where we have known lists
   known_projects = ['FACT', 'HI', 'PDB', 'PUP', 'NC']

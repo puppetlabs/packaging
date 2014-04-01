@@ -350,12 +350,12 @@ def jenkins_job_exists?(name)
   curl_form_data(job_url, form_args, :quiet => true)
 end
 
-def require_library_or_fail(library, gem_name = nil)
-  gem_name ||= library
+def require_library_or_fail(library, library_name = nil)
+  library_name ||= library
   begin
     require library
   rescue LoadError
-    fail "Could not load #{gem_name}. #{gem_name} is required by the packaging repo for this task"
+    fail "Could not load #{library_name}. #{library_name} is required by the packaging repo for this task"
   end
 end
 

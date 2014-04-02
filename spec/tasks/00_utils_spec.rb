@@ -14,6 +14,7 @@ describe "00_utils" do
       :get_rpmrelease             => '1',
       :is_rc?                     => false,
       :is_odd?                    => true,
+      :is_less_than_one?          => true,
     },
     '0.8.0rc10'                   => {
       :git_describe_version       => %w{0.8.0rc10},
@@ -25,6 +26,7 @@ describe "00_utils" do
       :get_rpmrelease             => '0.1rc10',
       :is_rc?                     => true,
       :is_odd?                    => false,
+      :is_less_than_one?          => true,
     },
     '0.7.0-rc1'                   => {
       :git_describe_version       => %w{0.7.0 rc1},
@@ -36,6 +38,7 @@ describe "00_utils" do
       :get_rpmrelease             => '0.1rc1',
       :is_rc?                     => true,
       :is_odd?                    => true,
+      :is_less_than_one?          => true,
     },
     '0.4.0-rc1-63-ge391f55'       => {
       :git_describe_version       => %w{0.4.0 rc1 63},
@@ -47,6 +50,7 @@ describe "00_utils" do
       :get_rpmrelease             => '0.1rc1.63',
       :is_rc?                     => true,
       :is_odd?                    => false,
+      :is_less_than_one?          => true,
     },
     '0.6.0-rc1-63-ge391f55-dirty' => {
       :git_describe_version       => %w{0.6.0 rc1 63 dirty},
@@ -58,6 +62,7 @@ describe "00_utils" do
       :get_rpmrelease             => '0.1rc1.63dirty',
       :is_rc?                     => true,
       :is_odd?                    => false,
+      :is_less_than_one?          => true,
 
     },
     '0.7.0-63-ge391f55'           => {
@@ -70,6 +75,7 @@ describe "00_utils" do
       :get_rpmrelease             => '1',
       :is_rc?                     => false,
       :is_odd?                    => true,
+      :is_less_than_one?          => true,
 
     },
     '0.7.0-63-ge391f55-dirty'     => {
@@ -82,6 +88,30 @@ describe "00_utils" do
       :get_rpmrelease             => '1',
       :is_rc?                     => false,
       :is_odd?                    => true,
+      :is_less_than_one?          => true,
+    },
+    '1.7.0'                       => {
+      :is_less_than_one?          => false,
+    },
+    '1.8.0rc10'                   => {
+      :is_less_than_one?          => false,
+    },
+    '1.7.0-rc1'                   => {
+      :is_less_than_one?          => false,
+    },
+    '1.4.0-rc1-63-ge391f55'       => {
+      :is_less_than_one?          => false,
+    },
+    '1.6.0-rc1-63-ge391f55-dirty' => {
+      :is_less_than_one?          => false,
+
+    },
+    '1.7.0-63-ge391f55'           => {
+      :is_less_than_one?          => false,
+
+    },
+    '1.7.0-63-ge391f55-dirty'     => {
+      :is_less_than_one?          => false,
     },
   }
 

@@ -69,10 +69,10 @@ namespace :pl do
   if Pkg::Config.build_gem
     desc "Ship built gem to rubygems"
     task :ship_gem do
-      # Even if a project builds a gem, if it uses the odd_even strategy, we only
-      # want to ship final gems because otherwise a development gem would be
-      # preferred over the last final gem
-      if Pkg::Config.version_strategy != "odd_even" || Pkg::Util::Version.is_final?
+      # Even if a project builds a gem, if it uses the odd_even or zero-based
+      # strategies, we only want to ship final gems because otherwise a
+      # development gem would be preferred over the last final gem
+      if Pkg::Config.version_strategy !~ /odd_even|zero_based/ || Pkg::Util::Version.is_final?
         FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |f|
           puts "Shipping gem #{f} to rubygems"
           ship_gem(f)

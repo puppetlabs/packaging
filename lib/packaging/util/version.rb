@@ -182,6 +182,8 @@ module Pkg::Util::Version
           ret = is_rc?
         when "odd_even"
           ret = is_odd?
+        when "zero_based"
+          ret = is_less_than_one?
         when nil
           ret = is_rc?
       end
@@ -215,6 +217,20 @@ module Pkg::Util::Version
     # '0.7.1-63-dirty'
     def is_odd?
       return TRUE if get_dash_version.match(/^\d+\.(\d+)\.\d+/)[1].to_i.odd?
+      return FALSE
+    end
+
+    # the pre-1.0 strategy (node classifier)
+    # final:
+    # '1.8.0'
+    # '1.8.0-63'
+    # '1.8.1-63-dirty'
+    # development:
+    # '0.7.0'
+    # '0.7.0-63'
+    # '0.7.1-63-dirty'
+    def is_less_than_one?
+      return TRUE if get_dash_version.match(/^(\d+)\.\d+\.\d+/)[1].to_i.zero?
       return FALSE
     end
 

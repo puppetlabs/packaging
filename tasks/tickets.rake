@@ -11,10 +11,6 @@
 # The BUILDER/DEVELOPER/WRITER params are checked against a known list of jira user
 # ids. The Jira project is selected based on the foss project this is run from.
 #
-# A note on authentication: the tickets will be created by the gepetto-bot
-# account. You will need the current password for that account in the environment
-# variable: GEPETTO_BOT_PASSWORD.
-#
 
 class Jira
 

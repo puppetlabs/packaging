@@ -10,6 +10,7 @@ module Pkg::Util
   require 'packaging/util/version'
   require 'packaging/util/serialization'
   require 'packaging/util/rake_utils'
+  require 'packaging/util/jira'
 
   def self.boolean_value(var)
     return TRUE if (var == TRUE || ( var.is_a?(String) && ( var.downcase == 'true' || var.downcase =~ /^y$|^yes$/ )))

@@ -216,10 +216,19 @@ describe "Pkg::Config" do
   end
 
   describe "#issue_reassignments" do
+    before :all do
+      prev_tar_host = Pkg::Config.tar_host
+      Pkg::Config.tar_host = nil
+    end
+
     it "should set tar_host to yum_host" do
       Pkg::Config.config_from_hash({ :yum_host => 'foo' })
       Pkg::Config.issue_reassignments
       Pkg::Config.tar_host.should eq("foo")
+    end
+
+    after :all do
+      Pkg::Config.tar_host = prev_tar_host
     end
   end
 

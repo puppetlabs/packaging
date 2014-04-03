@@ -142,8 +142,10 @@ def create_tickets(jira, vars)
   summary = "#{project_name} #{vars[:release]} #{vars[:date]} Release"
 
   # Values for the main ticket
+  # Note: use the 're' user for the main ticket to get notifications
+  # to the Release Engineering team
   project  = vars[:project]
-  assignee = vars[:developer]
+  assignee = 're'
 
   # Create the main ticket
   key, parent_id = jira.create_issue(summary,

@@ -70,7 +70,7 @@ def create_tickets(jira, vars)
       :assignee    => vars[:developer]
     },
     {
-      :summary     => 'Is a new version created for the next version in the series?',
+      :summary     => 'Is a new version created in Jira for the next version in the series?',
       :description => '',
       :assignee    => vars[:developer]
     },

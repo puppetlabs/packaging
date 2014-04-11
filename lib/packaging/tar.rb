@@ -125,7 +125,15 @@ module Pkg
         #   essence, templating "in place." This is why we remove the original
         #   files - they're not the originals in the authoritative project
         #   directory, but the originals in the temporary working copy.
-        Pkg::Util::File.erb_file(File.join(workdir,rel_path_to_template), File.join(workdir, rel_path_to_target), true, :binding => Pkg::Config.get_binding)
+        if File.exist?(File.join(workdir,rel_path_to_template))
+          mkpath(File.dirname( File.join(workdir, rel_path_to_target) ), :verbose => false)
+          Pkg::Util::File.erb_file(File.join(workdir,rel_path_to_template), File.join(workdir, rel_path_to_target), true, :binding => Pkg::Config.get_binding)
+        elsif File.exist?(File.join(root,rel_path_to_template))
+          mkpath(File.dirname( File.join(workdir, rel_path_to_target) ), :verbose => false)
+          Pkg::Util::File.erb_file(File.join(root,rel_path_to_template), File.join(workdir, rel_path_to_target), false, :binding => Pkg::Config.get_binding)
+        else
+          fail "Expected to find #{template_file} in #{root} for templating. But it was not there. Maybe you deleted it?"
+        end
       end
     end
 

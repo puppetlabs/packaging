@@ -168,7 +168,7 @@ module Pkg
       #   really belongs in the Rpm object.
 
       def load_versioning
-        if @project_root and Pkg::Util::Version.git_tagged?
+        if @project_root and Pkg::Util::Version.git_repo_has_tags?
           @ref         = Pkg::Util::Version.git_sha_or_tag
           @version     = Pkg::Util::Version.get_dash_version
           @gemversion  = Pkg::Util::Version.get_dot_version

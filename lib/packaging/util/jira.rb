@@ -4,7 +4,7 @@ module Pkg::Util
     # Future improvement, exception handling and more helpful error messages
     #
     def initialize(username, password, site)
-      require_library_or_fail('jira', 'jira-ruby')
+      Pkg::Util.require_library_or_fail('jira', 'jira-ruby')
 
       # Jira client options
       options = {

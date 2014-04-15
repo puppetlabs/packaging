@@ -94,7 +94,7 @@ namespace :pl do
       Pkg::Util::Version.fail_on_dirty_source
 
       # We use JSON for parsing the json part of the submission to JSON
-      require_library_or_fail 'json'
+      Pkg::Util.require_library_or_fail 'json'
 
       build_task = args.build_task
       ##

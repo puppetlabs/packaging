@@ -32,4 +32,13 @@ module Pkg::Util
     ENV[var]
   end
 
+  def self.require_library_or_fail(library, library_name = nil)
+    library_name ||= library
+    begin
+      require library
+    rescue LoadError
+      fail "Could not load #{library_name}. #{library_name} is required by the packaging repo for this task"
+    end
+  end
+
 end

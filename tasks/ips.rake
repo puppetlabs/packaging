@@ -20,7 +20,7 @@ if @build_ips
 
       # Create an installation image at ips/proto
       task :prepare do
-        mkdir_pr workdir, pkgs
+        FileUtils.mkdir_p([workdir, pkgs])
         sh "gmake -f ext/ips/rules DESTDIR=#{proto} 2>#{workdir}/build.out"
       end
 

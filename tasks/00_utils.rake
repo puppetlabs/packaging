@@ -114,9 +114,8 @@ def gpg_sign_file(file)
 end
 
 def mkdir_pr *args
-  args.each do |arg|
-    mkdir_p arg
-  end
+  deprecate('mkdir_pr', 'FileUtils.mkdir_p')
+  FileUtils.mkdir_p args
 end
 
 def set_cow_envs(cow)

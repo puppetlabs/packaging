@@ -141,6 +141,7 @@ def set_cow_envs(cow)
 end
 
 def ln(target, name)
+  deprecate('ln', 'FileUtils.ln')
   FileUtils.ln(name, target, :force => true, :verbose => true)
 end
 

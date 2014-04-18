@@ -181,7 +181,7 @@ def build_rpm_with_mock(mocks)
               cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-x86_64")
             when /noarch/
               cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-i386")
-              ln("pkg/pe/rpm/#{family}-#{version}-i386/#{File.basename(rpm)}", "pkg/pe/rpm/#{family}-#{version}-x86_64/")
+              FileUtils.ln("pkg/pe/rpm/#{family}-#{version}-i386/#{File.basename(rpm)}", "pkg/pe/rpm/#{family}-#{version}-x86_64/", :force => true, :verbose => true)
           end
         else
           %x{mkdir -p pkg/#{family}/#{version}/#{subdir}/{SRPMS,i386,x86_64}}
@@ -196,7 +196,7 @@ def build_rpm_with_mock(mocks)
               cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/x86_64")
             when /noarch/
               cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/i386")
-              ln("pkg/#{family}/#{version}/#{subdir}/i386/#{File.basename(rpm)}", "pkg/#{family}/#{version}/#{subdir}/x86_64/")
+              FileUtils.ln("pkg/#{family}/#{version}/#{subdir}/i386/#{File.basename(rpm)}", "pkg/#{family}/#{version}/#{subdir}/x86_64/", :force => true, :verbose => true)
           end
         end
       end

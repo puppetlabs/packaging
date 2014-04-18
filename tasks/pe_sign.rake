@@ -31,7 +31,7 @@ if Pkg::Config.build_pe
         dir = rpm.split('/')[-2]
         family, version, _arch = dir.split('-')
         cd File.dirname(rpm) do
-          ln File.basename(rpm), File.join('..', "#{family}-#{version}-x86_64")
+          FileUtils.ln(File.basename(rpm), File.join('..', "#{family}-#{version}-x86_64"), :force => true, :verbose => true)
         end
       end
     end

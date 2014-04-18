@@ -146,6 +146,7 @@ def ln(target, name)
 end
 
 def ln_sfT(src, dest)
+  deprecate('ln_sfT')
   sh "ln -sfT #{src} #{dest}"
 end
 

@@ -1,7 +1,7 @@
 def prep_rpm_build_dir
   temp = Pkg::Util::File.mktemp
   tarball = "#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
-  mkdir_pr temp, "#{temp}/SOURCES", "#{temp}/SPECS"
+  FileUtils.mkdir_p([temp, "#{temp}/SOURCES", "#{temp}/SPECS"])
   cp_pr FileList["pkg/#{tarball}*"], "#{temp}/SOURCES"
   # If the file ext/redhat/<project>.spec exists in the tarball, we use it. If
   # it doesn't we try to 'erb' the file from a predicted template in source,
@@ -32,9 +32,9 @@ def build_rpm(buildarg = "-bs")
      --define "_binary_payload w9.gzdio" --define "_source_payload w9.gzdio" \
      --define "_default_patch_fuzz 2"'
   args = rpm_define + ' ' + rpm_old_version
-  mkdir_pr 'pkg/srpm'
+  FileUtils.mkdir_p('pkg/srpm')
   if buildarg == '-ba'
-    mkdir_p 'pkg/rpm'
+    FileUtils.mkdir_p('pkg/rpm')
   end
   if Pkg::Config.sign_tar
     Rake::Task["pl:sign_tar"].invoke

@@ -114,9 +114,8 @@ def gpg_sign_file(file)
 end
 
 def mkdir_pr *args
-  args.each do |arg|
-    mkdir_p arg
-  end
+  deprecate('mkdir_pr', 'FileUtils.mkdir_p')
+  FileUtils.mkdir_p args
 end
 
 def set_cow_envs(cow)
@@ -142,10 +141,12 @@ def set_cow_envs(cow)
 end
 
 def ln(target, name)
+  deprecate('ln', 'FileUtils.ln')
   FileUtils.ln(name, target, :force => true, :verbose => true)
 end
 
 def ln_sfT(src, dest)
+  deprecate('ln_sfT')
   sh "ln -sfT #{src} #{dest}"
 end
 

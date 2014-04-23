@@ -1,15 +1,4 @@
-# This rake task creates tickets in jira for a release. Typical usage
-# would start in a clone of a foss project like puppet, and after
-# running 'rake package:bootstrap', tickets could be created like so:
-#
-#    rake pl:tickets BUILDER=melissa DEVELOPER=kylo WRITER=nickf RELEASE=3.5.0-rc4 \
-#        DATE=2014-04-01 JIRA_USER=kylo PROJECT=PUP
-#
-# The JIRA_USER parameter is used to login to jira to create the tickets. You will
-# be prompted for a password. It will not be displayed.
-#
-# The BUILDER/DEVELOPER/WRITER params are checked against a known list of jira user
-# ids. The Jira project is selected based on the foss project this is run from.
+# This rake task creates tickets in jira for a release.
 #
 
 def get_password(site, user)
@@ -175,7 +164,27 @@ def create_tickets(jira, vars)
 end
 
 namespace :pl do
-  desc "Make release tickets in jira for this project"
+  desc <<-EOS
+Make release tickets in jira for this project.
+Tickets are created by specifying a number of environment variables, e.g.:
+
+    rake pl:tickets BUILDER=melissa DEVELOPER=kylo WRITER=nickf RELEASE=3.5.0-rc4
+        DATE=2014-04-01 JIRA_USER=kylo PROJECT=PUP
+
+The BUILDER/DEVELOPER/WRITER params must be valid jira usernames.
+
+The RELEASE param is a freeform string, no validation is done against it.
+
+The DATE param is a predicted date that this release ticket will be started. This
+  is a hint to Release Engineering about when to prep for the release, but not a
+  binding contract to release on that date.
+
+The PROJECT param must be a valid jira project name; tickets will be created in this project.
+
+The JIRA_USER parameter is used to login to jira to create the tickets. You will
+  be prompted for a password. It will not be displayed.
+EOS
+
   task :tickets do
     vars = get_vars
     jira = Pkg::Util::Jira.new(vars[:username], vars[:password], vars[:site])

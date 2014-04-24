@@ -97,7 +97,7 @@ module Pkg
       end
 
       ##
-      # Print the names of all of the cows for the project, taking off the
+      # Return the names of all of the cows for the project, taking off the
       # base prefix, the architecture, and the .cow suffix. This is helpful in
       # the debian changelog.
       #

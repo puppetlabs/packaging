@@ -199,6 +199,13 @@ describe "Pkg::Config" do
     end
   end
 
+  describe "#cow_list" do
+    it "should return a list of the cows for a project" do
+      Pkg::Config.cows = "base-lucid-i386.cow base-lucid-amd64.cow base-precise-i386.cow base-precise-amd64.cow base-quantal-i386.cow base-quantal-amd64.cow base-saucy-i386.cow base-saucy-amd64.cow base-sid-i386.cow base-sid-amd64.cow base-squeeze-i386.cow base-squeeze-amd64.cow base-stable-i386.cow base-stable-amd64.cow base-testing-i386.cow base-testing-amd64.cow base-trusty-i386.cow base-trusty-amd64.cow base-unstable-i386.cow base-unstable-amd64.cow base-wheezy-i386.cow base-wheezy-amd64.cow"
+      Pkg::Config.cow_list.should eq "lucid precise quantal saucy sid squeeze stable testing trusty unstable wheezy"
+    end
+  end
+
   describe "#config" do
     context "given :format => :hash" do
       it "should call Pkg::Config.config_to_hash" do

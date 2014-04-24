@@ -96,6 +96,17 @@ module Pkg
         self.config_to_hash.each { |k,v| puts "#{k}: #{v}" }
       end
 
+      ##
+      # Print the names of all of the cows for the project, taking off the
+      # base prefix, the architecture, and the .cow suffix. This is helpful in
+      # the debian changelog.
+      #
+      def cow_list
+        self.cows.split(' ').map do
+          |cow| cow.split('-')[1]
+        end.uniq.join(' ')
+      end
+
       def default_project_root
         # It is really quite unsafe to assume github.com/puppetlabs/packaging has been
         # cloned into $project_root/ext/packaging even if it has _always_ been the

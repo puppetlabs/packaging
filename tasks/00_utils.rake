@@ -27,6 +27,7 @@
 
 def check_var(varname,var=nil)
   var.nil? and fail "Requires #{varname} be set!"
+  var
 end
 
 def check_host(host)
@@ -348,14 +349,6 @@ def jenkins_job_exists?(name)
   job_url = "http://#{Pkg::Config.jenkins_build_host}/job/#{name}/config.xml"
   form_args = ["--silent", "--fail"]
   curl_form_data(job_url, form_args, :quiet => true)
-end
-
-def require_library_or_fail(library)
-  begin
-    require library
-  rescue LoadError
-    fail "Could not load #{library}. #{library} is required by the packaging repo for this task"
-  end
 end
 
 # Use the provided URL string to print important information with

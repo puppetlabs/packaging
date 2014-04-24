@@ -21,7 +21,7 @@ namespace :pl do
 
       # Use JSON to parse the json part of the submission, so we want to fail
       # here also if JSON isn't available
-      require_library_or_fail 'json'
+      Pkg::Util.require_library_or_fail 'json'
 
       # The uber_build.xml.erb file is an XML erb template that will define a
       # job in Jenkins with all of the appropriate tasks

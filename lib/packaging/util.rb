@@ -10,6 +10,7 @@ module Pkg::Util
   require 'packaging/util/version'
   require 'packaging/util/serialization'
   require 'packaging/util/rake_utils'
+  require 'packaging/util/jira'
 
   def self.boolean_value(var)
     return TRUE if (var == TRUE || ( var.is_a?(String) && ( var.downcase == 'true' || var.downcase =~ /^y$|^yes$/ )))
@@ -24,6 +25,20 @@ module Pkg::Util
       result = blk.call
     end
     result
+  end
+
+  def self.get_var(var)
+    check_var(var, ENV[var])
+    ENV[var]
+  end
+
+  def self.require_library_or_fail(library, library_name = nil)
+    library_name ||= library
+    begin
+      require library
+    rescue LoadError
+      fail "Could not load #{library_name}. #{library_name} is required by the packaging repo for this task"
+    end
   end
 
 end

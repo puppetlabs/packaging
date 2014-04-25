@@ -4,7 +4,7 @@
 # also has a data file for information specific to it. If the project builds
 # both PE and not PE, it has two files, one for PE, and the other for FOSS
 #
-data_repo = 'https://raw.github.com/puppetlabs/build-data'
+data_repo = 'https://raw.githubusercontent.com/puppetlabs/build-data'
 project_data_branch = Pkg::Config.project
 team_data_branch = Pkg::Config.team
 

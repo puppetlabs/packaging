@@ -92,11 +92,22 @@ module Pkg
     # The templates of a project can include globs, which may expand to an
     # arbitrary number of files. This method expands all of the templates using
     # Dir.glob and then filters out any templates that live in the packaging
-    # tools themselves.
+    # tools themselves. If the template is a source/target combination, it is
+    # returned to the array untouched.
     def expand_templates
-      @templates.map! { |tempfile| Dir.glob(File.join(Pkg::Config::project_root, tempfile)) }
+      @templates.map! do |tempfile|
+        if tempfile.is_a?(String)
+          # Expand possible globs to all matching entries
+          Dir.glob(File.join(Pkg::Config::project_root, tempfile))
+        elsif tempfile.is_a?(Hash)
+          tempfile
+        end
+      end
       @templates.flatten!
-      @templates.reject! { |temp| temp.match(/#{Pkg::Config::packaging_root}/) }
+
+      # Reject matches that are templates from packaging itself. These will contain the packaging root.
+      # These tend to come from the current tar.rake implementation.
+      @templates.reject! { |temp| is_a?(String) && temp.match(/#{Pkg::Config::packaging_root}/) }
     end
 
     # Given the tar object's template files (assumed to be in Pkg::Config.project_root), transform
@@ -105,11 +116,19 @@ module Pkg
     def template(workdir=nil)
       workdir ||= Pkg::Config.project_root
       root = Pathname.new(Pkg::Config.project_root)
-      @templates.each do |template_file|
 
-        template_file = File.expand_path(template_file)
-
-        target_file = template_file.sub(File.extname(template_file),"")
+      # Templates can be either a string or a hash of source and target. If it
+      # is a string, the target is assumed to be the same path as the
+      # source,with the extension removed. If it is a hash, we assume nothing
+      # and use the provided source and target.
+      @templates.each do |cur_template|
+        if cur_template.is_a?(String)
+          template_file = File.expand_path(cur_template)
+          target_file = template_file.sub(File.extname(template_file),"")
+        elsif cur_template.is_a?(Hash)
+          template_file = File.expand_path(cur_template["source"])
+          target_file = File.expand_path(cur_template["target"])
+        end
 
         #   We construct paths to the erb template and its proposed target file
         #   relative to the project root, *not* fully qualified. This allows us

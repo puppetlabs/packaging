@@ -107,7 +107,7 @@ module Pkg
 
       # Reject matches that are templates from packaging itself. These will contain the packaging root.
       # These tend to come from the current tar.rake implementation.
-      @templates.reject! { |temp| is_a?(String) && temp.match(/#{Pkg::Config::packaging_root}/) }
+      @templates.reject! { |temp| temp.is_a?(String) && temp.match(/#{Pkg::Config::packaging_root}/) }
     end
 
     # Given the tar object's template files (assumed to be in Pkg::Config.project_root), transform

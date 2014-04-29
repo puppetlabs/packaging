@@ -60,4 +60,63 @@ describe "tar.rb" do
       tar.templates.should eq expanded_templates
     end
   end
+
+  describe "#template" do
+    it "should handle hashes and strings correctly" do
+      Pkg::Config.config_from_hash(
+        {
+          :templates      => expanded_templates,
+          :project        => project,
+          :version        => version,
+          :files          => files,
+          :project_root   => PROJECT_ROOT,
+          :packaging_root => "ext/packaging"
+        })
+
+      # Set up correct stubs and expectations
+      expanded_templates.each do |temp|
+        if temp.is_a?(String)
+          full_path_temp = File.join(PROJECT_ROOT, temp)
+          target = full_path_temp.sub(File.extname(full_path_temp), "")
+        elsif temp.is_a?(Hash)
+          full_path_temp = File.join(PROJECT_ROOT, temp["source"])
+          target = File.join(PROJECT_ROOT, temp["target"])
+        end
+
+        Dir.stub(:glob).with(full_path_temp).and_return(full_path_temp)
+        File.stub(:exist?).with(full_path_temp).and_return(true)
+        Pkg::Util::File.should_receive(:erb_file).with(full_path_temp, target, true, :binding => an_instance_of(Binding))
+      end
+
+      Pkg::Tar.new.template
+    end
+
+    it "should raise an error if the template source can't be found" do
+     Pkg::Config.config_from_hash(
+        {
+          :templates      => expanded_templates,
+          :project        => project,
+          :version        => version,
+          :files          => files,
+          :project_root   => PROJECT_ROOT,
+          :packaging_root => "ext/packaging"
+        })
+
+      # Set up correct stubs and expectations
+      expanded_templates.each do |temp|
+        if temp.is_a?(String)
+          full_path_temp = File.join(PROJECT_ROOT, temp)
+          target = full_path_temp.sub(File.extname(full_path_temp), "")
+        elsif temp.is_a?(Hash)
+          full_path_temp = File.join(PROJECT_ROOT, temp["source"])
+          target = File.join(PROJECT_ROOT, temp["target"])
+        end
+
+        Dir.stub(:glob).with(full_path_temp).and_return(full_path_temp)
+        File.stub(:exist?).with(full_path_temp).and_return(false)
+      end
+
+      expect { Pkg::Tar.new.template }.to raise_error RuntimeError
+    end
+  end
 end

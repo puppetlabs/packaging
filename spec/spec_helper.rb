@@ -4,6 +4,7 @@ require 'pathname'
 require 'rake'
 
 SPECDIR = Pathname(__FILE__).dirname
+PROJECT_ROOT = File.expand_path(File.join(Pathname(__FILE__).dirname, ".."))
 FIXTURES = File.join(SPECDIR, 'fixtures')
 
 require File.join(SPECDIR, '..', 'lib', 'packaging.rb')

@@ -12,7 +12,7 @@ describe "Pkg::Util::Prompt" do
     # This is the prompt that
     let(:prompt) { "yes or no? > " }
     it "displays a prompt on STDOUT" do
-      fake_stdin(affirmatives.sample) do
+      fake_stdin(affirmatives.shuffle.first) do
         printed = capture_stdout do
           Pkg::Util::Prompt.ask_yes_or_no
         end
@@ -21,7 +21,7 @@ describe "Pkg::Util::Prompt" do
     end
 
     it "repeats the prompt on invalid answers" do
-      fake_stdin(jibberish, affirmatives.sample) do
+      fake_stdin(jibberish, affirmatives.shuffle.first) do
         printed = capture_stdout do
           Pkg::Util::Prompt.ask_yes_or_no
         end
@@ -52,7 +52,7 @@ describe "Pkg::Util::Prompt" do
     let(:stubs)  { ["this", "that", "the other one", "and those right there"] }
 
     it "accepts a list of files, repeats them correctly" do
-      fake_stdin(negatives.sample) do
+      fake_stdin(negatives.shuffle.first) do
         printed = capture_stdout do
           Pkg::Util::Prompt.confirm_ship(stubs)
         end
@@ -61,7 +61,7 @@ describe "Pkg::Util::Prompt" do
     end
 
     it "returns false if you say no" do
-      fake_stdin(negatives.sample) do
+      fake_stdin(negatives.shuffle.first) do
         capture_stdout do
           Pkg::Util::Prompt.confirm_ship(stubs).should be_false
         end
@@ -69,7 +69,7 @@ describe "Pkg::Util::Prompt" do
     end
 
     it "returns true if you say yes" do
-      fake_stdin(affirmatives.sample) do
+      fake_stdin(affirmatives.shuffle.first) do
         capture_stdout do
           Pkg::Util::Prompt.confirm_ship(stubs).should be_true
         end

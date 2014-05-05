@@ -41,12 +41,17 @@ end
 
 def create_tickets(jira, vars)
   description = {}
-  description[:tests_passing] = <<-DOC
+  description[:code_ready] = <<-DOC
 All tests (spec, acceptance) should be passing on all platforms for both stable & master.
 
   * If a new platform has been added, make sure that platform has acceptance testing, new features have decent coverage, etc. etc.
   * If the release is going to be cut from a sha, rather than the head of a branch, make sure that sha specifically has gone through spec/acceptance/etc. tests
   * Move all items that should be moved from Ready for CI to Ready for Review
+
+Have all tickets been resolved (passed Functional Review)? If not please add any missing tickets to the current sprint's board.
+
+NOTE: This link may not work properly for RC releases. Edit it to remove the "-rc#".
+https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20#{vars[:project]}%20AND%20resolution%20%3D%20Unresolved%20AND%20fixVersion%20%3D%20%22#{vars[:release]}%22
 DOC
 
   description[:jira_tickets_for_commit] = <<-DOC
@@ -56,15 +61,6 @@ Ensure all tickets referenced in the commit log have a bug targeted at the relea
   * look through, and make sure that if there is a JIRA ticket number referenced in any of the commits, that ticket is targeted at the release
   * Also, make sure the code itself is sane, that you understand why the change was made, etc. etc.
   * [ticketmatch.rb script|https://gist.github.com/hlindberg/9520023] is a ruby script that helps with tasks 3 and 4 (it beats doing it manually, but requires manual steps and hacking the script for the specific release)
-DOC
-
-  description[:jira_tickets_resolved] = <<-DOC
-Have all tickets been resolved (passed Functional Review)?
-
-If not, please add any missing tickets to the current sprint's board.
-
-NOTE: This link may not work properly for RC releases. Edit it to remove the "-rc#".
-https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20#{vars[:project]}%20AND%20resolution%20%3D%20Unresolved%20AND%20fixVersion%20%3D%20%22#{vars[:release]}%22
 DOC
 
   description[:git_commits_for_tickets] = <<-DOC
@@ -83,7 +79,7 @@ Bump VERSION in lib/{#project}/version.rb to correct version.
   * Once this is done, hand the SHA to be built to RelEng to be tagged.
 
 Dependencies:
-  * Ensure tests are passing
+  * Is the code ready for release?
   * Is there a commit for every JIRA ticket targeted at the release?
 DOC
 
@@ -92,7 +88,7 @@ git checkout stable
 git merge master --no-ff --log
 
 Dependencies:
-  * Ensure tests are passing
+  * Is the code ready for release?
   * Is there a commit for every JIRA ticket targeted at the release?
   * Update version number in source
 DOC
@@ -179,7 +175,6 @@ Keep in mind we typically do not ship releases in the evening and we don't ship 
 
 Dependencies:
   * Smoke testing
-  * Have all JIRA tickets for the release been resolved?
 DOC
 
   description[:push_tag] = <<-DOC
@@ -253,18 +248,13 @@ DOC
   subtickets =
   [
     {
-      :summary     => 'Ensure tests are passing',
-      :description => description[:tests_passing],
+      :summary     => 'Is the code ready for release?',
+      :description => description[:code_ready],
       :assignee    => vars[:developer]
     },
     {
       :summary     => 'Is there a JIRA ticket targeted at the release for every commit?',
       :description => description[:jira_tickets_for_commit],
-      :assignee    => vars[:developer]
-    },
-    {
-      :summary     => 'Have all JIRA tickets for the release been resolved?',
-      :description => description[:jira_tickets_resolved],
       :assignee    => vars[:developer]
     },
     {

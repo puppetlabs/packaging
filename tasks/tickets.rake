@@ -238,7 +238,15 @@ DOC
 Close any tickets that have been resolved for the release.
 
 NOTE: This link may not work properly for RC releases. Edit it to remove the "-rc#".
-https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20#{vars[:project]}%20AND%20resolution%20%3D%20Fixed%20AND%20fixVersion%20%3D%20%22#{vars[:release]}%22
+https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20#{vars[:project]}%20AND%20resolution%20%3D%20Fixed%20AND%20fixVersion%20%3D%20%22#{vars[:release]}%22%20AND%20status%20%3D%20Resolved
+
+There is a bulk edit at the top (a gear with the word "Tools"). Should you decide to take this route:
+  * Select Bulk Change - All # issues
+  * Step 1 - choose all relevant issues (likely all of them)
+  * Step 2 - Select "Transition Issues"
+  * Step 3 - Select "Closed"
+  * Step 4 - Select "Fixed" in Change Resolution.
+  * View what is about to change and confirm it. Then commit the change.
 
 Dependencies:
   * Packages pushed

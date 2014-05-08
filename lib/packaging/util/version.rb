@@ -82,7 +82,9 @@ module Pkg::Util::Version
       # For a final with added commits, it will look like '0.7.0-63-g51ccc51'
       # and our return will be [0.7.0, 64, <dirty>]
       info = raw.chomp.sub(/^v/, '').split('-')
-      if info[1].to_s.match('^[\d]+')
+      if git_ref_type == "tag"
+        version_string = info.compact
+      elsif info[1].to_s.match('^[\d]+')
         version_string = info.values_at(0,1,3).compact
       else
         version_string = info.values_at(0,1,2,4).compact

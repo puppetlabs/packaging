@@ -60,14 +60,14 @@ Ensure all tickets referenced in the commit log have a bug targeted at the relea
   * git log <old tag>..<new tag>
   * look through, and make sure that if there is a JIRA ticket number referenced in any of the commits, that ticket is targeted at the release
   * Also, make sure the code itself is sane, that you understand why the change was made, etc. etc.
-  * [ticketmatch.rb script|https://gist.github.com/hlindberg/9520023] is a ruby script that helps with tasks 3 and 4 (it beats doing it manually, but requires manual steps and hacking the script for the specific release)
+  * [ticketmatch.rb script|https://gist.github.com/hlindberg/9520023] is a ruby script that helps with "Is there a JIRA ticket targeted at the release for every commit?" and "Is there a commit for every JIRA ticket targeted at the release?" (it beats doing it manually, but requires manual steps and hacking the script for the specific release)
 DOC
 
   description[:git_commits_for_tickets] = <<-DOC
 Ensure all tickets targeted at the release have a corresponding commit
   * git log <old tag>..<new tag>
   * This time, look through tickets targeted at this release in JIRA, and compare it to the commit log, looking for the corresponding numbers
-  * [ticketmatch.rb script|https://gist.github.com/hlindberg/9520023] is a ruby script that helps with tasks 3 and 4 (it beats doing it manually, but requires manual steps and hacking the script for the specific release)
+  * [ticketmatch.rb script|https://gist.github.com/hlindberg/9520023] is a ruby script that helps with "Is there a JIRA ticket targeted at the release for every commit?" and "Is there a commit for every JIRA ticket targeted at the release?" (it beats doing it manually, but requires manual steps and hacking the script for the specific release)
 DOC
 
   description[:update_version_source] = <<-DOC
@@ -84,20 +84,34 @@ Dependencies:
 DOC
 
   description[:merge_to_stable] = <<-DOC
+For some releases, the code base will need to be merged down to stable.
+
+*NOTE:* This is usually only during a z-rc1 release, but even then it may have already been done. If it doesn't apply, close this ticket.
+
+
+Assuming you have origin (your remote) and upstream (puppetlabs remote), the commands will look something like this:
+{noformat}
+git fetch upstream
+git rebase upstream/master
+
 git checkout stable
+git rebase upstream/stable
+
 git merge master --no-ff --log
+{noformat}
+
+Once that looks good:
+{noformat}
+git push origin
+git push upstream
+{noformat}
+
+After merging to stable, the jobs on jenkins may require updates (spec, acceptance, etc) when you merge master into stable. Please ensure that the jenkins jobs are updated if necessary.
 
 Dependencies:
   * Is the code ready for release?
   * Is there a commit for every JIRA ticket targeted at the release?
   * Update version number in source
-DOC
-
-  description[:update_jenkins_jobs] = <<-DOC
-The jobs on jenkins may require updates (spec, acceptance, etc) when you merge master into stable. Please ensure that there are no changes needed to be made.
-
-Dependencies:
-  * Merge master into stable
 DOC
 
   description[:new_jira_version] = <<-DOC
@@ -216,11 +230,12 @@ Dependencies:
 DOC
 
   description[:send_announcements] = <<-DOC
- * Update the release google document (ask around for location).
- * Send the drafted release notes email.
- * If RC send to puppet-users and puppet-dev. If final send to puppet-announce, puppet-users, and puppet-dev.
- * Make a PSA on IRC #puppet letting those kiddos know about the new release.
-   * Something along the lines of "PSA: facter 1.7.3-rc1 now available"
+  * Update the release google document (ask around for location).
+  * Send the drafted release notes email.
+    * If final send to puppet-announce and specific distribution lists (e.g. puppet to puppet-users & puppet-dev).
+    * If RC only send to the specific distribution lists.
+  * Make a PSA on IRC letting those kiddos know about the new release.
+    * Something along the lines of "PSA: facter 1.7.3-rc1 now available"
 
 Dependencies:
   * Prepare long form release notes and short form release story
@@ -278,11 +293,6 @@ DOC
     {
       :summary     => 'Merge master into stable',
       :description => description[:merge_to_stable],
-      :assignee    => vars[:developer]
-    },
-    {
-      :summary     => 'Update jenkins stable jobs if necessary',
-      :description => description[:update_jenkins_jobs],
       :assignee    => vars[:developer]
     },
     {

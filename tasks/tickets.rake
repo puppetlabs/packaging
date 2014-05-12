@@ -158,7 +158,7 @@ If this is a final release then the previous RC (which should be identical to wh
 
   * Add a link to the Packages repository that you receive from the "Tag and create packages" subtask
   * Ping folks on your team for help with different platforms.
-  * When you pick up a platform, please leave a comment below that you are testing it. When it looks good, leave another comment.
+  * When you pick up a platform, please leave a comment below that you are testing it. When it looks good, leave another comment, preferably with a code snippet showing the commands executed and their output.
   * When all platforms picked have been smoke tested, move this ticket to done.
 
 Example:

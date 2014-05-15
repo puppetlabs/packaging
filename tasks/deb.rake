@@ -78,6 +78,20 @@ task :build_deb, :deb_command, :cow do |t,args|
       if !File.directory?('debian') and File.directory?('ext/debian')
         mv 'ext/debian', 'debian'
       end
+
+      # So this is terrible. It is a hacky hacky bandaid for until this can be
+      # totally refactored into a library with templates drawn entirely from
+      # the tarball. The following two lines are needed because the deb.rake
+      # logic currently re-templates all of the templates in ext/debian for use
+      # in packaging. Then, before the package is built, if the debian
+      # directory doesn't exist (this is really only the case for puppetdb),
+      # the ext/debian directory from the tarball is moved into place. This
+      # breaks ezbake because ezbake maps templates to differently named files
+      # in the tarball templating, but those newly generated templates are
+      # completely ignored without the following two lines that unconditionally
+      # copy anything in ext/debian into the debian directory.
+      mkdir_p 'debian'
+      cp_pr(Dir.glob("ext/debian/*"), 'debian')
       send(deb_build, deb_args)
       cp FileList["#{work_dir}/*.deb", "#{work_dir}/*.dsc", "#{work_dir}/*.changes", "#{work_dir}/*.debian.tar.gz", "#{work_dir}/*.orig.tar.gz", "${work_dir}/*.diff.gz"], dest_dir
       rm_rf "#{work_dir}/#{Pkg::Config.project}-#{Pkg::Config.debversion}"

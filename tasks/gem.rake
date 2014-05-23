@@ -88,6 +88,9 @@ if Pkg::Config.build_gem
     bench = Benchmark.realtime do
       copy_gem_files_into(workdir)
 
+      # Burn in the version for the project if needed
+      Pkg::Util::Version.versionbump(workdir) if Pkg::Config.update_version_file
+
       cd workdir do
         gem_task = Gem::PackageTask.new(spec)
         gem_task.define

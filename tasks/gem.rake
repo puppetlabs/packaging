@@ -49,7 +49,7 @@ if Pkg::Config.build_gem
       s.summary = Pkg::Config.gem_summary                              unless Pkg::Config.gem_summary.nil?
       s.description = Pkg::Config.description                          unless Pkg::Config.description.nil?
       s.description = Pkg::Config.gem_description                      unless Pkg::Config.gem_description.nil?
-      s.files = glob_gem_files                                    unless glob_gem_files.nil?
+      s.files = glob_gem_files                                         unless glob_gem_files.nil?
       s.executables = Pkg::Config.gem_executables                      unless Pkg::Config.gem_executables.nil?
       s.require_path = Pkg::Config.gem_require_path                    unless Pkg::Config.gem_require_path.nil?
       s.test_files = FileList[Pkg::Config.gem_test_files.split(' ')]   unless Pkg::Config.gem_test_files.nil?

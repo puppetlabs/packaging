@@ -114,10 +114,13 @@ Dependencies:
   * Update version number in source
 DOC
 
-  description[:new_jira_version] = <<-DOC
-This happens on Jira - there needs to be a version we can target future issues or issues that didn't make it into the current release.
-  * e.g. if we're releasing Facter 1.7.4, make sure there's a 1.7.5 version (or at least 1.7.x if there's isn't another bug release planned for the near future)
-  * If releasing an RC, ensure you create the RC version e.g 3.6.0 RC (leave RC number off of here).
+  description[:jira_maintenance] = <<-DOC
+This happens on Jira - we need to clean up the current release and prepare for the next release.
+  * Mark the version that's going out as "Released" in the Project Admin -> Versions panel.
+  * Create a version we can target future issues or issues that didn't make it into the current release.  (e.g. if we're releasing Facter 1.7.4, make sure there's a 1.7.5 version (or at least 1.7.x if there's isn't another bug release planned for the near future)
+  * Create a public pair of queries for inclusion in the release notes/announcement. These allow easy tracking as new bugs come in for a particular version and allow everyone to see the list of changes slated for the next release (Paste their URLs into the "Release story" ticket):
+    - 'project = XX AND affectedVersion = 'X.Y.Y', Save as "Introduced in X.Y.Y", click Details, add permission for Everyone
+    - 'project = XX AND fixVersion = 'X.Y.Z', Save as "Fixes for X.Y.Z", click Details, add permission for Everyone
 DOC
 
   description[:release_notes] = <<-DOC
@@ -296,8 +299,8 @@ DOC
       :assignee    => vars[:developer]
     },
     {
-      :summary     => 'Is a new version created in Jira for the next version in the series?',
-      :description => description[:new_jira_version],
+      :summary     => 'Is the Jira tidy-up done for this release and prepared for the next one?',
+      :description => description[:jira_maintenance],
      :assignee    => vars[:developer]
     },
     {

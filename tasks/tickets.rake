@@ -162,7 +162,10 @@ If this is a final release then the previous RC (which should be identical to wh
   * Add a link to the Packages repository that you receive from the "Tag and create packages" subtask
   * Ping folks on your team for help with different platforms.
   * When you pick up a platform, please leave a comment below that you are testing it. When it looks good, leave another comment, preferably with a code snippet showing the commands executed and their output.
+  * If your smoke testing includes MSIs, you will generally test on other platforms first and when that is looking good, ping the Release Engineer that built the other packages to move forward with MSIs (they require tags to be pushed). This ticket doesn't close until all chosen platforms (including MSIs) have been tested.
   * When all platforms picked have been smoke tested, move this ticket to done.
+
+IMPORTANT: Please edit the description of this ticket and remove "Example:" below. Edit the platforms to smoke test on, and the smoke test procedure.
 
 Example:
 Smoke test platforms:

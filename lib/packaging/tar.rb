@@ -41,7 +41,6 @@ module Pkg
     end
 
     def install_files_to(workdir)
-      install = []
       # It is nice to use arrays in YAML to represent array content, but we used
       # to support a mode where a space-separated string was used.  Support both
       # to allow a gentle migration to a modern style...
@@ -55,38 +54,8 @@ module Pkg
         else
           raise "`files` must be a string or an array!"
         end
-      # We need to add our list of file patterns from the configuration; this
-      # used to be a list of "things to copy recursively", which would install
-      # editor backup files and other nasty things.
-      #
-      # This handles that case correctly, with a deprecation warning, to augment
-      # our FileList with the right things to put in place.
-      #
-      # Eventually, when all our projects are migrated to the new standard, we
-      # can drop this in favour of just pushing the patterns directly into the
-      # FileList and eliminate many lines of code and comment.
-      cd Pkg::Config.project_root do
-        patterns.each do |pattern|
-          if File.directory?(pattern) and not Pkg::Util::File.empty_dir?(pattern)
-            install << Dir[pattern + "/**/*"]
-          else
-            install << Dir[pattern]
-          end
-        end
-        install.flatten!
 
-        # Transfer all the files and symlinks into the working directory...
-        install = install.select { |x| File.file?(x) or File.symlink?(x) or Pkg::Util::File.empty_dir?(x) }
-
-        install.each do |file|
-          if Pkg::Util::File.empty_dir?(file)
-            mkpath(File.join(workdir, file), :verbose => false)
-          else
-            mkpath(File.dirname( File.join(workdir, file) ), :verbose => false)
-            cp(file, File.join(workdir, file), :verbose => false, :preserve => true)
-          end
-        end
-      end
+      Pkg::Util::File.install_files_into_dir(patterns, workdir)
     end
 
     # The templates of a project can include globs, which may expand to an

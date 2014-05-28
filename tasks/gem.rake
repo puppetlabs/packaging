@@ -49,7 +49,7 @@ if Pkg::Config.build_gem
       s.summary = Pkg::Config.gem_summary                              unless Pkg::Config.gem_summary.nil?
       s.description = Pkg::Config.description                          unless Pkg::Config.description.nil?
       s.description = Pkg::Config.gem_description                      unless Pkg::Config.gem_description.nil?
-      s.files = glob_gem_files                                    unless glob_gem_files.nil?
+      s.files = glob_gem_files                                         unless glob_gem_files.nil?
       s.executables = Pkg::Config.gem_executables                      unless Pkg::Config.gem_executables.nil?
       s.require_path = Pkg::Config.gem_require_path                    unless Pkg::Config.gem_require_path.nil?
       s.test_files = FileList[Pkg::Config.gem_test_files.split(' ')]   unless Pkg::Config.gem_test_files.nil?
@@ -69,14 +69,39 @@ if Pkg::Config.build_gem
     spec
   end
 
-  def create_gem(spec, gembuilddir)
-    gem_task = Gem::PackageTask.new(spec)
-    bench = Benchmark.realtime do
-      gem_task.define
-      Rake::Task[:gem].reenable
-      Rake::Task[:gem].invoke
-      rm_rf File.join("pkg", gembuilddir)
+  def copy_gem_files_into(workdir)
+    # Take all of the gem files (both test and lib), and copy them into the workdir
+    (glob_gem_files + FileList[(Pkg::Config.gem_test_files || '').split(' ')]).each do |file|
+      if File.directory?(file)
+        mkpath(File.join(workdir, file))
+      else
+        mkpath(File.dirname( File.join(workdir, file) ), :verbose => false)
+        cp(file, File.join(workdir, file), :verbose => true, :preserve => false)
+      end
     end
+  end
+
+  def create_gem(spec, gembuilddir)
+    workdir = File.join(Pkg::Util::File.mktemp)
+    mkpath workdir
+
+    bench = Benchmark.realtime do
+      copy_gem_files_into(workdir)
+
+      # Burn in the version for the project if needed
+      Pkg::Util::Version.versionbump(workdir) if Pkg::Config.update_version_file
+
+      cd workdir do
+        gem_task = Gem::PackageTask.new(spec)
+        gem_task.define
+        Rake::Task[:gem].reenable
+        Rake::Task[:gem].invoke
+        rm_rf File.join("pkg", gembuilddir)
+        mv Dir.glob("pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"), File.join(Pkg::Config.project_root, "pkg")
+      end
+    end
+
+    rm_rf workdir
     puts "Finished building in: #{bench}"
   end
 
@@ -118,6 +143,7 @@ if Pkg::Config.build_gem
   namespace :package do
     desc "Build a gem - All gems if platform specific"
     task :gem => [ "clean" ] do
+      mkdir_p File.join(Pkg::Config.project_root, "pkg")
       create_default_gem
       if Pkg::Config.gem_platform_dependencies
         create_platform_specific_gems

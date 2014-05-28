@@ -21,7 +21,7 @@ namespace :pl do
     desc "Update remote rpm repodata on #{Pkg::Config.yum_host}"
     task :update_yum_repo do
       STDOUT.puts "Really run remote repo update on #{Pkg::Config.yum_host}? [y,n]"
-      if ask_yes_or_no
+      if Pkg::Util::Prompt.ask_yes_or_no
         remote_ssh_cmd(Pkg::Config.yum_host, 'rake -f /opt/repository/Rakefile mk_repo')
       end
     end
@@ -29,7 +29,7 @@ namespace :pl do
     desc "remote freight packages to repos on #{Pkg::Config.apt_host}"
     task :freight do
       STDOUT.puts "Really run remote freight command on #{Pkg::Config.apt_host}? [y,n]"
-      if ask_yes_or_no
+      if Pkg::Util::Prompt.ask_yes_or_no
         override = "OVERRIDE=1" if ENV['OVERRIDE']
         remote_ssh_cmd(Pkg::Config.apt_host, "rake -f /opt/repository/Rakefile freight #{override}")
       end
@@ -99,7 +99,7 @@ namespace :pl do
 
   desc "UBER ship: ship all the things in pkg"
   task :uber_ship => 'pl:fetch' do
-    if confirm_ship(FileList["pkg/**/*"])
+    if Pkg::Util::Prompt.confirm_ship(FileList["pkg/**/*"])
       ENV['ANSWER_OVERRIDE'] = 'yes'
       Rake::Task["pl:ship_gem"].invoke if Pkg::Config.build_gem
       Rake::Task["pl:ship_rpms"].invoke

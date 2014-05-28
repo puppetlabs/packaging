@@ -86,7 +86,7 @@ DOC
   description[:merge_to_stable] = <<-DOC
 For some releases, the code base will need to be merged down to stable.
 
-*NOTE:* This is usually only during a z-rc1 release, but even then it may have already been done. If it doesn't apply, close this ticket.
+*NOTE:* This is usually only during a x.y.0-rc1 release, but even then it may have already been done. If it doesn't apply, close this ticket.
 
 
 Assuming you have origin (your remote) and upstream (puppetlabs remote), the commands will look something like this:

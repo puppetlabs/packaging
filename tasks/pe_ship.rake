@@ -85,7 +85,7 @@ if Pkg::Config.build_pe
 
       puts "Shipping all built artifacts to to archive directories on #{Pkg::Config.apt_host}"
 
-      Pkg::Config.cows.enumerate_cows.map { |i| i.sub('.cow','') }.each do |cow|
+      Pkg::Config.cows.map { |i| i.sub('.cow','') }.each do |cow|
         _base, dist, arch = cow.split('-')
         unless Pkg::Util::File.empty_dir? "pkg/pe/deb/#{dist}"
           archive_path = "#{base_path}/#{dist}-#{arch}"
@@ -129,7 +129,7 @@ if Pkg::Config.build_pe
       desc "Update remote rpm repodata for PE on #{Pkg::Config.yum_host}"
       task :update_yum_repo => "pl:fetch" do
         repo_base_path = File.join(Pkg::Config.yum_repo_path, Pkg::Config.pe_version, "repos")
-        mock_paths = Pkg::Config.enumerate_mocks.map {|mock| "#{mock_el_family(mock)}-#{mock_el_ver(mock)}"}
+        mock_paths = Pkg::Config.final_mocks.map {|mock| "#{mock_el_family(mock)}-#{mock_el_ver(mock)}"}
 
         # This entire command is going to be passed across SSH, but it's unwieldy on a
         # single line. By breaking it into a series of concatenated strings, we can maintain

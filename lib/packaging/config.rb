@@ -45,6 +45,7 @@ module Pkg
       def config_from_yaml(file)
         build_data = Pkg::Util::Serialization.load_yaml(file)
         config_from_hash(build_data)
+        sanitize_mocks_and_cows
       end
 
       ##
@@ -107,35 +108,33 @@ module Pkg
         end.uniq.join(' ')
       end
 
-     def enumerate_cows
-       if self.cows
-         if self.cows.is_a?(String)
-            warn "warning: 'cows' should be an array, not a string"
-            @enumerated_cows = self.cows.split(' ')
-         elsif self.cows.is_a?(Array)
-            @enumerated_cows = self.cows
-         else
-           fail "'cows' must be a string or an array!"
-         end
-       else
-         @enumerated_cows = []
-       end
-     end
+  def sanitize_mocks_and_cows
+    if self.cows
+      if self.cows.is_a?(String)
+         warn "warning: 'cows' should be an array, not a string"
+         @cows = self.cows.split(' ')
+      elsif self.cows.is_a?(Array)
+         @cows = self.cows
+      else
+         fail "'cows' must be a string or an array!"
+      end
+    else
+      @cows = []
+    end
 
-     def enumerate_mocks
-       if self.final_mocks
-         if self.final_mocks.is_a?(String)
-            warn "warning: 'final_mocks' should be an array, not a string"
-            @enumerated_mocks = self.final_mocks.split(' ')
-         elsif self.final_mocks.is_a?(Array)
-            @enumerated_mocks = self.final_mocks
-         else
-           fail "'final_mocks' must be a string or an array!"
-         end
-       else
-         @enumerated_mocks = []
-       end
-     end
+    if self.final_mocks
+      if self.final_mocks.is_a?(String)
+        warn "warning: 'final_mocks' should be an array, not a string"
+        @final_mocks = self.final_mocks.split(' ')
+      elsif self.final_mocks.is_a?(Array)
+        @final_mocks = self.final_mocks
+      else
+        fail "'final_mocks' must be a string or an array!"
+      end
+    else
+      @final_mocks = []
+    end
+  end
 
       def default_project_root
         # It is really quite unsafe to assume github.com/puppetlabs/packaging has been

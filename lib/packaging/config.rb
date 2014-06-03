@@ -120,6 +120,22 @@ module Pkg
        else
          @enumerated_cows = []
        end
+     end
+
+     def enumerate_mocks
+       if self.final_mocks
+         if self.final_mocks.is_a?(String)
+            warn "warning: 'final_mocks' should be an array, not a string"
+            @enumerated_mocks = self.final_mocks.split(' ')
+         elsif self.final_mocks.is_a?(Array)
+            @enumerated_mocks = self.final_mocks
+         else
+           fail "'final_mocks' must be a string or an array!"
+         end
+       else
+         @enumerated_mocks = []
+       end
+     end
 
       def default_project_root
         # It is really quite unsafe to assume github.com/puppetlabs/packaging has been

@@ -126,9 +126,9 @@ namespace :pl do
         when /deb/ then Pkg::Config.default_cow.split('-')[1]
         when /rpm/
           if Pkg::Config.pe_version
-            Pkg::Config.final_mocks.split(' ')[0].split('-')[2]
+            Pkg::Config.enumerate_mocks[0].split('-')[2]
           else
-            Pkg::Config.final_mocks.split(' ')[0].split('-')[1..2].join("")
+            Pkg::Config.enumerate_mocks[0].split('-')[1..2].join("")
           end
         when /dmg/ then "apple"
         when /gem/ then "gem"
@@ -241,7 +241,7 @@ namespace :pl do
     # This does the mocks in parallel
     desc "Queue pl:mock_all on jenkins builder"
     task :mock_all => "pl:fetch" do
-      Pkg::Config.final_mocks.split(' ').each do |mock|
+      Pkg::Config.enumerate_mocks.each do |mock|
         Pkg::Config.default_mock = mock
         invoke_task("pl:jenkins:post_build", "pl:mock")
         sleep 5
@@ -288,7 +288,7 @@ if Pkg::Config.build_pe
       # This does the mocks in parallel
       desc "Queue pe:mock_all on jenkins builder"
       task :mock_all => "pl:fetch" do
-        Pkg::Config.final_mocks.split(' ').each do |mock|
+        Pkg::Config.enumerate_mocks.each do |mock|
           Pkg::Config.default_mock = mock
           invoke_task("pl:jenkins:post_build", "pe:mock")
           sleep 5

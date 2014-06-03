@@ -107,6 +107,20 @@ module Pkg
         end.uniq.join(' ')
       end
 
+     def enumerate_cows
+       if self.cows
+         if self.cows.is_a?(String)
+            warn "warning: 'cows' should be an array, not a string"
+            @enumerated_cows = self.cows.split(' ')
+         elsif self.cows.is_a?(Array)
+            @enumerated_cows = self.cows
+         else
+           fail "'cows' must be a string or an array!"
+         end
+       else
+         @enumerated_cows = []
+       end
+
       def default_project_root
         # It is really quite unsafe to assume github.com/puppetlabs/packaging has been
         # cloned into $project_root/ext/packaging even if it has _always_ been the

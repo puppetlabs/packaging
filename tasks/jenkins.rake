@@ -231,7 +231,7 @@ namespace :pl do
     # DOSing it with our packaging.
     desc "Queue pl:deb_all on jenkins builder"
     task :deb_all => "pl:fetch" do
-      Pkg::Config.cows.split(' ').each do |cow|
+      Pkg::Config.enumerate_cows.each do |cow|
         Pkg::Config.default_cow = cow
         invoke_task("pl:jenkins:post_build", "pl:deb")
         sleep 5
@@ -278,7 +278,7 @@ if Pkg::Config.build_pe
       desc "Queue pe:deb_all on jenkins builder"
       task :deb_all => "pl:fetch" do
         check_var("PE_VER", Pkg::Config.pe_version)
-        Pkg::Config.cows.split(' ').each do |cow|
+        Pkg::Config.enumerate_cows.each do |cow|
           Pkg::Config.default_cow = cow
           invoke_task("pl:jenkins:post_build", "pe:deb")
           sleep 5

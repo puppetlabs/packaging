@@ -118,7 +118,7 @@ namespace :pl do
   desc "Create debs from this git repository using all cows specified in build_defaults yaml"
   task :deb_all do
     check_var('PE_VER', Pkg::Config.pe_version) if Pkg::Config.build_pe
-    Pkg::Config.cows.split(' ').each do |cow|
+    Pkg::Config.enumerate_cows.each do |cow|
       Rake::Task["package:tar"].invoke
       Rake::Task[:build_deb].reenable
       Rake::Task[:build_deb].invoke('pdebuild', cow)

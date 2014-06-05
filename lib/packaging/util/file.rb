@@ -91,8 +91,6 @@ module Pkg::Util::File
           end
         end
       end
-
-
     end
   end
 end

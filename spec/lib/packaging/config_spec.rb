@@ -22,6 +22,7 @@ describe "Pkg::Config" do
                   :cows,
                   :db_table,
                   :deb_build_host,
+                  :deb_build_mirrors,
                   :debversion,
                   :debug,
                   :default_cow,

@@ -14,3 +14,9 @@ def load_task(name)
   load File.join(SPECDIR, '..', 'tasks', name)
   @loaded[name] = true
 end
+
+def reset_env(keys)
+  keys.each do |key|
+    ENV[key] = nil
+  end
+end

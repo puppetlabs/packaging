@@ -134,6 +134,11 @@ def set_cow_envs(cow)
   if Pkg::Config.build_pe
     ENV['PE_VER'] = Pkg::Config.pe_version
   end
+  if Pkg::Config.deb_build_mirrors
+    ENV['BUILDMIRROR'] = Pkg::Config.deb_build_mirrors.map do |mirror|
+      mirror.gsub(/__DIST__/, dist)
+    end.join(' | ')
+  end
   ENV['DIST'] = dist
   ENV['ARCH'] = arch
   if dist =~ /cumulus/

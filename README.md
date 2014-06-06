@@ -401,6 +401,14 @@ default_cow: 'base-squeeze-i386.cow'
 cows: 'base-lucid-amd64.cow base-lucid-i386.cow base-natty-amd64.cow base-natty-i386.cow base-oneiric-amd64.cow base-oneiric-i386.cow base-precise-amd64.cow base-precise-i386.cow base-sid-amd64.cow base-sid-i386.cow base-squeeze-amd64.cow base-squeeze-i386.cow base-testing-amd64.cow base-testing-i386.cow base-wheezy-i386.cow'
 # The pbuilder configuration file to use
 pbuild_conf: '/etc/pbuilderrc'
+# Alternate debian mirrors to build against (must be an array)
+# The __DIST__ string is automatically replaced with codename of the cow being built, so when the squeeze cow is being built the deb_build_mirrors will be:
+# deb http://apt.puppetlabs.com squeeze main dependencies
+# deb http://somethingelse.com/debian squeeze
+# This will happen for each cow during the build.
+deb_build_mirrors:
+  - deb http://apt.puppetlabs.com __DIST__ main dependencies
+  - deb http://somethingelse.com/debian __DIST__
 # Who is packaging. Turns up in various packaging artifacts
 packager: 'puppetlabs'
 # Who is signing packages

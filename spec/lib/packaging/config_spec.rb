@@ -22,6 +22,7 @@ describe "Pkg::Config" do
                   :cows,
                   :db_table,
                   :deb_build_host,
+                  :deb_build_mirrors,
                   :debversion,
                   :debug,
                   :default_cow,
@@ -302,15 +303,13 @@ describe "Pkg::Config" do
     # explicitly set everything to nil to prevent any hazardous effects on
     # the rest of the tests.
     after(:all) do
-      Pkg::Params::ENV_VARS.each do |v|
-        ENV[v[:envvar].to_s] = nil
-      end
+      reset_env(Pkg::Params::ENV_VARS.map {|hash| hash[:envvar].to_s})
     end
 
     Pkg::Params::ENV_VARS.each do |v|
-      ENV[v[:envvar].to_s] = "FOO"
       if v[:type] == :bool
         it "should set boolean value on #{v[:var]} for :type == :bool" do
+          ENV[v[:envvar].to_s] = "FOO"
           Pkg::Util.stub(:boolean_value) {"FOO"}
           allow(Pkg::Config).to receive(:instance_variable_set)
           expect(Pkg::Util).to receive(:boolean_value).with("FOO")
@@ -319,6 +318,7 @@ describe "Pkg::Config" do
         end
       else
         it "should set Pkg::Config##{v[:var]} to ENV[#{v[:envvar].to_s}]" do
+          ENV[v[:envvar].to_s] = "FOO"
           Pkg::Util.stub(:boolean_value) {"FOO"}
           allow(Pkg::Config).to receive(:instance_variable_set)
           expect(Pkg::Config).to receive(:instance_variable_set).with("@#{v[:var]}", "FOO")

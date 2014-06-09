@@ -168,7 +168,7 @@ describe "00_utils" do
   }
 
   TestVersions.keys.sort.each do |input|
-    before :all do
+    before :each do
       Pkg::Config.project_root = File.expand_path(File.dirname(__FILE__))
     end
 

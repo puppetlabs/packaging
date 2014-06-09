@@ -126,9 +126,6 @@ def set_cow_envs(cow)
   else
     dist = elements[1]
     arch = elements[2]
-    if dist.nil? or arch.nil?
-      fail "Couldn't get the arg and dist from cow name. Expecting something like 'base-dist-arch'"
-    end
     arch = arch.split('.')[0] if arch.include?('.')
   end
   if Pkg::Config.build_pe

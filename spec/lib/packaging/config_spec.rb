@@ -303,9 +303,7 @@ describe "Pkg::Config" do
     # explicitly set everything to nil to prevent any hazardous effects on
     # the rest of the tests.
     after(:all) do
-      Pkg::Params::ENV_VARS.each do |v|
-        ENV[v[:envvar].to_s] = nil
-      end
+      reset_env(Pkg::Params::ENV_VARS.map {|hash| hash[:envvar].to_s})
     end
 
     Pkg::Params::ENV_VARS.each do |v|

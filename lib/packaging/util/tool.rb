@@ -12,6 +12,17 @@ module Pkg::Util::Tool
     def find_tool(tool, args={:required => false})
       ENV['PATH'].split(File::PATH_SEPARATOR).each do |root|
         location = File.join(root, tool)
+
+        if Pkg::Util::OS.windows? && File.extname(location).empty?
+          exts = ENV['PATHEXT']
+          exts = exts ? exts.split(File::PATH_SEPARATOR) : %w[.EXE .BAT .CMD .COM]
+          exts.each do |ext|
+            locationext = File.expand_path(location + ext)
+
+            return locationext if FileTest.executable?(locationext)
+          end
+        end
+
         return location if FileTest.executable? location
       end
       fail "#{tool} tool not found...exiting" if args[:required]

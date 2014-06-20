@@ -6,6 +6,7 @@ if Pkg::Config.build_gem
     gem_excludes_file_list = []
     gem_excludes_raw = Pkg::Config.gem_excludes.nil? ? [] : Pkg::Config.gem_excludes.split(' ')
     gem_excludes_raw << 'ext/packaging'
+    gem_excludes_raw << 'pkg'
     gem_excludes_raw.each do |exclude|
       if File.directory?(exclude)
         gem_excludes_file_list += FileList["#{exclude}/**/*"]

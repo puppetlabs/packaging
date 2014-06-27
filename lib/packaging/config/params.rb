@@ -103,7 +103,8 @@ module Pkg::Params
                   :version_file,
                   :version_strategy,
                   :yum_host,
-                  :yum_repo_path]
+                  :yum_repo_path,
+                  :internal_gem_host]
 
   # Environment variable overrides for Pkg::Config parameters
   #
@@ -149,7 +150,8 @@ module Pkg::Params
               {:var => :random_mockroot,   :val => true},
               {:var => :keychain_loaded,   :val => false},
               {:var => :build_date,        :val => Pkg::Util::Date.timestamp('-')},
-              {:var => :release,           :val => '1'}]
+              {:var => :release,           :val => '1'},
+              {:var => :internal_gem_host, :val => 'http://rubygems.delivery.puppetlabs.net/'}]
 
   # These are variables which, over time, we decided to rename or replace. For
   # backwards compatibility, we assign the value of the old/deprecated

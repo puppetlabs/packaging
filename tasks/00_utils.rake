@@ -165,7 +165,17 @@ end
 
 def ship_gem(file)
   Pkg::Util::File.file_exists?("#{ENV['HOME']}/.gem/credentials", :required => true)
-  %x{gem push #{file}}
+  ex("gem push #{file}")
+  begin
+    Pkg::Util::Tool.check_tool("stickler")
+    ex("stickler push #{file} --server=#{Pkg::Config.gemhost} 2>/dev/null")
+    puts "#{file} pushed to stickler server at #{Pkg::Config.internal_gem_host}"
+  rescue
+    puts "##########################################\n#"
+    puts "#  Stickler failed, ensure it's installed"
+    puts "#  and you have access to #{Pkg::Config.internal_gem_host} \n#"
+    puts "##########################################"
+  end
 end
 
 def ask_yes_or_no

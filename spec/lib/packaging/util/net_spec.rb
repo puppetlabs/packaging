@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'socket'
 
 describe "Pkg::Util::Net" do
   let(:target)     { "/tmp/placething" }
@@ -22,7 +23,6 @@ describe "Pkg::Util::Net" do
   end
 
   describe "hostname utils" do
-    before(:each) { require 'socket' }
 
     describe "hostname" do
       it "should return the hostname of the current host" do

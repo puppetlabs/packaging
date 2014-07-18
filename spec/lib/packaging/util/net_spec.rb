@@ -57,13 +57,11 @@ describe "Pkg::Util::Net" do
     end
 
     it "should execute a command :foo on a host :bar" do
-      Pkg::Util::Net.stub(:ex) { :true }
       Pkg::Util::Net.should_receive(:ex).with("ssh -t foo 'bar'")
       Pkg::Util::Net.remote_ssh_cmd("foo", "bar")
     end
 
     it "should escape single quotes in the command" do
-      Pkg::Util::Net.stub(:ex) { :true }
       Pkg::Util::Net.should_receive(:ex).with("ssh -t foo 'b'\\''ar'")
       Pkg::Util::Net.remote_ssh_cmd("foo", "b'ar")
     end

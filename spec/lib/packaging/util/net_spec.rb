@@ -43,7 +43,7 @@ describe "Pkg::Util::Net" do
       context "with required :false" do
         it "should return nil if the passed host does not match the current host" do
           Socket.stub(:gethostname) { "foo" }
-          expect(Pkg::Util::Net.check_host("bar", :required => false)).to be_nil
+          Pkg::Util::Net.check_host("bar", :required => false).should be_nil
         end
       end
     end

@@ -288,8 +288,8 @@ describe "Pkg::Config" do
   end
 
   describe "#load_versioning" do
-      # We let the actual version determination testing happen in the version
-      # tests. Here we just test that we try when we should.
+    # We let the actual version determination testing happen in the version
+    # tests. Here we just test that we try when we should.
     context "When project root is nil" do
       it "should not try to load versioning" do
         Pkg::Config.stub(:project_root) {nil}

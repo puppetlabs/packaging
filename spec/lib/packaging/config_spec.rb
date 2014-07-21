@@ -288,12 +288,19 @@ describe "Pkg::Config" do
   end
 
   describe "#load_versioning" do
+    around do |example|
+      orig = Pkg::Config.project_root
+      example.run
+      Pkg::Config.project_root = orig
+    end
+
     # We let the actual version determination testing happen in the version
     # tests. Here we just test that we try when we should.
     context "When project root is nil" do
       it "should not try to load versioning" do
-        Pkg::Config.stub(:project_root) {nil}
-        expect(Pkg::Config).to_not receive(:git_sha_or_tag)
+        Pkg::Config.project_root = nil
+        expect(Pkg::Util::Version).to_not receive(:git_sha_or_tag)
+        Pkg::Config.load_versioning
       end
     end
   end

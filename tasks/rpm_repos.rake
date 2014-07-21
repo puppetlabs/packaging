@@ -41,7 +41,7 @@ namespace :pl do
         cmd << "pushd ${repodir} && ${createrepo} --checksum=sha --database --update . ; popd ; "
         cmd << "done ; popd "
 
-        remote_ssh_cmd(Pkg::Config.distribution_server, cmd)
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, cmd)
         # Now that we've created our repositories, we can create the configs for
         # them
         Rake::Task["pl:jenkins:generate_rpm_repo_configs"].execute
@@ -50,7 +50,7 @@ namespace :pl do
         Rake::Task["pl:jenkins:ship_repo_configs"].execute
       ensure
         # Always remove the lock file, even if we've failed
-        remote_ssh_cmd(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/.lock")
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/.lock")
       end
     end
 

@@ -53,7 +53,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
       cmd << "popd ; popd "
 
       begin
-        remote_ssh_cmd(Pkg::Config.distribution_server, cmd)
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, cmd)
         # Now that we've created our package repositories, we can generate repo
         # configurations for use with downstream jobs, acceptance clients, etc.
         Rake::Task["pl:jenkins:generate_deb_repo_configs"].execute
@@ -62,7 +62,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
         Rake::Task["pl:jenkins:ship_repo_configs"].execute
       ensure
         # Always remove the lock file, even if we've failed
-        remote_ssh_cmd(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/.lock")
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/.lock")
       end
 
     end

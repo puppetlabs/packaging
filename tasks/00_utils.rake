@@ -30,10 +30,6 @@ def check_var(varname,var=nil)
   var
 end
 
-def check_host(host)
-  host == %x{hostname}.chomp! or fail "Requires host to be #{host}!"
-end
-
 def cp_pr(src, dest, options={})
   mandatory = {:preserve => true}
   cp_r(src, dest, options.merge(mandatory))
@@ -47,12 +43,6 @@ end
 def mv_f(src, dest, options={})
   mandatory = {:force => true}
   mv(src, dest, options.merge(mandatory))
-end
-
-def remote_ssh_cmd target, command
-  Pkg::Util::Tool.check_tool('ssh')
-  puts "Executing '#{command}' on #{target}"
-  sh "ssh -t #{target} '#{command.gsub("'", "'\\\\''")}'"
 end
 
 def rsync_to *args
@@ -267,11 +257,6 @@ def update_rpm_repo(dir)
 end
 alias :create_rpm_repo :update_rpm_repo
 
-def hostname
-  require 'socket'
-  Socket.gethostname
-end
-
 # Loop a block up to the number of attempts given, exiting when we receive success
 # or max attempts is reached. Raise an exception unless we've succeeded.
 def retry_on_fail(args, &blk)
@@ -390,7 +375,7 @@ end
 # Remotely set the immutable bit on a list of files
 #
 def remote_set_immutable(host, files)
-  remote_ssh_cmd(host, "sudo chattr +i #{files.join(" ")}")
+  Pkg::Util::Net.remote_ssh_cmd(host, "sudo chattr +i #{files.join(" ")}")
 end
 
 # ex combines the behavior of `%x{cmd}` and rake's `sh "cmd"`. `%x{cmd}` has

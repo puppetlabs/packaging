@@ -224,19 +224,17 @@ describe "Pkg::Config" do
   end
 
   describe "#issue_reassignments" do
-    before :all do
+    around do |example|
       prev_tar_host = Pkg::Config.tar_host
       Pkg::Config.tar_host = nil
+      example.run
+      Pkg::Config.tar_host = prev_tar_host
     end
 
     it "should set tar_host to yum_host" do
       Pkg::Config.config_from_hash({ :yum_host => 'foo' })
       Pkg::Config.issue_reassignments
       Pkg::Config.tar_host.should eq("foo")
-    end
-
-    after :all do
-      Pkg::Config.tar_host = prev_tar_host
     end
   end
 
@@ -255,34 +253,34 @@ describe "Pkg::Config" do
   end
 
   describe "#load_default_configs" do
+    around do |example|
+      orig = Pkg::Config.project_root
+      example.run
+      Pkg::Config.project_root = orig
+    end
+
     context "given ext/build_defaults.yaml and ext/project_data.yaml are readable" do
       it "should try to load build_defaults.yaml and project_data.yaml" do
-        orig = Pkg::Config.project_root
         Pkg::Config.project_root = File.join(FIXTURES, 'config')
         test_project_data = File.join(FIXTURES, 'config', 'ext', 'project_data.yaml')
         test_build_defaults = File.join(FIXTURES, 'config', 'ext', 'build_defaults.yaml')
         expect(Pkg::Config).to receive(:config_from_yaml).with(test_project_data)
         expect(Pkg::Config).to receive(:config_from_yaml).with(test_build_defaults)
         Pkg::Config.load_default_configs
-        Pkg::Config.project_root = orig
       end
     end
 
     context "given ext/build_defaults.yaml and ext/project_data.yaml are not readable" do
       it "should not try to load build_defaults.yaml and project_data.yaml" do
-        orig = Pkg::Config.project_root
         Pkg::Config.project_root = 'foo'
         expect(Pkg::Config).to_not receive(:config_from_yaml)
         Pkg::Config.load_default_configs
-        Pkg::Config.project_root = orig
       end
 
       it "should set the project root to nil" do
-        orig = Pkg::Config.project_root
         Pkg::Config.project_root = 'foo'
         Pkg::Config.load_default_configs
         expect(Pkg::Config.project_root).to be(nil)
-        Pkg::Config.project_root = orig
       end
     end
   end

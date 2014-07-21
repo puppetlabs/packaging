@@ -244,11 +244,6 @@ def update_rpm_repo(dir)
 end
 alias :create_rpm_repo :update_rpm_repo
 
-def hostname
-  require 'socket'
-  Socket.gethostname
-end
-
 # Loop a block up to the number of attempts given, exiting when we receive success
 # or max attempts is reached. Raise an exception unless we've succeeded.
 def retry_on_fail(args, &blk)

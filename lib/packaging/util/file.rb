@@ -1,4 +1,5 @@
 # Utility methods for handling files and directories
+require 'fileutils'
 
 module Pkg::Util::File
 
@@ -53,6 +54,42 @@ module Pkg::Util::File
       end
       if file_exists?(source, :required => true)
         ex(%Q[#{tar} #{options} #{target_opts} -xf #{source}])
+      end
+    end
+
+    def install_files_into_dir(file_patterns, workdir)
+      install = []
+      # We need to add our list of file patterns from the configuration; this
+      # used to be a list of "things to copy recursively", which would install
+      # editor backup files and other nasty things.
+      #
+      # This handles that case correctly, with a deprecation warning, to augment
+      # our FileList with the right things to put in place.
+      #
+      # Eventually, when all our projects are migrated to the new standard, we
+      # can drop this in favour of just pushing the patterns directly into the
+      # FileList and eliminate many lines of code and comment.
+      Dir.chdir(Pkg::Config.project_root) do
+        file_patterns.each do |pattern|
+          if File.directory?(pattern) and not Pkg::Util::File.empty_dir?(pattern)
+            install << Dir[pattern + "/**/*"]
+          else
+            install << Dir[pattern]
+          end
+        end
+        install.flatten!
+
+        # Transfer all the files and symlinks into the working directory...
+        install = install.select { |x| File.file?(x) or File.symlink?(x) or Pkg::Util::File.empty_dir?(x) }
+
+        install.each do |file|
+          if Pkg::Util::File.empty_dir?(file)
+            FileUtils.mkpath(File.join(workdir, file), :verbose => false)
+          else
+            FileUtils.mkpath(File.dirname( File.join(workdir, file) ), :verbose => false)
+            FileUtils.cp(file, File.join(workdir, file), :verbose => false, :preserve => true)
+          end
+        end
       end
     end
   end

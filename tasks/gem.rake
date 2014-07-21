@@ -70,27 +70,12 @@ if Pkg::Config.build_gem
     spec
   end
 
-  def copy_gem_files_into(workdir)
-    # Take all of the gem files (both test and lib), and copy them into the workdir
-    (glob_gem_files + FileList[(Pkg::Config.gem_test_files || '').split(' ')]).each do |file|
-      if File.directory?(file)
-        mkpath(File.join(workdir, file))
-      else
-        mkpath(File.dirname( File.join(workdir, file) ), :verbose => false)
-        cp(file, File.join(workdir, file), :verbose => true, :preserve => false)
-      end
-    end
-  end
-
   def create_gem(spec, gembuilddir)
+    gem_files = glob_gem_files + FileList[(Pkg::Config.gem_test_files || '').split(' ')]
     workdir = File.join(Pkg::Util::File.mktemp)
-    mkpath workdir
 
     bench = Benchmark.realtime do
-      copy_gem_files_into(workdir)
-
-      # Burn in the version for the project if needed
-      Pkg::Util::Version.versionbump(workdir) if Pkg::Config.update_version_file
+      Pkg::Util::File.install_files_into_dir(gem_files, workdir)
 
       cd workdir do
         gem_task = Gem::PackageTask.new(spec)

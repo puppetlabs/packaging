@@ -86,11 +86,16 @@ module Pkg
       workdir ||= Pkg::Config.project_root
       root = Pathname.new(Pkg::Config.project_root)
 
-      # Templates can be either a string or a hash of source and target. If it
-      # is a string, the target is assumed to be the same path as the
-      # source,with the extension removed. If it is a hash, we assume nothing
-      # and use the provided source and target.
+      template_list = []
+      usage_count_map = Hash.new(0)
+
+      # Create Array of template/target pairs and a map where template_file keys
+      # have usage count balues.
       @templates.each do |cur_template|
+        # Templates can be either a string or a hash of source and target. If it
+        # is a string, the target is assumed to be the same path as the
+        # source,with the extension removed. If it is a hash, we assume nothing
+        # and use the provided source and target.
         if cur_template.is_a?(String)
           template_file = File.expand_path(cur_template)
           target_file = template_file.sub(File.extname(template_file),"")
@@ -98,6 +103,22 @@ module Pkg
           template_file = File.expand_path(cur_template["source"])
           target_file = File.expand_path(cur_template["target"])
         end
+        template_list << [template_file, target_file]
+
+        usage_count_map[template_file] += 1
+      end
+
+      template_list.each do |template_file, target_file|
+        # Check usage count for the given template file, if more than one then
+        # don't remove the working directory copy.
+        remove_workdir_copy = true
+        if usage_count_map[template_file] > 1
+          remove_workdir_copy = false
+        end
+
+        # Decrement usage_count_map to allow the next loop iteration that sees
+        # it to remove the template_file from workdir.
+        usage_count_map[template_file] -= 1
 
         #   We construct paths to the erb template and its proposed target file
         #   relative to the project root, *not* fully qualified. This allows us
@@ -115,7 +136,7 @@ module Pkg
         #   directory, but the originals in the temporary working copy.
         if File.exist?(File.join(workdir,rel_path_to_template))
           mkpath(File.dirname( File.join(workdir, rel_path_to_target) ), :verbose => false)
-          Pkg::Util::File.erb_file(File.join(workdir,rel_path_to_template), File.join(workdir, rel_path_to_target), true, :binding => Pkg::Config.get_binding)
+          Pkg::Util::File.erb_file(File.join(workdir,rel_path_to_template), File.join(workdir, rel_path_to_target), remove_workdir_copy, :binding => Pkg::Config.get_binding)
         elsif File.exist?(File.join(root,rel_path_to_template))
           mkpath(File.dirname( File.join(workdir, rel_path_to_target) ), :verbose => false)
           Pkg::Util::File.erb_file(File.join(root,rel_path_to_template), File.join(workdir, rel_path_to_target), false, :binding => Pkg::Config.get_binding)

@@ -279,7 +279,7 @@ namespace :pl do
   desc "Use default mock to make a final rpm, keyed to PL infrastructure, pass MOCK to specify config"
   task :mock => "package:tar" do
     # If default mock isn't specified, just take the first one in the Pkg::Config.final_mocks list
-    Pkg::Config.default_mock ||= Pkg::Config.final_mocks.split(' ')[0]
+    Pkg::Config.default_mock ||= Pkg::Config.final_mocks[0]
     build_rpm_with_mock(Pkg::Config.default_mock)
   end
 

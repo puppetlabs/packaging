@@ -62,13 +62,15 @@ namespace :pl do
   end
 
   desc "Sign mocked rpms, Defaults to PL Key, pass GPG_KEY to override"
-  task :sign_rpms do
+  task :sign_rpms, :root_dir do |t, args|
+    rpm_dir = args.root_dir || "pkg"
+
     # Find x86_64 noarch rpms that have been created as hard links and remove them
-    rm_r Dir["pkg/*/*/*/x86_64/*.noarch.rpm"]
+    rm_r Dir["#{rpm_dir}/*/*/*/x86_64/*.noarch.rpm"]
     # We'll sign the remaining noarch
-    all_rpms = Dir["pkg/**/*.rpm"]
-    old_rpms    = Dir["pkg/el/4/**/*.rpm"] + Dir["pkg/el/5/**/*.rpm"]
-    modern_rpms = Dir["pkg/el/6/**/*.rpm"] + Dir["pkg/el/7/**/*.rpm"] + Dir["pkg/fedora/**/*.rpm"]
+    all_rpms = Dir["#{rpm_dir}/**/*.rpm"]
+    old_rpms    = Dir["#{rpm_dir}/el/4/**/*.rpm"] + Dir["#{rpm_dir}/el/5/**/*.rpm"]
+    modern_rpms = Dir["#{rpm_dir}/el/6/**/*.rpm"] + Dir["#{rpm_dir}/el/7/**/*.rpm"] + Dir["#{rpm_dir}/fedora/**/*.rpm"]
 
     unsigned_rpms = all_rpms - old_rpms - modern_rpms
     unless unsigned_rpms.empty?
@@ -85,7 +87,7 @@ namespace :pl do
       sign_rpm(modern_rpms.join(' '))
     end
     # Now we hardlink them back in
-    Dir["pkg/*/*/*/i386/*.noarch.rpm"].each do |rpm|
+    Dir["#{rpm_dir}/*/*/*/i386/*.noarch.rpm"].each do |rpm|
       cd File.dirname(rpm) do
         FileUtils.ln(File.basename(rpm), File.join("..","x86_64"), :force => true, :verbose => true)
       end

@@ -139,7 +139,7 @@ namespace :pl do
       # use the packaging repo for shipping and signing (things that really
       # don't require build automation, specifically) we still need the project
       # clone itself.
-      git_bundle('HEAD', 'signing_bundle', 'pkg')
+      Pkg::Util::Git.git_bundle('HEAD', 'signing_bundle', 'pkg')
 
       # While we're bundling things, let's also make a git bundle of the
       # packaging repo that we're using when we invoke pl:jenkins:ship. We can
@@ -158,7 +158,7 @@ namespace :pl do
       if defined?(PACKAGING_ROOT)
         packaging_bundle = ''
         cd PACKAGING_ROOT do
-          packaging_bundle = git_bundle('HEAD', 'packaging-bundle')
+          packaging_bundle = Pkg::Util::Git.git_bundle('HEAD', 'packaging-bundle')
         end
         mv(packaging_bundle, 'pkg')
       end

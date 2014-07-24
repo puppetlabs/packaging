@@ -66,7 +66,7 @@ namespace :pl do
       name = args.name
 
       properties = Pkg::Config.config_to_yaml
-      bundle = git_bundle('HEAD')
+      bundle = Pkg::Util::Git.git_bundle('HEAD')
 
       # Create a string of metrics to send to Jenkins for data analysis
       if Pkg::Config.pe_version

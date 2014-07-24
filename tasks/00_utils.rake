@@ -108,17 +108,6 @@ def set_cow_envs(cow)
   end
 end
 
-def git_commit_file(file, message = nil)
-  if Pkg::Util::Tool.find_tool('git') and File.exist?('.git')
-    message ||= "changes"
-    puts "Commiting changes:"
-    puts
-    diff = %x(git diff HEAD #{file})
-    puts diff
-    %x(git commit #{file} -m "Commit #{message} in #{file}" &> #{Pkg::Util::OS::DEVNULL})
-  end
-end
-
 def ship_gem(file)
   Pkg::Util::File.file_exists?("#{ENV['HOME']}/.gem/credentials", :required => true)
   Pkg::Util::Execution.ex("gem push #{file}")
@@ -166,24 +155,8 @@ def confirm_ship(files)
   ask_yes_or_no
 end
 
-def git_tag(version)
-  sh "git tag -s -u #{Pkg::Config.gpg_key} -m '#{version}' #{version}"
-  $?.success or fail "Unable to tag repo at #{version}"
-end
-
 def rand_string
   rand.to_s.split('.')[1]
-end
-
-def git_bundle(treeish, appendix = nil, output_dir = nil)
-  temp = output_dir || Pkg::Util::File.mktemp
-  appendix ||= rand_string
-  sh "git bundle create #{temp}/#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix} #{treeish} --tags"
-  cd temp do
-    sh "tar -czf #{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix}.tar.gz #{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix}"
-    rm_rf "#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix}"
-  end
-  "#{temp}/#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix}.tar.gz"
 end
 
 # We take a tar argument for cases where `tar` isn't best, e.g. Solaris.  We
@@ -193,7 +166,7 @@ def remote_bootstrap(host, treeish, tar_cmd = nil, tarball = nil)
   unless tar = tar_cmd
     tar = 'tar'
   end
-  tarball ||= git_bundle(treeish)
+  tarball ||= Pkg::Util::Git.git_bundle(treeish)
   tarball_name = File.basename(tarball).gsub('.tar.gz', '')
   Pkg::Util::Net.rsync_to(tarball, host, '/tmp')
   appendix = rand_string
@@ -209,10 +182,6 @@ def remote_buildparams(host, build)
   params_dir = rand_string
   Pkg::Util::Net.rsync_to(params_file, host, "/tmp/#{params_dir}/")
   "/tmp/#{params_dir}/#{params_file_name}"
-end
-
-def git_pull(remote, branch)
-  sh "git pull #{remote} #{branch}"
 end
 
 def update_rpm_repo(dir)
@@ -375,6 +344,26 @@ end
 def ln_sfT(src, dest)
   deprecate('ln_sfT')
   sh "ln -sfT #{src} #{dest}"
+end
+
+def git_commit_file(file, message = nil)
+  deprecate('git_commit_file', 'Pkg::Util::Git.git_commit_file')
+  Pkg::Util::Git.git_commit_file(file, message)
+end
+
+def git_bundle(treeish, appendix = nil, output_dir = nil)
+  deprecate('git_bundle', 'Pkg::Util::Git.git_bundle')
+  Pkg::Util::Git.git_bundle(treeish, appendix, output_dir)
+end
+
+def git_tag(version)
+  deprecate('git_tag', 'Pkg::Util::Git.git_tag')
+  Pkg::Util::Git.git_tag(version)
+end
+
+def git_pull(remote, branch)
+  deprecate('git_pull', 'Pkg::Util::Git.git_pull')
+  Pkg::Util::Git.git_pull(remote, branch)
 end
 
 # ex combines the behavior of `%x{cmd}` and rake's `sh "cmd"`. `%x{cmd}` has

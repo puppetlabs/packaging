@@ -12,17 +12,18 @@
 namespace :pl do
   namespace :jenkins do
     desc "Retrieve packages from the distribution server\. Check out commit to retrieve"
-    task :retrieve, :target do |t, args|
-      target = args.target || "artifacts"
+    task :retrieve, :remote_target, :local_target do |t, args|
+      remote_target = args.remote_target || "artifacts"
+      local_target = args.local_target || "pkg"
       invoke_task("pl:fetch")
-      mkdir_p 'pkg'
-      package_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}"
-      if wget=Pkg::Util::Tool.find_tool("wget")
-        sh "#{wget} -r -np -nH --cut-dirs 3 -P pkg --reject 'index*' #{package_url}/"
+      mkdir_p local_target
+      package_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{remote_target}"
+      if wget = Pkg::Util::Tool.find_tool("wget")
+        sh "#{wget} -r -np -nH --cut-dirs 3 -P #{local_target} --reject 'index*' #{package_url}/"
       else
         warn "Could not find `wget` tool. Falling back to rsyncing from #{Pkg::Config.distribution_server}"
         begin
-          Pkg::Util::Net.rsync_from("#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}/", Pkg::Config.distribution_server, "pkg/")
+          Pkg::Util::Net.rsync_from("#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{remote_target}/", Pkg::Config.distribution_server, "#{local_target}/")
         rescue
           fail "Couldn't download packages from distribution server. Try installing wget!"
         end

@@ -61,7 +61,7 @@ namespace :pl do
     gpg_sign_file "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
   end
 
-  desc "Sign mocked rpms, Defaults to PL Key, pass KEY to override"
+  desc "Sign mocked rpms, Defaults to PL Key, pass GPG_KEY to override"
   task :sign_rpms do
     # Find x86_64 noarch rpms that have been created as hard links and remove them
     rm_r Dir["pkg/*/*/*/x86_64/*.noarch.rpm"]
@@ -92,7 +92,7 @@ namespace :pl do
     end
   end
 
-  desc "Sign ips package, Defaults to PL Key, pass KEY to override"
+  desc "Sign ips package, uses PL certificates by default, update privatekey_pem, certificate_pem, and ips_inter_cert in project_data.yaml to override."
   task :sign_ips, :repo_uri, :fmri do |t, args|
     repo_uri  = args.repo_uri
     fmri      = args.fmri
@@ -117,7 +117,7 @@ namespace :pl do
     puts "All rpms signed"
   end
 
-  desc "Sign generated debian changes files. Defaults to PL Key, pass KEY to override"
+  desc "Sign generated debian changes files. Defaults to PL Key, pass GPG_KEY to override"
   task :sign_deb_changes do
     begin
       load_keychain if Pkg::Util::Tool.find_tool('keychain')

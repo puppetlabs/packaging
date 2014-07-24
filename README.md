@@ -411,8 +411,6 @@ deb_build_mirrors:
   - deb http://somethingelse.com/debian __DIST__
 # Who is packaging. Turns up in various packaging artifacts
 packager: 'puppetlabs'
-# Who is signing packages
-gpg_name: 'info@puppetlabs.com'
 # GPG key ID of the signer
 gpg_key: '4BD6EC30'
 # Whether to require tarball signing as a prerequisite of other package building

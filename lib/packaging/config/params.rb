@@ -163,7 +163,8 @@ module Pkg::Params
                    {:oldvar => :yum_host,               :newvar => :tar_host},
                    {:oldvar => :gem_devel_dependencies, :newvar => :gem_development_dependencies},
                    {:oldvar => :pe_name,                :newvar => :project},
-                   {:oldvar => :project,                :newvar => :gem_name}]
+                   {:oldvar => :project,                :newvar => :gem_name},
+                   {:oldvar => :gpg_name,               :newvar => :gpg_key}]
 
   # These are variables that we have deprecated. If they are encountered in a
   # project's config, we issue deprecations for them.
@@ -171,7 +172,10 @@ module Pkg::Params
   DEPRECATIONS = [{:var => :gem_devel_dependencies, :message => "
     DEPRECATED, 9-Nov-2013: 'gem_devel_dependencies' has been replaced with
     'gem_development_dependencies.' Please update this field in your
-    project_data.yaml"}]
+    project_data.yaml"},
+                  {:var => :gpg_name, :message => "
+    DEPRECATED, 29-Jul-2014: 'gpg_name' has been replaced with 'gpg_key'.
+                   Please update this field in your project_data.yaml"}]
 
 end
 

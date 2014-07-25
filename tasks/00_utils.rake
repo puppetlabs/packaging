@@ -45,24 +45,14 @@ def mv_f(src, dest, options={})
   mv(src, dest, options.merge(mandatory))
 end
 
-def rsync_to *args
-  Pkg::Util::Tool.check_tool('rsync')
-  flags = "-rHlv -O --no-perms --no-owner --no-group --ignore-existing"
-  source  = args[0]
-  target  = args[1]
-  dest    = args[2]
-  puts "rsyncing #{source} to #{target}"
-  sh "rsync #{flags} #{source} #{target}:#{dest}"
+def rsync_to(*args)
+  deprecate('rsync_to', 'Pkg::Util::Net.rsync_to')
+  Pkg::Util::Net.rsync_to(args[0], args[1], args[2])
 end
 
-def rsync_from *args
-  Pkg::Util::Tool.check_tool('rsync')
-  flags = "-rHlv -O --no-perms --no-owner --no-group"
-  source  = args[0]
-  target  = args[1]
-  dest    = args[2]
-  puts "rsyncing #{source} from #{target} to #{dest}"
-  sh "rsync #{flags} #{target}:#{source} #{dest}"
+def rsync_from(*args)
+  deprecate('rsync_from', 'Pkg::Util::Net.rsync_from')
+  Pkg::Util::Net.rsync_from(args[0], args[1], args[2])
 end
 
 def scp_file_from(host,path,file)

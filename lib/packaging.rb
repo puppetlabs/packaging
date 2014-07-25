@@ -8,6 +8,7 @@ module Pkg
   require 'packaging/util'
   require 'packaging/config'
   require 'packaging/tar'
+  require 'packaging/deb'
 
   # Load configuration defaults
   Pkg::Config.load_defaults

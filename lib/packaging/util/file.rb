@@ -13,6 +13,18 @@ module Pkg::Util::File
       File.exist?(dir) and File.directory?(dir) and Dir["#{dir}/**/*"].empty?
     end
 
+    # Returns an array of all the directories at the top level of #{dir}
+    #
+    def directories(dir)
+      if File.directory?(dir)
+        Dir.chdir(dir) do
+          Dir.glob("*").select do |entry|
+            File.directory?(entry)
+          end
+        end
+      end
+    end
+
     def file_exists?(file, args={:required => false})
       exists = File.exist? file
       if !exists and args[:required]

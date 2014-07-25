@@ -103,4 +103,26 @@ describe "Pkg::Util::File" do
       rm_rf workdir
     end
   end
+
+  describe "#directories" do
+    it "returns nil if there is no directory" do
+      File.should_receive(:directory?).with("/tmp").and_return(false)
+      Pkg::Util::File.directories("/tmp").should be_nil
+    end
+
+    it "returns the empty array if there are no dirs in the directory" do
+      File.should_receive(:directory?).with("/tmp").and_return(true)
+      Dir.should_receive(:glob).with("*").and_return([])
+      Pkg::Util::File.directories("/tmp").should be_empty
+    end
+
+    it "returns an array of the top level directories inside a directory" do
+      File.stub(:directory?) { false }
+      ["/tmp", "/tmp/dir", "/tmp/other_dir"].each do |dir|
+        File.should_receive(:directory?).with(dir).and_return(true)
+      end
+      Dir.should_receive(:glob).with("*").and_return(["/tmp/file", "/tmp/dir", "/tmp/other_dir"])
+      Pkg::Util::File.directories("/tmp").should eq(["/tmp/dir", "/tmp/other_dir"])
+    end
+  end
 end

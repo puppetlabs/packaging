@@ -28,7 +28,6 @@ describe "Pkg::Deb::Repo" do
     Pkg::Config.jenkins_repo_path = orig_repo_path
   end
 
-
   describe "#generate_repo_configs" do
     it "fails if wget isn't available" do
       Pkg::Util::Tool.stub(:find_tool).with("wget", {:required => true}) {false}
@@ -113,6 +112,31 @@ describe "Pkg::Deb::Repo" do
       Pkg::Util::Net.should_receive(:remote_ssh_cmd).with(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
       Pkg::Deb::Repo.should_receive(:retry_on_fail).with(:times => 3)
       Pkg::Deb::Repo.ship_repo_configs
+    end
+  end
+
+  describe "#sign_repos" do
+    it "fails without reprepro" do
+      Pkg::Util::Tool.should_receive(:find_tool).with('reprepro', {:required => true}).and_raise(RuntimeError)
+      expect { Pkg::Deb::Repo.sign_repos }.to raise_error(RuntimeError)
+    end
+
+    it "makes a repo for each dist" do
+      dists = cows.reject { |cow| cow.empty? }
+      distfiles = {}
+      reprepro = "/bin/reprepro"
+      Pkg::Util::File.should_receive(:directories).with("repos/apt").and_return(dists)
+      Pkg::Util::Tool.should_receive(:check_tool).with("reprepro").and_return(reprepro)
+      Pkg::Util::Execution.should_receive(:ex).exactly(4).times.with("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
+
+      dists.each do |dist|
+        distfiles[dist] = double
+        Dir.should_receive(:chdir).with("repos/apt/#{dist}").and_yield
+        File.should_receive(:open).with("conf/distributions", "w").and_yield(distfiles[dist])
+        distfiles[dist].should_receive(:puts)
+      end
+
+      Pkg::Deb::Repo.sign_repos
     end
   end
 end

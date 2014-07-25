@@ -135,5 +135,28 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
         Pkg::Util::Net.rsync_to("pkg/repo_configs/deb/", Pkg::Config.distribution_server, repo_dir)
       end
     end
+
+    def sign_repos(target = "repos", message = "Repository message")
+      reprepro = Pkg::Util::Tool.check_tool('reprepro')
+      load_keychain if Pkg::Util::Tool.find_tool('keychain')
+
+      dists = Pkg::Util::File.directories('repos/apt')
+
+      dists.each do |dist|
+        Dir.chdir("repos/apt/#{dist}") do
+          File.open("conf/distributions", "w") do |f|
+            f.puts "Origin: Puppet Labs
+Label: Puppet Labs
+Codename: #{dist}
+Architectures: i386 amd64
+Components: main
+Description: #{message}
+SignWith: #{Pkg::Config.gpg_key}"
+          end
+
+          Pkg::Util::Execution.ex("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
+        end
+      end
+    end
   end
 end

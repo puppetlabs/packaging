@@ -15,7 +15,7 @@ module Pkg::Deb::Repo
     # pl-$project-$sha.list, and can be placed in /etc/apt/sources.list.d to
     # enable clients to install these packages.
     #
-    def generate_repo_configs
+    def generate_repo_configs(source = "repos", target = "repo_configs")
       # We use wget to obtain a directory listing of what are presumably our deb repos
       #
       wget = Pkg::Util::Tool.check_tool("wget")
@@ -23,7 +23,7 @@ module Pkg::Deb::Repo
       # This is the standard path to all debian build artifact repositories on
       # the distribution server for this commit
       #
-      repo_base = "#{base_url}/repos/apt/"
+      repo_base = "#{base_url}/#{source}/apt/"
 
       # First test if the directory even exists
       #
@@ -41,31 +41,32 @@ module Pkg::Deb::Repo
       # these packages. We use the list of distributions to create a config
       # file for every distribution.
       #
-      FileUtils.mkdir_p(File.join("pkg", "repo_configs", "deb"))
+      FileUtils.mkdir_p(File.join("pkg", target, "deb"))
       repo_urls.each do |url|
         # We want to skip the base_url, which wget returns as one of the results
         next if "#{url}/" == repo_base
         dist = url.split('/').last
         repoconfig = ["# Packages for #{Pkg::Config.project} built from ref #{Pkg::Config.ref}",
                       "deb #{url} #{dist} main"]
-        config = File.join("pkg", "repo_configs", "deb", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}.list")
+        config = File.join("pkg", target, "deb", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}.list")
         File.open(config, 'w') { |f| f.puts repoconfig }
       end
-      puts "Wrote apt repo configs for #{Pkg::Config.project} at #{Pkg::Config.ref} to pkg/repo_configs/deb."
+      puts "Wrote apt repo configs for #{Pkg::Config.project} at #{Pkg::Config.ref} to pkg/#{target}/deb."
     end
 
-    def retrieve_repo_configs
+    def retrieve_repo_configs(target = "repo_configs")
       wget = Pkg::Util::Tool.check_tool("wget")
-      FileUtils.mkdir_p("pkg/repo_configs")
-      config_url = "#{base_url}/repo_configs/deb/"
+      FileUtils.mkdir_p("pkg/#{target}")
+      config_url = "#{base_url}/#{target}/deb/"
       begin
-        Pkg::Util::Execution.ex("#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{config_url}")
+        Pkg::Util::Execution.ex("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
       rescue
         fail "Couldn't retrieve deb apt repo configs. See preceding http response for more info."
       end
     end
 
     def repo_creation_command(prefix, artifact_directory)
+      # First, we test that artifacts exist and set up the repos directory
       cmd = 'echo " Checking for deb build artifacts. Will exit if not found.." ; '
       cmd << "[ -d #{artifact_directory}/artifacts/#{prefix}deb ] || exit 1 ; "
       # Descend into the deb directory and obtain the list of distributions
@@ -104,10 +105,10 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
       return cmd
     end
 
+    # This method is doing too much for its name
     def create_repos
       prefix = Pkg::Config.build_pe ? "pe/" : ""
 
-      # First, we test that artifacts exist and set up the repos directory
       artifact_directory = File.join(Pkg::Config.jenkins_repo_path, Pkg::Config.project, Pkg::Config.ref)
 
       command = repo_creation_command(prefix, artifact_directory)
@@ -126,31 +127,31 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
       end
     end
 
-    def ship_repo_configs
-      Pkg::Util::File.empty_dir?("pkg/repo_configs/deb") and fail "No repo configs have been generated! Try pl:deb_repo_configs."
+    def ship_repo_configs(target = "repo_configs")
+      Pkg::Util::File.empty_dir?("pkg/#{target}/deb") and fail "No repo configs have been generated! Try pl:deb_repo_configs."
       invoke_task("pl:fetch")
-      repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/repo_configs/deb"
+      repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}/deb"
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
       retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to("pkg/repo_configs/deb/", Pkg::Config.distribution_server, repo_dir)
+        Pkg::Util::Net.rsync_to("pkg/#{target}/deb/", Pkg::Config.distribution_server, repo_dir)
       end
     end
 
-    def sign_repos(target = "repos", message = "Repository message")
+    def sign_repos(target = "repos", message = "Signed apt repository")
       reprepro = Pkg::Util::Tool.check_tool('reprepro')
       load_keychain if Pkg::Util::Tool.find_tool('keychain')
 
-      dists = Pkg::Util::File.directories('repos/apt')
+      dists = Pkg::Util::File.directories("#{target}/apt")
 
       dists.each do |dist|
-        Dir.chdir("repos/apt/#{dist}") do
+        Dir.chdir("#{target}/apt/#{dist}") do
           File.open("conf/distributions", "w") do |f|
             f.puts "Origin: Puppet Labs
 Label: Puppet Labs
 Codename: #{dist}
 Architectures: i386 amd64
 Components: main
-Description: #{message}
+Description: #{message} for #{dist}
 SignWith: #{Pkg::Config.gpg_key}"
           end
 

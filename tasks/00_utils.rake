@@ -219,7 +219,7 @@ def remote_bootstrap(host, treeish, tar_cmd=nil, tarball=nil)
   end
   tarball ||= git_bundle(treeish)
   tarball_name = File.basename(tarball).gsub('.tar.gz','')
-  rsync_to(tarball, host, '/tmp')
+  Pkg::Util::Net.rsync_to(tarball, host, '/tmp')
   appendix = rand_string
   sh "ssh -t #{host} '#{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone --recursive /tmp/#{tarball_name} /tmp/#{Pkg::Config.project}-#{appendix} ; cd /tmp/#{Pkg::Config.project}-#{appendix} ; rake package:bootstrap'"
   "/tmp/#{Pkg::Config.project}-#{appendix}"
@@ -231,7 +231,7 @@ def remote_buildparams(host, build)
   params_file = build.config_to_yaml
   params_file_name = File.basename(params_file)
   params_dir = rand_string
-  rsync_to(params_file, host, "/tmp/#{params_dir}/")
+  Pkg::Util::Net.rsync_to(params_file, host, "/tmp/#{params_dir}/")
   "/tmp/#{params_dir}/#{params_file_name}"
 end
 

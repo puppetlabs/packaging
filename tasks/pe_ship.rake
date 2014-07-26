@@ -5,7 +5,7 @@ if Pkg::Config.build_pe
       Pkg::Util::File.empty_dir?("pkg/pe/rpm") and fail "The 'pkg/pe/rpm' directory has no packages. Did you run rake pe:deb?"
       target_path = ENV['YUM_REPO'] ? ENV['YUM_REPO'] : "#{Pkg::Config.yum_repo_path}/#{Pkg::Config.pe_version}/repos/"
       retry_on_fail(:times => 3) do
-        rsync_to('pkg/pe/rpm/', Pkg::Config.yum_host, target_path)
+        Pkg::Util::Net.rsync_to('pkg/pe/rpm/', Pkg::Config.yum_host, target_path)
       end
       if Pkg::Config.team == 'release'
         Rake::Task["pe:remote:update_yum_repo"].invoke
@@ -53,7 +53,7 @@ if Pkg::Config.build_pe
         retry_on_fail(:times => 3) do
           Dir["pkg/pe/deb/#{dist}/*.deb"].each do |deb|
             Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "mkdir -p '#{target_path}/#{dist}'")
-            rsync_to(deb, Pkg::Config.apt_host, "#{target_path}/#{dist}/#{File.basename(deb)}")
+            Pkg::Util::Net.rsync_to(deb, Pkg::Config.apt_host, "#{target_path}/#{dist}/#{File.basename(deb)}")
           end
         end
 
@@ -92,7 +92,7 @@ if Pkg::Config.build_pe
 
           # Ship arch-specific debs to correct dir, e.g. 'squeeze-i386'
           unless Dir["pkg/pe/deb/#{dist}/pe-*_#{arch}.deb"].empty?
-            rsync_to("pkg/pe/deb/#{dist}/pe-*_#{arch}.deb --ignore-existing", Pkg::Config.apt_host, "#{archive_path}/" )
+            Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_#{arch}.deb --ignore-existing", Pkg::Config.apt_host, "#{archive_path}/" )
           end
 
           # Ship all-arch debs to same dist-location, but to all known
@@ -102,16 +102,16 @@ if Pkg::Config.build_pe
 
           unless Dir["pkg/pe/deb/#{dist}/pe-*_all.deb"].empty?
             if dist =~ /cumulus/
-              rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", Pkg::Config.apt_host, "#{base_path}/#{dist}-powerpc/")
+              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", Pkg::Config.apt_host, "#{base_path}/#{dist}-powerpc/")
             else
-              rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", Pkg::Config.apt_host, "#{base_path}/#{dist}-i386/")
-              rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", Pkg::Config.apt_host, "#{base_path}/#{dist}-amd64/")
+              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", Pkg::Config.apt_host, "#{base_path}/#{dist}-i386/")
+              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", Pkg::Config.apt_host, "#{base_path}/#{dist}-amd64/")
             end
           end
 
           unless Dir["pkg/pe/deb/#{dist}/pe-*"].select { |i| i !~ /^.*\.deb$/ }.empty?
             # Ship source files to source dir, e.g. 'squeeze-source'
-            rsync_to("pkg/pe/deb/#{dist}/pe-* --exclude *.deb --ignore-existing", Pkg::Config.apt_host, "#{base_path}/#{dist}-source")
+            Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-* --exclude *.deb --ignore-existing", Pkg::Config.apt_host, "#{base_path}/#{dist}-source")
           end
 
           files = Dir["pkg/pe/deb/#{dist}/pe-*{_#{arch},all}.deb"].map { |f| "#{archive_path}/#{File.basename(f)}" }

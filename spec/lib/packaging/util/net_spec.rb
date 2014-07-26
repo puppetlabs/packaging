@@ -6,6 +6,7 @@ describe "Pkg::Util::Net" do
   let(:target_uri) { "http://google.com" }
   let(:content)    { "stuff" }
   let(:rsync)      { "/bin/rsync" }
+  let(:ssh)        { "/usr/local/bin/ssh" }
 
   describe "#fetch_uri" do
     context "given a target directory" do
@@ -52,26 +53,30 @@ describe "Pkg::Util::Net" do
 
   describe "remote_ssh_cmd" do
     it "should fail if ssh is not present" do
-      Pkg::Util::Tool.stub(:find_tool) { fail }
-      Pkg::Util::Tool.should_receive(:check_tool).and_raise(RuntimeError)
+      Pkg::Util::Tool.stub(:find_tool).with("ssh") { fail }
+      Pkg::Util::Tool.should_receive(:check_tool).with("ssh").and_raise(RuntimeError)
       expect{ Pkg::Util::Net.remote_ssh_cmd("foo", "bar") }.to raise_error(RuntimeError)
     end
 
     it "should execute a command :foo on a host :bar" do
-      Kernel.should_receive(:system).with("ssh -t foo 'bar'")
+      Pkg::Util::Tool.should_receive(:check_tool).with("ssh").and_return(ssh)
+      Kernel.should_receive(:system).with("#{ssh} -t foo 'bar'")
       Pkg::Util::Execution.should_receive(:success?).and_return(true)
       Pkg::Util::Net.remote_ssh_cmd("foo", "bar")
     end
 
     it "should escape single quotes in the command" do
-      Kernel.should_receive(:system).with("ssh -t foo 'b'\\''ar'")
+      Pkg::Util::Tool.should_receive(:check_tool).with("ssh").and_return(ssh)
+      Kernel.should_receive(:system).with("#{ssh} -t foo 'b'\\''ar'")
       Pkg::Util::Execution.should_receive(:success?).and_return(true)
       Pkg::Util::Net.remote_ssh_cmd("foo", "b'ar")
     end
 
     it "should raise an error if ssh fails" do
-      Kernel.should_receive(:system).with("ssh -t foo 'bar'").and_raise(RuntimeError)
-      expect{ Pkg::Util::Net.remote_ssh_cmd("foo", "bar") }.to raise_error(RuntimeError)
+      Pkg::Util::Tool.should_receive(:check_tool).with("ssh").and_return(ssh)
+      Kernel.should_receive(:system).with("#{ssh} -t foo 'bar'")
+      Pkg::Util::Execution.should_receive(:success?).and_return(false)
+      expect{ Pkg::Util::Net.remote_ssh_cmd("foo", "bar") }.to raise_error(RuntimeError, /Remote ssh command failed./)
     end
   end
 

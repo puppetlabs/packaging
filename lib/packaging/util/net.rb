@@ -30,9 +30,9 @@ module Pkg::Util::Net
     end
 
     def remote_ssh_cmd(target, command)
-      Pkg::Util::Tool.check_tool('ssh')
+      ssh = Pkg::Util::Tool.check_tool('ssh')
       puts "Executing '#{command}' on #{target}"
-      Kernel.system("ssh -t #{target} '#{command.gsub("'", "'\\\\''")}'")
+      Kernel.system("#{ssh} -t #{target} '#{command.gsub("'", "'\\\\''")}'")
       Pkg::Util::Execution.success? or raise "Remote ssh command failed."
     end
 

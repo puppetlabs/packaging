@@ -154,7 +154,7 @@ namespace :pl do
       build_params  = remote_buildparams(Pkg::Config.distribution_server, Pkg::Config)
       Pkg::Util::Net.rsync_to('pkg', Pkg::Config.distribution_server, remote_repo)
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "cd #{remote_repo} ; rake #{sign_tasks.join(' ')} PARAMS_FILE=#{build_params}")
-      rsync_from("#{remote_repo}/pkg/", Pkg::Config.distribution_server, "pkg/")
+      Pkg::Util::Net.rsync_from("#{remote_repo}/pkg/", Pkg::Config.distribution_server, "pkg/")
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "rm -rf #{remote_repo}")
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "rm #{build_params}")
       puts "Signed packages staged in 'pkg/ directory"

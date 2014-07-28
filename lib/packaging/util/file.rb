@@ -53,7 +53,7 @@ module Pkg::Util::File
         target_opts = "-C #{target}"
       end
       if file_exists?(source, :required => true)
-        ex(%Q[#{tar} #{options} #{target_opts} -xf #{source}])
+        Pkg::Util::Execution.ex(%Q[#{tar} #{options} #{target_opts} -xf #{source}])
       end
     end
 

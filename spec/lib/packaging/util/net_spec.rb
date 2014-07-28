@@ -57,13 +57,18 @@ describe "Pkg::Util::Net" do
     end
 
     it "should execute a command :foo on a host :bar" do
-      Pkg::Util::Net.should_receive(:ex).with("ssh -t foo 'bar'")
+      Kernel.should_receive(:system).with("ssh -t foo 'bar'")
       Pkg::Util::Net.remote_ssh_cmd("foo", "bar")
     end
 
     it "should escape single quotes in the command" do
-      Pkg::Util::Net.should_receive(:ex).with("ssh -t foo 'b'\\''ar'")
+      Kernel.should_receive(:system).with("ssh -t foo 'b'\\''ar'")
       Pkg::Util::Net.remote_ssh_cmd("foo", "b'ar")
+    end
+
+    it "should raise an error if ssh fails" do
+      Kernel.should_receive(:system).with("ssh -t foo 'bar'").and_raise(RuntimeError)
+      expect{ Pkg::Util::Net.remote_ssh_cmd("foo", "bar") }.to raise_error(RuntimeError)
     end
   end
 end

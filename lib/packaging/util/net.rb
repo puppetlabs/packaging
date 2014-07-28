@@ -33,7 +33,7 @@ module Pkg::Util::Net
       Pkg::Util::Tool.check_tool('ssh')
       puts "Executing '#{command}' on #{target}"
       Kernel.system("ssh -t #{target} '#{command.gsub("'", "'\\\\''")}'")
-      $?.success? or raise "Remote ssh command failed."
+      Pkg::Util::Execution.success? or raise "Remote ssh command failed."
     end
 
   end

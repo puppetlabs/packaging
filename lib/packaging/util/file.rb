@@ -6,7 +6,7 @@ module Pkg::Util::File
   class << self
     def mktemp
       mktemp = Pkg::Util::Tool.find_tool('mktemp', :required => true)
-      `#{mktemp} -d -t pkgXXXXXX`.strip
+      Pkg::Util::Execution.ex("#{mktemp} -d -t pkgXXXXXX").strip
     end
 
     def empty_dir?(dir)

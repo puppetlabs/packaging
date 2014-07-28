@@ -389,9 +389,6 @@ end
 # purport to both return the results of the command execution (ala `%x{cmd}`)
 # while also raising an exception if a command does not succeed (ala `sh "cmd"`).
 def ex(command)
-  ret = %x[#{command}]
-  unless $?.success?
-    raise RuntimeError
-  end
-  ret
+  deprecate("ex", "Pkg::Util::Execution.ex")
+  Pkg::Util::Execution.ex(command)
 end

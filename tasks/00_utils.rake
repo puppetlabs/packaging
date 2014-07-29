@@ -155,10 +155,10 @@ end
 
 def ship_gem(file)
   Pkg::Util::File.file_exists?("#{ENV['HOME']}/.gem/credentials", :required => true)
-  ex("gem push #{file}")
+  Pkg::Util::Execution.ex("gem push #{file}")
   begin
     Pkg::Util::Tool.check_tool("stickler")
-    ex("stickler push #{file} --server=#{Pkg::Config.gemhost} 2>/dev/null")
+    Pkg::Util::Execution.ex("stickler push #{file} --server=#{Pkg::Config.gemhost} 2>/dev/null")
     puts "#{file} pushed to stickler server at #{Pkg::Config.internal_gem_host}"
   rescue
     puts "##########################################\n#"
@@ -389,9 +389,6 @@ end
 # purport to both return the results of the command execution (ala `%x{cmd}`)
 # while also raising an exception if a command does not succeed (ala `sh "cmd"`).
 def ex(command)
-  ret = %x[#{command}]
-  unless $?.success?
-    raise RuntimeError
-  end
-  ret
+  deprecate("ex", "Pkg::Util::Execution.ex")
+  Pkg::Util::Execution.ex(command)
 end

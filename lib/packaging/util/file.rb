@@ -6,7 +6,7 @@ module Pkg::Util::File
   class << self
     def mktemp
       mktemp = Pkg::Util::Tool.find_tool('mktemp', :required => true)
-      `#{mktemp} -d -t pkgXXXXXX`.strip
+      Pkg::Util::Execution.ex("#{mktemp} -d -t pkgXXXXXX").strip
     end
 
     def empty_dir?(dir)
@@ -53,7 +53,7 @@ module Pkg::Util::File
         target_opts = "-C #{target}"
       end
       if file_exists?(source, :required => true)
-        ex(%Q[#{tar} #{options} #{target_opts} -xf #{source}])
+        Pkg::Util::Execution.ex(%Q[#{tar} #{options} #{target_opts} -xf #{source}])
       end
     end
 

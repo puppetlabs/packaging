@@ -5,7 +5,7 @@ namespace :pl do
       retry_on_fail(:times => 3) do
         pkgs = Dir["pkg/#{dist}/**/*.rpm"].map { |f| "'#{f.gsub("pkg/#{dist}/", "#{Pkg::Config.yum_repo_path}/#{dist}/")}'"}
         unless pkgs.empty?
-          rsync_to("pkg/#{dist}", Pkg::Config.yum_host, Pkg::Config.yum_repo_path)
+          Pkg::Util::Net.rsync_to("pkg/#{dist}", Pkg::Config.yum_host, Pkg::Config.yum_repo_path)
           remote_set_immutable(Pkg::Config.yum_host, pkgs)
         end
       end if File.directory?("pkg/#{dist}")
@@ -40,7 +40,7 @@ namespace :pl do
   task :ship_debs do
     retry_on_fail(:times => 3) do
       if File.directory?("pkg/deb")
-        rsync_to('pkg/deb/', Pkg::Config.apt_host, Pkg::Config.apt_repo_path)
+        Pkg::Util::Net.rsync_to('pkg/deb/', Pkg::Config.apt_host, Pkg::Config.apt_repo_path)
       end
     end
   end
@@ -50,7 +50,7 @@ namespace :pl do
 
   desc "Update remote ips repository on #{Pkg::Config.ips_host}"
   task :update_ips_repo do
-    rsync_to('pkg/ips/pkgs/', Pkg::Config.ips_host, Pkg::Config.ips_store)
+    Pkg::Util::Net.rsync_to('pkg/ips/pkgs/', Pkg::Config.ips_host, Pkg::Config.ips_store)
     Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "pkgrecv -s #{Pkg::Config.ips_store}/pkgs/#{Pkg::Config.project}Pkg::Config.#{Pkg::Config.ipsversion}.p5p -d #{Pkg::Config.ips_repo} \\*")
     Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "pkgrepo refresh -s #{Pkg::Config.ips_repo}")
     Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "/usr/sbin/svcadm restart svc:/application/pkg/server")
@@ -61,7 +61,7 @@ namespace :pl do
     if Dir['pkg/ips/pkgs/**/*'].empty?
       STDOUT.puts "There aren't any p5p packages in pkg/ips/pkgs. Maybe something went wrong?"
     else
-      rsync_to('pkg/ips/pkgs/', Pkg::Config.ips_package_host, Pkg::Config.ips_path)
+      Pkg::Util::Net.rsync_to('pkg/ips/pkgs/', Pkg::Config.ips_package_host, Pkg::Config.ips_path)
     end
   end if Pkg::Config.build_ips
 
@@ -86,14 +86,14 @@ namespace :pl do
   desc "ship apple dmg to #{Pkg::Config.yum_host}"
   task :ship_dmg => 'pl:fetch' do
     retry_on_fail(:times => 3) do
-      rsync_to('pkg/apple/*.dmg', Pkg::Config.yum_host, Pkg::Config.dmg_path)
+      Pkg::Util::Net.rsync_to('pkg/apple/*.dmg', Pkg::Config.yum_host, Pkg::Config.dmg_path)
     end
   end if Pkg::Config.build_dmg
 
   desc "ship tarball and signature to #{Pkg::Config.tar_host}"
   task :ship_tar => 'pl:fetch' do
     retry_on_fail(:times => 3) do
-      rsync_to("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*", Pkg::Config.tar_host, Pkg::Config.tarball_path)
+      Pkg::Util::Net.rsync_to("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*", Pkg::Config.tar_host, Pkg::Config.tarball_path)
     end
   end
 
@@ -168,7 +168,7 @@ namespace :pl do
       end
       retry_on_fail(:times => 3) do
         ignore_existing = "--ignore-existing"
-        rsync_to("pkg/", Pkg::Config.distribution_server, "#{artifact_dir}/ #{ignore_existing} --exclude repo_configs")
+        Pkg::Util::Net.rsync_to("pkg/", Pkg::Config.distribution_server, "#{artifact_dir}/ #{ignore_existing} --exclude repo_configs")
       end
       # If we just shipped a tagged version, we want to make it immutable
       files = Dir.glob("pkg/**/*").select { |f| File.file?(f) }.map do |file|
@@ -184,7 +184,7 @@ namespace :pl do
       repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/repo_configs"
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
       retry_on_fail(:times => 3) do
-        rsync_to("pkg/repo_configs/", Pkg::Config.distribution_server, repo_dir)
+        Pkg::Util::Net.rsync_to("pkg/repo_configs/", Pkg::Config.distribution_server, repo_dir)
       end
     end
   end

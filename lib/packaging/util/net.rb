@@ -30,11 +30,22 @@ module Pkg::Util::Net
     end
 
     def remote_ssh_cmd(target, command)
-      Pkg::Util::Tool.check_tool('ssh')
+      ssh = Pkg::Util::Tool.check_tool('ssh')
       puts "Executing '#{command}' on #{target}"
-      Kernel.system("ssh -t #{target} '#{command.gsub("'", "'\\\\''")}'")
+      Kernel.system("#{ssh} -t #{target} '#{command.gsub("'", "'\\\\''")}'")
       Pkg::Util::Execution.success? or raise "Remote ssh command failed."
     end
 
+    def rsync_to(source, target, dest)
+      rsync = Pkg::Util::Tool.check_tool('rsync')
+      flags = "-rHlv -O --no-perms --no-owner --no-group --ignore-existing"
+      ex("#{rsync} #{flags} #{source} #{target}:#{dest}")
+    end
+
+    def rsync_from(source, target, dest)
+      rsync = Pkg::Util::Tool.check_tool('rsync')
+      flags = "-rHlv -O --no-perms --no-owner --no-group"
+      ex("#{rsync} #{flags} #{target}:#{source} #{dest}")
+    end
   end
 end

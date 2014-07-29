@@ -22,7 +22,7 @@ namespace :pl do
       else
         warn "Could not find `wget` tool. Falling back to rsyncing from #{Pkg::Config.distribution_server}"
         begin
-          rsync_from("#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}/", Pkg::Config.distribution_server, "pkg/")
+          Pkg::Util::Net.rsync_from("#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}/", Pkg::Config.distribution_server, "pkg/")
         rescue
           fail "Couldn't download packages from distribution server. Try installing wget!"
         end

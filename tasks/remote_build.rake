@@ -13,7 +13,7 @@ if File.exist?("#{ENV['HOME']}/.packaging")
         build_params            = remote_buildparams(host, Pkg::Config)
         STDOUT.puts "Beginning package build on #{host}"
         Pkg::Util::Net.remote_ssh_cmd(host, "cd #{remote_repo} ; rake #{task} PARAMS_FILE=#{build_params} ANSWER_OVERRIDE=no PGUSER=#{ENV['PGUSER']} PGDATABASE=#{ENV['PGDATABASE']} PGHOST=#{ENV['PGHOST']}")
-        rsync_from("#{remote_repo}/pkg/", host, 'pkg/')
+        Pkg::Util::Net.rsync_from("#{remote_repo}/pkg/", host, 'pkg/')
         Pkg::Util::Net.remote_ssh_cmd(host, "rm -rf #{remote_repo}")
         Pkg::Util::Net.remote_ssh_cmd(host, "rm #{build_params}")
         STDOUT.puts "packages from #{host} staged in pkg/ directory"
@@ -111,7 +111,7 @@ if File.exist?("#{ENV['HOME']}/.packaging")
         build_params            = remote_buildparams(host, Pkg::Config)
         puts "Beginning package build on #{host}"
         Pkg::Util::Net.remote_ssh_cmd(host, "cd #{remote_repo} ; rvmsudo rake #{task} PARAMS_FILE=#{build_params} PGUSER=#{ENV['PGUSER']} PGDATABASE=#{ENV['PGDATABASE']} PGHOST=#{ENV['PGHOST']}")
-        rsync_from("#{remote_repo}/pkg/apple", host, 'pkg/')
+        Pkg::Util::Net.rsync_from("#{remote_repo}/pkg/apple", host, 'pkg/')
         Pkg::Util::Net.remote_ssh_cmd(host, "sudo rm -rf #{remote_repo}")
         STDOUT.puts "packages from #{host} staged in pkg/ directory"
       end if Pkg::Config.build_dmg

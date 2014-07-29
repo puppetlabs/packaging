@@ -222,72 +222,8 @@ def deprecate(old_cmd, new_cmd = nil)
   STDOUT.puts
 end
 
-# This is fairly absurd. We're implementing curl by shelling out. What do I
-# wish we were doing? Using a sweet ruby wrapper around curl, such as Curb or
-# Curb-fu. However, because we're using clean build systems and trying to
-# make this portable with minimal system requirements, we can't very well
-# depend on libraries that aren't in the ruby standard libaries. We could
-# also do this using Net::HTTP but that set of libraries is a rabbit hole to
-# go down when what we're trying to accomplish is posting multi-part form
-# data that includes file uploads to jenkins. It gets hairy fairly quickly,
-# but, as they say, pull requests accepted.
-#
-# This method takes two arguments
-# 1) String - the URL to post to
-# 2) Array  - Ordered array of name=VALUE curl form parameters
-def curl_form_data(uri, form_data = [], options = {})
-  curl = Pkg::Util::Tool.find_tool("curl") or fail "Couldn't find curl. Curl is required for posting jenkins to trigger a build. Please install curl and try again."
-  #
-  # Begin constructing the post string.
-  # First, assemble the form_data arguments
-  #
-  post_string = "-i "
-  form_data.each do |param|
-    post_string << "#{param} "
-  end
-
-  # Add the uri
-  post_string << "#{uri}"
-
-  # If this is quiet, we're going to silence all output
-  if options[:quiet]
-    post_string << " >#{Pkg::Util::OS::DEVNULL} 2>&1"
-  end
-
-  %x(#{curl} #{post_string})
-  return $?.success?
-end
-
 def random_string(length)
   rand(36**length).to_s(36)
-end
-
-# Use the curl to create a jenkins job from a valid XML
-# configuration file.
-# Returns the URL to the job
-def create_jenkins_job(name, xml_file)
-  create_url = "http://#{Pkg::Config.jenkins_build_host}/createItem?name=#{name}"
-  form_args = ["-H", '"Content-Type: application/xml"', "--data-binary", "@#{xml_file}"]
-  curl_form_data(create_url, form_args)
-  "http://#{Pkg::Config.jenkins_build_host}/job/#{name}"
-end
-
-# Use the curl to check of a named job is defined on the jenkins server.  We
-# curl the config file rather than just checking if the job exists by curling
-# the job url and passing --head because jenkins will mistakenly return 200 OK
-# if you issue multiple very fast requests just requesting the header.
-def jenkins_job_exists?(name)
-  job_url = "http://#{Pkg::Config.jenkins_build_host}/job/#{name}/config.xml"
-  form_args = ["--silent", "--fail"]
-  curl_form_data(job_url, form_args, :quiet => true)
-end
-
-# Use the provided URL string to print important information with
-# ASCII emphasis
-def print_url_info(url_string)
-  puts "\n////////////////////////////////////////////////////////////////////////////////\n\n
-  Build submitted. To view your build progress, go to\n#{url_string}\n\n
-////////////////////////////////////////////////////////////////////////////////\n\n"
 end
 
 def escape_html(uri)
@@ -364,6 +300,26 @@ end
 def git_pull(remote, branch)
   deprecate('git_pull', 'Pkg::Util::Git.git_pull')
   Pkg::Util::Git.git_pull(remote, branch)
+end
+
+def curl_form_data(uri, form_data = [], options = {})
+  deprecate("curl_form_data", "Pkg::Util::Net.curl_form_data")
+  Pkg::Util::Net.curl_form_data(uri, form_data, options)
+end
+
+def create_jenkins_job(name, xml_file)
+  deprecate("create_jenkins_job", "Pkg::Util::Jenkins.create_jenkins_job")
+  Pkg::Util::Jenkins.create_jenkins_job(name, xml_file)
+end
+
+def jenkins_job_exists?(name)
+  deprecate("jenkins_job_exists", "Pkg::Util::Jenkins.jenkins_job_exists?")
+  Pkg::Util::Jenkins.jenkins_job_exists?(name)
+end
+
+def print_url_info(url_string)
+  deprecate("print_url_info", "Pkg::Util::Net.print_url_info")
+  Pkg::Util::Net.print_url_info(url_string)
 end
 
 # ex combines the behavior of `%x{cmd}` and rake's `sh "cmd"`. `%x{cmd}` has

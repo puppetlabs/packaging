@@ -14,6 +14,7 @@ module Pkg::Util
   require 'packaging/util/jira'
   require 'packaging/util/execution'
   require 'packaging/util/git'
+  require 'packaging/util/jenkins'
 
   def self.boolean_value(var)
     return TRUE if var == TRUE || ( var.is_a?(String) && ( var.downcase == 'true' || var.downcase =~ /^y$|^yes$/))

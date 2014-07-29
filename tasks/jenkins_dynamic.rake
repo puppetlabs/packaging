@@ -38,16 +38,16 @@ namespace :pl do
         Pkg::Util::File.erb_file(erb_template, xml_file, nil, :binding => Pkg::Config.get_binding)
         job_name  = "#{Pkg::Config.project}-#{t.gsub('.xml.erb', '')}-#{Pkg::Config.build_date}-#{Pkg::Config.ref}"
         puts "Checking for existence of #{job_name}..."
-        if jenkins_job_exists?(job_name)
+        if Pkg::Util::Jenkins.jenkins_job_exists?(job_name)
           raise "Job #{job_name} already exists on #{Pkg::Config.jenkins_build_host}"
         else
           retry_on_fail(:times => 3) do
-            url = create_jenkins_job(job_name, xml_file)
+            url = Pkg::Util::Jenkins.create_jenkins_job(job_name, xml_file)
             if t == "packaging.xml.erb"
               ENV["PACKAGE_BUILD_URL"] = url
             end
             puts "Verifying job created successfully..."
-            unless jenkins_job_exists?(job_name)
+            unless Pkg::Util::Jenkins.jenkins_job_exists?(job_name)
               raise "Unable to verify Jenkins job, trying again..."
             end
             puts "Jenkins job created at #{url}"
@@ -98,8 +98,8 @@ namespace :pl do
       # Contstruct the job url
       trigger_url = "#{Pkg::Config.jenkins_build_host}/job/#{name}/build"
 
-      if curl_form_data(trigger_url, curl_args)
-        print_url_info("http://#{Pkg::Config.jenkins_build_host}/job/#{name}")
+      if Pkg::Util::Net.curl_form_data(trigger_url, curl_args)
+        Pkg::Util::Net.print_url_info("http://#{Pkg::Config.jenkins_build_host}/job/#{name}")
         puts "Your packages will be available at #{Pkg::Config.distribution_server}:#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
       else
         fail "An error occurred submitting the job to jenkins. Take a look at the preceding http response for more info."

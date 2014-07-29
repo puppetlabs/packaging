@@ -65,12 +65,7 @@ module Pkg::Deb::Repo
       end
     end
 
-    def create_repos
-      prefix = Pkg::Config.build_pe ? "pe/" : ""
-
-      # First, we test that artifacts exist and set up the repos directory
-      artifact_directory = File.join(Pkg::Config.jenkins_repo_path, Pkg::Config.project, Pkg::Config.ref)
-
+    def repo_creation_command(prefix, artifact_directory)
       cmd = 'echo " Checking for deb build artifacts. Will exit if not found.." ; '
       cmd << "[ -d #{artifact_directory}/artifacts/#{prefix}deb ] || exit 1 ; "
       # Descend into the deb directory and obtain the list of distributions
@@ -106,8 +101,19 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
       cmd << "$reprepro includedeb $dist ../../#{prefix}deb/$dist/*.deb ; popd ; done ; "
       cmd << "popd ; popd "
 
+      return cmd
+    end
+
+    def create_repos
+      prefix = Pkg::Config.build_pe ? "pe/" : ""
+
+      # First, we test that artifacts exist and set up the repos directory
+      artifact_directory = File.join(Pkg::Config.jenkins_repo_path, Pkg::Config.project, Pkg::Config.ref)
+
+      command = repo_creation_command(prefix, artifact_directory)
+
       begin
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, cmd)
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, command)
         # Now that we've created our package repositories, we can generate repo
         # configurations for use with downstream jobs, acceptance clients, etc.
         Pkg::Deb::Repo.generate_repo_configs

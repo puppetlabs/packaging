@@ -34,7 +34,7 @@ module Pkg::Deb::Repo
       end
 
       # We want to exclude index and robots files and only include the http: prefixed elements
-      repo_urls = wget_results.split.uniq.reject{|x| x=~ /\?|index|robots/}.select{|x| x =~ /http:/}.map{|x| x.chomp('/')}
+      repo_urls = wget_results.split.uniq.reject{ |x| x=~ /\?|index|robots/ }.select{ |x| x =~ /http:/ }.map{ |x| x.chomp('/') }
 
 
       # Create apt sources.list files that can be added to hosts for installing
@@ -56,7 +56,7 @@ module Pkg::Deb::Repo
 
     def retrieve_repo_configs
       wget = Pkg::Util::Tool.check_tool("wget")
-      FileUtils.mkdir_p "pkg/repo_configs"
+      FileUtils.mkdir_p("pkg/repo_configs")
       config_url = "#{base_url}/repo_configs/deb/"
       begin
         Pkg::Util::Execution.ex("#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{config_url}")

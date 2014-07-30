@@ -81,21 +81,21 @@ namespace :pl do
       # repodata folders in them, and second that those same directories also
       # contain rpms
       #
-      repo_urls = %x{#{wget} --spider -r -l 5 --no-parent #{base_url} 2>&1}.split.uniq.reject{ |x| x =~ /\?|index/ }.select{|x| x =~ /http:.*repodata\/$/}
+      repo_urls = %x{#{wget} --spider -r -l 5 --no-parent #{base_url} 2>&1}.split.uniq.reject{ |x| x =~ /\?|index/ }.select{ |x| x =~ /http:.*repodata\/$/ }
 
       # RPMs will always exist at the same directory level as the repodata
       # folder, which means if we go up a level we should find rpms
       #
       yum_repos = []
-      repo_urls.map{|x| x.chomp('repodata/')}.each do |url|
-        unless %x{#{wget} --spider -r -l 1 --no-parent #{url} 2>&1}.split.uniq.reject{ |x| x =~ /\?|index/ }.select{|x| x =~ /http:.*\.rpm$/}.empty?
+      repo_urls.map{ |x| x.chomp('repodata/') }.each do |url|
+        unless %x{#{wget} --spider -r -l 1 --no-parent #{url} 2>&1}.split.uniq.reject{ |x| x =~ /\?|index/ }.select{ |x| x =~ /http:.*\.rpm$/ }.empty?
           yum_repos << url
         end
       end
 
       yum_repos.empty? and fail "No rpm repos were found to generate configs from!"
 
-      mkdir_p File.join("pkg","repo_configs","rpm")
+      mkdir_p(File.join("pkg", "repo_configs", "rpm"))
 
       # Parse the rpm configs file to generate repository configs. Each line in
       # the rpm_configs file corresponds with a repo directory on the
@@ -106,7 +106,7 @@ namespace :pl do
         # ignore this one because its an extra
         next if url == "#{base_url}srpm/"
 
-        dist,version,_subdir,arch = url.split('/')[-4..-1]
+        dist, version, _subdir, arch = url.split('/')[-4..-1]
 
         # Create an array of lines that will become our yum config
         #

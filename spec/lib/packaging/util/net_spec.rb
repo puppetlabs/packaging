@@ -103,7 +103,7 @@ describe "Pkg::Util::Net" do
 
     it "should rsync 'thing' from 'foo@bar' to '/home/foo' with flags '-rHlv -O --no-perms --no-owner --no-group'" do
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
-      Pkg::Util::Net.should_receive(:ex).with("#{rsync} -rHlv -O --no-perms --no-owner --no-group foo@bar:thing /home/foo")
+      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} -rHlv -O --no-perms --no-owner --no-group foo@bar:thing /home/foo")
       Pkg::Util::Net.rsync_from("thing", "foo@bar", "/home/foo")
     end
   end

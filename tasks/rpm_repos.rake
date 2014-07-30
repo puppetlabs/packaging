@@ -47,7 +47,7 @@ namespace :pl do
         Rake::Task["pl:jenkins:generate_rpm_repo_configs"].execute
 
         # And once they're created, we can ship them
-        Rake::Task["pl:jenkins:ship_repo_configs"].execute
+        Pkg::Rpm::Repo.ship_repo_configs
       ensure
         # Always remove the lock file, even if we've failed
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/.lock")

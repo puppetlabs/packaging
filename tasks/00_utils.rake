@@ -139,7 +139,7 @@ def git_commit_file(file, message=nil)
     puts
     diff = %x{git diff HEAD #{file}}
     puts diff
-    %x{git commit #{file} -m "Commit #{message} in #{file}" &> /dev/null}
+    %x{git commit #{file} -m "Commit #{message} in #{file}" &> #{Pkg::Util::OS::DEVNULL}}
   end
 end
 
@@ -306,7 +306,7 @@ def curl_form_data(uri, form_data=[], options={})
 
   # If this is quiet, we're going to silence all output
   if options[:quiet]
-    post_string << " >/dev/null 2>&1"
+    post_string << " >#{Pkg::Util::OS::DEVNULL} 2>&1"
   end
 
   %x{#{curl} #{post_string}}

@@ -4,6 +4,7 @@ module Pkg::Util::Version
   class << self
 
     GIT = Pkg::Util::Tool::GIT
+    DEVNULL = Pkg::Util::OS::DEVNULL
 
     def git_co(ref)
       Pkg::Util.in_project_root do
@@ -14,7 +15,7 @@ module Pkg::Util::Version
 
     def git_tagged?
       Pkg::Util.in_project_root do
-        %x{#{GIT} describe >/dev/null 2>&1}
+        %x{#{GIT} describe >#{DEVNULL} 2>&1}
         $?.success?
       end
     end
@@ -51,7 +52,7 @@ module Pkg::Util::Version
     # Return true if we're in a git repo, otherwise false
     def is_git_repo?
       Pkg::Util.in_project_root do
-        %x{#{GIT} rev-parse --git-dir > /dev/null 2>&1}
+        %x{#{GIT} rev-parse --git-dir > #{DEVNULL} 2>&1}
         $?.success?
       end
     end
@@ -95,7 +96,7 @@ module Pkg::Util::Version
     # This is a stub to ease testing...
     def run_git_describe_internal
       Pkg::Util.in_project_root do
-        raw = %x{#{GIT} describe --tags --dirty 2>/dev/null}
+        raw = %x{#{GIT} describe --tags --dirty 2>#{DEVNULL}}
         $?.success? ? raw : nil
       end
     end

@@ -3,6 +3,7 @@
 module Pkg::Util
   require 'erb'
   require 'benchmark'
+  require 'packaging/util/os'
   require 'packaging/util/date'
   require 'packaging/util/tool'
   require 'packaging/util/file'

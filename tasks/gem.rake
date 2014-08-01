@@ -126,6 +126,23 @@ if Pkg::Config.build_gem
     end
   end
 
+  def sign_gem(file)
+    Pkg::Util::Execution.ex("gem unpack #{file}")
+    Pkg::Util::Execution.ex("gem unpack #{file} --spec")
+    base = File.basename(file, ".gem")
+    spec_name = "#{base}.gemspec"
+    spec = YAML.load_file(spec_name)
+    cd base do
+      spec.signing_key = File.expand_path(Pkg::Config.gem_privatekey)
+      spec.cert_chain << File.expand_path(Pkg::Config.gem_publickey)
+      File.open(spec_name, 'w') { |f| f.write(spec.to_yaml) }
+      Pkg::Util::Execution.ex("gem build '#{spec_name}'")
+    end
+    mv("#{base}/#{base}.gem", file)
+    rm_r(base)
+    rm(spec_name)
+  end
+
   namespace :package do
     desc "Build a gem - All gems if platform specific"
     task :gem => [ "clean" ] do
@@ -133,6 +150,22 @@ if Pkg::Config.build_gem
       create_default_gem
       if Pkg::Config.gem_platform_dependencies
         create_platform_specific_gems
+      end
+    end
+  end
+
+  namespace :pl do
+    if Pkg::Config.build_gem
+      desc "Sign built gems, pass path to GEM_PRIVATE and GEM_PUBLIC for signing"
+      task :sign_gem do
+        if Pkg::Config.version_strategy !~ /odd_even|zero_based/ || Pkg::Util::Version.is_final?
+          FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |gem|
+            puts "signing gem #{gem}"
+            sign_gem(gem)
+          end
+        else
+          STDERR.puts "Not signing development gems using odd_even strategy for the sake of your users."
+        end
       end
     end
   end

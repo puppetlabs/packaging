@@ -12,5 +12,15 @@ module Pkg::Rpm::Repo
         Pkg::Util::Net.rsync_to("pkg/repo_configs/rpm/", Pkg::Config.distribution_server, repo_dir)
       end
     end
+
+    def create_repos(directory = "repos")
+      Dir.chdir(directory) do
+        createrepo = Pkg::Util::Tool.find_tool('createrepo')
+        cmd = 'for repodir in $(find ./ -name "*.rpm" | xargs -I {} dirname {}) ; do '
+        cmd << "[ -d ${repodir} ] || continue; "
+        cmd << "pushd ${repodir} && #{createrepo} --checksum=sha --database --update . ; popd ; "
+        cmd << "done ; popd "
+      end
+    end
   end
 end

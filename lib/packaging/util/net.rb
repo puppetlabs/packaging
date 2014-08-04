@@ -9,7 +9,7 @@ module Pkg::Util::Net
     def fetch_uri(uri, target)
       require 'open-uri'
       if Pkg::Util::File.file_writable?(File.dirname(target))
-        File.open(target, 'w') { |f| f.puts( open(uri).read ) }
+        File.open(target, 'w') { |f| f.puts(open(uri).read) }
       end
     end
 
@@ -33,7 +33,7 @@ module Pkg::Util::Net
       ssh = Pkg::Util::Tool.check_tool('ssh')
       puts "Executing '#{command}' on #{target}"
       Kernel.system("#{ssh} -t #{target} '#{command.gsub("'", "'\\\\''")}'")
-      Pkg::Util::Execution.success? or raise "Remote ssh command failed."
+      Pkg::Util::Execution.success? or fail "Remote ssh command failed."
     end
 
     def rsync_to(source, target, dest)

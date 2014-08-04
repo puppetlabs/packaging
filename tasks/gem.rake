@@ -22,7 +22,7 @@ if Pkg::Config.build_gem
         gem_files << file
       end
     end
-    gem_files = gem_files - gem_excludes_file_list
+    gem_files -= gem_excludes_file_list
   end
 
   def add_gem_dependency(opts = {})
@@ -128,7 +128,7 @@ if Pkg::Config.build_gem
 
   namespace :package do
     desc "Build a gem - All gems if platform specific"
-    task :gem => [ "clean" ] do
+    task :gem => ["clean"] do
       mkdir_p File.join(Pkg::Config.project_root, "pkg")
       create_default_gem
       if Pkg::Config.gem_platform_dependencies

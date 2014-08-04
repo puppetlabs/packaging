@@ -34,7 +34,7 @@ module Pkg::Deb::Repo
       end
 
       # We want to exclude index and robots files and only include the http: prefixed elements
-      repo_urls = wget_results.split.uniq.reject{ |x| x=~ /\?|index|robots/ }.select{ |x| x =~ /http:/ }.map{ |x| x.chomp('/') }
+      repo_urls = wget_results.split.uniq.reject { |x| x =~ /\?|index|robots/ }.select { |x| x =~ /http:/ }.map { |x| x.chomp('/') }
 
 
       # Create apt sources.list files that can be added to hosts for installing
@@ -61,7 +61,7 @@ module Pkg::Deb::Repo
       begin
         Pkg::Util::Execution.ex("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
       rescue
-        fail "Couldn't retrieve deb apt repo configs. See preceding http response for more info."
+        raise "Couldn't retrieve deb apt repo configs. See preceding http response for more info."
       end
     end
 

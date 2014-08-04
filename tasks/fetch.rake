@@ -37,7 +37,7 @@ namespace :pl do
     [team_data_url, project_data_url].each do |url|
       begin
         tempdir = Pkg::Util::File.mktemp
-        %x{curl --fail --silent #{flag} #{url}/#{Pkg::Config.builder_data_file} > #{tempdir}/#{Pkg::Config.builder_data_file}}
+        %x(curl --fail --silent #{flag} #{url}/#{Pkg::Config.builder_data_file} > #{tempdir}/#{Pkg::Config.builder_data_file})
         case $?.exitstatus
         when 0
           invoke_task("pl:load_extras", tempdir)

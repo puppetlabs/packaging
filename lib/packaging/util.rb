@@ -15,7 +15,7 @@ module Pkg::Util
   require 'packaging/util/execution'
 
   def self.boolean_value(var)
-    return TRUE if (var == TRUE || ( var.is_a?(String) && ( var.downcase == 'true' || var.downcase =~ /^y$|^yes$/ )))
+    return TRUE if var == TRUE || ( var.is_a?(String) && ( var.downcase == 'true' || var.downcase =~ /^y$|^yes$/))
     FALSE
   end
 
@@ -39,7 +39,7 @@ module Pkg::Util
     begin
       require library
     rescue LoadError
-      fail "Could not load #{library_name}. #{library_name} is required by the packaging repo for this task"
+      raise "Could not load #{library_name}. #{library_name} is required by the packaging repo for this task"
     end
   end
 

@@ -26,7 +26,7 @@ module Pkg::Util
       fields = {
           'summary'     => summary,
           'description' => description,
-          'project'     => { 'key' => project},
+          'project'     => { 'key' => project },
           'issuetype'   => { 'name' => parent ? "Sub-task" : "Task" },
           'assignee'    => { 'name' => assignee },
       }
@@ -54,13 +54,13 @@ module Pkg::Util
     def project?(project)
       @client.Project.find(project)
     rescue
-      fail "Could not find project: #{project}"
+      raise "Could not find project: #{project}"
     end
 
     def user?(user)
       @client.User.find(user)
     rescue
-      fail "Could not find user: #{user}"
+      raise "Could not find user: #{user}"
     end
 
     def project_name(project)
@@ -72,7 +72,7 @@ module Pkg::Util
                                             parent, assignee)
 
       issue = @client.Issue.build
-      issue.save!( {'fields' => fields } )
+      issue.save!({ 'fields' => fields })
 
       # fetch the issue back so we can report the key and id
       issue.fetch

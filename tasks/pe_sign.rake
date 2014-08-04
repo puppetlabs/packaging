@@ -13,8 +13,8 @@ if Pkg::Config.build_pe
       sign_dists = 'el4', 'el5', 'el6', 'el7', 'sles11'
       ['i386', 'x86_64'].each do |arch|
         sign_dists.each do |dist|
-          family=dist[/[a-z]+/]
-          version=dist[/[0-9]+/]
+          family = dist[/[a-z]+/]
+          version = dist[/[0-9]+/]
           rpm_stagedir        = "pkg/pe/rpm/#{family}-#{version}-#{arch}/*.rpm"
           srpm_stagedir       = "pkg/pe/rpm/#{family}-#{version}-srpms/*.rpm"
           if family == 'el' and version >= '6'

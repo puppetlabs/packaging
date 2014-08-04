@@ -52,7 +52,7 @@ module Pkg
       # instance variables. With :format => :yaml, write a yaml file containing
       # the current names,values of Pkg::Config class instance variables
       #
-      def config(args={:target => nil, :format => :hash})
+      def config(args = { :target => nil, :format => :hash })
         case args[:format]
           when :hash
             self.config_to_hash
@@ -78,7 +78,7 @@ module Pkg
       # string. Accept an argument for the write target file. If not specified,
       # the name of the params file is the current git commit sha or tag.
       #
-      def config_to_yaml(target=nil)
+      def config_to_yaml(target = nil)
         file = "#{self.ref}.yaml"
         target = target.nil? ? File.join(Pkg::Util::File.mktemp, "#{self.ref}.yaml") : File.join(target, file)
         Pkg::Util::File.file_writable?(File.dirname(target), :required => true)
@@ -93,7 +93,7 @@ module Pkg
       # Print the names and values of all the params known to the build object
       #
       def print_config
-        self.config_to_hash.each { |k,v| puts "#{k}: #{v}" }
+        self.config_to_hash.each { |k, v| puts "#{k}: #{v}" }
       end
 
       ##
@@ -118,7 +118,7 @@ module Pkg
         # three subdirectories below $project_root, e.g.,
         # $project_root/ext/packaging/lib/packaging.rb.
         #
-        ENV['PROJECT_ROOT'] || File.expand_path(File.join(LIBDIR, "..","..",".."))
+        ENV['PROJECT_ROOT'] || File.expand_path(File.join(LIBDIR, "..", "..", ".."))
       end
 
       def default_packaging_root
@@ -255,7 +255,7 @@ module Pkg
         Pkg::Params::REASSIGNMENTS.each do |v|
           oldval = self.instance_variable_get("@#{v[:oldvar]}")
           newval = self.instance_variable_get("@#{v[:newvar]}")
-          if newval.nil? and not oldval.nil?
+          if newval.nil? and !oldval.nil?
             self.instance_variable_set("@#{v[:newvar]}", oldval)
           end
         end

@@ -52,7 +52,7 @@ module Pkg
         when Array
           @files
         else
-          raise "`files` must be a string or an array!"
+          fail "`files` must be a string or an array!"
         end
 
       Pkg::Util::File.install_files_into_dir(patterns, workdir)
@@ -82,7 +82,7 @@ module Pkg
     # Given the tar object's template files (assumed to be in Pkg::Config.project_root), transform
     # them, removing the originals. If workdir is passed, assume Pkg::Config.project_root
     # exists in workdir
-    def template(workdir=nil)
+    def template(workdir = nil)
       workdir ||= Pkg::Config.project_root
       root = Pathname.new(Pkg::Config.project_root)
 
@@ -93,7 +93,7 @@ module Pkg
       @templates.each do |cur_template|
         if cur_template.is_a?(String)
           template_file = File.expand_path(cur_template)
-          target_file = template_file.sub(File.extname(template_file),"")
+          target_file = template_file.sub(File.extname(template_file), "")
         elsif cur_template.is_a?(Hash)
           template_file = File.expand_path(cur_template["source"])
           target_file = File.expand_path(cur_template["target"])
@@ -113,12 +113,12 @@ module Pkg
         #   essence, templating "in place." This is why we remove the original
         #   files - they're not the originals in the authoritative project
         #   directory, but the originals in the temporary working copy.
-        if File.exist?(File.join(workdir,rel_path_to_template))
-          mkpath(File.dirname( File.join(workdir, rel_path_to_target) ), :verbose => false)
-          Pkg::Util::File.erb_file(File.join(workdir,rel_path_to_template), File.join(workdir, rel_path_to_target), true, :binding => Pkg::Config.get_binding)
-        elsif File.exist?(File.join(root,rel_path_to_template))
-          mkpath(File.dirname( File.join(workdir, rel_path_to_target) ), :verbose => false)
-          Pkg::Util::File.erb_file(File.join(root,rel_path_to_template), File.join(workdir, rel_path_to_target), false, :binding => Pkg::Config.get_binding)
+        if File.exist?(File.join(workdir, rel_path_to_template))
+          mkpath(File.dirname(File.join(workdir, rel_path_to_target)), :verbose => false)
+          Pkg::Util::File.erb_file(File.join(workdir, rel_path_to_template), File.join(workdir, rel_path_to_target), true, :binding => Pkg::Config.get_binding)
+        elsif File.exist?(File.join(root, rel_path_to_template))
+          mkpath(File.dirname(File.join(workdir, rel_path_to_target)), :verbose => false)
+          Pkg::Util::File.erb_file(File.join(root, rel_path_to_template), File.join(workdir, rel_path_to_target), false, :binding => Pkg::Config.get_binding)
         else
           fail "Expected to find #{template_file} in #{root} for templating. But it was not there. Maybe you deleted it?"
         end
@@ -128,7 +128,7 @@ module Pkg
     def tar(target, source)
       mkpath File.dirname(target)
       cd File.dirname(source) do
-        %x[#{@tar} #{@excludes.map{ |x| (" --exclude #{x} ") }.join if @excludes} -zcf '#{File.basename(target)}' '#{File.basename(source)}']
+        %x(#{@tar} #{@excludes.map { |x| (" --exclude #{x} ") }.join if @excludes} -zcf '#{File.basename(target)}' '#{File.basename(source)}')
         unless $?.success?
           fail "Failed to create .tar.gz archive with #{@tar}. Please ensure the tar command in your path accepts the flags '-c', '-z', and '-f'"
         end

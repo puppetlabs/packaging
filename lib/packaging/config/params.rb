@@ -113,47 +113,47 @@ module Pkg::Params
   #
   #           Note: :type is assumed :string if not present
   #
-  ENV_VARS = [{:var => :apt_host,            :envvar => :APT_HOST},
-              {:var => :apt_repo_path,       :envvar => :APT_REPO},
-              {:var => :build_dmg,           :envvar => :DMG,             :type => :bool},
-              {:var => :build_doc,           :envvar => :DOC,             :type => :bool},
-              {:var => :build_gem,           :envvar => :GEM,             :type => :bool},
-              {:var => :build_ips,           :envvar => :IPS,             :type => :bool},
-              {:var => :build_pe,            :envvar => :PE_BUILD,        :type => :bool},
-              {:var => :certificate_pem,     :envvar => :CERT_PEM},
-              {:var => :cows,                :envvar => :COW},
-              {:var => :debug,               :envvar => :DEBUG,           :type => :bool},
-              {:var => :default_cow,         :envvar => :COW},
-              {:var => :default_mock,        :envvar => :MOCK},
-              {:var => :final_mocks,         :envvar => :MOCK},
-              {:var => :gpg_name,            :envvar => :GPG_NAME},
-              {:var => :gpg_key,             :envvar => :GPG_KEY},
-              {:var => :notify,              :envvar => :NOTIFY},
-              {:var => :packager,            :envvar => :PACKAGER},
-              {:var => :pbuild_conf,         :envvar => :PBUILDCONF},
-              {:var => :pe_version,          :envvar => :PE_VER},
-              {:var => :privatekey_pem,      :envvar => :PRIVATE_PEM},
-              {:var => :project_root,        :envvar => :PROJECT_ROOT},
-              {:var => :random_mockroot,     :envvar => :RANDOM_MOCKROOT, :type => :bool},
-              {:var => :rc_mocks,            :envvar => :MOCK},
-              {:var => :release,             :envvar => :RELEASE},
-              {:var => :sign_tar,            :envvar => :SIGN_TAR,        :type => :bool},
-              {:var => :signing_server,      :envvar => :SIGNING_SERVER},
-              {:var => :team,                :envvar => :TEAM},
-              {:var => :update_version_file, :envvar => :NEW_STYLE_PACKAGE},
-              {:var => :yum_repo_path,       :envvar => :YUM_REPO},
-              {:var => :yum_host,            :envvar => :YUM_HOST}]
+  ENV_VARS = [{ :var => :apt_host,            :envvar => :APT_HOST },
+              { :var => :apt_repo_path,       :envvar => :APT_REPO },
+              { :var => :build_dmg,           :envvar => :DMG,             :type => :bool },
+              { :var => :build_doc,           :envvar => :DOC,             :type => :bool },
+              { :var => :build_gem,           :envvar => :GEM,             :type => :bool },
+              { :var => :build_ips,           :envvar => :IPS,             :type => :bool },
+              { :var => :build_pe,            :envvar => :PE_BUILD,        :type => :bool },
+              { :var => :certificate_pem,     :envvar => :CERT_PEM },
+              { :var => :cows,                :envvar => :COW },
+              { :var => :debug,               :envvar => :DEBUG,           :type => :bool },
+              { :var => :default_cow,         :envvar => :COW },
+              { :var => :default_mock,        :envvar => :MOCK },
+              { :var => :final_mocks,         :envvar => :MOCK },
+              { :var => :gpg_name,            :envvar => :GPG_NAME },
+              { :var => :gpg_key,             :envvar => :GPG_KEY },
+              { :var => :notify,              :envvar => :NOTIFY },
+              { :var => :packager,            :envvar => :PACKAGER },
+              { :var => :pbuild_conf,         :envvar => :PBUILDCONF },
+              { :var => :pe_version,          :envvar => :PE_VER },
+              { :var => :privatekey_pem,      :envvar => :PRIVATE_PEM },
+              { :var => :project_root,        :envvar => :PROJECT_ROOT },
+              { :var => :random_mockroot,     :envvar => :RANDOM_MOCKROOT, :type => :bool },
+              { :var => :rc_mocks,            :envvar => :MOCK },
+              { :var => :release,             :envvar => :RELEASE },
+              { :var => :signing_server,      :envvar => :SIGNING_SERVER },
+              { :var => :sign_tar,            :envvar => :SIGN_TAR,        :type => :bool },
+              { :var => :team,                :envvar => :TEAM },
+              { :var => :update_version_file, :envvar => :NEW_STYLE_PACKAGE },
+              { :var => :yum_repo_path,       :envvar => :YUM_REPO },
+              { :var => :yum_host,            :envvar => :YUM_HOST }]
   # Default values that are supplied if the user does not supply them
   #
   # usage is the same as above
   #
-  DEFAULTS = [{:var => :builder_data_file, :val => 'builder_data.yaml'},
-              {:var => :team,              :val => 'dev'},
-              {:var => :random_mockroot,   :val => true},
-              {:var => :keychain_loaded,   :val => false},
-              {:var => :build_date,        :val => Pkg::Util::Date.timestamp('-')},
-              {:var => :release,           :val => '1'},
-              {:var => :internal_gem_host, :val => 'http://rubygems.delivery.puppetlabs.net/'}]
+  DEFAULTS = [{ :var => :builder_data_file, :val => 'builder_data.yaml' },
+              { :var => :team,              :val => 'dev' },
+              { :var => :random_mockroot,   :val => true },
+              { :var => :keychain_loaded,   :val => false },
+              { :var => :build_date,        :val => Pkg::Util::Date.timestamp('-') },
+              { :var => :release,           :val => '1' },
+              { :var => :internal_gem_host, :val => 'http://rubygems.delivery.puppetlabs.net/' }]
 
   # These are variables which, over time, we decided to rename or replace. For
   # backwards compatibility, we assign the value of the old/deprecated
@@ -161,23 +161,23 @@ module Pkg::Params
   # "redirects" - e.g. defaulting the populated value of one parameter for another
   # in case it is not set.
   #
-  REASSIGNMENTS = [{:oldvar => :name,                   :newvar => :project},
-                   {:oldvar => :yum_host,               :newvar => :tar_host},
-                   {:oldvar => :gem_devel_dependencies, :newvar => :gem_development_dependencies},
-                   {:oldvar => :pe_name,                :newvar => :project},
-                   {:oldvar => :project,                :newvar => :gem_name},
-                   {:oldvar => :gpg_name,               :newvar => :gpg_key}]
+  REASSIGNMENTS = [{ :oldvar => :name,                   :newvar => :project },
+                   { :oldvar => :yum_host,               :newvar => :tar_host },
+                   { :oldvar => :gem_devel_dependencies, :newvar => :gem_development_dependencies },
+                   { :oldvar => :pe_name,                :newvar => :project },
+                   { :oldvar => :project,                :newvar => :gem_name },
+                   { :oldvar => :gpg_name,               :newvar => :gpg_key }]
 
   # These are variables that we have deprecated. If they are encountered in a
   # project's config, we issue deprecations for them.
   #
-  DEPRECATIONS = [{:var => :gem_devel_dependencies, :message => "
+  DEPRECATIONS = [{ :var => :gem_devel_dependencies, :message => "
     DEPRECATED, 9-Nov-2013: 'gem_devel_dependencies' has been replaced with
     'gem_development_dependencies.' Please update this field in your
-    project_data.yaml"},
-                  {:var => :gpg_name, :message => "
+    project_data.yaml" },
+                  { :var => :gpg_name, :message => "
     DEPRECATED, 29-Jul-2014: 'gpg_name' has been replaced with 'gpg_key'.
-                   Please update this field in your project_data.yaml"}]
+                   Please update this field in your project_data.yaml" }]
 
 end
 

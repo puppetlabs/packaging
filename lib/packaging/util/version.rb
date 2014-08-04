@@ -8,35 +8,35 @@ module Pkg::Util::Version
 
     def git_co(ref)
       Pkg::Util.in_project_root do
-        %x{#{GIT} reset --hard ; #{GIT} checkout #{ref}}
+        %x(#{GIT} reset --hard ; #{GIT} checkout #{ref})
         $?.success? or fail "Could not checkout #{ref} git branch to build package from...exiting"
       end
     end
 
     def git_tagged?
       Pkg::Util.in_project_root do
-        %x{#{GIT} describe >#{DEVNULL} 2>&1}
+        %x(#{GIT} describe >#{DEVNULL} 2>&1)
         $?.success?
       end
     end
 
     def git_describe
       Pkg::Util.in_project_root do
-        %x{#{GIT} describe}.strip
+        %x(#{GIT} describe).strip
       end
     end
 
     # return the sha of HEAD on the current branch
     def git_sha
       Pkg::Util.in_project_root do
-        %x{#{GIT} rev-parse HEAD}.strip
+        %x(#{GIT} rev-parse HEAD).strip
       end
     end
 
     # Return the ref type of HEAD on the current branch
     def git_ref_type
       Pkg::Util.in_project_root do
-        %x{#{GIT} cat-file -t #{git_describe}}.strip
+        %x(#{GIT} cat-file -t #{git_describe}).strip
       end
     end
 
@@ -52,7 +52,7 @@ module Pkg::Util::Version
     # Return true if we're in a git repo, otherwise false
     def is_git_repo?
       Pkg::Util.in_project_root do
-        %x{#{GIT} rev-parse --git-dir > #{DEVNULL} 2>&1}
+        %x(#{GIT} rev-parse --git-dir > #{DEVNULL} 2>&1)
         $?.success?
       end
     end
@@ -62,7 +62,7 @@ module Pkg::Util::Version
     # Return the basename of the project repo
     def git_project_name
       Pkg::Util.in_project_root do
-        %x{#{GIT} config --get remote.origin.url}.split('/')[-1].chomp(".git").chomp
+        %x(#{GIT} config --get remote.origin.url).split('/')[-1].chomp(".git").chomp
       end
     end
 
@@ -86,9 +86,9 @@ module Pkg::Util::Version
       if git_ref_type == "tag"
         version_string = info.compact
       elsif info[1].to_s.match('^[\d]+')
-        version_string = info.values_at(0,1,3).compact
+        version_string = info.values_at(0, 1, 3).compact
       else
-        version_string = info.values_at(0,1,2,4).compact
+        version_string = info.values_at(0, 1, 2, 4).compact
       end
       version_string
     end
@@ -96,7 +96,7 @@ module Pkg::Util::Version
     # This is a stub to ease testing...
     def run_git_describe_internal
       Pkg::Util.in_project_root do
-        raw = %x{#{GIT} describe --tags --dirty 2>#{DEVNULL}}
+        raw = %x(#{GIT} describe --tags --dirty 2>#{DEVNULL})
         $?.success? ? raw : nil
       end
     end
@@ -111,7 +111,7 @@ module Pkg::Util::Version
 
     def uname_r
       uname = Pkg::Util::Tool.find_tool('uname', :required => true)
-      %x{#{uname} -r}.chomp
+      %x(#{uname} -r).chomp
     end
 
     def get_ips_version
@@ -143,7 +143,7 @@ module Pkg::Util::Version
         rc_num = dash.match(/rc(\d+)/)[1]
         ver = dash.sub(/-?rc[0-9]+/, "-0.#{Pkg::Config.release}rc#{rc_num}").gsub(/(rc[0-9]+)-(\d+)?-?/, '\1.\2')
       else
-        ver = dash.gsub('-','.') + "-#{Pkg::Config.release}"
+        ver = dash.gsub('-', '.') + "-#{Pkg::Config.release}"
       end
 
       ver.split('-')
@@ -197,7 +197,7 @@ module Pkg::Util::Version
         when nil
           ret = is_rc?
       end
-      return (! ret)
+      return (!ret)
     end
 
     # the rc_final strategy (default)
@@ -265,7 +265,7 @@ module Pkg::Util::Version
     #
     # If you invoke this the version will only be modified in the temporary copy,
     # with the intent that it never change the official source tree.
-    def versionbump(workdir=nil)
+    def versionbump(workdir = nil)
       version = ENV['VERSION'] || Pkg::Config.version.to_s.strip
       new_version = '"' + version + '"'
 
@@ -276,7 +276,7 @@ module Pkg::Util::Version
 
       # Match version files containing 'VERSION = "x.x.x"' and just x.x.x
       if version_string = contents.match(/VERSION =.*/)
-        old_version = version_string.to_s.split()[-1]
+        old_version = version_string.to_s.split[-1]
       else
         old_version = contents
       end
@@ -295,7 +295,7 @@ module Pkg::Util::Version
       end
 
       # ...and write it back on out.
-      File.open(version_file, 'w') {|f| f.write contents }
+      File.open(version_file, 'w') { |f| f.write contents }
     end
   end
 end

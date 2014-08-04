@@ -118,7 +118,7 @@ namespace :pl do
         when /dmg|apple/ then "dmg"
         when /gem/ then "gem"
         when /tar/ then "tar"
-        else raise "Could not determine build type for #{build_task}"
+        else fail "Could not determine build type for #{build_task}"
       end
 
       # Create a string of metrics to send to Jenkins for data analysis
@@ -134,7 +134,7 @@ namespace :pl do
         when /gem/ then "gem"
         when /sles/ then "sles"
         when /tar/ then "tar"
-        else raise "Could not determine build type for #{build_task}"
+        else fail "Could not determine build type for #{build_task}"
       end
 
       if Pkg::Config.pe_version
@@ -152,7 +152,7 @@ namespace :pl do
                     { "name" => "PROJECT_BUNDLE",   "file"  => "file1" },
                     { "name" => "PROJECT",          "value" => "#{Pkg::Config.project}" },
                     { "name" => "BUILD_TYPE",       "label" => "#{build_type}" },
-                    { "name" => "METRICS",          "value" => "#{metrics}"}]
+                    { "name" => "METRICS",          "value" => "#{metrics}" }]
 
       # Initialize the args array that will hold all of the arguments we pass
       # to the curl utility method.
@@ -163,7 +163,7 @@ namespace :pl do
       # downstream job, and with what URI.
       if ENV['DOWNSTREAM_JOB']
         parameters << { "name" => "DOWNSTREAM_JOB", "value" => ENV['DOWNSTREAM_JOB'] }
-        args << [ "-Fname=DOWNSTREAM_JOB", "-Fvalue=#{ENV['DOWNSTREAM_JOB']}" ]
+        args << ["-Fname=DOWNSTREAM_JOB", "-Fvalue=#{ENV['DOWNSTREAM_JOB']}"]
       end
 
       # Contruct the json string
@@ -174,10 +174,10 @@ namespace :pl do
       #
       args <<  [
       "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
-      "-Fname=PROJECT_BUNDLE"  , "-Ffile1=@#{bundle}",
-      "-Fname=PROJECT"         , "-Fvalue=#{Pkg::Config.project}",
-      "-Fname=BUILD_TYPE"      , "-Fvalue=#{build_type}",
-      "-Fname=METRICS"         , "-Fvalue=#{metrics}",
+      "-Fname=PROJECT_BUNDLE",   "-Ffile1=@#{bundle}",
+      "-Fname=PROJECT",          "-Fvalue=#{Pkg::Config.project}",
+      "-Fname=BUILD_TYPE",       "-Fvalue=#{build_type}",
+      "-Fname=METRICS",          "-Fvalue=#{metrics}",
       "-FSubmit=Build",
       "-Fjson=#{json.to_json}",
       ]
@@ -213,8 +213,8 @@ end
 # tasks. We can assume deb, mock, but not gem/dmg.
 #
 tasks = ["deb", "mock", "tar"]
-tasks << "gem" if Pkg::Config.build_gem and ! Pkg::Config.build_pe
-tasks << "dmg" if Pkg::Config.build_dmg and ! Pkg::Config.build_pe
+tasks << "gem" if Pkg::Config.build_gem and !Pkg::Config.build_pe
+tasks << "dmg" if Pkg::Config.build_dmg and !Pkg::Config.build_pe
 
 namespace :pl do
   namespace :jenkins do
@@ -250,7 +250,7 @@ namespace :pl do
 
     desc "Retrieve packages built by jenkins, sign, and ship all!"
     task :uber_ship => "pl:fetch" do
-      uber_tasks = ["jenkins:retrieve", "jenkins:sign_all", "uber_ship", "remote:freight", "remote:update_yum_repo" ]
+      uber_tasks = ["jenkins:retrieve", "jenkins:sign_all", "uber_ship", "remote:freight", "remote:update_yum_repo"]
       uber_tasks.map { |t| "pl:#{t}" }.each { |t| Rake::Task[t].invoke }
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
     end
@@ -336,7 +336,7 @@ namespace :pl do
       begin
         require 'json'
       rescue LoadError
-        fail "Couldn't require 'json'. JSON is required for sanely generating the string we curl to Jenkins."
+        raise "Couldn't require 'json'. JSON is required for sanely generating the string we curl to Jenkins."
       end
 
       # Assemble the JSON string for the JSON parameter

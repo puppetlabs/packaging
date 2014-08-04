@@ -36,10 +36,10 @@ namespace :pl do
         erb_template  = File.join(template_dir, t)
         xml_file = File.join(work_dir, t.gsub('.erb', ''))
         Pkg::Util::File.erb_file(erb_template, xml_file, nil, :binding => Pkg::Config.get_binding)
-        job_name  = "#{Pkg::Config.project}-#{t.gsub('.xml.erb','')}-#{Pkg::Config.build_date}-#{Pkg::Config.ref}"
+        job_name  = "#{Pkg::Config.project}-#{t.gsub('.xml.erb', '')}-#{Pkg::Config.build_date}-#{Pkg::Config.ref}"
         puts "Checking for existence of #{job_name}..."
         if jenkins_job_exists?(job_name)
-          raise "Job #{job_name} already exists on #{Pkg::Config.jenkins_build_host}"
+          fail "Job #{job_name} already exists on #{Pkg::Config.jenkins_build_host}"
         else
           retry_on_fail(:times => 3) do
             url = create_jenkins_job(job_name, xml_file)
@@ -48,7 +48,7 @@ namespace :pl do
             end
             puts "Verifying job created successfully..."
             unless jenkins_job_exists?(job_name)
-              raise "Unable to verify Jenkins job, trying again..."
+              fail "Unable to verify Jenkins job, trying again..."
             end
             puts "Jenkins job created at #{url}"
           end
@@ -79,7 +79,7 @@ namespace :pl do
       parameters = [{ "name" => "BUILD_PROPERTIES", "file"  => "file0" },
                     { "name" => "PROJECT_BUNDLE",   "file"  => "file1" },
                     { "name" => "PROJECT",          "value" => "#{Pkg::Config.project}" },
-                    { "name" => "METRICS",          "value" => "#{metrics}"}]
+                    { "name" => "METRICS",          "value" => "#{metrics}" }]
 
       # Contruct the json string
       json = JSON.generate("parameter" => parameters)
@@ -88,9 +88,9 @@ namespace :pl do
       # to the curl utility method.
       curl_args =  [
       "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
-      "-Fname=PROJECT_BUNDLE"  , "-Ffile1=@#{bundle}",
-      "-Fname=PROJECT"         , "-Fvalue=#{Pkg::Config.project}",
-      "-Fname=METRICS"         , "-Fvalue=#{metrics}",
+      "-Fname=PROJECT_BUNDLE",   "-Ffile1=@#{bundle}",
+      "-Fname=PROJECT",          "-Fvalue=#{Pkg::Config.project}",
+      "-Fname=METRICS",          "-Fvalue=#{metrics}",
       "-FSubmit=Build",
       "-Fjson=#{json.to_json}",
       ]

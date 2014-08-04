@@ -31,7 +31,7 @@ if Pkg::Config.build_pe
         dist = File.basename(dist)
         unless target_path
           puts "Creating temporary incoming dir on #{Pkg::Config.apt_host}"
-          target_path = %x{ssh -t #{Pkg::Config.apt_host} 'mktemp -d -t incoming-XXXXXX'}.chomp
+          target_path = %x(ssh -t #{Pkg::Config.apt_host} 'mktemp -d -t incoming-XXXXXX').chomp
         end
 
         #   For reprepro, we ship just the debs into an incoming dir. On the remote end,
@@ -85,14 +85,14 @@ if Pkg::Config.build_pe
 
       puts "Shipping all built artifacts to to archive directories on #{Pkg::Config.apt_host}"
 
-      Pkg::Config.cows.split(' ').map { |i| i.sub('.cow','') }.each do |cow|
+      Pkg::Config.cows.split(' ').map { |i| i.sub('.cow', '') }.each do |cow|
         _base, dist, arch = cow.split('-')
         unless Pkg::Util::File.empty_dir? "pkg/pe/deb/#{dist}"
           archive_path = "#{base_path}/#{dist}-#{arch}"
 
           # Ship arch-specific debs to correct dir, e.g. 'squeeze-i386'
           unless Dir["pkg/pe/deb/#{dist}/pe-*_#{arch}.deb"].empty?
-            Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_#{arch}.deb --ignore-existing", Pkg::Config.apt_host, "#{archive_path}/" )
+            Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_#{arch}.deb --ignore-existing", Pkg::Config.apt_host, "#{archive_path}/")
           end
 
           # Ship all-arch debs to same dist-location, but to all known
@@ -129,15 +129,15 @@ if Pkg::Config.build_pe
       desc "Update remote rpm repodata for PE on #{Pkg::Config.yum_host}"
       task :update_yum_repo => "pl:fetch" do
         repo_base_path = File.join(Pkg::Config.yum_repo_path, Pkg::Config.pe_version, "repos")
-        mock_paths = Pkg::Config.final_mocks.split.map {|mock| "#{mock_el_family(mock)}-#{mock_el_ver(mock)}"}
+        mock_paths = Pkg::Config.final_mocks.split.map { |mock| "#{mock_el_family(mock)}-#{mock_el_ver(mock) }" }
 
         # This entire command is going to be passed across SSH, but it's unwieldy on a
         # single line. By breaking it into a series of concatenated strings, we can maintain
         # a semblance of formatting and structure (nevermind readability).
-        command  = %{for dir in #{repo_base_path}/{#{mock_paths.join(",")}}-*; do}
-        command += %{  sudo createrepo --checksum=sha --quiet --database --update $dir; }
-        command += %{done; }
-        command += %{sync}
+        command  = %(for dir in #{repo_base_path}/{#{mock_paths.join(",")}}-*; do)
+        command += %(  sudo createrepo --checksum=sha --quiet --database --update $dir; )
+        command += %(done; )
+        command += %(sync)
 
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, command)
       end

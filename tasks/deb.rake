@@ -1,6 +1,6 @@
 require 'pathname'
 
-def pdebuild args
+def pdebuild(args)
   results_dir = args[:work_dir]
   cow         = args[:cow]
   set_cow_envs(cow)
@@ -20,16 +20,16 @@ def update_cow(cow)
   end
 end
 
-def debuild args
+def debuild(args)
   results_dir = args[:work_dir]
   begin
     sh "debuild --no-lintian -uc -us"
   rescue
-    fail "Something went wrong. Hopefully the backscroll or #{results_dir}/#{Pkg::Config.project}_#{Pkg::Config.debversion}.build file has a clue."
+    raise "Something went wrong. Hopefully the backscroll or #{results_dir}/#{Pkg::Config.project}_#{Pkg::Config.debversion}.build file has a clue."
   end
 end
 
-task :prep_deb_tars, :work_dir do |t,args|
+task :prep_deb_tars, :work_dir do |t, args|
   work_dir = args.work_dir
   cp_p "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz", work_dir
   cd work_dir do
@@ -62,7 +62,7 @@ task :prep_deb_tars, :work_dir do |t,args|
   end
 end
 
-task :build_deb, :deb_command, :cow do |t,args|
+task :build_deb, :deb_command, :cow do |t, args|
   bench = Benchmark.realtime do
     deb_build = args.deb_command
     cow       = args.cow
@@ -71,7 +71,7 @@ task :build_deb, :deb_command, :cow do |t,args|
     dest_dir  = "#{Pkg::Config.project_root}/pkg/#{subdir}deb/#{cow.split('-')[1] unless cow.nil?}"
     Pkg::Util::Tool.check_tool(deb_build)
     mkdir_p dest_dir
-    deb_args  = { :work_dir => work_dir, :cow => cow}
+    deb_args  = { :work_dir => work_dir, :cow => cow }
     Rake::Task[:prep_deb_tars].reenable
     Rake::Task[:prep_deb_tars].invoke(work_dir)
     cd "#{work_dir}/#{Pkg::Config.project}-#{Pkg::Config.debversion}" do

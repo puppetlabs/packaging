@@ -8,6 +8,7 @@ describe "Pkg::Deb::Repo" do
   let(:base_url)      { "http://#{builds_server}/#{project}/#{ref}" }
   let(:cows)          { ["squeeze", "wheezy", "lucid", "woody", ""] }
   let(:wget_results)  { cows.map {|cow| "#{base_url}/repos/apt/#{cow}" }.join("\n") }
+  let(:wget_garbage)  { "\n and an index\nhttp://somethingelse.com/robots" }
   let(:repo_configs)  { cows.reject {|cow| cow.empty?}.map {|dist| "pkg/repo_configs/deb/pl-#{project}-#{ref}-#{dist}.list" } }
 
   # Setup and tear down for the tests
@@ -43,7 +44,7 @@ describe "Pkg::Deb::Repo" do
 
     it "writes the expected repo configs to disk" do
       Pkg::Util::Tool.should_receive(:find_tool).with("wget", {:required => true}).and_return(wget)
-      Pkg::Util::Execution.should_receive(:ex).with("#{wget} --spider -r -l 1 --no-parent #{base_url}/repos/apt/ 2>&1").and_return(wget_results)
+      Pkg::Util::Execution.should_receive(:ex).with("#{wget} --spider -r -l 1 --no-parent #{base_url}/repos/apt/ 2>&1").and_return(wget_results + wget_garbage)
       Pkg::Util::Execution.should_receive(:success?).and_return(true)
       FileUtils.should_receive(:mkdir_p).with("pkg/repo_configs/deb")
       config = []

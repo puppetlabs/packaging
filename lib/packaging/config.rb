@@ -29,9 +29,17 @@ module Pkg
       #   value for each Config param to the corresponding hash key,value.
       #
       def config_from_hash(data = {})
+        build_type="pl"
+        if @build_pe
+          build_type="pe"
+        end
         data.each do |param, value|
           if Pkg::Params::BUILD_PARAMS.include?(param.to_sym)
             self.instance_variable_set("@#{param}", value)
+          elsif value.is_a?(Hash)
+            if param == build_type
+              config_from_hash(value)
+            end
           else
             warn "Warning - No build data parameter found for '#{param}'. Perhaps you have an erroneous entry in your yaml file?"
           end

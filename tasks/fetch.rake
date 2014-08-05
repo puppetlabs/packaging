@@ -34,7 +34,7 @@ namespace :pl do
         flag = "-k"
       end
     end
-    [project_data_url, team_data_url].each do |url|
+    [team_data_url, project_data_url].each do |url|
       begin
         tempdir = Pkg::Util::File.mktemp
         %x{curl --fail --silent #{flag} #{url}/#{Pkg::Config.builder_data_file} > #{tempdir}/#{Pkg::Config.builder_data_file}}

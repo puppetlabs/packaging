@@ -83,7 +83,7 @@ module Pkg::Rpm::Repo
       yum_repos.each do |url|
         # We ship a base 'srpm' that gets turned into a repo, but we want to
         # ignore this one because its an extra
-        next if url == "#{base_url}srpm/"
+        next if url == "#{repo_base}srpm/"
 
         dist, version, _subdir, arch = url.split('/')[-4..-1]
 

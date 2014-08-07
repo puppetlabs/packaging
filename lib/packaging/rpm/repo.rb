@@ -42,6 +42,13 @@ module Pkg::Rpm::Repo
       end
     end
 
+    # Generate yum configuration files that point to the repositories created
+    # on the distribution server with packages created from the current source
+    # repo commit. There is one for each dist/version that is packaged (e.g.
+    # el5, el6, etc). Files are created in pkg/repo_configs/rpm and are named
+    # pl-$project-$sha.conf, and can be placed in /etc/yum.repos.d to enable
+    # clients to install these packages.
+    #
     def generate_repo_configs(source = "repos", target = "repo_configs", signed = false)
       # We have a hard requirement on wget because of all the download magicks
       # we have to do
@@ -108,13 +115,6 @@ module Pkg::Rpm::Repo
       puts "Wrote yum configuration files for #{Pkg::Config.project} at #{Pkg::Config.ref} to pkg/#{target}/rpm"
     end
 
-    # Generate yum configuration files that point to the repositories created
-    # on the distribution server with packages created from the current source
-    # repo commit. There is one for each dist/version that is packaged (e.g.
-    # el5, el6, etc). Files are created in pkg/repo_configs/rpm and are named
-    # pl-$project-$sha.conf, and can be placed in /etc/yum.repos.d to enable
-    # clients to install these packages.
-    #
     def create_repos_from_artifacts
       begin
         # Formulate our command string, which will just find directories with rpms

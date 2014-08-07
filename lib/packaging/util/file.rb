@@ -18,9 +18,7 @@ module Pkg::Util::File
     def directories(dir)
       if File.directory?(dir)
         Dir.chdir(dir) do
-          Dir.glob("*").select do |entry|
-            File.directory?(entry)
-          end
+          Dir.glob("*").select { |entry| File.directory?(entry) }
         end
       end
     end

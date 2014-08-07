@@ -43,7 +43,7 @@ namespace :pl do
     end
 
     task :generate_nightly_repo_configs => "pl:fetch" do
-      Pkg::Rpm::Repo.generate_repo_configs('nightly_repos', 'nightly_repo_configs')
+      Pkg::Rpm::Repo.generate_repo_configs('nightly_repos', 'nightly_repo_configs', true)
       Pkg::Deb::Repo.generate_repo_configs('nightly_repos', 'nightly_repo_configs')
     end
 

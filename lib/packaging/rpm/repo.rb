@@ -42,7 +42,7 @@ module Pkg::Rpm::Repo
       end
     end
 
-    def generate_repo_configs(source = "repos", target = "repo_configs")
+    def generate_repo_configs(source = "repos", target = "repo_configs", signed = false)
       # We have a hard requirement on wget because of all the download magicks
       # we have to do
       #
@@ -93,7 +93,12 @@ module Pkg::Rpm::Repo
         config << ["name=PL Repo for #{Pkg::Config.project} at commit #{Pkg::Config.ref}"]
         config << ["baseurl=#{url}"]
         config << ["enabled=1"]
-        config << ["gpgcheck=0"]
+        if signed
+          config << ["gpgcheck=1"]
+          config << ["gpgkey=http://#{Pkg::Config.builds_server}/#{Pkg::Config.gpg_key}"]
+        else
+          config << ["gpgcheck=0"]
+        end
 
         # Write the new config to a file under our repo configs dir
         #

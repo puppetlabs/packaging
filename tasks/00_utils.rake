@@ -178,9 +178,9 @@ def handle_method_failure(method, args)
   end
 end
 
-def invoke_task(task, args = nil)
+def invoke_task(task, *args)
   Rake::Task[task].reenable
-  Rake::Task[task].invoke(args)
+  Rake::Task[task].invoke(*args)
 end
 
 def confirm_ship(files)

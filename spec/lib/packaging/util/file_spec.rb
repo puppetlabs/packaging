@@ -100,7 +100,7 @@ describe "Pkg::Util::File" do
       end
 
       Pkg::Util::File.install_files_into_dir(patterns, workdir)
-      rm_rf workdir
+      FileUtils.rm_rf workdir
     end
   end
 

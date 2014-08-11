@@ -41,7 +41,9 @@ module Pkg::Params
                   :gem_executables,
                   :gem_files,
                   :gem_forge_project,
+                  :gem_host,
                   :gem_name,
+                  :gem_path,
                   :gem_platform_dependencies,
                   :gem_rdoc_options,
                   :gem_require_path,
@@ -153,7 +155,9 @@ module Pkg::Params
               { :var => :keychain_loaded,   :val => false },
               { :var => :build_date,        :val => Pkg::Util::Date.timestamp('-') },
               { :var => :release,           :val => '1' },
-              { :var => :internal_gem_host, :val => 'http://rubygems.delivery.puppetlabs.net/' }]
+              { :var => :internal_gem_host, :val => 'http://rubygems.delivery.puppetlabs.net/' },
+              { :var => :gem_path,          :val => :tarball_path },
+              { :var => :gem_host,          :val => :tar_host }]
 
   # These are variables which, over time, we decided to rename or replace. For
   # backwards compatibility, we assign the value of the old/deprecated

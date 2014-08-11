@@ -91,6 +91,7 @@ module Pkg::Params
                   :rpmversion,
                   :ref,
                   :sign_tar,
+                  :signing_server,
                   :summary,
                   :tar_excludes,
                   :tar_host,
@@ -137,6 +138,7 @@ module Pkg::Params
               {:var => :rc_mocks,            :envvar => :MOCK},
               {:var => :release,             :envvar => :RELEASE},
               {:var => :sign_tar,            :envvar => :SIGN_TAR,        :type => :bool},
+              {:var => :signing_server,      :envvar => :SIGNING_SERVER},
               {:var => :team,                :envvar => :TEAM},
               {:var => :update_version_file, :envvar => :NEW_STYLE_PACKAGE},
               {:var => :yum_repo_path,       :envvar => :YUM_REPO},
@@ -163,7 +165,8 @@ module Pkg::Params
                    {:oldvar => :yum_host,               :newvar => :tar_host},
                    {:oldvar => :gem_devel_dependencies, :newvar => :gem_development_dependencies},
                    {:oldvar => :pe_name,                :newvar => :project},
-                   {:oldvar => :project,                :newvar => :gem_name}]
+                   {:oldvar => :project,                :newvar => :gem_name},
+                   {:oldvar => :gpg_name,               :newvar => :gpg_key}]
 
   # These are variables that we have deprecated. If they are encountered in a
   # project's config, we issue deprecations for them.
@@ -171,7 +174,10 @@ module Pkg::Params
   DEPRECATIONS = [{:var => :gem_devel_dependencies, :message => "
     DEPRECATED, 9-Nov-2013: 'gem_devel_dependencies' has been replaced with
     'gem_development_dependencies.' Please update this field in your
-    project_data.yaml"}]
+    project_data.yaml"},
+                  {:var => :gpg_name, :message => "
+    DEPRECATED, 29-Jul-2014: 'gpg_name' has been replaced with 'gpg_key'.
+                   Please update this field in your project_data.yaml"}]
 
 end
 

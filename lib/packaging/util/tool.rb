@@ -36,6 +36,6 @@ module Pkg::Util::Tool
   #   Set up paths to system tools we use in the packaging repo
   #   no matter what distribution we're packaging for.
 
-  GIT = Pkg::Util::Tool.find_tool('git', :required => :true)
+  GIT = Pkg::Util::Tool.check_tool('git')
 
 end

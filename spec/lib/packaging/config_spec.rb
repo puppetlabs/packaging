@@ -90,6 +90,7 @@ describe "Pkg::Config" do
                   :rpmversion,
                   :ref,
                   :sign_tar,
+                  :signing_server,
                   :summary,
                   :tar_excludes,
                   :tar_host,

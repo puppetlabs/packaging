@@ -26,6 +26,7 @@ PACKAGING_TASK_DIR = File.join(PACKAGING_ROOT, 'tasks')
   'jenkins_dynamic.rake',
   'load_extras.rake',
   'mock.rake',
+  'nightly_repos.rake',
   'pe_deb.rake',
   'pe_remote.rake',
   'pe_rpm.rake',

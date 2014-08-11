@@ -24,7 +24,7 @@ def sign_rpm(rpm, sign_flags = nil)
     # accept extra flags to override certain signing behavior for older
     # versions of rpm, e.g. specifying V3 signatures instead of V4.
     #
-    sh "#{rpm_cmd} #{gpg_check_cmd} --define '%_gpg_name #{Pkg::Config.gpg_name}' --define '%__gpg_sign_cmd %{__gpg} gpg #{sign_flags} #{input_flag} --batch --no-verbose --no-armor --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm}"
+    sh "#{rpm_cmd} #{gpg_check_cmd} --define '%_gpg_name #{Pkg::Config.gpg_key}' --define '%__gpg_sign_cmd %{__gpg} gpg #{sign_flags} #{input_flag} --batch --no-verbose --no-armor --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm}"
   end
 
 end
@@ -61,14 +61,16 @@ namespace :pl do
     gpg_sign_file "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
   end
 
-  desc "Sign mocked rpms, Defaults to PL Key, pass KEY to override"
-  task :sign_rpms do
+  desc "Sign mocked rpms, Defaults to PL Key, pass GPG_KEY to override"
+  task :sign_rpms, :root_dir do |t, args|
+    rpm_dir = args.root_dir || "pkg"
+
     # Find x86_64 noarch rpms that have been created as hard links and remove them
-    rm_r Dir["pkg/*/*/*/x86_64/*.noarch.rpm"]
+    rm_r Dir["#{rpm_dir}/*/*/*/x86_64/*.noarch.rpm"]
     # We'll sign the remaining noarch
-    all_rpms = Dir["pkg/**/*.rpm"]
-    old_rpms    = Dir["pkg/el/4/**/*.rpm"] + Dir["pkg/el/5/**/*.rpm"]
-    modern_rpms = Dir["pkg/el/6/**/*.rpm"] + Dir["pkg/el/7/**/*.rpm"] + Dir["pkg/fedora/**/*.rpm"]
+    all_rpms = Dir["#{rpm_dir}/**/*.rpm"]
+    old_rpms    = Dir["#{rpm_dir}/el/4/**/*.rpm"] + Dir["#{rpm_dir}/el/5/**/*.rpm"]
+    modern_rpms = Dir["#{rpm_dir}/el/6/**/*.rpm"] + Dir["#{rpm_dir}/el/7/**/*.rpm"] + Dir["#{rpm_dir}/fedora/**/*.rpm"]
 
     unsigned_rpms = all_rpms - old_rpms - modern_rpms
     unless unsigned_rpms.empty?
@@ -85,14 +87,14 @@ namespace :pl do
       sign_rpm(modern_rpms.join(' '))
     end
     # Now we hardlink them back in
-    Dir["pkg/*/*/*/i386/*.noarch.rpm"].each do |rpm|
+    Dir["#{rpm_dir}/*/*/*/i386/*.noarch.rpm"].each do |rpm|
       cd File.dirname(rpm) do
         FileUtils.ln(File.basename(rpm), File.join("..","x86_64"), :force => true, :verbose => true)
       end
     end
   end
 
-  desc "Sign ips package, Defaults to PL Key, pass KEY to override"
+  desc "Sign ips package, uses PL certificates by default, update privatekey_pem, certificate_pem, and ips_inter_cert in project_data.yaml to override."
   task :sign_ips, :repo_uri, :fmri do |t, args|
     repo_uri  = args.repo_uri
     fmri      = args.fmri
@@ -117,7 +119,7 @@ namespace :pl do
     puts "All rpms signed"
   end
 
-  desc "Sign generated debian changes files. Defaults to PL Key, pass KEY to override"
+  desc "Sign generated debian changes files. Defaults to PL Key, pass GPG_KEY to override"
   task :sign_deb_changes do
     begin
       load_keychain if Pkg::Util::Tool.find_tool('keychain')

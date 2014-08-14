@@ -86,7 +86,7 @@ if Pkg::Config.pre_tar_task
       Bundler.settings.without = []
 
       # Stupid bundler requires this because it's not abstracted out into a library that doesn't need IO
-      Bundler.ui = UI.new()
+      Bundler.ui = UI.new
       Bundler.rubygems.ui = ::RGProxy.new(Bundler.ui)
       Bundler.ui.level = "debug"
 

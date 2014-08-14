@@ -1,11 +1,11 @@
 @metrics          = []
-def add_shipped_metrics args
+def add_shipped_metrics(args)
   @metrics << {
     :type         => 'shipped',
-    :package      => ( args[:package]             || Pkg::Config.project    ),
-    :version      => ( args[:version]             || Pkg::Config.version    ),
-    :pe_version   => ( args[:pe_version]          || Pkg::Config.pe_version ),
-    :is_rc        => ( args[:is_rc]               || false             ),
+    :package      => (args[:package]             || Pkg::Config.project),
+    :version      => (args[:version]             || Pkg::Config.version),
+    :pe_version   => (args[:pe_version]          || Pkg::Config.pe_version),
+    :is_rc        => (args[:is_rc]               || false),
   }
 end
 

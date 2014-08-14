@@ -34,7 +34,7 @@ def sign_legacy_rpm(rpm)
 end
 
 def rpm_has_sig(rpm)
-  %x{rpm -Kv #{rpm} | grep "#{Pkg::Config.gpg_key.downcase}" &> /dev/null}
+  %x(rpm -Kv #{rpm} | grep "#{Pkg::Config.gpg_key.downcase}" &> /dev/null)
   $?.success?
 end
 
@@ -50,7 +50,7 @@ end
 # technically this can be any ips-compliant package identifier, e.g. application/facter
 # repo_uri is the path to the repo currently containing the package
 def sign_ips(fmri, repo_uri)
-  %x{pkgsign -s #{repo_uri}  -k #{Pkg::Config.privatekey_pem} -c #{Pkg::Config.certificate_pem} -i #{Pkg::Config.ips_inter_cert} #{fmri}}
+  %x(pkgsign -s #{repo_uri}  -k #{Pkg::Config.privatekey_pem} -c #{Pkg::Config.certificate_pem} -i #{Pkg::Config.ips_inter_cert} #{fmri})
 end
 
 namespace :pl do
@@ -89,7 +89,7 @@ namespace :pl do
     # Now we hardlink them back in
     Dir["#{rpm_dir}/*/*/*/i386/*.noarch.rpm"].each do |rpm|
       cd File.dirname(rpm) do
-        FileUtils.ln(File.basename(rpm), File.join("..","x86_64"), :force => true, :verbose => true)
+        FileUtils.ln(File.basename(rpm), File.join("..", "x86_64"), :force => true, :verbose => true)
       end
     end
   end
@@ -126,7 +126,7 @@ namespace :pl do
       sign_deb_changes("pkg/deb/*/*.changes") unless Dir["pkg/deb/*/*.changes"].empty?
       sign_deb_changes("pkg/deb/*.changes") unless Dir["pkg/deb/*.changes"].empty?
     ensure
-      %x{keychain -k mine}
+      %x(keychain -k mine)
     end
   end
 

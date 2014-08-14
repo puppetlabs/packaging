@@ -23,7 +23,7 @@ module Pkg::Util::File
       end
     end
 
-    def file_exists?(file, args={:required => false})
+    def file_exists?(file, args = { :required => false })
       exists = File.exist? file
       if !exists and args[:required]
         fail "Required file #{file} could not be found"
@@ -31,7 +31,7 @@ module Pkg::Util::File
       exists
     end
 
-    def file_writable?(file, args={:required => false})
+    def file_writable?(file, args = { :required => false })
       writable = File.writable? file
       if !writable and args[:required]
         fail "File #{file} is not writable"
@@ -47,8 +47,8 @@ module Pkg::Util::File
       message.result(b)
     end
 
-    def erb_file(erbfile, outfile=nil, remove_orig = false, opts = { :binding => binding })
-      outfile ||= File.join(mktemp, File.basename(erbfile).sub(File.extname(erbfile),""))
+    def erb_file(erbfile, outfile = nil, remove_orig = false, opts = { :binding => binding })
+      outfile ||= File.join(mktemp, File.basename(erbfile).sub(File.extname(erbfile), ""))
       output = erb_string(erbfile, opts[:binding])
       File.open(outfile, 'w') { |f| f.write output }
       puts "Generated: #{outfile}"
@@ -63,7 +63,7 @@ module Pkg::Util::File
         target_opts = "-C #{target}"
       end
       if file_exists?(source, :required => true)
-        Pkg::Util::Execution.ex(%Q[#{tar} #{options} #{target_opts} -xf #{source}])
+        Pkg::Util::Execution.ex(%Q(#{tar} #{options} #{target_opts} -xf #{source}))
       end
     end
 
@@ -81,7 +81,7 @@ module Pkg::Util::File
       # FileList and eliminate many lines of code and comment.
       Dir.chdir(Pkg::Config.project_root) do
         file_patterns.each do |pattern|
-          if File.directory?(pattern) and not Pkg::Util::File.empty_dir?(pattern)
+          if File.directory?(pattern) and !Pkg::Util::File.empty_dir?(pattern)
             install << Dir[pattern + "/**/*"]
           else
             install << Dir[pattern]
@@ -96,7 +96,7 @@ module Pkg::Util::File
           if Pkg::Util::File.empty_dir?(file)
             FileUtils.mkpath(File.join(workdir, file), :verbose => false)
           else
-            FileUtils.mkpath(File.dirname( File.join(workdir, file) ), :verbose => false)
+            FileUtils.mkpath(File.dirname(File.join(workdir, file)), :verbose => false)
             FileUtils.cp(file, File.join(workdir, file), :verbose => false, :preserve => true)
           end
         end

@@ -3,7 +3,7 @@
 module Pkg::Util::Date
 
   class << self
-    def timestamp(separator=nil)
+    def timestamp(separator = nil)
       if s = separator
         format = "%Y#{s}%m#{s}%d#{s}%H#{s}%M#{s}%S"
       else

@@ -53,7 +53,7 @@ if @build_ips
 
       # Ensure that our manifest is sane.
       task :lint => :license do
-        print %x{pkglint #{workdir}/#{Pkg::Config.project}.p5m}
+        print %x(pkglint #{workdir}/#{Pkg::Config.project}.p5m)
       end
 
       task :package => [:clean_pkgs, :clean, :prepare, :lint] do
@@ -99,7 +99,7 @@ if @build_ips
         # publish the package to the repository
         Rake::Task['package:ips:send'].invoke
         # signing the package occurs remotely in the repository
-        Rake::Task['pl:sign_ips'].invoke(repouri,"#{Pkg::Config.project}@#{Pkg::Config.ipsversion}") if sign_ips
+        Rake::Task['pl:sign_ips'].invoke(repouri, "#{Pkg::Config.project}@#{Pkg::Config.ipsversion}") if sign_ips
         # retrieve the signed package in a .p5p archive file format
         Rake::Task['package:ips:receive'].invoke
         # clean up the workdir area

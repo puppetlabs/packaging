@@ -386,8 +386,9 @@ Style/TrivialAccessors:
 Style/UnlessElse:
   Enabled: true
 
+# This pushes preference for shell commands as backticks instead of %x
 Style/UnneededPercentX:
-  Enabled: true
+  Enabled: false
 
 Style/VariableInterpolation:
   Enabled: true
@@ -411,7 +412,7 @@ Style/Lambda:
   Enabled: false
 
 Style/MethodName:
-  Enabled: true
+  Enabled: false
 
 Style/MultilineTernaryOperator:
   Enabled: true
@@ -432,7 +433,7 @@ Style/Semicolon:
   Enabled: true
 
 Style/SignalException:
-  Enabled: true
+  Enabled: false
 
 Style/NonNilCheck:
   Enabled: true
@@ -481,7 +482,7 @@ Style/RescueModifier:
   Enabled: true
 
 Style/RegexpLiteral:
-  Enabled: true
+  Enabled: false
 
 Lint/UnderscorePrefixedVariableName:
   Enabled: true

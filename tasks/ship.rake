@@ -3,7 +3,7 @@ namespace :pl do
   task :ship_rpms do
     ["el", "fedora"].each do |dist|
       retry_on_fail(:times => 3) do
-        pkgs = Dir["pkg/#{dist}/**/*.rpm"].map { |f| "'#{f.gsub("pkg/#{dist}/", "#{Pkg::Config.yum_repo_path}/#{dist}/")}'"}
+        pkgs = Dir["pkg/#{dist}/**/*.rpm"].map { |f| "'#{f.gsub("pkg/#{dist}/", "#{Pkg::Config.yum_repo_path}/#{dist}/")}'" }
         unless pkgs.empty?
           Pkg::Util::Net.rsync_to("pkg/#{dist}", Pkg::Config.yum_host, Pkg::Config.yum_repo_path)
           remote_set_immutable(Pkg::Config.yum_host, pkgs)
@@ -107,7 +107,7 @@ namespace :pl do
       Rake::Task["pl:ship_dmg"].execute if Pkg::Config.build_dmg
       Rake::Task["pl:ship_tar"].execute
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
-      add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (! Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark
+      add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark
       post_shipped_metrics if Pkg::Config.benchmark
     else
       puts "Ship canceled"
@@ -172,7 +172,7 @@ namespace :pl do
       end
       # If we just shipped a tagged version, we want to make it immutable
       files = Dir.glob("pkg/**/*").select { |f| File.file?(f) }.map do |file|
-        "#{artifact_dir}/#{file.sub(/^pkg\//,'')}"
+        "#{artifact_dir}/#{file.sub(/^pkg\//, '')}"
       end
       remote_set_immutable(Pkg::Config.distribution_server, files)
     end

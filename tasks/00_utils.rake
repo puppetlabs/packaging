@@ -25,23 +25,23 @@
 
 # Utility methods used by the various rake tasks
 
-def check_var(varname,var=nil)
+def check_var(varname, var = nil)
   var.nil? and fail "Requires #{varname} be set!"
   var
 end
 
-def cp_pr(src, dest, options={})
-  mandatory = {:preserve => true}
+def cp_pr(src, dest, options = {})
+  mandatory = { :preserve => true }
   cp_r(src, dest, options.merge(mandatory))
 end
 
-def cp_p(src, dest, options={})
-  mandatory = {:preserve => true}
+def cp_p(src, dest, options = {})
+  mandatory = { :preserve => true }
   cp(src, dest, options.merge(mandatory))
 end
 
-def mv_f(src, dest, options={})
-  mandatory = {:force => true}
+def mv_f(src, dest, options = {})
+  mandatory = { :force => true }
   mv(src, dest, options.merge(mandatory))
 end
 
@@ -55,12 +55,12 @@ def rsync_from(*args)
   Pkg::Util::Net.rsync_from(args[0], args[1], args[2])
 end
 
-def scp_file_from(host,path,file)
-  %x{scp #{host}:#{path}/#{file} #{@tempdir}/#{file}}
+def scp_file_from(host, path, file)
+  %x(scp #{host}:#{path}/#{file} #{@tempdir}/#{file})
 end
 
-def scp_file_to(host,path,file)
-  %x{scp #{@tempdir}/#{file} #{host}:#{path}}
+def scp_file_to(host, path, file)
+  %x(scp #{@tempdir}/#{file} #{host}:#{path})
 end
 
 def load_keychain
@@ -74,11 +74,11 @@ def load_keychain
 end
 
 def kill_keychain
-  %x{keychain -k mine}
+  %x(keychain -k mine)
 end
 
 def start_keychain
-  keychain = %x{/usr/bin/keychain -q --agents gpg --eval #{Pkg::Config.gpg_key}}.chomp
+  keychain = %x(/usr/bin/keychain -q --agents gpg --eval #{Pkg::Config.gpg_key}).chomp
   new_env = keychain.match(/(GPG_AGENT_INFO)=([^;]*)/)
   ENV[new_env[1]] = new_env[2]
 end
@@ -94,7 +94,7 @@ def gpg_sign_file(file)
   end
 end
 
-def mkdir_pr *args
+def mkdir_pr(*args)
   deprecate('mkdir_pr', 'FileUtils.mkdir_p')
   FileUtils.mkdir_p args
 end
@@ -132,14 +132,14 @@ def ln_sfT(src, dest)
   sh "ln -sfT #{src} #{dest}"
 end
 
-def git_commit_file(file, message=nil)
+def git_commit_file(file, message = nil)
   if Pkg::Util::Tool.find_tool('git') and File.exist?('.git')
     message ||= "changes"
     puts "Commiting changes:"
     puts
-    diff = %x{git diff HEAD #{file}}
+    diff = %x(git diff HEAD #{file})
     puts diff
-    %x{git commit #{file} -m "Commit #{message} in #{file}" &> #{Pkg::Util::OS::DEVNULL}}
+    %x(git commit #{file} -m "Commit #{message} in #{file}" &> #{Pkg::Util::OS::DEVNULL})
   end
 end
 
@@ -178,7 +178,7 @@ def handle_method_failure(method, args)
   end
 end
 
-def invoke_task(task, args=nil)
+def invoke_task(task, args = nil)
   Rake::Task[task].reenable
   Rake::Task[task].invoke(args)
 end
@@ -199,7 +199,7 @@ def rand_string
   rand.to_s.split('.')[1]
 end
 
-def git_bundle(treeish, appendix=nil, output_dir=nil)
+def git_bundle(treeish, appendix = nil, output_dir = nil)
   temp = output_dir || Pkg::Util::File.mktemp
   appendix ||= rand_string
   sh "git bundle create #{temp}/#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix} #{treeish} --tags"
@@ -213,12 +213,12 @@ end
 # We take a tar argument for cases where `tar` isn't best, e.g. Solaris.  We
 # also take an optional argument of the tarball containing the git bundle to
 # use.
-def remote_bootstrap(host, treeish, tar_cmd=nil, tarball=nil)
+def remote_bootstrap(host, treeish, tar_cmd = nil, tarball = nil)
   unless tar = tar_cmd
     tar = 'tar'
   end
   tarball ||= git_bundle(treeish)
-  tarball_name = File.basename(tarball).gsub('.tar.gz','')
+  tarball_name = File.basename(tarball).gsub('.tar.gz', '')
   Pkg::Util::Net.rsync_to(tarball, host, '/tmp')
   appendix = rand_string
   sh "ssh -t #{host} '#{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone --recursive /tmp/#{tarball_name} /tmp/#{Pkg::Config.project}-#{appendix} ; cd /tmp/#{Pkg::Config.project}-#{appendix} ; rake package:bootstrap'"
@@ -267,7 +267,7 @@ def retry_on_fail(args, &blk)
   fail "Block failed maximum of #{args[:times]} tries. Exiting.." unless success
 end
 
-def deprecate(old_cmd, new_cmd=nil)
+def deprecate(old_cmd, new_cmd = nil)
   msg = "!! #{old_cmd} is deprecated."
   if new_cmd
     msg << " Please use #{new_cmd} instead."
@@ -290,7 +290,7 @@ end
 # This method takes two arguments
 # 1) String - the URL to post to
 # 2) Array  - Ordered array of name=VALUE curl form parameters
-def curl_form_data(uri, form_data=[], options={})
+def curl_form_data(uri, form_data = [], options = {})
   curl = Pkg::Util::Tool.find_tool("curl") or fail "Couldn't find curl. Curl is required for posting jenkins to trigger a build. Please install curl and try again."
   #
   # Begin constructing the post string.
@@ -309,11 +309,11 @@ def curl_form_data(uri, form_data=[], options={})
     post_string << " >#{Pkg::Util::OS::DEVNULL} 2>&1"
   end
 
-  %x{#{curl} #{post_string}}
+  %x(#{curl} #{post_string})
   return $?.success?
 end
 
-def random_string length
+def random_string(length)
   rand(36**length).to_s(36)
 end
 
@@ -340,7 +340,7 @@ end
 # Use the provided URL string to print important information with
 # ASCII emphasis
 def print_url_info(url_string)
-puts "\n////////////////////////////////////////////////////////////////////////////////\n\n
+  puts "\n////////////////////////////////////////////////////////////////////////////////\n\n
   Build submitted. To view your build progress, go to\n#{url_string}\n\n
 ////////////////////////////////////////////////////////////////////////////////\n\n"
 end

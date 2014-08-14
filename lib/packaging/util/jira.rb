@@ -26,7 +26,7 @@ module Pkg::Util
       fields = {
           'summary'     => summary,
           'description' => description,
-          'project'     => { 'key' => project},
+          'project'     => { 'key' => project },
           'issuetype'   => { 'name' => parent ? "Sub-task" : "Task" },
           'assignee'    => { 'name' => assignee },
       }
@@ -72,7 +72,7 @@ module Pkg::Util
                                             parent, assignee)
 
       issue = @client.Issue.build
-      issue.save!( {'fields' => fields } )
+      issue.save!({ 'fields' => fields })
 
       # fetch the issue back so we can report the key and id
       issue.fetch

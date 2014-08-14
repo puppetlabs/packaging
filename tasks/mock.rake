@@ -34,7 +34,7 @@ def mock_artifact(mock_config, cmd_args)
     sh "#{mock} -r #{mock_config} #{configdir_arg} #{cmd_args}"
 
     # Return a FileList of the build artifacts
-    return FileList[File.join(basedir, mock_config, 'result','*.rpm')]
+    return FileList[File.join(basedir, mock_config, 'result', '*.rpm')]
 
   rescue RuntimeError => error
     build_log = File.join(basedir, mock_config, 'result', 'build.log')
@@ -69,7 +69,7 @@ end
 
 # Use mock to build an SRPM
 # Return the path to the srpm
-def mock_srpm(mock_config, spec, sources, defines=nil)
+def mock_srpm(mock_config, spec, sources, defines = nil)
   cmd_args = "--buildsrpm #{defines} --sources #{sources} --spec #{spec}"
   srpms = mock_artifact(mock_config, cmd_args)
 
@@ -95,7 +95,7 @@ def mock_el_family(mock_config)
     family = mock_config.split('-')[2][/[a-z]+/]
   else
     first, second = mock_config.split('-')
-    if (first == 'el' || first == 'fedora')
+    if first == 'el' || first == 'fedora'
       family = first
     elsif first == 'pl'
       if second.match(/^\d+$/)
@@ -123,7 +123,7 @@ def mock_el_ver(mock_config)
       version = third
     end
   end
-  if [first,second].include?('fedora')
+  if [first, second].include?('fedora')
     version = "f#{version}"
   end
   version
@@ -137,12 +137,12 @@ def mock_defines(mock_config)
   version = mock_el_ver(mock_config)
   defines = ""
   if version =~ /^(4|5)$/ or family == "sles"
-    defines = %Q{--define "%dist .#{family}#{version}" \
+    defines = %Q(--define "%dist .#{family}#{version}" \
       --define "_source_filedigest_algorithm 1" \
       --define "_binary_filedigest_algorithm 1" \
       --define "_binary_payload w9.gzdio" \
       --define "_source_payload w9.gzdio" \
-      --define "_default_patch_fuzz 2"}
+      --define "_default_patch_fuzz 2")
   end
   defines
 end
@@ -169,7 +169,7 @@ def build_rpm_with_mock(mocks)
         rpm.strip!
 
         if Pkg::Config.build_pe
-          %x{mkdir -p pkg/pe/rpm/#{family}-#{version}-{srpms,i386,x86_64}}
+          %x(mkdir -p pkg/pe/rpm/#{family}-#{version}-{srpms,i386,x86_64})
           case File.basename(rpm)
             when /debuginfo/
               rm_rf(rpm)
@@ -184,7 +184,7 @@ def build_rpm_with_mock(mocks)
               FileUtils.ln("pkg/pe/rpm/#{family}-#{version}-i386/#{File.basename(rpm)}", "pkg/pe/rpm/#{family}-#{version}-x86_64/", :force => true, :verbose => true)
           end
         else
-          %x{mkdir -p pkg/#{family}/#{version}/#{subdir}/{SRPMS,i386,x86_64}}
+          %x(mkdir -p pkg/#{family}/#{version}/#{subdir}/{SRPMS,i386,x86_64})
           case File.basename(rpm)
             when /debuginfo/
               rm_rf(rpm)
@@ -204,7 +204,7 @@ def build_rpm_with_mock(mocks)
       # clean up. However, this requires sudo. If we don't have sudo, we'll
       # just fail and not clean up, but warn the user about it.
       if Pkg::Config.random_mockroot
-        %x{sudo -n echo 'Cleaning build root.'}
+        %x(sudo -n echo 'Cleaning build root.')
         if $?.success?
           sh "sudo -n rm -r #{File.dirname(srpm)}" unless File.dirname(srpm).nil?
           sh "sudo -n rm -r #{File.dirname(rpms[0])}" unless File.dirname(rpms[0]).nil?

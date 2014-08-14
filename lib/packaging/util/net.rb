@@ -9,7 +9,7 @@ module Pkg::Util::Net
     def fetch_uri(uri, target)
       require 'open-uri'
       if Pkg::Util::File.file_writable?(File.dirname(target))
-        File.open(target, 'w') { |f| f.puts( open(uri).read ) }
+        File.open(target, 'w') { |f| f.puts(open(uri).read) }
       end
     end
 

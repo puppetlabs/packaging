@@ -3,7 +3,7 @@
 
 def get_password(site, user)
   require 'io/console'
-  puts  "Logging in to #{site} as #{user}"
+  puts "Logging in to #{site} as #{user}"
   print "Password please: "
   password = STDIN.noecho(&:gets).chomp
   puts "\nOkay trying to log in to #{site} as #{user} ..."
@@ -33,10 +33,10 @@ def get_vars
 end
 
 def validate_vars(jira, vars)
-  jira.project?(vars[:project])
-  jira.user?   (vars[:builder])
-  jira.user?   (vars[:writer])
-  jira.user?   (vars[:developer])
+  jira.project? (vars[:project])
+  jira.user? (vars[:builder])
+  jira.user? (vars[:writer])
+  jira.user? (vars[:developer])
 end
 
 def create_tickets(jira, vars)
@@ -441,7 +441,7 @@ EOS
 
     puts "Creating tickets based on:"
     require 'pp'
-    pp vars.select { |k,v| k != :password }
+    pp vars.select { |k, v| k != :password }
 
     create_tickets(jira, vars)
   end

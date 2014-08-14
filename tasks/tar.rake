@@ -1,6 +1,6 @@
 namespace :package do
   desc "Create a source tar archive"
-  task :tar => [ :clean ] do
+  task :tar => [:clean] do
 
     if Pkg::Config.pre_tar_task
       invoke_task(Pkg::Config.pre_tar_task)

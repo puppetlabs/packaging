@@ -9,13 +9,13 @@ module Pkg::Util::Tool
       find_tool(tool, :required => true)
     end
 
-    def find_tool(tool, args={:required => false})
+    def find_tool(tool, args = { :required => false })
       ENV['PATH'].split(File::PATH_SEPARATOR).each do |root|
         location = File.join(root, tool)
 
         if Pkg::Util::OS.windows? && File.extname(location).empty?
           exts = ENV['PATHEXT']
-          exts = exts ? exts.split(File::PATH_SEPARATOR) : %w[.EXE .BAT .CMD .COM]
+          exts = exts ? exts.split(File::PATH_SEPARATOR) : %w(.EXE .BAT .CMD .COM)
           exts.each do |ext|
             locationext = File.expand_path(location + ext)
 

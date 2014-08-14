@@ -53,7 +53,7 @@ def make_directory_tree
   }
   puts "Cleaning Tree: #{project_tmp}"
   rm_rf(project_tmp)
-  @working_tree.each do |key,val|
+  @working_tree.each do |key, val|
     mkdir_p(val)
   end
 
@@ -255,7 +255,7 @@ if Pkg::Config.build_dmg
         pack_source
         build_dmg
       end
-    puts "Finished building in: #{bench}"
+      puts "Finished building in: #{bench}"
     end
   end
 

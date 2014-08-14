@@ -15,7 +15,7 @@ module Pkg::Util
   require 'packaging/util/execution'
 
   def self.boolean_value(var)
-    return TRUE if (var == TRUE || ( var.is_a?(String) && ( var.downcase == 'true' || var.downcase =~ /^y$|^yes$/ )))
+    return TRUE if var == TRUE || ( var.is_a?(String) && ( var.downcase == 'true' || var.downcase =~ /^y$|^yes$/))
     FALSE
   end
 

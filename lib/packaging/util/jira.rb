@@ -54,13 +54,13 @@ module Pkg::Util
     def project?(project)
       @client.Project.find(project)
     rescue
-      raise "Could not find project: #{project}"
+      fail "Could not find project: #{project}"
     end
 
     def user?(user)
       @client.User.find(user)
     rescue
-      raise "Could not find user: #{user}"
+      fail "Could not find user: #{user}"
     end
 
     def project_name(project)

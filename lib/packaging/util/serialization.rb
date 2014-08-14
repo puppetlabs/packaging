@@ -10,7 +10,7 @@ module Pkg::Util::Serialization
       begin
         input_data = YAML.load_file(file) || {}
       rescue
-        raise "There was an error loading data from #{file}."
+        fail "There was an error loading data from #{file}."
       end
       input_data
     end

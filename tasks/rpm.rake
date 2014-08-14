@@ -10,7 +10,7 @@ def prep_rpm_build_dir
   cp_p("pkg/#{tarball}", temp)
 
   # Test for specfile in tarball
-  %x(tar -tzf #{File.join(temp, tarball)}).split.grep(%r{/ext/redhat/#{Pkg::Config.project}.spec$/})
+  %x(tar -tzf #{File.join(temp, tarball)}).split.grep(/\/ext\/redhat\/#{Pkg::Config.project}.spec$/)
 
   if $?.success?
     sh "tar -C #{temp} -xzf #{File.join(temp, tarball)} #{Pkg::Config.project}-#{Pkg::Config.version}/ext/redhat/#{Pkg::Config.project}.spec"

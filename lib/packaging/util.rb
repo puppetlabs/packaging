@@ -39,7 +39,7 @@ module Pkg::Util
     begin
       require library
     rescue LoadError
-      raise "Could not load #{library_name}. #{library_name} is required by the packaging repo for this task"
+      fail "Could not load #{library_name}. #{library_name} is required by the packaging repo for this task"
     end
   end
 

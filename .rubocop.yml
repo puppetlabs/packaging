@@ -433,7 +433,7 @@ Style/Semicolon:
   Enabled: true
 
 Style/SignalException:
-  Enabled: true
+  Enabled: false
 
 Style/NonNilCheck:
   Enabled: true
@@ -482,7 +482,7 @@ Style/RescueModifier:
   Enabled: true
 
 Style/RegexpLiteral:
-  Enabled: true
+  Enabled: false
 
 Lint/UnderscorePrefixedVariableName:
   Enabled: true

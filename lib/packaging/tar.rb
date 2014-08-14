@@ -52,7 +52,7 @@ module Pkg
         when Array
           @files
         else
-          fail "`files` must be a string or an array!"
+          raise "`files` must be a string or an array!"
         end
 
       Pkg::Util::File.install_files_into_dir(patterns, workdir)

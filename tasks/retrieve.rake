@@ -25,7 +25,7 @@ namespace :pl do
         begin
           Pkg::Util::Net.rsync_from("#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{remote_target}/", Pkg::Config.distribution_server, "#{local_target}/")
         rescue
-          raise "Couldn't download packages from distribution server. Try installing wget!"
+          fail "Couldn't download packages from distribution server. Try installing wget!"
         end
       end
       puts "Packages staged in pkg"

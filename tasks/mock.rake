@@ -19,7 +19,7 @@
 # pkg/el-5-i386/*.rpm
 def mock_artifact(mock_config, cmd_args)
   unless mock = Pkg::Util::Tool.find_tool('mock')
-    fail "mock is required for building srpms with mock. Please install mock and try again."
+    raise "mock is required for building srpms with mock. Please install mock and try again."
   end
   randomize = Pkg::Config.random_mockroot
   configdir = nil

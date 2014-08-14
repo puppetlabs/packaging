@@ -118,7 +118,7 @@ namespace :pl do
         when /dmg|apple/ then "dmg"
         when /gem/ then "gem"
         when /tar/ then "tar"
-        else fail "Could not determine build type for #{build_task}"
+        else raise "Could not determine build type for #{build_task}"
       end
 
       # Create a string of metrics to send to Jenkins for data analysis
@@ -134,7 +134,7 @@ namespace :pl do
         when /gem/ then "gem"
         when /sles/ then "sles"
         when /tar/ then "tar"
-        else fail "Could not determine build type for #{build_task}"
+        else raise "Could not determine build type for #{build_task}"
       end
 
       if Pkg::Config.pe_version
@@ -336,7 +336,7 @@ namespace :pl do
       begin
         require 'json'
       rescue LoadError
-        raise "Couldn't require 'json'. JSON is required for sanely generating the string we curl to Jenkins."
+        fail "Couldn't require 'json'. JSON is required for sanely generating the string we curl to Jenkins."
       end
 
       # Assemble the JSON string for the JSON parameter

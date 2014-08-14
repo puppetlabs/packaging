@@ -24,7 +24,7 @@ module Pkg::Util::Execution
     def ex(command)
       ret = `#{command}`
       unless Pkg::Util::Execution.success?
-        fail RuntimeError
+        raise RuntimeError
       end
       ret
     end

@@ -61,7 +61,7 @@ module Pkg::Deb::Repo
       begin
         Pkg::Util::Execution.ex("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
       rescue
-        raise "Couldn't retrieve deb apt repo configs. See preceding http response for more info."
+        fail "Couldn't retrieve deb apt repo configs. See preceding http response for more info."
       end
     end
 

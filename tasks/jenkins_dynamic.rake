@@ -39,7 +39,7 @@ namespace :pl do
         job_name  = "#{Pkg::Config.project}-#{t.gsub('.xml.erb', '')}-#{Pkg::Config.build_date}-#{Pkg::Config.ref}"
         puts "Checking for existence of #{job_name}..."
         if jenkins_job_exists?(job_name)
-          fail "Job #{job_name} already exists on #{Pkg::Config.jenkins_build_host}"
+          raise "Job #{job_name} already exists on #{Pkg::Config.jenkins_build_host}"
         else
           retry_on_fail(:times => 3) do
             url = create_jenkins_job(job_name, xml_file)
@@ -48,7 +48,7 @@ namespace :pl do
             end
             puts "Verifying job created successfully..."
             unless jenkins_job_exists?(job_name)
-              fail "Unable to verify Jenkins job, trying again..."
+              raise "Unable to verify Jenkins job, trying again..."
             end
             puts "Jenkins job created at #{url}"
           end

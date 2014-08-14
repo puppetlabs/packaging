@@ -14,7 +14,7 @@ namespace :package do
     # by the tar class. Otherwise, we load what we consider to be the "default"
     # set, which is default for historical purposes.
     #
-    tar.templates ||= Dir[File.join(Pkg::Config.project_root, "ext", "**", "*.erb")].select { |i| i !~ %r{/ext/packaging|ext/osx/} }
+    tar.templates ||= Dir[File.join(Pkg::Config.project_root, "ext", "**", "*.erb")].select { |i| i !~ /ext\/packaging|ext\/osx/ }
 
 
     # If the user has specified things to exclude via config file, they will be

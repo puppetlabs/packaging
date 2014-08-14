@@ -20,7 +20,7 @@ task :setup do
   begin
     @source_files        = Pkg::Util::Serialization.load_yaml('ext/osx/file_mapping.yaml')
   rescue
-    raise "Could not load Apple file mappings from 'ext/osx/file_mapping.yaml'"
+    fail "Could not load Apple file mappings from 'ext/osx/file_mapping.yaml'"
   end
   @package_name          = Pkg::Config.project
   @title                 = "#{Pkg::Config.project}-#{Pkg::Config.version}"

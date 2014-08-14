@@ -45,7 +45,7 @@ if Pkg::Config.pre_tar_task
         end
 
         def level=(level)
-          fail ArgumentError unless LEVELS.include?(level.to_s)
+          raise ArgumentError unless LEVELS.include?(level.to_s)
           @level = level
         end
 

@@ -1,5 +1,5 @@
 language: ruby
-script: "bundle exec rspec spec --color --format documentation --order random"
+script: "bundle exec $CHECK"
 notifications:
   email: false
 rvm:
@@ -7,3 +7,16 @@ rvm:
   - 1.9.3
   - 2.0.0
   - 2.1.1
+
+env:
+  - "CHECK='rspec spec --color --format documentation --order random'"
+  - "CHECK='rubocop -D'"
+
+matrix:
+  exclude:
+    - rvm: 1.8.7-p374
+      env: "CHECK='rubocop -D'"
+    - rvm: 1.9.3
+      env: "CHECK='rubocop -D'"
+    - rvm: 2.0.0
+      env: "CHECK='rubocop -D'"

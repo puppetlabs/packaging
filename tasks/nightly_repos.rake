@@ -63,7 +63,7 @@ namespace :pl do
         # want them only to see repos, and not nightly repos, since the host is
         # called nightlies.puppetlabs.com. Here we replace those values in each
         # config with the desired value.
-        Dir.glob("#{local_target}/repo_configs/**/*").select {|t_config| File.file?(t_config) }.each do |config|
+        Dir.glob("#{local_target}/repo_configs/**/*").select { |t_config| File.file?(t_config) }.each do |config|
           new_contents = File.read(config).gsub(Pkg::Config.builds_server, target_host).gsub(/nightly_repos/, "repos")
           File.open(config, "w") { |file| file.puts new_contents }
         end

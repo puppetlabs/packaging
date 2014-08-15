@@ -42,6 +42,40 @@ namespace :pl do
       end
     end
 
+    task :deploy_nightly_repos, [:target_host, :target_basedir] => ["clean", "pl:fetch"] do |t, args|
+      target_host = args.target_host or fail ":target_host is a required argument to #{t}"
+      target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
+      mkdir("pkg")
+
+      Dir.chdir("pkg") do
+        local_target = File.join(Pkg::Config.project, Pkg::Config.ref)
+        mkdir_p(local_target)
+
+        # Rake task dependencies with arguments are nuts, so we just directly
+        # invoke them here.  We want the nightly_* directories staged as
+        # repos/repo_configs, because that's how we want them on the public
+        # server
+        invoke_task("pl:jenkins:retrieve", "nightly_repos", File.join(local_target, "repos"))
+        invoke_task("pl:jenkins:retrieve", "nightly_repo_configs", File.join(local_target, "repo_configs"))
+
+        # The repo configs have Pkg::Config.builds_server used in them, but that
+        # is internal, so we need to replace it with our public server. We also
+        # want them only to see repos, and not nightly repos, since the host is
+        # called nightlies.puppetlabs.com. Here we replace those values in each
+        # config with the desired value.
+        Dir.glob("#{local_target}/repo_configs/**/*").select {|t_config| File.file?(t_config) }.each do |config|
+          new_contents = File.read(config).gsub(Pkg::Config.builds_server, target_host).gsub(/nightly_repos/, "repos")
+          File.open(config, "w") { |file| file.puts new_contents }
+        end
+
+        # Make a latest symlink for the project
+        FileUtils.ln_s(local_target, "#{Pkg::Config.project}-latest")
+      end
+
+      # Ship it to the target for consumption
+      Pkg::Util::Net.rsync_to("pkg/", target_host, target_basedir)
+    end
+
     task :generate_nightly_repo_configs => "pl:fetch" do
       Pkg::Rpm::Repo.generate_repo_configs('nightly_repos', 'nightly_repo_configs', true)
       Pkg::Deb::Repo.generate_repo_configs('nightly_repos', 'nightly_repo_configs')

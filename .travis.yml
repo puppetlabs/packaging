@@ -3,7 +3,7 @@ script: "bundle exec rspec spec --color --format documentation --order random"
 notifications:
   email: false
 rvm:
-  - 1.9.3
   - 1.8.7-p374
+  - 1.9.3
   - 2.0.0
   - 2.1.1

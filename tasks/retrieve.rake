@@ -19,7 +19,7 @@ namespace :pl do
       mkdir_p local_target
       package_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{remote_target}"
       if wget = Pkg::Util::Tool.find_tool("wget")
-        sh "#{wget} -r -np -nH --cut-dirs 3 -P #{local_target} --reject 'index*' #{package_url}/"
+        sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' #{package_url}/"
       else
         warn "Could not find `wget` tool. Falling back to rsyncing from #{Pkg::Config.distribution_server}"
         begin

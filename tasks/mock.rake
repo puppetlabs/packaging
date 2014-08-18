@@ -129,6 +129,22 @@ def mock_el_ver(mock_config)
   version
 end
 
+# Checks to see if the pe agnostic config template is in place.
+# If it is then the mock config is set to point to the generated config file.
+# The generated config file is formed by substituting the pe_version into the erb
+#
+def mock_template(mock_config)
+  pe_version = Pkg::Config.pe_version
+  template = mock_config.sub("#{pe_version}-", "")
+  template_location = File.join(File::SEPARATOR, "etc", "mock", "#{template}.cfg.erb")
+  if File.exists?(template_location)
+    Pkg::Util::File.erb_file(template_location, template_location.sub(".erb", ""), false, {:binding => binding})
+    return template
+  else
+    return mock_config
+  end
+end
+
 # Determine the appropriate rpm macro definitions based on the mock config name
 # Return a string of space separated macros prefixed with --define
 #
@@ -158,7 +174,9 @@ def build_rpm_with_mock(mocks)
       spec = Dir.glob(File.join(workdir, "SPECS", "*.spec"))[0]
       sources = File.join(workdir, "SOURCES")
       defines = mock_defines(mock_config)
-
+      if Pkg::Config.build_pe
+        mock_config = mock_template(mock_config)
+      end
       # Build the srpm inside a mock chroot
       srpm = mock_srpm(mock_config, spec, sources, defines)
 

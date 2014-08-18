@@ -19,7 +19,15 @@ namespace :pl do
       mkdir_p local_target
       package_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{remote_target}"
       if wget = Pkg::Util::Tool.find_tool("wget")
-        sh "#{wget} -r -np -nH --cut-dirs 3 -P #{local_target} --reject 'index*' #{package_url}/"
+        # For the next person who needs to look these flags up:
+        # -r = recursive
+        # -l 0 = infinitely recurse, no limit
+        # --cut-dirs 3 = will cut off #{Pkg::Config.project}, #{Pkg::Config.ref}, and the first directory in #{remote_target} from the url when saving to disk
+        # -np = Only descend when recursing, never ascend
+        # -nH = Discard http://#{Pkg::Config.builds_server} when saving to disk
+        # --reject = Reject all hits that match the supplied regex
+        # -P = where to save to disk (defaults to ./)
+        sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' #{package_url}/"
       else
         warn "Could not find `wget` tool. Falling back to rsyncing from #{Pkg::Config.distribution_server}"
         begin

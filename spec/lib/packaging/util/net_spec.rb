@@ -92,6 +92,12 @@ describe "Pkg::Util::Net" do
       Pkg::Util::Execution.should_receive(:ex).with("#{rsync} -rHlv -O --no-perms --no-owner --no-group --ignore-existing thing foo@bar:/home/foo")
       Pkg::Util::Net.rsync_to("thing", "foo@bar", "/home/foo")
     end
+
+    it "rsyncs 'thing' to 'foo@bar:/home/foo' with flags that don't include --ignore-existing" do
+      Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
+      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} -rHlv -O --no-perms --no-owner --no-group thing foo@bar:/home/foo")
+      Pkg::Util::Net.rsync_to("thing", "foo@bar", "/home/foo", false)
+    end
   end
 
   describe "#rsync_from" do

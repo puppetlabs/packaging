@@ -49,7 +49,7 @@ namespace :pl do
 
       Dir.chdir("pkg") do
         local_target = File.join(Pkg::Config.project, Pkg::Config.ref)
-        mkdir_p(local_target)
+        FileUtils.mkdir_p([local_target, Pkg::Config.project + "-latest"])
 
         # Rake task dependencies with arguments are nuts, so we just directly
         # invoke them here.  We want the nightly_* directories staged as
@@ -68,12 +68,34 @@ namespace :pl do
           File.open(config, "w") { |file| file.puts new_contents }
         end
 
+        # Latest repo work. This little section does some magic to munge the
+        # repo configs and link in the latest repos.  The repo_configs are
+        # renamed to project-latest-$platform.{list,repo} to ensure that their
+        # names stay the same between runs. Their contents have the ref
+        # stripped off and the project replaced by $project-latest. Then the
+        # repos directory is a symlink to the last pushed ref's repos.
+        cp_pr(File.join(local_target, "repo_configs"), Pkg::Config.project + "-latest")
+
+        # Now we need to remove the ref and replace $project with
+        # $project-latest so that it will work as a pinned latest repo
+        # Also rename the repo config to a static filename.
+        Dir.glob("#{Pkg::Config.project}-latest/repo_configs/**/*").select { |t_config| File.file?(t_config) }.each do |config|
+          new_contents = File.read(config)
+          new_contents.gsub!(%r{#{Pkg::Config.ref}/}, "")
+          new_contents.gsub!(%r{#{Pkg::Config.project}/}, Pkg::Config.project + "-latest/")
+          new_contents.gsub!(Pkg::Config.ref, "latest")
+
+          File.open(config, "w") { |file| file.puts new_contents }
+          FileUtils.mv(config, config.gsub(Pkg::Config.ref, "latest"))
+        end
+
         # Make a latest symlink for the project
-        FileUtils.ln_s(local_target, "#{Pkg::Config.project}-latest")
+        FileUtils.ln_s(File.join("..", local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"))
       end
 
       # Ship it to the target for consumption
-      Pkg::Util::Net.rsync_to("pkg/", target_host, target_basedir)
+      Pkg::Util::Net.rsync_to("pkg/", target_host, target_basedir, false)
+      puts "'#{Pkg::Config.ref}' of '#{Pkg::Config.project}' has been shipped to '#{target_host}:#{target_basedir}'"
     end
 
     task :generate_nightly_repo_configs => "pl:fetch" do
@@ -87,7 +109,7 @@ namespace :pl do
     end
 
     task :nightly_repos => ["pl:fetch", "jenkins:remote_sign_nightly_repos", "jenkins:ship_nightly_repos", "jenkins:generate_nightly_repo_configs", "jenkins:ship_nightly_repo_configs"] do
-      puts "Shipped #{Pkg::Config.ref} of #{Pkg::Config.project} into the nightly repos."
+      puts "Shipped '#{Pkg::Config.ref}' of '#{Pkg::Config.project}' into the nightly repos."
     end
   end
 end

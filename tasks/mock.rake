@@ -134,11 +134,12 @@ end
 # The generated config file is formed by substituting the pe_version into the erb
 #
 def mock_template(mock_config)
+  check_var("PE version", Pkg::Config.pe_version)
   pe_version = Pkg::Config.pe_version
   template = mock_config.sub("#{pe_version}-", "")
   template_location = File.join(File::SEPARATOR, "etc", "mock", "#{template}.cfg.erb")
   if File.exists?(template_location)
-    Pkg::Util::File.erb_file(template_location, template_location.sub(".erb", ""), false, {:binding => binding})
+    Pkg::Util::File.erb_file(template_location, template_location.sub(".erb", ""), false, { :binding => binding })
     return template
   else
     return mock_config

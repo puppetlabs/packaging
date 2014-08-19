@@ -45,16 +45,6 @@ def mv_f(src, dest, options = {})
   mv(src, dest, options.merge(mandatory))
 end
 
-def rsync_to(*args)
-  deprecate('rsync_to', 'Pkg::Util::Net.rsync_to')
-  Pkg::Util::Net.rsync_to(args[0], args[1], args[2])
-end
-
-def rsync_from(*args)
-  deprecate('rsync_from', 'Pkg::Util::Net.rsync_from')
-  Pkg::Util::Net.rsync_from(args[0], args[1], args[2])
-end
-
 def scp_file_from(host, path, file)
   %x(scp #{host}:#{path}/#{file} #{@tempdir}/#{file})
 end
@@ -94,10 +84,6 @@ def gpg_sign_file(file)
   end
 end
 
-def mkdir_pr(*args)
-  deprecate('mkdir_pr', 'FileUtils.mkdir_p')
-  FileUtils.mkdir_p args
-end
 
 def set_cow_envs(cow)
   elements = cow.split('-')
@@ -120,16 +106,6 @@ def set_cow_envs(cow)
   if dist =~ /cumulus/
     ENV['NETWORK_OS'] = 'cumulus'
   end
-end
-
-def ln(target, name)
-  deprecate('ln', 'FileUtils.ln')
-  FileUtils.ln(name, target, :force => true, :verbose => true)
-end
-
-def ln_sfT(src, dest)
-  deprecate('ln_sfT')
-  sh "ln -sfT #{src} #{dest}"
 end
 
 def git_commit_file(file, message = nil)
@@ -366,6 +342,39 @@ end
 #
 def remote_set_immutable(host, files)
   Pkg::Util::Net.remote_ssh_cmd(host, "sudo chattr +i #{files.join(" ")}")
+end
+
+#######################################################################
+#                                                                     #
+#         DEPRECATED METHODS: Please move any newly depreacted        #
+#     methods into the following section so that we can easily        #
+#              see what methods are left to librarify.                #
+#                                                                     #
+#######################################################################
+
+def rsync_to(*args)
+  deprecate('rsync_to', 'Pkg::Util::Net.rsync_to')
+  Pkg::Util::Net.rsync_to(args[0], args[1], args[2])
+end
+
+def rsync_from(*args)
+  deprecate('rsync_from', 'Pkg::Util::Net.rsync_from')
+  Pkg::Util::Net.rsync_from(args[0], args[1], args[2])
+end
+
+def mkdir_pr(*args)
+  deprecate('mkdir_pr', 'FileUtils.mkdir_p')
+  FileUtils.mkdir_p args
+end
+
+def ln(target, name)
+  deprecate('ln', 'FileUtils.ln')
+  FileUtils.ln(name, target, :force => true, :verbose => true)
+end
+
+def ln_sfT(src, dest)
+  deprecate('ln_sfT')
+  sh "ln -sfT #{src} #{dest}"
 end
 
 # ex combines the behavior of `%x{cmd}` and rake's `sh "cmd"`. `%x{cmd}` has

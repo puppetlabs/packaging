@@ -212,7 +212,7 @@ Push packages
     * Don't forget to make sure everything looks like it's in the correct folder, the pkgs dir has been cleared out, and that you are shipping for all expected platforms.
     * Get a *second set of RelEng eyes* on the packages that are about to be shipped to make sure everything looks a-okay.
     * If you're shipping a gem you need to make sure you have a rubygems account, are an owner of that project, and have a gem config file.
-    * If you're shipping puppet you need to sign the MSI file for Windows. This is a manual process and the ship task doesn't ship or build the msi so talk to Moses or [~matthaus] for more details. This file also needs to be manually signed.
+    * If you're shipping puppet you need to sign the MSI file for Windows. This is a manual process and the ship task doesn't ship or build the msi so talk to Moses or Haus for more details. This file also needs to be manually signed.
 
 Dependencies:
   * Go / No Go meeting (Status - Ship it!)

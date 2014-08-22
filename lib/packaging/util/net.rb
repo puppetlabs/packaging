@@ -36,10 +36,12 @@ module Pkg::Util::Net
       Pkg::Util::Execution.success? or raise "Remote ssh command failed."
     end
 
-    def rsync_to(source, target, dest, ignore_existing = true)
+    def rsync_to(source, target, dest, extra_flags = ["--ignore-existing"])
       rsync = Pkg::Util::Tool.check_tool('rsync')
       flags = "-rHlv -O --no-perms --no-owner --no-group"
-      flags << " --ignore-existing" if ignore_existing
+      unless extra_flags.empty?
+        flags << " " << extra_flags.join(" ")
+      end
       Pkg::Util::Execution.ex("#{rsync} #{flags} #{source} #{target}:#{dest}")
     end
 

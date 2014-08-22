@@ -38,7 +38,7 @@ namespace :pl do
       retry_on_fail(:times => 3) do
         # Ship the now signed repos to the distribution server
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{target_dir}")
-        Pkg::Util::Net.rsync_to("nightly_repos/", Pkg::Config.distribution_server, "#{target_dir} --ignore-existing")
+        Pkg::Util::Net.rsync_to("nightly_repos/", Pkg::Config.distribution_server, target_dir)
       end
     end
 

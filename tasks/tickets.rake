@@ -236,7 +236,7 @@ Dependencies:
 DOC
 
   description[:send_announcements] = <<-DOC
-  * Update the release google document (ask around for location).
+  * [~#{vars[:builder]}]: update the release google spreadsheet.
   * Send the drafted release notes email.
     * If final send to puppet-announce and specific distribution lists (e.g. puppet to puppet-users & puppet-dev).
     * If RC only send to the specific distribution lists.

@@ -113,4 +113,45 @@ describe "Pkg::Util::Net" do
       Pkg::Util::Net.rsync_from("thing", "foo@bar", "/home/foo")
     end
   end
+
+  describe "#curl_form_data" do
+    let(:curl) {"/bin/curl"}
+    let(:form_data) {["name=FOO"]}
+    let(:options) { {:quiet => true} }
+
+    it "should return false on failure" do
+      Pkg::Util::Tool.should_receive(:check_tool).with("curl").and_return(curl)
+      Pkg::Util::Execution.should_receive(:ex).with("#{curl} -i #{target_uri}").and_return(false)
+      Pkg::Util::Net.curl_form_data(target_uri).should be_false
+    end
+
+
+    it "should curl with just the uri" do
+      Pkg::Util::Tool.should_receive(:check_tool).with("curl").and_return(curl)
+      Pkg::Util::Execution.should_receive(:ex).with("#{curl} -i #{target_uri}")
+      Pkg::Util::Net.curl_form_data(target_uri)
+    end
+
+    it "should curl with the form data and uri" do
+      Pkg::Util::Tool.should_receive(:check_tool).with("curl").and_return(curl)
+      Pkg::Util::Execution.should_receive(:ex).with("#{curl} -i #{form_data[0]} #{target_uri}")
+      Pkg::Util::Net.curl_form_data(target_uri, form_data)
+    end
+
+    it "should curl with form data, uri, and be quiet" do
+      Pkg::Util::Tool.should_receive(:check_tool).with("curl").and_return(curl)
+      Pkg::Util::Execution.should_receive(:ex).with("#{curl} -i #{form_data[0]} #{target_uri} >/dev/null 2>&1")
+      Pkg::Util::Net.curl_form_data(target_uri, form_data, options)
+    end
+
+  end
+
+  describe "#print_url_info" do
+    it "should output correct formatting" do
+      Pkg::Util::Net.should_receive(:puts).with("\n////////////////////////////////////////////////////////////////////////////////\n\n
+  Build submitted. To view your build progress, go to\n#{target_uri}\n\n
+////////////////////////////////////////////////////////////////////////////////\n\n")
+      Pkg::Util::Net.print_url_info(target_uri)
+    end
+  end
 end

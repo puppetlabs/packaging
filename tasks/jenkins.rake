@@ -193,7 +193,7 @@ namespace :pl do
       # Call out to the curl_form_data utility method in 00_utils.rake
       #
       begin
-        if curl_form_data(trigger_url, args)
+        if Pkg::Util::Net.curl_form_data(trigger_url, args)
           puts "Build submitted. To view your build results, go to #{job_url}"
           puts "Your packages will be available at #{Pkg::Config.distribution_server}:#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
         else
@@ -349,7 +349,7 @@ namespace :pl do
       "-FSubmit=Build"
       ]
 
-      if curl_form_data(uri, args)
+      if Pkg::Util::Net.curl_form_data(uri, args)
         puts "Job triggered at #{uri}."
       else
         fail "An error occurred attempting to trigger the job at #{uri}. Please see the preceding http response for more info."

@@ -16,7 +16,7 @@ namespace :package do
   task :versionset do
     check_var('VERSION', ENV['VERSION'])
     Pkg::Util::Version.versionbump
-    git_commit_file(Pkg::Config.version_file, "update to #{ENV['VERSION']}")
+    Pkg::Util::Git.git_commit_file(Pkg::Config.version_file, "update to #{ENV['VERSION']}")
   end
 
   task :versionbump, :workdir do |t, args|

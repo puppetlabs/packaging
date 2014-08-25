@@ -145,7 +145,7 @@ namespace :pl do
       #
       # Create the data files to send to jenkins
       properties = Pkg::Config.config_to_yaml
-      bundle = git_bundle('HEAD')
+      bundle = Pkg::Util::Git.git_bundle('HEAD')
 
       # Construct the parameters, which is an array of hashes we turn into JSON
       parameters = [{ "name" => "BUILD_PROPERTIES", "file"  => "file0" },

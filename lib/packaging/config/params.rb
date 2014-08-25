@@ -91,6 +91,7 @@ module Pkg::Params
                   :rpmrelease,
                   :rpmversion,
                   :ref,
+                  :short_ref,
                   :sign_tar,
                   :signing_server,
                   :summary,

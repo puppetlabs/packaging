@@ -27,9 +27,13 @@ module Pkg::Util::Version
     end
 
     # return the sha of HEAD on the current branch
-    def git_sha
+    # You can specify the length you want from the sha. Default is 40, the
+    # length for sha1. If you specify anything higher, it will still return 40
+    # characters. Ideally, you're not going to specify anything under 7 characters,
+    # but I'll leave that discretion up to you.
+    def git_sha(length = 40)
       Pkg::Util.in_project_root do
-        %x(#{GIT} rev-parse HEAD).strip
+        Pkg::Util::Execution.ex("#{GIT} rev-parse --short=#{length} HEAD").strip
       end
     end
 
@@ -41,11 +45,11 @@ module Pkg::Util::Version
     end
 
     # If HEAD is a tag, return the tag. Otherwise return the sha of HEAD.
-    def git_sha_or_tag
+    def git_sha_or_tag(length = 40)
       if git_ref_type == "tag"
         git_describe
       else
-        git_sha
+        git_sha(length)
       end
     end
 

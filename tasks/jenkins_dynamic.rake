@@ -37,7 +37,16 @@ namespace :pl do
         erb_template  = File.join(template_dir, t)
         xml_file = File.join(work_dir, t.gsub('.erb', ''))
         Pkg::Util::File.erb_file(erb_template, xml_file, nil, :binding => Pkg::Config.get_binding)
-        job_name  = "#{Pkg::Config.project}-#{t.gsub('.xml.erb', '')}-#{Pkg::Config.build_date}-#{Pkg::Config.ref}"
+        # If we're creating a job meant to run on a windows box, we need to limit the path length
+        # Max path length allowed is 260 chars, which we manage to exceed with this job name. Luckily,
+        # simply using the short sha rather than the long sha gets us just under the length limit. Gross fix,
+        # I know, but hey, it works for now.
+        if t == "msi.xml.erb"
+          ref = Pkg::Config.short_ref
+        else
+          ref = Pkg::Config.ref
+        end
+        job_name  = "#{Pkg::Config.project}-#{t.gsub('.xml.erb', '')}-#{Pkg::Config.build_date}-#{ref}"
         puts "Checking for existence of #{job_name}..."
         if Pkg::Util::Jenkins.jenkins_job_exists?(job_name)
           raise "Job #{job_name} already exists on #{Pkg::Config.jenkins_build_host}"

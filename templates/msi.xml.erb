@@ -1,0 +1,185 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<matrix-project>
+  <actions/>
+  <description>&lt;p&gt;&#xd;
+    Dynamically created job to generate the MSI for this version of Puppet&#xd;
+&#xd;
+The artifacts are sent out to builds.delivery.puppetlabs.net
+&lt;p&gt;&#xd;
+This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed to rake in the upstream invocation.&#xd;
+&lt;/p&gt;&#xd;
+</description>
+  <logRotator class="hudson.tasks.LogRotator">
+    <daysToKeep>3</daysToKeep>
+    <numToKeep>1</numToKeep>
+    <artifactDaysToKeep>-1</artifactDaysToKeep>
+    <artifactNumToKeep>-1</artifactNumToKeep>
+  </logRotator>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.plugins.hipchat.HipChatNotifier_-HipChatJobProperty plugin="hipchat-plugin@0.1.0">
+      <room></room>
+      <startNotification>false</startNotification>
+    </jenkins.plugins.hipchat.HipChatNotifier_-HipChatJobProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@1.2.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <name>origin</name>
+        <refspec>+refs/heads/*:refs/remotes/origin/*</refspec>
+        <url><%= Pkg::Config.build_msi["puppet_for_the_win"]["repo"] %></url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name><%= Pkg::Config.build_msi["puppet_for_the_win"]["ref"] %></name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <disableSubmodules>false</disableSubmodules>
+    <recursiveSubmodules>false</recursiveSubmodules>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <authorOrCommitter>false</authorOrCommitter>
+    <clean>false</clean>
+    <wipeOutWorkspace>false</wipeOutWorkspace>
+    <pruneBranches>false</pruneBranches>
+    <remotePoll>false</remotePoll>
+    <ignoreNotifyCommit>false</ignoreNotifyCommit>
+    <useShallowClone>false</useShallowClone>
+    <buildChooser class="hudson.plugins.git.util.DefaultBuildChooser"/>
+    <gitTool>Default</gitTool>
+    <submoduleCfg class="list"/>
+    <relativeTargetDir></relativeTargetDir>
+    <reference></reference>
+    <excludedRegions></excludedRegions>
+    <excludedUsers></excludedUsers>
+    <gitConfigName></gitConfigName>
+    <gitConfigEmail></gitConfigEmail>
+    <skipTag>true</skipTag>
+    <includedRegions></includedRegions>
+    <scmName></scmName>
+  </scm>
+  <assignedNode>win-build</assignedNode>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <axes>
+    <hudson.matrix.TextAxis>
+      <name>ARCH</name>
+      <values>
+        <string>x64</string>
+        <string>x86</string>
+      </values>
+    </hudson.matrix.TextAxis>
+    <hudson.matrix.LabelAxis>
+      <name>label</name>
+      <values>
+        <string>win-build</string>
+      </values>
+    </hudson.matrix.LabelAxis>
+  </axes>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!C:/puppetwinbuilder/sys/ruby/bin/ruby.exe
+
+require &apos;yaml&apos;
+
+puts &quot;arch is #{ENV[&apos;ARCH&apos;]}&quot;
+
+if ENV[&apos;ARCH&apos;] == &quot;x64&quot;
+  SYS_REF=&apos;<%= Pkg::Config.build_msi["sys"]["ref"]["x64"] %>&apos;
+else
+  SYS_REF=&apos;<%= Pkg::Config.build_msi["sys"]["ref"]["x86"] %>&apos;
+end
+
+CONFIG = {
+  :repos =&gt; {
+    &apos;puppet&apos; =&gt; {
+      :ref =&gt; &apos;<%= ref %>&apos;,
+      :repo =&gt; &quot;#{ENV[&apos;WORKSPACE&apos;]}/puppet-<%= Pkg::Config.version %>-signing_bundle&quot;
+    },
+    <% Pkg::Config.build_msi.each do |project, info| -%>
+      <% next if project == "puppet_for_the_win" %>
+    &apos;<%= project %>&apos; =&gt; {
+      :ref =&gt; &quot;<%= ('#{SYS_REF}' if project == "sys") || info["ref"] %>&quot;,
+      :repo =&gt; &apos;<%= info["repo"] %>&apos;
+    },
+  <% end -%>
+  }
+}
+
+File.open(&quot;#{ENV[&apos;WORKSPACE&apos;]}/ondemand.yaml&quot;, &apos;w&apos;) { |f| f.write(YAML.dump(CONFIG)) }</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.BatchFile>
+      <command>call c:\puppetwinbuilder\setup_env.bat
+
+set ARCH=%ARCH%
+set SUFFIX=-%ARCH%
+
+if &quot;%ARCH%&quot; == &quot;x86&quot; (
+  set SUFFIX=
+)
+
+echo %CD%
+set ORIG_PATH=/opt/jenkins-builds/puppet/<%= Pkg::Config.ref %>/artifacts
+set GIT_BUNDLE=puppet-<%= Pkg::Config.version %>-signing_bundle.tar.gz
+set BUILD_HOST=jenkins@builds.delivery.puppetlabs.net
+scp %BUILD_HOST%:%ORIG_PATH%/%GIT_BUNDLE% .
+tar xf %GIT_BUNDLE%
+
+cmd.exe /c rake clobber windows:build config=ondemand.yaml
+
+
+pushd downloads\puppet
+for /f %%i in (&apos;git describe --match &quot;3.*&quot;&apos;) do set VERSION_DESC=%%i
+for /f %%i in (&apos;git rev-parse HEAD&apos;) do set SHA=%%i
+for /f %%i in (&apos;git cat-file -t %VERSION_DESC%&apos;) do set TYPE=%%i
+if &quot;%TYPE%&quot; == &quot;tag&quot; (
+  set TARGET=%VERSION_DESC%
+)
+if &quot;%TYPE%&quot; == &quot;commit&quot; (
+  set TARGET=%SHA%
+)
+popd
+
+pushd pkg
+
+echo Puppet&apos;s sha is: %SHA%
+echo Puppet&apos;s describe is: %VERSION_DESC%
+echo Puppet&apos;s target is: %TARGET%
+echo Puppet&apos;s type is: %TYPE%
+echo Puppet&apos;s arch is: %ARCH%
+echo Find the msi at: http://builds.puppetlabs.lan/puppet/%TARGET%/artifacts/windows/puppet-%VERSION_DESC%%SUFFIX%.msi
+
+move puppet%SUFFIX%.msi puppet-%VERSION_DESC%%SUFFIX%.msi
+
+set DEST_PATH=%ORIG_PATH%/windows
+ssh %BUILD_HOST% &quot;mkdir -p %DEST_PATH%&quot;
+REM rsync -avg --ignore-existing puppet-%VERSION_DESC%%SUFFIX%.msi %BUILD_HOST%:%DEST_PATH%
+scp -B puppet-%VERSION_DESC%%SUFFIX%.msi %BUILD_HOST%:%DEST_PATH%
+
+popd</command>
+    </hudson.tasks.BatchFile>
+  </builders>
+  <publishers>
+    <hudson.plugins.parameterizedtrigger.BuildTrigger plugin="parameterized-trigger@2.16">
+      <configs>
+        <hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+          <configs>
+            <hudson.plugins.parameterizedtrigger.CurrentBuildParameters/>
+          </configs>
+          <projects><%= "#{Pkg::Config.project}-repo-#{Pkg::Config.build_date}-#{Pkg::Config.ref}" %></projects>
+          <condition>ALWAYS</condition>
+          <triggerWithNoParameters>false</triggerWithNoParameters>
+        </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>
+      </configs>
+    </hudson.plugins.parameterizedtrigger.BuildTrigger>
+    </publishers>
+    <buildWrappers/>
+  <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
+    <runSequentially>false</runSequentially>
+  </executionStrategy>
+</matrix-project>

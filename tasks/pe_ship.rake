@@ -92,7 +92,7 @@ if Pkg::Config.build_pe
 
           # Ship arch-specific debs to correct dir, e.g. 'squeeze-i386'
           unless Dir["pkg/pe/deb/#{dist}/pe-*_#{arch}.deb"].empty?
-            Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_#{arch}.deb --ignore-existing", Pkg::Config.apt_host, "#{archive_path}/")
+            Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_#{arch}.deb", Pkg::Config.apt_host, "#{archive_path}/")
           end
 
           # Ship all-arch debs to same dist-location, but to all known
@@ -102,16 +102,16 @@ if Pkg::Config.build_pe
 
           unless Dir["pkg/pe/deb/#{dist}/pe-*_all.deb"].empty?
             if dist =~ /cumulus/
-              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", Pkg::Config.apt_host, "#{base_path}/#{dist}-powerpc/")
+              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb", Pkg::Config.apt_host, "#{base_path}/#{dist}-powerpc/")
             else
-              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", Pkg::Config.apt_host, "#{base_path}/#{dist}-i386/")
-              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb --ignore-existing", Pkg::Config.apt_host, "#{base_path}/#{dist}-amd64/")
+              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb", Pkg::Config.apt_host, "#{base_path}/#{dist}-i386/")
+              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb", Pkg::Config.apt_host, "#{base_path}/#{dist}-amd64/")
             end
           end
 
           unless Dir["pkg/pe/deb/#{dist}/pe-*"].select { |i| i !~ /^.*\.deb$/ }.empty?
             # Ship source files to source dir, e.g. 'squeeze-source'
-            Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-* --exclude *.deb --ignore-existing", Pkg::Config.apt_host, "#{base_path}/#{dist}-source")
+            Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*", Pkg::Config.apt_host, "#{base_path}/#{dist}-source", ["--exclude '*.deb'", "--ignore-existing"])
           end
 
           files = Dir["pkg/pe/deb/#{dist}/pe-*{_#{arch},all}.deb"].map { |f| "#{archive_path}/#{File.basename(f)}" }

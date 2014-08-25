@@ -165,11 +165,9 @@ namespace :pl do
 
       retry_on_fail(:times => 3) do
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{artifact_dir}")
+        Pkg::Util::Net.rsync_to("pkg/", Pkg::Config.distribution_server, "#{artifact_dir}/", ["--ignore-existing", "--exclude repo_configs"])
       end
-      retry_on_fail(:times => 3) do
-        ignore_existing = "--ignore-existing"
-        Pkg::Util::Net.rsync_to("pkg/", Pkg::Config.distribution_server, "#{artifact_dir}/ #{ignore_existing} --exclude repo_configs")
-      end
+
       # If we just shipped a tagged version, we want to make it immutable
       files = Dir.glob("pkg/**/*").select { |f| File.file?(f) }.map do |file|
         "#{artifact_dir}/#{file.sub(/^pkg\//, '')}"

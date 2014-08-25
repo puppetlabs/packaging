@@ -38,7 +38,7 @@ namespace :pl do
       retry_on_fail(:times => 3) do
         # Ship the now signed repos to the distribution server
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{target_dir}")
-        Pkg::Util::Net.rsync_to("nightly_repos/", Pkg::Config.distribution_server, "#{target_dir} --ignore-existing")
+        Pkg::Util::Net.rsync_to("nightly_repos/", Pkg::Config.distribution_server, target_dir)
       end
     end
 
@@ -94,7 +94,11 @@ namespace :pl do
       end
 
       # Ship it to the target for consumption
-      Pkg::Util::Net.rsync_to("pkg/", target_host, target_basedir, false)
+      # First we ship the latest and clean up any repo-configs that are no longer valid with --delete-after
+      Pkg::Util::Net.rsync_to("pkg/#{Pkg::Config.project}-latest", target_host, target_basedir, ["--delete-after"])
+      # Then we ship the sha version with default rsync flags
+      Pkg::Util::Net.rsync_to("pkg/#{Pkg::Config.project}", target_host, target_basedir)
+
       puts "'#{Pkg::Config.ref}' of '#{Pkg::Config.project}' has been shipped to '#{target_host}:#{target_basedir}'"
     end
 

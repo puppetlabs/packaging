@@ -50,7 +50,6 @@ All tests (spec, acceptance) should be passing on all platforms for both stable 
 
 Have all tickets been resolved (passed Functional Review)? If not please add any missing tickets to the current sprint's board.
 
-NOTE: This link may not work properly for RC releases. Edit it to remove the "-rc#".
 https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20#{vars[:project]}%20AND%20resolution%20%3D%20Unresolved%20AND%20fixVersion%20%3D%20%22#{vars[:release]}%22
 DOC
 
@@ -74,7 +73,7 @@ DOC
 Bump VERSION in lib/{#project}/version.rb to correct version.
 
   * Commit the updated version file.
-    * e.g) commit -m "(packaging) Update FACTERVERSION to 1.7.3-rc1".
+    * e.g) commit -m "(packaging) Update FACTERVERSION to 1.7.3".
   * If any merging needs to happen (i.e. master into stable/stable into master), it can now happen (different subtask).
   * Once this is done, hand the SHA to be built to RelEng to be tagged.
 
@@ -86,7 +85,7 @@ DOC
   description[:merge_to_stable] = <<-DOC
 For some releases, the code base will need to be merged down to stable.
 
-*NOTE:* This is usually only during a x.y.0-rc1 release, but even then it may have already been done. If it doesn't apply, close this ticket.
+*NOTE:* This is usually only during a x.y.0 release, but even then it may have already been done. If it doesn't apply, close this ticket.
 
 
 Assuming you have origin (your remote) and upstream (puppetlabs remote), the commands will look something like this:
@@ -136,9 +135,8 @@ Tag and create packages
 
   * Developer provides the SHA - [~#{vars[:developer]}] - Please add the SHA as a comment (this should be the commit which contains the newly updated version.rb)
   * checkout the sha
-    * NOTE: If this is a final release, make sure you're releasing only the code that already went through rc, so don't let any new code get into the final release
     * Make sure you are about to tag the correct thing
-  * Create the tag e.g.) git tag -s -u {GPG key} -m "1.7.3-rc1" 1.7.3-rc1
+  * Create the tag e.g.) git tag -s -u {GPG key} -m "1.7.3" 1.7.3
     * You need to know the pass phrase for this to complete successfully. It's important that we make sure all releases are signed to verify authenticity.
     * DO NOT push the tag to the repo, keep it local only
   * `git describe` will show you the tag. Make sure you're building what you think you're building.
@@ -157,7 +155,7 @@ DOC
 Procedure may vary by project and point in the release cycle. Ask around.
 
 In general this should happen on a variety of platforms, i.e. one or two each of kind of package we create (i.e., gem, dmg, msi, deb, rpm, etc).
-If this is a final release then the previous RC (which should be identical to what is currently being released) will have gone through this testing. Lighter testing is acceptable.
+Lighter testing of Z releases is acceptable.
 
   * Add a link to the Packages repository that you receive from the "Tag and create packages" subtask
   * Ping folks on your team for help with different platforms.
@@ -239,9 +237,8 @@ DOC
   * Update the release google document (ask around for location).
   * Send the drafted release notes email.
     * If final send to puppet-announce and specific distribution lists (e.g. puppet to puppet-users & puppet-dev).
-    * If RC only send to the specific distribution lists.
   * Make a PSA on IRC letting those kiddos know about the new release.
-    * Something along the lines of "PSA: facter 1.7.3-rc1 now available"
+    * Something along the lines of "PSA: facter 1.7.3 now available"
 
 Dependencies:
   * Prepare long form release notes and short form release story
@@ -258,7 +255,6 @@ DOC
   description[:close_tickets] = <<-DOC
 Close any tickets that have been resolved for the release.
 
-NOTE: This link may not work properly for RC releases. Edit it to remove the "-rc#".
 https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20#{vars[:project]}%20AND%20resolution%20%3D%20Fixed%20AND%20fixVersion%20%3D%20%22#{vars[:release]}%22%20AND%20status%20%3D%20Resolved
 
 There is a bulk edit at the top (a gear with the word "Tools"). Should you decide to take this route:
@@ -417,7 +413,7 @@ namespace :pl do
 Make release tickets in JIRA for this project.
 Tickets are created by specifying a number of environment variables, e.g.:
 
-    rake pl:tickets BUILDER=melissa DEVELOPER=kylo WRITER=nickf RELEASE=3.5.0-rc4
+    rake pl:tickets BUILDER=melissa DEVELOPER=kylo WRITER=nickf RELEASE=3.5.0
         DATE=2014-04-01 JIRA_USER=kylo PROJECT=PUP
 
 The BUILDER/DEVELOPER/WRITER params must be valid jira usernames.

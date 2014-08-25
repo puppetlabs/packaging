@@ -304,7 +304,12 @@ try {
           <configs>
             <hudson.plugins.parameterizedtrigger.CurrentBuildParameters/>
           </configs>
-          <projects><%= "#{Pkg::Config.project}-repo-#{Pkg::Config.build_date}-#{Pkg::Config.ref}" %></projects>
+          <% if Pkg::Config.build_msi
+            downstream = "#{Pkg::Config.project}-msi-#{Pkg::Config.build_date}-#{Pkg::Config.short_ref}"
+          else
+            downstream = "#{Pkg::Config.project}-repo-#{Pkg::Config.build_date}-#{Pkg::Config.ref}"
+          end -%>
+          <projects><%= downstream %></projects>
           <condition>ALWAYS</condition>
           <triggerWithNoParameters>false</triggerWithNoParameters>
         </hudson.plugins.parameterizedtrigger.BuildTriggerConfig>

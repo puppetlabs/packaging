@@ -15,6 +15,7 @@ describe "Pkg::Config" do
                   :build_doc,
                   :build_gem,
                   :build_ips,
+                  :build_msi,
                   :build_pe,
                   :builder_data_file,
                   :bundle_platforms,

@@ -28,6 +28,7 @@ namespace :pl do
       work_dir           = Pkg::Util::File.mktemp
       template_dir       = File.join(File.dirname(__FILE__), '..', 'templates')
       templates          = ['repo.xml.erb', 'packaging.xml.erb']
+      templates << ('msi.xml.erb') if Pkg::Config.build_msi
       templates << ('downstream.xml.erb') if ENV['DOWNSTREAM_JOB']
 
       # Generate an XML file for every job configuration erb and attempt to

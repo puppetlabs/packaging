@@ -12,6 +12,7 @@ module Pkg::Params
                   :build_doc,
                   :build_gem,
                   :build_ips,
+                  :build_msi,
                   :build_pe,
                   :builder_data_file,
                   :builds_server,

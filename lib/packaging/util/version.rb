@@ -8,21 +8,21 @@ module Pkg::Util::Version
 
     def git_co(ref)
       Pkg::Util.in_project_root do
-        %x(#{GIT} reset --hard ; #{GIT} checkout #{ref})
+        Pkg::Util::Execution.ex("#{GIT} reset --hard ; #{GIT} checkout #{ref}")
         $?.success? or fail "Could not checkout #{ref} git branch to build package from...exiting"
       end
     end
 
     def git_tagged?
       Pkg::Util.in_project_root do
-        %x(#{GIT} describe >#{DEVNULL} 2>&1)
+        Pkg::Util::Execution.ex("#{GIT} describe >#{DEVNULL} 2>&1")
         $?.success?
       end
     end
 
     def git_describe
       Pkg::Util.in_project_root do
-        %x(#{GIT} describe).strip
+        Pkg::Util::Execution.ex("#{GIT} describe").strip
       end
     end
 
@@ -40,7 +40,7 @@ module Pkg::Util::Version
     # Return the ref type of HEAD on the current branch
     def git_ref_type
       Pkg::Util.in_project_root do
-        %x(#{GIT} cat-file -t #{git_describe}).strip
+        Pkg::Util::Execution.ex("#{GIT} cat-file -t #{git_describe}").strip
       end
     end
 
@@ -56,7 +56,7 @@ module Pkg::Util::Version
     # Return true if we're in a git repo, otherwise false
     def is_git_repo?
       Pkg::Util.in_project_root do
-        %x(#{GIT} rev-parse --git-dir > #{DEVNULL} 2>&1)
+        Pkg::Util::Execution.ex("#{GIT} rev-parse --git-dir > #{DEVNULL} 2>&1")
         $?.success?
       end
     end
@@ -66,7 +66,7 @@ module Pkg::Util::Version
     # Return the basename of the project repo
     def git_project_name
       Pkg::Util.in_project_root do
-        %x(#{GIT} config --get remote.origin.url).split('/')[-1].chomp(".git").chomp
+        Pkg::Util::Execution.ex("#{GIT} config --get remote.origin.url").split('/')[-1].chomp(".git").chomp
       end
     end
 
@@ -100,7 +100,7 @@ module Pkg::Util::Version
     # This is a stub to ease testing...
     def run_git_describe_internal
       Pkg::Util.in_project_root do
-        raw = %x(#{GIT} describe --tags --dirty 2>#{DEVNULL})
+        raw = Pkg::Util::Execution.ex("#{GIT} describe --tags --dirty 2>#{DEVNULL}")
         $?.success? ? raw : nil
       end
     end
@@ -115,7 +115,7 @@ module Pkg::Util::Version
 
     def uname_r
       uname = Pkg::Util::Tool.find_tool('uname', :required => true)
-      %x(#{uname} -r).chomp
+      Pkg::Util::Execution.ex("#{uname} -r").chomp
     end
 
     def get_ips_version
@@ -257,7 +257,7 @@ module Pkg::Util::Version
         nil
       elsif File.exists?('/etc/redhat-release')
         rpm = Pkg::Util::Tool.find_tool('rpm', :required => true)
-        return %x{#{rpm} -q --qf \"%{VERSION}\" $(#{rpm} -q --whatprovides /etc/redhat-release )}
+        return Pkg::Util::Execution.ex("#{rpm} -q --qf \"%{VERSION}\" $(#{rpm} -q --whatprovides /etc/redhat-release ")
       end
     end
 

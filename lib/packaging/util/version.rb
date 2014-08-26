@@ -257,7 +257,7 @@ module Pkg::Util::Version
         nil
       elsif File.exists?('/etc/redhat-release')
         rpm = Pkg::Util::Tool.find_tool('rpm', :required => true)
-        return Pkg::Util::Execution.ex("#{rpm} -q --qf \"%{VERSION}\" $(#{rpm} -q --whatprovides /etc/redhat-release ")
+        return Pkg::Util::Execution.ex("#{rpm} -q --qf \"%{VERSION}\" $(#{rpm} -q --whatprovides /etc/redhat-release )")
       end
     end
 

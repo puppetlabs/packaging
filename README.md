@@ -434,6 +434,25 @@ build_gem: TRUE
 build_dmg: TRUE
 # Whether to execute the rdoc rake tasks prior to composing the tarball
 build_doc: FALSE
+# Whether to kick of a dynamic msi build job along side the uber_build
+# If present, a dynamically generated jenkins job will be kicked off.
+# The automation in puppet_for_the_win is used to build the msi with the
+# following components.
+build_msi:
+  puppet_for_the_win:
+    ref: 'origin/master'
+    repo: 'git://github.com/puppetlabs/puppet_for_the_win.git'
+  facter:
+    ref: 'refs/tags/2.1.0'
+    repo: 'git://github.com/puppetlabs/facter.git'
+  hiera:
+    ref: 'refs/tags/1.3.4'
+    repo: 'git://github.com/puppetlabs/hiera.git'
+  sys:
+    ref:
+      x86: 'origin/1.9.3-x86'
+      x64: 'origin/2.0.0-x64'
+    repo: 'git://github.com/puppetlabs/puppet-win32-ruby.git'
 # Whether to present the Solaris 11 IPS packaging tasks
 # This requires suitable IPS packaging artifacts in the project in ext/ips
 build_ips: FALSE

@@ -123,6 +123,7 @@ module Pkg::Params
               { :var => :build_doc,           :envvar => :DOC,             :type => :bool },
               { :var => :build_gem,           :envvar => :GEM,             :type => :bool },
               { :var => :build_ips,           :envvar => :IPS,             :type => :bool },
+              { :var => :build_msi,           :envvar => :MSI,             :type => :bool },
               { :var => :build_pe,            :envvar => :PE_BUILD,        :type => :bool },
               { :var => :certificate_pem,     :envvar => :CERT_PEM },
               { :var => :cows,                :envvar => :COW },

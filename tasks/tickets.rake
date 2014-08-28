@@ -235,6 +235,7 @@ DOC
 
   description[:send_announcements] = <<-DOC
   * [~#{vars[:builder]}]: update the release google spreadsheet.
+  * Update the MSI build targets in the Puppet repo in ext/build_defaults.yaml. This needs to be done for any projects that are to get into the MSI (facter and hiera as of 8/2014)
   * Send the drafted release notes email.
     * If final send to puppet-announce and specific distribution lists (e.g. puppet to puppet-users & puppet-dev).
   * Make a PSA on IRC letting those kiddos know about the new release.

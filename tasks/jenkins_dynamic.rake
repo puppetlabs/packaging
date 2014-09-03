@@ -110,7 +110,7 @@ namespace :pl do
 
       if Pkg::Util::Net.curl_form_data(trigger_url, curl_args)
         Pkg::Util::Net.print_url_info("http://#{Pkg::Config.jenkins_build_host}/job/#{name}")
-        puts "Your packages will be available at #{Pkg::Config.distribution_server}:#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
+        puts "Your packages will be available at http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
       else
         fail "An error occurred submitting the job to jenkins. Take a look at the preceding http response for more info."
       end

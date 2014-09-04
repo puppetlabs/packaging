@@ -102,20 +102,6 @@ namespace :pl do
     sign_ips(fmri, repo_uri)
   end if Pkg::Config.build_ips
 
-  if Pkg::Config.build_gem
-    desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
-    task :sign_gem do
-      if Pkg::Config.version_strategy !~ /odd_even|zero_based/ || Pkg::Util::Version.is_final?
-        FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |gem|
-          puts "signing gem #{gem}"
-          gpg_sign_file(gem)
-        end
-      else
-        STDERR.puts "Not signing development gems using odd_even strategy for the sake of your users."
-      end
-    end
-  end
-
   desc "Check if all rpms are signed"
   task :check_rpm_sigs do
     signed = TRUE
@@ -166,7 +152,6 @@ namespace :pl do
       rpm_sign_task = Pkg::Config.build_pe ? "pe:sign_rpms" : "pl:sign_rpms"
       deb_sign_task = Pkg::Config.build_pe ? "pe:sign_deb_changes" : "pl:sign_deb_changes"
       sign_tasks    = ["pl:sign_tar", rpm_sign_task, deb_sign_task]
-      sign_tasks    << "pl:sign_gem" if Pkg::Config.build_gem
       remote_repo   = remote_bootstrap(Pkg::Config.distribution_server, 'HEAD', nil, signing_bundle)
       build_params  = remote_buildparams(Pkg::Config.distribution_server, Pkg::Config)
       Pkg::Util::Net.rsync_to('pkg', Pkg::Config.distribution_server, remote_repo)

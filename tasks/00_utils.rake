@@ -113,7 +113,7 @@ def ship_gem(file)
   Pkg::Util::Execution.ex("gem push #{file}")
   begin
     Pkg::Util::Tool.check_tool("stickler")
-    Pkg::Util::Execution.ex("stickler push #{file} --server=#{Pkg::Config.gemhost} 2>/dev/null")
+    Pkg::Util::Execution.ex("stickler push #{file} --server=#{Pkg::Config.internal_gem_host} 2>/dev/null")
     puts "#{file} pushed to stickler server at #{Pkg::Config.internal_gem_host}"
   rescue
     puts "##########################################\n#"

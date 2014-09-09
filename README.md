@@ -311,6 +311,32 @@ The goal is to move toward migrating all of the jenkins tasks from the first
 workflow, using a static job that is called many times per package, to this
 second workflow of creating the jobs on demand.
 
+### `uber_build_with_polling`
+
+This task performs 100% of the same behavior as the `uber_build` task with two
+additional behaviors for each of the triggered jobs.  First, the rake task will
+block until the job has finished; then it will print the status of the build.
+For a project configured to build only the `packaging` and `repo` jobs, the
+following blocks demonstrate the additional output that `uber_build_wih_polling`
+provides:
+
+```bash
+Packaging SUCCESS
+Repo SUCCESS
+```
+
+If for example the Packaging job had failed the output would look like this:
+
+```bash
+Packaging FAILURE
+Repo SUCCESS
+```
+
+If a build fails then the rake task will terminate with a nonzero exit status
+which can be used during CI or other automated contexts to detect and act on the
+failure.  This eliminates the need to pass a `DOWNSTREAM_JOB` variable to the
+uber_build job although it is still possible to do so. The CI job calling
+`uber_build_with_polling` can instead trigger its downstream job(s) normally.
 
 ## Task Explanations
 For a listing of all available tasks and their functions, see the [Task

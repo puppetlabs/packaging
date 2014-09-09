@@ -1,4 +1,6 @@
 # Utility methods for handling Jenkins
+require 'net/http'
+require 'json'
 
 module Pkg::Util::Jenkins
 
@@ -23,5 +25,62 @@ module Pkg::Util::Jenkins
       form_args = ["--silent", "--fail"]
       Pkg::Util::Net.curl_form_data(job_url, form_args, :quiet => true)
     end
+
+    # Wait for last build of job to finish.
+    #
+    # @param build_url [String] Valid build uri of a Jankins job.
+    # @param polling_interval [Int] Timeout in seconds between HTTP GET on given
+    #                               build_uri.
+    #
+    def wait_for_build(build_url, polling_interval = 2)
+      build_hash = get_jenkins_info(build_url)
+
+      while build_hash['building']
+        build_hash = get_jenkins_info(build_url)
+        sleep polling_interval
+      end
+
+      return build_hash
+    end
+
+    # Query jankins api and return a hash parsed from the JSON response if
+    # response is usable. Raise Runtime Error if response code is other than
+    # HTTP 200.
+    #
+    # @param url [String] Valid url of a Jankins job.
+    #
+    def get_jenkins_info(url)
+      uri = URI("#{url}/api/json")
+      response = Net::HTTP.get_response(uri)
+      unless response.code == '200'
+        raise "Unable to query #{uri}, please check that it is valid."
+      end
+      return JSON.parse(response.body)
+    end
+
+    # Poll the job at the given url until it is finished, then return the final
+    # map of build information for calling context to do with as it pleases.
+    #
+    # Note that this method uses the build specified by the job api's lastBuild
+    # parameter.
+    #
+    # @param job_url [String] Valid url of a Jankins job.
+    #
+    def poll_jenkins_job(job_url)
+      job_hash = get_jenkins_info(job_url)
+
+      ##
+      # Sometimes we get a janky ol' nil because we get here too soon after the
+      # jankins job's build was triggered. This is kind of an ugly workaround
+      # but whatever.
+      #
+      while job_hash['lastBuild'].nil?
+        job_hash = get_jenkins_info(job_url)
+        sleep 1
+      end
+
+      wait_for_build job_hash['lastBuild']['url']
+    end
+
   end
 end

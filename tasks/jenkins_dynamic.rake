@@ -13,6 +13,62 @@
 
 namespace :pl do
   namespace :jenkins do
+    desc "Like uber_build but with polling and build status output."
+    task :uber_build_with_polling => "pl:jenkins:uber_build" do
+      ##
+      # Wait for the '*packaging*' job to finish.
+      #
+      name = "#{Pkg::Config.project}-packaging-#{Pkg::Config.build_date}-#{Pkg::Config.ref}"
+      packaging_job_url = "http://#{Pkg::Config.jenkins_build_host}/job/#{name}"
+      packaging_build_hash = Pkg::Util::Jenkins.poll_jenkins_job(packaging_job_url)
+
+      ##
+      # Output status of packaging build for cli consumption
+      #
+      puts "Packaging #{packaging_build_hash['result']}"
+
+      if packaging_build_hash['result'] == 'FAILURE'
+        puts "Please see #{packaging_job_url} for failure details."
+        exit 1
+      end
+
+      if Pkg::Config.build_msi
+        ##
+        # Wait for the '*msi*' job to finish.
+        #
+        name = "#{Pkg::Config.project}-msi-#{Pkg::Config.build_date}-#{Pkg::Config.short_ref}"
+        msi_job_url = "http://#{Pkg::Config.jenkins_build_host}/job/#{name}"
+        msi_build_hash = Pkg::Util::Jenkins.poll_jenkins_job(msi_job_url)
+
+        ##
+        # Output status of msi build for cli consumption
+        #
+        puts "MSI #{msi_build_hash['result']}"
+
+        if msi_build_hash['result'] == 'FAILURE'
+          puts "Please see #{msi_job_url} for failure details."
+          exit 1
+        end
+      end
+
+      ##
+      # Wait for the '*repo*' job to finish.
+      #
+      name = "#{Pkg::Config.project}-repo-#{Pkg::Config.build_date}-#{Pkg::Config.ref}"
+      repo_job_url = "http://#{Pkg::Config.jenkins_build_host}/job/#{name}"
+      repo_build_hash = Pkg::Util::Jenkins.poll_jenkins_job(repo_job_url)
+
+      ##
+      # Output status of repo build for cli consumption
+      #
+      puts "Repo Creation #{repo_build_hash['result']}"
+
+      if repo_build_hash['result'] == 'FAILURE'
+        puts "Please see #{repo_job_url} for failure details."
+        exit 1
+      end
+    end
+
     desc "Dynamic Jenkins UBER build: Build all the things with ONE job"
     task :uber_build => "pl:fetch" do
       # If we have a dirty source, bail, because changes won't get reflected in

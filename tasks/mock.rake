@@ -17,7 +17,7 @@
 # pkg/<dist>-<version>-<arch>/*.rpm
 # e.g.,
 # pkg/el-5-i386/*.rpm
-def mock_artifact(mock_config, cmd_args)
+def mock_artifact(mock_config, cmd_args, mockfile)
   unless mock = Pkg::Util::Tool.find_tool('mock')
     raise "mock is required for building srpms with mock. Please install mock and try again."
   end
@@ -26,19 +26,21 @@ def mock_artifact(mock_config, cmd_args)
   basedir = File.join('var', 'lib', 'mock')
 
   if randomize
-    basedir, configdir = randomize_mock_config_dir(mock_config)
+    basedir, configdir = randomize_mock_config_dir(mock_config, mockfile)
     configdir_arg = " --configdir #{configdir}"
   end
+  result_dir = Pkg::Util::File.mktemp
+  resultdir_arg = " --resultdir #{result_dir}"
 
   begin
-    sh "#{mock} -r #{mock_config} #{configdir_arg} #{cmd_args}"
+    sh "#{mock} -r #{mock_config} #{resultdir_arg} #{configdir_arg} #{cmd_args}"
 
     # Return a FileList of the build artifacts
-    return FileList[File.join(basedir, mock_config, 'result', '*.rpm')]
+    return FileList[File.join(result_dir, '*.rpm')]
 
   rescue RuntimeError => error
-    build_log = File.join(basedir, mock_config, 'result', 'build.log')
-    root_log  = File.join(basedir, mock_config, 'result', 'root.log')
+    build_log = File.join(result_dir, 'build.log')
+    root_log  = File.join(result_dir, 'root.log')
     content   = File.read(build_log) if File.readable?(build_log)
 
     if File.readable?(root_log)
@@ -55,6 +57,7 @@ def mock_artifact(mock_config, cmd_args)
 
     if randomize and basedir and File.directory?(basedir)
       sh "sudo -n rm -r #{basedir}"
+      sh "sudo -n rm -r #{result_dir}"
     end
 
     raise error
@@ -69,9 +72,9 @@ end
 
 # Use mock to build an SRPM
 # Return the path to the srpm
-def mock_srpm(mock_config, spec, sources, defines = nil)
+def mock_srpm(mock_config, spec, sources, mockfile, defines = nil)
   cmd_args = "--buildsrpm #{defines} --sources #{sources} --spec #{spec}"
-  srpms = mock_artifact(mock_config, cmd_args)
+  srpms = mock_artifact(mock_config, cmd_args, mockfile)
 
   unless srpms.size == 1
     fail "#{srpms} contains an unexpected number of artifacts."
@@ -81,9 +84,9 @@ end
 
 # Use mock to build rpms from an srpm
 # Return a FileList containing the built RPMs
-def mock_rpm(mock_config, srpm)
+def mock_rpm(mock_config, srpm, mockfile)
   cmd_args = " #{srpm}"
-  mock_artifact(mock_config, cmd_args)
+  mock_artifact(mock_config, cmd_args, mockfile)
 end
 
 # Determine the "family" of the target distribution based on the mock config name,
@@ -129,6 +132,22 @@ def mock_el_ver(mock_config)
   version
 end
 
+# Checks to see if the pe agnostic config template is in place.
+# If it is then the mock config is set to point to the generated config file.
+# The generated config file is formed by substituting the pe_version into the erb
+#
+def mock_template(mock_config)
+  check_var("PE version, ENV[PE_VER]", Pkg::Config.pe_version)
+  pe_version = Pkg::Config.pe_version
+  template = mock_config.sub("#{pe_version}-", "")
+  template_location = File.join(File::SEPARATOR, "etc", "mock", "#{template}.cfg.erb")
+  if File.exists?(template_location)
+    return template, Pkg::Util::File.erb_file(template_location, nil, false, { :binding => binding })
+  else
+    return mock_config
+  end
+end
+
 # Determine the appropriate rpm macro definitions based on the mock config name
 # Return a string of space separated macros prefixed with --define
 #
@@ -158,12 +177,14 @@ def build_rpm_with_mock(mocks)
       spec = Dir.glob(File.join(workdir, "SPECS", "*.spec"))[0]
       sources = File.join(workdir, "SOURCES")
       defines = mock_defines(mock_config)
-
+      if Pkg::Config.build_pe
+        mock_config, mockfile = mock_template(mock_config)
+      end
       # Build the srpm inside a mock chroot
-      srpm = mock_srpm(mock_config, spec, sources, defines)
+      srpm = mock_srpm(mock_config, spec, sources, mockfile, defines)
 
       # Now that we have the srpm, build the rpm in a mock chroot
-      rpms = mock_rpm(mock_config, srpm)
+      rpms = mock_rpm(mock_config, srpm, mockfile)
 
       rpms.each do |rpm|
         rpm.strip!
@@ -257,13 +278,13 @@ end
 # mock config and the required default mock settings files into a new config
 # dir to pass to mock. Return the path to the config dir.
 #
-def randomize_mock_config_dir(mock_config)
+def randomize_mock_config_dir(mock_config, mockfile)
   # basedir will be the location of our temporary mock root
   basedir = Pkg::Util::File.mktemp
   chown("#{ENV['USER']}", "mock", basedir)
   # Mock requires the sticky bit be set on the basedir
   chmod(02775, basedir)
-  mockfile = File.join('/', 'etc', 'mock', "#{mock_config}.cfg")
+  mockfile ||= File.join('/', 'etc', 'mock', "#{mock_config}.cfg")
   puts "Setting mock basedir to #{basedir}"
   # Create a new mock config file with 'basedir' set to our basedir
   config = mock_with_basedir(mockfile, basedir)

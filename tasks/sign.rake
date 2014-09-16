@@ -105,14 +105,9 @@ namespace :pl do
   if Pkg::Config.build_gem
     desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
     task :sign_gem do
-      # This Odd/Even strategy is going away soon and this if statement should be removed when that occurs
-      if Pkg::Config.version_strategy !~ /odd_even|zero_based/ || Pkg::Util::Version.is_final?
-        FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |gem|
-          puts "signing gem #{gem}"
-          gpg_sign_file(gem)
-        end
-      else
-        STDERR.puts "Not signing development gems using odd_even strategy for the sake of your users."
+      FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |gem|
+        puts "signing gem #{gem}"
+        gpg_sign_file(gem)
       end
     end
   end

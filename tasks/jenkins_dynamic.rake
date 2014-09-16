@@ -91,8 +91,7 @@ namespace :pl do
         puts "Packaging #{packaging_build_hash['result']}"
 
         if packaging_build_hash['result'] == 'FAILURE'
-          puts "Please see #{packaging_job_url} for failure details."
-          exit 1
+          fail "Please see #{packaging_job_url} for failure details."
         end
 
         if Pkg::Config.build_msi
@@ -109,8 +108,7 @@ namespace :pl do
           puts "MSI #{msi_build_hash['result']}"
 
           if msi_build_hash['result'] == 'FAILURE'
-            puts "Please see #{msi_job_url} for failure details."
-            exit 1
+            fail "Please see #{msi_job_url} for failure details."
           end
         end
 
@@ -127,8 +125,7 @@ namespace :pl do
         puts "Repo Creation #{repo_build_hash['result']}"
 
         if repo_build_hash['result'] == 'FAILURE'
-          puts "Please see #{repo_job_url} for failure details."
-          exit 1
+          fail "Please see #{repo_job_url} for failure details."
         end
       end
     end

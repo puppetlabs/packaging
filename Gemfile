@@ -6,5 +6,5 @@ group :development, :test do
   gem 'pry'
   gem 'win32console', :platforms => [:mingw_18, :mingw_19]
   gem 'rubocop', "~> 0.24.1", :require => false unless RUBY_VERSION =~ /^1.8/
-  gem 'json', :require => true if RUBY_VERSION =~ /^1.8/
+  gem 'json_pure', :require => true if RUBY_VERSION =~ /^1.8/
 end

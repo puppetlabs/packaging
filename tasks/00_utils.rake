@@ -121,6 +121,9 @@ def ship_gem(file)
     puts "#  and you have access to #{Pkg::Config.internal_gem_host} \n#"
     puts "##########################################"
   end
+  retry_on_fail(:times => 3) do
+    Pkg::Util::Net.rsync_to("#{file}*", Pkg::Config.gem_host, Pkg::Config.gem_path)
+  end
 end
 
 def ask_yes_or_no

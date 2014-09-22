@@ -28,7 +28,7 @@ module Pkg::Util::Jenkins
 
     # Wait for last build of job to finish.
     #
-    # @param build_url [String] Valid build uri of a Jankins job.
+    # @param build_url [String] Valid build uri of a Jenkins job.
     # @param polling_interval [Int] Timeout in seconds between HTTP GET on given
     #                               build_uri.
     #
@@ -43,11 +43,11 @@ module Pkg::Util::Jenkins
       return build_hash
     end
 
-    # Query jankins api and return a hash parsed from the JSON response if
+    # Query jenkins api and return a hash parsed from the JSON response if
     # response is usable. Raise Runtime Error if response code is other than
     # HTTP 200.
     #
-    # @param url [String] Valid url of a Jankins job.
+    # @param url [String] Valid url of a Jenkins job.
     #
     def get_jenkins_info(url)
       uri = URI("#{url}/api/json")
@@ -64,15 +64,15 @@ module Pkg::Util::Jenkins
     # Note that this method uses the build specified by the job api's lastBuild
     # parameter.
     #
-    # @param job_url [String] Valid url of a Jankins job.
+    # @param job_url [String] Valid url of a Jenkins job.
     #
     def poll_jenkins_job(job_url)
       job_hash = get_jenkins_info(job_url)
 
       ##
-      # Sometimes we get a janky ol' nil because we get here too soon after the
-      # jankins job's build was triggered. This is kind of an ugly workaround
-      # but whatever.
+      # Sometimes we get a nil because we get here too soon after the jenkins
+      # job's build was triggered. This is kind of an ugly workaround but
+      # whatever.
       #
       while job_hash['lastBuild'].nil?
         job_hash = get_jenkins_info(job_url)

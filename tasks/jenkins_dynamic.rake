@@ -18,12 +18,6 @@ namespace :pl do
       args.with_defaults(poll_interval: 0)
       poll_interval = args.poll_interval.to_i
 
-      if poll_interval > 60
-        puts "Polling interval too high! Setting to 60 seconds."
-        puts "Recommended polling interval is between 1 and 10 seconds."
-        poll_interval = 60
-      end
-
       # If we have a dirty source, bail, because changes won't get reflected in
       # the package builds
       Pkg::Util::Version.fail_on_dirty_source

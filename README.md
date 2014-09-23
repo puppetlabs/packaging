@@ -311,6 +311,29 @@ The goal is to move toward migrating all of the jenkins tasks from the first
 workflow, using a static job that is called many times per package, to this
 second workflow of creating the jobs on demand.
 
+### Polling behavior with `pl:jenkins:uber_build:`
+
+It is possible to pass an integer argument to the `uber_build` task which will be
+used by the job as polling interval. If this value is passed in, the task will
+query the dynamic job using the Jenkins API periodically until the build is
+finished. Then, it will query the build to determine the SUCCESS/FAILURE status.
+The job output will look something like:
+
+```bash
+Packaging SUCCESS
+Repo SUCCESS
+```
+
+If for example the Packaging job had failed the output would look like this:
+
+```bash
+Packaging FAILURE
+```
+
+If a build fails then the rake task will terminate with a nonzero exit status
+which can be used during CI or other automated contexts to detect and act on the
+failure. This eliminates the need to pass a `DOWNSTREAM_JOB` variable to the
+uber_build job although it is still possible to do so.
 
 ## Task Explanations
 For a listing of all available tasks and their functions, see the [Task

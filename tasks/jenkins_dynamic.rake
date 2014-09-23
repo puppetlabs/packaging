@@ -15,7 +15,7 @@ namespace :pl do
   namespace :jenkins do
     desc "Dynamic Jenkins UBER build: Build all the things with ONE job"
     task :uber_build, [:poll_interval] => "pl:fetch" do |t, args|
-      args.with_defaults(poll_interval: 0)
+      args.with_defaults(:poll_interval => 0)
       poll_interval = args.poll_interval.to_i
 
       # If we have a dirty source, bail, because changes won't get reflected in

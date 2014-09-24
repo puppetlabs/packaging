@@ -155,12 +155,14 @@ DOC
 Procedure may vary by project and point in the release cycle. Ask around.
 
 In general this should happen on a variety of platforms, i.e. one or two each of kind of package we create (i.e., gem, dmg, msi, deb, rpm, etc).
+
+For Puppet, our acceptance suite now tests service scripts, and on debian, a passenger master.  Manual smoke testing can therefore be limited to other package formats than deb and rpm.
+
 Lighter testing of Z releases is acceptable.
 
   * Add a link to the Packages repository that you receive from the "Tag and create packages" subtask
   * Ping folks on your team for help with different platforms.
   * When you pick up a platform, please leave a comment below that you are testing it. When it looks good, leave another comment, preferably with a code snippet showing the commands executed and their output.
-  * If your smoke testing includes MSIs, you will generally test on other platforms first and when that is looking good, ping the Release Engineer that built the other packages to move forward with MSIs (they require tags to be pushed). This ticket doesn't close until all chosen platforms (including MSIs) have been tested.
   * When all platforms picked have been smoke tested, move this ticket to done.
 
 IMPORTANT: Please edit the description of this ticket and remove "Example:" below. Edit the platforms to smoke test on, and the smoke test procedure.
@@ -168,14 +170,17 @@ IMPORTANT: Please edit the description of this ticket and remove "Example:" belo
 Example:
 Smoke test platforms:
   * pick some platforms such as
-  * RHEL 5/6/7
-  * CentOS 5/6
-  * Windows 2003/2008/2012
-  * Debian 6/7/
-  * Ubuntu 10.04/12.04/14.04
+  * Windows 2003/2008/2012 (msi)
+  * Solaris 10/11 (tarball or gem?)
+  * OSX (dmg)
+  * (Note if you are smoke testing Puppet and pick an rpm or deb based platform, concentrate on testing a gem or tarball, since acceptance should have adequately smoke tested those packages.)
+    * RHEL/CentOS 5/6/7
+    * Fedora 19/20
+    * Debian 6/7
+    * Ubuntu 10.04/12.04/14.04
 
 Smoke test procedure:
-  * Start/stop/restart a master with the init scripts (on Debian try the passenger master)
+  * Start/stop/restart a master (if the platform supports that)
   * Start/stop/restart an agent
   * Help/man
   * Write and run some manifests

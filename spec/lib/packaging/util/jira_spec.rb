@@ -28,7 +28,7 @@ describe Pkg::Util::Jira do
     expect(fields['summary']).to eq("summary")
     expect(fields['description']).to eq("desc")
     expect(fields['project']['key']).to eq("PUP")
-    expect(fields['issuetype']['name']).to eq("Task")
+    expect(fields['issuetype']['name']).to eq("Release")
     expect(fields['assignee']['name']).to eq("ivy")
     expect(fields['parent']).to eq(nil)
   end

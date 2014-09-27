@@ -27,7 +27,7 @@ module Pkg::Util
           'summary'     => summary,
           'description' => description,
           'project'     => { 'key' => project },
-          'issuetype'   => { 'name' => parent ? "Sub-task" : "Task" },
+          'issuetype'   => { 'name' => parent ? "Sub-task" : "Release" },
           'assignee'    => { 'name' => assignee },
       }
       if parent

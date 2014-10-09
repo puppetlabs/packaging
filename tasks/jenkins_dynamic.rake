@@ -180,9 +180,10 @@ end
 namespace :pe do
   namespace :jenkins do
     desc "Dynamic Jenkins UBER build: Build all the things with ONE job"
-    task :uber_build do
+    task :uber_build, [:poll_interval] do |t, args|
       check_var("PE_VER", Pkg::Config.pe_version)
-      invoke_task("pl:jenkins:uber_build")
+      args.with_defaults(:poll_interval => 0)
+      Rake::Task["pl:jenkins:uber_build"].invoke(args.poll_interval)
     end
   end
 end

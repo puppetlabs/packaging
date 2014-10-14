@@ -45,9 +45,12 @@ module Pkg::Util::Net
       Pkg::Util::Execution.ex("#{rsync} #{flags} #{source} #{target}:#{dest}")
     end
 
-    def rsync_from(source, target, dest)
+    def rsync_from(source, target, dest, extra_flags = [])
       rsync = Pkg::Util::Tool.check_tool('rsync')
       flags = "-rHlv -O --no-perms --no-owner --no-group"
+      unless extra_flags.empty?
+        flags << " " << extra_flags.join(" ")
+      end
       Pkg::Util::Execution.ex("#{rsync} #{flags} #{target}:#{source} #{dest}")
     end
 

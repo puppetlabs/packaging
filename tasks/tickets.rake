@@ -221,16 +221,6 @@ Dependencies:
   * Go / No Go meeting (Status - Ship it!)
 DOC
 
-  description[:update_downloads] = <<-DOC
-Update downloads page
-  * Update misc/download-options to reflect the new builds you just pushed and also make sure they're displayed. It's a good idea to make sure this looks like it's supposed to
-
-NOTE: this page will hopefully be deprecated soon. The idea is that docs with update their documentation to include "latest release version" and where to download files. This page will then be changed to redirect to docs.puppetlabs.com and will no longer need updating.
-
-Dependencies:
-  * Go / No Go meeting (Status - Ship it!)
-DOC
-
   description[:push_docs] = <<-DOC
 Push the documentation updates to docs.puppetlabs.com.
 
@@ -336,11 +326,6 @@ DOC
     {
       :summary     => 'Packages pushed',
       :description => description[:push_packages],
-      :assignee    => vars[:builder]
-    },
-    {
-      :summary     => 'Update the downloads page',
-      :description => description[:update_downloads],
       :assignee    => vars[:builder]
     },
     {

@@ -138,8 +138,11 @@ end
 #
 def mock_template(mock_config)
   check_var("PE version, ENV[PE_VER]", Pkg::Config.pe_version)
+  # pe_version is used in the erb template
   pe_version = Pkg::Config.pe_version
-  template = mock_config.sub("#{pe_version}-", "")
+  # This bit is fun, here we remove any x.y version in the PE version location in the string from the mock_config
+  # for example, pupent-3.4-el5-i386.cfg would become pupent-el5-i386 while pupent-el7-x86_64 would remain unmodified.
+  template = mock_config.sub(/([^-]*)-\d\.\d-([^-]*)-([^-]*)/, '\1-\2-\3')
   template_location = File.join(File::SEPARATOR, "etc", "mock", "#{template}.cfg.erb")
   if File.exists?(template_location)
     return template, Pkg::Util::File.erb_file(template_location, nil, false, { :binding => binding })

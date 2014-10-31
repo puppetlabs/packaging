@@ -145,7 +145,6 @@ module Pkg
       mkpath workdir
       self.install_files_to workdir
       self.template(workdir)
-      Pkg::Util::Version.versionbump(workdir) if Pkg::Config.update_version_file
       self.tar(@target, workdir)
       self.clean_up workdir
     end

@@ -101,6 +101,7 @@ module Pkg::Util::File
           end
         end
       end
+      Pkg::Util::Version.versionbump(workdir) if Pkg::Config.update_version_file
     end
   end
 end

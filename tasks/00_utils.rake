@@ -84,15 +84,13 @@ def gpg_sign_file(file)
   end
 end
 
-
 def set_cow_envs(cow)
-  elements = cow.split('-')
-  if elements.size != 3
-    fail "Expecting a cow name split on hyphens, e.g. 'base-squeeze-i386'"
+  elements = /base-(.*)-(.*).cow/.match(cow)
+  if elements.nil?
+    fail "Didn't get a matching cow, e.g. 'base-squeeze-i386'"
   end
   dist = elements[1]
   arch = elements[2]
-  arch = arch.split('.')[0] if arch.include?('.')
   if Pkg::Config.build_pe
     ENV['PE_VER'] = Pkg::Config.pe_version
   end

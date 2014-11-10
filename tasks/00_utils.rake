@@ -85,7 +85,7 @@ def gpg_sign_file(file)
 end
 
 def set_cow_envs(cow)
-  elements = /base-(.*)-(.*).cow/.match(cow)
+  elements = /base-(.*)-(.*)\.cow/.match(cow)
   if elements.nil?
     fail "Didn't get a matching cow, e.g. 'base-squeeze-i386'"
   end

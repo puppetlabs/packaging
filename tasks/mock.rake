@@ -95,7 +95,8 @@ end
 #
 def mock_el_family(mock_config)
   if Pkg::Config.build_pe
-    family = mock_config.split('-')[2][/[a-z]+/]
+    # This uses a regex capture instead of splitting to allow the now defunct PE version component to be optional
+    family = mock_config.match(/^pupent-(\d\.\d-)?([a-z]+)([0-9]+)-(.*)$/)[2]
   else
     first, second = mock_config.split('-')
     if first == 'el' || first == 'fedora'
@@ -117,7 +118,8 @@ end
 #
 def mock_el_ver(mock_config)
   if Pkg::Config.build_pe
-    version = mock_config.split('-')[2][/[0-9]+/]
+    # This uses a regex capture instead of splitting to allow the now defunct PE version component to be optional
+    version = mock_config.match(/^pupent-(\d\.\d-)?([a-z]+)([0-9]+)-(.*)$/)[3]
   else
     first, second, third = mock_config.split('-')
     if (first == 'el' || first == 'fedora') || (first == 'pl' && second.match(/^\d+$/))

@@ -33,10 +33,10 @@ def get_vars
 end
 
 def validate_vars(jira, vars)
-  jira.project? (vars[:project])
-  jira.user? (vars[:builder])
-  jira.user? (vars[:writer])
-  jira.user? (vars[:developer])
+  jira.project? vars[:project]
+  jira.user? vars[:builder]
+  jira.user? vars[:writer]
+  jira.user? vars[:developer]
 end
 
 def create_tickets(jira, vars)

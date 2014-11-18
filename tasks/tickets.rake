@@ -72,7 +72,7 @@ Ensure all tickets targeted at the release have a corresponding commit
 DOC
 
   description[:update_version_source] = <<-DOC
-Bump VERSION in lib/{#project}/version.rb or project.clj to correct version.
+Bump VERSION in lib/#{vars[:project]}/version.rb or project.clj to correct version.
 
   * Commit the updated version file.
     * e.g) commit -m "(packaging) Update FACTERVERSION to 1.7.3".
@@ -344,7 +344,7 @@ DOC
     },
     {
       :projects    => ['PDB', 'SERVER'],  # Only PDB and puppet-server have this step
-      :summary     => 'Update dujour to notify users to use #{vars[:release]}',
+      :summary     => "Update dujour to notify users to use #{vars[:release]}",
       :description => description[:update_dujour],
       :assignee    => vars[:developer]
     },

@@ -42,6 +42,8 @@ end
 def create_tickets(jira, vars)
   description = {}
   description[:code_ready] = <<-DOC
+If there are any version dependencies expressed in the code base, make sure these are up to date. For Puppet, make sure the shas used to build the MSI are correct. For Puppet-Server, make sure all references to the puppet version are correct.
+
 All tests (spec, acceptance) should be passing on all platforms for both stable & master.
 
   * If a new platform has been added, make sure that platform has acceptance testing, new features have decent coverage, etc. etc.
@@ -59,18 +61,18 @@ Ensure all tickets referenced in the commit log have a bug targeted at the relea
   * git log <old tag>..<new tag>
   * look through, and make sure that if there is a JIRA ticket number referenced in any of the commits, that ticket is targeted at the release
   * Also, make sure the code itself is sane, that you understand why the change was made, etc. etc.
-  * [ticketmatch.rb script|https://gist.github.com/hlindberg/9520023] is a ruby script that helps with "Is there a JIRA ticket targeted at the release for every commit?" and "Is there a commit for every JIRA ticket targeted at the release?" (it beats doing it manually, but requires manual steps and hacking the script for the specific release)
+  * [ticketmatch.rb script|https://gist.github.com/hlindberg/9520023] is a ruby script that helps with "Is there a JIRA ticket targeted at the release for every commit?" and "Is there a commit for every JIRA ticket targeted at the release?" (it beats doing it manually, but requires manual steps and hacking the script for the specific release). There is also the [release-inquisition|https://github.com/adrienthebo/release-inquisition], which also helps a lot with this task.
 DOC
 
   description[:git_commits_for_tickets] = <<-DOC
 Ensure all tickets targeted at the release have a corresponding commit
   * git log <old tag>..<new tag>
   * This time, look through tickets targeted at this release in JIRA, and compare it to the commit log, looking for the corresponding numbers
-  * [ticketmatch.rb script|https://gist.github.com/hlindberg/9520023] is a ruby script that helps with "Is there a JIRA ticket targeted at the release for every commit?" and "Is there a commit for every JIRA ticket targeted at the release?" (it beats doing it manually, but requires manual steps and hacking the script for the specific release)
+  * [ticketmatch.rb script|https://gist.github.com/hlindberg/9520023] is a ruby script that helps with "Is there a JIRA ticket targeted at the release for every commit?" and "Is there a commit for every JIRA ticket targeted at the release?" (it beats doing it manually, but requires manual steps and hacking the script for the specific release) There is also the [release-inquisition|https://github.com/adrienthebo/release-inquisition], which also helps a lot with this task.
 DOC
 
   description[:update_version_source] = <<-DOC
-Bump VERSION in lib/{#project}/version.rb to correct version.
+Bump VERSION in lib/$project/version.rb or project.clj to correct version.
 
   * Commit the updated version file.
     * e.g) commit -m "(packaging) Update FACTERVERSION to 1.7.3".
@@ -191,6 +193,8 @@ Dependencies:
 DOC
 
   description[:go_no_go] = <<-DOC
+This should happen Monday-Thursday, before 4pm. We should not be shipping anything after 4:00 PM or on a Friday both for our users, and because shipping takes time.
+
 Get a yes/no for the release from dev, docs, product, qa, releng.
 
 This meeting is informal, over chat, and usually happens right before packages are pushed.
@@ -314,7 +318,7 @@ DOC
       :assignee    => vars[:developer]
     },
     {
-      :summary     => 'Go/no-go meeting',
+      :summary     => 'Go/no-go meeting (before 4pm)',
       :description => description[:go_no_go],
       :assignee    => vars[:developer]
     },
@@ -339,8 +343,8 @@ DOC
       :assignee    => 'eric.sorenson'
     },
     {
-      :projects    => ['PDB'],  # Only PDB has this step
-      :summary     => 'Update dujour to notify users to use #{vars[:release]}',
+      :projects    => ['PDB', 'SERVER'],  # Only PDB and puppet-server have this step
+      :summary     => "Update dujour to notify users to use #{vars[:release]}",
       :description => description[:update_dujour],
       :assignee    => vars[:developer]
     },

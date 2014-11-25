@@ -237,6 +237,7 @@ DOC
   * Update the MSI build targets in the Puppet repo in ext/build_defaults.yaml. This needs to be done for any projects that are to get into the MSI (facter and hiera as of 8/2014)
   * Send the drafted release notes email.
     * If final send to puppet-announce and specific distribution lists (e.g. puppet to puppet-users & puppet-dev).
+    * If this release has security implications, also send the release announcement to puppet-security-announce
   * Make a PSA on IRC letting those kiddos know about the new release.
     * Something along the lines of "PSA: facter 1.7.3 now available"
 

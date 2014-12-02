@@ -14,6 +14,16 @@ describe "Pkg::Util::Execution" do
       %x{true}
       Pkg::Util::Execution.success?.should be_true
     end
+
+    it "should return false when passed an exitstatus object from a failure" do
+      %x{false}
+      Pkg::Util::Execution.success?($?).should be_false
+    end
+
+    it "should return true when passed and exitstatus object from a success" do
+      %x{true}
+      Pkg::Util::Execution.success?($?).should be_true
+    end
   end
 
   describe "#ex" do

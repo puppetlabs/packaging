@@ -7,8 +7,8 @@ module Pkg::Util::Execution
     # Alias to $?.success? that makes success? slightly easier to test and stub
     # If immediately run, $? will not be instanciated, so only call success? if
     # $? exists, otherwise return nil
-    def success?
-      return $?.success? if $?
+    def success?(statusobject = $?)
+      return statusobject.success?
     end
 
     # ex combines the behavior of `%x{cmd}` and rake's `sh "cmd"`. `%x{cmd}` has

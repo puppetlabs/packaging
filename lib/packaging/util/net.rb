@@ -29,11 +29,18 @@ module Pkg::Util::Net
       end
     end
 
-    def remote_ssh_cmd(target, command)
+    def remote_ssh_cmd(target, command, capture_output = false)
       ssh = Pkg::Util::Tool.check_tool('ssh')
       puts "Executing '#{command}' on #{target}"
-      Kernel.system("#{ssh} -t #{target} '#{command.gsub("'", "'\\\\''")}'")
-      Pkg::Util::Execution.success? or raise "Remote ssh command failed."
+      if capture_output
+        require 'open3'
+        stdout, stderr, exitstatus = Open3.capture3("#{ssh} -t #{target} '#{command.gsub("'", "'\\\\''")}'")
+        Pkg::Util::Execution.success?(exitstatus) or raise "Remote ssh command failed."
+        return stdout, stderr
+      else
+        Kernel.system("#{ssh} -t #{target} '#{command.gsub("'", "'\\\\''")}'")
+        Pkg::Util::Execution.success? or raise "Remote ssh command failed."
+      end
     end
 
     def rsync_to(source, target, dest, extra_flags = ["--ignore-existing"])

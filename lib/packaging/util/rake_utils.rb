@@ -60,5 +60,53 @@ module Pkg::Util::RakeUtils
         end
       end
     end
+
+    def load_packaging_tasks(packaging_root = Pkg::Config.packaging_root)
+      packaging_task_dir = File.join(packaging_root, 'tasks')
+      tasks = [
+        '00_utils.rake',
+        '30_metrics.rake',
+        'apple.rake',
+        'build.rake',
+        'clean.rake',
+        'deb.rake',
+        'deb_repos.rake',
+        'doc.rake',
+        'fetch.rake',
+        'gem.rake',
+        'ips.rake',
+        'jenkins.rake',
+        'jenkins_dynamic.rake',
+        'load_extras.rake',
+        'mock.rake',
+        'nightly_repos.rake',
+        'pe_deb.rake',
+        'pe_remote.rake',
+        'pe_rpm.rake',
+        'pe_ship.rake',
+        'pe_sign.rake',
+        'pe_tar.rake',
+        'release.rake',
+        'remote_build.rake',
+        'retrieve.rake',
+        'rpm.rake',
+        'rpm_repos.rake',
+        'ship.rake',
+        'sign.rake',
+        'tag.rake',
+        'tar.rake',
+        'tickets.rake',
+        'update.rake',
+        'vendor_gems.rake',
+        'version.rake',
+        'z_data_dump.rake',
+      ]
+
+      tasks.each do |task|
+        load File.join(packaging_task_dir, task)
+      end
+
+      Pkg::Util::RakeUtils.evaluate_pre_tasks
+    end
   end
 end

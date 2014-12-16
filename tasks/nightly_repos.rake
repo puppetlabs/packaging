@@ -28,7 +28,7 @@ namespace :pl do
     end
 
     task :sign_nightly_repos => "pl:fetch" do
-      invoke_task("pl:sign_rpms", "repos")
+      Pkg::Util::RakeUtils.invoke_task("pl:sign_rpms", "repos")
       Pkg::Rpm::Repo.create_repos('repos')
       Pkg::Deb::Repo.sign_repos('repos', 'Apt repository for nightly builds')
     end
@@ -55,8 +55,8 @@ namespace :pl do
         # invoke them here.  We want the nightly_* directories staged as
         # repos/repo_configs, because that's how we want them on the public
         # server
-        invoke_task("pl:jenkins:retrieve", "nightly_repos", File.join(local_target, "repos"))
-        invoke_task("pl:jenkins:retrieve", "nightly_repo_configs", File.join(local_target, "repo_configs"))
+        Pkg::Util::RakeUtils.invoke_task("pl:jenkins:retrieve", "nightly_repos", File.join(local_target, "repos"))
+        Pkg::Util::RakeUtils.invoke_task("pl:jenkins:retrieve", "nightly_repo_configs", File.join(local_target, "repo_configs"))
 
         # The repo configs have Pkg::Config.builds_server used in them, but that
         # is internal, so we need to replace it with our public server. We also

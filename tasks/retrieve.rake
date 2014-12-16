@@ -15,7 +15,7 @@ namespace :pl do
     task :retrieve, :remote_target, :local_target do |t, args|
       remote_target = args.remote_target || "artifacts"
       local_target = args.local_target || "pkg"
-      invoke_task("pl:fetch")
+      Pkg::Util::RakeUtils.invoke_task("pl:fetch")
       mkdir_p local_target
       package_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{remote_target}"
       if wget = Pkg::Util::Tool.find_tool("wget")
@@ -47,7 +47,7 @@ if Pkg::Config.build_pe
       desc "Retrieve packages from the distribution server\. Check out commit to retrieve"
       task :retrieve, :target do |t, args|
         target = args.target || "artifacts"
-        invoke_task("pl:jenkins:retrieve", target)
+        Pkg::Util::RakeUtils.invoke_task("pl:jenkins:retrieve", target)
       end
     end
   end

@@ -69,7 +69,7 @@ namespace :pl do
       end
       rm_r work_dir
       packaging_name = "#{Pkg::Config.project}-packaging-#{Pkg::Config.build_date}-#{Pkg::Config.ref}"
-      invoke_task("pl:jenkins:trigger_dynamic_job", packaging_name)
+      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:trigger_dynamic_job", packaging_name)
 
       if poll_interval > 0
         ##

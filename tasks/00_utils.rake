@@ -144,11 +144,6 @@ def handle_method_failure(method, args)
   end
 end
 
-def invoke_task(task, *args)
-  Rake::Task[task].reenable
-  Rake::Task[task].invoke(*args)
-end
-
 def confirm_ship(files)
   STDOUT.puts "The following files have been built and are ready to ship:"
   files.each { |file| STDOUT.puts "\t#{file}\n" unless File.directory?(file) }
@@ -257,6 +252,11 @@ end
 #              see what methods are left to librarify.                #
 #                                                                     #
 #######################################################################
+
+def invoke_task(task, *args)
+  deprecate('invoke_task', 'Pkg::Util::RakeUtils.invoke_task')
+  Pkg::Util::RakeUtils.invoke_task(task, *args)
+end
 
 def rsync_to(*args)
   deprecate('rsync_to', 'Pkg::Util::Net.rsync_to')

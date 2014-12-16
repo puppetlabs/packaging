@@ -124,7 +124,7 @@ namespace :pl do
   namespace :jenkins do
     desc "Ship pkg directory contents to distribution server"
     task :ship, :target do |t, args|
-      invoke_task("pl:fetch")
+      Pkg::Util::RakeUtils.invoke_task("pl:fetch")
       target = args.target || "artifacts"
       artifact_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}"
 

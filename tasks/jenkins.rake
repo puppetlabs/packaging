@@ -221,7 +221,7 @@ namespace :pl do
     tasks.each do |build_task|
       desc "Queue pl:#{build_task} build on jenkins builder"
       task build_task => "pl:fetch" do
-        invoke_task("pl:jenkins:post_build", "pl:#{build_task}")
+        Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pl:#{build_task}")
       end
     end
 
@@ -233,7 +233,7 @@ namespace :pl do
     task :deb_all => "pl:fetch" do
       Pkg::Config.cows.split(' ').each do |cow|
         Pkg::Config.default_cow = cow
-        invoke_task("pl:jenkins:post_build", "pl:deb")
+        Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pl:deb")
         sleep 5
       end
     end
@@ -243,7 +243,7 @@ namespace :pl do
     task :mock_all => "pl:fetch" do
       Pkg::Config.final_mocks.split(' ').each do |mock|
         Pkg::Config.default_mock = mock
-        invoke_task("pl:jenkins:post_build", "pl:mock")
+        Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pl:mock")
         sleep 5
       end
     end
@@ -267,7 +267,7 @@ if Pkg::Config.build_pe
         desc "Queue pe:#{build_task} build on jenkins builder"
         task build_task => "pl:fetch" do
           check_var("PE_VER", Pkg::Config.pe_version)
-          invoke_task("pl:jenkins:post_build", "pe:#{build_task}")
+          Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pe:#{build_task}")
         end
       end
 
@@ -280,7 +280,7 @@ if Pkg::Config.build_pe
         check_var("PE_VER", Pkg::Config.pe_version)
         Pkg::Config.cows.split(' ').each do |cow|
           Pkg::Config.default_cow = cow
-          invoke_task("pl:jenkins:post_build", "pe:deb")
+          Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pe:deb")
           sleep 5
         end
       end
@@ -290,7 +290,7 @@ if Pkg::Config.build_pe
       task :mock_all => "pl:fetch" do
         Pkg::Config.final_mocks.split(' ').each do |mock|
           Pkg::Config.default_mock = mock
-          invoke_task("pl:jenkins:post_build", "pe:mock")
+          Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pe:mock")
           sleep 5
         end
       end

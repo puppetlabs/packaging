@@ -1,3 +1,5 @@
+require 'rake'
+
 # Utility methods for working with rake tasks. These utilities will not work
 # if the packaging repo was loaded as a library unless rake has been required
 # explicitly.
@@ -20,6 +22,11 @@ module Pkg::Util::RakeUtils
       if using_rake? and task_defined?(task_name)
         Rake::Task[task_name]
       end
+    end
+
+    def invoke_task(task, *args)
+      Rake::Task[task].reenable
+      Rake::Task[task].invoke(*args)
     end
 
     #  Add a dependency to a rake task. "depender" must be an instance of
@@ -52,6 +59,54 @@ module Pkg::Util::RakeUtils
           add_dependency(depender, dependency)
         end
       end
+    end
+
+    def load_packaging_tasks(packaging_root = Pkg::Config.packaging_root)
+      packaging_task_dir = File.join(packaging_root, 'tasks')
+      tasks = [
+        '00_utils.rake',
+        '30_metrics.rake',
+        'apple.rake',
+        'build.rake',
+        'clean.rake',
+        'deb.rake',
+        'deb_repos.rake',
+        'doc.rake',
+        'fetch.rake',
+        'gem.rake',
+        'ips.rake',
+        'jenkins.rake',
+        'jenkins_dynamic.rake',
+        'load_extras.rake',
+        'mock.rake',
+        'nightly_repos.rake',
+        'pe_deb.rake',
+        'pe_remote.rake',
+        'pe_rpm.rake',
+        'pe_ship.rake',
+        'pe_sign.rake',
+        'pe_tar.rake',
+        'release.rake',
+        'remote_build.rake',
+        'retrieve.rake',
+        'rpm.rake',
+        'rpm_repos.rake',
+        'ship.rake',
+        'sign.rake',
+        'tag.rake',
+        'tar.rake',
+        'tickets.rake',
+        'update.rake',
+        'vendor_gems.rake',
+        'version.rake',
+        'z_data_dump.rake',
+      ]
+
+      tasks.each do |task|
+        load File.join(packaging_task_dir, task)
+      end
+
+      Pkg::Util::RakeUtils.evaluate_pre_tasks
     end
   end
 end

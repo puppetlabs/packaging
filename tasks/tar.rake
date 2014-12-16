@@ -3,7 +3,7 @@ namespace :package do
   task :tar => [:clean] do
 
     if Pkg::Config.pre_tar_task
-      invoke_task(Pkg::Config.pre_tar_task)
+      Pkg::Util::RakeUtils.invoke_task(Pkg::Config.pre_tar_task)
     end
 
     Rake::Task["package:doc"].invoke if Pkg::Config.build_doc

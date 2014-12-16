@@ -163,7 +163,7 @@ if Pkg::Config.build_pe
 
         incoming_dir = args.incoming
         incoming_dir or fail "Adding packages to apt repo requires an incoming directory"
-        invoke_task("pl:fetch")
+        Pkg::Util::RakeUtils.invoke_task("pl:fetch")
         stdout, stderr = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "/usr/bin/repsimple add_all \
             --confdir #{reprepro_confdir} \
             --basedir #{reprepro_basedir} \

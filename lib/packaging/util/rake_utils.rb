@@ -1,3 +1,5 @@
+require 'rake'
+
 # Utility methods for working with rake tasks. These utilities will not work
 # if the packaging repo was loaded as a library unless rake has been required
 # explicitly.
@@ -20,6 +22,11 @@ module Pkg::Util::RakeUtils
       if using_rake? and task_defined?(task_name)
         Rake::Task[task_name]
       end
+    end
+
+    def invoke_task(task, *args)
+      Rake::Task[task].reenable
+      Rake::Task[task].invoke(*args)
     end
 
     #  Add a dependency to a rake task. "depender" must be an instance of

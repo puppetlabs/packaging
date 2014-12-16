@@ -40,7 +40,7 @@ namespace :pl do
         %x(curl --fail --silent #{flag} #{url}/#{Pkg::Config.builder_data_file} > #{tempdir}/#{Pkg::Config.builder_data_file})
         case $?.exitstatus
         when 0
-          invoke_task("pl:load_extras", tempdir)
+          Pkg::Util::RakeUtils.invoke_task("pl:load_extras", tempdir)
         when 22
           if url == team_data_url
             fail "Could not load team extras data from #{url}. This should not normally happen"

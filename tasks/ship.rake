@@ -123,15 +123,16 @@ namespace :pl do
   # signed/actually shipped artifacts e.g. $path/shipped/ or $path/artifacts.
   namespace :jenkins do
     desc "Ship pkg directory contents to distribution server"
-    task :ship, :target do |t, args|
+    task :ship, :target, :local_dir do |t, args|
       Pkg::Util::RakeUtils.invoke_task("pl:fetch")
       target = args.target || "artifacts"
+      local_dir = args.local_dir || "pkg"
       artifact_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}"
 
       # In order to get a snapshot of what this build looked like at the time
       # of shipping, we also generate and ship the params file
       #
-      Pkg::Config.config_to_yaml('pkg')
+      Pkg::Config.config_to_yaml(local_dir)
 
 
       # Sadly, the packaging repo cannot yet act on its own, without living
@@ -139,7 +140,7 @@ namespace :pl do
       # use the packaging repo for shipping and signing (things that really
       # don't require build automation, specifically) we still need the project
       # clone itself.
-      Pkg::Util::Git.git_bundle('HEAD', 'signing_bundle', 'pkg')
+      Pkg::Util::Git.git_bundle('HEAD', 'signing_bundle', local_dir)
 
       # While we're bundling things, let's also make a git bundle of the
       # packaging repo that we're using when we invoke pl:jenkins:ship. We can
@@ -160,17 +161,17 @@ namespace :pl do
         cd PACKAGING_ROOT do
           packaging_bundle = Pkg::Util::Git.git_bundle('HEAD', 'packaging-bundle')
         end
-        mv(packaging_bundle, 'pkg')
+        mv(packaging_bundle, local_dir)
       end
 
       retry_on_fail(:times => 3) do
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{artifact_dir}")
-        Pkg::Util::Net.rsync_to("pkg/", Pkg::Config.distribution_server, "#{artifact_dir}/", ["--ignore-existing", "--exclude repo_configs"])
+        Pkg::Util::Net.rsync_to("#{local_dir}/", Pkg::Config.distribution_server, "#{artifact_dir}/", ["--ignore-existing", "--exclude repo_configs"])
       end
 
       # If we just shipped a tagged version, we want to make it immutable
-      files = Dir.glob("pkg/**/*").select { |f| File.file?(f) }.map do |file|
-        "#{artifact_dir}/#{file.sub(/^pkg\//, '')}"
+      files = Dir.glob("#{local_dir}/**/*").select { |f| File.file?(f) }.map do |file|
+        "#{artifact_dir}/#{file.sub(/^#{local_dir}\//, '')}"
       end
       remote_set_immutable(Pkg::Config.distribution_server, files)
     end

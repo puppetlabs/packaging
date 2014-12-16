@@ -357,8 +357,7 @@ DOC
   ]
 
   # Use the human-friendly project name in the summary
-  project_name = jira.project_name(vars[:project])
-  summary = "#{project_name} #{vars[:release]} #{vars[:date]} Release"
+  summary = "#{Pkg::Config.project} #{vars[:release]} #{vars[:date]} Release"
   description[:top_level_ticket] = <<-DOC
 #{summary}
 

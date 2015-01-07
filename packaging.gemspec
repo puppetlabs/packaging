@@ -1,6 +1,6 @@
 Gem::Specification.new do |gem|
   gem.name    = 'packaging'
-  gem.version = %x(git describe --tags).sub('-', '.').chomp
+  gem.version = %x(git describe --tags).gsub('-', '.').chomp
   gem.date    = Date.today.to_s
 
   gem.summary = "Puppet Labs' packaging automation"

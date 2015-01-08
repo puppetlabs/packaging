@@ -15,7 +15,7 @@ end
 def update_cow(cow)
   ENV['PATH'] = "/usr/sbin:#{ENV['PATH']}"
   set_cow_envs(cow)
-  retry_on_fail(:times => 3) do
+  Pkg::Util::Execution.retry_on_fail(:times => 3) do
     sh "sudo -E /usr/sbin/cowbuilder --update --override-config --configfile #{Pkg::Config.pbuild_conf} --basepath /var/cache/pbuilder/#{cow} --distribution #{ENV['DIST']} --architecture #{ENV['ARCH']}"
   end
 end

@@ -112,7 +112,7 @@ describe "Pkg::Rpm::Repo" do
       Pkg::Util::File.should_receive(:empty_dir?).with("pkg/repo_configs/rpm").and_return(false)
       Pkg::Rpm::Repo.should_receive(:invoke_task).with("pl:fetch")
       Pkg::Util::Net.should_receive(:remote_ssh_cmd).with(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
-      Pkg::Rpm::Repo.should_receive(:retry_on_fail).with(:times => 3)
+      Pkg::Util::Execution.should_receive(:retry_on_fail).with(:times => 3)
       Pkg::Rpm::Repo.ship_repo_configs
     end
   end

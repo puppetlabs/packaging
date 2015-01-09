@@ -119,7 +119,7 @@ def ship_gem(file)
     puts "#  and you have access to #{Pkg::Config.internal_gem_host} \n#"
     puts "##########################################"
   end
-  retry_on_fail(:times => 3) do
+  Pkg::Util::Execution.retry_on_fail(:times => 3) do
     Pkg::Util::Net.rsync_to("#{file}*", Pkg::Config.gem_host, Pkg::Config.gem_path)
   end
 end
@@ -187,26 +187,6 @@ def update_rpm_repo(dir)
   end
 end
 alias :create_rpm_repo :update_rpm_repo
-
-# Loop a block up to the number of attempts given, exiting when we receive success
-# or max attempts is reached. Raise an exception unless we've succeeded.
-def retry_on_fail(args, &blk)
-  success = FALSE
-  if args[:times].respond_to?(:times) and block_given?
-    args[:times].times do |i|
-      begin
-        blk.call
-        success = TRUE
-        break
-      rescue
-        puts "An error was encountered evaluating block. Retrying.."
-      end
-    end
-  else
-    fail "retry_on_fail requires and arg (:times => x) where x is an Integer/Fixnum, and a block to execute"
-  end
-  fail "Block failed maximum of #{args[:times]} tries. Exiting.." unless success
-end
 
 def deprecate(old_cmd, new_cmd = nil)
   msg = "!! #{old_cmd} is deprecated."
@@ -321,6 +301,11 @@ end
 def print_url_info(url_string)
   deprecate("print_url_info", "Pkg::Util::Net.print_url_info")
   Pkg::Util::Net.print_url_info(url_string)
+end
+
+def retry_on_fail(args, &block)
+  deprecate("retry_on_fail", "Pkg::Util::Execution.retry_on_fail")
+  Pkg::Util::Execution.retry_on_fail(args, &block)
 end
 
 # ex combines the behavior of `%x{cmd}` and rake's `sh "cmd"`. `%x{cmd}` has

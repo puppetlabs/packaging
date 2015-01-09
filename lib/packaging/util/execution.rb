@@ -29,29 +29,5 @@ module Pkg::Util::Execution
       ret
     end
 
-    # Loop a block up to the number of attempts given, exiting when we receive success
-    # or max attempts is reached. Raise an exception unless we've succeeded.
-    def retry_on_fail(args, &blk)
-      success = FALSE
-
-      if args[:times].respond_to?(:times) and block_given?
-        args[:times].times do |i|
-          if args[:delay]
-            sleep args[:delay]
-          end
-
-          begin
-            blk.call
-            success = TRUE
-            break
-          rescue
-            puts "An error was encountered evaluating block. Retrying.."
-          end
-        end
-      else
-        fail "retry_on_fail requires and arg (:times => x) where x is an Integer/Fixnum, and a block to execute"
-      end
-      fail "Block failed maximum of #{args[:times]} tries. Exiting.." unless success
-    end
   end
 end

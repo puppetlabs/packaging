@@ -4,7 +4,7 @@ if Pkg::Config.build_pe
     task :ship_rpms => "pl:fetch" do
       Pkg::Util::File.empty_dir?("pkg/pe/rpm") and fail "The 'pkg/pe/rpm' directory has no packages. Did you run rake pe:deb?"
       target_path = ENV['YUM_REPO'] ? ENV['YUM_REPO'] : "#{Pkg::Config.yum_repo_path}/#{Pkg::Config.pe_version}/repos/"
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+      retry_on_fail(:times => 3) do
         Pkg::Util::Net.rsync_to('pkg/pe/rpm/', Pkg::Config.yum_host, target_path)
       end
       if Pkg::Config.team == 'release'
@@ -50,7 +50,7 @@ if Pkg::Config.build_pe
         #                 |_wheezy/*.deb
         #
         puts "Shipping PE debs to apt repo 'incoming' dir on #{Pkg::Config.apt_host}"
-        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+        retry_on_fail(:times => 3) do
           Dir["pkg/pe/deb/#{dist}/*.deb"].each do |deb|
             Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "mkdir -p '#{target_path}/#{dist}'")
             Pkg::Util::Net.rsync_to(deb, Pkg::Config.apt_host, "#{target_path}/#{dist}/#{File.basename(deb)}")

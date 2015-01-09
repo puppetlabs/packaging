@@ -2,7 +2,7 @@ namespace :pl do
   desc "Ship mocked rpms to #{Pkg::Config.yum_host}"
   task :ship_rpms do
     ["el", "fedora"].each do |dist|
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+      retry_on_fail(:times => 3) do
         pkgs = Dir["pkg/#{dist}/**/*.rpm"].map { |f| "'#{f.gsub("pkg/#{dist}/", "#{Pkg::Config.yum_repo_path}/#{dist}/")}'" }
         unless pkgs.empty?
           Pkg::Util::Net.rsync_to("pkg/#{dist}", Pkg::Config.yum_host, Pkg::Config.yum_repo_path)
@@ -38,7 +38,7 @@ namespace :pl do
 
   desc "Ship cow-built debs to #{Pkg::Config.apt_host}"
   task :ship_debs do
-    Pkg::Util::Execution.retry_on_fail(:times => 3) do
+    retry_on_fail(:times => 3) do
       if File.directory?("pkg/deb")
         Pkg::Util::Net.rsync_to('pkg/deb/', Pkg::Config.apt_host, Pkg::Config.apt_repo_path)
       end
@@ -85,14 +85,14 @@ namespace :pl do
 
   desc "ship apple dmg to #{Pkg::Config.yum_host}"
   task :ship_dmg => 'pl:fetch' do
-    Pkg::Util::Execution.retry_on_fail(:times => 3) do
+    retry_on_fail(:times => 3) do
       Pkg::Util::Net.rsync_to('pkg/apple/*.dmg', Pkg::Config.yum_host, Pkg::Config.dmg_path)
     end
   end if Pkg::Config.build_dmg
 
   desc "ship tarball and signature to #{Pkg::Config.tar_host}"
   task :ship_tar => 'pl:fetch' do
-    Pkg::Util::Execution.retry_on_fail(:times => 3) do
+    retry_on_fail(:times => 3) do
       Pkg::Util::Net.rsync_to("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*", Pkg::Config.tar_host, Pkg::Config.tarball_path)
     end
   end
@@ -164,7 +164,7 @@ namespace :pl do
         mv(packaging_bundle, local_dir)
       end
 
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+      retry_on_fail(:times => 3) do
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{artifact_dir}")
         Pkg::Util::Net.rsync_to("#{local_dir}/", Pkg::Config.distribution_server, "#{artifact_dir}/", ["--ignore-existing", "--exclude repo_configs"])
       end

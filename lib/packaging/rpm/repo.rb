@@ -12,7 +12,7 @@ module Pkg::Rpm::Repo
       invoke_task("pl:fetch")
       repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}/rpm"
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
-      retry_on_fail(:times => 3) do
+      Pkg::Util::Execution.retry_on_fail(:times => 3) do
         Pkg::Util::Net.rsync_to("pkg/#{target}/rpm/", Pkg::Config.distribution_server, repo_dir)
       end
     end

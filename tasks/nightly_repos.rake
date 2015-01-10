@@ -35,7 +35,7 @@ namespace :pl do
 
     task :ship_nightly_repos => "pl:fetch" do
       target_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/nightly_repos"
-      retry_on_fail(:times => 3) do
+      Pkg::Util::Execution.retry_on_fail(:times => 3) do
         # Ship the now signed repos to the distribution server
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{target_dir}")
         Pkg::Util::Net.rsync_to("nightly_repos/", Pkg::Config.distribution_server, target_dir)

@@ -19,7 +19,7 @@ def sign_rpm(rpm, sign_flags = nil)
   end
 
   # Try this up to 5 times, to allow for incorrect passwords
-  retry_on_fail(:times => 5) do
+  Pkg::Util::Execution.retry_on_fail(:times => 5) do
     # This definition of %__gpg_sign_cmd is the default on modern rpm. We
     # accept extra flags to override certain signing behavior for older
     # versions of rpm, e.g. specifying V3 signatures instead of V4.

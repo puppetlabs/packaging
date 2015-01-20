@@ -116,9 +116,10 @@ File.open(&quot;#{ENV[&apos;WORKSPACE&apos;]}/ondemand.yaml&quot;, &apos;w&apos;
     <hudson.tasks.BatchFile>
       <command>call c:\puppetwinbuilder\setup_env.bat
 
+set PKG_NAME=<%= Pkg::Config.msi_name || 'puppet' %>
+set AGENT_VERSION_STRING=<%= Pkg::Config.version %>
 set ARCH=%ARCH%
 set SUFFIX=-%ARCH%
-
 if &quot;%ARCH%&quot; == &quot;x86&quot; (
   set SUFFIX=
 )
@@ -132,34 +133,21 @@ tar xf %GIT_BUNDLE%
 
 cmd.exe /c rake clobber windows:build config=ondemand.yaml
 
-
-pushd downloads\puppet
-for /f %%i in (&apos;git describe --match &quot;3.*&quot;&apos;) do set VERSION_DESC=%%i
-for /f %%i in (&apos;git rev-parse HEAD&apos;) do set SHA=%%i
-for /f %%i in (&apos;git cat-file -t %VERSION_DESC%&apos;) do set TYPE=%%i
-if &quot;%TYPE%&quot; == &quot;tag&quot; (
-  set TARGET=%VERSION_DESC%
-)
-if &quot;%TYPE%&quot; == &quot;commit&quot; (
-  set TARGET=%SHA%
-)
-popd
-
 pushd pkg
 
-echo Puppet&apos;s sha is: %SHA%
-echo Puppet&apos;s describe is: %VERSION_DESC%
-echo Puppet&apos;s target is: %TARGET%
-echo Puppet&apos;s type is: %TYPE%
-echo Puppet&apos;s arch is: %ARCH%
-echo Find the msi at: http://builds.puppetlabs.lan/puppet/%TARGET%/artifacts/windows/puppet-%VERSION_DESC%%SUFFIX%.msi
-
-move puppet%SUFFIX%.msi puppet-%VERSION_DESC%%SUFFIX%.msi
+if exist %PKG_NAME%%SUFFIX%.msi (
+  move %PKG_NAME%%SUFFIX%.msi %PKG_NAME%-%AGENT_VERSION_STRING%-%ARCH%.msi
+)
 
 set DEST_PATH=%ORIG_PATH%/windows
 ssh %BUILD_HOST% &quot;mkdir -p %DEST_PATH%&quot;
-REM rsync -avg --ignore-existing puppet-%VERSION_DESC%%SUFFIX%.msi %BUILD_HOST%:%DEST_PATH%
-scp -B puppet-%VERSION_DESC%%SUFFIX%.msi %BUILD_HOST%:%DEST_PATH%
+REM rsync -avg --ignore-existing %PKG_NAME%-%AGENT_VERSION_STRING%-%ARCH%.msi %BUILD_HOST%:%DEST_PATH%
+scp -B %PKG_NAME%-%AGENT_VERSION_STRING%-%ARCH%.msi %BUILD_HOST%:%DEST_PATH%
+
+echo Puppet&apos;s package name is: %PKG_NAME%
+echo Puppet&apos;s version is: %AGENT_VERSION_STRING%
+echo Puppet&apos;s arch is: %ARCH%
+echo Find the msi at: http://builds.puppetlabs.lan/puppet/<%= Pkg::Config.ref %>/artifacts/windows/%PKG_NAME%-%AGENT_VERSION_STRING%-%ARCH%.msi
 
 popd</command>
     </hudson.tasks.BatchFile>

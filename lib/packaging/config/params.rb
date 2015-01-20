@@ -68,6 +68,7 @@ module Pkg::Params
                   :jenkins_repo_path,
                   :metrics,
                   :metrics_url,
+                  :msi_name,
                   :name,
                   :notify,
                   :project,

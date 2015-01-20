@@ -91,8 +91,14 @@ puts &quot;arch is #{ENV[&apos;ARCH&apos;]}&quot;
 
 if ENV[&apos;ARCH&apos;] == &quot;x64&quot;
   SYS_REF=&apos;<%= Pkg::Config.build_msi["sys"]["ref"]["x64"] %>&apos;
+<% if Pkg::Config.build_msi["cfacter"] -%>
+  CFACTER=&apos;<%= Pkg::Config.build_msi["cfacter"]["archive"]["x64"] %>&apos;
+<% end -%>
 else
   SYS_REF=&apos;<%= Pkg::Config.build_msi["sys"]["ref"]["x86"] %>&apos;
+<% if Pkg::Config.build_msi["cfacter"] -%>
+  CFACTER=&apos;<%= Pkg::Config.build_msi["cfacter"]["archive"]["x86"] %>&apos;
+<% end -%>
 end
 
 CONFIG = {
@@ -101,13 +107,19 @@ CONFIG = {
       :ref =&gt; &apos;<%= ref %>&apos;,
       :repo =&gt; &quot;#{ENV[&apos;WORKSPACE&apos;]}/puppet-<%= Pkg::Config.version %>-signing_bundle&quot;
     },
-    <% Pkg::Config.build_msi.each do |project, info| -%>
-      <% next if project == "puppet_for_the_win" %>
+<% Pkg::Config.build_msi.each do |project, info| -%>
+<% next if project == "puppet_for_the_win" || project == "cfacter" -%>
     &apos;<%= project %>&apos; =&gt; {
       :ref =&gt; &quot;<%= ('#{SYS_REF}' if project == "sys") || info["ref"] %>&quot;,
       :repo =&gt; &apos;<%= info["repo"] %>&apos;
     },
-  <% end -%>
+<% end -%>
+<% if Pkg::Config.build_msi["cfacter"] -%>
+    &apos;cfacter&apos; =&gt; {
+      :archive =&gt; &quot;#{CFACTER}&quot;,
+      :path =&gt; &apos;<%= Pkg::Config.build_msi["cfacter"]["path"] %>&apos;
+    },
+<% end -%>
   }
 }
 

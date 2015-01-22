@@ -68,7 +68,7 @@ namespace :pl do
   # We want to ship a gem only for projects that build gems
   if Pkg::Config.build_gem
     desc "Ship built gem to rubygems"
-    task :ship_gem do
+    task :ship_gem => 'pl:fetch' do
       # Even if a project builds a gem, if it uses the odd_even or zero-based
       # strategies, we only want to ship final gems because otherwise a
       # development gem would be preferred over the last final gem

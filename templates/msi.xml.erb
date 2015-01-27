@@ -147,19 +147,29 @@ cmd.exe /c rake clobber windows:build config=ondemand.yaml
 
 pushd pkg
 
+REM If we are shipping the old version of puppet, in the 3.x series, we need to maintain established naming conventions.
+REM For 3, we ship two msi's, one with a `-x64` suffix, and one with no architecture suffix at all. In order to
+REM maintain that convention, we need to change the name of the installer we are shipping, either from puppet-x64.msi to puppet-%version%-x64.msi,
+REM or from puppet.msi to puppet-%version%.msi. However, for windows installers in the puppet 4 series, we don't want to change the name at all,
+REM which will already be set at puppet-agent-%version%-%arch%.msi
+REM We also have to do this in multiple checks, because %MSI_NAME% is not updated until after the check ends...
+set MSI_NAME=%PKG_NAME%-%AGENT_VERSION_STRING%-%ARCH%.msi
 if exist %PKG_NAME%%SUFFIX%.msi (
-  move %PKG_NAME%%SUFFIX%.msi %PKG_NAME%-%AGENT_VERSION_STRING%-%ARCH%.msi
+  set MSI_NAME=%PKG_NAME%-%AGENT_VERSION_STRING%%SUFFIX%.msi
+)
+if exist %PKG_NAME%%SUFFIX%.msi (
+  move %PKG_NAME%%SUFFIX%.msi %MSI_NAME%
 )
 
 set DEST_PATH=%ORIG_PATH%/windows
 ssh %BUILD_HOST% &quot;mkdir -p %DEST_PATH%&quot;
-REM rsync -avg --ignore-existing %PKG_NAME%-%AGENT_VERSION_STRING%-%ARCH%.msi %BUILD_HOST%:%DEST_PATH%
-scp -B %PKG_NAME%-%AGENT_VERSION_STRING%-%ARCH%.msi %BUILD_HOST%:%DEST_PATH%
+REM rsync -avg --ignore-existing %MSI_NAME% %BUILD_HOST%:%DEST_PATH%
+scp -B %MSI_NAME% %BUILD_HOST%:%DEST_PATH%
 
 echo Puppet&apos;s package name is: %PKG_NAME%
 echo Puppet&apos;s version is: %AGENT_VERSION_STRING%
 echo Puppet&apos;s arch is: %ARCH%
-echo Find the msi at: http://builds.puppetlabs.lan/puppet/<%= Pkg::Config.ref %>/artifacts/windows/%PKG_NAME%-%AGENT_VERSION_STRING%-%ARCH%.msi
+echo Find the msi at: http://builds.puppetlabs.lan/puppet/<%= Pkg::Config.ref %>/artifacts/windows/%MSI_NAME%
 
 popd</command>
     </hudson.tasks.BatchFile>

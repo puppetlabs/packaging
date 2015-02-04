@@ -56,9 +56,11 @@ end
 namespace :pl do
   desc "Sign the tarball, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_tar do
-    File.exist?("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz") or fail "No tarball exists. Try rake package:tar?"
-    load_keychain if Pkg::Util::Tool.find_tool('keychain', :required => false)
-    gpg_sign_file "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
+    unless Pkg::Config.vanagon_project
+      File.exist?("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz") or fail "No tarball exists. Try rake package:tar?"
+      load_keychain if Pkg::Util::Tool.find_tool('keychain', :required => false)
+      gpg_sign_file "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
+    end
   end
 
   desc "Sign mocked rpms, Defaults to PL Key, pass GPG_KEY to override"

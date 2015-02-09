@@ -129,7 +129,7 @@ File.open(&quot;#{ENV[&apos;WORKSPACE&apos;]}/ondemand.yaml&quot;, &apos;w&apos;
       <command>call c:\puppetwinbuilder\setup_env.bat
 
 set PKG_NAME=<%= Pkg::Config.msi_name || 'puppet' %>
-set AGENT_VERSION_STRING=<%= Pkg::Config.version %>
+set AGENT_VERSION_STRING=<%= Pkg::Config.version %>-<%= Pkg::Config.short_ref %>
 set ARCH=%ARCH%
 set SUFFIX=-%ARCH%
 if &quot;%ARCH%&quot; == &quot;x86&quot; (

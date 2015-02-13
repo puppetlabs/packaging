@@ -143,20 +143,24 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
 
       dists = Pkg::Util::File.directories("#{target}/apt")
 
-      dists.each do |dist|
-        Dir.chdir("#{target}/apt/#{dist}") do
-          File.open("conf/distributions", "w") do |f|
-            f.puts "Origin: Puppet Labs
-Label: Puppet Labs
-Codename: #{dist}
-Architectures: i386 amd64
-Components: main
-Description: #{message} for #{dist}
-SignWith: #{Pkg::Config.gpg_key}"
-          end
+      if dists
+        dists.each do |dist|
+          Dir.chdir("#{target}/apt/#{dist}") do
+            File.open("conf/distributions", "w") do |f|
+              f.puts "Origin: Puppet Labs
+  Label: Puppet Labs
+  Codename: #{dist}
+  Architectures: i386 amd64
+  Components: main
+  Description: #{message} for #{dist}
+  SignWith: #{Pkg::Config.gpg_key}"
+            end
 
-          Pkg::Util::Execution.ex("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
+            Pkg::Util::Execution.ex("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
+          end
         end
+      else
+        STDERR.puts "No repos found to sign. Maybe you didn't build any debs, or the repo creation failed?"
       end
     end
   end

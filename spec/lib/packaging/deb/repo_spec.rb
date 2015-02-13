@@ -99,12 +99,14 @@ describe "Pkg::Deb::Repo" do
 
   describe "#ship_repo_configs" do
     it "warns if there are no repo configs to ship" do
+      File.should_receive(:exist?).with("pkg/repo_configs/deb").and_return(true)
       Pkg::Util::File.should_receive(:empty_dir?).with("pkg/repo_configs/deb").and_return(true)
       Pkg::Deb::Repo.should_receive(:warn).with("No repo configs have been generated! Try pl:deb_repo_configs.")
       Pkg::Deb::Repo.ship_repo_configs
     end
 
     it "ships repo configs to the build server" do
+      File.should_receive(:exist?).with("pkg/repo_configs/deb").and_return(true)
       Pkg::Config.jenkins_repo_path = "/a/b/c/d"
       Pkg::Config.distribution_server = "a.host.that.wont.exist"
       repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/repo_configs/deb"

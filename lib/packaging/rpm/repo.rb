@@ -8,7 +8,11 @@ module Pkg::Rpm::Repo
     end
 
     def ship_repo_configs(target = "repo_configs")
-      Pkg::Util::File.empty_dir?("pkg/#{target}/rpm") and fail "No repo configs have been generated! Try pl:rpm_repo_configs."
+      if Pkg::Util::File.empty_dir?("pkg/#{target}/rpm")
+        warn "No repo configs have been generated! Try pl:rpm_repo_configs."
+        return
+      end
+
       invoke_task("pl:fetch")
       repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}/rpm"
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
@@ -79,7 +83,10 @@ module Pkg::Rpm::Repo
         end
       end
 
-      yum_repos.empty? and fail "No rpm repos were found to generate configs from!"
+      if yum_repos.empty?
+        warn "No rpm repos were found to generate configs from!"
+        return
+      end
 
       FileUtils.mkdir_p(File.join("pkg", target, "rpm"))
 

@@ -31,21 +31,20 @@ describe "Pkg::Deb::Repo" do
 
   describe "#generate_repo_configs" do
     it "fails if wget isn't available" do
-      Pkg::Util::Tool.stub(:find_tool).with("wget", {:required => true}) {false}
+      Pkg::Util::Tool.should_receive(:find_tool).with("wget", {:required => true}).and_raise(RuntimeError)
       expect {Pkg::Deb::Repo.generate_repo_configs}.to raise_error(RuntimeError)
     end
 
-    it "fails if there are no deb repos available for the build" do
+    it "warns if there are no deb repos available for the build" do
       Pkg::Util::Tool.should_receive(:find_tool).with("wget", {:required => true}).and_return(wget)
-      Pkg::Util::Execution.should_receive(:ex).with("#{wget} --spider -r -l 1 --no-parent #{base_url}/repos/apt/ 2>&1")
-      Pkg::Util::Execution.should_receive(:success?).and_return(false)
-      expect {Pkg::Deb::Repo.generate_repo_configs}.to raise_error(RuntimeError, /No debian repos/)
+      Pkg::Util::Execution.should_receive(:ex).with("#{wget} --spider -r -l 1 --no-parent #{base_url}/repos/apt/ 2>&1").and_raise(RuntimeError)
+      Pkg::Deb::Repo.should_receive(:warn).with("No debian repos available for #{project} at #{ref}.")
+      Pkg::Deb::Repo.generate_repo_configs
     end
 
     it "writes the expected repo configs to disk" do
       Pkg::Util::Tool.should_receive(:find_tool).with("wget", {:required => true}).and_return(wget)
       Pkg::Util::Execution.should_receive(:ex).with("#{wget} --spider -r -l 1 --no-parent #{base_url}/repos/apt/ 2>&1").and_return(wget_results + wget_garbage)
-      Pkg::Util::Execution.should_receive(:success?).and_return(true)
       FileUtils.should_receive(:mkdir_p).with("pkg/repo_configs/deb")
       config = []
       repo_configs.each_with_index do |repo_config, i|
@@ -59,11 +58,11 @@ describe "Pkg::Deb::Repo" do
 
   describe "#retrieve_repo_configs" do
     it "fails if wget isn't available" do
-      Pkg::Util::Tool.stub(:find_tool).with("wget", {:required => true}) {false}
+      Pkg::Util::Tool.should_receive(:find_tool).with("wget", {:required => true}).and_raise(RuntimeError)
       expect {Pkg::Deb::Repo.generate_repo_configs}.to raise_error(RuntimeError)
     end
 
-    it "fails if there are no deb repos available for the build" do
+    it "warns if there are no deb repos available for the build" do
       Pkg::Util::Tool.should_receive(:find_tool).with("wget", {:required => true}).and_return(wget)
       FileUtils.should_receive(:mkdir_p).with("pkg/repo_configs").and_return(true)
       Pkg::Util::Execution.should_receive(:ex).with("#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{base_url}/repo_configs/deb/").and_raise(RuntimeError)
@@ -99,9 +98,10 @@ describe "Pkg::Deb::Repo" do
   end
 
   describe "#ship_repo_configs" do
-    it "fails if there are no repo configs to ship" do
+    it "warns if there are no repo configs to ship" do
       Pkg::Util::File.should_receive(:empty_dir?).with("pkg/repo_configs/deb").and_return(true)
-      expect { Pkg::Deb::Repo.ship_repo_configs }.to raise_error(RuntimeError, /No repo configs have been generated!/)
+      Pkg::Deb::Repo.should_receive(:warn).with("No repo configs have been generated! Try pl:deb_repo_configs.")
+      Pkg::Deb::Repo.ship_repo_configs
     end
 
     it "ships repo configs to the build server" do

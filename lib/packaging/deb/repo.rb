@@ -27,10 +27,11 @@ module Pkg::Deb::Repo
 
       # First test if the directory even exists
       #
-      wget_results = Pkg::Util::Execution.ex("#{wget} --spider -r -l 1 --no-parent #{repo_base} 2>&1")
-
-      unless Pkg::Util::Execution.success?
-        fail "No debian repos available for #{Pkg::Config.project} at #{Pkg::Config.ref}."
+      begin
+        wget_results = Pkg::Util::Execution.ex("#{wget} --spider -r -l 1 --no-parent #{repo_base} 2>&1")
+      rescue RuntimeError
+        warn "No debian repos available for #{Pkg::Config.project} at #{Pkg::Config.ref}."
+        return
       end
 
       # We want to exclude index and robots files and only include the http: prefixed elements
@@ -128,7 +129,11 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
     end
 
     def ship_repo_configs(target = "repo_configs")
-      Pkg::Util::File.empty_dir?("pkg/#{target}/deb") and fail "No repo configs have been generated! Try pl:deb_repo_configs."
+      if Pkg::Util::File.empty_dir?("pkg/#{target}/deb")
+        warn "No repo configs have been generated! Try pl:deb_repo_configs."
+        return
+      end
+
       invoke_task("pl:fetch")
       repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}/deb"
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
@@ -160,7 +165,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
           end
         end
       else
-        STDERR.puts "No repos found to sign. Maybe you didn't build any debs, or the repo creation failed?"
+        warn "No repos found to sign. Maybe you didn't build any debs, or the repo creation failed?"
       end
     end
   end

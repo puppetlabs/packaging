@@ -40,10 +40,11 @@ describe "Pkg::Rpm::Repo" do
       expect {Pkg::Rpm::Repo.generate_repo_configs}.to raise_error(RuntimeError)
     end
 
-    it "fails if there are no rpm repos available for the build" do
+    it "warns if there are no rpm repos available for the build" do
       Pkg::Util::Tool.should_receive(:find_tool).with("wget", {:required => true}).and_return(wget)
       Pkg::Util::Execution.should_receive(:ex).with("#{wget} --spider -r -l 5 --no-parent #{base_url}/repos/ 2>&1").and_return("")
-      expect {Pkg::Rpm::Repo.generate_repo_configs}.to raise_error(RuntimeError, /No rpm repos/)
+      Pkg::Rpm::Repo.should_receive(:warn).with("No rpm repos were found to generate configs from!")
+      Pkg::Rpm::Repo.generate_repo_configs
     end
 
     it "writes the expected repo configs to disk" do
@@ -98,9 +99,10 @@ describe "Pkg::Rpm::Repo" do
   end
 
   describe "#ship_repo_configs" do
-    it "fails if there are no repo configs to ship" do
+    it "warn if there are no repo configs to ship" do
       Pkg::Util::File.should_receive(:empty_dir?).with("pkg/repo_configs/rpm").and_return(true)
-      expect { Pkg::Rpm::Repo.ship_repo_configs }.to raise_error(RuntimeError, /No repo configs have been generated!/)
+      Pkg::Rpm::Repo.should_receive(:warn).with("No repo configs have been generated! Try pl:rpm_repo_configs.")
+      Pkg::Rpm::Repo.ship_repo_configs
     end
 
     it "ships repo configs to the build server" do

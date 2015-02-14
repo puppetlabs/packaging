@@ -129,7 +129,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
     end
 
     def ship_repo_configs(target = "repo_configs")
-      if Pkg::Util::File.empty_dir?("pkg/#{target}/deb")
+      if (!File.exist?("pkg/#{target}/deb")) || Pkg::Util::File.empty_dir?("pkg/#{target}/deb")
         warn "No repo configs have been generated! Try pl:deb_repo_configs."
         return
       end

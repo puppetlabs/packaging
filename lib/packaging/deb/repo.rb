@@ -153,12 +153,12 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
           Dir.chdir("#{target}/apt/#{dist}") do
             File.open("conf/distributions", "w") do |f|
               f.puts "Origin: Puppet Labs
-  Label: Puppet Labs
-  Codename: #{dist}
-  Architectures: i386 amd64
-  Components: main
-  Description: #{message} for #{dist}
-  SignWith: #{Pkg::Config.gpg_key}"
+Label: Puppet Labs
+Codename: #{dist}
+Architectures: i386 amd64
+Components: main
+Description: #{message} for #{dist}
+SignWith: #{Pkg::Config.gpg_key}"
             end
 
             Pkg::Util::Execution.ex("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")

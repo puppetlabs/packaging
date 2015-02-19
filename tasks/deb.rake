@@ -101,6 +101,21 @@ task :build_deb, :deb_command, :cow do |t, args|
   puts "Finished building in: #{bench}"
 end
 
+def cow_to_codename_arch(cow)
+  /^base-(.*)-(.*)\.cow$/.match(cow).captures
+end
+
+def deb_build_targets
+  if Pkg::Config.vanagon_project
+    Pkg::Config.deb_targets.split(' ')
+  else
+    Pkg::Config.cows.split(' ').map do |cow|
+      codename, arch = cow_to_codename_arch(cow)
+      "#{codename}-#{arch}"
+    end
+  end
+end
+
 namespace :package do
   desc "Create a deb from this repo, using debuild (all builddeps must be installed)"
   task :deb => :tar do

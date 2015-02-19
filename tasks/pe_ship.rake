@@ -85,14 +85,15 @@ if Pkg::Config.build_pe
 
       puts "Shipping all built artifacts to to archive directories on #{Pkg::Config.apt_host}"
 
-      Pkg::Config.cows.split(' ').each do |cow|
-        dist, arch = /^base-(.*)-(.*)\.cow$/.match(cow).captures
+
+      deb_build_targets.each do |target|
+        dist, arch = target.split('-')
         unless Pkg::Util::File.empty_dir? "pkg/pe/deb/#{dist}"
           archive_path = "#{base_path}/#{dist}-#{arch}"
 
           # Ship arch-specific debs to correct dir, e.g. 'squeeze-i386'
-          unless Dir["pkg/pe/deb/#{dist}/pe-*_#{arch}.deb"].empty?
-            Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_#{arch}.deb", Pkg::Config.apt_host, "#{archive_path}/")
+          unless Dir["pkg/pe/deb/#{dist}/*_#{arch}.deb"].empty?
+            Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*_#{arch}.deb", Pkg::Config.apt_host, "#{archive_path}/")
           end
 
           # Ship all-arch debs to same dist-location, but to all known
@@ -100,23 +101,23 @@ if Pkg::Config.build_pe
           #
           # I am not proud of this. MM - 1/3/2014.
 
-          unless Dir["pkg/pe/deb/#{dist}/pe-*_all.deb"].empty?
+          unless Dir["pkg/pe/deb/#{dist}/*_all.deb"].empty?
             if dist =~ /cumulus/
-              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb", Pkg::Config.apt_host, "#{base_path}/#{dist}-powerpc/")
+              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*_all.deb", Pkg::Config.apt_host, "#{base_path}/#{dist}-powerpc/")
             else
-              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb", Pkg::Config.apt_host, "#{base_path}/#{dist}-i386/")
-              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*_all.deb", Pkg::Config.apt_host, "#{base_path}/#{dist}-amd64/")
+              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*_all.deb", Pkg::Config.apt_host, "#{base_path}/#{dist}-i386/")
+              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*_all.deb", Pkg::Config.apt_host, "#{base_path}/#{dist}-amd64/")
             end
           end
 
-          unless Dir["pkg/pe/deb/#{dist}/pe-*"].select { |i| i !~ /^.*\.deb$/ }.empty?
+          unless Dir["pkg/pe/deb/#{dist}/*"].select { |i| i !~ /^.*\.deb$/ }.empty?
             # Ship source files to source dir, e.g. 'squeeze-source'
-            Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/pe-*", Pkg::Config.apt_host, "#{base_path}/#{dist}-source", ["--exclude '*.deb'", "--ignore-existing"])
+            Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*", Pkg::Config.apt_host, "#{base_path}/#{dist}-source", ["--exclude '*.deb'", "--ignore-existing"])
           end
 
-          files = Dir["pkg/pe/deb/#{dist}/pe-*{_#{arch},all}.deb"].map { |f| "#{archive_path}/#{File.basename(f)}" }
+          files = Dir["pkg/pe/deb/#{dist}/*{_#{arch},all}.deb"].map { |f| "#{archive_path}/#{File.basename(f)}" }
 
-          files += Dir["pkg/pe/deb/#{dist}/pe-*"].select { |f| f !~ /^.*\.deb$/ }.map { |f| "#{base_path}/#{dist}-source/#{File.basename(f)}" }
+          files += Dir["pkg/pe/deb/#{dist}/*"].select { |f| f !~ /^.*\.deb$/ }.map { |f| "#{base_path}/#{dist}-source/#{File.basename(f)}" }
 
           unless files.empty?
             remote_set_immutable(Pkg::Config.apt_host, files)
@@ -129,12 +130,11 @@ if Pkg::Config.build_pe
       desc "Update remote rpm repodata for PE on #{Pkg::Config.yum_host}"
       task :update_yum_repo => "pl:fetch" do
         repo_base_path = File.join(Pkg::Config.yum_repo_path, Pkg::Config.pe_version, "repos")
-        mock_paths = Pkg::Config.final_mocks.split.map { |mock| "#{mock_el_family(mock)}-#{mock_el_ver(mock) }" }
 
         # This entire command is going to be passed across SSH, but it's unwieldy on a
         # single line. By breaking it into a series of concatenated strings, we can maintain
         # a semblance of formatting and structure (nevermind readability).
-        command  = %(for dir in #{repo_base_path}/{#{mock_paths.join(",")}}-*; do)
+        command  = %(for dir in #{repo_base_path}/{#{rpm_family_and_version.join(",")}}-*; do)
         command += %(  sudo createrepo --checksum=sha --quiet --database --update $dir; )
         command += %(done; )
         command += %(sync)

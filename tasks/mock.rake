@@ -134,6 +134,19 @@ def mock_el_ver(mock_config)
   version
 end
 
+# Return the RPM family and version for a Vanagon or Packaging repo built project.
+def rpm_family_and_version
+  if Pkg::Config.vanagon_project
+    Pkg::Config.rpm_targets.split(' ').map do |target|
+      rpm_el_family, rpm_el_version, arch = target.split('-')
+      "#{rpm_el_family}-#{rpm_el_version}"
+    end
+  else
+    Pkg::Config.final_mocks.split.map { |mock| "#{mock_el_family(mock)}-#{mock_el_ver(mock) }" }
+  end
+end
+
+
 # Checks to see if the pe agnostic config template is in place.
 # If it is then the mock config is set to point to the generated config file.
 # The generated config file is formed by substituting the pe_version into the erb

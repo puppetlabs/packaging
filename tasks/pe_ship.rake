@@ -86,7 +86,7 @@ if Pkg::Config.build_pe
       puts "Shipping all built artifacts to to archive directories on #{Pkg::Config.apt_host}"
 
 
-      deb_build_targets.each do |target|
+      Pkg::Config.deb_build_targets.each do |target|
         dist, arch = target.split('-')
         unless Pkg::Util::File.empty_dir? "pkg/pe/deb/#{dist}"
           archive_path = "#{base_path}/#{dist}-#{arch}"

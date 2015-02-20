@@ -273,6 +273,42 @@ module Pkg
           end
         end
       end
+
+
+      # This method is duplicated from enterprise-dist so we can access it here.
+      def cow_to_codename_arch(cow)
+        /^base-(.*)-(.*)\.cow$/.match(cow).captures
+      end
+
+      # This method is duplicated from enterprise-dist so we can access it here.
+      def mock_to_dist_version_arch(mock)
+        # We care about matching against two patterns here:
+        # pupent-3.4-el5-i386 <= old style with PE_VER baked into the mock name
+        # pupent-el5-i386     <= new style derived from a template
+        mock.match(/pupent(-\d\.\d)?-([a-z]*)(\d*)-([^-]*)/)[2..4]
+      end
+
+      def deb_build_targets
+        if self.vanagon_project
+          self.deb_targets.split(' ')
+        else
+          self.cows.split(' ').map do |cow|
+            codename, arch = self.cow_to_codename_arch(cow)
+            "#{codename}-#{arch}"
+          end
+        end
+      end
+
+      def rpm_build_targets
+        if self.vanagon_project
+          self.rpm_targets.split(' ')
+        else
+          self.final_mocks.split(' ').map do |mock|
+            platform, version, arch = self.mock_to_dist_version_arch(mock)
+            "#{platform}-#{version}-#{arch}"
+          end
+        end
+      end
     end
   end
 end

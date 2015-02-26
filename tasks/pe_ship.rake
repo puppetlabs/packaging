@@ -87,7 +87,7 @@ if Pkg::Config.build_pe
 
 
       Pkg::Config.deb_build_targets.each do |target|
-        dist, arch = target.split('-')
+        dist, arch = target.match(/(.*)-(.*)/)[1, 2]
         unless Pkg::Util::File.empty_dir? "pkg/pe/deb/#{dist}"
           archive_path = "#{base_path}/#{dist}-#{arch}"
 

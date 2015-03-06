@@ -57,6 +57,7 @@ module Pkg::Params
                   :gpg_key,
                   :gpg_name,
                   :homepage,
+                  :internal_gem_host,
                   :ips_build_host,
                   :ips_host,
                   :ips_inter_cert,
@@ -115,7 +116,7 @@ module Pkg::Params
                   :yum_host,
                   :yum_repo_path,
                   :yum_repo_name,
-                  :internal_gem_host]
+  ]
 
   # Environment variable overrides for Pkg::Config parameters
   #

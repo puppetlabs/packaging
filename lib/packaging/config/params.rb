@@ -3,6 +3,7 @@
 module Pkg::Params
   BUILD_PARAMS = [:apt_host,
                   :apt_repo_path,
+                  :apt_repo_name,
                   :apt_repo_url,
                   :author,
                   :benchmark,
@@ -113,6 +114,7 @@ module Pkg::Params
                   :version_strategy,
                   :yum_host,
                   :yum_repo_path,
+                  :yum_repo_name,
                   :internal_gem_host]
 
   # Environment variable overrides for Pkg::Config parameters

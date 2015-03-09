@@ -16,6 +16,7 @@ module Pkg::Deb::Repo
     # enable clients to install these packages.
     #
     def generate_repo_configs(source = "repos", target = "repo_configs")
+      subrepo = Pkg::Config.apt_repo_name || "main"
       # We use wget to obtain a directory listing of what are presumably our deb repos
       #
       wget = Pkg::Util::Tool.check_tool("wget")
@@ -48,7 +49,7 @@ module Pkg::Deb::Repo
         next if "#{url}/" == repo_base
         dist = url.split('/').last
         repoconfig = ["# Packages for #{Pkg::Config.project} built from ref #{Pkg::Config.ref}",
-                      "deb #{url} #{dist} main"]
+                      "deb #{url} #{dist} #{subrepo}"]
         config = File.join("pkg", target, "deb", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}.list")
         File.open(config, 'w') { |f| f.puts repoconfig }
       end
@@ -67,6 +68,7 @@ module Pkg::Deb::Repo
     end
 
     def repo_creation_command(prefix, artifact_directory)
+      subrepo = Pkg::Config.apt_repo_name || 'main'
       # First, we test that artifacts exist and set up the repos directory
       cmd = 'echo " Checking for deb build artifacts. Will exit if not found.." ; '
       cmd << "[ -d #{artifact_directory}/artifacts/#{prefix}deb ] || exit 1 ; "
@@ -87,20 +89,20 @@ module Pkg::Deb::Repo
 
       # Make the conf directory and write out our configuration file
       cmd << "rm -rf apt && mkdir -p apt ; pushd apt ; "
-      cmd << 'for dist in $dists ; do mkdir -p $dist/conf ; pushd $dist ;
+      cmd << %Q(for dist in $dists ; do mkdir -p $dist/conf ; pushd $dist ;
       echo "
 Origin: Puppet Labs
 Label: Puppet Labs
 Codename: $dist
 Architectures: i386 amd64
-Components: main
-Description: Apt repository for acceptance testing" >> conf/distributions ; '
+Components: #{subrepo}
+Description: Apt repository for acceptance testing" >> conf/distributions ; )
 
       # Create the repositories using reprepro. Since these are for acceptance
       # testing only, we'll just add the debs and ignore source files for now.
       #
       cmd << "reprepro=$(which reprepro) ; "
-      cmd << "$reprepro includedeb $dist ../../#{prefix}deb/$dist/*.deb ; popd ; done ; "
+      cmd << %Q($reprepro includedeb $dist ../../#{prefix}deb/$dist#{Pkg::Config.apt_repo_name ? "/#{subrepo}" : ""}/*.deb ; popd ; done ; )
       cmd << "popd ; popd "
 
       return cmd
@@ -143,6 +145,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
     end
 
     def sign_repos(target = "repos", message = "Signed apt repository")
+      subrepo = Pkg::Config.apt_repo_name || 'main'
       reprepro = Pkg::Util::Tool.check_tool('reprepro')
       load_keychain if Pkg::Util::Tool.find_tool('keychain')
 
@@ -156,7 +159,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; '
 Label: Puppet Labs
 Codename: #{dist}
 Architectures: i386 amd64
-Components: main
+Components: #{subrepo}
 Description: #{message} for #{dist}
 SignWith: #{Pkg::Config.gpg_key}"
             end

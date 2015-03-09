@@ -7,6 +7,7 @@ describe "Pkg::Config" do
   Build_Params = [:apt_host,
                   :apt_repo_path,
                   :apt_repo_url,
+                  :apt_repo_name,
                   :author,
                   :benchmark,
                   :build_date,
@@ -107,7 +108,9 @@ describe "Pkg::Config" do
                   :version_file,
                   :version_strategy,
                   :yum_host,
-                  :yum_repo_path]
+                  :yum_repo_path,
+                  :yum_repo_name,
+  ]
 
   describe "#new" do
     Build_Params.each do |param|

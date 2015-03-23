@@ -7,6 +7,7 @@ module Pkg::Util
   require 'packaging/util/date'
   require 'packaging/util/tool'
   require 'packaging/util/file'
+  require 'packaging/util/misc'
   require 'packaging/util/net'
   require 'packaging/util/version'
   require 'packaging/util/serialization'

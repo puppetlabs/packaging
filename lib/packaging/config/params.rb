@@ -5,6 +5,7 @@ module Pkg::Params
                   :apt_repo_path,
                   :apt_repo_name,
                   :apt_repo_url,
+                  :apt_repo_command,
                   :author,
                   :benchmark,
                   :build_date,
@@ -57,6 +58,7 @@ module Pkg::Params
                   :gpg_key,
                   :gpg_name,
                   :homepage,
+                  :internal_gem_host,
                   :ips_build_host,
                   :ips_host,
                   :ips_inter_cert,
@@ -115,7 +117,8 @@ module Pkg::Params
                   :yum_host,
                   :yum_repo_path,
                   :yum_repo_name,
-                  :internal_gem_host]
+                  :yum_repo_command,
+  ]
 
   # Environment variable overrides for Pkg::Config parameters
   #

@@ -8,6 +8,7 @@ describe "Pkg::Config" do
                   :apt_repo_path,
                   :apt_repo_url,
                   :apt_repo_name,
+                  :apt_repo_command,
                   :author,
                   :benchmark,
                   :build_date,
@@ -110,6 +111,7 @@ describe "Pkg::Config" do
                   :yum_host,
                   :yum_repo_path,
                   :yum_repo_name,
+                  :yum_repo_command,
   ]
 
   describe "#new" do

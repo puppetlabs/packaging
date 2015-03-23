@@ -18,20 +18,45 @@ namespace :pl do
     # to various target yum and apt repositories based on their specific type
     # e.g., final vs devel vs PE vs FOSS packages
 
-    desc "Update remote rpm repodata on #{Pkg::Config.yum_host}"
+    desc "Update remote yum repository on '#{Pkg::Config.yum_host}'"
     task :update_yum_repo do
-      STDOUT.puts "Really run remote repo update on #{Pkg::Config.yum_host}? [y,n]"
+      yum_whitelist = {
+        :yum_repo_name => "__REPO_NAME__",
+        :yum_repo_path => "__REPO_PATH__",
+        :yum_host      => "__REPO_HOST__",
+        :gpg_key       => "__GPG_KEY__",
+      }
+
+      STDOUT.puts "Really run remote repo update on '#{Pkg::Config.yum_host}'? [y,n]"
       if ask_yes_or_no
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, 'rake -f /opt/repository/Rakefile mk_repo')
+        if Pkg::Config.yum_repo_command
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, Pkg::Util::Misc.search_and_replace(Pkg::Config.yum_repo_command, yum_whitelist))
+        else
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, 'rake -f /opt/repository/Rakefile mk_repo')
+        end
       end
     end
 
-    desc "remote freight packages to repos on #{Pkg::Config.apt_host}"
-    task :freight do
-      STDOUT.puts "Really run remote freight command on #{Pkg::Config.apt_host}? [y,n]"
+    task :freight => :update_apt_repo
+
+    desc "Update remote apt repository on '#{Pkg::Config.apt_host}'"
+    task :update_apt_repo do
+      apt_whitelist = {
+        :apt_repo_name => "__REPO_NAME__",
+        :apt_repo_path => "__REPO_PATH__",
+        :apt_repo_url  => "__REPO_URL__",
+        :apt_host      => "__REPO_HOST__",
+        :gpg_key       => "__GPG_KEY__",
+      }
+
+      STDOUT.puts "Really run remote repo update on '#{Pkg::Config.apt_host}'? [y,n]"
       if ask_yes_or_no
-        override = "OVERRIDE=1" if ENV['OVERRIDE']
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "rake -f /opt/repository/Rakefile freight #{override}")
+        if Pkg::Config.apt_repo_command
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, Pkg::Util::Misc.search_and_replace(Pkg::Config.apt_repo_command, apt_whitelist))
+        else
+          override = "OVERRIDE=1" if ENV['OVERRIDE']
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "rake -f /opt/repository/Rakefile freight #{override}")
+        end
       end
     end
   end

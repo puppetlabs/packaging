@@ -16,6 +16,7 @@ module Pkg::Params
                   :build_ips,
                   :build_msi,
                   :build_pe,
+                  :build_tar,
                   :builder_data_file,
                   :builds_server,
                   :bundle_platforms,
@@ -134,6 +135,7 @@ module Pkg::Params
               { :var => :build_ips,           :envvar => :IPS,             :type => :bool },
               { :var => :build_msi,           :envvar => :MSI,             :type => :bool },
               { :var => :build_pe,            :envvar => :PE_BUILD,        :type => :bool },
+              { :var => :build_tar,           :envvar => :TAR,             :type => :bool },
               { :var => :vanagon_project,     :envvar => :VANAGON_PROJECT, :type => :bool },
               { :var => :certificate_pem,     :envvar => :CERT_PEM },
               { :var => :cows,                :envvar => :COW },
@@ -168,7 +170,8 @@ module Pkg::Params
               { :var => :keychain_loaded,   :val => false },
               { :var => :build_date,        :val => Pkg::Util::Date.timestamp('-') },
               { :var => :release,           :val => '1' },
-              { :var => :internal_gem_host, :val => 'http://rubygems.delivery.puppetlabs.net/' }]
+              { :var => :internal_gem_host, :val => 'http://rubygems.delivery.puppetlabs.net/' },
+              { :var => :build_tar,         :val => true }]
 
   # These are variables which, over time, we decided to rename or replace. For
   # backwards compatibility, we assign the value of the old/deprecated

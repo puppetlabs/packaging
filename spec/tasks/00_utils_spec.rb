@@ -63,6 +63,21 @@ describe "00_utils" do
         :is_less_than_one?          => true,
       },
     },
+    '0.7.0.SNAPSHOT.2015.03.25T0146' => {
+      :ref_type                     => "tag",
+      :method_map                   => {
+        :git_describe_version       => %w{0.7.0.SNAPSHOT.2015.03.25T0146},
+        :get_dash_version           => '0.7.0.SNAPSHOT.2015.03.25T0146',
+        :get_ips_version            => '0.7.0.SNAPSHOT.2015.03.25T0146,3.14159-0',
+        :get_dot_version            => '0.7.0.SNAPSHOT.2015.03.25T0146',
+        :get_debversion             => '0.7.0-0.1SNAPSHOT.2015.03.25T0146puppetlabs1',
+        :get_rpmversion             => '0.7.0',
+        :get_rpmrelease             => '0.1SNAPSHOT.2015.03.25T0146',
+        :is_rc?                     => true,
+        :is_odd?                    => true,
+        :is_less_than_one?          => true,
+      },
+    },
     '0.4.0-rc1-63-ge391f55'         => {
       :ref_type                     => "commit",
       :method_map                   => {

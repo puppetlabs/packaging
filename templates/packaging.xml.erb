@@ -63,7 +63,7 @@ pl:jenkins:uber_build NOTIFY=foo@puppetlabs.com&#xd;
           <% end %>
         <% end %>
         <% Pkg::Config.final_mocks.split(' ').each do |mock| %>&quot;pl_mock MOCK=<%= mock %>&quot;: &quot;rpm&quot;,<% end %>
-        &quot;package_tar&quot;: &quot;rpm&quot;,
+        <% if Pkg::Config.build_tar then %>&quot;package_tar&quot;: &quot;rpm&quot;,<% end %>
         <% if Pkg::Config.build_gem then %>&quot;package_gem&quot;: &quot;gem&quot;,<% end %>
         <% if Pkg::Config.build_dmg then %>&quot;package_apple&quot;: &quot;dmg&quot;,<% end %>
 ];
@@ -109,7 +109,7 @@ return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScr
       <values>
         <% Pkg::Config.cows.split(' ').each do |cow| %><string>pl_deb COW=<%= cow %></string><% end %>
         <% Pkg::Config.final_mocks.split(' ').each do |mock| %><string>pl_mock MOCK=<%= mock %></string><% end %>
-        <string>package_tar</string>
+        <% if Pkg::Config.build_tar then %><string>package_tar</string><% end %>
         <% if Pkg::Config.build_gem then %><string>package_gem</string><% end %>
         <% if Pkg::Config.build_dmg then %><string>package_apple</string><% end %>
       </values>

@@ -19,6 +19,7 @@ describe "Pkg::Config" do
                   :build_ips,
                   :build_msi,
                   :build_pe,
+                  :build_tar,
                   :builder_data_file,
                   :bundle_platforms,
                   :certificate_pem,

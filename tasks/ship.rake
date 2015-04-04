@@ -115,10 +115,12 @@ namespace :pl do
     end
   end if Pkg::Config.build_dmg
 
-  desc "ship tarball and signature to #{Pkg::Config.tar_host}"
-  task :ship_tar => 'pl:fetch' do
-    Pkg::Util::Execution.retry_on_fail(:times => 3) do
-      Pkg::Util::Net.rsync_to("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*", Pkg::Config.tar_host, Pkg::Config.tarball_path)
+  if Pkg::Config.build_tar
+    desc "ship tarball and signature to #{Pkg::Config.tar_host}"
+    task :ship_tar => 'pl:fetch' do
+      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+        Pkg::Util::Net.rsync_to("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*", Pkg::Config.tar_host, Pkg::Config.tarball_path)
+      end
     end
   end
 
@@ -130,7 +132,7 @@ namespace :pl do
       Rake::Task["pl:ship_rpms"].invoke
       Rake::Task["pl:ship_debs"].invoke
       Rake::Task["pl:ship_dmg"].execute if Pkg::Config.build_dmg
-      Rake::Task["pl:ship_tar"].execute
+      Rake::Task["pl:ship_tar"].execute if Pkg::Config.build_tar
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
       add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark
       post_shipped_metrics if Pkg::Config.benchmark

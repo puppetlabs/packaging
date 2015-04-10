@@ -55,14 +55,18 @@ pl:jenkins:uber_build NOTIFY=foo@puppetlabs.com&#xd;
   <properties>
     <jp.ikedam.jenkins.plugins.groovy__label__assignment.GroovyLabelAssignmentProperty plugin="groovy-label-assignment@1.0.0">
       <groovyScript>def labelMap = [
-        <% Pkg::Config.cows.split(' ').each do |cow| %>
-          <% if cow =~ /cumulus/ %>
-        &quot;pl_deb COW=<%= cow %>&quot;: &quot;cumulus&quot;,
-          <% else %>
-        &quot;pl_deb COW=<%= cow %>&quot;: &quot;deb&quot;,
+        <% if Pkg::Config.cows %>
+          <% Pkg::Config.cows.split(' ').each do |cow| %>
+            <% if cow =~ /cumulus/ %>
+          &quot;pl_deb COW=<%= cow %>&quot;: &quot;cumulus&quot;,
+            <% else %>
+          &quot;pl_deb COW=<%= cow %>&quot;: &quot;deb&quot;,
+            <% end %>
           <% end %>
         <% end %>
-        <% Pkg::Config.final_mocks.split(' ').each do |mock| %>&quot;pl_mock MOCK=<%= mock %>&quot;: &quot;rpm&quot;,<% end %>
+        <% if Pkg::Config.final_mocks %>
+          <% Pkg::Config.final_mocks.split(' ').each do |mock| %>&quot;pl_mock MOCK=<%= mock %>&quot;: &quot;rpm&quot;,<% end %>
+        <% end %>
         <% if Pkg::Config.build_tar then %>&quot;package_tar&quot;: &quot;rpm&quot;,<% end %>
         <% if Pkg::Config.build_gem then %>&quot;package_gem&quot;: &quot;gem&quot;,<% end %>
         <% if Pkg::Config.build_dmg then %>&quot;package_apple&quot;: &quot;dmg&quot;,<% end %>
@@ -107,8 +111,12 @@ return labelMap.get(binding.getVariables().get(&quot;command&quot;));</groovyScr
     <hudson.matrix.TextAxis>
       <name>command</name>
       <values>
-        <% Pkg::Config.cows.split(' ').each do |cow| %><string>pl_deb COW=<%= cow %></string><% end %>
-        <% Pkg::Config.final_mocks.split(' ').each do |mock| %><string>pl_mock MOCK=<%= mock %></string><% end %>
+        <% if Pkg::Config.cows %>
+          <% Pkg::Config.cows.split(' ').each do |cow| %><string>pl_deb COW=<%= cow %></string><% end %>
+        <% end %>
+        <% if Pkg::Config.final_mocks %>
+          <% Pkg::Config.final_mocks.split(' ').each do |mock| %><string>pl_mock MOCK=<%= mock %></string><% end %>
+        <% end %>
         <% if Pkg::Config.build_tar then %><string>package_tar</string><% end %>
         <% if Pkg::Config.build_gem then %><string>package_gem</string><% end %>
         <% if Pkg::Config.build_dmg then %><string>package_apple</string><% end %>

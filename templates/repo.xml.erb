@@ -74,14 +74,15 @@ if [ $PACKAGE_BUILD_RESULT -eq 0 ] ; then
       rake package:bootstrap --trace
 
       ### Run repo creation
-<% if Pkg::Config.final_mocks %>
+<% if Pkg::Config.final_mocks and not Pkg::Config.final_mocks.empty? %>
       rake PARAMS_FILE=../../BUILD_PROPERTIES pl:jenkins:rpm_repos --trace
+<% else %>
+      echo "No mock/rpm targets found, skipping rpm repo creation"
 <% end %>
-<% if Pkg::Config.cows %>
+<% if Pkg::Config.cows and not Pkg::Config.cows.empty? %>
       rake PARAMS_FILE=../../BUILD_PROPERTIES pl:jenkins:deb_repos --trace
-<% end %>
-<% if Pkg::Config.final_mocks.nil? and Pkg::Config.cows.nil? %>
-      echo "No final_mocks or cows defined in configuration (usually build_defaults.yaml). Skipping repo creation"
+<% else %>
+      echo "No cow/deb targets found, skipping deb repo creation"
 <% end %>
     popd
   popd

@@ -163,7 +163,8 @@ namespace :pl do
       signing_bundle = ENV['SIGNING_BUNDLE']
       rpm_sign_task = Pkg::Config.build_pe ? "pe:sign_rpms" : "pl:sign_rpms"
       deb_sign_task = Pkg::Config.build_pe ? "pe:sign_deb_changes" : "pl:sign_deb_changes"
-      sign_tasks    = ["pl:sign_tar", rpm_sign_task, deb_sign_task]
+      sign_tasks    = [rpm_sign_task, deb_sign_task]
+      sign_tasks    << "pl:sign_tar" if Pkg::Config.build_tar
       sign_tasks    << "pl:sign_gem" if Pkg::Config.build_gem
       remote_repo   = remote_bootstrap(Pkg::Config.distribution_server, 'HEAD', nil, signing_bundle)
       build_params  = remote_buildparams(Pkg::Config.distribution_server, Pkg::Config)

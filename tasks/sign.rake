@@ -91,6 +91,7 @@ namespace :pl do
     # Now we hardlink them back in
     Dir["#{rpm_dir}/*/*/*/i386/*.noarch.rpm"].each do |rpm|
       cd File.dirname(rpm) do
+        FileUtils.mkdir_p(File.join("..", "x86_64"))
         FileUtils.ln(File.basename(rpm), File.join("..", "x86_64"), :force => true, :verbose => true)
       end
     end

@@ -146,6 +146,9 @@ module Pkg::Util::Version
         # Grab the rc number
         rc_num = dash.match(/rc(\d+)/)[1]
         ver = dash.sub(/-?rc[0-9]+/, "-0.#{Pkg::Config.release}rc#{rc_num}").gsub(/(rc[0-9]+)-(\d+)?-?/, '\1.\2')
+      elsif dash.include?("SNAPSHOT")
+        # Insert -0.#{release} between the version and the SNAPSHOT string
+        ver = dash.sub(/^(.*)\.(SNAPSHOT\..*)$/, "\\1-0.#{Pkg::Config.release}\\2")
       else
         ver = dash.gsub('-', '.') + "-#{Pkg::Config.release}"
       end
@@ -215,9 +218,16 @@ module Pkg::Util::Version
     # '0.7.0-rc1'
     # '0.7.0-rc1-63'
     # '0.7.0-rc1-63-dirty'
+    # '0.7.0.SNAPSHOT.2015.03.25T0146'
     def is_rc?
-      return TRUE if get_dash_version =~ /^\d+\.\d+\.\d+-*rc\d+/
-      return FALSE
+      case get_dash_version
+      when /^\d+\.\d+\.\d+-*rc\d+/
+        TRUE
+      when /^\d+\.\d+\.\d+\.SNAPSHOT\.\d{4}\.\d{2}\.\d{2}T\d{4}/
+        TRUE
+      else
+        FALSE
+      end
     end
 
     # the odd_even strategy (mcollective)

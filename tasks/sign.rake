@@ -72,7 +72,7 @@ namespace :pl do
     # We'll sign the remaining noarch
     all_rpms = Dir["#{rpm_dir}/**/*.rpm"]
     old_rpms    = Dir["#{rpm_dir}/el/4/**/*.rpm"] + Dir["#{rpm_dir}/el/5/**/*.rpm"]
-    modern_rpms = Dir["#{rpm_dir}/el/6/**/*.rpm"] + Dir["#{rpm_dir}/el/7/**/*.rpm"] + Dir["#{rpm_dir}/fedora/**/*.rpm"]
+    modern_rpms = Dir["#{rpm_dir}/el/6/**/*.rpm"] + Dir["#{rpm_dir}/el/7/**/*.rpm"] + Dir["#{rpm_dir}/fedora/**/*.rpm"] + Dir["#{rpm_dir}/nxos/**/*.rpm"]
 
     unsigned_rpms = all_rpms - old_rpms - modern_rpms
     unless unsigned_rpms.empty?

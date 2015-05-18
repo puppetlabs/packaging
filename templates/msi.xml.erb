@@ -83,7 +83,7 @@ This job will trigger the downstream job supplied with DOWNSTREAM_JOB if passed 
   </axes>
   <builders>
     <hudson.tasks.Shell>
-      <command>#!C:/puppetwinbuilder/sys/ruby/bin/ruby.exe
+      <command>#!ruby.exe
 
 require &apos;yaml&apos;
 
@@ -126,7 +126,9 @@ CONFIG = {
 File.open(&quot;#{ENV[&apos;WORKSPACE&apos;]}/ondemand.yaml&quot;, &apos;w&apos;) { |f| f.write(YAML.dump(CONFIG)) }</command>
     </hudson.tasks.Shell>
     <hudson.tasks.BatchFile>
-      <command>call c:\puppetwinbuilder\setup_env.bat
+      <command>
+REM Print the environment
+set
 
 set PKG_NAME=<%= Pkg::Config.msi_name || 'puppet' %>
 set AGENT_VERSION_STRING=<%= Pkg::Config.version %>

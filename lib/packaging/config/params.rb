@@ -12,6 +12,7 @@ module Pkg::Params
                   :build_defaults,
                   :build_dmg,
                   :build_doc,
+                  :build_for,
                   :build_gem,
                   :build_ips,
                   :build_msi,
@@ -131,6 +132,7 @@ module Pkg::Params
               { :var => :apt_repo_path,       :envvar => :APT_REPO },
               { :var => :build_dmg,           :envvar => :DMG,             :type => :bool },
               { :var => :build_doc,           :envvar => :DOC,             :type => :bool },
+              { :var => :build_for,           :envvar => :BUILD_FOR },
               { :var => :build_gem,           :envvar => :GEM,             :type => :bool },
               { :var => :build_ips,           :envvar => :IPS,             :type => :bool },
               { :var => :build_msi,           :envvar => :MSI,             :type => :bool },
@@ -171,7 +173,8 @@ module Pkg::Params
               { :var => :build_date,        :val => Pkg::Util::Date.timestamp('-') },
               { :var => :release,           :val => '1' },
               { :var => :internal_gem_host, :val => 'http://rubygems.delivery.puppetlabs.net/' },
-              { :var => :build_tar,         :val => true }]
+              { :var => :build_tar,         :val => true },
+              { :var => :build_for,         :val => 'agent' }]
 
   # These are variables which, over time, we decided to rename or replace. For
   # backwards compatibility, we assign the value of the old/deprecated

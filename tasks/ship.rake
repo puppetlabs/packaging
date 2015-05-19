@@ -1,7 +1,7 @@
 namespace :pl do
   desc "Ship mocked rpms to #{Pkg::Config.yum_host}"
   task :ship_rpms do
-    ["el", "fedora"].each do |dist|
+    ["el", "fedora", "nxos", "eos"].each do |dist|
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
         pkgs = Dir["pkg/#{dist}/**/*.rpm"].map { |f| "'#{f.gsub("pkg/#{dist}/", "#{Pkg::Config.yum_repo_path}/#{dist}/")}'" }
         unless pkgs.empty?

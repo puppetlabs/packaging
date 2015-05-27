@@ -174,6 +174,11 @@ if Pkg::Config.build_pe
         if (stdout + stderr).include?("Skipping inclusion")
           fail "Unable to add packages to debian repo because it already contains identical files. Perhaps you are trying to ship a deb that already exists. Verify the debs are a newer version than what already exists in #{reprepro_basedir} on #{Pkg::Config.apt_host}"
         end
+
+        puts
+        puts "Repsimple output: #{stdout + stderr}"
+        puts
+
         puts "Cleaning up apt repo 'incoming' dir on #{Pkg::Config.apt_host}"
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "rm -r #{incoming_dir}")
 

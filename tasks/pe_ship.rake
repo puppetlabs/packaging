@@ -168,7 +168,8 @@ if Pkg::Config.build_pe
             --confdir #{reprepro_confdir} \
             --basedir #{reprepro_basedir} \
             --databasedir #{reprepro_dbdir} \
-            --incomingdir #{incoming_dir}", true)
+            --incomingdir #{incoming_dir} \
+            --verbose", true)
 
         if (stdout + stderr).include?("Skipping inclusion")
           fail "Unable to add packages to debian repo because it already contains identical files. Perhaps you are trying to ship a deb that already exists. Verify the debs are a newer version than what already exists in #{reprepro_basedir} on #{Pkg::Config.apt_host}"

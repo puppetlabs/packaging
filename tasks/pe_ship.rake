@@ -175,6 +175,9 @@ if Pkg::Config.build_pe
 
         if output.include?("Skipping inclusion")
           fail "Unable to add packages to debian repo because it already contains identical files. Perhaps you are trying to ship a deb that already exists. Verify the debs are a newer version than what already exists in #{reprepro_basedir} on #{Pkg::Config.apt_host}"
+        elsif output.include?("ERROR:") || output.include?("There have been errors!")
+          # We shouldn't ever get here if repsimple returns non-zero on failure, but just in case...
+          fail "Unable to add packages to debian repo. Hopefully the output has some helpful information. Output: #{output}"
         end
 
         puts

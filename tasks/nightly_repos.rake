@@ -124,6 +124,16 @@ namespace :pl do
       end
       puts "Shipped '#{Pkg::Config.ref}' (#{Pkg::Config.version}) of '#{Pkg::Config.project}' into the puppet-agent repos."
     end
+
+    task :nightly_repos => ["pl:fetch"] do
+      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:generate_signed_repos", 'nightly')
+    end
+
+    task :deploy_nightly_repos, [:target_host, :target_basedir] => ["pl:fetch"] do |t, args|
+      target_host = args.target_host or fail ":target_host is a required argument to #{t}"
+      target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
+      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:deploy_signed_repos", target_host, target_basedir, 'nightly')
+    end
   end
 end
 

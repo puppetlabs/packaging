@@ -44,14 +44,20 @@ namespace :pl do
       end
     end
 
-    task :deploy_signed_repos, [:target_host, :target_basedir, :target_prefix] => ["clean", "pl:fetch"] do |t, args|
+    task :deploy_signed_repos, [:target_host, :target_basedir, :target_prefix, :versioning] => ["clean", "pl:fetch"] do |t, args|
       target_host = args.target_host or fail ":target_host is a required argument to #{t}"
       target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
       target_prefix = args.target_prefix or fail ":target_prefix is a required argument for #{t}"
+      versioning = args.versioning or fail ":versioning is a required argument for #{t}"
       mkdir("pkg")
 
       Dir.chdir("pkg") do
-        local_target = File.join(Pkg::Config.project, Pkg::Config.ref)
+        if versioning == 'ref'
+          local_target = File.join(Pkg::Config.project, Pkg::Config.ref)
+        elsif versioning == 'version'
+          local_target = File.join(Pkg::Config.project, Pkg::Util::Version.get_dot_version)
+        end
+
         FileUtils.mkdir_p([local_target, Pkg::Config.project + "-latest"])
 
         # Rake task dependencies with arguments are nuts, so we just directly
@@ -90,6 +96,19 @@ namespace :pl do
 
           File.open(config, "w") { |file| file.puts new_contents }
           FileUtils.mv(config, config.gsub(Pkg::Config.ref, "latest"))
+        end
+
+        # If we're using the version strategy instead of ref, here we shuffle
+        # around directories and munge repo_configs to replace the ref with the
+        # version
+        if versioning == 'version'
+          Dir.glob("#{local_target}/repo_configs/**/*").select { |t_config| File.file?(t_config) }.each do |config|
+            new_contents = File.read(config)
+            new_contents.gsub!(%r{#{Pkg::Config.ref}}, Pkg::Util::Version.get_dot_version)
+
+            File.open(config, "w") { |file| file.puts new_contents }
+            FileUtils.mv(config, config.gsub(Pkg::Config.ref, Pkg::Util::Version.get_dot_version))
+          end
         end
 
         # Make a latest symlink for the project
@@ -132,7 +151,7 @@ namespace :pl do
     task :deploy_nightly_repos, [:target_host, :target_basedir] => ["pl:fetch"] do |t, args|
       target_host = args.target_host or fail ":target_host is a required argument to #{t}"
       target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
-      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:deploy_signed_repos", target_host, target_basedir, 'nightly')
+      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:deploy_signed_repos", target_host, target_basedir, 'nightly', 'ref')
     end
   end
 end

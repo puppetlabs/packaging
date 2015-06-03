@@ -10,8 +10,9 @@ namespace :pl do
     # This is to enable the work in CPR-52 to support nightly repos. For this
     # work we'll have signed repos for each package of a build.
     #
-    task :remote_sign_nightly_repos => "pl:fetch" do
-      target = "nightly_repos/"
+    task :remote_sign_repos, [:target_prefix] => "pl:fetch" do |t, args|
+      target_prefix = args.target_prefix or fail ":target_prefix is a required argument for #{t}"
+      target = "#{target_prefix}_repos/"
       signing_server = Pkg::Config.signing_server
       # Sign the repos please
       Pkg::Util::File.empty_dir?("repos") and fail "There were no repos found in repos/. Maybe something in the pipeline failed?"
@@ -20,51 +21,59 @@ namespace :pl do
       remote_repo   = remote_bootstrap(signing_server, 'HEAD', nil, signing_bundle)
       build_params  = remote_buildparams(signing_server, Pkg::Config)
       Pkg::Util::Net.rsync_to('repos', signing_server, remote_repo)
-      Pkg::Util::Net.remote_ssh_cmd(signing_server, "cd #{remote_repo} ; rake pl:jenkins:sign_nightly_repos GPG_KEY=#{Pkg::Config.gpg_key} PARAMS_FILE=#{build_params}")
+      Pkg::Util::Net.remote_ssh_cmd(signing_server, "cd #{remote_repo} ; rake pl:jenkins:sign_repos GPG_KEY=#{Pkg::Config.gpg_key} PARAMS_FILE=#{build_params}")
       Pkg::Util::Net.rsync_from("#{remote_repo}/repos/", signing_server, target)
       Pkg::Util::Net.remote_ssh_cmd(signing_server, "rm -rf #{remote_repo}")
       Pkg::Util::Net.remote_ssh_cmd(signing_server, "rm #{build_params}")
       puts "Signed packages staged in '#{target}' directory"
     end
 
-    task :sign_nightly_repos => "pl:fetch" do
+    task :sign_repos => "pl:fetch" do
       Pkg::Util::RakeUtils.invoke_task("pl:sign_rpms", "repos")
       Pkg::Rpm::Repo.create_repos('repos')
-      Pkg::Deb::Repo.sign_repos('repos', 'Apt repository for nightly builds')
+      Pkg::Deb::Repo.sign_repos('repos', 'Apt repository for signed builds')
     end
 
-    task :ship_nightly_repos => "pl:fetch" do
-      target_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/nightly_repos"
+    task :ship_signed_repos, [:target_prefix] => "pl:fetch" do |t, args|
+      target_prefix = args.target_prefix or fail ":target_prefix is a required argument for #{t}"
+      target_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target_prefix}_repos"
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
         # Ship the now signed repos to the distribution server
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{target_dir}")
-        Pkg::Util::Net.rsync_to("nightly_repos/", Pkg::Config.distribution_server, target_dir)
+        Pkg::Util::Net.rsync_to("#{target_prefix}_repos/", Pkg::Config.distribution_server, target_dir)
       end
     end
 
-    task :deploy_nightly_repos, [:target_host, :target_basedir] => ["clean", "pl:fetch"] do |t, args|
+    task :deploy_signed_repos, [:target_host, :target_basedir, :target_prefix, :versioning] => ["clean", "pl:fetch"] do |t, args|
       target_host = args.target_host or fail ":target_host is a required argument to #{t}"
       target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
+      target_prefix = args.target_prefix or fail ":target_prefix is a required argument for #{t}"
+      versioning = args.versioning or fail ":versioning is a required argument for #{t}"
       mkdir("pkg")
 
       Dir.chdir("pkg") do
-        local_target = File.join(Pkg::Config.project, Pkg::Config.ref)
+        if versioning == 'ref'
+          local_target = File.join(Pkg::Config.project, Pkg::Config.ref)
+        elsif versioning == 'version'
+          local_target = File.join(Pkg::Config.project, Pkg::Util::Version.get_dot_version)
+        end
+
         FileUtils.mkdir_p([local_target, Pkg::Config.project + "-latest"])
 
         # Rake task dependencies with arguments are nuts, so we just directly
-        # invoke them here.  We want the nightly_* directories staged as
+        # invoke them here.  We want the signed_* directories staged as
         # repos/repo_configs, because that's how we want them on the public
         # server
-        Pkg::Util::RakeUtils.invoke_task("pl:jenkins:retrieve", "nightly_repos", File.join(local_target, "repos"))
-        Pkg::Util::RakeUtils.invoke_task("pl:jenkins:retrieve", "nightly_repo_configs", File.join(local_target, "repo_configs"))
+        Pkg::Util::RakeUtils.invoke_task("pl:jenkins:retrieve", "#{target_prefix}_repos", File.join(local_target, "repos"))
+        Pkg::Util::RakeUtils.invoke_task("pl:jenkins:retrieve", "#{target_prefix}_repo_configs", File.join(local_target, "repo_configs"))
 
         # The repo configs have Pkg::Config.builds_server used in them, but that
         # is internal, so we need to replace it with our public server. We also
-        # want them only to see repos, and not nightly repos, since the host is
+        # want them only to see repos, and not signed repos, since the host is
         # called nightlies.puppetlabs.com. Here we replace those values in each
         # config with the desired value.
         Dir.glob("#{local_target}/repo_configs/**/*").select { |t_config| File.file?(t_config) }.each do |config|
-          new_contents = File.read(config).gsub(Pkg::Config.builds_server, target_host).gsub(/nightly_repos/, "repos")
+          new_contents = File.read(config).gsub(Pkg::Config.builds_server, target_host).gsub(/#{target_prefix}_repos/, "repos")
           File.open(config, "w") { |file| file.puts new_contents }
         end
 
@@ -89,6 +98,19 @@ namespace :pl do
           FileUtils.mv(config, config.gsub(Pkg::Config.ref, "latest"))
         end
 
+        # If we're using the version strategy instead of ref, here we shuffle
+        # around directories and munge repo_configs to replace the ref with the
+        # version
+        if versioning == 'version'
+          Dir.glob("#{local_target}/repo_configs/**/*").select { |t_config| File.file?(t_config) }.each do |config|
+            new_contents = File.read(config)
+            new_contents.gsub!(%r{#{Pkg::Config.ref}}, Pkg::Util::Version.get_dot_version)
+
+            File.open(config, "w") { |file| file.puts new_contents }
+            FileUtils.mv(config, config.gsub(Pkg::Config.ref, Pkg::Util::Version.get_dot_version))
+          end
+        end
+
         # Make a latest symlink for the project
         FileUtils.ln_s(File.join("..", local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"))
       end
@@ -102,18 +124,35 @@ namespace :pl do
       puts "'#{Pkg::Config.ref}' of '#{Pkg::Config.project}' has been shipped to '#{target_host}:#{target_basedir}'"
     end
 
-    task :generate_nightly_repo_configs => "pl:fetch" do
-      Pkg::Rpm::Repo.generate_repo_configs('nightly_repos', 'nightly_repo_configs', true)
-      Pkg::Deb::Repo.generate_repo_configs('nightly_repos', 'nightly_repo_configs')
+    task :generate_signed_repo_configs, [:target_prefix] => "pl:fetch" do |t, args|
+      target_prefix = args.target_prefix or fail ":target_prefix is a required argument for #{t}"
+      Pkg::Rpm::Repo.generate_repo_configs("#{target_prefix}_repos", "#{target_prefix}_repo_configs", true)
+      Pkg::Deb::Repo.generate_repo_configs("#{target_prefix}_repos", "#{target_prefix}_repo_configs")
     end
 
-    task :ship_nightly_repo_configs => "pl:fetch" do
-      Pkg::Rpm::Repo.ship_repo_configs('nightly_repo_configs')
-      Pkg::Deb::Repo.ship_repo_configs('nightly_repo_configs')
+    task :ship_signed_repo_configs, [:target_prefix] => "pl:fetch" do |t, args|
+      target_prefix = args.target_prefix or fail ":target_prefix is a required argument for #{t}"
+      Pkg::Rpm::Repo.ship_repo_configs("#{target_prefix}_repo_configs")
+      Pkg::Deb::Repo.ship_repo_configs("#{target_prefix}_repo_configs")
     end
 
-    task :nightly_repos => ["pl:fetch", "jenkins:remote_sign_nightly_repos", "jenkins:ship_nightly_repos", "jenkins:generate_nightly_repo_configs", "jenkins:ship_nightly_repo_configs"] do
-      puts "Shipped '#{Pkg::Config.ref}' of '#{Pkg::Config.project}' into the nightly repos."
+    task :generate_signed_repos, [:target_prefix] => ["pl:fetch"] do |t, args|
+      target_prefix = args.target_prefix || 'nightly'
+      ["pl:jenkins:remote_sign_repos", "pl:jenkins:ship_signed_repos", "pl:jenkins:generate_signed_repo_configs", "pl:jenkins:ship_signed_repo_configs"].each do |task|
+        Pkg::Util::RakeUtils.invoke_task(task, target_prefix)
+      end
+      puts "Shipped '#{Pkg::Config.ref}' (#{Pkg::Config.version}) of '#{Pkg::Config.project}' into the puppet-agent repos."
+    end
+
+    task :nightly_repos => ["pl:fetch"] do
+      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:generate_signed_repos", 'nightly')
+    end
+
+    task :deploy_nightly_repos, [:target_host, :target_basedir] => ["pl:fetch"] do |t, args|
+      target_host = args.target_host or fail ":target_host is a required argument to #{t}"
+      target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
+      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:deploy_signed_repos", target_host, target_basedir, 'nightly', 'ref')
     end
   end
 end
+

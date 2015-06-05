@@ -154,7 +154,8 @@ namespace :pl do
       Pkg::Util::RakeUtils.invoke_task("pl:fetch")
       target = args.target || "artifacts"
       local_dir = args.local_dir || "pkg"
-      artifact_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}"
+      project_basedir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
+      artifact_dir = "#{project_basedir}/#{target}"
 
       # In order to get a snapshot of what this build looked like at the time
       # of shipping, we also generate and ship the params file
@@ -192,7 +193,8 @@ namespace :pl do
       end
 
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir --mode=775 -p #{artifact_dir}")
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir --mode=775 -p #{project_basedir}")
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{artifact_dir}")
         Pkg::Util::Net.rsync_to("#{local_dir}/", Pkg::Config.distribution_server, "#{artifact_dir}/", ["--ignore-existing", "--exclude repo_configs"])
       end
 

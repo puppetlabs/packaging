@@ -8,6 +8,7 @@ describe "Pkg::Util::Net" do
   let(:content)    { "stuff" }
   let(:rsync)      { "/bin/rsync" }
   let(:ssh)        { "/usr/local/bin/ssh" }
+  let(:s3cmd)      { "/usr/local/bin/s3cmd" }
 
   describe "#fetch_uri" do
     context "given a target directory" do
@@ -129,6 +130,34 @@ describe "Pkg::Util::Net" do
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
       Pkg::Util::Execution.should_receive(:ex).with("#{rsync} -rHlv -O --no-perms --no-owner --no-group --foo-bar --and-another-flag thing foo@bar:/home/foo")
       Pkg::Util::Net.rsync_to("thing", "foo@bar", "/home/foo", ["--foo-bar", "--and-another-flag"])
+    end
+  end
+
+  describe "#s3sync_to" do
+    it "should fail if s3cmd is not present" do
+      Pkg::Util::Tool.should_receive(:find_tool).with('s3cmd', :required => true).and_raise(RuntimeError)
+      Pkg::Util::Execution.should_not_receive(:ex).with("#{s3cmd} sync  'foo' s3://bar/boo/")
+      expect{ Pkg::Util::Net.s3sync_to("foo", "bar", "boo") }.to raise_error(RuntimeError)
+    end
+
+    it "should fail if ~/.s3cfg is not present" do
+      Pkg::Util::Tool.should_receive(:check_tool).with("s3cmd").and_return(s3cmd)
+      Pkg::Util::File.should_receive(:file_exists?).with(File.join(ENV['HOME'], '.s3cfg')).and_return(false)
+      expect{ Pkg::Util::Net.s3sync_to("foo", "bar", "boo") }.to raise_error(RuntimeError, /does not exist/)
+    end
+
+    it "should s3 sync 'thing' to 's3://foo@bar/home/foo/' with no flags" do
+      Pkg::Util::Tool.should_receive(:check_tool).with("s3cmd").and_return(s3cmd)
+      Pkg::Util::File.should_receive(:file_exists?).with(File.join(ENV['HOME'], '.s3cfg')).and_return(true)
+      Pkg::Util::Execution.should_receive(:ex).with("#{s3cmd} sync  'thing' s3://foo@bar/home/foo/")
+      Pkg::Util::Net.s3sync_to("thing", "foo@bar", "home/foo")
+    end
+
+    it "should s3 sync 'thing' to 's3://foo@bar/home/foo/' with --delete-removed and --acl-public" do
+      Pkg::Util::Tool.should_receive(:check_tool).with("s3cmd").and_return(s3cmd)
+      Pkg::Util::File.should_receive(:file_exists?).with(File.join(ENV['HOME'], '.s3cfg')).and_return(true)
+      Pkg::Util::Execution.should_receive(:ex).with("#{s3cmd} sync --delete-removed --acl-public 'thing' s3://foo@bar/home/foo/")
+      Pkg::Util::Net.s3sync_to("thing", "foo@bar", "home/foo", ["--delete-removed", "--acl-public"])
     end
   end
 

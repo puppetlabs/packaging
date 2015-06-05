@@ -127,6 +127,18 @@ namespace :pl do
       puts "'#{Pkg::Config.ref}' of '#{Pkg::Config.project}' has been shipped to '#{target_host}:#{target_basedir}'"
     end
 
+    task :deploy_signed_repos_to_s3, [:target_bucket] => "pl:fetch" do |t, args|
+      target_bucket = args.target_bucket or fail ":target_bucket is a required argument to #{t}"
+
+      # Ship it to the target for consumption
+      # First we ship the latest and clean up any repo-configs that are no longer valid with --delete-removed and --acl-public
+      Pkg::Util::Net.s3sync_to("pkg/#{Pkg::Config.project}-latest/", target_bucket, "#{Pkg::Config.project}-latest", ["--acl-public", "--delete-removed"])
+      # Then we ship the sha version with just --acl-public
+      Pkg::Util::Net.s3sync_to("pkg/#{Pkg::Config.project}/", target_bucket, Pkg::Config.project, ["--acl-public"])
+
+      puts "'#{Pkg::Config.ref}' of '#{Pkg::Config.project}' has been shipped via s3 to '#{target_bucket}'"
+    end
+
     task :generate_signed_repo_configs, [:target_prefix] => "pl:fetch" do |t, args|
       target_prefix = args.target_prefix or fail ":target_prefix is a required argument for #{t}"
       Pkg::Rpm::Repo.generate_repo_configs("#{target_prefix}_repos", "#{target_prefix}_repo_configs", true)
@@ -156,6 +168,13 @@ namespace :pl do
       target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
       Pkg::Util::RakeUtils.invoke_task("pl:jenkins:prepare_signed_repos", target_host, 'nightly', 'ref')
       Pkg::Util::RakeUtils.invoke_task("pl:jenkins:deploy_signed_repos", target_host, target_basedir)
+    end
+
+    task :deploy_repos_to_s3, [:target_bucket] => ["pl:fetch"] do |t, args|
+      target_bucket = args.target_bucket or fail ":target_bucket is a required argument to #{t}"
+      target_host = "https://s3.amazonaws.com/#{target_bucket}"
+      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:prepare_signed_repos", target_host, 'signed', 'version')
+      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:deploy_signed_repos_to_s3", target_bucket)
     end
   end
 end

@@ -61,6 +61,16 @@ module Pkg::Util::Net
       Pkg::Util::Execution.ex("#{rsync} #{flags} #{target}:#{source} #{dest}")
     end
 
+    def s3sync_to(source, target_bucket, target_directory = "", flags = [])
+      s3cmd = Pkg::Util::Tool.check_tool('s3cmd')
+
+      if Pkg::Util::File.file_exists?(File.join(ENV['HOME'], '.s3cfg'))
+        Pkg::Util::Execution.ex("#{s3cmd} sync #{flags.join(' ')} '#{source}' s3://#{target_bucket}/#{target_directory}/")
+      else
+        fail "#{File.join(ENV['HOME'], '.s3cfg')} does not exist. It is required to ship files using s3cmd."
+      end
+    end
+
     # This is fairly absurd. We're implementing curl by shelling out. What do I
     # wish we were doing? Using a sweet ruby wrapper around curl, such as Curb or
     # Curb-fu. However, because we're using clean build systems and trying to

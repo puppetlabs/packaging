@@ -44,9 +44,8 @@ namespace :pl do
       end
     end
 
-    task :deploy_signed_repos, [:target_host, :target_basedir, :target_prefix, :versioning] => ["clean", "pl:fetch"] do |t, args|
+    task :prepare_signed_repos, [:target_host, :target_prefix, :versioning] => ["clean", "pl:fetch"] do |t, args|
       target_host = args.target_host or fail ":target_host is a required argument to #{t}"
-      target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
       target_prefix = args.target_prefix or fail ":target_prefix is a required argument for #{t}"
       versioning = args.versioning or fail ":versioning is a required argument for #{t}"
       mkdir("pkg")
@@ -114,7 +113,11 @@ namespace :pl do
         # Make a latest symlink for the project
         FileUtils.ln_s(File.join("..", local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"))
       end
+    end
 
+    task :deploy_signed_repos, [:target_host, :target_basedir] => "pl:fetch" do |t, args|
+      target_host = args.target_host or fail ":target_host is a required argument to #{t}"
+      target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
       # Ship it to the target for consumption
       # First we ship the latest and clean up any repo-configs that are no longer valid with --delete-after
       Pkg::Util::Net.rsync_to("pkg/#{Pkg::Config.project}-latest", target_host, target_basedir, ["--delete-after"])
@@ -122,6 +125,18 @@ namespace :pl do
       Pkg::Util::Net.rsync_to("pkg/#{Pkg::Config.project}", target_host, target_basedir)
 
       puts "'#{Pkg::Config.ref}' of '#{Pkg::Config.project}' has been shipped to '#{target_host}:#{target_basedir}'"
+    end
+
+    task :deploy_signed_repos_to_s3, [:target_bucket] => "pl:fetch" do |t, args|
+      target_bucket = args.target_bucket or fail ":target_bucket is a required argument to #{t}"
+
+      # Ship it to the target for consumption
+      # First we ship the latest and clean up any repo-configs that are no longer valid with --delete-removed and --acl-public
+      Pkg::Util::Net.s3sync_to("pkg/#{Pkg::Config.project}-latest/", target_bucket, "#{Pkg::Config.project}-latest", ["--acl-public", "--delete-removed"])
+      # Then we ship the sha version with just --acl-public
+      Pkg::Util::Net.s3sync_to("pkg/#{Pkg::Config.project}/", target_bucket, Pkg::Config.project, ["--acl-public"])
+
+      puts "'#{Pkg::Config.ref}' of '#{Pkg::Config.project}' has been shipped via s3 to '#{target_bucket}'"
     end
 
     task :generate_signed_repo_configs, [:target_prefix] => "pl:fetch" do |t, args|
@@ -151,7 +166,15 @@ namespace :pl do
     task :deploy_nightly_repos, [:target_host, :target_basedir] => ["pl:fetch"] do |t, args|
       target_host = args.target_host or fail ":target_host is a required argument to #{t}"
       target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
-      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:deploy_signed_repos", target_host, target_basedir, 'nightly', 'ref')
+      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:prepare_signed_repos", target_host, 'nightly', 'ref')
+      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:deploy_signed_repos", target_host, target_basedir)
+    end
+
+    task :deploy_repos_to_s3, [:target_bucket] => ["pl:fetch"] do |t, args|
+      target_bucket = args.target_bucket or fail ":target_bucket is a required argument to #{t}"
+      target_host = "https://s3.amazonaws.com/#{target_bucket}"
+      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:prepare_signed_repos", target_host, 'signed', 'version')
+      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:deploy_signed_repos_to_s3", target_bucket)
     end
   end
 end

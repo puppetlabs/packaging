@@ -44,6 +44,31 @@ namespace :pl do
       end
     end
 
+    # This task should be invoked after prepare_signed_repos, so that there are repos to pack up.
+    task :pack_signed_repo, [:path_to_repo, :name_of_archive, :versioning] => ["pl:fetch"] do |t, args|
+      # path_to_repo should be relative to ./pkg
+      path_to_repo = args.path_to_repo or fail ":path_to_repo is a required argument for #{t}"
+      name_of_archive = args.name_of_archive or fail ":name_of_archive is a required argument for #{t}"
+      versioning = args.versioning or fail ":versioning is a required argument for #{t}"
+      tar = Pkg::Util::Tool.check_tool('tar')
+
+      Dir.chdir("pkg") do
+        if versioning == 'ref'
+          local_target = File.join(Pkg::Config.project, Pkg::Config.ref)
+        elsif versioning == 'version'
+          local_target = File.join(Pkg::Config.project, Pkg::Util::Version.get_dot_version)
+        end
+
+        Dir.chdir(local_target) do
+          if Pkg::Util::File.empty_dir?(path_to_repo)
+            warn "Skipping #{name_of_archive} because it (#{path_to_repo}) has no files"
+          else
+            Pkg::Util::Execution.ex("#{tar} -czf #{File.join("repos", "#{name_of_archive}.tar.gz")} #{path_to_repo}")
+          end
+        end
+      end
+    end
+
     task :prepare_signed_repos, [:target_host, :target_prefix, :versioning] => ["clean", "pl:fetch"] do |t, args|
       target_host = args.target_host or fail ":target_host is a required argument to #{t}"
       target_prefix = args.target_prefix or fail ":target_prefix is a required argument for #{t}"

@@ -110,10 +110,14 @@ namespace :pl do
 
   desc "ship apple dmg to #{Pkg::Config.yum_host}"
   task :ship_dmg => 'pl:fetch' do
-    Pkg::Util::Execution.retry_on_fail(:times => 3) do
-      Pkg::Util::Net.rsync_to('pkg/apple/*.dmg', Pkg::Config.yum_host, Pkg::Config.dmg_path)
+    if Dir['pkg/apple/**/*.dmg'].empty?
+      STDOUT.puts "There aren't any dmg packages in pkg/apple. Maybe something went wrong?"
+    else
+      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+        Pkg::Util::Net.rsync_to('pkg/apple/', Pkg::Config.yum_host, Pkg::Config.dmg_path)
+      end
     end
-  end if Pkg::Config.build_dmg
+  end if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
 
   if Pkg::Config.build_tar
     desc "ship tarball and signature to #{Pkg::Config.tar_host}"
@@ -131,7 +135,7 @@ namespace :pl do
       Rake::Task["pl:ship_gem"].invoke if Pkg::Config.build_gem
       Rake::Task["pl:ship_rpms"].invoke if Pkg::Config.final_mocks || Pkg::Config.vanagon_project
       Rake::Task["pl:ship_debs"].invoke if Pkg::Config.cows || Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_dmg"].execute if Pkg::Config.build_dmg
+      Rake::Task["pl:ship_dmg"].execute if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
       Rake::Task["pl:ship_tar"].execute if Pkg::Config.build_tar
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
       add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark

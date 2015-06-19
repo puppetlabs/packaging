@@ -40,19 +40,6 @@ def cp_p(src, dest, options = {})
   cp(src, dest, options.merge(mandatory))
 end
 
-def mv_f(src, dest, options = {})
-  mandatory = { :force => true }
-  mv(src, dest, options.merge(mandatory))
-end
-
-def scp_file_from(host, path, file)
-  %x(scp #{host}:#{path}/#{file} #{@tempdir}/#{file})
-end
-
-def scp_file_to(host, path, file)
-  %x(scp #{@tempdir}/#{file} #{host}:#{path})
-end
-
 def load_keychain
   unless @keychain_loaded
     unless ENV['RPM_GPG_AGENT']
@@ -133,17 +120,6 @@ def ask_yes_or_no
   ask_yes_or_no
 end
 
-def handle_method_failure(method, args)
-  STDERR.puts "There was an error running the method #{method} with the arguments:"
-  args.each { |param, arg| STDERR.puts "\t#{param} => #{arg}\n" }
-  STDERR.puts "The rake session is paused. Would you like to retry #{method} with these args and continue where you left off? [y,n]"
-  if ask_yes_or_no
-    send(method, args)
-  else
-    exit 1
-  end
-end
-
 def confirm_ship(files)
   STDOUT.puts "The following files have been built and are ready to ship:"
   files.each { |file| STDOUT.puts "\t#{file}\n" unless File.directory?(file) }
@@ -180,14 +156,6 @@ def remote_buildparams(host, build)
   "/tmp/#{params_dir}/#{params_file_name}"
 end
 
-def update_rpm_repo(dir)
-  Pkg::Util::Tool.check_tool('createrepo')
-  cd dir do
-    sh "createrepo --checksum=sha --database --update ."
-  end
-end
-alias :create_rpm_repo :update_rpm_repo
-
 def deprecate(old_cmd, new_cmd = nil)
   msg = "!! #{old_cmd} is deprecated."
   if new_cmd
@@ -196,10 +164,6 @@ def deprecate(old_cmd, new_cmd = nil)
   STDOUT.puts
   STDOUT.puts(msg)
   STDOUT.puts
-end
-
-def random_string(length)
-  rand(36**length).to_s(36)
 end
 
 def escape_html(uri)

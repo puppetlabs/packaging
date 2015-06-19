@@ -147,7 +147,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
     def sign_repos(target = "repos", message = "Signed apt repository")
       subrepo = Pkg::Config.apt_repo_name || 'main'
       reprepro = Pkg::Util::Tool.check_tool('reprepro')
-      load_keychain if Pkg::Util::Tool.find_tool('keychain')
+      Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
 
       dists = Pkg::Util::File.directories("#{target}/apt")
 

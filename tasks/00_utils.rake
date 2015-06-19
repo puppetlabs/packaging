@@ -40,37 +40,6 @@ def cp_p(src, dest, options = {})
   cp(src, dest, options.merge(mandatory))
 end
 
-def load_keychain
-  unless @keychain_loaded
-    unless ENV['RPM_GPG_AGENT']
-      kill_keychain
-      start_keychain
-    end
-    @keychain_loaded = TRUE
-  end
-end
-
-def kill_keychain
-  %x(keychain -k mine)
-end
-
-def start_keychain
-  keychain = %x(/usr/bin/keychain -q --agents gpg --eval #{Pkg::Config.gpg_key}).chomp
-  new_env = keychain.match(/(GPG_AGENT_INFO)=([^;]*)/)
-  ENV[new_env[1]] = new_env[2]
-end
-
-def gpg_sign_file(file)
-  gpg ||= Pkg::Util::Tool.find_tool('gpg')
-
-  if gpg
-    use_tty = "--no-tty --use-agent" if ENV['RPM_GPG_AGENT']
-    sh "#{gpg} #{use_tty} --armor --detach-sign -u #{Pkg::Config.gpg_key} #{file}"
-  else
-    fail "No gpg available. Cannot sign #{file}."
-  end
-end
-
 def set_cow_envs(cow)
   elements = /base-(.*)-(.*)\.cow/.match(cow)
   if elements.nil?
@@ -285,4 +254,24 @@ end
 def ex(command)
   deprecate("ex", "Pkg::Util::Execution.ex")
   Pkg::Util::Execution.ex(command)
+end
+
+def load_keychain
+  deprecate("load_keychain", "Pkg::Util::Gpg.load_keychain")
+  Pkg::Util::Gpg.load_keychain
+end
+
+def kill_keychain
+  deprecate("kill_keychain", "Pkg::Util::Gpg.kill_keychain")
+  Pkg::Util::Gpg.kill_keychain
+end
+
+def start_keychain
+  deprecate("start_keychain", "Pkg::Util::Gpg.start_keychain")
+  Pkg::Util::Gpg.start_keychain
+end
+
+def gpg_sign_file(file)
+  deprecate("gpg_sign_file", "Pkg::Util::Gpg.sign_file")
+  Pkg::Util::Gpg.sign_file(file)
 end

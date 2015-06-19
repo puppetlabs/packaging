@@ -10,7 +10,7 @@ namespace :pl do
 
   task :release_deb_rc do
     deprecate("pl:release_deb_rc", "pl:release_deb")
-    load_keychain if Pkg::Util::Tool.find_tool('keychain')
+    Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
     Pkg::Util::RakeUtils.invoke_task("pl:deb_all_rc")
     Pkg::Util::RakeUtils.invoke_task("pl:sign_deb_changes")
     if confirm_ship(FileList["pkg/deb/**/*"])
@@ -20,7 +20,7 @@ namespace :pl do
 
   task :release_deb_final do
     deprecate("pl:release_deb_final", "pl:release_deb")
-    load_keychain if Pkg::Util::Tool.find_tool('keychain')
+    Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
     Pkg::Util::RakeUtils.invoke_task("pl:deb_all")
     Pkg::Util::RakeUtils.invoke_task("pl:sign_deb_changes")
     if confirm_ship(FileList["pkg/deb/**/*"])
@@ -29,7 +29,7 @@ namespace :pl do
   end
 
   task :release_deb do
-    load_keychain if Pkg::Util::Tool.find_tool('keychain')
+    Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
     Pkg::Util::RakeUtils.invoke_task("pl:deb_all")
     Pkg::Util::RakeUtils.invoke_task("pl:sign_deb_changes")
     if confirm_ship(FileList["pkg/deb/**/*"])

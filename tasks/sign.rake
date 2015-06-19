@@ -58,8 +58,8 @@ namespace :pl do
   task :sign_tar do
     unless Pkg::Config.vanagon_project
       File.exist?("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz") or fail "No tarball exists. Try rake package:tar?"
-      load_keychain if Pkg::Util::Tool.find_tool('keychain', :required => false)
-      gpg_sign_file "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
+      Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
+      Pkg::Util::Gpg.sign_file "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
     end
   end
 
@@ -115,7 +115,7 @@ namespace :pl do
     task :sign_gem do
       FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |gem|
         puts "signing gem #{gem}"
-        gpg_sign_file(gem)
+        Pkg::Util::Gpg.sign_file(gem)
       end
     end
   end
@@ -140,11 +140,11 @@ namespace :pl do
   desc "Sign generated debian changes files. Defaults to PL Key, pass GPG_KEY to override"
   task :sign_deb_changes do
     begin
-      load_keychain if Pkg::Util::Tool.find_tool('keychain')
+      Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
       sign_deb_changes("pkg/deb/*/*.changes") unless Dir["pkg/deb/*/*.changes"].empty?
       sign_deb_changes("pkg/deb/*.changes") unless Dir["pkg/deb/*.changes"].empty?
     ensure
-      %x(keychain -k mine)
+      Pkg::Util::Gpg.kill_keychain
     end
   end
 

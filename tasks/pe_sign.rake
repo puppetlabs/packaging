@@ -40,7 +40,7 @@ if Pkg::Config.build_pe
     # this is a separate task we can pull out later.
     desc "Sign all debian changes files staged in pkg/pe"
     task :sign_deb_changes do
-      load_keychain if Pkg::Util::Tool.find_tool('keychain')
+      Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
       sign_deb_changes("pkg/pe/deb/*/*.changes") unless Dir["pkg/pe/deb/*/*.changes"].empty?
     end
   end

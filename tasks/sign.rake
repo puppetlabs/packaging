@@ -148,6 +148,11 @@ namespace :pl do
     end
   end
 
+  desc "Sign OSX packages"
+  task :sign_osx => "pl:fetch" do
+    Pkg::OSX.sign_osx unless Dir['pkg/apple/**/*.dmg'].empty?
+  end
+
   ##
   # This crazy piece of work establishes a remote repo on the distribution
   # server, ships our packages out to it, signs them, and brings them back.
@@ -172,6 +177,7 @@ namespace :pl do
       sign_tasks    = [rpm_sign_task, deb_sign_task]
       sign_tasks    << "pl:sign_tar" if Pkg::Config.build_tar
       sign_tasks    << "pl:sign_gem" if Pkg::Config.build_gem
+      sign_tasks    << "pl:sign_osx" if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
       remote_repo   = remote_bootstrap(Pkg::Config.distribution_server, 'HEAD', nil, signing_bundle)
       build_params  = remote_buildparams(Pkg::Config.distribution_server, Pkg::Config)
       Pkg::Util::Net.rsync_to('pkg', Pkg::Config.distribution_server, remote_repo)

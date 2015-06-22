@@ -1,5 +1,6 @@
 # Utilities for working with rpm repos
 require 'fileutils'
+require 'find'
 
 module Pkg::Rpm::Repo
   class << self
@@ -32,6 +33,13 @@ module Pkg::Rpm::Repo
       Dir.chdir(directory) do
         createrepo = Pkg::Util::Tool.check_tool('createrepo')
         Pkg::Util::Execution.ex("bash -c '#{repo_creation_command(createrepo)}'")
+      end
+    end
+
+    def sign_repos(directory)
+      files_to_sign = Find.find(directory).select { |file| file.match(/repomd.xml$/) }
+      files_to_sign.each do |file|
+        Pkg::Util::Gpg.sign_file(file)
       end
     end
 

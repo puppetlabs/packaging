@@ -174,7 +174,7 @@ def mock_defines(mock_config)
   version = mock_el_ver(mock_config)
   defines = ""
   if version =~ /^(4|5)$/ or family == "sles"
-    defines = %Q(--define "%dist .#{family}#{version}" \
+    defines = %Q(--define "dist .#{family}#{version}" \
       --define "_source_filedigest_algorithm 1" \
       --define "_binary_filedigest_algorithm 1" \
       --define "_binary_payload w9.gzdio" \

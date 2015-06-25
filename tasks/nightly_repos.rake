@@ -125,8 +125,9 @@ namespace :pl do
 
         # If we're using the version strategy instead of ref, here we shuffle
         # around directories and munge repo_configs to replace the ref with the
-        # version
-        if versioning == 'version'
+        # version. In the case that get_dot_version and ref are the same, we
+        # have nothing to do, so the conditional is skipped.
+        if versioning == 'version' && Pkg::Util::Version.get_dot_version != Pkg::Config.ref
           Dir.glob("#{local_target}/repo_configs/**/*").select { |t_config| File.file?(t_config) }.each do |config|
             new_contents = File.read(config)
             new_contents.gsub!(%r{#{Pkg::Config.ref}}, Pkg::Util::Version.get_dot_version)

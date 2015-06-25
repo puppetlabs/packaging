@@ -10,6 +10,7 @@ module Pkg
   require 'packaging/tar'
   require 'packaging/deb'
   require 'packaging/rpm'
+  require 'packaging/osx'
 
   # Load configuration defaults
   Pkg::Config.load_defaults

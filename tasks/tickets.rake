@@ -371,10 +371,8 @@ In general subtasks should only be moved to Ready for Engineering when they are 
 DOC
 
   # Values for the main ticket
-  # Note: use the 're' user for the main ticket to get notifications
-  # to the Release Engineering team
   project  = vars[:project]
-  assignee = 're'
+  assignee = vars[:developer]
 
   # Create the main ticket
   key, parent_id = jira.create_issue(summary,

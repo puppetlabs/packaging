@@ -49,7 +49,7 @@ end
 # signing bundle, and also unpacks and clones the signing bundle. This prepares
 # the directory for either uber_shipping or reshipping.
 def bootstrap(project, ref)
-  package_url = "http://builds.puppetlabs.lan/#{project}/#{ref}/artifacts"
+  package_url = "http://builds.delivery.puppetlabs.net/#{project}/#{ref}/artifacts"
 
   # First fetch the params file
   params_file = "#{package_url}/#{ref}.yaml"

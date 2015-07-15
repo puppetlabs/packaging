@@ -55,20 +55,31 @@ Have all tickets been resolved (passed Functional Review)? If not please add any
 https://tickets.puppetlabs.com/issues/?jql=project%20%3D%20#{vars[:project]}%20AND%20resolution%20%3D%20Unresolved%20AND%20fixVersion%20%3D%20%22#{vars[:release]}%22
 DOC
 
-  description[:jira_tickets_for_commit] = <<-DOC
-Ensure all tickets referenced in the commit log have a bug targeted at the release
+  description[:reconcile_git_jira] = <<-DOC
+Use the [ticketmatch|https://github.com/puppetlabs/ticketmatch] script to ensure all tickets referenced in the commit log have a bug targeted at the release, and ensure all tickets targeted at the release have a corresponding commit.
 
-  * git log <old tag>..<new tag>
-  * look through, and make sure that if there is a JIRA ticket number referenced in any of the commits, that ticket is targeted at the release
-  * Also, make sure the code itself is sane, that you understand why the change was made, etc. etc.
-  * [ticketmatch.rb script|https://gist.github.com/hlindberg/9520023] is a ruby script that helps with "Is there a JIRA ticket targeted at the release for every commit?" and "Is there a commit for every JIRA ticket targeted at the release?" (it beats doing it manually, but requires manual steps and hacking the script for the specific release). There is also the [release-inquisition|https://github.com/adrienthebo/release-inquisition], which also helps a lot with this task.
-DOC
+  * cd ~/work
+  * git clone https://github.com/puppetlabs/ticketmatch
+  * cd ~/work/puppet # or whatever the repo is you're releasing from
+  * ruby ../ticketmatch/ticketmatch.rb
+    Enter Git From Rev: 4.1.0
+    Enter Git To Rev: |master| stable
+    Enter JIRA project: |PUP|
+    Enter JIRA fix version: PUP 4.2.0
 
-  description[:git_commits_for_tickets] = <<-DOC
-Ensure all tickets targeted at the release have a corresponding commit
-  * git log <old tag>..<new tag>
-  * This time, look through tickets targeted at this release in JIRA, and compare it to the commit log, looking for the corresponding numbers
-  * [ticketmatch.rb script|https://gist.github.com/hlindberg/9520023] is a ruby script that helps with "Is there a JIRA ticket targeted at the release for every commit?" and "Is there a commit for every JIRA ticket targeted at the release?" (it beats doing it manually, but requires manual steps and hacking the script for the specific release) There is also the [release-inquisition|https://github.com/adrienthebo/release-inquisition], which also helps a lot with this task.
+The output may contain the following headers:
+
+COMMIT TOKENS NOT FOUND IN JIRA (OR NOT WITH FIX VERSION OF ...)
+
+Lists git commits that don't have a corresponding ticket, at least not for the specified fix version. If the commit has a ticket, but the ticket is not targeted correctly, then the ticket's fixVersion should be updated. This can frequently happen if a ticket is initially targeted for a future release (master), but is pulled into an earlier release (stable), but the ticket's fixVersion is not updated.
+
+UNRESOLVED ISSUES NOT FOUND IN GIT
+
+Lists JIRA tickets that have a matching fixVersion, e.g. PUP 4.2.0, but none of the commits have the JIRA ticket in the subject. If the JIRA ticket really is fixed in the release, e.g. the JIRA ticket was typo'ed in the git commit subject, then leave the ticket as is. If the JIRA ticket should not be fixed in the release, e.g. it was originally targeted for the release, but was later bumped out, then update the ticket's fixVersion accordingly, e.g. PUP 4.3.0.
+
+UNRESOLVED ISSUES FOUND IN GIT
+
+Lists JIRA tickets have a git commit, but the ticket is not resolved. Usually this is because the ticket is still passing CI or going through manual validation. It can also occur if a fix is made, but a problem is encountered, and the ticket is reopened. If that happens, make sure the ticket reflects reality, so it's clear the ticket is not actually fixed in the release.
 DOC
 
   description[:update_version_source] = <<-DOC
@@ -81,7 +92,7 @@ Bump VERSION in lib/#{vars[:project]}/version.rb or project.clj to correct versi
 
 Dependencies:
   * Is the code ready for release?
-  * Is there a commit for every JIRA ticket targeted at the release?
+  * Reconcile git commits and JIRA tickets
 DOC
 
   description[:merge_to_stable] = <<-DOC
@@ -111,7 +122,7 @@ After merging to stable, the jobs on jenkins may require updates (spec, acceptan
 
 Dependencies:
   * Is the code ready for release?
-  * Is there a commit for every JIRA ticket targeted at the release?
+  * Reconcile git commits and JIRA tickets
   * Update version number in source
 DOC
 
@@ -128,8 +139,7 @@ DOC
 Collaborating with product for release story
 
 Dependencies:
-  * Is there a JIRA ticket targeted at the release for every commit?
-  * Is there a commit for every JIRA ticket targeted at the release?
+  * Reconcile git commits and JIRA tickets
 DOC
 
   description[:tag_package] = <<-DOC
@@ -279,13 +289,8 @@ DOC
       :assignee    => vars[:developer]
     },
     {
-      :summary     => 'Is there a JIRA ticket targeted at the release for every commit?',
-      :description => description[:jira_tickets_for_commit],
-      :assignee    => vars[:developer]
-    },
-    {
-      :summary     => 'Is there a commit for every JIRA ticket targeted at the release?',
-      :description => description[:git_commits_for_tickets],
+      :summary     => 'Reconcile git commits and JIRA tickets',
+      :description => description[:reconcile_git_jira],
       :assignee    => vars[:developer]
     },
     {
@@ -406,7 +411,7 @@ namespace :pl do
 Make release tickets in JIRA for this project.
 Tickets are created by specifying a number of environment variables, e.g.:
 
-    rake pl:tickets BUILDER=melissa DEVELOPER=kylo WRITER=nickf RELEASE=3.5.0
+    rake pl:tickets BUILDER=melissa DEVELOPER=kylo WRITER=nick.fagerlund RELEASE=3.5.0
         DATE=2014-04-01 JIRA_USER=kylo PROJECT=PUP
 
 The BUILDER/DEVELOPER/WRITER params must be valid jira usernames.

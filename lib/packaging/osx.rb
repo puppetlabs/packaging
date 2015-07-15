@@ -1,6 +1,6 @@
 module Pkg::OSX
   class << self
-    def sign_osx
+    def sign
       use_identity = "-i #{Pkg::Config.osx_signing_ssh_key}" unless Pkg::Config.osx_signing_ssh_key.nil?
 
       ssh_host_string = "#{use_identity} #{ENV['USER']}@#{Pkg::Config.osx_signing_server}"

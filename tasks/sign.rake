@@ -150,7 +150,7 @@ namespace :pl do
 
   desc "Sign OSX packages"
   task :sign_osx => "pl:fetch" do
-    Pkg::OSX.sign_osx unless Dir['pkg/apple/**/*.dmg'].empty?
+    Pkg::OSX.sign unless Dir['pkg/apple/**/*.dmg'].empty?
   end
 
   ##

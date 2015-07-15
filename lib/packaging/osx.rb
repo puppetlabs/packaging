@@ -1,6 +1,6 @@
 module Pkg::OSX
   class << self
-    def sign_osx
+    def sign(target_dir = 'pkg')
       use_identity = "-i #{Pkg::Config.osx_signing_ssh_key}" unless Pkg::Config.osx_signing_ssh_key.nil?
 
       ssh_host_string = "#{use_identity} #{ENV['USER']}@#{Pkg::Config.osx_signing_server}"
@@ -9,9 +9,9 @@ module Pkg::OSX
       work_dir  = "/tmp/#{rand_string}"
       mount     = File.join(work_dir, "mount")
       signed    = File.join(work_dir, "signed")
-      output    = File.join("pkg", "apple", "#{Pkg::Config.yum_repo_name}")
+      output    = File.join(target_dir, "apple", "#{Pkg::Config.yum_repo_name}")
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "mkdir -p #{mount} #{signed}")
-      dmgs = Dir.glob("pkg/apple/**/*.dmg")
+      dmgs = Dir.glob("#{target_dir}/apple/**/*.dmg")
       Pkg::Util::Net.rsync_to(dmgs.join(" "), rsync_host_string, work_dir)
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, %Q[for dmg in #{dmgs.map { |d| File.basename(d, ".dmg") }.join(" ")}; do
         /usr/bin/hdiutil attach #{work_dir}/$dmg.dmg -mountpoint #{mount} -nobrowse -quiet ;

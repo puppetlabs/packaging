@@ -33,6 +33,7 @@ namespace :pl do
       Pkg::Rpm::Repo.create_repos('repos')
       Pkg::Rpm::Repo.sign_repos('repos')
       Pkg::Deb::Repo.sign_repos('repos', 'Apt repository for signed builds')
+      Pkg::OSX.sign('repos') unless Dir['repos/apple/**/*.dmg'].empty?
     end
 
     task :ship_signed_repos, [:target_prefix] => "pl:fetch" do |t, args|

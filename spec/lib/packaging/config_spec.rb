@@ -100,6 +100,8 @@ describe "Pkg::Config" do
                   :sign_tar,
                   :signing_server,
                   :summary,
+                  :svr4_host,
+                  :svr4_path,
                   :tar_excludes,
                   :tar_host,
                   :tarball_path,

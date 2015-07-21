@@ -70,6 +70,15 @@ namespace :pl do
     end
   end
 
+  desc "Ship svr4 packages to #{Pkg::Config.yum_host}"
+  task :ship_svr4 do
+    Pkg::Util::Execution.retry_on_fail(:times => 3) do
+      if File.directory?("pkg/solaris/10")
+        Pkg::Util::Net.rsync_to('pkg/solaris/10', Pkg::Config.svr4_host, Pkg::Config.svr4_path)
+      end
+    end
+  end
+
   namespace :remote do
   end
 
@@ -137,6 +146,7 @@ namespace :pl do
       Rake::Task["pl:ship_debs"].invoke if Pkg::Config.cows || Pkg::Config.vanagon_project
       Rake::Task["pl:ship_dmg"].execute if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
       Rake::Task["pl:ship_tar"].execute if Pkg::Config.build_tar
+      Rake::Task["pl:ship_svr4"].execute if Pkg::Config.vanagon_project
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
       add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark
       post_shipped_metrics if Pkg::Config.benchmark

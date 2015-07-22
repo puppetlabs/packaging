@@ -158,7 +158,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
               f.puts "Origin: Puppet Labs
 Label: Puppet Labs
 Codename: #{dist}
-Architectures: i386 amd64 arm64 armel armhf powerpc sparc mips mipsel all
+Architectures: i386 amd64 arm64 armel armhf powerpc sparc mips mipsel
 Components: #{subrepo}
 Description: #{message} for #{dist}
 SignWith: #{Pkg::Config.gpg_key}"

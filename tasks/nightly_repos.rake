@@ -139,7 +139,7 @@ namespace :pl do
         end
 
         # Make a latest symlink for the project
-        cp_pr(File.join("..", local_target, "repos"), File.join(Pkg::Config.project + "-latest"))
+        FileUtils.ln_s(File.join("..", local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"))
       end
     end
 

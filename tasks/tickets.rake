@@ -169,6 +169,7 @@ Procedure may vary by project and point in the release cycle. Ask around.
 In general this should happen on a variety of platforms, i.e. one or two each of kind of package we create (i.e., gem, dmg, msi, deb, rpm, etc).
 
 For Puppet, our acceptance suite now tests service scripts, and on debian, a passenger master.  Manual smoke testing can therefore be limited to other package formats than deb and rpm.
+For the Puppet gem, we don't yet have automated acceptance testing, so some quick manual smoke testing should always be performed.  Platform packages express their dependencies differently than gems, so it's possible to encounter a situation where the build pipeline produced packages out of sync with the gems.
 
 Lighter testing of Z releases is acceptable.
 
@@ -182,6 +183,7 @@ IMPORTANT: Please edit the description of this ticket and remove "Example:" belo
 Example:
 Smoke test platforms:
   * pick some platforms such as
+  * gem - select one Linux for the universal gem, Windows with x64 platform-specific gem, and Windows with x86 platform-specific gem
   * Windows 2003/2008/2012 (msi)
   * Solaris 10/11 (tarball or gem?)
   * OSX (dmg)

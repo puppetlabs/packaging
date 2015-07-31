@@ -17,6 +17,8 @@ def get_vars
   vars[:builder]   = Pkg::Util.get_var("BUILDER")
   vars[:developer] = Pkg::Util.get_var("DEVELOPER")
   vars[:writer]    = Pkg::Util.get_var("WRITER")
+  vars[:owner]     = Pkg::Util.get_var("OWNER")
+  vars[:tester]    = Pkg::Util.get_var("TESTER")
 
   # project and release
   vars[:release]   = Pkg::Util.get_var("RELEASE")
@@ -37,6 +39,8 @@ def validate_vars(jira, vars)
   jira.user? vars[:builder]
   jira.user? vars[:writer]
   jira.user? vars[:developer]
+  jira.user? vars[:owner]
+  jira.user? vars[:tester]
 end
 
 def create_tickets(jira, vars)
@@ -214,6 +218,13 @@ Keep in mind we typically do not ship releases in the evening and we don't ship 
 
 Dependencies:
   * Smoke testing
+
+Participants:
+  * [~#{vars[:developer]}]
+  * [~#{vars[:writer]}]
+  * [~#{vars[:owner]}]
+  * [~#{vars[:tester]}]
+  * [~#{vars[:builder]}]
 DOC
 
   description[:push_tag] = <<-DOC
@@ -413,10 +424,10 @@ namespace :pl do
 Make release tickets in JIRA for this project.
 Tickets are created by specifying a number of environment variables, e.g.:
 
-    rake pl:tickets BUILDER=melissa DEVELOPER=kylo WRITER=nick.fagerlund RELEASE=3.5.0
+    rake pl:tickets BUILDER=melissa DEVELOPER=kylo WRITER=nick.fagerlund OWNER=eric.sorenson TESTER=john.duarte RELEASE=3.5.0
         DATE=2014-04-01 JIRA_USER=kylo PROJECT=PUP
 
-The BUILDER/DEVELOPER/WRITER params must be valid jira usernames.
+The BUILDER/DEVELOPER/WRITER/OWNER/TESTER params must be valid jira usernames.
 
 The RELEASE param is a freeform string, no validation is done against it.
 

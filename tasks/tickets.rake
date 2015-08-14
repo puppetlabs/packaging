@@ -10,7 +10,7 @@ def get_password(site, user)
   password
 end
 
-def get_vars
+def get_release_ticket_vars
   vars = {}
 
   # roles
@@ -34,7 +34,7 @@ def get_vars
   vars
 end
 
-def validate_vars(jira, vars)
+def validate_release_ticket_vars(jira, vars)
   jira.project? vars[:project]
   jira.user? vars[:builder]
   jira.user? vars[:writer]
@@ -43,7 +43,7 @@ def validate_vars(jira, vars)
   jira.user? vars[:tester]
 end
 
-def create_tickets(jira, vars)
+def create_release_tickets(jira, vars)
   description = {}
   description[:code_ready] = <<-DOC
 If there are any version dependencies expressed in the code base, make sure these are up to date. For Puppet, make sure the shas used to build the MSI are correct. For Puppet-Server, make sure all references to the puppet version are correct.
@@ -442,15 +442,15 @@ The JIRA_USER parameter is used to login to jira to create the tickets. You will
 EOS
 
   task :tickets do
-    vars = get_vars
+    vars = get_release_ticket_vars
     jira = Pkg::Util::Jira.new(vars[:username], vars[:password], vars[:site])
-    validate_vars(jira, vars)
+    validate_release_ticket_vars(jira, vars)
 
-    puts "Creating tickets based on:"
+    puts "Creating release tickets based on:"
     require 'pp'
     pp vars.select { |k, v| k != :password }
 
-    create_tickets(jira, vars)
+    create_release_tickets(jira, vars)
   end
 end
 

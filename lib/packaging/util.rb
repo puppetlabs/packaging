@@ -3,6 +3,7 @@
 module Pkg::Util
   require 'erb'
   require 'benchmark'
+  require 'base64'
   require 'packaging/util/os'
   require 'packaging/util/date'
   require 'packaging/util/tool'
@@ -60,5 +61,9 @@ module Pkg::Util
     rescue LoadError
       fail "Could not load #{library_name}. #{library_name} is required by the packaging repo for this task"
     end
+  end
+
+  def self.base64_encode(string)
+    Base64.encode64(string).strip
   end
 end

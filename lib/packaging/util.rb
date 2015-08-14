@@ -33,9 +33,24 @@ module Pkg::Util
     result
   end
 
+  # Utility to get the contents of an Environment variable
+  #
+  # @param var [String] The name of the environment variable to return
+  # @return [String, Boolean, Hash, Array, nil] The contents of ENV[var]
   def self.get_var(var)
-    check_var(var, ENV[var])
+    self.check_var(var, ENV[var])
     ENV[var]
+  end
+
+  # Utility to check if a variable is set
+  #
+  # @param varname [String] the name of the variable to be checked
+  # @param var [String, Boolean, Hash, Array, nil] the contents of the variable to be checked
+  # @return [String, Boolean, Hash, Array, nil] the contents of var
+  # @raise [RuntimeError] raises an exception if the variable is not set and is required
+  def self.check_var(varname, var)
+    fail "Requires #{varname} be set!" if var.nil?
+    var
   end
 
   def self.require_library_or_fail(library, library_name = nil)
@@ -46,5 +61,4 @@ module Pkg::Util
       fail "Could not load #{library_name}. #{library_name} is required by the packaging repo for this task"
     end
   end
-
 end

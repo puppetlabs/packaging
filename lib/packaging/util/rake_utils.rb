@@ -66,6 +66,7 @@ module Pkg::Util::RakeUtils
       tasks = [
         '00_utils.rake',
         '30_metrics.rake',
+        'agent-tickets.rake',
         'apple.rake',
         'build.rake',
         'clean.rake',

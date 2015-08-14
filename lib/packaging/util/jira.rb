@@ -110,10 +110,9 @@ module Pkg::Util
       issue = @client.Issue.build
       issue.save!({ 'fields' => fields })
 
-      # fetch the issue back so we can report the key and id
-      issue.fetch
-
       return issue.key, issue.id
+    rescue Exception => e
+      fail "Cannot create Jira Ticket with fields #{fields}"
     end
   end
 end

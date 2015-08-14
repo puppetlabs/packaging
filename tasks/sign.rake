@@ -89,6 +89,7 @@ namespace :pl do
     modern_rpms = Dir["#{rpm_dir}/el/6/**/*.rpm"] +
       Dir["#{rpm_dir}/el/7/**/*.rpm"] +
       Dir["#{rpm_dir}/fedora/**/*.rpm"] +
+      Dir["#{rpm_dir}/huaweios/**/**/*.rpm"] +
       Dir["#{rpm_dir}/nxos/**/*.rpm"] +
       Dir["#{rpm_dir}/cisco-wrlinux/**/*.rpm"] +
       Dir["#{rpm_dir}/sles/12/**/*.rpm"] +

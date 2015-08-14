@@ -1,6 +1,8 @@
 module Pkg::Util
   class Jira
 
+    require 'json'
+
     attr_accessor :client
 
     # This class is a very thin wrapper around the jira library. For testability,
@@ -43,6 +45,25 @@ module Pkg::Util
       vars[:site]     = ENV['JIRA_INSTANCE'] || 'https://tickets.puppetlabs.com'
       vars[:username] = Pkg::Util.get_var("JIRA_USER")
       vars
+    end
+
+    def self.link_issues(inwardIssue, outwardIssue, site, authentication, type = 'Blocks')
+      data = {
+        'type'          => { 'name' => type },
+        'inwardIssue'   => { 'key'  => inwardIssue },
+        'outwardIssue'  => { 'key'  => outwardIssue },
+      }
+
+      uri = "#{site}:443/rest/api/2/issueLink"
+      form_data = ['-D-',
+                   '-X POST',
+                   "--data '#{data.to_json}'",
+                   "-H 'Authorization: Basic #{authentication}'",
+                   "-H 'Content-Type: application/json'"]
+      options = { :quiet => true }
+      Pkg::Util::Net.curl_form_data(uri, form_data, options)
+    rescue Exception => e
+      fail "Cannot create link between #{inwardIssue} and #{outwardIssue}"
     end
 
     # Future improvement, exception handling and more helpful error messages

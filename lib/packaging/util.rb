@@ -4,6 +4,7 @@ module Pkg::Util
   require 'erb'
   require 'benchmark'
   require 'base64'
+  require 'io/console'
   require 'packaging/util/os'
   require 'packaging/util/date'
   require 'packaging/util/tool'
@@ -65,5 +66,17 @@ module Pkg::Util
 
   def self.base64_encode(string)
     Base64.encode64(string).strip
+  end
+
+  # Utility to retrieve command line input
+  # @param noecho [Boolean, nil] if we are retrieving command line input with or without privacy. This is mainly
+  #   for sensitive information like passwords.
+  def self.get_input(echo = true)
+    fail "Cannot get input on a noninteractive terminal" unless $stdin.tty?
+
+    system 'stty -echo' unless echo
+    $stdin.gets.chomp!
+  ensure
+    system 'stty echo'
   end
 end

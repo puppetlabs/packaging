@@ -1,14 +1,15 @@
 module Pkg::Util
   class Jira
 
+    attr_accessor :client
+
     # This class is a very thin wrapper around the jira library. For testability,
     # the small bit of logic that does some prep for the library or processing of its
     # output are extracted into a handful of class methods.
 
-    def self.jira_client_options(username, password, site)
+    def self.jira_client_options(username, site)
       {
         :username           => username,
-        :password           => password,
         :site               => site,
         :context_path       => '',
         :auth_type          => :basic,
@@ -37,15 +38,29 @@ module Pkg::Util
       fields
     end
 
+    def self.get_auth_vars
+      vars = {}
+      vars[:site]     = ENV['JIRA_INSTANCE'] || 'https://tickets.puppetlabs.com'
+      vars[:username] = Pkg::Util.get_var("JIRA_USER")
+      vars
+    end
+
     # Future improvement, exception handling and more helpful error messages
     #
-    def initialize(username, password, site)
+    def initialize(username, site)
       # This library uses the gem called 'jira-ruby' which provides the library 'jira'.
       # Not to be confused with the gem called 'jira'. Be careful out there.
       Pkg::Util.require_library_or_fail('jira', 'jira-ruby')
 
       # Construct a jira client
-      options = self.class.jira_client_options(username, password, site)
+      options = self.class.jira_client_options(username, site)
+
+      # retrieve password without revealing it
+      puts "Logging in to #{site} as #{options[:username]}"
+      print "Password please: "
+      options[:password] = Pkg::Util.get_input(false)
+      puts "\nOkay trying to log in to #{site} as #{options[:username]} ..."
+
       options[:ssl_verify_mode] = OpenSSL::SSL::VERIFY_PEER
           # only get OpenSSL through the jira library so leave it out of the class method
       @client = JIRA::Client.new(options)

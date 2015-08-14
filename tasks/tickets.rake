@@ -1,15 +1,6 @@
 # This rake task creates tickets in jira for a release.
 #
 
-def get_password(site, user)
-  require 'io/console'
-  puts "Logging in to #{site} as #{user}"
-  print "Password please: "
-  password = STDIN.noecho(&:gets).chomp
-  puts "\nOkay trying to log in to #{site} as #{user} ..."
-  password
-end
-
 def get_release_ticket_vars
   vars = {}
 
@@ -27,11 +18,7 @@ def get_release_ticket_vars
 
   # Jira authentication - do this after validating other params, so user doesn't need to
   # enter password only to find out they typo'd one of the above
-  vars[:site]      = 'https://tickets.puppetlabs.com'
-  vars[:username]  = Pkg::Util.get_var("JIRA_USER")
-  vars[:password]  = get_password(vars[:site], vars[:username])
-
-  vars
+  vars.merge(Pkg::Util::Jira.get_auth_vars)
 end
 
 def validate_release_ticket_vars(jira, vars)
@@ -443,7 +430,7 @@ EOS
 
   task :tickets do
     vars = get_release_ticket_vars
-    jira = Pkg::Util::Jira.new(vars[:username], vars[:password], vars[:site])
+    jira = Pkg::Util::Jira.new(vars[:username], vars[:site])
     validate_release_ticket_vars(jira, vars)
 
     puts "Creating release tickets based on:"

@@ -24,17 +24,59 @@ module Pkg::Util
       projects.find { |p| p.key == project }.name
     end
 
-    def self.jira_issue_fields(summary, description, project, parent, assignee)
+    def self.jira_issue_fields(options_hash)
+
+      # Check to ensure we have what we need to create a ticket
+      fail "The following ticket options hash requires a summary\n\n#{options_hash}" unless options_hash[:summary]
+
       # build the fields hash describing the ticket
+
+      # These are required for all tickets
       fields = {
-          'summary'     => summary,
-          'description' => description,
-          'project'     => { 'key' => project },
-          'issuetype'   => { 'name' => parent ? "Sub-task" : "Task" },
-          'assignee'    => { 'name' => assignee },
+          'summary'     => options_hash[:summary],
+          'project'     => { 'key' => options_hash[:project] },
       }
-      if parent
-        fields['parent'] = { 'id' => parent }
+
+      # The following are optional
+      if options_hash[:description]
+        fields['description'] = options_hash[:description]
+      end
+      if options_hash[:assignee]
+        fields['assignee'] = { 'name' => options_hash[:assignee] }
+      end
+      if options_hash[:story_points]
+        fields['customfield_10002'] = options_hash[:story_points].to_i
+      end
+
+      if options_hash[:components]
+        fields['components'] = []
+        options_hash[:components].each do |component|
+          fields['components'] << { 'name' => component }
+        end
+      end
+
+      # Default ticket type to 'Task' if it isn't already set
+      if options_hash[:type]
+        fields['issuetype'] = { 'name' => options_hash[:type] }
+      else
+        fields['issuetype'] = { 'name' => "Task" }
+      end
+
+      # If this is an epic, we need to add an epic name
+      if options_hash[:type] == 'Epic'
+        fields['customfield_10007'] = options_hash[:summary]
+      end
+
+      # If a ticket has a specified parent ticket, prefer that. The parent ticket *should* already
+      # be linked to the main epic. Otherwise, we need to set it to have an epic_parent. This can
+      # either be an epic linked to the main epic or the main epic itself.
+      if options_hash[:parent]
+        fail "A ticket with a parent must be classified as a Sub-ticket\n\n#{options_hash}" unless options_hash[:type] == 'Sub-task' || !options_hash[:type]
+        fields['issuetype'] = { 'name' => "Sub-task" }
+        fields['parent'] = { 'key' => options_hash[:parent] }
+      elsif options_hash[:epic_parent]
+        fail "This ticket cannot be a Sub-task of an epic\n\n#{options_hash}" if options_hash[:type] == 'Sub-task'
+        fields['customfield_10006'] = options_hash[:epic_parent]
       end
 
       fields
@@ -103,9 +145,8 @@ module Pkg::Util
       self.class.jira_project_name(@client.Project.all, project)
     end
 
-    def create_issue(summary, description, project, parent, assignee)
-      fields = self.class.jira_issue_fields(summary, description, project,
-                                            parent, assignee)
+    def create_issue(options_hash)
+      fields = self.class.jira_issue_fields(options_hash)
 
       issue = @client.Issue.build
       issue.save!({ 'fields' => fields })

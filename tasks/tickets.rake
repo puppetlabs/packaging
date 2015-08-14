@@ -379,14 +379,17 @@ DOC
   project  = vars[:project]
   assignee = vars[:developer]
 
-  # Create the main ticket
-  key, parent_id = jira.create_issue(summary,
-                                     description[:top_level_ticket],
-                                     project,
-                                     nil,     # no parent id
-                                     assignee)
+  main_ticket_hash = {
+    :summary => summary,
+    :description => description[:top_level_ticket],
+    :project => project,
+    :assignee => assignee,
+  }
 
-  puts "Main release ticket: #{key} (#{assignee}) - #{summary}"
+  # Create the main ticket
+  parent_key, parent_id = jira.create_issue(main_ticket_hash)
+
+  puts "Main release ticket: #{parent_key} (#{assignee}) - #{summary}"
 
   # Create subtasks for each step of the release process
   subticket_idx = 1
@@ -394,11 +397,10 @@ DOC
 
     next if subticket[:projects] && !subticket[:projects].include?(vars[:project])
 
-    key, _ = jira.create_issue(subticket[:summary],
-                               subticket[:description],
-                               project,
-                               parent_id,
-                               subticket[:assignee])
+    subticket[:project] = project
+    subticket[:parent] = parent_key
+
+    key, _ = jira.create_issue(subticket)
 
     puts "\tSubticket #{subticket_idx.to_s.rjust(2)}: #{key} (#{subticket[:assignee]}) - #{subticket[:summary]}"
 

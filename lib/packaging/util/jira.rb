@@ -129,13 +129,13 @@ module Pkg::Util
       @client = JIRA::Client.new(options)
     end
 
-    def project?(project)
+    def project(project)
       @client.Project.find(project)
     rescue
       fail "Could not find project: #{project}"
     end
 
-    def user?(user)
+    def user(user)
       @client.User.find(user)
     rescue
       fail "Could not find user: #{user}"

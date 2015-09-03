@@ -22,12 +22,12 @@ def get_release_ticket_vars
 end
 
 def validate_release_ticket_vars(jira, vars)
-  jira.project? vars[:project]
-  jira.user? vars[:builder]
-  jira.user? vars[:writer]
-  jira.user? vars[:developer]
-  jira.user? vars[:owner]
-  jira.user? vars[:tester]
+  jira.project vars[:project]
+  jira.user vars[:builder]
+  jira.user vars[:writer]
+  jira.user vars[:developer]
+  jira.user vars[:owner]
+  jira.user vars[:tester]
 end
 
 def create_release_tickets(jira, vars)

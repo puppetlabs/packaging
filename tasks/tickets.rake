@@ -1,16 +1,7 @@
 # This rake task creates tickets in jira for a release.
 #
 
-def get_password(site, user)
-  require 'io/console'
-  puts "Logging in to #{site} as #{user}"
-  print "Password please: "
-  password = STDIN.noecho(&:gets).chomp
-  puts "\nOkay trying to log in to #{site} as #{user} ..."
-  password
-end
-
-def get_vars
+def get_release_ticket_vars
   vars = {}
 
   # roles
@@ -27,23 +18,19 @@ def get_vars
 
   # Jira authentication - do this after validating other params, so user doesn't need to
   # enter password only to find out they typo'd one of the above
-  vars[:site]      = 'https://tickets.puppetlabs.com'
-  vars[:username]  = Pkg::Util.get_var("JIRA_USER")
-  vars[:password]  = get_password(vars[:site], vars[:username])
-
-  vars
+  vars.merge(Pkg::Util::Jira.get_auth_vars)
 end
 
-def validate_vars(jira, vars)
-  jira.project? vars[:project]
-  jira.user? vars[:builder]
-  jira.user? vars[:writer]
-  jira.user? vars[:developer]
-  jira.user? vars[:owner]
-  jira.user? vars[:tester]
+def validate_release_ticket_vars(jira, vars)
+  jira.project vars[:project]
+  jira.user vars[:builder]
+  jira.user vars[:writer]
+  jira.user vars[:developer]
+  jira.user vars[:owner]
+  jira.user vars[:tester]
 end
 
-def create_tickets(jira, vars)
+def create_release_tickets(jira, vars)
   description = {}
   description[:code_ready] = <<-DOC
 If there are any version dependencies expressed in the code base, make sure these are up to date. For Puppet, make sure the shas used to build the MSI are correct. For Puppet-Server, make sure all references to the puppet version are correct.
@@ -392,14 +379,17 @@ DOC
   project  = vars[:project]
   assignee = vars[:developer]
 
-  # Create the main ticket
-  key, parent_id = jira.create_issue(summary,
-                                     description[:top_level_ticket],
-                                     project,
-                                     nil,     # no parent id
-                                     assignee)
+  main_ticket_hash = {
+    :summary => summary,
+    :description => description[:top_level_ticket],
+    :project => project,
+    :assignee => assignee,
+  }
 
-  puts "Main release ticket: #{key} (#{assignee}) - #{summary}"
+  # Create the main ticket
+  parent_key, parent_id = jira.create_issue(main_ticket_hash)
+
+  puts "Main release ticket: #{parent_key} (#{assignee}) - #{summary}"
 
   # Create subtasks for each step of the release process
   subticket_idx = 1
@@ -407,11 +397,10 @@ DOC
 
     next if subticket[:projects] && !subticket[:projects].include?(vars[:project])
 
-    key, _ = jira.create_issue(subticket[:summary],
-                               subticket[:description],
-                               project,
-                               parent_id,
-                               subticket[:assignee])
+    subticket[:project] = project
+    subticket[:parent] = parent_key
+
+    key, _ = jira.create_issue(subticket)
 
     puts "\tSubticket #{subticket_idx.to_s.rjust(2)}: #{key} (#{subticket[:assignee]}) - #{subticket[:summary]}"
 
@@ -442,15 +431,15 @@ The JIRA_USER parameter is used to login to jira to create the tickets. You will
 EOS
 
   task :tickets do
-    vars = get_vars
-    jira = Pkg::Util::Jira.new(vars[:username], vars[:password], vars[:site])
-    validate_vars(jira, vars)
+    vars = get_release_ticket_vars
+    jira = Pkg::Util::Jira.new(vars[:username], vars[:site])
+    validate_release_ticket_vars(jira, vars)
 
-    puts "Creating tickets based on:"
+    puts "Creating release tickets based on:"
     require 'pp'
     pp vars.select { |k, v| k != :password }
 
-    create_tickets(jira, vars)
+    create_release_tickets(jira, vars)
   end
 end
 

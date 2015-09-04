@@ -3,6 +3,8 @@
 module Pkg::Util
   require 'erb'
   require 'benchmark'
+  require 'base64'
+  require 'io/console'
   require 'packaging/util/os'
   require 'packaging/util/date'
   require 'packaging/util/tool'
@@ -33,9 +35,24 @@ module Pkg::Util
     result
   end
 
+  # Utility to get the contents of an Environment variable
+  #
+  # @param var [String] The name of the environment variable to return
+  # @return [String, Boolean, Hash, Array, nil] The contents of ENV[var]
   def self.get_var(var)
-    check_var(var, ENV[var])
+    self.check_var(var, ENV[var])
     ENV[var]
+  end
+
+  # Utility to check if a variable is set
+  #
+  # @param varname [String] the name of the variable to be checked
+  # @param var [String, Boolean, Hash, Array, nil] the contents of the variable to be checked
+  # @return [String, Boolean, Hash, Array, nil] the contents of var
+  # @raise [RuntimeError] raises an exception if the variable is not set and is required
+  def self.check_var(varname, var)
+    fail "Requires #{varname} be set!" if var.nil?
+    var
   end
 
   def self.require_library_or_fail(library, library_name = nil)
@@ -47,4 +64,19 @@ module Pkg::Util
     end
   end
 
+  def self.base64_encode(string)
+    Base64.encode64(string).strip
+  end
+
+  # Utility to retrieve command line input
+  # @param noecho [Boolean, nil] if we are retrieving command line input with or without privacy. This is mainly
+  #   for sensitive information like passwords.
+  def self.get_input(echo = true)
+    fail "Cannot get input on a noninteractive terminal" unless $stdin.tty?
+
+    system 'stty -echo' unless echo
+    $stdin.gets.chomp!
+  ensure
+    system 'stty echo'
+  end
 end

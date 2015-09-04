@@ -25,9 +25,9 @@
 
 # Utility methods used by the various rake tasks
 
-def check_var(varname, var = nil)
-  var.nil? and fail "Requires #{varname} be set!"
-  var
+def check_var(varname, var)
+  deprecate('check_var', 'Pkg::Util.check_var')
+  Pkg::Util.check_var(varname, var)
 end
 
 def cp_pr(src, dest, options = {})

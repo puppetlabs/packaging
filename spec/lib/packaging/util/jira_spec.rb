@@ -4,9 +4,8 @@ require 'packaging/util/jira'
 
 describe Pkg::Util::Jira do
   it "should build an expected set of client options" do
-    options = described_class.jira_client_options("user", "password", "http://devnull.tld")
+    options = described_class.jira_client_options("user", "http://devnull.tld")
     expect(options[:username]).to eq("user")
-    expect(options[:password]).to eq("password")
     expect(options[:site]).to eq("http://devnull.tld")
   end
 
@@ -19,11 +18,11 @@ describe Pkg::Util::Jira do
   end
 
   it "should build a parent ticket's fields" do
-    fields = described_class.jira_issue_fields("summary",
-                                               "desc",
-                                               "PUP",
-                                               nil,
-                                               "ivy")
+    fields = described_class.jira_issue_fields({:summary => "summary",
+                                               :description => "desc",
+                                               :project => "PUP",
+                                               :parent => nil,
+                                               :assignee => "ivy"})
 
     expect(fields['summary']).to eq("summary")
     expect(fields['description']).to eq("desc")
@@ -34,17 +33,17 @@ describe Pkg::Util::Jira do
   end
 
   it "should build a subtask ticket's fields" do
-    fields = described_class.jira_issue_fields("sub summary",
-                                               "sub desc",
-                                               "PUP",
-                                               42,
-                                               "bean")
+    fields = described_class.jira_issue_fields({:summary => "sub summary",
+                                               :description => "sub desc",
+                                               :project => "PUP",
+                                               :parent => "PUP-123",
+                                               :assignee => "bean"})
 
     expect(fields['summary']).to eq("sub summary")
     expect(fields['description']).to eq("sub desc")
     expect(fields['project']['key']).to eq("PUP")
     expect(fields['issuetype']['name']).to eq("Sub-task")
     expect(fields['assignee']['name']).to eq("bean")
-    expect(fields['parent']['id']).to eq(42)
+    expect(fields['parent']['key']).to eq("PUP-123")
   end
 end

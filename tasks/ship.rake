@@ -79,9 +79,6 @@ namespace :pl do
     end
   end
 
-  namespace :remote do
-  end
-
   desc "Update remote ips repository on #{Pkg::Config.ips_host}"
   task :update_ips_repo do
     Pkg::Util::Net.rsync_to('pkg/ips/pkgs/', Pkg::Config.ips_host, Pkg::Config.ips_store)

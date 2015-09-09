@@ -1,5 +1,6 @@
 language: ruby
 script: "bundle exec $CHECK"
+sudo: false
 notifications:
   email: false
 rvm:

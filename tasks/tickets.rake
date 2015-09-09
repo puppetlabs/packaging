@@ -394,7 +394,7 @@ DOC
   # Create subtasks for each step of the release process
   subticket_idx = 1
   release_tickets = []
-  subtickets.each { |subticket|
+  subtickets.each do |subticket|
 
     next if subticket[:projects] && !subticket[:projects].include?(vars[:project])
 
@@ -408,7 +408,7 @@ DOC
     release_tickets << key if subticket[:assignee] == vars[:builder]
 
     subticket_idx += 1
-  }
+  end
 
   # Create an RE ticket for this release so the RE team can plan
   release_ticket = {

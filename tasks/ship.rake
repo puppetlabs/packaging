@@ -79,25 +79,35 @@ namespace :pl do
     end
   end
 
-  namespace :remote do
-  end
-
   desc "Update remote ips repository on #{Pkg::Config.ips_host}"
-  task :update_ips_repo do
-    Pkg::Util::Net.rsync_to('pkg/ips/pkgs/', Pkg::Config.ips_host, Pkg::Config.ips_store)
-    Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "pkgrecv -s #{Pkg::Config.ips_store}/pkgs/#{Pkg::Config.project}Pkg::Config.#{Pkg::Config.ipsversion}.p5p -d #{Pkg::Config.ips_repo} \\*")
-    Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "pkgrepo refresh -s #{Pkg::Config.ips_repo}")
-    Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "/usr/sbin/svcadm restart svc:/application/pkg/server")
-  end if Pkg::Config.build_ips
+  task :update_ips_repo  => 'pl:fetch' do
+    if Dir['pkg/ips/pkgs/**/*'].empty? && Dir['pkg/solaris/11/**/*'].empty?
+      STDOUT.puts "There aren't any p5p packages in pkg/ips/pkgs or pkg/solaris/11. Maybe something went wrong?"
+      fail
+    end
+
+    if !Dir['pkg/ips/pkgs/**/*'].empty?
+      source_dir = 'pkg/ips/pkgs/'
+    else
+      source_dir = 'pkg/solaris/11/'
+    end
+
+    tmpdir, _ = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, 'mktemp -d -p /var/tmp', true)
+    tmpdir.chomp!
+
+    Pkg::Util::Net.rsync_to(source_dir, Pkg::Config.ips_host, tmpdir)
+
+    remote_cmd = %(for pkg in #{tmpdir}/*.p5p; do
+    sudo pkgrecv -s $pkg -d #{Pkg::Config.ips_path} '*';
+    done)
+
+    Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, remote_cmd)
+    Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "sudo pkgrepo refresh -s #{Pkg::Config.ips_path}")
+    Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "sudo /usr/sbin/svcadm restart svc:/application/pkg/server:#{Pkg::Config.ips_repo || 'default'}")
+  end if Pkg::Config.build_ips || Pkg::Config.vanagon_project
 
   desc "Upload ips p5p packages to downloads"
-  task :ship_ips => 'pl:fetch' do
-    if Dir['pkg/ips/pkgs/**/*'].empty?
-      STDOUT.puts "There aren't any p5p packages in pkg/ips/pkgs. Maybe something went wrong?"
-    else
-      Pkg::Util::Net.rsync_to('pkg/ips/pkgs/', Pkg::Config.ips_package_host, Pkg::Config.ips_path)
-    end
-  end if Pkg::Config.build_ips
+  task :ship_ips => 'remote:update_ips_repo' if Pkg::Config.build_ips || Pkg::Config.vanagon_project
 
   # We want to ship a gem only for projects that build gems
   if Pkg::Config.build_gem

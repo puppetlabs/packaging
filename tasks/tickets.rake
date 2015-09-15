@@ -122,7 +122,7 @@ This happens on Jira - we need to clean up the current release and prepare for t
   * Mark the version that's going out as "Released" in the Project Admin -> Versions panel.
   * Create a version we can target future issues or issues that didn't make it into the current release.  (e.g. if we're releasing Facter 1.7.4, make sure there's a 1.7.5 version (or at least 1.7.x if there's isn't another bug release planned for the near future)
   * Create a public pair of queries for inclusion in the release notes/announcement. These allow easy tracking as new bugs come in for a particular version and allow everyone to see the list of changes slated for the next release (Paste their URLs into the "Release story" ticket):
-    - 'project = XX AND affectedVersion = 'X.Y.Y', Save as "Introduced in X.Y.Y", click Details, add permission for Everyone
+    - 'project = XX AND affectedVersion = 'X.Y.Z', Save as "Introduced in X.Y.Z", click Details, add permission for Everyone
     - 'project = XX AND fixVersion = 'X.Y.Z', Save as "Fixes for X.Y.Z", click Details, add permission for Everyone
 DOC
 

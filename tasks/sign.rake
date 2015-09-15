@@ -77,8 +77,8 @@ namespace :pl do
   task :sign_rpms, :root_dir do |t, args|
     rpm_dir = args.root_dir || "pkg"
 
-    # Find x86_64 noarch rpms that have been created as hard links and remove them
-    rm_r Dir["#{rpm_dir}/*/*/*/x86_64/*.noarch.rpm"]
+    # Find i386 noarch rpms that have been created as hard links and remove them
+    rm_r Dir["#{rpm_dir}/*/*/*/i386/*.noarch.rpm"]
     # We'll sign the remaining noarch
     all_rpms = Dir["#{rpm_dir}/**/*.rpm"]
     old_rpms = Dir["#{rpm_dir}/el/4/**/*.rpm"] +
@@ -110,10 +110,10 @@ namespace :pl do
       sign_rpm(modern_rpms.join(' '))
     end
     # Now we hardlink them back in
-    Dir["#{rpm_dir}/*/*/*/i386/*.noarch.rpm"].each do |rpm|
+    Dir["#{rpm_dir}/*/*/*/x86_64/*.noarch.rpm"].each do |rpm|
       cd File.dirname(rpm) do
-        FileUtils.mkdir_p(File.join("..", "x86_64"))
-        FileUtils.ln(File.basename(rpm), File.join("..", "x86_64"), :force => true, :verbose => true)
+        FileUtils.mkdir_p(File.join("..", "i386"))
+        FileUtils.ln(File.basename(rpm), File.join("..", "i386"), :force => true, :verbose => true)
       end
     end
   end

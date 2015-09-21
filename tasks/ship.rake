@@ -147,6 +147,15 @@ namespace :pl do
     end
   end
 
+  desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.tar_host}"
+  task :ship_swix => 'pl:fetch' do
+    packages = Dir['pkg/eos/**/*.swix']
+    STDOUT.puts "There aren't any swix packages in pkg/eos. Maybe something went wrong?" if packages.empty?
+    Pkg::Util::Execution.retry_on_fail(:times => 3) do
+      Pkg::Util::Net.rsync_to("pkg/eos/", Pkg::Config.tar_host, Pkg::Config.swix_path)
+    end
+  end
+
   desc "UBER ship: ship all the things in pkg"
   task :uber_ship => 'pl:fetch' do
     if confirm_ship(FileList["pkg/**/*"])
@@ -155,6 +164,7 @@ namespace :pl do
       Rake::Task["pl:ship_rpms"].invoke if Pkg::Config.final_mocks || Pkg::Config.vanagon_project
       Rake::Task["pl:ship_debs"].invoke if Pkg::Config.cows || Pkg::Config.vanagon_project
       Rake::Task["pl:ship_dmg"].execute if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_swix"].execute if Pkg::Config.vanagon_project
       Rake::Task["pl:ship_tar"].execute if Pkg::Config.build_tar
       Rake::Task["pl:ship_svr4"].execute if Pkg::Config.vanagon_project
       Rake::Task["pl:jenkins:ship"].invoke("shipped")

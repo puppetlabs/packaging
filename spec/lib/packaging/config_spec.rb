@@ -102,6 +102,7 @@ describe "Pkg::Config" do
                   :summary,
                   :svr4_host,
                   :svr4_path,
+                  :swix_path,
                   :tar_excludes,
                   :tar_host,
                   :tarball_path,

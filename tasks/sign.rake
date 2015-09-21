@@ -63,6 +63,16 @@ namespace :pl do
     end
   end
 
+  desc "Sign the Arista EOS swix packages, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
+  task :sign_swix do
+    packages = Dir["pkg/eos/**/*.swix"]
+    fail "No swix packages exist." if packages.empty?
+    Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
+    packages.each do |swix_package|
+      Pkg::Util::Gpg.sign_file swix_package
+    end
+  end
+
   desc "Detach sign any solaris svr4 packages"
   task :sign_svr4 do
     unless Dir["pkg/solaris/10/**/*.pkg.gz"].empty?
@@ -194,6 +204,7 @@ namespace :pl do
       sign_tasks    << "pl:sign_tar" if Pkg::Config.build_tar
       sign_tasks    << "pl:sign_gem" if Pkg::Config.build_gem
       sign_tasks    << "pl:sign_osx" if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
+      sign_tasks    << "pl:sign_swix" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_svr4" if Pkg::Config.vanagon_project
       remote_repo   = remote_bootstrap(Pkg::Config.distribution_server, 'HEAD', nil, signing_bundle)
       build_params  = remote_buildparams(Pkg::Config.distribution_server, Pkg::Config)

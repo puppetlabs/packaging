@@ -172,6 +172,7 @@ module Pkg::Params
               { :var => :svr4_host,               :envvar => :SVR4_HOST },
               { :var => :svr4_path,               :envvar => :SVR4_PATH },
               { :var => :swix_path,               :envvar => :SWIX_PATH },
+              { :var => :tar_host,                :envvar => :TAR_HOST },
               { :var => :ips_repo,                :envvar => :IPS_REPO },
               { :var => :ips_path,                :envvar => :IPS_PATH },
               { :var => :ips_host,                :envvar => :IPS_HOST },

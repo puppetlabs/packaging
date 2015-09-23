@@ -29,7 +29,7 @@ module Pkg::Platforms
     },
 
     'cumulus' => {
-      '2.2' => { :codename => :'cumulus', :architectures => ['amd64'], :repo => true, :package_format => 'deb', },
+      '2.2' => { :codename => 'cumulus', :architectures => ['amd64'], :repo => true, :package_format => 'deb', },
     },
 
     'aix' => {

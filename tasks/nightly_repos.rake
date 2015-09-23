@@ -65,7 +65,7 @@ namespace :pl do
           if Pkg::Util::File.empty_dir?(path_to_repo)
             warn "Skipping #{name_of_archive} because it (#{path_to_repo}) has no files"
           else
-            Pkg::Util::Execution.ex("#{tar} -czf #{File.join("repos", "#{name_of_archive}.tar.gz")} #{path_to_repo}")
+            Pkg::Util::Execution.ex("#{tar} --owner=0 --group=0 --create --gzip --file #{File.join("repos", "#{name_of_archive}.tar.gz")} #{path_to_repo}")
           end
         end
       end

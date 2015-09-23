@@ -143,14 +143,31 @@ namespace :pl do
       end
     end
 
-    task :deploy_signed_repos, [:target_host, :target_basedir] => "pl:fetch" do |t, args|
+    task :deploy_signed_repos, [:target_host, :target_basedir, :foss_only] => "pl:fetch" do |t, args|
       target_host = args.target_host or fail ":target_host is a required argument to #{t}"
       target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
+      include_paths = []
+
+      if args.foss_only && !Pkg::Config.foss_platforms.empty?
+        Pkg::Config.foss_platforms.each do |platform|
+          include_paths << Pkg::Util::Platform.repo_path(platform)
+          if Pkg::Util::Platform.repo_config_path(platform)
+            include_paths << Pkg::Util::Platform.repo_config_path(platform)
+          end
+        end
+      else
+        include_paths = ["./"]
+      end
+
       # Ship it to the target for consumption
       # First we ship the latest and clean up any repo-configs that are no longer valid with --delete-after
-      Pkg::Util::Net.rsync_to("pkg/#{Pkg::Config.project}-latest", target_host, target_basedir, ["--delete-after"])
+      Pkg::Util::Execution.ex(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}-latest/#{path}" }.join(' ') } | sort > include_file_latest))
+      Pkg::Util::Execution.ex(%(mkdir -p tmp_latest && tar -T include_file_latest -cf - | (cd ./tmp_latest && tar -xf -)))
+      Pkg::Util::Net.rsync_to("tmp_latest/pkg/#{Pkg::Config.project}-latest", target_host, target_basedir, ["--delete-after"])
       # Then we ship the sha version with default rsync flags
-      Pkg::Util::Net.rsync_to("pkg/#{Pkg::Config.project}", target_host, target_basedir)
+      Pkg::Util::Execution.ex(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}/**/#{path}" }.join(' ') } | sort > include_file))
+      Pkg::Util::Execution.ex(%(mkdir -p tmp && tar -T include_file -cf - | (cd ./tmp && tar -xf -)))
+      Pkg::Util::Net.rsync_to("tmp/pkg/#{Pkg::Config.project}", target_host, target_basedir)
 
       puts "'#{Pkg::Config.ref}' of '#{Pkg::Config.project}' has been shipped to '#{target_host}:#{target_basedir}'"
     end
@@ -195,7 +212,7 @@ namespace :pl do
       target_host = args.target_host or fail ":target_host is a required argument to #{t}"
       target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
       Pkg::Util::RakeUtils.invoke_task("pl:jenkins:prepare_signed_repos", target_host, 'nightly', 'ref')
-      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:deploy_signed_repos", target_host, target_basedir)
+      Pkg::Util::RakeUtils.invoke_task("pl:jenkins:deploy_signed_repos", target_host, target_basedir, true)
     end
 
     task :deploy_repos_to_s3, [:target_bucket] => ["pl:fetch"] do |t, args|

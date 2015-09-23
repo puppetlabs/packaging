@@ -66,10 +66,11 @@ namespace :pl do
   desc "Sign the Arista EOS swix packages, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_swix do
     packages = Dir["pkg/eos/**/*.swix"]
-    fail "No swix packages exist." if packages.empty?
-    Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-    packages.each do |swix_package|
-      Pkg::Util::Gpg.sign_file swix_package
+    unless packages.empty?
+      Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
+      packages.each do |swix_package|
+        Pkg::Util::Gpg.sign_file swix_package
+      end
     end
   end
 

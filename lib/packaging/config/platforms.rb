@@ -29,6 +29,9 @@ module Pkg::Platforms
       '4' => { :architectures => ['i386'], :repo => false, :package_format => 'swix', },
     },
 
+    'fedora' => {
+      'f21' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
+      'f22' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
     },
 
     'osx' => {
@@ -45,6 +48,7 @@ module Pkg::Platforms
     'solaris' => {
       '10' => { :architectures => ['i386', 'sparc'], :repo => false, :package_format => 'srv4', },
       '11' => { :architectures => ['i386', 'sparc'], :repo => false, :package_format => 'ips', },
+    },
 
     'ubuntu' => {
       '10.04' => { :codename => 'lucid', :architectures   => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },

@@ -24,11 +24,23 @@ describe "Pkg::Util::Platform" do
     it 'should be correct' do
       expect(Pkg::Util::Platform.repo_path('el-7-x86_64')).to eq('repos/el/7/**/x86_64')
     end
+
+    it 'should work on all current platforms' do
+      Pkg::Util::Platform.platform_tags.each do |tag|
+        expect { Pkg::Util::Platform.repo_path(tag) }.not_to raise_error
+      end
+    end
   end
 
   describe '#repo_config_path' do
     it 'should be correct' do
       expect(Pkg::Util::Platform.repo_config_path('el-7-x86_64')).to eq('repo_configs/rpm/*el-7-x86_64*.repo')
+    end
+
+    it 'should work on all current platforms' do
+      Pkg::Util::Platform.platform_tags.each do |tag|
+        expect { Pkg::Util::Platform.repo_config_path(tag) }.not_to raise_error
+      end
     end
   end
 end

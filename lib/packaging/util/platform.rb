@@ -25,7 +25,7 @@ module Pkg::Util::Platform
 
     def parse_platform_tag(platform_tag)
       platform, version, arch = platform_tag.match(/^(.*)-(.*)-(.*)$/).captures
-      if PLATFORM_INFO[platform][version][:architectures].include?(arch)
+      if PLATFORM_INFO.has_key?(platform) && PLATFORM_INFO[platform].has_key?(version) && PLATFORM_INFO[platform][version][:architectures].include?(arch)
         [platform, version, arch]
       else
         fail "#{platform_tag} isn't a valid platform tag. Perhaps it hasn't been defined yet?"

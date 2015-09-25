@@ -46,7 +46,7 @@ module Pkg::Platforms
     },
 
     'solaris' => {
-      '10' => { :architectures => ['i386', 'sparc'], :repo => false, :package_format => 'srv4', },
+      '10' => { :architectures => ['i386', 'sparc'], :repo => false, :package_format => 'svr4', },
       '11' => { :architectures => ['i386', 'sparc'], :repo => false, :package_format => 'ips', },
     },
 

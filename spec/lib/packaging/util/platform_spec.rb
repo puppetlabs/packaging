@@ -14,6 +14,12 @@ describe "Pkg::Util::Platform" do
     end
   end
 
+  describe '#parse_platform_tag' do
+    it 'fails with a reasonable error on invalid platform' do
+      expect { Pkg::Util::Platform.parse_platform_tag("abcd-15-ia64") }.to raise_error(/valid platform tag/)
+    end
+  end
+
   describe '#repo_path' do
     it 'should be correct' do
       expect(Pkg::Util::Platform.repo_path('el-7-x86_64')).to eq('repos/el/7/**/x86_64')

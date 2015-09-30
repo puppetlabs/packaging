@@ -9,7 +9,6 @@ module Pkg::OSX
       work_dir  = "/tmp/#{rand_string}"
       mount     = File.join(work_dir, "mount")
       signed    = File.join(work_dir, "signed")
-      output    = File.join(target_dir, "apple", "#{Pkg::Config.yum_repo_name}")
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "mkdir -p #{mount} #{signed}")
       dmgs = Dir.glob("#{target_dir}/apple/**/*.dmg")
       Pkg::Util::Net.rsync_to(dmgs.join(" "), rsync_host_string, work_dir)
@@ -23,7 +22,9 @@ module Pkg::OSX
         /bin/rm #{work_dir}/$dmg.dmg ;
         /usr/bin/hdiutil create -volname $dmg -srcfolder #{signed}/ #{work_dir}/$dmg.dmg ;
         /bin/rm #{signed}/* ; done])
-      Pkg::Util::Net.rsync_from("#{work_dir}/*.dmg", rsync_host_string, "#{output}")
+      dmgs.each do | dmg |
+        Pkg::Util::Net.rsync_from("#{work_dir}/#{File.basename(dmg)}", rsync_host_string, File.dirname(dmg))
+      end
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "if [ -d '#{work_dir}' ]; then rm -rf '#{work_dir}'; fi")
     end
   end

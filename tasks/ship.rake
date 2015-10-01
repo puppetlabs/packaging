@@ -138,21 +138,24 @@ namespace :pl do
     end
   end if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
 
+  desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.tar_host}"
+  task :ship_swix => 'pl:fetch' do
+    packages = Dir['pkg/eos/**/*.swix']
+    if packages.empty?
+      STDOUT.puts "There aren't any swix packages in pkg/eos. Maybe something went wrong?"
+    else
+      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+        Pkg::Util::Net.rsync_to("pkg/eos/", Pkg::Config.tar_host, Pkg::Config.swix_path)
+      end
+    end
+  end
+
   if Pkg::Config.build_tar
     desc "ship tarball and signature to #{Pkg::Config.tar_host}"
     task :ship_tar => 'pl:fetch' do
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
         Pkg::Util::Net.rsync_to("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*", Pkg::Config.tar_host, Pkg::Config.tarball_path)
       end
-    end
-  end
-
-  desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.tar_host}"
-  task :ship_swix => 'pl:fetch' do
-    packages = Dir['pkg/eos/**/*.swix']
-    STDOUT.puts "There aren't any swix packages in pkg/eos. Maybe something went wrong?" if packages.empty?
-    Pkg::Util::Execution.retry_on_fail(:times => 3) do
-      Pkg::Util::Net.rsync_to("pkg/eos/", Pkg::Config.tar_host, Pkg::Config.swix_path)
     end
   end
 

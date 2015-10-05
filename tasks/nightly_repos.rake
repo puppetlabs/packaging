@@ -216,15 +216,18 @@ namespace :pl do
       if versioning == 'ref'
         local_pa = File.join(pa_source, Pkg::Config.ref)
         local_pe = File.join(pe_target, Pkg::Config.ref)
+        local_pa_latest = "#{pa_source}-latest"
         local_pe_latest = "#{pe_target}-latest"
       elsif versioning == 'version'
         local_pa = File.join(pa_source, Pkg::Util::Version.get_dot_version)
         local_pe = File.join(pe_target, Pkg::Util::Version.get_dot_version)
+        local_pa_latest = "#{pa_source}-latest"
         local_pe_latest = "#{pe_target}-latest"
       end
 
       Pkg::Util::Net.remote_ssh_cmd(target_host, "mkdir -p '#{pe_target}'")
-      Pkg::Util::Net.remote_ssh_cmd(target_host, "ln -sf '#{local_pa}' '#{local_pe_latest}'")
+      Pkg::Util::Net.remote_ssh_cmd(target_host, "mkdir -p '#{local_pe_latest}'")
+      Pkg::Util::Net.remote_ssh_cmd(target_host, "cp -r #{local_pa_latest}/* #{local_pe_latest}")
       Pkg::Util::Net.remote_ssh_cmd(target_host, "ln -sf '#{local_pa}' '#{local_pe}'")
     end
 

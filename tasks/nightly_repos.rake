@@ -207,27 +207,28 @@ namespace :pl do
     # We want to keep the puppet-agent repos at a higher level and them link
     # them into the correct version of PE. This is a private method and is
     # called from the internal_puppet-agent-ship jenkins job
-    task :link_signed_repos, [:target_host, :pa_source, :pe_target, :versioning] => ["pl:fetch"] do |t, args|
+    task :link_signed_repos, [:target_host, :pa_source, :pe_target, :versioning, :pe_version] => ["pl:fetch"] do |t, args|
       target_host = args.target_host or fail ":target_host is a required argument for #{t}"
       pa_source = args.pa_source or fail ":pa_source is a required argument for #{t}"
       pe_target = args.pe_target or fail ":pe_target is a required argument for #{t}"
       versioning = args.versioning or fail ":versioning is a required argument for #{t}"
+      pe_version = args.pe_version or fail ":pe_version is a required argument for #{t}"
 
       if versioning == 'ref'
-        local_pa = File.join(pa_source, Pkg::Config.ref)
-        local_pe = File.join(pe_target, Pkg::Config.ref)
-        local_pa_latest = "#{pa_source}-latest"
-        local_pe_latest = "#{pe_target}-latest"
+        version_string = Pkg::Config.ref
       elsif versioning == 'version'
-        local_pa = File.join(pa_source, Pkg::Util::Version.get_dot_version)
-        local_pe = File.join(pe_target, Pkg::Util::Version.get_dot_version)
-        local_pa_latest = "#{pa_source}-latest"
-        local_pe_latest = "#{pe_target}-latest"
+        version_string =  Pkg::Util::Version.get_dot_version
       end
+
+      local_pa = File.join(pa_source, version_string)
+      local_pe = File.join(pe_target, version_string)
+      local_pa_latest = "#{pa_source}-latest"
+      local_pe_latest = "#{pe_target}-latest"
 
       Pkg::Util::Net.remote_ssh_cmd(target_host, "mkdir -p '#{pe_target}'")
       Pkg::Util::Net.remote_ssh_cmd(target_host, "mkdir -p '#{local_pe_latest}'")
       Pkg::Util::Net.remote_ssh_cmd(target_host, "cp -r #{local_pa_latest}/* #{local_pe_latest}")
+      Pkg::Util::Net.remote_ssh_cmd(target_host, "sed -i 's|/#{File.basename(local_pa_latest)}|/#{pe_version}/#{File.basename(local_pa_latest)}|' #{local_pe_latest}/repo_configs/*/*")
       Pkg::Util::Net.remote_ssh_cmd(target_host, "ln -sf '#{local_pa}' '#{local_pe}'")
     end
 

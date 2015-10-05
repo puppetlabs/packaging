@@ -210,18 +210,15 @@ namespace :pl do
     #
     # @param target_host the remote host where the packages are being shipped
     #        ex: agent-downloads.delivery.puppetlabs.net
-    # @param pa_source the path all versions of puppet-agent are deployed to
-    #        ex: /opt/puppet-agent/puppet-agent
-    # @param pe_target the path puppet-agent is deployed to within a PE version
-    #        ex: /opt/puppet-agent/2015.2/puppet-agent
+    # @param remote_dir the base path to deploy packages to
+    #        ex: /opt/puppet-agent
     # @param versioning whether the puppet-agent version is a version string or
     #        a github ref. Valid values are 'version' and 'ref'
-    # @param pe_version the PE-version to deploy to. Must match the version
-    #        from pe_target.  ex: 2015.2
-    task :link_signed_repos, [:target_host, :pa_source, :pe_target, :versioning, :pe_version] => ["pl:fetch"] do |t, args|
+    # @param pe_version the PE-version to deploy to.
+    #        ex: 2015.2
+    task :link_signed_repos, [:target_host, :remote_dir, :versioning, :pe_version] => ["pl:fetch"] do |t, args|
       target_host = args.target_host or fail ":target_host is a required argument for #{t}"
-      pa_source = args.pa_source or fail ":pa_source is a required argument for #{t}"
-      pe_target = args.pe_target or fail ":pe_target is a required argument for #{t}"
+      remote_dir = args.remote_dir or fail ":remote_dir is a required argument for #{t}"
       versioning = args.versioning or fail ":versioning is a required argument for #{t}"
       pe_version = args.pe_version or fail ":pe_version is a required argument for #{t}"
 
@@ -231,6 +228,8 @@ namespace :pl do
         version_string =  Pkg::Util::Version.get_dot_version
       end
 
+      pa_source = File.join(remote_dir, Pkg::Config.project)
+      pe_target = File.join(remote_dir, pe_version, Pkg::Config.project)
       local_pa = File.join(pa_source, version_string)
       local_pe = File.join(pe_target, version_string)
       local_pa_latest = "#{pa_source}-latest"

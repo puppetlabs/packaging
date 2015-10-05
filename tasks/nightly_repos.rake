@@ -207,6 +207,17 @@ namespace :pl do
     # We want to keep the puppet-agent repos at a higher level and them link
     # them into the correct version of PE. This is a private method and is
     # called from the internal_puppet-agent-ship jenkins job
+    #
+    # @param target_host the remote host where the packages are being shipped
+    #        ex: agent-downloads.delivery.puppetlabs.net
+    # @param pa_source the path all versions of puppet-agent are deployed to
+    #        ex: /opt/puppet-agent/puppet-agent
+    # @param pe_target the path puppet-agent is deployed to within a PE version
+    #        ex: /opt/puppet-agent/2015.2/puppet-agent
+    # @param versioning whether the puppet-agent version is a version string or
+    #        a github ref. Valid values are 'version' and 'ref'
+    # @param pe_version the PE-version to deploy to. Must match the version
+    #        from pe_target.  ex: 2015.2
     task :link_signed_repos, [:target_host, :pa_source, :pe_target, :versioning, :pe_version] => ["pl:fetch"] do |t, args|
       target_host = args.target_host or fail ":target_host is a required argument for #{t}"
       pa_source = args.pa_source or fail ":pa_source is a required argument for #{t}"

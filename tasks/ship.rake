@@ -39,7 +39,7 @@ namespace :pl do
 
     task :freight => :update_apt_repo
 
-    desc "Update remote apt repository on '#{Pkg::Config.apt_host}'"
+    desc "Update remote apt repository on '#{Pkg::Config.apt_signing_server}'"
     task :update_apt_repo do
       apt_whitelist = {
         :apt_repo_name => "__REPO_NAME__",
@@ -49,13 +49,18 @@ namespace :pl do
         :gpg_key       => "__GPG_KEY__",
       }
 
-      STDOUT.puts "Really run remote repo update on '#{Pkg::Config.apt_host}'? [y,n]"
+      STDOUT.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
       if ask_yes_or_no
         if Pkg::Config.apt_repo_command
-          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, Pkg::Util::Misc.search_and_replace(Pkg::Config.apt_repo_command, apt_whitelist))
+          Pkg::Util::Net.remote_ssh_cmd(
+            Pkg::Config.apt_signing_server,
+            Pkg::Util::Misc.search_and_replace(
+              Pkg::Config.apt_repo_command,
+              apt_whitelist
+            )
+          )
         else
-          override = "OVERRIDE=1" if ENV['OVERRIDE']
-          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "rake -f /opt/repository/Rakefile freight #{override}")
+          warn %(Pkg::Config#apt_repo_command returned something unexpected, so no attempt will be made to update remote repos)
         end
       end
     end

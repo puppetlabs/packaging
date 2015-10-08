@@ -6,6 +6,7 @@ module Pkg::Params
                   :apt_repo_name,
                   :apt_repo_url,
                   :apt_repo_command,
+                  :apt_signing_server,
                   :author,
                   :benchmark,
                   :build_date,
@@ -146,6 +147,7 @@ module Pkg::Params
   #
   ENV_VARS = [{ :var => :apt_host,                :envvar => :APT_HOST },
               { :var => :apt_repo_path,           :envvar => :APT_REPO },
+              { :var => :apt_signing_server,      :envvar => :APT_SIGNING_SERVER },
               { :var => :build_dmg,               :envvar => :DMG,             :type => :bool },
               { :var => :build_doc,               :envvar => :DOC,             :type => :bool },
               { :var => :build_gem,               :envvar => :GEM,             :type => :bool },

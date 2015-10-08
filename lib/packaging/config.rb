@@ -288,6 +288,23 @@ module Pkg
         mock.match(/pupent(-\d\.\d)?-([a-z]*)(\d*)-([^-]*)/)[2..4]
       end
 
+      # We're overriding the accessor for @apt_signing_server so that
+      # a deprecation warning will be raised if @apt_host is used as a signing server.
+      #
+      # @return [String]
+      #   the hostname of the server where apt repos and/or
+      #   packages should be signed before being shipped.
+      def apt_signing_server
+        @apt_signing_server || deprecated_apt_signing_server
+      end
+
+      # This function will hopefully go away once we've got build_data and
+      # build_defaults ironed out everywhere.
+      def deprecated_apt_signing_server
+        warn "using :apt_host to sign packages is deprecated. Please update build_defaults.yaml to use :apt_signing_server"
+        @apt_host
+      end
+
       def deb_build_targets
         if self.vanagon_project
           self.deb_targets.split(' ')

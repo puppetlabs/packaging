@@ -288,6 +288,7 @@ DOC
       :project      => 'FM',
       :summary      => "Intention to support #{vars[:platform_tag]} as an agent platform",
       :description  => description[:module_support],
+      :blocked_by   => ['beaker', 'pooler_image']
     },
     {
       :short_name   => 'docs_support',

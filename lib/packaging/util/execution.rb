@@ -21,11 +21,18 @@ module Pkg::Util::Execution
     # only true or false depending on its success or failure. With `ex(cmd)` we
     # purport to both return the results of the command execution (ala `%x{cmd}`)
     # while also raising an exception if a command does not succeed (ala `sh "cmd"`).
-    def ex(command)
+    def ex(command, debug = false)
+      puts "Executing '#{command}'..." if debug
       ret = `#{command}`
       unless Pkg::Util::Execution.success?
         raise RuntimeError
       end
+
+      if debug
+        puts "Command '#{command}' returned:"
+        puts ret
+      end
+
       ret
     end
 

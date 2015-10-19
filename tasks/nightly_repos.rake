@@ -148,7 +148,7 @@ namespace :pl do
       target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
       include_paths = []
 
-      if args.foss_only && !Pkg::Config.foss_platforms.empty?
+      if args.foss_only && Pkg::Config.foss_platforms && !Pkg::Config.foss_platforms.empty?
         Pkg::Config.foss_platforms.each do |platform|
           include_paths << Pkg::Util::Platform.repo_path(platform)
           if Pkg::Util::Platform.repo_config_path(platform)

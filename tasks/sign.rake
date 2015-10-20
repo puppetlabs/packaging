@@ -123,7 +123,7 @@ namespace :pl do
   desc "Sign ips package, uses PL certificates by default, update privatekey_pem, certificate_pem, and ips_inter_cert in project_data.yaml to override."
   task :sign_ips do
     Pkg::IPS.sign unless Dir['pkg/solaris/11/**/*.p5p'].empty?
-  end if Pkg::Config.build_ips || Pkg::Config.vanagon_project
+  end
 
   if Pkg::Config.build_gem
     desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"

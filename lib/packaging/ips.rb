@@ -20,7 +20,9 @@ module Pkg::IPS
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgrepo create #{repo_dir}")
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgrepo set -s #{repo_dir} publisher/prefix=puppetlabs.com")
       # And import all the packages into the repo.
-      Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgrecv -s #{unsigned_dir}/*.p5p -d #{repo_dir} '*'")
+      p5ps.each do |p5p|
+        Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgrecv -s #{unsigned_dir}/#{File.basename(p5p)} -d #{repo_dir} '*'")
+      end
       # We sign the entire repo
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgsign \
                                           -c #{Pkg::Config.ips_signing_cert} \

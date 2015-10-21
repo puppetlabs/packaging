@@ -44,15 +44,6 @@ def sign_deb_changes(file)
   sh "debsign #{sign_program} --re-sign -k#{Pkg::Config.gpg_key} #{file}"
 end
 
-# requires atleast a self signed prvate key and certificate pair
-# fmri is the full IPS package name with version, e.g.
-# facter@facter@1.6.15,5.11-0:20121112T042120Z
-# technically this can be any ips-compliant package identifier, e.g. application/facter
-# repo_uri is the path to the repo currently containing the package
-def sign_ips(fmri, repo_uri)
-  %x(pkgsign -s #{repo_uri}  -k #{Pkg::Config.privatekey_pem} -c #{Pkg::Config.certificate_pem} -i #{Pkg::Config.ips_inter_cert} #{fmri})
-end
-
 namespace :pl do
   desc "Sign the tarball, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_tar do
@@ -130,12 +121,9 @@ namespace :pl do
   end
 
   desc "Sign ips package, uses PL certificates by default, update privatekey_pem, certificate_pem, and ips_inter_cert in project_data.yaml to override."
-  task :sign_ips, :repo_uri, :fmri do |t, args|
-    repo_uri  = args.repo_uri
-    fmri      = args.fmri
-    puts "Signing ips packages..."
-    sign_ips(fmri, repo_uri)
-  end if Pkg::Config.build_ips
+  task :sign_ips do
+    Pkg::IPS.sign unless Dir['pkg/solaris/11/**/*.p5p'].empty?
+  end
 
   if Pkg::Config.build_gem
     desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"

@@ -11,6 +11,7 @@ module Pkg
   require 'packaging/deb'
   require 'packaging/rpm'
   require 'packaging/osx'
+  require 'packaging/ips'
 
   # Load configuration defaults
   Pkg::Config.load_defaults

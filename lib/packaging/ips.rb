@@ -31,6 +31,15 @@ module Pkg::IPS
                                           -s 'file://#{work_dir}/repo' '*'")
         # pkgrecv with -a will pull packages out of the repo, so we need to do that too to actually get the packages we signed
         Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgrecv -d #{signed_dir}/#{File.basename(p5p)} -a -s #{repo_dir} '*'")
+        begin
+          # lets make sure we actually signed something?
+          # **NOTE** if we're repeatedly trying to sign the same version this
+          # might explode because I don't know how to reset the IPS cache.
+          # Everything is amazing.
+          Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkg contents -m -g #{signed_dir}/#{File.basename(p5p)} '*' | grep '^signature '")
+        rescue RuntimeError
+          raise "Looks like #{File.basename(p5p)} was not signed correctly, quitting!"
+        end
         # and pull the packages back.
         Pkg::Util::Net.rsync_from("#{signed_dir}/#{File.basename(p5p)}", rsync_host_string, File.dirname(p5p))
         Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "if [ -e '#{work_dir}' ] ; then sudo rm -r '#{work_dir}' ; fi")

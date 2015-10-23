@@ -40,7 +40,7 @@ namespace :pl do
     task :freight => :update_apt_repo
 
     desc "Update remote apt repository on '#{Pkg::Config.apt_signing_server}'"
-    task :update_apt_repo do
+    task :update_apt_repo => 'pl:fetch' do
       apt_whitelist = {
         :apt_repo_name => "__REPO_NAME__",
         :apt_repo_path => "__REPO_PATH__",

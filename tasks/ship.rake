@@ -70,7 +70,7 @@ namespace :pl do
     end
   end
 
-  desc "Ship svr4 packages to #{Pkg::Config.yum_host}"
+  desc "Ship svr4 packages to #{Pkg::Config.svr4_host}"
   task :ship_svr4 do
     Pkg::Util::Execution.retry_on_fail(:times => 3) do
       if File.directory?("pkg/solaris/10")
@@ -78,6 +78,16 @@ namespace :pl do
       end
     end
   end
+
+  desc "Ship p5p packages to #{Pkg::Config.p5p_host}"
+  task :ship_p5p do
+    Pkg::Util::Execution.retry_on_fail(:times => 3) do
+      if File.directory?("pkg/solaris/11")
+        Pkg::Util::Net.rsync_to('pkg/solaris/11', Pkg::Config.p5p_host, Pkg::Config.p5p_path)
+      end
+    end
+  end
+
 
   namespace :remote do
     desc "Update remote ips repository on #{Pkg::Config.ips_host}"
@@ -109,7 +119,10 @@ namespace :pl do
   end
 
   desc "Upload ips p5p packages to downloads"
-  task :ship_ips => 'remote:update_ips_repo' if Pkg::Config.build_ips || Pkg::Config.vanagon_project
+  task :ship_ips => 'pl:fetch' do
+      Pkg::Util::RakeUtils.invoke_task("remote:update_ips_repo")
+      Pkg::Util::RakeUtils.invoke_task("pl:ship_p5p")
+  end
 
   # We want to ship a gem only for projects that build gems
   if Pkg::Config.build_gem

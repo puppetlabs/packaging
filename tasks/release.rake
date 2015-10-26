@@ -84,7 +84,9 @@ namespace :pl do
 
     task :release_ips => 'pl:fetch' do
       Rake::Task['pl:ips'].invoke
-      Rake::Task['pl:ship_ips'].invoke
+      Rake::Task['pl:sign_ips'].invoke
+      Rake::Task['pl:remote:update_ips_rep'].invoke
+      Rake::Task['pl:ship_p5p'].invoke
     end
   end
 end

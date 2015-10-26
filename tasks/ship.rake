@@ -118,12 +118,6 @@ namespace :pl do
     end if Pkg::Config.build_ips || Pkg::Config.vanagon_project
   end
 
-  desc "Upload ips p5p packages to downloads"
-  task :ship_ips => 'pl:fetch' do
-      Pkg::Util::RakeUtils.invoke_task("remote:update_ips_repo")
-      Pkg::Util::RakeUtils.invoke_task("pl:ship_p5p")
-  end
-
   # We want to ship a gem only for projects that build gems
   if Pkg::Config.build_gem
     desc "Ship built gem to rubygems"
@@ -185,7 +179,7 @@ namespace :pl do
       Rake::Task["pl:ship_swix"].execute if Pkg::Config.vanagon_project
       Rake::Task["pl:ship_tar"].execute if Pkg::Config.build_tar
       Rake::Task["pl:ship_svr4"].execute if Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_ips"].execute if Pkg::Config.build_ips || Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_p5p"].execute if Pkg::Config.build_ips || Pkg::Config.vanagon_project
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
       add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark
       post_shipped_metrics if Pkg::Config.benchmark

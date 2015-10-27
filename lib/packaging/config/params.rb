@@ -103,6 +103,8 @@ module Pkg::Params
                   :pre_tasks,
                   :privatekey_pem,
                   :project_root,
+                  :p5p_host,
+                  :p5p_path,
                   :random_mockroot,
                   :rc_mocks,
                   :redis_hostname,
@@ -171,6 +173,8 @@ module Pkg::Params
               { :var => :pe_version,              :envvar => :PE_VER },
               { :var => :privatekey_pem,          :envvar => :PRIVATE_PEM },
               { :var => :project_root,            :envvar => :PROJECT_ROOT },
+              { :var => :p5p_host,                :envvar => :P5P_HOST },
+              { :var => :p5p_path,                :envvar => :P5P_PATH },
               { :var => :random_mockroot,         :envvar => :RANDOM_MOCKROOT, :type => :bool },
               { :var => :rc_mocks,                :envvar => :MOCK },
               { :var => :release,                 :envvar => :RELEASE },
@@ -207,7 +211,11 @@ module Pkg::Params
               { :var => :build_tar,               :val => true },
               { :var => :osx_signing_cert,        :val => '$OSX_SIGNING_CERT' },
               { :var => :osx_signing_keychain,    :val => '$OSX_SIGNING_KEYCHAIN' },
-              { :var => :osx_signing_keychain_pw, :val => '$OSX_SIGNING_KEYCHAIN_PW' }]
+              { :var => :osx_signing_keychain_pw, :val => '$OSX_SIGNING_KEYCHAIN_PW' },
+              { :var => :ips_signing_cert,        :val => '$IPS_SIGNING_CERT' },
+              { :var => :ips_inter_cert,          :val => '$IPS_INTER_CERT' },
+              { :var => :ips_root_cert,           :val => '$IPS_ROOT_CERT' },
+              { :var => :ips_signing_key,         :val => '$IPS_SIGNING_KEY' }]
 
   # These are variables which, over time, we decided to rename or replace. For
   # backwards compatibility, we assign the value of the old/deprecated

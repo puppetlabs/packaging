@@ -70,7 +70,7 @@ namespace :pl do
     end
   end
 
-  desc "Ship svr4 packages to #{Pkg::Config.yum_host}"
+  desc "Ship svr4 packages to #{Pkg::Config.svr4_host}"
   task :ship_svr4 do
     Pkg::Util::Execution.retry_on_fail(:times => 3) do
       if File.directory?("pkg/solaris/10")
@@ -78,6 +78,16 @@ namespace :pl do
       end
     end
   end
+
+  desc "Ship p5p packages to #{Pkg::Config.p5p_host}"
+  task :ship_p5p do
+    Pkg::Util::Execution.retry_on_fail(:times => 3) do
+      if File.directory?("pkg/solaris/11")
+        Pkg::Util::Net.rsync_to('pkg/solaris/11', Pkg::Config.p5p_host, Pkg::Config.p5p_path)
+      end
+    end
+  end
+
 
   namespace :remote do
     desc "Update remote ips repository on #{Pkg::Config.ips_host}"
@@ -107,9 +117,6 @@ namespace :pl do
       end
     end if Pkg::Config.build_ips || Pkg::Config.vanagon_project
   end
-
-  desc "Upload ips p5p packages to downloads"
-  task :ship_ips => 'remote:update_ips_repo' if Pkg::Config.build_ips || Pkg::Config.vanagon_project
 
   # We want to ship a gem only for projects that build gems
   if Pkg::Config.build_gem
@@ -172,6 +179,7 @@ namespace :pl do
       Rake::Task["pl:ship_swix"].execute if Pkg::Config.vanagon_project
       Rake::Task["pl:ship_tar"].execute if Pkg::Config.build_tar
       Rake::Task["pl:ship_svr4"].execute if Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_p5p"].execute if Pkg::Config.build_ips || Pkg::Config.vanagon_project
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
       add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark
       post_shipped_metrics if Pkg::Config.benchmark

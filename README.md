@@ -921,50 +921,6 @@ files:
     variables. Useful for debugging problems with parameter values. param
     should be the name of the parameter as a symbol, e.g. :ref or :version
 
-* **pl:release_deb**
-
-    A composite task of `package:tar`, `pl:deb_all`, `pl:sign_deb_changes`, and
-    `pl:ship_debs`
-
-* **pl:release_dmg**
-
-    A composite task of `package:apple`, and `pl:ship_dmg`
-
-* **pl:release_gem**
-
-    A composite task of `package:gem`, and `pl:ship_gem`
-
-* **pl:release_ips**
-
-    A composite task of `pl:ips`, and `pl:ship_ips`
-
-* **pl:release_rpm**
-
-    A composite task of `pl:mock_all`, `pl:sign_rpms`, `pl:ship_rpms`, and
-    `pl:remote:update_yum_repo`
-
-* **pl:release_tar**
-
-    A composes task of `package:tar`, `pl:sign_tar`, and `pl:ship_tar`
-
-* **pl:remote:deb**
-
-    As described above, this is a remote task, which means that the task is
-    performed remotely on the debian build host as specified in team
-    build_data.yaml retrieved from github.com/puppetlabs/build-data. This task
-    performs a `pl:deb` remotely on the builder
-
-* **pl:remote:deb_all**
-
-    Perform `pl:deb_all` on the remote debian build host as specified in the
-    team build_data.yaml file
-
-* **pl:remote:dmg**
-
-
-    Perform `package:apple` on the remote Mac build host as specified in the
-    team build_data.yaml file
-
 * **pl:remote:freight**
 
     Performs an ssh call to the package server that calls a server-side rake
@@ -972,35 +928,6 @@ files:
     shipped via `pl:ship_debs` and invokes
     [freight](https://github.com/rcrowley/freight) with them, which places them
     in the apt repository.
-
-* **pl:remote:ips**
-
-    Perform `pl:ips` on the remote IPS build host as specified in the team
-    build_data.yaml file
-
-* **pl:remote:mock**
-
-    Perform `pl:mock` on the remote RPM build host as specified in the team
-    build_data.yaml file
-
-* **pl:remote:mock_all**
-
-    Perform `pl:mock_all` on the remote RPM build host as specified in the team
-    build_data.yaml file
-
-* **pl:remote:release_deb**
-
-    Perform `pl:release_deb` on the remote debian build host. The caveat is
-    that while performing a `pl:release:deb` locally will prompt you to confirm
-    shipping the resulting debian packages, `pl:remote:release_deb` overrides
-    this and just retrieves the packages, to be staged locally under pkg/deb.
-
-* **pl:remote:release_rpm**
-
-    Perform `pl:release_rpm` on the remote RPM build host. The same caveat
-    applies as for `pl:remote:release_deb` - Packages aren't shipped into
-    production, but rather retrieved from the remote builder and staged locally
-    under pkg/el and pkg/fedora.
 
 * **pl:remote:update_yum_repo**
 
@@ -1061,23 +988,6 @@ files:
     key that is used for signing is assumed from gpg_key in
     ext/build_defaults.yaml. This can be overridden by passing GPG_KEY as an
     environment variable to the rake task.
-
-* **pl:uber_release**
-
-    A composite task that performs the following tasks:
-    `package:gem` (if build_gem is "true" in build_defaults.yaml)
-    `pl:remote:release_deb`
-    `pl:remote:release_rpm`
-    `pl:remote:dmg` (if build_dmg is "true" in build_defaults.yaml)
-    `package:tar`
-    `pl:sign_tar`
-    `pl:uber_ship`
-    `pl:remote:freight`
-    `pl:remote:update_yum_repo`
-    This is essentially a complete build from start to finish. Gem and tarball
-    are generated locally, and other packages (deb, rpm, dmg) are all created
-    remotely. Assumes ssh access and appropriate build tool access on all
-    respective build hosts.
 
 * **pl:uber_ship**
 

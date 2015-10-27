@@ -115,7 +115,7 @@ namespace :pl do
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "sudo pkgrepo refresh -s #{Pkg::Config.ips_path}")
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "sudo /usr/sbin/svcadm restart svc:/application/pkg/server:#{Pkg::Config.ips_repo || 'default'}")
       end
-    end if Pkg::Config.build_ips || Pkg::Config.vanagon_project
+    end
   end
 
   # We want to ship a gem only for projects that build gems

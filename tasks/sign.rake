@@ -86,8 +86,7 @@ namespace :pl do
     old_rpms = Dir["#{rpm_dir}/el/4/**/*.rpm"] +
       Dir["#{rpm_dir}/el/5/**/*.rpm"] +
       Dir["#{rpm_dir}/sles/10/**/*.rpm"] +
-      Dir["#{rpm_dir}/sles/11/**/*.rpm"] +
-      Dir["#{rpm_dir}/aix/**/**/*.rpm"]
+      Dir["#{rpm_dir}/sles/11/**/*.rpm"]
     modern_rpms = Dir["#{rpm_dir}/el/6/**/*.rpm"] +
       Dir["#{rpm_dir}/el/7/**/*.rpm"] +
       Dir["#{rpm_dir}/fedora/**/*.rpm"] +

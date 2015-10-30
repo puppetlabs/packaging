@@ -49,7 +49,7 @@ module Pkg::Util::Net
       unless extra_flags.empty?
         flags << " " << extra_flags.join(" ")
       end
-      Pkg::Util::Execution.ex("#{rsync} #{flags} #{source} #{target}:#{dest}")
+      Pkg::Util::Execution.ex("#{rsync} #{flags} #{source} #{target}:#{dest}", true)
     end
 
     def rsync_from(source, target, dest, extra_flags = [])
@@ -58,7 +58,7 @@ module Pkg::Util::Net
       unless extra_flags.empty?
         flags << " " << extra_flags.join(" ")
       end
-      Pkg::Util::Execution.ex("#{rsync} #{flags} #{target}:#{source} #{dest}")
+      Pkg::Util::Execution.ex("#{rsync} #{flags} #{target}:#{source} #{dest}", true)
     end
 
     def s3sync_to(source, target_bucket, target_directory = "", flags = [])

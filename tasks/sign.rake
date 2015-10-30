@@ -96,7 +96,11 @@ namespace :pl do
       Dir["#{rpm_dir}/sles/12/**/*.rpm"] +
       Dir["#{rpm_dir}/eos/**/**/*.rpm"]
 
-    unsigned_rpms = all_rpms - old_rpms - modern_rpms
+    # We don't sign AIX rpms, but we don't want to fail because they
+    # will be in the list
+    aix_rpms = Dir["#{rpm_dir}/aix/**/*.rpm"]
+
+    unsigned_rpms = all_rpms - old_rpms - modern_rpms - aix_rpms
     unless unsigned_rpms.empty?
       fail "#{unsigned_rpms} are not signed. Please update the automation in the signing task"
     end
@@ -206,4 +210,3 @@ namespace :pl do
     end
   end
 end
-

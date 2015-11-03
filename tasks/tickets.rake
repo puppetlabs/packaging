@@ -346,7 +346,7 @@ DOC
     {
       :summary     => 'Send out announcements',
       :description => description[:send_announcements],
-      :assignee    => 'eric.sorenson'
+      :assignee    => vars[:owner]
     },
     {
       :projects    => ['PDB', 'SERVER'],  # Only PDB and puppet-server have this step

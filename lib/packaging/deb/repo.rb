@@ -195,11 +195,9 @@ SignWith: #{Pkg::Config.gpg_key}"
       options.join("\s")
     end
 
-    def deploy_repos(path, from, to)
-      command = remote_repo_deployment_command(path, from, to)
-
-      puts command
-      # Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_signing_server, command)
+    def deploy_repos(path, origin_server, destination_server)
+      command = remote_repo_deployment_command(path, destination_server)
+      Pkg::Util::Net.remote_ssh_cmd(origin_server, command)
     end
 
   end

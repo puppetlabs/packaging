@@ -171,5 +171,36 @@ SignWith: #{Pkg::Config.gpg_key}"
         warn "No repos found to sign. Maybe you didn't build any debs, or the repo creation failed?"
       end
     end
+
+    def remote_repo_deployment_command(filepath, destination, dryrun = false)
+      path = Pathname.new(filepath)
+
+      options = %w(
+        rsync
+        --hard-links
+        --links
+        --omit-dir-times
+        --progress
+        --recursive
+        --update
+        --verbose
+        --no-perms
+        --no-owner
+        --no-group
+      )
+
+      options << '--dry-run' if dryrun
+      options << path
+      options << "#{destination}:#{path.parent}"
+      options.join("\s")
+    end
+
+    def deploy_repos(path, from, to)
+      command = remote_repo_deployment_command(path, from, to)
+
+      puts command
+      # Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_signing_server, command)
+    end
+
   end
 end

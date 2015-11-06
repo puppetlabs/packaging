@@ -298,11 +298,29 @@ module Pkg
         @apt_signing_server || deprecated_apt_signing_server
       end
 
+      # We're overriding the accessor for @apt_repo_staging_path so that
+      # a deprecation warning will be raised if @apt_repo_path is used as a
+      # path for staged repos.
+      #
+      # @return [String]
+      #   the pathname on the signing server where apt packages copied to
+      #   before being signed and shipped.
+      def apt_repo_staging_path
+        @apt_repo_staging_path || deprecated_apt_repo_staging_path
+      end
+
       # This function will hopefully go away once we've got build_data and
       # build_defaults ironed out everywhere.
       def deprecated_apt_signing_server
         warn "using :apt_host to sign packages is deprecated. Please update build_defaults.yaml to use :apt_signing_server"
         @apt_host
+      end
+
+      # This function will hopefully go away once we've got build_data and
+      # build_defaults ironed out everywhere.
+      def deprecated_apt_repo_staging_path
+        warn "using :apt_repo_path to ship packages is deprecated. Please update build_defaults.yaml to use :apt_repo_staging_path"
+        @apt_repo_path
       end
 
       def deb_build_targets

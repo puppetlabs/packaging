@@ -97,8 +97,15 @@ namespace :pl do
 
   desc "Move signed debs from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}"
   task :deploy_debs do
-    Pkg::Util::Execution.retry_on_fail(:times => 3) do
-      Pkg::Deb::Repo.deploy_repos(Pkg::Config.apt_repo_staging_path, Pkg::Config.apt_signing_server, Pkg::Config.apt_host)
+    puts "Really run remote rsync to deploy Debian repos to #{Pkg::Config.apt_host}"
+    if ask_yes_or_no
+      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+        Pkg::Deb::Repo.deploy_repos(
+          Pkg::Config.apt_repo_staging_path,
+          Pkg::Config.apt_signing_server,
+          Pkg::Config.apt_host
+        )
+      end
     end
   end
 

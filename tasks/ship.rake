@@ -72,7 +72,7 @@ namespace :pl do
       if File.directory?("pkg/deb")
         Pkg::Util::Net.rsync_to('pkg/deb/', Pkg::Config.Config.apt_signing_server, Pkg::Config.apt_repo_staging_path)
       else
-        puts "No deb packages found to ship; nothing to do"
+        warn "No deb packages found to ship; nothing to do"
       end
     end
   end

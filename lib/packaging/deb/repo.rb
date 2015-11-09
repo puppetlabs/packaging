@@ -195,9 +195,9 @@ SignWith: #{Pkg::Config.gpg_key}"
       options.join("\s")
     end
 
-    def deploy_repos(path, origin_server, destination_server)
+    def deploy_repos(path, origin_server, destination_server, dryrun = false)
       command = remote_repo_deployment_command(path, destination_server)
-      Pkg::Util::Net.remote_ssh_cmd(origin_server, command)
+      Pkg::Util::Net.remote_ssh_cmd(origin_server, command, dryrun)
     end
 
   end

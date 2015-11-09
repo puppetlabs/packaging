@@ -103,7 +103,8 @@ namespace :pl do
         Pkg::Deb::Repo.deploy_repos(
           Pkg::Config.apt_repo_staging_path,
           Pkg::Config.apt_signing_server,
-          Pkg::Config.apt_host
+          Pkg::Config.apt_host,
+          ENV['DRYRUN']
         )
       end
     end

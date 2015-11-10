@@ -382,6 +382,13 @@ DOC
 
   ]
 
+  # Add redundant (but very useful in emails and tab titles) info to subtask
+  # summaries / descriptions.
+  subtickets.each {|t|
+    t[:summary] << " (#{vars[:project]} #{vars[:puppet_agent_release]})"
+    t[:description] = "(Initial planned release date: #{vars[:date]})\n\n" + t[:description]
+  }
+
   # Use the human-friendly project name in the summary
   summary = "#{Pkg::Config.project} #{vars[:puppet_agent_release]} #{vars[:date]} Release"
   description[:top_level_ticket] = <<-DOC

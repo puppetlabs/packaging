@@ -217,9 +217,6 @@ SignWith: #{Pkg::Config.gpg_key}"
     # @param filepath [String] path for Deb repos on local filesystem
     # @param destination [String] remote host to send rsynced content to
     # @param dryrun [Boolean] whether or not to use '--dry-run'
-    #
-    # @return [String] an rsync command that can be executed on a remote host
-    #   to copy local content from that host to a remote node.
     def deploy_repos(path, origin_server, destination_server, dryrun = false)
       command = remote_repo_deployment_command(path, destination_server, dryrun)
       Pkg::Util::Net.remote_ssh_cmd(origin_server, command)

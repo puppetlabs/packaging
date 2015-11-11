@@ -221,8 +221,8 @@ SignWith: #{Pkg::Config.gpg_key}"
     # @return [String] an rsync command that can be executed on a remote host
     #   to copy local content from that host to a remote node.
     def deploy_repos(path, origin_server, destination_server, dryrun = false)
-      command = remote_repo_deployment_command(path, destination_server)
-      Pkg::Util::Net.remote_ssh_cmd(origin_server, command, dryrun)
+      command = remote_repo_deployment_command(path, destination_server, dryrun)
+      Pkg::Util::Net.remote_ssh_cmd(origin_server, command)
     end
 
   end

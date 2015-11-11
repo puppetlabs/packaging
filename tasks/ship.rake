@@ -70,7 +70,7 @@ namespace :pl do
   task :ship_debs do
     Pkg::Util::Execution.retry_on_fail(:times => 3) do
       if File.directory?("pkg/deb")
-        Pkg::Util::Net.rsync_to('pkg/deb/', Pkg::Config.Config.apt_signing_server, Pkg::Config.apt_repo_staging_path)
+        Pkg::Util::Net.rsync_to('pkg/deb/', Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path)
       else
         warn "No deb packages found to ship; nothing to do"
       end

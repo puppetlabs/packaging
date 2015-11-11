@@ -171,5 +171,56 @@ SignWith: #{Pkg::Config.gpg_key}"
         warn "No repos found to sign. Maybe you didn't build any debs, or the repo creation failed?"
       end
     end
+
+    # @deprecated this command will die a painful death when we are
+    #   able to sit down with Operations and refactor our distribution infra.
+    #   For now, it's extremely debian specific, which is why it lives here.
+    #   - Ryan McKern 11/2015
+    #
+    # @param filepath [String] path for Deb repos on local filesystem
+    # @param destination [String] remote host to send rsynced content to
+    # @param dryrun [Boolean] whether or not to use '--dry-run'
+    #
+    # @return [String] an rsync command that can be executed on a remote host
+    #   to copy local content from that host to a remote node.
+    def remote_repo_deployment_command(filepath, destination, dryrun = false)
+      path = Pathname.new(filepath)
+
+      options = %w(
+        rsync
+        --hard-links
+        --links
+        --omit-dir-times
+        --progress
+        --recursive
+        --update
+        --verbose
+        --no-perms
+        --no-owner
+        --no-group
+      )
+
+      options << '--dry-run' if dryrun
+      options << path
+      options << "#{destination}:#{path.parent}"
+      options.join("\s")
+    end
+
+    # @deprecated this command will die a painful death when we are
+    #   able to sit down with Operations and refactor our distribution infra.
+    #   It's extremely Debian specific due to how Debian repos are signed,
+    #   which is why it lives here.
+    #   Yes, it is basically just a layer of indirection around the task
+    #   of copying content from one node to another. No, I am not proud
+    #   of it. - Ryan McKern 11/2015
+    #
+    # @param filepath [String] path for Deb repos on local filesystem
+    # @param destination [String] remote host to send rsynced content to
+    # @param dryrun [Boolean] whether or not to use '--dry-run'
+    def deploy_repos(path, origin_server, destination_server, dryrun = false)
+      command = remote_repo_deployment_command(path, destination_server, dryrun)
+      Pkg::Util::Net.remote_ssh_cmd(origin_server, command)
+    end
+
   end
 end

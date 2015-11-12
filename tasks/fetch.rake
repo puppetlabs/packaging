@@ -24,7 +24,6 @@ team_data_url = data_repo + '/' + team_data_branch
 # It uses curl to download the files, and places them in a temporary
 # directory, e.g. /tmp/somedirectory/{project,team}/Pkg::Config.builder_data_file
 namespace :pl do
-  desc "retrieve build-data configurations to override/extend local build_defaults"
   task :fetch do
     # Remove .packaging directory from old-style extras loading
     rm_rf "#{ENV['HOME']}/.packaging" if File.directory?("#{ENV['HOME']}/.packaging")

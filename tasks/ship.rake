@@ -39,8 +39,8 @@ namespace :pl do
 
     task :freight => :update_apt_repo
 
-    desc "Update remote apt repository on '#{Pkg::Config.apt_signing_server}'"
-    task :update_apt_repo => 'pl:fetch' do
+    desc "Update remote apt repository on '#{Pkg::Config.apt_host}'"
+    task :update_apt_repo do
       apt_whitelist = {
         :apt_repo_name => "__REPO_NAME__",
         :apt_repo_path => "__REPO_PATH__",
@@ -49,30 +49,23 @@ namespace :pl do
         :gpg_key       => "__GPG_KEY__",
       }
 
-      STDOUT.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
+      STDOUT.puts "Really run remote repo update on '#{Pkg::Config.apt_host}'? [y,n]"
       if ask_yes_or_no
         if Pkg::Config.apt_repo_command
-          Pkg::Util::Net.remote_ssh_cmd(
-            Pkg::Config.apt_signing_server,
-            Pkg::Util::Misc.search_and_replace(
-              Pkg::Config.apt_repo_command,
-              apt_whitelist
-            )
-          )
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, Pkg::Util::Misc.search_and_replace(Pkg::Config.apt_repo_command, apt_whitelist))
         else
-          warn %(Pkg::Config#apt_repo_command returned something unexpected, so no attempt will be made to update remote repos)
+          override = "OVERRIDE=1" if ENV['OVERRIDE']
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "rake -f /opt/repository/Rakefile freight #{override}")
         end
       end
     end
   end
 
-  desc "Ship cow-built debs to #{Pkg::Config.apt_signing_server}"
+  desc "Ship cow-built debs to #{Pkg::Config.apt_host}"
   task :ship_debs do
     Pkg::Util::Execution.retry_on_fail(:times => 3) do
       if File.directory?("pkg/deb")
-        Pkg::Util::Net.rsync_to('pkg/deb/', Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path)
-      else
-        warn "No deb packages found to ship; nothing to do"
+        Pkg::Util::Net.rsync_to('pkg/deb/', Pkg::Config.apt_host, Pkg::Config.apt_repo_path)
       end
     end
   end
@@ -95,20 +88,6 @@ namespace :pl do
     end
   end
 
-  desc "Move signed debs from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}"
-  task :deploy_debs do
-    puts "Really run remote rsync to deploy Debian repos to #{Pkg::Config.apt_host}? [y,n]"
-    if ask_yes_or_no
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Deb::Repo.deploy_repos(
-          Pkg::Config.apt_repo_path,
-          Pkg::Config.apt_signing_server,
-          Pkg::Config.apt_host,
-          ENV['DRYRUN']
-        )
-      end
-    end
-  end
 
   namespace :remote do
     desc "Update remote ips repository on #{Pkg::Config.ips_host}"

@@ -95,21 +95,6 @@ namespace :pl do
     end
   end
 
-  desc "Move signed debs from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}"
-  task :deploy_debs do
-    puts "Really run remote rsync to deploy Debian repos to #{Pkg::Config.apt_host}? [y,n]"
-    if ask_yes_or_no
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Deb::Repo.deploy_repos(
-          Pkg::Config.apt_repo_path,
-          Pkg::Config.apt_signing_server,
-          Pkg::Config.apt_host,
-          ENV['DRYRUN']
-        )
-      end
-    end
-  end
-
   namespace :remote do
     desc "Update remote ips repository on #{Pkg::Config.ips_host}"
     task :update_ips_repo  => 'pl:fetch' do
@@ -135,6 +120,21 @@ namespace :pl do
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, remote_cmd)
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "sudo pkgrepo refresh -s #{Pkg::Config.ips_path}")
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "sudo /usr/sbin/svcadm restart svc:/application/pkg/server:#{Pkg::Config.ips_repo || 'default'}")
+      end
+    end
+
+    desc "Move signed deb repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}"
+    task :deploy_apt_repo do
+      puts "Really run remote rsync to deploy Debian repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}? [y,n]"
+      if ask_yes_or_no
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          Pkg::Deb::Repo.deploy_repos(
+            Pkg::Config.apt_repo_path,
+            Pkg::Config.apt_signing_server,
+            Pkg::Config.apt_host,
+            ENV['DRYRUN']
+          )
+        end
       end
     end
   end

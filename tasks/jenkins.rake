@@ -250,7 +250,15 @@ namespace :pl do
 
     desc "Retrieve packages built by jenkins, sign, and ship all!"
     task :uber_ship => "pl:fetch" do
-      uber_tasks = ["jenkins:retrieve", "jenkins:sign_all", "uber_ship", "remote:update_apt_repo", "remote:update_yum_repo", "remote:update_ips_repo"]
+      uber_tasks = %w(
+        jenkins:retrieve
+        jenkins:sign_all
+        uber_ship
+        remote:update_apt_repo
+        remote:deploy_apt_repo
+        remote:update_yum_repo
+        remote:update_ips_repo
+      )
       uber_tasks.map { |t| "pl:#{t}" }.each { |t| Rake::Task[t].invoke }
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
     end

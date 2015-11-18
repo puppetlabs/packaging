@@ -312,12 +312,12 @@ DOC
     {
       :summary     => 'Is the code ready for release?',
       :description => description[:code_ready],
-      :assignee    => vars[:developer]
+      :assignee    => vars[:project_manager]
     },
     {
       :summary     => 'Reconcile git commits and JIRA tickets',
       :description => description[:reconcile_git_jira],
-      :assignee    => vars[:developer]
+      :assignee    => vars[:project_manager]
     },
     {
       :summary     => 'Merge master into stable',
@@ -347,7 +347,7 @@ DOC
     {
       :summary     => 'Go/no-go meeting (before 4pm)',
       :description => description[:go_no_go],
-      :assignee    => vars[:developer]
+      :assignee    => vars[:project_manager]
     },
     {
       :summary     => 'Packages pushed',
@@ -367,7 +367,7 @@ DOC
     {
       :summary     => 'Close all resolved tickets in Jira',
       :description => description[:close_tickets],
-      :assignee    => vars[:developer]
+      :assignee    => vars[:project_manager]
     },
     {
       :summary     => 'Update version number in source',

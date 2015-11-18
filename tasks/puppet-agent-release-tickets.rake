@@ -187,7 +187,7 @@ Our automated acceptance pipelines generally cover most basic scenarios, so in g
 
 1) Test the new puppet gems
   * {{cd work/puppet/acceptance}}
-  * {{rake ci:test:gem #{vars[:puppet_release]}}}
+  * {{bundle exec rake ci:test:gem SHA=#{vars[:puppet_release]}}}
   * When finished, leave a comment indicating so, or alert the team if they fail.
 
 2) Manual package smoketesting

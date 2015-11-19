@@ -189,15 +189,16 @@ SignWith: #{Pkg::Config.gpg_key}"
       options = %w(
         rsync
         --hard-links
-        --links
+        --copy-links
         --omit-dir-times
         --progress
-        --recursive
+        --archive
         --update
         --verbose
-        --no-perms
-        --no-owner
-        --no-group
+        --perms
+        --chmod='Dug=rwx,Do=rx,Fug=rw,Fo=r'
+        --exclude='dists/*-*'
+        --exclude='pool/*-*'
       )
 
       options << '--dry-run' if dryrun
@@ -214,11 +215,14 @@ SignWith: #{Pkg::Config.gpg_key}"
     #   of copying content from one node to another. No, I am not proud
     #   of it. - Ryan McKern 11/2015
     #
-    # @param filepath [String] path for Deb repos on local filesystem
-    # @param destination [String] remote host to send rsynced content to
+    # @param path [String] path for Deb repos on local filesystem
+    # @param origin_server [String] remote host to start the  rsync from
+    # @param destination_server [String] remote host to send rsynced content to
     # @param dryrun [Boolean] whether or not to use '--dry-run'
     def deploy_repos(path, origin_server, destination_server, dryrun = false)
       command = remote_repo_deployment_command(path, destination_server, dryrun)
+      # Defensive permissions setting are defensive
+      Pkg::Util::Net.remote_ssh_cmd(destination_server, "chmod -R g=rwX #{path}")
       Pkg::Util::Net.remote_ssh_cmd(origin_server, command)
     end
 

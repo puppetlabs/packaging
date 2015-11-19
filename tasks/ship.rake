@@ -130,6 +130,7 @@ namespace :pl do
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
           Pkg::Deb::Repo.deploy_repos(
             Pkg::Config.apt_repo_path,
+            Pkg::Config.apt_repo_staging_path,
             Pkg::Config.apt_signing_server,
             Pkg::Config.apt_host,
             ENV['DRYRUN']

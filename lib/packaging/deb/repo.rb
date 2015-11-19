@@ -177,32 +177,40 @@ SignWith: #{Pkg::Config.gpg_key}"
     #   For now, it's extremely debian specific, which is why it lives here.
     #   - Ryan McKern 11/2015
     #
-    # @param filepath [String] path for Deb repos on local filesystem
-    # @param destination [String] remote host to send rsynced content to
+    # @param origin_path [String] path for Deb repos on local filesystem
+    # @param destination_path [String] path for Deb repos on remote filesystem
+    # @param destination [String] remote host to send rsynced content to. If
+    #        nil will copy locally
     # @param dryrun [Boolean] whether or not to use '--dry-run'
     #
     # @return [String] an rsync command that can be executed on a remote host
     #   to copy local content from that host to a remote node.
-    def remote_repo_deployment_command(filepath, destination, dryrun = false)
-      path = Pathname.new(filepath)
+    def repo_deployment_command(origin_path, destination_path, destination, dryrun = false)
+      path = Pathname.new(origin_path)
+      dest_path = Pathname.new(destination_path)
 
       options = %w(
         rsync
         --hard-links
-        --links
+        --copy-links
         --omit-dir-times
         --progress
-        --recursive
+        --archive
         --update
         --verbose
-        --no-perms
-        --no-owner
-        --no-group
+        --perms
+        --chmod='Dugo-s,Dug=rwx,Do=rx,Fug=rw,Fo=r'
+        --exclude='dists/*-*'
+        --exclude='pool/*-*'
       )
 
       options << '--dry-run' if dryrun
       options << path
-      options << "#{destination}:#{path.parent}"
+      if !destination.nil?
+        options << "#{destination}:#{dest_path.parent}"
+      else
+        options << "#{dest_path.parent}"
+      end
       options.join("\s")
     end
 
@@ -214,12 +222,29 @@ SignWith: #{Pkg::Config.gpg_key}"
     #   of copying content from one node to another. No, I am not proud
     #   of it. - Ryan McKern 11/2015
     #
-    # @param filepath [String] path for Deb repos on local filesystem
-    # @param destination [String] remote host to send rsynced content to
+    # @param apt_path [String] path for Deb repos on local and remote filesystem
+    # @param destination_staging_path [String] staging path for Deb repos on
+    #        remote filesystem
+    # @param origin_server [String] remote host to start the  rsync from
+    # @param destination_server [String] remote host to send rsynced content to
     # @param dryrun [Boolean] whether or not to use '--dry-run'
-    def deploy_repos(path, origin_server, destination_server, dryrun = false)
-      command = remote_repo_deployment_command(path, destination_server, dryrun)
-      Pkg::Util::Net.remote_ssh_cmd(origin_server, command)
+    def deploy_repos(apt_path, destination_staging_path, origin_server, destination_server, dryrun = false)
+      rsync_command = repo_deployment_command(apt_path, destination_staging_path, destination_server, dryrun)
+      cp_command = repo_deployment_command(destination_staging_path, apt_path, nil, dryrun)
+      # Defensive permissions setting are defensive
+      chmod_command = "sudo chmod -R g=rwX #{destination_staging_path}; sudo chmod -R g=rwX #{apt_path}"
+
+      if dryrun
+        puts "[DRYRUN] not executing #{chmod_command} on #{destination_server}"
+      else
+        Pkg::Util::Net.remote_ssh_cmd(destination_server, chmod_command)
+      end
+      Pkg::Util::Net.remote_ssh_cmd(origin_server, rsync_command)
+      if dryrun
+        puts "[DRYRUN] not executing #{cp_command} on #{destination_server}"
+      else
+        Pkg::Util::Net.remote_ssh_cmd(destination_server, cp_command)
+      end
     end
 
   end

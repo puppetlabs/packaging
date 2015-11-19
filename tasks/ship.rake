@@ -190,6 +190,16 @@ namespace :pl do
     end
   end
 
+  desc "ship Windows nuget packages to #{Pkg::Config.nuget_host}"
+  task :ship_nuget => 'pl:fetch' do
+    packages = Dir['pkg/windows/**/*.nupkg']
+    if packages.empty?
+      STDOUT.puts "There aren't any nuget packages in pkg/windows. Maybe something went wrong?"
+    else
+      Pkg::Nuget.ship(packages)
+    end
+  end
+
   desc "UBER ship: ship all the things in pkg"
   task :uber_ship => 'pl:fetch' do
     if confirm_ship(FileList["pkg/**/*"])
@@ -199,6 +209,7 @@ namespace :pl do
       Rake::Task["pl:ship_debs"].invoke if Pkg::Config.cows || Pkg::Config.vanagon_project
       Rake::Task["pl:ship_dmg"].execute if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
       Rake::Task["pl:ship_swix"].execute if Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_nuget"].execute if Pkg::Config.vanagon_project
       Rake::Task["pl:ship_tar"].execute if Pkg::Config.build_tar
       Rake::Task["pl:ship_svr4"].execute if Pkg::Config.vanagon_project
       Rake::Task["pl:ship_p5p"].execute if Pkg::Config.build_ips || Pkg::Config.vanagon_project
@@ -281,4 +292,3 @@ namespace :pl do
     end
   end
 end
-

@@ -181,6 +181,17 @@ namespace :pl do
     end
   end
 
+  desc "ship Windows nuget packages to #{Pkg::Config.nuget_host}"
+  task :ship_nuget => 'pl:fetch' do
+    packages = Dir['pkg/windows/**/*.nupkg']
+    if packages.empty?
+      STDOUT.puts "There aren't any nuget packages in pkg/windows. Maybe something went wrong?"
+    else
+      Pkg::Nuget.ship(packages)
+    end
+  end
+
+
   if Pkg::Config.build_tar
     desc "ship tarball and signature to #{Pkg::Config.tar_host}"
     task :ship_tar => 'pl:fetch' do
@@ -202,6 +213,7 @@ namespace :pl do
       Rake::Task["pl:ship_tar"].execute if Pkg::Config.build_tar
       Rake::Task["pl:ship_svr4"].execute if Pkg::Config.vanagon_project
       Rake::Task["pl:ship_p5p"].execute if Pkg::Config.build_ips || Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_nupkg"].execute if Pkg::Config.vanagon_project
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
       add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark
       post_shipped_metrics if Pkg::Config.benchmark

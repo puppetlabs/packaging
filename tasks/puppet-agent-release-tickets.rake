@@ -1,10 +1,31 @@
+require 'cgi'
 # This rake task creates tickets in jira for a puppet-agent release.
 # Tasks here differ from single-component releases in that they apply
 # to multiple components - each project which is being updated for
 # the new puppet-agent version.
 
+def build_query(vars, jql)
+  "#{vars[:site]}/issues/?jql=#{CGI.escape(jql)}"
+end
+
+def build_queries(vars, label)
+  queries = {}
+
+  queries[:all]          = build_query(vars, "#{label} in ('puppet-agent #{vars[:puppet_agent_release]}', 'PUP #{vars[:puppet_release]}', 'FACT #{vars[:facter_release]}', 'HI #{vars[:hiera_release]}', 'MCO #{vars[:mcollective_release]}', 'pxp-agent #{vars[:pcp_release]}')")
+  queries[:puppet_agent] = build_query(vars, "#{label} = 'puppet-agent #{vars[:puppet_agent_release]}'")
+  queries[:puppet]       = build_query(vars, "#{label} = 'PUP #{vars[:puppet_release]}'")
+  queries[:facter]       = build_query(vars, "#{label} = 'FACT #{vars[:facter_release]}'")
+  queries[:hiera]        = build_query(vars, "#{label} = 'HI #{vars[:hiera_release]}'")
+  queries[:mcollective]  = build_query(vars, "#{label} = 'MCO #{vars[:mcollective_release]}'")
+  queries[:pcp]          = build_query(vars, "#{label} = 'pxp-agent #{vars[:pcp_release]}'")
+
+  queries
+end
+
 def get_agent_release_ticket_vars
   vars = {}
+
+  vars[:site]            = Pkg::Util.get_var("JIRA_INSTANCE") || "https://tickets.puppetlabs.com"
 
   # roles
   vars[:builder]         = Pkg::Util.get_var("BUILDER")
@@ -23,6 +44,14 @@ def get_agent_release_ticket_vars
   vars[:mcollective_release]  = Pkg::Util.get_var("MCOLLECTIVE_RELEASE")
   vars[:pcp_release]          = Pkg::Util.get_var("PCP_RELEASE")
   vars[:date]                 = Pkg::Util.get_var("DATE")
+
+  vars[:fixed_in]      = build_queries(vars, "fixVersion")
+  vars[:introduced_in] = build_queries(vars, "affectedVersion")
+
+  tickets = "((project = PUP AND fixVersion = 'PUP #{vars[:puppet_release]}') OR (project = FACT AND fixVersion = 'FACT #{vars[:facter_release]}') OR (project = HI AND fixVersion = 'HI #{vars[:hiera_release]}') OR (project = MCO AND fixVersion = 'MCO #{vars[:mcollective_release]}') OR (project = PCP AND fixVersion = 'pxp-agent #{vars[:pcp_release]}') OR (project = PA AND fixVersion = 'puppet-agent #{vars[:puppet_agent_release]}')) AND status = Resolved"
+  vars[:tickets_to_close] = build_query(vars, tickets)
+  vars[:tickets_to_make_public] = build_query(vars, "#{tickets} AND level in (Internal,Confidential)")
+
   # Jira authentication - do this after validating other params, so user doesn't need to
   # enter password only to find out they typo'd one of the above
   vars.merge(Pkg::Util::Jira.get_auth_vars)
@@ -44,16 +73,15 @@ def create_agent_release_tickets(jira, vars)
 
 2) For each component and puppet-agent, ensure there is a *next* version. Often this will be the next z in x.y.z. However, if we are jumping to a new x or y release that skips an existing z version in jira, make sure those tickets are reassigned to the correct fix version, and the version is closed. For example, if we have tickets with fixVersion 4.3.3, but we decide to go from 4.3.2 to 4.4.0, then we need to reassign the tickets assigned to 4.3.3 and close that version in JIRA.
 
-3) Create a public pair of queries for inclusion in the release notes/announcement. These allow easy tracking as new bugs come in for a particular version and allow everyone to see the list of changes slated for the next release (Paste their URLs into the "Release story" ticket).
+3) Create a public pair of queries for inclusion in the release notes/announcement. These allow easy tracking as new bugs come in for a particular version and allow everyone to see the list of changes slated for the next release (Paste their URLs into the "Prepare long form release notes and short form release story" ticket).
 
-  {{affectedVersion in ("puppet-agent #{vars[:puppet_agent_release]}", "PUP #{vars[:puppet_release]}", "FACT #{vars[:facter_release]}", "HI #{vars[:hiera_release]}", "MCO #{vars[:mcollective_release]}", "PCP #{vars[:pcp_release]}")}}, Save as "Introduced in puppet-agent #{vars[:puppet_agent_release]}", click Details, add permission for Everyone
-   {{fixVersion in ("puppet-agent #{vars[:puppet_agent_release]}", "PUP #{vars[:puppet_release]}", "FACT #{vars[:facter_release]}", "HI #{vars[:hiera_release]}", "MCO #{vars[:mcollective_release]}", "PCP #{vars[:pcp_release]}")}}, Save as "Fixed in puppet-agent #{vars[:puppet_agent_release]}", click Details, add permission for Everyone
-
+  {{affectedVersion in ("puppet-agent #{vars[:puppet_agent_release]}", "PUP #{vars[:puppet_release]}", "FACT #{vars[:facter_release]}", "HI #{vars[:hiera_release]}", "MCO #{vars[:mcollective_release]}", "pxp-agent #{vars[:pcp_release]}")}}, Save as "Introduced in puppet-agent #{vars[:puppet_agent_release]}", click Details, add permission for Everyone
+   {{fixVersion in ("puppet-agent #{vars[:puppet_agent_release]}", "PUP #{vars[:puppet_release]}", "FACT #{vars[:facter_release]}", "HI #{vars[:hiera_release]}", "MCO #{vars[:mcollective_release]}", "pxp-agent #{vars[:pcp_release]}")}}, Save as "Fixed in puppet-agent #{vars[:puppet_agent_release]}", click Details, add permission for Everyone
 DOC
 
   description[:reconcile_git_jira] = <<-DOC
 1) Ensure that all tickets targeted at this release for all components are resolved.
-  * Use the following filter to view all tickets for all components for this release: https://tickets.puppetlabs.com/issues/?jql=fixVersion%20in%20(%22puppet-agent%20#{vars[:puppet_agent_release]}%22%2C%20%22PUP%20#{vars[:puppet_release]}%22%2C%20%22FACT%20#{vars[:facter_release]}%22%2C%20%22HI%20#{vars[:hiera_release]}%22%2C%20%22MCO%20#{vars[:mcollective_release]}%22%2C%20%22PCP%20#{vars[:pcp_release]}%22%29
+  * Use the following filter to view all tickets for all components for this release: #{vars[:fixed_in][:all]}
   * Any tickets which are not resolved should be brought to the attention of the appropriate scrum team so they can be resolved for the release.
   * Verify tickets have release notes. Ping devs to update tickets with missing release notes.
 
@@ -108,6 +136,23 @@ DOC
 Collaborating with product for release story
 
 Once git commits and JIRA tickets have been reconciled and the public JIRA filters exist for the release, mark this ticket as ready for engineering and hand it off to the Docs team.
+
+h3. Component Queries
+
+Introduced in puppet #{vars[:puppet_release]} [#{vars[:introduced_in][:puppet]}|#{vars[:introduced_in][:puppet]}]
+Fixed in puppet #{vars[:puppet_release]} [#{vars[:fixed_in][:puppet]}|#{vars[:fixed_in][:puppet]}]
+
+Introduced in facter #{vars[:facter_release]} [#{vars[:introduced_in][:facter]}|#{vars[:introduced_in][:facter]}]
+Fixed in facter #{vars[:facter_release]} [#{vars[:fixed_in][:facter]}|#{vars[:fixed_in][:facter]}]
+
+Introduced in hiera #{vars[:hiera_release]} [#{vars[:introduced_in][:hiera]}|#{vars[:introduced_in][:hiera]}]
+Fixed in hiera #{vars[:hiera_release]} [#{vars[:fixed_in][:hiera]}|#{vars[:fixed_in][:hiera]}]
+
+Introduced in mcollective #{vars[:mcollective_release]} [#{vars[:introduced_in][:mcollective]}|#{vars[:introduced_in][:mcollective]}]
+Fixed in mcollective #{vars[:mcollective_release]} [#{vars[:fixed_in][:mcollective]}|#{vars[:fixed_in][:mcollective]}]
+
+Introduced in pxp-agent #{vars[:pcp_release]} [#{vars[:introduced_in][:pcp]}|#{vars[:introduced_in][:pcp]}]
+Fixed in pxp-agent #{vars[:pcp_release]} [#{vars[:fixed_in][:pcp]}|#{vars[:fixed_in][:pcp]}]
 
 Dependencies:
   * Reconcile git commits and JIRA tickets
@@ -236,7 +281,7 @@ DOC
   description[:close_tickets] = <<-DOC
 Close any tickets that have been resolved for the release, and mark the versions as resolved.
 
-https://tickets.puppetlabs.com/issues/?jql=((project%20%3D%20PUP%20AND%20fixVersion%20%3D%20%22PUP%20#{vars[:puppet_release]}%22)%20OR%20(project%20%3D%20FACT%20AND%20fixVersion%20%3D%20%22FACT%20#{vars[:facter_release]}%22)%20OR%20(project%20%3D%20HI%20AND%20fixVersion%20%3D%20%22HI%20#{vars[:hiera_release]}%22)%20OR%20(project%20%3D%20MCO%20AND%20fixVersion%20%3D%20%22MCO%20#{vars[:mcollective_release]}%22)%20OR%20(project%20%3D%20PCP%20AND%20fixVersion%20%3D%20%22PCP%20#{vars[:pcp_release]}%22)%20OR%20(project%20%3D%20PA%20AND%20fixVersion%20%3D%20%22puppet-agent%20#{vars[:puppet_agent_release]}%22))%20AND%20status%20%3D%20Resolved
+#{vars[:tickets_to_close]}
 
 1) There is a bulk edit at the top (a gear with the word "Tools"). Should you decide to take this route:
   * Select Bulk Change - All # issues
@@ -248,7 +293,7 @@ https://tickets.puppetlabs.com/issues/?jql=((project%20%3D%20PUP%20AND%20fixVers
 
 2) Make all tickets marked as internal in this release public. Use the following filter to view all tickets still marked as internal in this release:
 
-https://tickets.puppetlabs.com/issues/?jql=((project%20%3D%20PUP%20AND%20fixVersion%20%3D%20%22PUP%20#{vars[:puppet_release]}%22)%20OR%20(project%20%3D%20FACT%20AND%20fixVersion%20%3D%20%22FACT%20#{vars[:facter_release]}%22)%20OR%20(project%20%3D%20HI%20AND%20fixVersion%20%3D%20%22HI%20#{vars[:hiera_release]}%22)%20OR%20(project%20%3D%20MCO%20AND%20fixVersion%20%3D%20%22MCO%20#{vars[:mcollective_release]}%22)%20OR%20(project%20%3D%20PCP%20AND%20fixVersion%20%3D%20%22PCP%20#{vars[:pcp_release]}%22)%20OR%20(project%20%3D%20PA%20AND%20fixVersion%20%3D%20%22puppet-agent%20#{vars[:puppet_agent_release]}%22))%20AND%20status%20%3D%20Resolved%20AND%20level%20in%20%28Internal%2CConfidential%29
+#{vars[:tickets_to_make_public]}
 
 3) Once all tickets have been closed and made public, mark each component version going out as "Released" in the Project Admin -> Versions panel.
   * Ping Kenn Hussey or Steve Barlow to mark the puppet-agent version as released.

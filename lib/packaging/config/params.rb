@@ -84,6 +84,8 @@ module Pkg::Params
                   :msi_name,
                   :name,
                   :notify,
+                  :nuget_host,
+                  :nuget_repo_path,
                   :project,
                   :origversion,
                   :osx_build_host,
@@ -168,6 +170,8 @@ module Pkg::Params
               { :var => :gpg_key,                 :envvar => :GPG_KEY },
               { :var => :notify,                  :envvar => :NOTIFY },
               { :var => :osx_signing_cert,        :envvar => :OSX_SIGNING_CERT },
+              { :var => :nuget_host,              :envvar => :NUGET_HOST },
+              { :var => :nuget_repo_path,         :envvar => :NUGET_REPO },
               { :var => :osx_signing_keychain,    :envvar => :OSX_SIGNING_KEYCHAIN },
               { :var => :osx_signing_keychain_pw, :envvar => :OSX_SIGNING_KEYCHAIN_PW },
               { :var => :osx_signing_server,      :envvar => :OSX_SIGNING_SERVER },
@@ -246,4 +250,3 @@ module Pkg::Params
                    Please update this field in your project_data.yaml" }]
 
 end
-

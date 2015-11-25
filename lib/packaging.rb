@@ -12,6 +12,7 @@ module Pkg
   require 'packaging/rpm'
   require 'packaging/osx'
   require 'packaging/ips'
+  require 'packaging/nuget'
 
   # Load configuration defaults
   Pkg::Config.load_defaults
@@ -22,4 +23,3 @@ module Pkg
   Pkg::Config.issue_reassignments
   Pkg::Config.issue_deprecations
 end
-

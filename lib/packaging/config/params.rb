@@ -99,6 +99,7 @@ module Pkg::Params
                   :packaging_root,
                   :packaging_url,
                   :pbuild_conf,
+                  :pe_feature_branch,
                   :pe_name,
                   :pe_platforms,
                   :pe_version,
@@ -204,7 +205,8 @@ module Pkg::Params
               { :var => :team,                    :envvar => :TEAM },
               { :var => :update_version_file,     :envvar => :NEW_STYLE_PACKAGE },
               { :var => :yum_repo_path,           :envvar => :YUM_REPO },
-              { :var => :yum_host,                :envvar => :YUM_HOST }]
+              { :var => :yum_host,                :envvar => :YUM_HOST },
+              { :var => :pe_feature_branch,       :envvar => :PE_FEATURE_BRANCH }]
   # Default values that are supplied if the user does not supply them
   #
   # usage is the same as above
@@ -223,7 +225,8 @@ module Pkg::Params
               { :var => :ips_signing_cert,        :val => '$IPS_SIGNING_CERT' },
               { :var => :ips_inter_cert,          :val => '$IPS_INTER_CERT' },
               { :var => :ips_root_cert,           :val => '$IPS_ROOT_CERT' },
-              { :var => :ips_signing_key,         :val => '$IPS_SIGNING_KEY' }]
+              { :var => :ips_signing_key,         :val => '$IPS_SIGNING_KEY' },
+              { :var => :pe_feature_branch,       :val => false }]
 
   # These are variables which, over time, we decided to rename or replace. For
   # backwards compatibility, we assign the value of the old/deprecated

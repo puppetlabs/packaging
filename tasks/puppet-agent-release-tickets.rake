@@ -11,13 +11,13 @@ end
 def build_queries(vars, label)
   queries = {}
 
-  queries[:all]          = build_query(vars, "#{label} in ('puppet-agent #{vars[:puppet_agent_release]}', 'PUP #{vars[:puppet_release]}', 'FACT #{vars[:facter_release]}', 'HI #{vars[:hiera_release]}', 'MCO #{vars[:mcollective_release]}', 'pxp-agent #{vars[:pcp_release]}')")
+  queries[:all]          = build_query(vars, "#{label} in ('puppet-agent #{vars[:puppet_agent_release]}', 'PUP #{vars[:puppet_release]}', 'FACT #{vars[:facter_release]}', 'HI #{vars[:hiera_release]}', 'MCO #{vars[:mcollective_release]}', 'pxp-agent #{vars[:pxp_agent_release]}')")
   queries[:puppet_agent] = build_query(vars, "#{label} = 'puppet-agent #{vars[:puppet_agent_release]}'")
   queries[:puppet]       = build_query(vars, "#{label} = 'PUP #{vars[:puppet_release]}'")
   queries[:facter]       = build_query(vars, "#{label} = 'FACT #{vars[:facter_release]}'")
   queries[:hiera]        = build_query(vars, "#{label} = 'HI #{vars[:hiera_release]}'")
   queries[:mcollective]  = build_query(vars, "#{label} = 'MCO #{vars[:mcollective_release]}'")
-  queries[:pcp]          = build_query(vars, "#{label} = 'pxp-agent #{vars[:pcp_release]}'")
+  queries[:pxp_agent]    = build_query(vars, "#{label} = 'pxp-agent #{vars[:pxp_agent_release]}'")
 
   queries
 end
@@ -42,13 +42,13 @@ def get_agent_release_ticket_vars
   vars[:facter_release]       = Pkg::Util.get_var("FACTER_RELEASE")
   vars[:hiera_release]        = Pkg::Util.get_var("HIERA_RELEASE")
   vars[:mcollective_release]  = Pkg::Util.get_var("MCOLLECTIVE_RELEASE")
-  vars[:pcp_release]          = Pkg::Util.get_var("PCP_RELEASE")
+  vars[:pxp_agent_release]    = Pkg::Util.get_var("PXP_AGENT_RELEASE")
   vars[:date]                 = Pkg::Util.get_var("DATE")
 
   vars[:fixed_in]      = build_queries(vars, "fixVersion")
   vars[:introduced_in] = build_queries(vars, "affectedVersion")
 
-  tickets = "((project = PUP AND fixVersion = 'PUP #{vars[:puppet_release]}') OR (project = FACT AND fixVersion = 'FACT #{vars[:facter_release]}') OR (project = HI AND fixVersion = 'HI #{vars[:hiera_release]}') OR (project = MCO AND fixVersion = 'MCO #{vars[:mcollective_release]}') OR (project = PCP AND fixVersion = 'pxp-agent #{vars[:pcp_release]}') OR (project = PA AND fixVersion = 'puppet-agent #{vars[:puppet_agent_release]}')) AND status = Resolved"
+  tickets = "((project = PUP AND fixVersion = 'PUP #{vars[:puppet_release]}') OR (project = FACT AND fixVersion = 'FACT #{vars[:facter_release]}') OR (project = HI AND fixVersion = 'HI #{vars[:hiera_release]}') OR (project = MCO AND fixVersion = 'MCO #{vars[:mcollective_release]}') OR (project = PCP AND fixVersion = 'pxp-agent #{vars[:pxp_agent_release]}') OR (project = PA AND fixVersion = 'puppet-agent #{vars[:puppet_agent_release]}')) AND status = Resolved"
   vars[:tickets_to_close] = build_query(vars, tickets)
   vars[:tickets_to_make_public] = build_query(vars, "#{tickets} AND level in (Internal,Confidential)")
 
@@ -75,8 +75,8 @@ def create_agent_release_tickets(jira, vars)
 
 3) Create a public pair of queries for inclusion in the release notes/announcement. These allow easy tracking as new bugs come in for a particular version and allow everyone to see the list of changes slated for the next release (Paste their URLs into the "Prepare long form release notes and short form release story" ticket).
 
-  {{affectedVersion in ("puppet-agent #{vars[:puppet_agent_release]}", "PUP #{vars[:puppet_release]}", "FACT #{vars[:facter_release]}", "HI #{vars[:hiera_release]}", "MCO #{vars[:mcollective_release]}", "pxp-agent #{vars[:pcp_release]}")}}, Save as "Introduced in puppet-agent #{vars[:puppet_agent_release]}", click Details, add permission for Everyone
-   {{fixVersion in ("puppet-agent #{vars[:puppet_agent_release]}", "PUP #{vars[:puppet_release]}", "FACT #{vars[:facter_release]}", "HI #{vars[:hiera_release]}", "MCO #{vars[:mcollective_release]}", "pxp-agent #{vars[:pcp_release]}")}}, Save as "Fixed in puppet-agent #{vars[:puppet_agent_release]}", click Details, add permission for Everyone
+  {{affectedVersion in ("puppet-agent #{vars[:puppet_agent_release]}", "PUP #{vars[:puppet_release]}", "FACT #{vars[:facter_release]}", "HI #{vars[:hiera_release]}", "MCO #{vars[:mcollective_release]}", "pxp-agent #{vars[:pxp_agent_release]}")}}, Save as "Introduced in puppet-agent #{vars[:puppet_agent_release]}", click Details, add permission for Everyone
+   {{fixVersion in ("puppet-agent #{vars[:puppet_agent_release]}", "PUP #{vars[:puppet_release]}", "FACT #{vars[:facter_release]}", "HI #{vars[:hiera_release]}", "MCO #{vars[:mcollective_release]}", "pxp-agent #{vars[:pxp_agent_release]}")}}, Save as "Fixed in puppet-agent #{vars[:puppet_agent_release]}", click Details, add permission for Everyone
 DOC
 
   description[:reconcile_git_jira] = <<-DOC
@@ -90,7 +90,7 @@ DOC
   * cd ~/work
   * git clone https://github.com/puppetlabs/ticketmatch
   * gem install highline (if you haven't already)
-  * cd ~/work/<component> for each of puppet, facter, hiera, marionette-collective, pxp-agent, cpp-pcp-client, and puppet-agent
+  * cd ~/work/<component> for each of puppet, facter, hiera, marionette-collective, pxp-agent, and puppet-agent
   * ruby ../ticketmatch/ticketmatch.rb
     Enter Git From Rev: <previous git tag> (i.e. 4.1.0)
     Enter Git To Rev: |master| stable
@@ -152,8 +152,8 @@ Fixed in hiera #{vars[:hiera_release]} [#{vars[:fixed_in][:hiera]}|#{vars[:fixed
 Introduced in mcollective #{vars[:mcollective_release]} [#{vars[:introduced_in][:mcollective]}|#{vars[:introduced_in][:mcollective]}]
 Fixed in mcollective #{vars[:mcollective_release]} [#{vars[:fixed_in][:mcollective]}|#{vars[:fixed_in][:mcollective]}]
 
-Introduced in pxp-agent #{vars[:pcp_release]} [#{vars[:introduced_in][:pcp]}|#{vars[:introduced_in][:pcp]}]
-Fixed in pxp-agent #{vars[:pcp_release]} [#{vars[:fixed_in][:pcp]}|#{vars[:fixed_in][:pcp]}]
+Introduced in pxp-agent #{vars[:pxp_agent_release]} [#{vars[:introduced_in][:pxp_agent]}|#{vars[:introduced_in][:pxp_agent]}]
+Fixed in pxp-agent #{vars[:pxp_agent_release]} [#{vars[:fixed_in][:pxp_agent]}|#{vars[:fixed_in][:pxp_agent]}]
 
 Dependencies:
   * Reconcile git commits and JIRA tickets
@@ -487,7 +487,7 @@ Tickets are created by specifying a number of environment variables, e.g.:
 
 $ cd ~/work/puppet
 $ gem install jira-ruby
-$ rake pl:puppet_agent_release_tickets BUILDER=melissa DEVELOPER=kylo WRITER=nick.fagerlund OWNER=eric.sorenson TESTER=john.duarte PROJECT_MANAGER=steven.barlow PUPPET_AGENT_RELEASE=1.2.7 PUPPET_RELEASE=4.2.3 FACTER_RELEASE=3.1.1 HIERA_RELEASE=3.0.4 MCOLLECTIVE_RELEASE=2.8.6 PCP_RELEASE=0.0.1 DATE=2014-04-01 JIRA_USER=kylo
+$ rake pl:puppet_agent_release_tickets BUILDER=melissa DEVELOPER=kylo WRITER=nick.fagerlund OWNER=eric.sorenson TESTER=john.duarte PROJECT_MANAGER=steven.barlow PUPPET_AGENT_RELEASE=1.2.7 PUPPET_RELEASE=4.2.3 FACTER_RELEASE=3.1.1 HIERA_RELEASE=3.0.4 MCOLLECTIVE_RELEASE=2.8.6 PXP_AGENT_RELEASE=0.0.1 DATE=2014-04-01 JIRA_USER=kylo
 
 The BUILDER/DEVELOPER/WRITER/OWNER/TESTER/PROJECT_MANAGER params must be valid jira usernames.
 

@@ -24,9 +24,7 @@ def build_queries(vars, label)
 end
 
 def get_agent_release_ticket_vars
-  vars = {}
-
-  vars[:site]            = Pkg::Util.get_var("JIRA_INSTANCE") || "https://tickets.puppetlabs.com"
+  vars = Pkg::Util::Jira.get_auth_vars
 
   # roles
   vars[:builder]         = Pkg::Util.get_var("BUILDER")
@@ -54,9 +52,7 @@ def get_agent_release_ticket_vars
   vars[:tickets_to_close] = build_query(vars, tickets)
   vars[:tickets_to_make_public] = build_query(vars, "#{tickets} AND level in (Internal,Confidential)")
 
-  # Jira authentication - do this after validating other params, so user doesn't need to
-  # enter password only to find out they typo'd one of the above
-  vars.merge(Pkg::Util::Jira.get_auth_vars)
+  vars
 end
 
 def validate_agent_release_ticket_vars(jira, vars)

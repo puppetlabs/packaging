@@ -89,6 +89,7 @@ DOC
 
   * cd ~/work
   * git clone https://github.com/puppetlabs/ticketmatch
+  * gem install highline (if you haven't already)
   * cd ~/work/<component> for each of puppet, facter, hiera, marionette-collective, pxp-agent, cpp-pcp-client, and puppet-agent
   * ruby ../ticketmatch/ticketmatch.rb
     Enter Git From Rev: <previous git tag> (i.e. 4.1.0)

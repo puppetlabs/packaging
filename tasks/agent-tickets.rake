@@ -90,6 +90,22 @@ Jenkins jobs should be updated to include the new target depending on which tier
 This is for all puppet-agent jenkins pipelines.
 DOC
 
+  description[:internal_agent_ship] = <<-DOC
+Edit the job configuration at http://jenkins-compose.delivery.puppetlabs.net/job/internal_puppet-agent_ship/configure to include #{vars[:platform_tag]}.
+
+This will enable shipping agent builds for #{vars[:platform_tag]} to http://agent-downloads.delivery.puppetlabs.net.
+DOC
+
+  description[:s3_agent_ship] = <<-DOC
+Edit the job configuration at http://jenkins-compose.delivery.puppetlabs.net/job/puppet-agent_s3-ship/configure to include #{vars[:platform_tag]}.
+
+This will enable shipping agent builds for #{vars[:platform_tag]} to S3.
+DOC
+
+  description[:build_data] = <<-DOC
+Update either the foss_platforms or pe_platforms list in puppet-agent ext/build_defaults.yaml so it can be properly whitelisted for nightly builds.
+DOC
+
   description[:pe_jenkins] = <<-DOC
 Jenkins jobs should be updated to include the new target depending on which tier the target falls into (nightly, per commit, etc.).
 
@@ -259,27 +275,51 @@ DOC
       :blocked_by   => ['hiera_test_targets'],
     },
     {
+      :short_name   => 'build_data',
+      :project      => 'RE',
+      :summary      => "Update build_data to whitelist #{vars[:platform_tag]} for nightlies",
+      :description  => description[:build_data],
+      :story_points => '1',
+      :blocked_by   => ['puppet_agent_configuration', 'pooler_image'],
+    },
+    {
       :short_name   => 'platform_jenkins',
       :project      => 'QENG',
       :summary      => "Update platform puppet-agent jenkins pipelines to include #{vars[:platform_tag]}",
       :description  => description[:jenkins],
       :story_points => '1',
-      :blocked_by   => ['puppet_agent_configuration', 'puppet_pre_suites', 'facter_pre_suites', 'hiera_pre_suites', 'pooler_image', 'decide_tier'],
+      :blocked_by   => ['build_data', 'puppet_agent_configuration', 'puppet_pre_suites', 'facter_pre_suites', 'hiera_pre_suites', 'pooler_image', 'decide_tier'],
       :components   => ['CI', 'Scrum Team - Client Platform'],
+    },
+    {
+      :short_name   => 'internal_agent_ship',
+      :project      => 'RE',
+      :summary      => "Update internal puppet-agent ship job to include #{vars[:platform_tag]}",
+      :description  => description[:internal_agent_ship],
+      :story_points => '1',
+      :blocked_by   => ['platform_jenkins'],
+    },
+    {
+      :short_name   => 's3_agent_ship',
+      :project      => 'RE',
+      :summary      => "Update S3 puppet-agent ship job to include #{vars[:platform_tag]}",
+      :description  => description[:s3_agent_ship],
+      :story_points => '1',
+      :blocked_by   => ['platform_jenkins'],
     },
     {
       :short_name   => 'pe_repo',
       :project      => 'PE',
       :summary      => "Add #{vars[:platform_tag]} to pe_repo module",
       :description  => description[:pe_repo],
-      :blocked_by   => ['platform_jenkins', 'puppet_pre_suites', 'facter_pre_suites', 'hiera_pre_suites'],
+      :blocked_by   => ['platform_jenkins', 'puppet_pre_suites', 'facter_pre_suites', 'hiera_pre_suites', 'internal_agent_ship', 's3_agent_ship'],
     },
     {
       :short_name   => 'pe_jenkins',
       :project      => 'QENG',
       :summary      => "Update PE Integration jenkins pipelines to include #{vars[:platform_tag]}",
       :description  => description[:pe_integration],
-      :blocked_by   => ['pe_repo', 'platform_jenkins'],
+      :blocked_by   => ['pe_repo', 'platform_jenkins', 'internal_agent_ship', 's3_agent_ship'],
       :story_points => '1',
       :components   => ['CI', 'Scrum Team - Integration'],
     },

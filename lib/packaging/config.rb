@@ -344,6 +344,13 @@ module Pkg
           end
         end
       end
+
+      def yum_target_path(feature_branch = false)
+        if feature_branch || Pkg::Config.pe_feature_branch
+          return "#{Pkg::Config.yum_repo_path}/#{Pkg::Config.pe_version}/feature/repos/"
+        end
+        "#{Pkg::Config.yum_repo_path}/#{Pkg::Config.pe_version}/repos/"
+      end
     end
   end
 end

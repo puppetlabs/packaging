@@ -2,13 +2,17 @@ if Pkg::Config.build_pe
   namespace :pe do
     desc "ship PE rpms to #{Pkg::Config.yum_host}"
     task :ship_rpms => "pl:fetch" do
+      puts "Shipping packages to #{Pkg::Config.yum_target_path}"
       Pkg::Util::File.empty_dir?("pkg/pe/rpm") and fail "The 'pkg/pe/rpm' directory has no packages. Did you run rake pe:deb?"
-      target_path = ENV['YUM_REPO'] ? ENV['YUM_REPO'] : "#{Pkg::Config.yum_repo_path}/#{Pkg::Config.pe_version}/repos/"
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to('pkg/pe/rpm/', Pkg::Config.yum_host, target_path)
+        Pkg::Util::Net.rsync_to('pkg/pe/rpm/', Pkg::Config.yum_host, Pkg::Config.yum_target_path)
       end
       if Pkg::Config.team == 'release'
-        Rake::Task["pe:remote:update_yum_repo"].invoke
+
+        # If this is not a feature branch, we need to link the shipped packages into the feature repos,
+        # then update their metadata as well.
+        Pkg::Util::RakeUtils.invoke_task("pe:remote:link_shipped_rpms_to_feature_repo") unless Pkg::Config.pe_feature_branch
+        Pkg::Util::RakeUtils.invoke_task("pe:remote:update_yum_repo")
       end
     end
 
@@ -129,17 +133,23 @@ if Pkg::Config.build_pe
     namespace :remote do
       desc "Update remote rpm repodata for PE on #{Pkg::Config.yum_host}"
       task :update_yum_repo => "pl:fetch" do
-        repo_base_path = File.join(Pkg::Config.yum_repo_path, Pkg::Config.pe_version, "repos")
 
-        # This entire command is going to be passed across SSH, but it's unwieldy on a
-        # single line. By breaking it into a series of concatenated strings, we can maintain
-        # a semblance of formatting and structure (nevermind readability).
-        command  = %(for dir in #{repo_base_path}/{#{rpm_family_and_version.join(",")}}-*; do)
-        command += %(  sudo createrepo --checksum=sha --quiet --database --update $dir; )
-        command += %(done; )
-        command += %(sync)
+        # Paths to the repos. If this is *not* a feature branch, we need to also
+        # Update the feature branch repos in addition to the primary repos.
+        repo_base_paths = Array[Pkg::Config.yum_target_path]
+        repo_base_paths << Pkg::Config.yum_target_path(true) unless Pkg::Config.pe_feature_branch
 
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, command)
+        repo_base_paths.each do |repo_base_path|
+          # This entire command is going to be passed across SSH, but it's unwieldy on a
+          # single line. By breaking it into a series of concatenated strings, we can maintain
+          # a semblance of formatting and structure (nevermind readability).
+          command  = %(for dir in #{repo_base_path}/{#{rpm_family_and_version.join(",")}}-*; do)
+          command += %(  sudo createrepo --checksum=sha --quiet --database --update $dir; )
+          command += %(done; )
+          command += %(sync)
+
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, command)
+        end
       end
 
       #   the repsimple application is a small wrapper around reprepro, the purpose of
@@ -187,6 +197,21 @@ if Pkg::Config.build_pe
         puts "Cleaning up apt repo 'incoming' dir on #{Pkg::Config.apt_host}"
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "rm -r #{incoming_dir}")
 
+      end
+
+      # Throw another tire on the fire
+      desc "Remotely link shipped packages into feature repo on #{Pkg::Config.yum_host}"
+      task :link_shipped_rpms_to_feature_repo => "pl:fetch" do
+        next if Pkg::Config.pe_feature_branch
+        repo_base_path = Pkg::Config.yum_target_path
+        feature_repo_path = Pkg::Config.yum_target_path(true)
+        pkgs = FileList['pkg/pe/rpm/**/*.rpm'].select { |path| path.gsub!('pkg/pe/rpm/', '') }
+        command  = %(for pkg in #{pkgs.join(' ')}; do)
+        command += %(  sudo ln -f "#{repo_base_path}/$( dirname ${pkg} )/$( basename ${pkg} )" "#{feature_repo_path}/$( dirname ${pkg} )/" ; )
+        command += %(done; )
+        command += %(sync)
+
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, command)
       end
     end
   end

@@ -250,15 +250,12 @@ namespace :pl do
 
     desc "Retrieve packages built by jenkins, sign, and ship all!"
     task :uber_ship => "pl:fetch" do
-      # NOTE: remote:deploy_apt_repo should be added to this after
-      # remote:update_apt_repo. We need to manually deploy until we fix the
-      # deployment code, the current rsyncing the whole repo takes too much
-      # time and results in an outage for the repos. -- morgan, 2015-11-17
       uber_tasks = %w(
         jenkins:retrieve
         jenkins:sign_all
         uber_ship
         remote:update_apt_repo
+        remote:deploy_apt_repo
         remote:update_yum_repo
         remote:update_ips_repo
       )

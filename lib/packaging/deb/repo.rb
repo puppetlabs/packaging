@@ -199,7 +199,8 @@ SignWith: #{Pkg::Config.gpg_key}"
         --update
         --verbose
         --perms
-        --chmod='Dugo-s,Dug=rwx,Do=rx,Fug=rw,Fo=r'
+        --no-group
+        --chmod='Dug=rwx,Do=rx,Fug=rw,Fo=r'
         --exclude='dists/*-*'
         --exclude='pool/*-*'
       )
@@ -232,7 +233,7 @@ SignWith: #{Pkg::Config.gpg_key}"
       rsync_command = repo_deployment_command(apt_path, destination_staging_path, destination_server, dryrun)
       cp_command = repo_deployment_command(destination_staging_path, apt_path, nil, dryrun)
       # Defensive permissions setting are defensive
-      chmod_command = "sudo chmod -R g=rwX #{destination_staging_path}; sudo chmod -R g=rwX #{apt_path}"
+      chmod_command = "sudo chmod -R g=rwX #{destination_staging_path}; sudo chmod -R g-s,g=rwX #{apt_path}"
 
       if dryrun
         puts "[DRYRUN] not executing #{chmod_command} on #{destination_server}"

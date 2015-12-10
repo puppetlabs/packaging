@@ -206,7 +206,7 @@ DOC
     },
     {
       :short_name   => 'puppet_agent_configuration',
-      :project      => 'RE',
+      :project      => 'PA',
       :summary      => "Add #{vars[:platform_tag]} platform definition to puppet-agent",
       :description  => description[:puppet_agent_configuration],
       :story_points => '2',
@@ -353,7 +353,7 @@ platform will happen in a separate epic.
 DOC
 
   # Values for the main ticket
-  parent_project  = vars[:pe_only] == "true" ? 'RE' : 'CPR'
+  parent_project  = 'PA'
   parent_assignee = vars[:username]
 
   jira.user(parent_assignee)
@@ -417,8 +417,8 @@ DOC
     if subticket[:epic_parent]
       subticket[:epic_parent] = subticket_hash[subticket[:epic_parent]]['key']
     else # otherwise, we definitely need to link it to the main epic ticket somehow
-      if (subticket[:project] == 'RE' || subticket[:project] == 'CPR') && (!subticket[:type] || subticket[:type] != 'Epic')
-        # If the ticket is not an epic and is a part of the RE or CPR projects, we can make it a part of the main epic
+      if subticket[:project] == 'PA' && (!subticket[:type] || subticket[:type] != 'Epic')
+        # Add any PA tickets to this epic
         subticket[:epic_parent] = parent_key
       elsif !subticket[:parent]
         # If the ticket isn't a sub-task (meaning it doesn't have a parent, otherwise the parent ticket will be linked against

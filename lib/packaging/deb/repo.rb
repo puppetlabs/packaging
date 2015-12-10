@@ -189,6 +189,9 @@ SignWith: #{Pkg::Config.gpg_key}"
       path = Pathname.new(origin_path)
       dest_path = Pathname.new(destination_path)
 
+      # You may think "rsync doesn't actually remove the sticky bit, let's
+      # remove the Dugo-s from the chmod". However, that will make your rsyncs
+      # fail due to permission errors.
       options = %w(
         rsync
         --hard-links
@@ -200,7 +203,7 @@ SignWith: #{Pkg::Config.gpg_key}"
         --verbose
         --perms
         --no-group
-        --chmod='Dug=rwx,Do=rx,Fug=rw,Fo=r'
+        --chmod='Dugo-s,Dug=rwx,Do=rx,Fug=rw,Fo=r'
         --exclude='dists/*-*'
         --exclude='pool/*-*'
       )

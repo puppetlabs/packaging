@@ -102,6 +102,10 @@ Edit the job configuration at http://jenkins-compose.delivery.puppetlabs.net/job
 This will enable shipping agent builds for #{vars[:platform_tag]} to S3.
 DOC
 
+  description[:platform_hash] = <<-DOC
+Update the hash at https://github.com/puppetlabs/packaging/blob/master/lib/packaging/config/platforms.rb to include the #{vars[:platform_tag]}.
+DOC
+
   description[:build_data] = <<-DOC
 Update either the foss_platforms or pe_platforms list in puppet-agent ext/build_defaults.yaml so it can be properly whitelisted for nightly builds.
 DOC
@@ -275,12 +279,20 @@ DOC
       :blocked_by   => ['hiera_test_targets'],
     },
     {
+      :short_name   => 'platform_hash',
+      :project      => 'RE',
+      :summary      => "Update packaging platform hash to include #{vars[:platform_tag]}",
+      :description  => description[:platform_hash],
+      :story_points => '1',
+      :blocked_by   => ['puppet_agent_configuration', 'pooler_image'],
+    },
+    {
       :short_name   => 'build_data',
       :project      => 'RE',
       :summary      => "Update build_data to whitelist #{vars[:platform_tag]} for nightlies",
       :description  => description[:build_data],
       :story_points => '1',
-      :blocked_by   => ['puppet_agent_configuration', 'pooler_image'],
+      :blocked_by   => ['puppet_agent_configuration', 'pooler_image', 'platform_hash'],
     },
     {
       :short_name   => 'platform_jenkins',

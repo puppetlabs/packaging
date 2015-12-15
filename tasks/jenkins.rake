@@ -257,6 +257,7 @@ namespace :pl do
         remote:update_apt_repo
         remote:deploy_apt_repo
         remote:update_yum_repo
+        remote:deploy_yum_repo
         remote:update_ips_repo
       )
       uber_tasks.map { |t| "pl:#{t}" }.each { |t| Rake::Task[t].invoke }

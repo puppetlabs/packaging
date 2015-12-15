@@ -141,6 +141,7 @@ module Pkg::Params
                   :yum_repo_path,
                   :yum_repo_name,
                   :yum_repo_command,
+                  :yum_staging_server,
   ]
 
   # Environment variable overrides for Pkg::Config parameters
@@ -206,6 +207,7 @@ module Pkg::Params
               { :var => :update_version_file,     :envvar => :NEW_STYLE_PACKAGE },
               { :var => :yum_repo_path,           :envvar => :YUM_REPO },
               { :var => :yum_host,                :envvar => :YUM_HOST },
+              { :var => :yum_staging_server,      :envvar => :YUM_STAGING_SERVER },
               { :var => :pe_feature_branch,       :envvar => :PE_FEATURE_BRANCH }]
   # Default values that are supplied if the user does not supply them
   #
@@ -236,6 +238,7 @@ module Pkg::Params
   #
   REASSIGNMENTS = [{ :oldvar => :name,                   :newvar => :project },
                    { :oldvar => :yum_host,               :newvar => :tar_host },
+                   { :oldvar => :yum_staging_server,     :newvar => :yum_host },
                    { :oldvar => :gem_devel_dependencies, :newvar => :gem_development_dependencies },
                    { :oldvar => :pe_name,                :newvar => :project },
                    { :oldvar => :project,                :newvar => :gem_name },

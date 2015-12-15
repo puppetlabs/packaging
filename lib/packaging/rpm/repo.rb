@@ -29,6 +29,69 @@ module Pkg::Rpm::Repo
       cmd << "done "
     end
 
+    # @deprecated this command will die a painful death when we are
+    #   able to sit down with Operations and refactor our distribution infra.
+    #   At a minimum, it should be refactored alongside its Debian counterpart
+    #   into something modestly more generic.
+    #   - Ryan McKern 11/2015
+    #
+    # @param origin_path [String] path for RPM repos on local filesystem
+    # @param destination_path [String] path for RPM repos on remote filesystem
+    # @param destination [String] remote host to send rsynced content to. If
+    #        nil will copy locally
+    # @param dryrun [Boolean] whether or not to use '--dry-run'
+    #
+    # @return [String] an rsync command that can be executed on a remote host
+    #   to copy local content from that host to a remote node.
+    def repo_deployment_command(origin_path, destination_path, destination, dryrun = false)
+      path = Pathname.new(origin_path)
+      dest_path = Pathname.new(destination_path)
+
+      # You may think "rsync doesn't actually remove the sticky bit, let's
+      # remove the Dugo-s from the chmod". However, that will make your rsyncs
+      # fail due to permission errors.
+      options = %w(
+        rsync
+        --archive
+        --hard-links
+        --update
+        --human-readable
+        --itemize-changes
+        --progress
+        --verbose
+        --perms
+        --chmod='Dugo-s,Dug=rwx,Do=rx,Fug=rw,Fo=r'
+        --omit-dir-times
+        --no-group
+        --no-owner
+        --delay-updates
+      )
+
+      options << '--dry-run' if dryrun
+      options << path
+
+      if destination
+        options << "#{destination}:#{dest_path.parent}"
+      else
+        options << "#{dest_path.parent}"
+      end
+
+      options.join("\s")
+    end
+
+    # @param path [String] The path to mangle permissions for
+    # @param sudo [Boolean] Whether or not the chmod command
+    #   should be wrapped by sudo
+    #
+    # @return [String] a chmod command (optionally wrapped in sudo)
+    #   that can be executed on a remote host
+    #   to mangle/reset permissions for a given directory
+    def repo_permissions_command(path, sudo = true)
+      cmd = "chmod -R g-s,g=rwX #{path}"
+      cmd = "sudo -E #{cmd}" if sudo
+      cmd
+    end
+
     def create_repos(directory = "repos")
       Dir.chdir(directory) do
         createrepo = Pkg::Util::Tool.check_tool('createrepo')
@@ -168,6 +231,26 @@ module Pkg::Rpm::Repo
     ensure
       # Always remove the lock file, even if we've failed
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/.lock")
+    end
+
+    # @deprecated this command is exactly as awful as you think it is.
+    #   -- Ryan McKern 12/2015
+    #
+    # @param yum_path [String] path for rpm repos on local and remote filesystem
+    # @param origin_server [String] remote host to start the  rsync from
+    # @param destination_server [String] remote host to send rsynced content to
+    # @param dryrun [Boolean] whether or not to use '--dry-run'
+    def deploy_repos(yum_path, origin_server, destination_server, dryrun = false)
+      rsync_command = repo_deployment_command(yum_path, yum_path, destination_server, dryrun)
+      chmod_command = repo_permissions_command(yum_path)
+
+      if dryrun
+        puts "[DRYRUN] not executing #{chmod_command} on #{destination_server}"
+      else
+        Pkg::Util::Net.remote_ssh_cmd(destination_server, chmod_command)
+      end
+
+      Pkg::Util::Net.remote_ssh_cmd(origin_server, rsync_command)
     end
   end
 end

@@ -68,7 +68,9 @@ you need to create a new ticket, block this ticket against that one, and add in 
 DOC
 
   description[:genconfig] = <<-DOC
-Update the genconfig for beaker
+Update genconfig2 (https://github.com/puppetlabs/sqa-utils-gem) and beaker-hostgenerator (https://github.com/puppetlabs/beaker-hostgenerator) for #{vars[:platform_tag]}.
+
+Once https://tickets.puppetlabs.com/browse/QENG-3181 and https://tickets.puppetlabs.com/browse/QENG-2436 are resolved, only the beaker-hostgenerator updates will be required.
 DOC
 
   description[:beaker] = <<-DOC

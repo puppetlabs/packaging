@@ -75,10 +75,6 @@ DOC
 Make sure beaker can support running tests on #{vars[:platform_tag]}
 DOC
 
-  description[:test_targets] = <<-DOC
-Update the source code to have test targets for #{vars[:platform_tag]} in acceptance/node/configs so we can run acceptance tests on it.
-DOC
-
   description[:pre_suites] = <<-DOC
 Before we add #{vars[:platform_tag]} to the Jenkins pipelines, we want to make sure we can shake out any
 major problems that might come up. Manually run acceptance tests on the platform, and fix any big failures.
@@ -232,27 +228,6 @@ DOC
       :story_points => '2',
       :type         => 'New Feature',
       :blocked_by   => ['pooler_image'],
-    },
-    {
-      :short_name   => 'puppet_test_targets',
-      :project      => 'PUP',
-      :summary      => "Add node definition for #{vars[:platform_tag]} to Puppet",
-      :description  => description[:test_targets],
-      :story_points => '1',
-    },
-    {
-      :short_name   => 'facter_test_targets',
-      :project      => 'FACT',
-      :summary      => "Add node definition for #{vars[:platform_tag]} to Facter",
-      :description  => description[:test_targets],
-      :story_points => '1',
-    },
-    {
-      :short_name   => 'hiera_test_targets',
-      :project      => 'HI',
-      :summary      => "Add node definition for #{vars[:platform_tag]} to Hiera",
-      :description  => description[:test_targets],
-      :story_points => '1',
     },
     {
       :short_name   => 'puppet_pre_suites',

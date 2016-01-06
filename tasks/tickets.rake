@@ -256,6 +256,19 @@ Dependencies:
   * Packages pushed
 DOC
 
+  description[:update_pe_promotion] = <<-DOC
+Update promotion to proper PE pipeline version(s).
+
+  * Review promotion of branch pipelines to PE
+  * Update PE pipeline version(s) as needed in ci-job-configs.
+    These updates typically occur in coordination with a significant release of PE
+      * stable branch should promote to pipelines for previously released significant versions of PE (e.g 2015.3.x)
+      * master branch should promote to pipelines for unreleased significant versions of PE
+
+Dependencies:
+  * Packages pushed
+DOC
+
   description[:update_dujour] = <<-DOC
 Update dujour to notify users to use #{vars[:release]}.
 
@@ -347,6 +360,12 @@ DOC
       :summary     => 'Send out announcements',
       :description => description[:send_announcements],
       :assignee    => vars[:owner]
+    },
+    {
+      :projects    => ['PA'],  # Only Puppet Agent has this step
+      :summary     => "Update branch promotion to proper PE version(s)",
+      :description => description[:update_pe_promotion],
+      :assignee    => vars[:tester]
     },
     {
       :projects    => ['PDB', 'SERVER'],  # Only PDB and puppet-server have this step

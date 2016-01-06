@@ -107,11 +107,6 @@ Jenkins jobs should be updated to include the new target depending on which tier
 This is for all PE Integration jenkins pipelines.
 DOC
 
-
-  description[:pe_integration] = <<-DOC
-If #{vars[:platform_tag]} is also getting into PE, which it for sure should if it's an agent platform, we need to add it to the pe integration tests
-DOC
-
   description[:pe_repo] = <<-DOC
 pe_repo needs to be udpated to support installing the agent package on #{vars[:platform_tag]}
 DOC
@@ -273,12 +268,11 @@ DOC
     },
     {
       :short_name   => 'pe_jenkins',
-      :project      => 'QENG',
+      :project      => 'PE',
       :summary      => "Update PE Integration jenkins pipelines to include #{vars[:platform_tag]}",
-      :description  => description[:pe_integration],
+      :description  => description[:pe_jenkins],
       :blocked_by   => ['pe_repo', 'platform_jenkins', 'internal_agent_ship', 's3_agent_ship'],
       :story_points => '1',
-      :components   => ['CI', 'Scrum Team - Integration'],
     },
     {
       :short_name   => 'module_support',

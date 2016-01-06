@@ -75,11 +75,6 @@ DOC
 Make sure beaker can support running tests on #{vars[:platform_tag]}
 DOC
 
-  description[:pre_suites] = <<-DOC
-Before we add #{vars[:platform_tag]} to the Jenkins pipelines, we want to make sure we can shake out any
-major problems that might come up. Manually run acceptance tests on the platform, and fix any big failures.
-DOC
-
   description[:platform_jenkins] = <<-DOC
 Jenkins jobs should be updated to include the new target depending on which tier the target falls into (nightly, per commit, etc.).
 
@@ -228,30 +223,6 @@ DOC
       :story_points => '2',
       :type         => 'New Feature',
       :blocked_by   => ['pooler_image'],
-    },
-    {
-      :short_name   => 'puppet_pre_suites',
-      :project      => 'PUP',
-      :summary      => "Get pre-suites working for #{vars[:platform_tag]} for Puppet",
-      :description  => description[:pre_suites],
-      :story_points => '2',
-      :blocked_by   => ['puppet_test_targets'],
-    },
-    {
-      :short_name   => 'facter_pre_suites',
-      :project      => 'FACT',
-      :summary      => "Get pre-suites working for #{vars[:platform_tag]} for Facter",
-      :description  => description[:pre_suites],
-      :story_points => '2',
-      :blocked_by   => ['facter_test_targets'],
-    },
-    {
-      :short_name   => 'hiera_pre_suites',
-      :project      => 'HI',
-      :summary      => "Get pre-suites working for #{vars[:platform_tag]} for Hiera",
-      :description  => description[:pre_suites],
-      :story_points => '2',
-      :blocked_by   => ['hiera_test_targets'],
     },
     {
       :short_name   => 'platform_hash',

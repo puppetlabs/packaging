@@ -67,10 +67,8 @@ This means you'll have to verify the build to resolve this ticket. If vanagon do
 you need to create a new ticket, block this ticket against that one, and add in vanagon support!
 DOC
 
-  description[:genconfig] = <<-DOC
-Update genconfig2 (https://github.com/puppetlabs/sqa-utils-gem) and beaker-hostgenerator (https://github.com/puppetlabs/beaker-hostgenerator) for #{vars[:platform_tag]}.
-
-Once https://tickets.puppetlabs.com/browse/QENG-3181 and https://tickets.puppetlabs.com/browse/QENG-2436 are resolved, only the beaker-hostgenerator updates will be required.
+  description[:hostgenerator] = <<-DOC
+Update beaker-hostgenerator (https://github.com/puppetlabs/beaker-hostgenerator) for #{vars[:platform_tag]}.
 DOC
 
   description[:beaker] = <<-DOC
@@ -219,10 +217,10 @@ DOC
       :blocked_by   => ['c_toolchain'],
     },
     {
-      :short_name   => 'genconfig',
+      :short_name   => 'hostgenerator',
       :project      => 'QENG',
-      :summary      => "Add #{vars[:platform_tag]} to genconfig",
-      :description  => description[:genconfig],
+      :summary      => "Add #{vars[:platform_tag]} to beaker-hostgenerator",
+      :description  => description[:hostgenerator],
       :story_points => '1',
       :blocked_by   => ['pooler_image'],
     },

@@ -76,7 +76,7 @@ Make sure beaker can support running tests on #{vars[:platform_tag]}
 DOC
 
   description[:platform_jenkins] = <<-DOC
-Jenkins jobs should be updated to include the new target depending on which tier the target falls into (nightly, per commit, etc.).
+Jenkins jobs should be updated to include the new target depending on which tier the target falls into (nightly, per commit, etc.). This change should be done via a PR against ci-job-configs, with at least one review by a member of QE. The PR should contain a link to a passing run of the ad-hoc pipeline for this platform.
 
 This is for all puppet-agent jenkins pipelines.
 DOC
@@ -242,12 +242,11 @@ DOC
     },
     {
       :short_name   => 'platform_jenkins',
-      :project      => 'QENG',
+      :project      => 'PA',
       :summary      => "Update platform puppet-agent jenkins pipelines to include #{vars[:platform_tag]}",
-      :description  => description[:jenkins],
+      :description  => description[:platform_jenkins],
       :story_points => '1',
       :blocked_by   => ['build_data', 'puppet_agent_configuration', 'puppet_pre_suites', 'facter_pre_suites', 'hiera_pre_suites', 'pooler_image', 'decide_tier'],
-      :components   => ['CI', 'Scrum Team - Client Platform'],
     },
     {
       :short_name   => 'internal_agent_ship',

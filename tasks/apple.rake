@@ -242,10 +242,10 @@ def pack_source
   end
 end
 
-if Pkg::Config.build_dmg
-  namespace :package do
-    desc "Task for building an Apple Package"
-    task :apple => [:setup] do
+namespace :package do
+  desc "Task for building an Apple Package"
+  task :apple => [:setup] do
+    if Pkg::Config.build_dmg
       bench = Benchmark.realtime do
         # Test for pkgbuild binary
         fail "pkgbuild must be installed." unless \
@@ -258,10 +258,9 @@ if Pkg::Config.build_dmg
       puts "Finished building in: #{bench}"
     end
   end
-
-  # An alias task to simplify our remote logic in jenkins.rake
-  namespace :pl do
-    task :dmg => "package:apple"
-  end
 end
 
+# An alias task to simplify our remote logic in jenkins.rake
+namespace :pl do
+  task :dmg => "package:apple"
+end

@@ -241,7 +241,7 @@ DOC
       :summary      => "Update platform puppet-agent jenkins pipelines to include #{vars[:platform_tag]}",
       :description  => description[:platform_jenkins],
       :story_points => '1',
-      :blocked_by   => ['build_data', 'puppet_agent_configuration', 'puppet_pre_suites', 'facter_pre_suites', 'hiera_pre_suites', 'pooler_image', 'decide_tier'],
+      :blocked_by   => ['build_data', 'puppet_agent_configuration', 'pooler_image', 'decide_tier'],
     },
     {
       :short_name   => 'internal_agent_ship',
@@ -264,7 +264,7 @@ DOC
       :project      => 'PE',
       :summary      => "Add #{vars[:platform_tag]} to pe_repo module",
       :description  => description[:pe_repo],
-      :blocked_by   => ['platform_jenkins', 'puppet_pre_suites', 'facter_pre_suites', 'hiera_pre_suites', 'internal_agent_ship', 's3_agent_ship'],
+      :blocked_by   => ['platform_jenkins', 'internal_agent_ship', 's3_agent_ship'],
     },
     {
       :short_name   => 'pe_jenkins',

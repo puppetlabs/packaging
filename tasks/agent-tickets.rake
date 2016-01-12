@@ -67,27 +67,16 @@ This means you'll have to verify the build to resolve this ticket. If vanagon do
 you need to create a new ticket, block this ticket against that one, and add in vanagon support!
 DOC
 
-  description[:genconfig] = <<-DOC
-Update genconfig2 (https://github.com/puppetlabs/sqa-utils-gem) and beaker-hostgenerator (https://github.com/puppetlabs/beaker-hostgenerator) for #{vars[:platform_tag]}.
-
-Once https://tickets.puppetlabs.com/browse/QENG-3181 and https://tickets.puppetlabs.com/browse/QENG-2436 are resolved, only the beaker-hostgenerator updates will be required.
+  description[:hostgenerator] = <<-DOC
+Update beaker-hostgenerator (https://github.com/puppetlabs/beaker-hostgenerator) for #{vars[:platform_tag]}.
 DOC
 
   description[:beaker] = <<-DOC
 Make sure beaker can support running tests on #{vars[:platform_tag]}
 DOC
 
-  description[:test_targets] = <<-DOC
-Update the source code to have test targets for #{vars[:platform_tag]} in acceptance/node/configs so we can run acceptance tests on it.
-DOC
-
-  description[:pre_suites] = <<-DOC
-Before we add #{vars[:platform_tag]} to the Jenkins pipelines, we want to make sure we can shake out any
-major problems that might come up. Manually run acceptance tests on the platform, and fix any big failures.
-DOC
-
   description[:platform_jenkins] = <<-DOC
-Jenkins jobs should be updated to include the new target depending on which tier the target falls into (nightly, per commit, etc.).
+Jenkins jobs should be updated to include the new target depending on which tier the target falls into (nightly, per commit, etc.). This change should be done via a PR against ci-job-configs, with at least one review by a member of QE. The PR should contain a link to a passing run of the ad-hoc pipeline for this platform.
 
 This is for all puppet-agent jenkins pipelines.
 DOC
@@ -116,11 +105,6 @@ DOC
 Jenkins jobs should be updated to include the new target depending on which tier the target falls into (nightly, per commit, etc.).
 
 This is for all PE Integration jenkins pipelines.
-DOC
-
-
-  description[:pe_integration] = <<-DOC
-If #{vars[:platform_tag]} is also getting into PE, which it for sure should if it's an agent platform, we need to add it to the pe integration tests
 DOC
 
   description[:pe_repo] = <<-DOC
@@ -219,10 +203,10 @@ DOC
       :blocked_by   => ['c_toolchain'],
     },
     {
-      :short_name   => 'genconfig',
+      :short_name   => 'hostgenerator',
       :project      => 'QENG',
-      :summary      => "Add #{vars[:platform_tag]} to genconfig",
-      :description  => description[:genconfig],
+      :summary      => "Add #{vars[:platform_tag]} to beaker-hostgenerator",
+      :description  => description[:hostgenerator],
       :story_points => '1',
       :blocked_by   => ['pooler_image'],
     },
@@ -234,51 +218,6 @@ DOC
       :story_points => '2',
       :type         => 'New Feature',
       :blocked_by   => ['pooler_image'],
-    },
-    {
-      :short_name   => 'puppet_test_targets',
-      :project      => 'PUP',
-      :summary      => "Add node definition for #{vars[:platform_tag]} to Puppet",
-      :description  => description[:test_targets],
-      :story_points => '1',
-    },
-    {
-      :short_name   => 'facter_test_targets',
-      :project      => 'FACT',
-      :summary      => "Add node definition for #{vars[:platform_tag]} to Facter",
-      :description  => description[:test_targets],
-      :story_points => '1',
-    },
-    {
-      :short_name   => 'hiera_test_targets',
-      :project      => 'HI',
-      :summary      => "Add node definition for #{vars[:platform_tag]} to Hiera",
-      :description  => description[:test_targets],
-      :story_points => '1',
-    },
-    {
-      :short_name   => 'puppet_pre_suites',
-      :project      => 'PUP',
-      :summary      => "Get pre-suites working for #{vars[:platform_tag]} for Puppet",
-      :description  => description[:pre_suites],
-      :story_points => '2',
-      :blocked_by   => ['puppet_test_targets'],
-    },
-    {
-      :short_name   => 'facter_pre_suites',
-      :project      => 'FACT',
-      :summary      => "Get pre-suites working for #{vars[:platform_tag]} for Facter",
-      :description  => description[:pre_suites],
-      :story_points => '2',
-      :blocked_by   => ['facter_test_targets'],
-    },
-    {
-      :short_name   => 'hiera_pre_suites',
-      :project      => 'HI',
-      :summary      => "Get pre-suites working for #{vars[:platform_tag]} for Hiera",
-      :description  => description[:pre_suites],
-      :story_points => '2',
-      :blocked_by   => ['hiera_test_targets'],
     },
     {
       :short_name   => 'platform_hash',
@@ -298,12 +237,11 @@ DOC
     },
     {
       :short_name   => 'platform_jenkins',
-      :project      => 'QENG',
+      :project      => 'PA',
       :summary      => "Update platform puppet-agent jenkins pipelines to include #{vars[:platform_tag]}",
-      :description  => description[:jenkins],
+      :description  => description[:platform_jenkins],
       :story_points => '1',
-      :blocked_by   => ['build_data', 'puppet_agent_configuration', 'puppet_pre_suites', 'facter_pre_suites', 'hiera_pre_suites', 'pooler_image', 'decide_tier'],
-      :components   => ['CI', 'Scrum Team - Client Platform'],
+      :blocked_by   => ['build_data', 'puppet_agent_configuration', 'pooler_image', 'decide_tier'],
     },
     {
       :short_name   => 'internal_agent_ship',
@@ -326,16 +264,15 @@ DOC
       :project      => 'PE',
       :summary      => "Add #{vars[:platform_tag]} to pe_repo module",
       :description  => description[:pe_repo],
-      :blocked_by   => ['platform_jenkins', 'puppet_pre_suites', 'facter_pre_suites', 'hiera_pre_suites', 'internal_agent_ship', 's3_agent_ship'],
+      :blocked_by   => ['platform_jenkins', 'internal_agent_ship', 's3_agent_ship'],
     },
     {
       :short_name   => 'pe_jenkins',
-      :project      => 'QENG',
+      :project      => 'PE',
       :summary      => "Update PE Integration jenkins pipelines to include #{vars[:platform_tag]}",
-      :description  => description[:pe_integration],
+      :description  => description[:pe_jenkins],
       :blocked_by   => ['pe_repo', 'platform_jenkins', 'internal_agent_ship', 's3_agent_ship'],
       :story_points => '1',
-      :components   => ['CI', 'Scrum Team - Integration'],
     },
     {
       :short_name   => 'module_support',

@@ -2,13 +2,25 @@ namespace :pl do
   desc "Ship mocked rpms to #{Pkg::Config.yum_staging_server}"
   task :ship_rpms do
     ["aix", "cisco-wrlinux", "el", "eos", "fedora", "nxos", "sles"].each do |dist|
+      pkgs = Dir["pkg/#{dist}/**/*.rpm"]
+      next if pkgs.empty?
+
+      prefix = File.join(Pkg::Config.yum_repo_path, dist)
+      pkgs = pkgs.map { |f| f.gsub("pkg/#{dist}", prefix) }
+
+      extra_flags = ['--delay-updates']
+      extra_flags << '--dry-run' if ENV['DRYRUN']
+
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        pkgs = Dir["pkg/#{dist}/**/*.rpm"].map { |f| "'#{f.gsub("pkg/#{dist}/", "#{Pkg::Config.yum_repo_path}/#{dist}/")}'" }
-        unless pkgs.empty?
-          Pkg::Util::Net.rsync_to("pkg/#{dist}", Pkg::Config.yum_staging_server, Pkg::Config.yum_repo_path)
-          remote_set_immutable(Pkg::Config.yum_staging_server, pkgs)
-        end
-      end if File.directory?("pkg/#{dist}")
+        Pkg::Util::Net.rsync_to(
+          "pkg/#{dist}",
+          Pkg::Config.yum_staging_server,
+          Pkg::Config.yum_repo_path,
+          extra_flags
+        )
+
+        remote_set_immutable(Pkg::Config.yum_staging_server, pkgs)
+      end
     end
   end
 

@@ -31,14 +31,28 @@ module Pkg::Util::Net
 
     def remote_ssh_cmd(target, command, capture_output = false)
       ssh = Pkg::Util::Tool.check_tool('ssh')
+      cmd = "#{ssh} -t #{target} '#{command.gsub("'", "'\\\\''")}'"
+
+      # This is NOT a good way to support this functionality.
+      # It needs to be refactored into a set of methods that
+      # other methods can use to safely and deterministically
+      # support dry-run operations.
+      # But I need to ship packages RIGHT NOW.
+      # - Ryan McKern, 13/01/2016
+      if ENV['DRYRUN']
+        puts "[DRY-RUN] Executing '#{command}' on #{target}"
+        puts "[DRY-RUN] #{cmd}"
+        return
+      end
+
       puts "Executing '#{command}' on #{target}"
       if capture_output
         require 'open3'
-        stdout, stderr, exitstatus = Open3.capture3("#{ssh} -t #{target} '#{command.gsub("'", "'\\\\''")}'")
+        stdout, stderr, exitstatus = Open3.capture3(cmd)
         Pkg::Util::Execution.success?(exitstatus) or raise "Remote ssh command failed."
         return stdout, stderr
       else
-        Kernel.system("#{ssh} -t #{target} '#{command.gsub("'", "'\\\\''")}'")
+        Kernel.system(cmd)
         Pkg::Util::Execution.success? or raise "Remote ssh command failed."
       end
     end

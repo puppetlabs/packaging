@@ -1,14 +1,26 @@
 namespace :pl do
-  desc "Ship mocked rpms to #{Pkg::Config.yum_host}"
+  desc "Ship mocked rpms to #{Pkg::Config.yum_staging_server}"
   task :ship_rpms do
     ["aix", "cisco-wrlinux", "el", "eos", "fedora", "nxos", "sles"].each do |dist|
+      pkgs = Dir["pkg/#{dist}/**/*.rpm"]
+      next if pkgs.empty?
+
+      prefix = File.join(Pkg::Config.yum_repo_path, dist)
+      pkgs = pkgs.map { |f| f.gsub("pkg/#{dist}", prefix) }
+
+      extra_flags = ['--delay-updates']
+      extra_flags << '--dry-run' if ENV['DRYRUN']
+
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        pkgs = Dir["pkg/#{dist}/**/*.rpm"].map { |f| "'#{f.gsub("pkg/#{dist}/", "#{Pkg::Config.yum_repo_path}/#{dist}/")}'" }
-        unless pkgs.empty?
-          Pkg::Util::Net.rsync_to("pkg/#{dist}", Pkg::Config.yum_host, Pkg::Config.yum_repo_path)
-          remote_set_immutable(Pkg::Config.yum_host, pkgs)
-        end
-      end if File.directory?("pkg/#{dist}")
+        Pkg::Util::Net.rsync_to(
+          "pkg/#{dist}",
+          Pkg::Config.yum_staging_server,
+          Pkg::Config.yum_repo_path,
+          extra_flags
+        )
+
+        remote_set_immutable(Pkg::Config.yum_staging_server, pkgs)
+      end
     end
   end
 
@@ -18,21 +30,21 @@ namespace :pl do
     # to various target yum and apt repositories based on their specific type
     # e.g., final vs devel vs PE vs FOSS packages
 
-    desc "Update remote yum repository on '#{Pkg::Config.yum_host}'"
+    desc "Update remote yum repository on '#{Pkg::Config.yum_staging_server}'"
     task :update_yum_repo do
       yum_whitelist = {
         :yum_repo_name => "__REPO_NAME__",
         :yum_repo_path => "__REPO_PATH__",
-        :yum_host      => "__REPO_HOST__",
-        :gpg_key       => "__GPG_KEY__",
+        :yum_staging_server => "__REPO_HOST__",
+        :gpg_key => "__GPG_KEY__",
       }
 
-      STDOUT.puts "Really run remote repo update on '#{Pkg::Config.yum_host}'? [y,n]"
+      STDOUT.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       if ask_yes_or_no
         if Pkg::Config.yum_repo_command
-          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, Pkg::Util::Misc.search_and_replace(Pkg::Config.yum_repo_command, yum_whitelist))
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_staging_server, Pkg::Util::Misc.search_and_replace(Pkg::Config.yum_repo_command, yum_whitelist))
         else
-          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, 'rake -f /opt/repository/Rakefile mk_repo')
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_staging_server, 'rake -f /opt/repository/Rakefile mk_repo')
         end
       end
     end
@@ -138,6 +150,21 @@ namespace :pl do
         end
       end
     end
+
+    desc "Copy rpm repos from #{Pkg::Config.yum_staging_server} to #{Pkg::Config.yum_host}"
+    task :deploy_yum_repos do
+      puts "Really run remote rsync to deploy yum repos from #{Pkg::Config.yum_staging_server} to #{Pkg::Config.yum_host}? [y,n]"
+      if ask_yes_or_no
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          Pkg::Rpm::Repo.deploy_repos(
+            Pkg::Config.yum_repo_path,
+            Pkg::Config.yum_staging_server,
+            Pkg::Config.yum_host,
+            ENV['DRYRUN']
+          )
+        end
+      end
+    end
   end
 
   # We want to ship a gem only for projects that build gems
@@ -158,13 +185,13 @@ namespace :pl do
     end
   end
 
-  desc "ship apple dmg to #{Pkg::Config.yum_host}"
+  desc "ship apple dmg to #{Pkg::Config.yum_staging_server}"
   task :ship_dmg => 'pl:fetch' do
     if Dir['pkg/apple/**/*.dmg'].empty?
       STDOUT.puts "There aren't any dmg packages in pkg/apple. Maybe something went wrong?"
     else
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to('pkg/apple/', Pkg::Config.yum_host, Pkg::Config.dmg_path)
+        Pkg::Util::Net.rsync_to('pkg/apple/', Pkg::Config.yum_staging_server, Pkg::Config.dmg_path)
       end
     end
   end if Pkg::Config.build_dmg || Pkg::Config.vanagon_project

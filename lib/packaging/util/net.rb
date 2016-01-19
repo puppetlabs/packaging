@@ -74,10 +74,10 @@ module Pkg
       def s3sync_to(source, target_bucket, target_directory = "", flags = [])
         s3cmd = Pkg::Util::Tool.check_tool('s3cmd')
 
-        if Pkg::Util::File.file_exists?(File.join(ENV['HOME'], '.s3cfg'))
+        if Pkg::Util::File.file_exists?(::File.join(ENV['HOME'], '.s3cfg'))
           Pkg::Util::Execution.ex("#{s3cmd} sync #{flags.join(' ')} '#{source}' s3://#{target_bucket}/#{target_directory}/")
         else
-          fail "#{File.join(ENV['HOME'], '.s3cfg')} does not exist. It is required to ship files using s3cmd."
+          fail "#{::File.join(ENV['HOME'], '.s3cfg')} does not exist. It is required to ship files using s3cmd."
         end
       end
       module_function :s3sync_to

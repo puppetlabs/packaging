@@ -18,23 +18,6 @@ describe "Pkg::Util::Net" do
         Pkg::Util::Net.hostname.should eq("foo")
       end
     end
-
-    describe "check_host" do
-      context "with required :true" do
-        it "should raise an exception if the passed host does not match the current host" do
-          Socket.stub(:gethostname) { "foo" }
-          Pkg::Util::Net.should_receive(:check_host).and_raise(RuntimeError)
-          expect{ Pkg::Util::Net.check_host("bar", :required => true) }.to raise_error(RuntimeError)
-        end
-      end
-
-      context "with required :false" do
-        it "should return nil if the passed host does not match the current host" do
-          Socket.stub(:gethostname) { "foo" }
-          Pkg::Util::Net.check_host("bar", :required => false).should be_nil
-        end
-      end
-    end
   end
 
   describe "remote_ssh_cmd" do
@@ -197,12 +180,12 @@ describe "Pkg::Util::Net" do
 
   end
 
-  describe "#print_url_info" do
+  describe "#print_job_url_info" do
     it "should output correct formatting" do
       Pkg::Util::Net.should_receive(:puts).with("\n////////////////////////////////////////////////////////////////////////////////\n\n
   Build submitted. To view your build progress, go to\n#{target_uri}\n\n
 ////////////////////////////////////////////////////////////////////////////////\n\n")
-      Pkg::Util::Net.print_url_info(target_uri)
+      Pkg::Util::Jenkins.print_job_url_info(target_uri)
     end
   end
 end

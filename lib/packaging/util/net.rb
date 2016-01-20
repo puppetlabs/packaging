@@ -12,17 +12,6 @@ module Pkg
       end
       module_function :hostname
 
-      # Check that the current host matches the one we think it should
-      def check_host(host, args = { :required => true })
-        if hostname == host
-          return true
-        else
-          fail "#{hostname} does not match #{host}" if args[:required]
-          return nil
-        end
-      end
-      module_function :check_host
-
       def remote_ssh_cmd(target, command, capture_output = false)
         ssh = Pkg::Util::Tool.check_tool('ssh')
         cmd = "#{ssh} -t #{target} '#{command.gsub("'", "'\\\\''")}'"

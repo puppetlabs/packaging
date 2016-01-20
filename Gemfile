@@ -1,11 +1,11 @@
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
 group :development, :test do
-  gem 'rake', "~> 0.9.6"
-  gem 'rspec', "~> 2.14.1"
+  gem 'rake', '~> 0.9.6'
+  gem 'rspec', '~> 2.14.1'
   gem 'pry'
-  gem 'win32console', :platforms => [:mingw_18, :mingw_19]
-  gem 'rubocop', "~> 0.24.1", :require => false
+  gem 'win32console', platforms: [:mingw_18, :mingw_19]
+  gem 'rubocop', '~> 0.24.1', require: false
 end
 
 group :jira do
@@ -18,7 +18,7 @@ group :jira do
   #
   # - Ryan McKern, 2016-01-19
   if RUBY_REVISION < 50295
-    gem 'activesupport', "< 5.0.0", require: false
+    gem 'activesupport', '< 5.0.0', require: false
   end
   gem 'jira-ruby'
 end

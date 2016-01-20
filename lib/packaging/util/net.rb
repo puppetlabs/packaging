@@ -110,16 +110,6 @@ module Pkg
         end
       end
       module_function :curl_form_data
-
-      # Use the provided URL string to print important information with
-      # ASCII emphasis
-      def print_url_info(url_string)
-        str = "\n////////////////////////////////////////////////////////////////////////////////\n\n\n"
-        str += "\s\sBuild submitted. To view your build progress, go to\n#{url_string}\n\n\n"
-        str += "////////////////////////////////////////////////////////////////////////////////\n\n"
-        puts str
-      end
-      module_function :print_url_info
     end
   end
 end

@@ -4,8 +4,8 @@ require 'open3'
 
 describe "Pkg::Util::Net" do
   let(:target)     { "/tmp/placething" }
-  let(:target_uri) { "http://google.com" }
-  let(:content)    { "stuff" }
+  let(:target_uri) { "http://example.com" }
+  let(:content)    { "some stuff in a string\nwith newlines\aand\ttabs" }
   let(:rsync)      { "/bin/rsync" }
   let(:ssh)        { "/usr/local/bin/ssh" }
   let(:s3cmd)      { "/usr/local/bin/s3cmd" }
@@ -178,14 +178,5 @@ describe "Pkg::Util::Net" do
       Pkg::Util::Net.curl_form_data(target_uri, form_data, options)
     end
 
-  end
-
-  describe "#print_job_url_info" do
-    it "should output correct formatting" do
-      Pkg::Util::Net.should_receive(:puts).with("\n////////////////////////////////////////////////////////////////////////////////\n\n
-  Build submitted. To view your build progress, go to\n#{target_uri}\n\n
-////////////////////////////////////////////////////////////////////////////////\n\n")
-      Pkg::Util::Jenkins.print_job_url_info(target_uri)
-    end
   end
 end

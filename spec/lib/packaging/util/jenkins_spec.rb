@@ -2,7 +2,8 @@
 require 'spec_helper'
 
 describe Pkg::Util::Jenkins do
-  let(:build_host) {"Jenkins-foo"}
+  let(:build_host) {"jenkins.example.com"}
+  let(:target_uri) { "https://#{build_host}" }
   let(:name) {"job-foo"}
   around do |example|
     old_build_host = Pkg::Config.jenkins_build_host
@@ -98,6 +99,15 @@ describe Pkg::Util::Jenkins do
           subject.get_jenkins_info(url)
         }.to raise_error(Exception, /Unable to query .*, please check that it is valid./)
       end
+    end
+  end
+
+  describe "#print_url_info" do
+    it "should contain the URL for a Jenkins job" do
+      Pkg::Util::Jenkins.should_receive(:puts) do |argument|
+        argument.should include target_uri
+      end
+      Pkg::Util::Jenkins.print_url_info(target_uri)
     end
   end
 

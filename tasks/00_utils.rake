@@ -232,8 +232,8 @@ def jenkins_job_exists?(name)
 end
 
 def print_url_info(url_string)
-  deprecate("print_url_info", "Pkg::Util::Net.print_url_info")
-  Pkg::Util::Net.print_url_info(url_string)
+  deprecate("print_url_info", "Pkg::Util::Jenkins.print_url_info")
+  Pkg::Util::Jenkins.print_url_info(url_string)
 end
 
 def retry_on_fail(args, &block)

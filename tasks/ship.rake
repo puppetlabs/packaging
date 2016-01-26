@@ -1,6 +1,6 @@
 namespace :pl do
   desc "Ship mocked rpms to #{Pkg::Config.yum_staging_server}"
-  task :ship_rpms do
+  task :ship_rpms => 'pl:fetch' do
     ["aix", "cisco-wrlinux", "el", "eos", "fedora", "nxos", "sles"].each do |dist|
       pkgs = Dir["pkg/#{dist}/**/*.rpm"]
       next if pkgs.empty?
@@ -31,7 +31,7 @@ namespace :pl do
     # e.g., final vs devel vs PE vs FOSS packages
 
     desc "Update remote yum repository on '#{Pkg::Config.yum_staging_server}'"
-    task :update_yum_repo do
+    task :update_yum_repo => 'pl:fetch' do
       yum_whitelist = {
         :yum_repo_name => "__REPO_NAME__",
         :yum_repo_path => "__REPO_PATH__",
@@ -79,7 +79,7 @@ namespace :pl do
   end
 
   desc "Ship cow-built debs to #{Pkg::Config.apt_signing_server}"
-  task :ship_debs do
+  task :ship_debs => 'pl:fetch' do
     Pkg::Util::Execution.retry_on_fail(:times => 3) do
       if File.directory?("pkg/deb")
         Pkg::Util::Net.rsync_to('pkg/deb/', Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path)
@@ -136,7 +136,7 @@ namespace :pl do
     end
 
     desc "Move signed deb repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}"
-    task :deploy_apt_repo do
+    task :deploy_apt_repo => 'pl:fetch' do
       puts "Really run remote rsync to deploy Debian repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}? [y,n]"
       if ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
@@ -152,7 +152,7 @@ namespace :pl do
     end
 
     desc "Copy rpm repos from #{Pkg::Config.yum_staging_server} to #{Pkg::Config.yum_host}"
-    task :deploy_yum_repos do
+    task :deploy_yum_repos => 'pl:fetch' do
       puts "Really run remote rsync to deploy yum repos from #{Pkg::Config.yum_staging_server} to #{Pkg::Config.yum_host}? [y,n]"
       if ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do

@@ -152,7 +152,7 @@ namespace :pl do
     end
 
     desc "Copy rpm repos from #{Pkg::Config.yum_staging_server} to #{Pkg::Config.yum_host}"
-    task :deploy_yum_repos => 'pl:fetch' do
+    task :deploy_yum_repo => 'pl:fetch' do
       puts "Really run remote rsync to deploy yum repos from #{Pkg::Config.yum_staging_server} to #{Pkg::Config.yum_host}? [y,n]"
       if ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do

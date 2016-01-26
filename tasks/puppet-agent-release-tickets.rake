@@ -250,9 +250,11 @@ Push packages
 
 2) Verify that each component has had the correct bits pushed by the uber_ship. I.e, http://builds.puppetlabs.lan/puppet/#{vars[:puppet_release]}/shipped/ should include the gems and the tarball.
 
-3) [~#{vars[:builder]}]: update the release google spreadsheet.
+3) Push the agent packages up to S3 for inclusion in the corect branch of PE. Do that by running the jenkins job at http://jenkins-compose.delivery.puppetlabs.net/job/puppet-agent_s3-ship.
 
-4) Disable auto-promotion to PE. View the Promote to PE job in https://jenkins.puppetlabs.com/view/All%20in%20One%20Agent/view/Stable/view/Puppet%20Agent%20Daily/ and click its 'Disable' button.
+4) [~#{vars[:builder]}]: update the release google spreadsheet.
+
+5) Disable auto-promotion to PE. View the Promote to PE job in https://jenkins.puppetlabs.com/view/All%20in%20One%20Agent/view/Stable/view/Puppet%20Agent%20Daily/ and click its 'Disable' button.
 
 Dependencies:
   * Go / No Go meeting (Status - Ship it!)

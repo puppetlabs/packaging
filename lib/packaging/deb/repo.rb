@@ -194,15 +194,20 @@ SignWith: #{Pkg::Config.gpg_key}"
       # fail due to permission errors.
       options = %w(
         rsync
+        --delay-updates
+        --links
         --hard-links
         --copy-links
         --omit-dir-times
         --progress
-        --archive
+        --recursive
         --update
+        --human-readable
+        --itemize-changes
         --verbose
         --perms
         --no-group
+        --no-owner
         --chmod='Dugo-s,Dug=rwx,Do=rx,Fug=rw,Fo=r'
         --exclude='dists/*-*'
         --exclude='pool/*-*'

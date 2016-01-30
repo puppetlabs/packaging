@@ -152,7 +152,7 @@ end
 # The generated config file is formed by substituting the pe_version into the erb
 #
 def mock_template(mock_config)
-  check_var("PE version, ENV[PE_VER]", Pkg::Config.pe_version)
+  Pkg::Util.check_var("PE version, ENV[PE_VER]", Pkg::Config.pe_version)
   # pe_version is used in the erb template
   pe_version = Pkg::Config.pe_version
   # This bit is fun, here we remove any x.y version in the PE version location in the string from the mock_config

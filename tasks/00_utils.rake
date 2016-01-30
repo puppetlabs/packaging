@@ -25,11 +25,6 @@
 
 # Utility methods used by the various rake tasks
 
-def check_var(varname, var)
-  deprecate('check_var', 'Pkg::Util.check_var')
-  Pkg::Util.check_var(varname, var)
-end
-
 def cp_pr(src, dest, options = {})
   mandatory = { :preserve => true }
   cp_r(src, dest, options.merge(mandatory))
@@ -274,4 +269,9 @@ end
 def gpg_sign_file(file)
   deprecate("gpg_sign_file", "Pkg::Util::Gpg.sign_file")
   Pkg::Util::Gpg.sign_file(file)
+end
+
+def check_var(varname, var)
+  deprecate('check_var', 'Pkg::Util.check_var')
+  Pkg::Util.check_var(varname, var)
 end

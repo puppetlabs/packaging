@@ -192,8 +192,11 @@ module Pkg
       def load_envvars
         Pkg::Params::ENV_VARS.each do |v|
           if var = ENV[v[:envvar].to_s]
-            if v[:type] == :bool
+            case v[:type]
+            when :bool
               self.instance_variable_set("@#{v[:var]}", Pkg::Util.boolean_value(var))
+            when :array
+              self.instance_variable_set("@#{v[:var]}", string_to_array(var))
             else
               self.instance_variable_set("@#{v[:var]}", var)
             end
@@ -274,6 +277,11 @@ module Pkg
         end
       end
 
+      def string_to_array(str)
+        delimiters = /[\s,;]/
+        return str if str.respond_to?('each')
+        str.split(delimiters)
+      end
 
       # This method is duplicated from enterprise-dist so we can access it here.
       def cow_to_codename_arch(cow)

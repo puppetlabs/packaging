@@ -5,6 +5,7 @@ require 'yaml'
 describe "Pkg::Config" do
 
   Build_Params = [:apt_host,
+                  :apt_releases,
                   :apt_repo_path,
                   :apt_repo_url,
                   :apt_repo_name,
@@ -327,13 +328,23 @@ describe "Pkg::Config" do
     end
 
     Pkg::Params::ENV_VARS.each do |v|
-      if v[:type] == :bool
+      case v[:type]
+      when :bool
         it "should set boolean value on #{v[:var]} for :type == :bool" do
           ENV[v[:envvar].to_s] = "FOO"
           Pkg::Util.stub(:boolean_value) {"FOO"}
           allow(Pkg::Config).to receive(:instance_variable_set)
           expect(Pkg::Util).to receive(:boolean_value).with("FOO")
           expect(Pkg::Config).to receive(:instance_variable_set).with("@#{v[:var]}", "FOO")
+          Pkg::Config.load_envvars
+        end
+      when :array
+        it "should set Pkg::Config##{v[:var]} to an Array for :type == :array" do
+          ENV[v[:envvar].to_s] = "FOO BAR ARR RAY"
+          Pkg::Config.stub(:string_to_array) {%w(FOO BAR ARR RAY)}
+          allow(Pkg::Config).to receive(:instance_variable_set)
+          expect(Pkg::Config).to receive(:string_to_array).with("FOO BAR ARR RAY")
+          expect(Pkg::Config).to receive(:instance_variable_set).with("@#{v[:var]}", %w(FOO BAR ARR RAY))
           Pkg::Config.load_envvars
         end
       else

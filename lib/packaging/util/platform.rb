@@ -1,4 +1,4 @@
-require 'packaging/config/platforms'
+require 'packaging/platforms'
 
 module Pkg::Util::Platform
   include Pkg::Platforms

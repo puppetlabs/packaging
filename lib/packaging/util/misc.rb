@@ -4,16 +4,19 @@
 module Pkg::Util::Misc
   class << self
     # This method takes a string and a list of tokens and variables and it replaces
-    # the listed tokens with the matched variable if it exists.
+    # the listed tokens with the matched variable if it exists. All values will
+    # be explicitly coerced to strings.
     def search_and_replace(search_string, replacements)
-      replacements.each do |variable, token|
-        begin
-          if (replacement = Pkg::Config.send(variable))
-            search_string.gsub!(token, replacement)
-          end
-        rescue NoMethodError
-          warn "Pkg::Config doesn't have '#{variable}' defined"
+      raise ArgumentError "replacements must respond to #each_pair" unless
+        replacements.respond_to? :each_pair
+
+      replacements.each_pair do |token, value|
+        unless value
+          warn "replacement value for '#{token}' probably shouldn't be nil"
+          next
         end
+
+        search_string.gsub!(token.to_s, value.to_s)
       end
 
       search_string

@@ -58,6 +58,7 @@ namespace :pl do
         __REPO_PATH__: Pkg::Config.apt_repo_path,
         __REPO_URL__: Pkg::Config.apt_repo_url,
         __REPO_HOST__: Pkg::Config.apt_host,
+        __APT_PLATFORMS__: Pkg::Config.apt_releases.join(' '),
         __GPG_KEY__: Pkg::Config.gpg_key,
       }
 

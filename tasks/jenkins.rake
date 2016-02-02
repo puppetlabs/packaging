@@ -260,6 +260,9 @@ namespace :pl do
         remote:deploy_yum_repo
         remote:update_ips_repo
       )
+      # Some projects such as pl-build-tools do not stage to a separate server - so we do to deploy
+      uber_tasks.delete("remote:deploy_apt_repo") if Pkg::Config.apt_host == Pkg::Config.apt_signing_server
+      uber_tasks.delete("remote:deploy_yum_repo") if Pkg::Config.yum_host == Pkg::Config.yum_staging_server
       uber_tasks.map { |t| "pl:#{t}" }.each { |t| Rake::Task[t].invoke }
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
     end

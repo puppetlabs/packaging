@@ -33,10 +33,10 @@ namespace :pl do
     desc "Update remote yum repository on '#{Pkg::Config.yum_staging_server}'"
     task :update_yum_repo => 'pl:fetch' do
       yum_whitelist = {
-        :yum_repo_name => "__REPO_NAME__",
-        :yum_repo_path => "__REPO_PATH__",
-        :yum_staging_server => "__REPO_HOST__",
-        :gpg_key => "__GPG_KEY__",
+        __REPO_NAME__: Pkg::Config.yum_repo_name,
+        __REPO_PATH__: Pkg::Config.yum_repo_path,
+        __REPO_HOST__: Pkg::Config.yum_staging_server,
+        __GPG_KEY__: Pkg::Config.gpg_key,
       }
 
       STDOUT.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
@@ -54,11 +54,11 @@ namespace :pl do
     desc "Update remote apt repository on '#{Pkg::Config.apt_signing_server}'"
     task :update_apt_repo => 'pl:fetch' do
       apt_whitelist = {
-        :apt_repo_name => "__REPO_NAME__",
-        :apt_repo_path => "__REPO_PATH__",
-        :apt_repo_url  => "__REPO_URL__",
-        :apt_host      => "__REPO_HOST__",
-        :gpg_key       => "__GPG_KEY__",
+        __REPO_NAME__: Pkg::Config.apt_repo_name,
+        __REPO_PATH__: Pkg::Config.apt_repo_path,
+        __REPO_URL__: Pkg::Config.apt_repo_url,
+        __REPO_HOST__: Pkg::Config.apt_host,
+        __GPG_KEY__: Pkg::Config.gpg_key,
       }
 
       STDOUT.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"

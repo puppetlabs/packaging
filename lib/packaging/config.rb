@@ -278,9 +278,9 @@ module Pkg
       end
 
       def string_to_array(str)
-        delimiters = /[\s,;]/
+        delimiters = /[,\s;]/
         return str if str.respond_to?('each')
-        str.split(delimiters)
+        str.split(delimiters).reject { |s| s.empty? }.map { |s| s.strip }
       end
 
       # This method is duplicated from enterprise-dist so we can access it here.

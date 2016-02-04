@@ -216,6 +216,48 @@ describe "Pkg::Config" do
     end
   end
 
+  describe "#string_to_array" do
+    ary = %W(FOO BAR ARR RAY)
+    context "given a string with spaces in it" do
+      it "should return an array containing the contents of that string" do
+        space_str = "FOO BAR ARR RAY"
+        expect(Pkg::Config.string_to_array(space_str)).to eq(ary)
+      end
+    end
+
+    context "given a string with commas in it" do
+      it "should return an array containing the contents of that string" do
+        comma_str = "FOO,BAR,ARR,RAY"
+        expect(Pkg::Config.string_to_array(comma_str)).to eq(ary)
+      end
+    end
+
+    context "given a string with semicolons in it" do
+      it "should return an array containing the contents of that string" do
+        semi_str = "FOO;BAR;ARR;RAY"
+        expect(Pkg::Config.string_to_array(semi_str)).to eq(ary)
+      end
+    end
+
+    context "given a string with multiple delimiters in it" do
+      delimiters = [',', ' ', ';']
+      mixed_str = "FOO, BAR, ARR, ; RAY"
+      mixed_arr = Pkg::Config.string_to_array(mixed_str)
+
+      it "should not return the delimiters as array items" do
+        expect(mixed_arr).to_not include(*delimiters)
+      end
+
+      it "should not contain empty strings" do
+        expect(mixed_arr).to_not include("\s")
+      end
+
+      it "should still return the expected array" do
+        expect(mixed_arr).to eq(ary)
+      end
+    end
+  end
+
   describe "#cow_list" do
     it "should return a list of the cows for a project" do
       Pkg::Config.cows = "base-lucid-i386.cow base-lucid-amd64.cow base-precise-i386.cow base-precise-amd64.cow base-quantal-i386.cow base-quantal-amd64.cow base-saucy-i386.cow base-saucy-amd64.cow base-sid-i386.cow base-sid-amd64.cow base-squeeze-i386.cow base-squeeze-amd64.cow base-stable-i386.cow base-stable-amd64.cow base-testing-i386.cow base-testing-amd64.cow base-trusty-i386.cow base-trusty-amd64.cow base-unstable-i386.cow base-unstable-amd64.cow base-wheezy-i386.cow base-wheezy-amd64.cow"

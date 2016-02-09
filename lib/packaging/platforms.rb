@@ -1,3 +1,5 @@
+require 'set'
+
 module Pkg
   module Platforms
     # Each element in this hash

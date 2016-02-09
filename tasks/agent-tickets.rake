@@ -94,7 +94,7 @@ This will enable shipping agent builds for #{vars[:platform_tag]} to S3.
 DOC
 
   description[:platform_hash] = <<-DOC
-Update the hash at https://github.com/puppetlabs/packaging/blob/master/lib/packaging/config/platforms.rb to include the #{vars[:platform_tag]}.
+Update the hash at https://github.com/puppetlabs/packaging/blob/master/lib/packaging/platforms.rb to include the #{vars[:platform_tag]}.
 DOC
 
   description[:build_data] = <<-DOC

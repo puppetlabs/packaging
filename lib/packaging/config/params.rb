@@ -1,3 +1,5 @@
+require "packaging/platforms"
+
 # These are all of the parameters known to our packaging system.
 # They are ingested by the config class as class instance variables
 module Pkg::Params
@@ -7,6 +9,7 @@ module Pkg::Params
                   :apt_repo_name,
                   :apt_repo_url,
                   :apt_repo_command,
+                  :apt_releases,
                   :apt_signing_server,
                   :author,
                   :benchmark,
@@ -154,6 +157,7 @@ module Pkg::Params
               { :var => :apt_repo_path,           :envvar => :APT_REPO },
               { :var => :apt_repo_staging_path,   :envvar => :APT_REPO_STAGING_PATH },
               { :var => :apt_signing_server,      :envvar => :APT_SIGNING_SERVER },
+              { :var => :apt_releases,            :envvar => :APT_RELEASES,    :type => :array },
               { :var => :build_dmg,               :envvar => :DMG,             :type => :bool },
               { :var => :build_doc,               :envvar => :DOC,             :type => :bool },
               { :var => :build_gem,               :envvar => :GEM,             :type => :bool },
@@ -228,7 +232,8 @@ module Pkg::Params
               { :var => :ips_inter_cert,          :val => '$IPS_INTER_CERT' },
               { :var => :ips_root_cert,           :val => '$IPS_ROOT_CERT' },
               { :var => :ips_signing_key,         :val => '$IPS_SIGNING_KEY' },
-              { :var => :pe_feature_branch,       :val => false }]
+              { :var => :pe_feature_branch,       :val => false },
+              { :var => :apt_releases,            :val => Pkg::Platforms.codenames("deb") }]
 
   # These are variables which, over time, we decided to rename or replace. For
   # backwards compatibility, we assign the value of the old/deprecated

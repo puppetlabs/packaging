@@ -8,7 +8,7 @@ namespace :pl do
       prefix = File.join(Pkg::Config.yum_repo_path, dist)
       pkgs = pkgs.map { |f| f.gsub("pkg/#{dist}", prefix) }
 
-      extra_flags = ['--delay-updates']
+      extra_flags = ['--ignore-existing', '--delay-updates']
       extra_flags << '--dry-run' if ENV['DRYRUN']
 
       Pkg::Util::Execution.retry_on_fail(:times => 3) do

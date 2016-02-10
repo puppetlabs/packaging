@@ -63,8 +63,6 @@ module Pkg::Rpm::Repo
         --chmod='Dugo-s,Dug=rwx,Do=rx,Fug=rw,Fo=r'
         --omit-dir-times
         --no-times
-        --no-group
-        --no-owner
         --delay-updates
       )
 

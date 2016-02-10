@@ -202,7 +202,6 @@ SignWith: #{Pkg::Config.gpg_key}"
         --update
         --verbose
         --perms
-        --no-group
         --chmod='Dugo-s,Dug=rwx,Do=rx,Fug=rw,Fo=r'
         --exclude='dists/*-*'
         --exclude='pool/*-*'

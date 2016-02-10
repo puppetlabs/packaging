@@ -126,23 +126,6 @@ def deprecate(old_cmd, new_cmd = nil)
   STDOUT.puts
 end
 
-def escape_html(uri)
-  require 'cgi'
-  CGI.escapeHTML(uri)
-end
-
-# Add a parameter to a given uri. If we were sane we'd use
-# encode_www_form(params) of URI, but because we're not, because that will http
-# encode it, which isn't what we want since we're require the encoding provided
-# by escapeHTML of CGI, since this is being transfered in the xml of a jenkins
-# job via curl and DEAR JEEBUS WHAT HAVE WE DONE.
-def add_param_to_uri(uri, param)
-  require 'uri'
-  uri = URI.parse(uri)
-  uri.query = [uri.query, param].compact.join('&')
-  uri.to_s
-end
-
 # Remotely set the immutable bit on a list of files
 #
 def remote_set_immutable(host, files)
@@ -275,6 +258,16 @@ end
 def rand_string
   deprecate('invoke_task', 'Pkg::Util.rand_string')
   Pkg::Util.rand_string
+end
+
+def escape_html(uri)
+  deprecate('escape_html', 'Pkg::Util::Net.escape_html')
+  Pkg::Util::Net.escape_html(uri)
+end
+
+def add_param_to_uri(uri, param)
+  deprecate('add_param_to_uri', 'Pkg::Util::Net.add_param_to_uri')
+  Pkg::Util::Net.add_param_to_uri(uri, param)
 end
 
 

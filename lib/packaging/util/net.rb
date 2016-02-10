@@ -152,5 +152,22 @@ module Pkg::Util::Net
       remote_cmd = "for file in #{files.join(" ")}; do lsattr $file | grep -q '\\-i\\-'; if [ $? -eq 1 ]; then sudo chmod #{permissions} $file; else echo \"$file is immutable\"; fi; done"
       Pkg::Util::Net.remote_ssh_cmd(host, remote_cmd)
     end
+
+    def escape_html(uri)
+      require 'cgi'
+      CGI.escapeHTML(uri)
+    end
+
+    # Add a parameter to a given uri. If we were sane we'd use
+    # encode_www_form(params) of URI, but because we're not, because that will http
+    # encode it, which isn't what we want since we're require the encoding provided
+    # by escapeHTML of CGI, since this is being transfered in the xml of a jenkins
+    # job via curl and DEAR JEEBUS WHAT HAVE WE DONE.
+    def add_param_to_uri(uri, param)
+      require 'uri'
+      uri = URI.parse(uri)
+      uri.query = [uri.query, param].compact.join('&')
+      uri.to_s
+    end
   end
 end

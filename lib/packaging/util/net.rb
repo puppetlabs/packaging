@@ -131,5 +131,13 @@ module Pkg::Util::Net
   Build submitted. To view your build progress, go to\n#{url_string}\n\n
 ////////////////////////////////////////////////////////////////////////////////\n\n"
     end
+
+    def remote_set_ownership(host, owner, group, files)
+      Pkg::Util::Net.remote_ssh_cmd(host, "sudo chown #{owner}:#{group} #{files.join(" ")}")
+    end
+
+    def remote_set_permissions(host, permissions, files)
+      Pkg::Util::Net.remote_ssh_cmd(host, "sudo chmod #{permissions} #{files.join(" ")}")
+    end
   end
 end

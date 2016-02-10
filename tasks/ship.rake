@@ -19,6 +19,8 @@ namespace :pl do
           extra_flags
         )
 
+        Pkg::Util::Net.remote_set_ownership(Pkg::Config.yum_staging_server, 'root', 'release', pkgs)
+        Pkg::Util::Net.remote_set_permissions(Pkg::Config.yum_staging_server, '0664', pkgs)
         remote_set_immutable(Pkg::Config.yum_staging_server, pkgs)
       end
     end
@@ -84,6 +86,8 @@ namespace :pl do
     Pkg::Util::Execution.retry_on_fail(:times => 3) do
       if File.directory?("pkg/deb")
         Pkg::Util::Net.rsync_to('pkg/deb/', Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path)
+        Pkg::Util::Net.remote_set_ownership(Pkg::Config.apt_signing_server, 'root', 'release', pkgs)
+        Pkg::Util::Net.remote_set_permissions(Pkg::Config.apt_signing_server, '0664', pkgs)
       else
         warn "No deb packages found to ship; nothing to do"
       end
@@ -310,6 +314,9 @@ namespace :pl do
       files = Dir.glob("#{local_dir}/**/*").select { |f| File.file?(f) }.map do |file|
         "#{artifact_dir}/#{file.sub(/^#{local_dir}\//, '')}"
       end
+
+      Pkg::Util::Net.remote_set_ownership(Pkg::Config.distribution_server, 'root', 'release', pkgs)
+      Pkg::Util::Net.remote_set_permissions(Pkg::Config.distribution_server, '0664', pkgs)
       remote_set_immutable(Pkg::Config.distribution_server, files)
     end
 

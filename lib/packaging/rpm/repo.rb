@@ -79,19 +79,6 @@ module Pkg::Rpm::Repo
       options.join("\s")
     end
 
-    # @param path [String] The path to mangle permissions for
-    # @param sudo [Boolean] Whether or not the chmod command
-    #   should be wrapped by sudo
-    #
-    # @return [String] a chmod command (optionally wrapped in sudo)
-    #   that can be executed on a remote host
-    #   to mangle/reset permissions for a given directory
-    def repo_permissions_command(path, sudo = true)
-      cmd = "chmod -R g-s,g=rwX #{path}"
-      cmd = "sudo -E #{cmd}" if sudo
-      cmd
-    end
-
     def create_repos(directory = "repos")
       Dir.chdir(directory) do
         createrepo = Pkg::Util::Tool.check_tool('createrepo')
@@ -242,13 +229,6 @@ module Pkg::Rpm::Repo
     # @param dryrun [Boolean] whether or not to use '--dry-run'
     def deploy_repos(yum_path, origin_server, destination_server, dryrun = false)
       rsync_command = repo_deployment_command(yum_path, yum_path, destination_server, dryrun)
-      chmod_command = repo_permissions_command(yum_path)
-
-      if dryrun
-        puts "[DRYRUN] not executing #{chmod_command} on #{destination_server}"
-      else
-        Pkg::Util::Net.remote_ssh_cmd(destination_server, chmod_command)
-      end
 
       Pkg::Util::Net.remote_ssh_cmd(origin_server, rsync_command)
     end

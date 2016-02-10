@@ -235,14 +235,7 @@ SignWith: #{Pkg::Config.gpg_key}"
     def deploy_repos(apt_path, destination_staging_path, origin_server, destination_server, dryrun = false)
       rsync_command = repo_deployment_command(apt_path, destination_staging_path, destination_server, dryrun)
       cp_command = repo_deployment_command(destination_staging_path, apt_path, nil, dryrun)
-      # Defensive permissions setting are defensive
-      chmod_command = "sudo chmod -R g=rwX #{destination_staging_path}; sudo chmod -R g-s,g=rwX #{apt_path}"
 
-      if dryrun
-        puts "[DRYRUN] not executing #{chmod_command} on #{destination_server}"
-      else
-        Pkg::Util::Net.remote_ssh_cmd(destination_server, chmod_command)
-      end
       Pkg::Util::Net.remote_ssh_cmd(origin_server, rsync_command)
       if dryrun
         puts "[DRYRUN] not executing #{cp_command} on #{destination_server}"

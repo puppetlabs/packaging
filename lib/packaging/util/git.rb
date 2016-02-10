@@ -17,7 +17,7 @@ module Pkg::Util::Git
       Pkg::Util::Execution.ex("#{Pkg::Util::Tool::GIT} tag -s -u #{Pkg::Config.gpg_key} -m '#{version}' #{version}")
     end
 
-    def git_bundle(treeish, appendix = rand_string, temp = Pkg::Util::File.mktemp)
+    def git_bundle(treeish, appendix = Pkg::Util.rand_string, temp = Pkg::Util::File.mktemp)
       fail unless Pkg::Util::Version.is_git_repo?
       Pkg::Util::Execution.ex("#{Pkg::Util::Tool::GIT} bundle create #{temp}/#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix} #{treeish} --tags")
       Dir.chdir(temp) do

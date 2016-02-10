@@ -80,4 +80,8 @@ module Pkg::Util
   ensure
     system 'stty echo'
   end
+
+  def self.rand_string
+    rand.to_s.split('.')[1]
+  end
 end

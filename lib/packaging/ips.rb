@@ -8,7 +8,7 @@ module Pkg::IPS
 
       p5ps = Dir.glob("#{target_dir}/solaris/11/**/*.p5p")
 
-      work_dir     = "/tmp/#{rand_string}"
+      work_dir     = "/tmp/#{Pkg::Util.rand_string}"
       unsigned_dir = "#{work_dir}/unsigned"
       repo_dir     = "#{work_dir}/repo"
       signed_dir   = "#{work_dir}/pkgs"

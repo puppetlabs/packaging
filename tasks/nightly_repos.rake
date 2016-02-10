@@ -110,7 +110,7 @@ namespace :pl do
         # names stay the same between runs. Their contents have the ref
         # stripped off and the project replaced by $project-latest. Then the
         # repos directory is a symlink to the last pushed ref's repos.
-        cp_pr(File.join(local_target, "repo_configs"), Pkg::Config.project + "-latest")
+        FileUtils.cp_r(File.join(local_target, "repo_configs"), Pkg::Config.project + "-latest", { :preserve => true })
 
         # Now we need to remove the ref and replace $project with
         # $project-latest so that it will work as a pinned latest repo

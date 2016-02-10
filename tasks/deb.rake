@@ -31,7 +31,7 @@ end
 
 task :prep_deb_tars, :work_dir do |t, args|
   work_dir = args.work_dir
-  cp_p "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz", work_dir
+  FileUtils.cp "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz", work_dir, { :preserve => true }
   cd work_dir do
     sh "tar zxf #{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
     mv "#{Pkg::Config.project}-#{Pkg::Config.version}", "#{Pkg::Config.project}-#{Pkg::Config.debversion}"
@@ -93,7 +93,7 @@ task :build_deb, :deb_command, :cow do |t, args|
       # completely ignored without the following two lines that unconditionally
       # copy anything in ext/debian into the debian directory.
       mkdir_p 'debian'
-      cp_pr(Dir.glob("ext/debian/*"), 'debian')
+      FileUtils.cp_r(Dir.glob("ext/debian/*"), 'debian', { :preserve => true })
       send(deb_build, deb_args)
       cp FileList["#{work_dir}/*.deb", "#{work_dir}/*.dsc", "#{work_dir}/*.changes", "#{work_dir}/*.debian.tar.gz", "#{work_dir}/*.orig.tar.gz", "${work_dir}/*.diff.gz"], dest_dir
       rm_rf "#{work_dir}/#{Pkg::Config.project}-#{Pkg::Config.debversion}"

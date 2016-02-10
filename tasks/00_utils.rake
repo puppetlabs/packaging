@@ -24,17 +24,6 @@
 
 
 # Utility methods used by the various rake tasks
-
-def cp_pr(src, dest, options = {})
-  mandatory = { :preserve => true }
-  cp_r(src, dest, options.merge(mandatory))
-end
-
-def cp_p(src, dest, options = {})
-  mandatory = { :preserve => true }
-  cp(src, dest, options.merge(mandatory))
-end
-
 def set_cow_envs(cow)
   elements = /base-(.*)-(.*)\.cow/.match(cow)
   if elements.nil?
@@ -268,6 +257,18 @@ end
 def add_param_to_uri(uri, param)
   deprecate('add_param_to_uri', 'Pkg::Util::Net.add_param_to_uri')
   Pkg::Util::Net.add_param_to_uri(uri, param)
+end
+
+def cp_pr(src, dest, options = {})
+  deprecate('cp_pr', 'FileUtils.cp_r')
+  mandatory = { :preserve => true }
+  FileUtils.cp_r(src, dest, options.merge(mandatory))
+end
+
+def cp_p(src, dest, options = {})
+  deprecate('cp_p', 'FileUtils.cp')
+  mandatory = { :preserve => true }
+  FileUtils.cp(src, dest, options.merge(mandatory))
 end
 
 

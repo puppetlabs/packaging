@@ -133,11 +133,13 @@ module Pkg::Util::Net
     end
 
     def remote_set_ownership(host, owner, group, files)
-      Pkg::Util::Net.remote_ssh_cmd(host, "sudo chown #{owner}:#{group} #{files.join(" ")}")
+      remote_cmd = "for file in #{files.join(" ")}; do lsattr $file | grep -q '\\-i\\-'; if [ $? -eq 1 ]; then sudo chown #{owner}:#{group} $file; else echo \"$file is immutable\"; fi; done"
+      Pkg::Util::Net.remote_ssh_cmd(host, remote_cmd)
     end
 
     def remote_set_permissions(host, permissions, files)
-      Pkg::Util::Net.remote_ssh_cmd(host, "sudo chmod #{permissions} #{files.join(" ")}")
+      remote_cmd = "for file in #{files.join(" ")}; do lsattr $file | grep -q '\\-i\\-'; if [ $? -eq 1 ]; then sudo chmod #{permissions} $file; else echo \"$file is immutable\"; fi; done"
+      Pkg::Util::Net.remote_ssh_cmd(host, remote_cmd)
     end
   end
 end

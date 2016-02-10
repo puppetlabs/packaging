@@ -85,6 +85,11 @@ namespace :pl do
   task :ship_debs => 'pl:fetch' do
     Pkg::Util::Execution.retry_on_fail(:times => 3) do
       if File.directory?("pkg/deb")
+
+        pkgs = Dir["pkg/deb/**/*\.*"]
+        pkgs = pkgs.map { |f| f.gsub("pkg/deb", Pkg::Config.apt_repo_staging_path) }
+        puts "pkgs = #{pkgs}"
+
         Pkg::Util::Net.rsync_to('pkg/deb/', Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path)
         Pkg::Util::Net.remote_set_ownership(Pkg::Config.apt_signing_server, 'root', 'release', pkgs)
         Pkg::Util::Net.remote_set_permissions(Pkg::Config.apt_signing_server, '0664', pkgs)
@@ -315,8 +320,8 @@ namespace :pl do
         "#{artifact_dir}/#{file.sub(/^#{local_dir}\//, '')}"
       end
 
-      Pkg::Util::Net.remote_set_ownership(Pkg::Config.distribution_server, 'root', 'release', pkgs)
-      Pkg::Util::Net.remote_set_permissions(Pkg::Config.distribution_server, '0664', pkgs)
+      Pkg::Util::Net.remote_set_ownership(Pkg::Config.distribution_server, 'root', 'release', files)
+      Pkg::Util::Net.remote_set_permissions(Pkg::Config.distribution_server, '0664', files)
       remote_set_immutable(Pkg::Config.distribution_server, files)
     end
 

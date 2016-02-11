@@ -115,12 +115,6 @@ def deprecate(old_cmd, new_cmd = nil)
   STDOUT.puts
 end
 
-# Remotely set the immutable bit on a list of files
-#
-def remote_set_immutable(host, files)
-  Pkg::Util::Net.remote_ssh_cmd(host, "sudo chattr +i #{files.join(" ")}")
-end
-
 #######################################################################
 #                                                                     #
 #         DEPRECATED METHODS: Please move any newly depreacted        #
@@ -269,6 +263,11 @@ def cp_p(src, dest, options = {})
   deprecate('cp_p', 'FileUtils.cp')
   mandatory = { :preserve => true }
   FileUtils.cp(src, dest, options.merge(mandatory))
+end
+
+def remote_set_immutable(host, files)
+  deprecate('remote_set_immutable', 'Pkg::Util::Net.remote_set_immutable')
+  Pkg::Util::Net.remote_set_immutable(host, files)
 end
 
 

@@ -153,6 +153,11 @@ module Pkg::Util::Net
       Pkg::Util::Net.remote_ssh_cmd(host, remote_cmd)
     end
 
+    # Remotely set the immutable bit on a list of files
+    def remote_set_immutable(host, files)
+      Pkg::Util::Net.remote_ssh_cmd(host, "sudo chattr +i #{files.join(" ")}")
+    end
+
     def escape_html(uri)
       require 'cgi'
       CGI.escapeHTML(uri)

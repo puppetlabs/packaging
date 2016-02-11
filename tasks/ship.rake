@@ -21,7 +21,7 @@ namespace :pl do
 
         Pkg::Util::Net.remote_set_ownership(Pkg::Config.yum_staging_server, 'root', 'release', pkgs)
         Pkg::Util::Net.remote_set_permissions(Pkg::Config.yum_staging_server, '0664', pkgs)
-        remote_set_immutable(Pkg::Config.yum_staging_server, pkgs)
+        Pkg::Util::Net.remote_set_immutable(Pkg::Config.yum_staging_server, pkgs)
       end
     end
   end
@@ -322,7 +322,7 @@ namespace :pl do
 
       Pkg::Util::Net.remote_set_ownership(Pkg::Config.distribution_server, 'root', 'release', files)
       Pkg::Util::Net.remote_set_permissions(Pkg::Config.distribution_server, '0664', files)
-      remote_set_immutable(Pkg::Config.distribution_server, files)
+      Pkg::Util::Net.remote_set_immutable(Pkg::Config.distribution_server, files)
     end
 
     desc "Ship generated repository configs to the distribution server"

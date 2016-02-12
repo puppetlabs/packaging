@@ -89,16 +89,6 @@ def remote_buildparams(host, build)
   "/tmp/#{params_dir}/#{params_file_name}"
 end
 
-def deprecate(old_cmd, new_cmd = nil)
-  msg = "!! #{old_cmd} is deprecated."
-  if new_cmd
-    msg << " Please use #{new_cmd} instead."
-  end
-  STDOUT.puts
-  STDOUT.puts(msg)
-  STDOUT.puts
-end
-
 #######################################################################
 #                                                                     #
 #         DEPRECATED METHODS: Please move any newly depreacted        #
@@ -108,77 +98,77 @@ end
 #######################################################################
 
 def invoke_task(task, *args)
-  deprecate('invoke_task', 'Pkg::Util::RakeUtils.invoke_task')
+  Pkg::Util.deprecate('invoke_task', 'Pkg::Util::RakeUtils.invoke_task')
   Pkg::Util::RakeUtils.invoke_task(task, *args)
 end
 
 def rsync_to(*args)
-  deprecate('rsync_to', 'Pkg::Util::Net.rsync_to')
+  Pkg::Util.deprecate('rsync_to', 'Pkg::Util::Net.rsync_to')
   Pkg::Util::Net.rsync_to(args[0], args[1], args[2])
 end
 
 def rsync_from(*args)
-  deprecate('rsync_from', 'Pkg::Util::Net.rsync_from')
+  Pkg::Util.deprecate('rsync_from', 'Pkg::Util::Net.rsync_from')
   Pkg::Util::Net.rsync_from(args[0], args[1], args[2])
 end
 
 def mkdir_pr(*args)
-  deprecate('mkdir_pr', 'FileUtils.mkdir_p')
+  Pkg::Util.deprecate('mkdir_pr', 'FileUtils.mkdir_p')
   FileUtils.mkdir_p args
 end
 
 def ln(target, name)
-  deprecate('ln', 'FileUtils.ln')
+  Pkg::Util.deprecate('ln', 'FileUtils.ln')
   FileUtils.ln(name, target, :force => true, :verbose => true)
 end
 
 def ln_sfT(src, dest)
-  deprecate('ln_sfT')
+  Pkg::Util.deprecate('ln_sfT')
   sh "ln -sfT #{src} #{dest}"
 end
 
 def git_commit_file(file, message = nil)
-  deprecate('git_commit_file', 'Pkg::Util::Git.git_commit_file')
+  Pkg::Util.deprecate('git_commit_file', 'Pkg::Util::Git.git_commit_file')
   Pkg::Util::Git.git_commit_file(file, message)
 end
 
 def git_bundle(treeish, appendix = nil, output_dir = nil)
-  deprecate('git_bundle', 'Pkg::Util::Git.git_bundle')
+  Pkg::Util.deprecate('git_bundle', 'Pkg::Util::Git.git_bundle')
   Pkg::Util::Git.git_bundle(treeish, appendix, output_dir)
 end
 
 def git_tag(version)
-  deprecate('git_tag', 'Pkg::Util::Git.git_tag')
+  Pkg::Util.deprecate('git_tag', 'Pkg::Util::Git.git_tag')
   Pkg::Util::Git.git_tag(version)
 end
 
 def git_pull(remote, branch)
-  deprecate('git_pull', 'Pkg::Util::Git.git_pull')
+  Pkg::Util.deprecate('git_pull', 'Pkg::Util::Git.git_pull')
   Pkg::Util::Git.git_pull(remote, branch)
 end
 
 def curl_form_data(uri, form_data = [], options = {})
-  deprecate("curl_form_data", "Pkg::Util::Net.curl_form_data")
+  Pkg::Util.deprecate("curl_form_data", "Pkg::Util::Net.curl_form_data")
   Pkg::Util::Net.curl_form_data(uri, form_data, options)
 end
 
 def create_jenkins_job(name, xml_file)
-  deprecate("create_jenkins_job", "Pkg::Util::Jenkins.create_jenkins_job")
+  Pkg::Util.deprecate("create_jenkins_job", "Pkg::Util::Jenkins.create_jenkins_job")
   Pkg::Util::Jenkins.create_jenkins_job(name, xml_file)
 end
 
 def jenkins_job_exists?(name)
-  deprecate("jenkins_job_exists", "Pkg::Util::Jenkins.jenkins_job_exists?")
+  Pkg::Util.deprecate("jenkins_job_exists", "Pkg::Util::Jenkins.jenkins_job_exists?")
   Pkg::Util::Jenkins.jenkins_job_exists?(name)
 end
 
 def print_url_info(url_string)
-  deprecate("print_url_info", "Pkg::Util::Net.print_url_info")
+  Pkg::Util.deprecate("print_url_info", "Pkg::Util::Net.print_url_info")
   Pkg::Util::Net.print_url_info(url_string)
 end
 
 def retry_on_fail(args, &block)
-  deprecate("retry_on_fail", "Pkg::Util::Execution.retry_on_fail")
+  Pkg::Util.deprecate("retry_on_fail", "Pkg::Util::Execution.retry_on_fail")
   Pkg::Util::Execution.retry_on_fail(args, &block)
 end
 
@@ -193,74 +183,79 @@ end
 # purport to both return the results of the command execution (ala `%x{cmd}`)
 # while also raising an exception if a command does not succeed (ala `sh "cmd"`).
 def ex(command)
-  deprecate("ex", "Pkg::Util::Execution.ex")
+  Pkg::Util.deprecate("ex", "Pkg::Util::Execution.ex")
   Pkg::Util::Execution.ex(command)
 end
 
 def load_keychain
-  deprecate("load_keychain", "Pkg::Util::Gpg.load_keychain")
+  Pkg::Util.deprecate("load_keychain", "Pkg::Util::Gpg.load_keychain")
   Pkg::Util::Gpg.load_keychain
 end
 
 def kill_keychain
-  deprecate("kill_keychain", "Pkg::Util::Gpg.kill_keychain")
+  Pkg::Util.deprecate("kill_keychain", "Pkg::Util::Gpg.kill_keychain")
   Pkg::Util::Gpg.kill_keychain
 end
 
 def start_keychain
-  deprecate("start_keychain", "Pkg::Util::Gpg.start_keychain")
+  Pkg::Util.deprecate("start_keychain", "Pkg::Util::Gpg.start_keychain")
   Pkg::Util::Gpg.start_keychain
 end
 
 def gpg_sign_file(file)
-  deprecate("gpg_sign_file", "Pkg::Util::Gpg.sign_file")
+  Pkg::Util.deprecate("gpg_sign_file", "Pkg::Util::Gpg.sign_file")
   Pkg::Util::Gpg.sign_file(file)
 end
 
 def check_var(varname, var)
-  deprecate('check_var', 'Pkg::Util.check_var')
+  Pkg::Util.deprecate('check_var', 'Pkg::Util.check_var')
   Pkg::Util.check_var(varname, var)
 end
 
 def rand_string
-  deprecate('invoke_task', 'Pkg::Util.rand_string')
+  Pkg::Util.deprecate('invoke_task', 'Pkg::Util.rand_string')
   Pkg::Util.rand_string
 end
 
 def escape_html(uri)
-  deprecate('escape_html', 'Pkg::Util::Net.escape_html')
+  Pkg::Util.deprecate('escape_html', 'Pkg::Util::Net.escape_html')
   Pkg::Util::Net.escape_html(uri)
 end
 
 def add_param_to_uri(uri, param)
-  deprecate('add_param_to_uri', 'Pkg::Util::Net.add_param_to_uri')
+  Pkg::Util.deprecate('add_param_to_uri', 'Pkg::Util::Net.add_param_to_uri')
   Pkg::Util::Net.add_param_to_uri(uri, param)
 end
 
 def cp_pr(src, dest, options = {})
-  deprecate('cp_pr', 'FileUtils.cp_r')
+  Pkg::Util.deprecate('cp_pr', 'FileUtils.cp_r')
   mandatory = { :preserve => true }
   FileUtils.cp_r(src, dest, options.merge(mandatory))
 end
 
 def cp_p(src, dest, options = {})
-  deprecate('cp_p', 'FileUtils.cp')
+  Pkg::Util.deprecate('cp_p', 'FileUtils.cp')
   mandatory = { :preserve => true }
   FileUtils.cp(src, dest, options.merge(mandatory))
 end
 
 def remote_set_immutable(host, files)
-  deprecate('remote_set_immutable', 'Pkg::Util::Net.remote_set_immutable')
+  Pkg::Util.deprecate('remote_set_immutable', 'Pkg::Util::Net.remote_set_immutable')
   Pkg::Util::Net.remote_set_immutable(host, files)
 end
 
 def ask_yes_or_no
-  deprecate('ask_yes_or_no', 'Pkg::Util.ask_yes_or_no')
+  Pkg::Util.deprecate('ask_yes_or_no', 'Pkg::Util.ask_yes_or_no')
   Pkg::Util.ask_yes_or_no
 end
 
 def confirm_ship(files)
-  deprecate('confirm_ship', 'Pkg::Util.confirm_ship')
+  Pkg::Util.deprecate('confirm_ship', 'Pkg::Util.confirm_ship')
   Pkg::Util.confirm_ship(files)
+end
+
+def deprecate(old_cmd, new_cmd = nil)
+  Pkg::Util.deprecate('deprecate', 'Pkg::Util.deprecate')
+  Pkg::Util.deprecate(old_cmd, new_cmd)
 end
 

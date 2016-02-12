@@ -101,4 +101,11 @@ module Pkg::Util
     Pkg::Util.ask_yes_or_no
   end
 
+  def self.deprecate(old_cmd, new_cmd = nil)
+    msg = "!! #{old_cmd} is deprecated."
+    if new_cmd
+      msg << " Please use #{new_cmd} instead."
+    end
+    puts("\n#{msg}\n")
+  end
 end

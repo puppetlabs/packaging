@@ -64,22 +64,6 @@ def ship_gem(file)
   end
 end
 
-def ask_yes_or_no
-  return Pkg::Util.boolean_value(ENV['ANSWER_OVERRIDE']) unless ENV['ANSWER_OVERRIDE'].nil?
-  answer = STDIN.gets.downcase.chomp
-  return TRUE if answer =~ /^y$|^yes$/
-  return FALSE if answer =~ /^n$|^no$/
-  puts "Nope, try something like yes or no or y or n, etc:"
-  ask_yes_or_no
-end
-
-def confirm_ship(files)
-  STDOUT.puts "The following files have been built and are ready to ship:"
-  files.each { |file| STDOUT.puts "\t#{file}\n" unless File.directory?(file) }
-  STDOUT.puts "Ship these files?? [y,n]"
-  ask_yes_or_no
-end
-
 # We take a tar argument for cases where `tar` isn't best, e.g. Solaris.  We
 # also take an optional argument of the tarball containing the git bundle to
 # use.
@@ -270,4 +254,13 @@ def remote_set_immutable(host, files)
   Pkg::Util::Net.remote_set_immutable(host, files)
 end
 
+def ask_yes_or_no
+  deprecate('ask_yes_or_no', 'Pkg::Util.ask_yes_or_no')
+  Pkg::Util.ask_yes_or_no
+end
+
+def confirm_ship(files)
+  deprecate('confirm_ship', 'Pkg::Util.confirm_ship')
+  Pkg::Util.confirm_ship(files)
+end
 

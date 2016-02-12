@@ -42,7 +42,7 @@ namespace :pl do
       }
 
       STDOUT.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
-      if ask_yes_or_no
+      if Pkg::Util.ask_yes_or_no
         if Pkg::Config.yum_repo_command
           Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_staging_server, Pkg::Util::Misc.search_and_replace(Pkg::Config.yum_repo_command, yum_whitelist))
         else
@@ -65,7 +65,7 @@ namespace :pl do
       }
 
       STDOUT.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
-      if ask_yes_or_no
+      if Pkg::Util.ask_yes_or_no
         if Pkg::Config.apt_repo_command
           Pkg::Util::Net.remote_ssh_cmd(
             Pkg::Config.apt_signing_server,
@@ -148,7 +148,7 @@ namespace :pl do
     desc "Move signed deb repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}"
     task :deploy_apt_repo => 'pl:fetch' do
       puts "Really run remote rsync to deploy Debian repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}? [y,n]"
-      if ask_yes_or_no
+      if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
           Pkg::Deb::Repo.deploy_repos(
             Pkg::Config.apt_repo_path,
@@ -164,7 +164,7 @@ namespace :pl do
     desc "Copy rpm repos from #{Pkg::Config.yum_staging_server} to #{Pkg::Config.yum_host}"
     task :deploy_yum_repo => 'pl:fetch' do
       puts "Really run remote rsync to deploy yum repos from #{Pkg::Config.yum_staging_server} to #{Pkg::Config.yum_host}? [y,n]"
-      if ask_yes_or_no
+      if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
           Pkg::Rpm::Repo.deploy_repos(
             Pkg::Config.yum_repo_path,
@@ -239,7 +239,7 @@ namespace :pl do
 
   desc "UBER ship: ship all the things in pkg"
   task :uber_ship => 'pl:fetch' do
-    if confirm_ship(FileList["pkg/**/*"])
+    if Pkg::Util.confirm_ship(FileList["pkg/**/*"])
       ENV['ANSWER_OVERRIDE'] = 'yes'
       Rake::Task["pl:ship_gem"].invoke if Pkg::Config.build_gem
       Rake::Task["pl:ship_rpms"].invoke if Pkg::Config.final_mocks || Pkg::Config.vanagon_project

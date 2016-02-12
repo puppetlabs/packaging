@@ -174,5 +174,30 @@ module Pkg::Util::Net
       uri.query = [uri.query, param].compact.join('&')
       uri.to_s
     end
+
+    # We take a tar argument for cases where `tar` isn't best, e.g. Solaris.  We
+    # also take an optional argument of the tarball containing the git bundle to
+    # use.
+    def remote_bootstrap(host, treeish, tar_cmd = nil, tarball = nil)
+      unless tar = tar_cmd
+        tar = 'tar'
+      end
+      tarball ||= Pkg::Util::Git.git_bundle(treeish)
+      tarball_name = File.basename(tarball).gsub('.tar.gz', '')
+      Pkg::Util::Net.rsync_to(tarball, host, '/tmp')
+      appendix = Pkg::Util.rand_string
+      Pkg::Util::Net.remote_ssh_cmd(host, "#{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone --recursive /tmp/#{tarball_name} /tmp/#{Pkg::Config.project}-#{appendix} ; cd /tmp/#{Pkg::Config.project}-#{appendix} ; rake package:bootstrap")
+      "/tmp/#{Pkg::Config.project}-#{appendix}"
+    end
+
+    # Given a BuildInstance object and a host, send its params to the host. Return
+    # the remote path to the params.
+    def remote_buildparams(host, build)
+      params_file = build.config_to_yaml
+      params_file_name = File.basename(params_file)
+      params_dir = Pkg::Util.rand_string
+      Pkg::Util::Net.rsync_to(params_file, host, "/tmp/#{params_dir}/")
+      "/tmp/#{params_dir}/#{params_file_name}"
+    end
   end
 end

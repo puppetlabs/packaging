@@ -20,10 +20,17 @@ namespace :pl do
       package_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
       if wget = Pkg::Util::Tool.find_tool("wget")
         if Pkg::Config::foss_only and Pkg::Config.foss_platforms and remote_target == 'artifacts'
+          urls = Hash.new
           Pkg::Config.foss_platforms.each do |platform|
             platform_path = Pkg::Util::Platform.artifacts_path(platform)
-            puts "Fetching: Platform = #{platform}, URL = #{package_url}/#{platform_path}"
-            sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' #{package_url}/#{platform_path}/"
+            url = "#{package_url}/#{platform_path}"
+            if urls.has_key? url
+              puts "Skipping fetch for #{platform}, #{url} has already been fetched"
+            else
+              urls[url] = true
+              puts "Fetching: Platform = #{platform}, URL = #{url}"
+              sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' #{url}/"
+            end
           end
         else
           # For the next person who needs to look these flags up:

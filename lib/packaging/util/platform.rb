@@ -41,6 +41,28 @@ module Pkg::Util::Platform
       end
     end
 
+    def artifacts_path(platform_tag)
+      platform, version = parse_platform_tag(platform_tag)
+      package_format = PLATFORM_INFO[platform][version][:package_format]
+
+      case package_format
+      when 'rpm', 'swix'
+        # el/7/PC1/x86_64 for example
+        File.join('artifacts', platform, version)
+      when 'deb'
+        File.join('artifacts', 'deb', get_attribute(platform_tag, :codename))
+      when 'svr4', 'ips'
+        # solaris/10/PC1 for example
+        File.join('artifacts', 'solaris', version)
+      when 'dmg'
+        File.join('artifacts', 'apple', version)
+      when 'msi'
+        File.join('artifacts', 'windows')
+      else
+        fail "Not sure what to do with a package format of '#{package_format}'"
+      end
+    end
+
     def repo_path(platform_tag)
       platform, version, arch = parse_platform_tag(platform_tag)
       package_format = PLATFORM_INFO[platform][version][:package_format]

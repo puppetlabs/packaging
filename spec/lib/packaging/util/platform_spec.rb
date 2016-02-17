@@ -32,6 +32,35 @@ describe "Pkg::Util::Platform" do
     end
   end
 
+  describe '#artifacts_path' do
+    it 'should be correct for el7' do
+      expect(Pkg::Util::Platform.artifacts_path('el-7-x86_64')).to eq('artifacts/el/7')
+    end
+
+    it 'should be correct for trusty' do
+      expect(Pkg::Util::Platform.artifacts_path('ubuntu-14.04-amd64')).to eq('artifacts/deb/trusty')
+    end
+
+    it 'should be correct for solaris 11' do
+      expect(Pkg::Util::Platform.artifacts_path('solaris-11-sparc')).to eq('artifacts/solaris/11')
+    end
+
+    it 'should be correct for osx' do
+      expect(Pkg::Util::Platform.artifacts_path('osx-10.10-x86_64')).to eq('artifacts/apple/10.10')
+    end
+
+    it 'should be correct for windows' do
+      expect(Pkg::Util::Platform.artifacts_path('windows-2012-x64')).to eq('artifacts/windows')
+    end
+
+    it 'should work on all current platforms' do
+      Pkg::Util::Platform.platform_tags.each do |tag|
+        expect { Pkg::Util::Platform.artifacts_path(tag) }.not_to raise_error
+      end
+    end
+  end
+
+
   describe '#repo_config_path' do
     it 'should be correct' do
       expect(Pkg::Util::Platform.repo_config_path('el-7-x86_64')).to eq('repo_configs/rpm/*el-7-x86_64*.repo')

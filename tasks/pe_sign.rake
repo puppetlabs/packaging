@@ -10,14 +10,22 @@ if Pkg::Config.build_pe
       # Find x86_64 noarch rpms that have been created as hard links and remove them
       rm_r Dir["pkg/pe/rpm/*-*-x86_64/*.noarch.rpm"]
       # We'll sign the remaining noarch
-      sign_dists = ['el4', 'el5', 'el6', 'el7', 'sles10', 'sles11', 'sles12']
+      sign_dists = [
+      { :OS => 'el', :version => 4 },
+      { :OS => 'el', :version => 5 },
+      { :OS => 'el', :version => 6 },
+      { :OS => 'el', :version => 7 },
+      { :OS => 'sles', :version => 10 },
+      { :OS => 'sles', :version => 11 },
+      { :OS => 'sles', :version => 12 }
+      ]
       ['i386', 'x86_64'].each do |arch|
         sign_dists.each do |dist|
-          family = dist[/[a-z]+/]
-          version = dist[/[0-9]+/]
+          family = dist[:OS]
+          version = dist[:version]
           rpm_stagedir        = "pkg/pe/rpm/#{family}-#{version}-#{arch}/*.rpm"
           srpm_stagedir       = "pkg/pe/rpm/#{family}-#{version}-srpms/*.rpm"
-          if (family == 'el' and version >= '6') || (family == 'sles' and version >= '12')
+          if (family == 'el' and version >= 6) || (family == 'sles' and version >= 12)
             modern_rpms += FileList[rpm_stagedir] + FileList[srpm_stagedir]
           else
             old_rpms += FileList[rpm_stagedir] + FileList[srpm_stagedir]

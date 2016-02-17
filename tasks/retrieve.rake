@@ -19,7 +19,20 @@ namespace :pl do
       mkdir_p local_target
       package_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
       if wget = Pkg::Util::Tool.find_tool("wget")
-        if Pkg::Config::foss_only and Pkg::Config.foss_platforms and remote_target == 'artifacts'
+        if Pkg::Config.foss_only && !Pkg::Config.foss_platforms
+          warn "FOSS_ONLY specified, but I don't know anything about FOSS_PLATFORMS. Fetch everything?"
+          unless ask_yes_or_no
+            warn "Retrieve cancelled"
+            exit
+          end
+        elsif Pkg::Config.foss_only && remote_target != 'artifacts'
+          warn "I only know how to fetch from remote_target 'artifacts' with FOSS_ONLY. Fetch everything?"
+          unless ask_yes_or_no
+            warn "Retrieve cancelled"
+            exit
+          end
+        end
+        if Pkg::Config.foss_only && Pkg::Config.foss_platforms && remote_target == 'artifacts'
           urls = Hash.new
           Pkg::Config.foss_platforms.each do |platform|
             platform_path = Pkg::Util::Platform.artifacts_path(platform)

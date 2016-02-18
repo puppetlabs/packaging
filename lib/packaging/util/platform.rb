@@ -41,6 +41,43 @@ module Pkg::Util::Platform
       end
     end
 
+    def artifacts_path(platform_tag, package_url = nil)
+      platform, version = parse_platform_tag(platform_tag)
+      package_format = PLATFORM_INFO[platform][version][:package_format]
+
+      case package_format
+      when 'rpm', 'swix'
+        # el/7/PC1/x86_64 for example
+        File.join('artifacts', platform, version)
+      when 'deb'
+        File.join('artifacts', 'deb', get_attribute(platform_tag, :codename))
+      when 'svr4', 'ips'
+        # solaris/10/PC1 for example
+        File.join('artifacts', 'solaris', version)
+      when 'dmg'
+        # We don't consistently ship OSX artifacts to the same path
+        # vanagon ships things under a version number, and standard
+        # packaging excludes the version number. We should fix that, but in
+        # the interim we can check whether or not the versioned path exists
+        # and fail back to the unversioned path if needed.
+        version_path = File.join('artifacts', 'apple', version)
+        if package_url.nil?
+          version_path
+        else
+          code = Pkg::Util::Net.uri_status_code("#{package_url}/#{version_path}")
+          if code == '200'
+            version_path
+          else
+            File.join('artifacts', 'apple')
+          end
+        end
+      when 'msi'
+        File.join('artifacts', 'windows')
+      else
+        fail "Not sure where to find packages with a package format of '#{package_format}'"
+      end
+    end
+
     def repo_path(platform_tag)
       platform, version, arch = parse_platform_tag(platform_tag)
       package_format = PLATFORM_INFO[platform][version][:package_format]

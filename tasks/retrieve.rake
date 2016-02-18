@@ -17,17 +17,45 @@ namespace :pl do
       local_target = args.local_target || "pkg"
       Pkg::Util::RakeUtils.invoke_task("pl:fetch")
       mkdir_p local_target
-      package_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{remote_target}"
+      package_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
       if wget = Pkg::Util::Tool.find_tool("wget")
-        # For the next person who needs to look these flags up:
-        # -r = recursive
-        # -l 0 = infinitely recurse, no limit
-        # --cut-dirs 3 = will cut off #{Pkg::Config.project}, #{Pkg::Config.ref}, and the first directory in #{remote_target} from the url when saving to disk
-        # -np = Only descend when recursing, never ascend
-        # -nH = Discard http://#{Pkg::Config.builds_server} when saving to disk
-        # --reject = Reject all hits that match the supplied regex
-        # -P = where to save to disk (defaults to ./)
-        sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' #{package_url}/"
+        if Pkg::Config.foss_only && !Pkg::Config.foss_platforms
+          warn "FOSS_ONLY specified, but I don't know anything about FOSS_PLATFORMS. Fetch everything?"
+          unless ask_yes_or_no
+            warn "Retrieve cancelled"
+            exit
+          end
+        elsif Pkg::Config.foss_only && remote_target != 'artifacts'
+          warn "I only know how to fetch from remote_target 'artifacts' with FOSS_ONLY. Fetch everything?"
+          unless ask_yes_or_no
+            warn "Retrieve cancelled"
+            exit
+          end
+        end
+        if Pkg::Config.foss_only && Pkg::Config.foss_platforms && remote_target == 'artifacts'
+          urls = Hash.new
+          Pkg::Config.foss_platforms.each do |platform|
+            platform_path = Pkg::Util::Platform.artifacts_path(platform, package_url)
+            url = "#{package_url}/#{platform_path}"
+            if urls.has_key? url
+              puts "Skipping fetch for #{platform}, #{url} has already been fetched"
+            else
+              urls[url] = true
+              puts "Fetching: Platform = #{platform}, URL = #{url}"
+              sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' #{url}/"
+            end
+          end
+        else
+          # For the next person who needs to look these flags up:
+          # -r = recursive
+          # -l 0 = infinitely recurse, no limit
+          # --cut-dirs 3 = will cut off #{Pkg::Config.project}, #{Pkg::Config.ref}, and the first directory in #{remote_target} from the url when saving to disk
+          # -np = Only descend when recursing, never ascend
+          # -nH = Discard http://#{Pkg::Config.builds_server} when saving to disk
+          # --reject = Reject all hits that match the supplied regex
+          # -P = where to save to disk (defaults to ./)
+          sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' #{package_url}/#{remote_target}/"
+        end
       else
         warn "Could not find `wget` tool. Falling back to rsyncing from #{Pkg::Config.distribution_server}"
         begin

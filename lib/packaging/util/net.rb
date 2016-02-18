@@ -124,6 +124,17 @@ module Pkg::Util::Net
       end
     end
 
+    def uri_status_code(uri)
+      data = [
+        '--request GET',
+        '--silent',
+        '--location',
+        '--write-out "%{http_code}"',
+        '--output /dev/null'
+      ]
+      Pkg::Util::Net.curl_form_data(uri, data)
+    end
+
     # Use the provided URL string to print important information with
     # ASCII emphasis
     def print_url_info(url_string)

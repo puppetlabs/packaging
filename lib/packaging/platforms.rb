@@ -37,6 +37,10 @@ module Pkg
         'f22' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
       },
 
+      'huaweios' => {
+        '6' => { :codename => 'huaweios', :architectures => ['powerpc'], :repo => true, :package_format => 'deb', },
+      },
+
       'osx' => {
         '10.9' => { :architectures => ['x86_64'], :repo => false, :package_format => 'dmg', },
         '10.10' => { :architectures => ['x86_64'], :repo => false, :package_format => 'dmg', },

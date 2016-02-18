@@ -35,7 +35,7 @@ namespace :pl do
         if Pkg::Config.foss_only && Pkg::Config.foss_platforms && remote_target == 'artifacts'
           urls = Hash.new
           Pkg::Config.foss_platforms.each do |platform|
-            platform_path = Pkg::Util::Platform.artifacts_path(platform)
+            platform_path = Pkg::Util::Platform.artifacts_path(platform, package_url)
             url = "#{package_url}/#{platform_path}"
             if urls.has_key? url
               puts "Skipping fetch for #{platform}, #{url} has already been fetched"

@@ -41,7 +41,7 @@ module Pkg::Util::Platform
       end
     end
 
-    def artifacts_path(platform_tag)
+    def artifacts_path(platform_tag, package_url = nil)
       platform, version = parse_platform_tag(platform_tag)
       package_format = PLATFORM_INFO[platform][version][:package_format]
 
@@ -55,11 +55,26 @@ module Pkg::Util::Platform
         # solaris/10/PC1 for example
         File.join('artifacts', 'solaris', version)
       when 'dmg'
-        File.join('artifacts', 'apple', version)
+        # We don't consistently ship OSX artifacts to the same path
+        # vanagon ships things under a version number, and standard
+        # packaging excludes the version number. We should fix that, but in
+        # the interim we can check whether or not the versioned path exists
+        # and fail back to the unversioned path if needed.
+        version_path = File.join('artifacts', 'apple', version)
+        if package_url.nil?
+          version_path
+        else
+          code = Pkg::Util::Net.uri_status_code("#{package_url}/#{version_path}")
+          if code == '200'
+            version_path
+          else
+            File.join('artifacts', 'apple')
+          end
+        end
       when 'msi'
         File.join('artifacts', 'windows')
       else
-        fail "Not sure what to do with a package format of '#{package_format}'"
+        fail "Not sure where to find packages with a package format of '#{package_format}'"
       end
     end
 

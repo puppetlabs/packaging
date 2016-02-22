@@ -187,7 +187,7 @@ namespace :pl do
       if Pkg::Config.version_strategy !~ /odd_even|zero_based/ || Pkg::Util::Version.is_final?
         FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |f|
           puts "Shipping gem #{f} to rubygems"
-          ship_gem(f)
+          Pkg::Gem.ship(f)
         end
       else
         STDERR.puts "Not shipping development gem using odd_even strategy for the sake of your users."

@@ -13,6 +13,7 @@ module Pkg
   require 'packaging/osx'
   require 'packaging/ips'
   require 'packaging/nuget'
+  require 'packaging/gem'
 
   # Load configuration defaults
   Pkg::Config.load_defaults

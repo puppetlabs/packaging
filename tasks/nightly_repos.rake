@@ -18,8 +18,8 @@ namespace :pl do
       Pkg::Util::File.empty_dir?("repos") and fail "There were no repos found in repos/. Maybe something in the pipeline failed?"
       signing_bundle = ENV['SIGNING_BUNDLE']
 
-      remote_repo   = remote_bootstrap(signing_server, 'HEAD', nil, signing_bundle)
-      build_params  = remote_buildparams(signing_server, Pkg::Config)
+      remote_repo   = Pkg::Util::Net.remote_bootstrap(signing_server, 'HEAD', nil, signing_bundle)
+      build_params  = Pkg::Util::Net.remote_buildparams(signing_server, Pkg::Config)
       Pkg::Util::Net.rsync_to('repos', signing_server, remote_repo)
       Pkg::Util::Net.remote_ssh_cmd(signing_server, "cd #{remote_repo} ; rake pl:jenkins:sign_repos GPG_KEY=#{Pkg::Config.gpg_key} PARAMS_FILE=#{build_params}")
       Pkg::Util::Net.rsync_from("#{remote_repo}/repos/", signing_server, target)
@@ -110,7 +110,7 @@ namespace :pl do
         # names stay the same between runs. Their contents have the ref
         # stripped off and the project replaced by $project-latest. Then the
         # repos directory is a symlink to the last pushed ref's repos.
-        cp_pr(File.join(local_target, "repo_configs"), Pkg::Config.project + "-latest")
+        FileUtils.cp_r(File.join(local_target, "repo_configs"), Pkg::Config.project + "-latest", { :preserve => true })
 
         # Now we need to remove the ref and replace $project with
         # $project-latest so that it will work as a pinned latest repo

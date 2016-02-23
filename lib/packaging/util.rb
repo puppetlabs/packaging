@@ -80,4 +80,32 @@ module Pkg::Util
   ensure
     system 'stty echo'
   end
+
+  def self.rand_string
+    rand.to_s.split('.')[1]
+  end
+
+  def self.ask_yes_or_no
+    return Pkg::Util.boolean_value(ENV['ANSWER_OVERRIDE']) unless ENV['ANSWER_OVERRIDE'].nil?
+    answer = Pkg::Util.get_input
+    return true if answer =~ /^y$|^yes$/
+    return false if answer =~ /^n$|^no$/
+    puts "Nope, try something like yes or no or y or n, etc:"
+    Pkg::Util.ask_yes_or_no
+  end
+
+  def self.confirm_ship(files)
+    STDOUT.puts "The following files have been built and are ready to ship:"
+    files.each { |file| puts "\t#{file}\n" unless File.directory?(file) }
+    STDOUT.puts "Ship these files?? [y,n]"
+    Pkg::Util.ask_yes_or_no
+  end
+
+  def self.deprecate(old_cmd, new_cmd = nil)
+    msg = "!! #{old_cmd} is deprecated."
+    if new_cmd
+      msg << " Please use #{new_cmd} instead."
+    end
+    STDOUT.puts("\n#{msg}\n")
+  end
 end

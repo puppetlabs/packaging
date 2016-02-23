@@ -60,7 +60,7 @@ describe "Pkg::Util::Git" do
     it "should create a git bundle with random appendix and random output directory" do
       Pkg::Util::Version.should_receive(:is_git_repo?).and_return(true)
       Pkg::Util::File.should_receive(:mktemp).and_return(temp)
-      Pkg::Util::Git.should_receive(:rand_string).and_return(string)
+      Pkg::Util.should_receive(:rand_string).and_return(string)
       Pkg::Util::Execution.should_receive(:ex).with("#{Pkg::Util::Tool::GIT} bundle create #{temp}/#{project}-#{version}-#{string} #{treeish} --tags")
       Dir.should_receive(:chdir).with(temp)
       Pkg::Util::Git.git_bundle(treeish)

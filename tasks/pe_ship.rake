@@ -124,7 +124,7 @@ if Pkg::Config.build_pe
           files += Dir["pkg/pe/deb/#{dist}/*"].select { |f| f !~ /^.*\.deb$/ }.map { |f| "#{base_path}/#{dist}-source/#{File.basename(f)}" }
 
           unless files.empty?
-            remote_set_immutable(Pkg::Config.apt_host, files)
+            Pkg::Util::Net.remote_set_immutable(Pkg::Config.apt_host, files)
           end
         end
       end

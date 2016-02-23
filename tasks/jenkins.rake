@@ -278,7 +278,7 @@ if Pkg::Config.build_pe
       tasks.each do |build_task|
         desc "Queue pe:#{build_task} build on jenkins builder"
         task build_task => "pl:fetch" do
-          check_var("PE_VER", Pkg::Config.pe_version)
+          Pkg::Util.check_var("PE_VER", Pkg::Config.pe_version)
           Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pe:#{build_task}")
         end
       end
@@ -289,7 +289,7 @@ if Pkg::Config.build_pe
       # DOSing it with our packaging.
       desc "Queue pe:deb_all on jenkins builder"
       task :deb_all => "pl:fetch" do
-        check_var("PE_VER", Pkg::Config.pe_version)
+        Pkg::Util.check_var("PE_VER", Pkg::Config.pe_version)
         Pkg::Config.cows.split(' ').each do |cow|
           Pkg::Config.default_cow = cow
           Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pe:deb")
@@ -309,7 +309,7 @@ if Pkg::Config.build_pe
 
       desc "Retrieve PE packages built by jenkins, sign, and ship all!"
       task :uber_ship => "pl:fetch" do
-        check_var("PE_VER", Pkg::Config.pe_version)
+        Pkg::Util.check_var("PE_VER", Pkg::Config.pe_version)
         ["pl:jenkins:retrieve", "pl:jenkins:sign_all", "pe:ship_rpms", "pe:ship_debs"].each do |task|
           Rake::Task[task].invoke
         end

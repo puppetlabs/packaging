@@ -14,7 +14,7 @@
 namespace :package do
   desc "Set and commit the version in #{Pkg::Config.version_file}, requires VERSION."
   task :versionset do
-    check_var('VERSION', ENV['VERSION'])
+    Pkg::Util.check_var('VERSION', ENV['VERSION'])
     Pkg::Util::Version.versionbump
     Pkg::Util::Git.git_commit_file(Pkg::Config.version_file, "update to #{ENV['VERSION']}")
   end

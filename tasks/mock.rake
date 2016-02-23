@@ -152,7 +152,7 @@ end
 # The generated config file is formed by substituting the pe_version into the erb
 #
 def mock_template(mock_config)
-  check_var("PE version, ENV[PE_VER]", Pkg::Config.pe_version)
+  Pkg::Util.check_var("PE version, ENV[PE_VER]", Pkg::Config.pe_version)
   # pe_version is used in the erb template
   pe_version = Pkg::Config.pe_version
   # This bit is fun, here we remove any x.y version in the PE version location in the string from the mock_config
@@ -217,13 +217,13 @@ def build_rpm_with_mock(mocks)
             when /debuginfo/
               rm_rf(rpm)
             when /src\.rpm/
-              cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-srpms")
+              FileUtils.cp_r(rpm, "pkg/pe/rpm/#{family}-#{version}-srpms", { :preserve => true })
             when /i.?86/
-              cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-i386")
+              FileUtils.cp_r(rpm, "pkg/pe/rpm/#{family}-#{version}-i386", { :preserve => true })
             when /x86_64/
-              cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-x86_64")
+              FileUtils.cp_r(rpm, "pkg/pe/rpm/#{family}-#{version}-x86_64", { :preserve => true })
             when /noarch/
-              cp_pr(rpm, "pkg/pe/rpm/#{family}-#{version}-i386")
+              FileUtils.cp_r(rpm, "pkg/pe/rpm/#{family}-#{version}-i386", { :preserve => true })
               FileUtils.ln("pkg/pe/rpm/#{family}-#{version}-i386/#{File.basename(rpm)}", "pkg/pe/rpm/#{family}-#{version}-x86_64/", :force => true, :verbose => true)
           end
         else
@@ -232,13 +232,13 @@ def build_rpm_with_mock(mocks)
             when /debuginfo/
               rm_rf(rpm)
             when /src\.rpm/
-              cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/SRPMS")
+              FileUtils.cp_r(rpm, "pkg/#{family}/#{version}/#{subdir}/SRPMS", { :preserve => true })
             when /i.?86/
-              cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/i386")
+              FileUtils.cp_r(rpm, "pkg/#{family}/#{version}/#{subdir}/i386", { :preserve => true })
             when /x86_64/
-              cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/x86_64")
+              FileUtils.cp_r(rpm, "pkg/#{family}/#{version}/#{subdir}/x86_64", { :preserve => true })
             when /noarch/
-              cp_pr(rpm, "pkg/#{family}/#{version}/#{subdir}/i386")
+              FileUtils.cp_r(rpm, "pkg/#{family}/#{version}/#{subdir}/i386", { :preserve => true })
               FileUtils.ln("pkg/#{family}/#{version}/#{subdir}/i386/#{File.basename(rpm)}", "pkg/#{family}/#{version}/#{subdir}/x86_64/", :force => true, :verbose => true)
           end
         end

@@ -3,7 +3,7 @@ require 'pathname'
 def pdebuild(args)
   results_dir = args[:work_dir]
   cow         = args[:cow]
-  set_cow_envs(cow)
+  Pkg::Deb.set_cow_envs(cow)
   update_cow(cow)
   sh "pdebuild  --configfile #{Pkg::Config.pbuild_conf} \
                 --buildresult #{results_dir} \
@@ -14,7 +14,7 @@ end
 
 def update_cow(cow)
   ENV['PATH'] = "/usr/sbin:#{ENV['PATH']}"
-  set_cow_envs(cow)
+  Pkg::Deb.set_cow_envs(cow)
   Pkg::Util::Execution.retry_on_fail(:times => 3) do
     sh "sudo -E /usr/sbin/cowbuilder --update --override-config --configfile #{Pkg::Config.pbuild_conf} --basepath /var/cache/pbuilder/#{cow} --distribution #{ENV['DIST']} --architecture #{ENV['ARCH']}"
   end
@@ -31,7 +31,7 @@ end
 
 task :prep_deb_tars, :work_dir do |t, args|
   work_dir = args.work_dir
-  cp_p "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz", work_dir
+  FileUtils.cp "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz", work_dir, { :preserve => true }
   cd work_dir do
     sh "tar zxf #{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
     mv "#{Pkg::Config.project}-#{Pkg::Config.version}", "#{Pkg::Config.project}-#{Pkg::Config.debversion}"
@@ -93,7 +93,7 @@ task :build_deb, :deb_command, :cow do |t, args|
       # completely ignored without the following two lines that unconditionally
       # copy anything in ext/debian into the debian directory.
       mkdir_p 'debian'
-      cp_pr(Dir.glob("ext/debian/*"), 'debian')
+      FileUtils.cp_r(Dir.glob("ext/debian/*"), 'debian', { :preserve => true })
       send(deb_build, deb_args)
       cp FileList["#{work_dir}/*.deb", "#{work_dir}/*.dsc", "#{work_dir}/*.changes", "#{work_dir}/*.debian.tar.gz", "#{work_dir}/*.orig.tar.gz", "${work_dir}/*.diff.gz"], dest_dir
       rm_rf "#{work_dir}/#{Pkg::Config.project}-#{Pkg::Config.debversion}"
@@ -113,13 +113,13 @@ end
 namespace :pl do
   desc "Create a deb from this repo using the default cow #{Pkg::Config.default_cow}."
   task :deb => "package:tar"  do
-    check_var('PE_VER', Pkg::Config.pe_version) if Pkg::Config.build_pe
+    Pkg::Util.check_var('PE_VER', Pkg::Config.pe_version) if Pkg::Config.build_pe
     Rake::Task[:build_deb].invoke('pdebuild', Pkg::Config.default_cow)
   end
 
   desc "Create debs from this git repository using all cows specified in build_defaults yaml"
   task :deb_all do
-    check_var('PE_VER', Pkg::Config.pe_version) if Pkg::Config.build_pe
+    Pkg::Util.check_var('PE_VER', Pkg::Config.pe_version) if Pkg::Config.build_pe
     Pkg::Config.cows.split(' ').each do |cow|
       Rake::Task["package:tar"].invoke
       Rake::Task[:build_deb].reenable

@@ -6,7 +6,7 @@ module Pkg::OSX
       ssh_host_string = "#{use_identity} #{ENV['USER']}@#{Pkg::Config.osx_signing_server}"
       rsync_host_string = "-e 'ssh #{use_identity}' #{ENV['USER']}@#{Pkg::Config.osx_signing_server}"
 
-      work_dir  = "/tmp/#{rand_string}"
+      work_dir  = "/tmp/#{Pkg::Util.rand_string}"
       mount     = File.join(work_dir, "mount")
       signed    = File.join(work_dir, "signed")
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "mkdir -p #{mount} #{signed}")

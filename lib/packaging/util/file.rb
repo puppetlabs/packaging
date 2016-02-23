@@ -4,6 +4,15 @@ require 'fileutils'
 module Pkg::Util::File
 
   class << self
+    def exist?(file)
+      ::File.exist?(file)
+    end
+    alias_method :exists?, :exist?
+
+    def directory?
+      ::File.directory?(file)
+    end
+
     def mktemp
       mktemp = Pkg::Util::Tool.find_tool('mktemp', :required => true)
       Pkg::Util::Execution.ex("#{mktemp} -d -t pkgXXXXXX").strip

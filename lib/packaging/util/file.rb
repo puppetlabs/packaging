@@ -9,7 +9,7 @@ module Pkg::Util::File
     end
     alias_method :exists?, :exist?
 
-    def directory?
+    def directory?(file)
       ::File.directory?(file)
     end
 

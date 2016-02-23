@@ -99,6 +99,7 @@ module Pkg::Util::RakeUtils
         'vendor_gems.rake',
         'version.rake',
         'z_data_dump.rake',
+        'config.rake',
       ]
 
       tasks.each do |task|

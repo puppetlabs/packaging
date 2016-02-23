@@ -9,6 +9,13 @@ module Pkg
     require 'yaml'
 
     class << self
+      ##
+      #   Returns a hash with string keys that maps instance variable
+      #   names without "@"" to their corresponding values.
+      #
+      def instance_values
+        Hash[instance_variables.map { |name| [name[1..-1], instance_variable_get(name)] }]
+      end
 
       #   Every element in Pkg::Params::BUILD_PARAMS is a configurable setting
       #   for the build. We use Pkg::Params::BUILD_PARAMS as the source of

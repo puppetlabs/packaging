@@ -259,7 +259,9 @@ module Pkg::Params
   REASSIGNMENTS = [{ :oldvar => :name,                   :newvar => :project },
                    { :oldvar => :yum_host,               :newvar => :tar_host },
                    { :oldvar => :yum_staging_server,     :newvar => :yum_host },
+                   { :oldvar => :apt_signing_server,     :newvar => :apt_host },
                    { :oldvar => :gem_devel_dependencies, :newvar => :gem_development_dependencies },
+                   { :oldvar => :apt_repo_staging_path,  :newvar => :apt_repo_path },
                    { :oldvar => :pe_name,                :newvar => :project },
                    { :oldvar => :project,                :newvar => :gem_name },
                    { :oldvar => :gpg_name,               :newvar => :gpg_key }]

@@ -256,15 +256,25 @@ module Pkg::Params
   # "redirects" - e.g. defaulting the populated value of one parameter for another
   # in case it is not set.
   #
-  REASSIGNMENTS = [{ :oldvar => :name,                   :newvar => :project },
-                   { :oldvar => :yum_host,               :newvar => :tar_host },
-                   { :oldvar => :yum_staging_server,     :newvar => :yum_host },
-                   { :oldvar => :apt_signing_server,     :newvar => :apt_host },
-                   { :oldvar => :gem_devel_dependencies, :newvar => :gem_development_dependencies },
-                   { :oldvar => :apt_repo_staging_path,  :newvar => :apt_repo_path },
-                   { :oldvar => :pe_name,                :newvar => :project },
-                   { :oldvar => :project,                :newvar => :gem_name },
-                   { :oldvar => :gpg_name,               :newvar => :gpg_key }]
+  REASSIGNMENTS = [
+                    # These are fall-through values for shipping endpoints
+                    { :oldvar => :staging_server,         :newvar => :apt_staging_server },
+                    { :oldvar => :staging_server,         :newvar => :gem_staging_server },
+                    { :oldvar => :staging_server,         :newvar => :nuget_staging_server },
+                    { :oldvar => :staging_server,         :newvar => :tar_staging_server },
+                    { :oldvar => :staging_server,         :newvar => :yum_staging_server },
+                    # These are fall-through values for signing/repo endpoints
+                    { :oldvar => :yum_staging_server,     :newvar => :yum_host },
+                    { :oldvar => :apt_repo_staging_path,  :newvar => :apt_repo_path },
+                    { :oldvar => :apt_signing_server,     :newvar => :apt_host },
+                    # These are legitimately old values
+                    { :oldvar => :gem_devel_dependencies, :newvar => :gem_development_dependencies },
+                    { :oldvar => :gpg_name,               :newvar => :gpg_key },
+                    { :oldvar => :name,                   :newvar => :project },
+                    { :oldvar => :pe_name,                :newvar => :project },
+                    { :oldvar => :project,                :newvar => :gem_name },
+                    { :oldvar => :yum_host,               :newvar => :tar_host },
+                 ]
 
   # These are variables that we have deprecated. If they are encountered in a
   # project's config, we issue deprecations for them.

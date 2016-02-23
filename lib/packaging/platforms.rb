@@ -38,7 +38,7 @@ module Pkg
       },
 
       'huaweios' => {
-        '6' => { :codename => 'huaweios', :architectures => ['powerpc'], :repo => true, :package_format => 'deb', },
+        '6' => { :codename => 'huaweios', :architectures => ['ppc'], :repo => true, :package_format => 'deb', },
       },
 
       'osx' => {

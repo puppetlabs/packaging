@@ -266,7 +266,7 @@ module Pkg
         Pkg::Params::REASSIGNMENTS.each do |v|
           oldval = self.instance_variable_get("@#{v[:oldvar]}")
           newval = self.instance_variable_get("@#{v[:newvar]}")
-          if newval.nil? and !oldval.nil?
+          if newval.nil? && oldval
             self.instance_variable_set("@#{v[:newvar]}", oldval)
           end
         end

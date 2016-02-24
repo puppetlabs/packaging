@@ -181,6 +181,8 @@ module Pkg::Params
               { :var => :final_mocks,             :envvar => :MOCK },
               { :var => :foss_only,               :envvar => :FOSS_ONLY },
               { :var => :foss_platforms,          :envvar => :FOSS_PLATFORMS,  :type => :array },
+              { :var => :gem_host,                :envvar => :GEM_HOST },
+              { :var => :gem_staging_server,      :envvar => :GEM_STAGING_SERVER },
               { :var => :gpg_key,                 :envvar => :GPG_KEY },
               { :var => :gpg_name,                :envvar => :GPG_NAME },
               { :var => :ips_host,                :envvar => :IPS_HOST },

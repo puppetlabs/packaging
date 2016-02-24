@@ -57,6 +57,42 @@ module Pkg::Util::Net
       end
     end
 
+    def rsync_cmd(origin_path, opts = {})
+      options = {
+        bin: 'rsync',
+        origin_host: nil,
+        target_path: nil,
+        target_host: nil,
+        extra_flags: ["--ignore-existing"],
+        dryrun: false }.merge(opts)
+      origin = Pkg::Util.cleanpath(origin_path)
+      target = Pkg::Util.cleanpath(options[:target_path]) || origin.parent
+
+      raise(ArgumentError, "Cannot sync between two remote hosts") if
+        options[:origin_host] && options[:target_host]
+
+      raise(ArgumentError, "Cannot sync path '#{origin}' to itself") unless
+        options[:origin_host] || options[:target_host]
+
+      cmd = %W(
+        #{options[:bin]}
+        --recursive
+        --hard-links
+        --links
+        --verbose
+        --omit-dir-times
+        --no-perms
+        --no-owner
+        --no-group
+      ) + options[:extra_flags]
+
+      cmd << '--dry-run' if options[:dryrun]
+      cmd << Pkg::Util.pseudo_uri(path: origin, host: options[:origin_host])
+      cmd << Pkg::Util.pseudo_uri(path: target, host: options[:target_host])
+
+      cmd.uniq.compact.join("\s")
+    end
+
     def rsync_to(source, target, dest, extra_flags = ["--ignore-existing"])
       rsync = Pkg::Util::Tool.check_tool('rsync')
       flags = "-rHlv -O --no-perms --no-owner --no-group"

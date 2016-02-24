@@ -112,13 +112,23 @@ module Pkg::Util::Net
       Pkg::Util::Execution.ex(cmd, true)
     end
 
-    def rsync_from(source, target, dest, extra_flags = [])
-      rsync = Pkg::Util::Tool.check_tool('rsync')
-      flags = "-rHlv -O --no-perms --no-owner --no-group"
-      unless extra_flags.empty?
-        flags << " " << extra_flags.join(" ")
-      end
-      Pkg::Util::Execution.ex("#{rsync} #{flags} #{target}:#{source} #{dest}", true)
+    def rsync_from(source, target_host, dest, opts = {})
+      options = {
+                  bin: Pkg::Util::Tool.check_tool('rsync'),
+                  extra_flags: ["--ignore-existing"],
+                  dryrun: false,
+                }.merge(opts)
+
+      cmd = rsync_cmd(
+              source,
+              origin_host: target_host,
+              target_path: dest,
+              extra_flags: options[:extra_flags],
+              dryrun: options[:dryrun],
+              bin: options[:bin],
+            )
+
+      Pkg::Util::Execution.ex(cmd, true)
     end
 
     def s3sync_to(source, target_bucket, target_directory = "", flags = [])

@@ -38,7 +38,9 @@ module Pkg::Params
                   :default_mock,
                   :description,
                   :distribution_server,
+                  :dmg_host,
                   :dmg_path,
+                  :dmg_staging_server,
                   :email,
                   :files,
                   :final_mocks,
@@ -178,6 +180,8 @@ module Pkg::Params
               { :var => :debug,                   :envvar => :DEBUG,           :type => :bool },
               { :var => :default_cow,             :envvar => :COW },
               { :var => :default_mock,            :envvar => :MOCK },
+              { :var => :dmg_host,                :envvar => :DMG_HOST },
+              { :var => :dmg_staging_server,      :envvar => :DMG_STAGING_SERVER },
               { :var => :final_mocks,             :envvar => :MOCK },
               { :var => :foss_only,               :envvar => :FOSS_ONLY },
               { :var => :foss_platforms,          :envvar => :FOSS_PLATFORMS,  :type => :array },
@@ -261,6 +265,7 @@ module Pkg::Params
   REASSIGNMENTS = [
                     # These are fall-through values for shipping endpoints
                     { :oldvar => :staging_server,         :newvar => :apt_staging_server },
+                    { :oldvar => :staging_server,         :newvar => :dmg_staging_server },
                     { :oldvar => :staging_server,         :newvar => :gem_staging_server },
                     { :oldvar => :staging_server,         :newvar => :nuget_staging_server },
                     { :oldvar => :staging_server,         :newvar => :tar_staging_server },
@@ -275,6 +280,7 @@ module Pkg::Params
                     { :oldvar => :name,                   :newvar => :project },
                     { :oldvar => :pe_name,                :newvar => :project },
                     { :oldvar => :project,                :newvar => :gem_name },
+                    { :oldvar => :yum_host,               :newvar => :dmg_host },
                     { :oldvar => :yum_host,               :newvar => :tar_host },
                  ]
 

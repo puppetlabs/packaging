@@ -145,6 +145,17 @@ namespace :pl do
       end
     end
 
+    desc "Move dmg repos from #{Pkg::Config.dmg_staging_server} to #{Pkg::Config.dmg_host}"
+    task :deploy_dmg => 'pl:fetch' do
+      puts "Really run remote rsync to deploy OS X repos from #{Pkg::Config.dmg_staging_server} to #{Pkg::Config.dmg_host}? [y,n]"
+      if Pkg::Util.ask_yes_or_no
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.dmg_path, target_host: Pkg::Config.dmg_host, dryrun: ENV['DRYRUN'])
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.dmg_staging_server, cmd)
+        end
+      end
+    end
+
     desc "Move signed deb repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}"
     task :deploy_apt_repo => 'pl:fetch' do
       puts "Really run remote rsync to deploy Debian repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}? [y,n]"
@@ -195,13 +206,13 @@ namespace :pl do
     end
   end
 
-  desc "ship apple dmg to #{Pkg::Config.yum_host}"
+  desc "ship apple dmg to #{Pkg::Config.dmg_staging_server}"
   task :ship_dmg => 'pl:fetch' do
     if Dir['pkg/apple/**/*.dmg'].empty?
       STDOUT.puts "There aren't any dmg packages in pkg/apple. Maybe something went wrong?"
     else
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to('pkg/apple/', Pkg::Config.yum_host, Pkg::Config.dmg_path)
+        Pkg::Util::Net.rsync_to('pkg/apple/', Pkg::Config.dmg_staging_server, Pkg::Config.dmg_path)
       end
     end
   end if Pkg::Config.build_dmg || Pkg::Config.vanagon_project

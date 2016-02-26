@@ -146,7 +146,7 @@ namespace :pl do
     end
 
     desc "Move dmg repos from #{Pkg::Config.dmg_staging_server} to #{Pkg::Config.dmg_host}"
-    task :deploy_dmg => 'pl:fetch' do
+    task :deploy_dmg_repo => 'pl:fetch' do
       puts "Really run remote rsync to deploy OS X repos from #{Pkg::Config.dmg_staging_server} to #{Pkg::Config.dmg_host}? [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
@@ -157,7 +157,7 @@ namespace :pl do
     end
 
     desc "Move swix repos from #{Pkg::Config.swix_staging_server} to #{Pkg::Config.swix_host}"
-    task :deploy_swix => 'pl:fetch' do
+    task :deploy_swix_repo => 'pl:fetch' do
       puts "Really run remote rsync to deploy Arista repos from #{Pkg::Config.swix_staging_server} to #{Pkg::Config.swix_host}? [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
@@ -168,7 +168,7 @@ namespace :pl do
     end
 
     desc "Move tar repos from #{Pkg::Config.tar_staging_server} to #{Pkg::Config.tar_host}"
-    task :deploy_tar => 'pl:fetch' do
+    task :deploy_tar_repo => 'pl:fetch' do
       puts "Really run remote rsync to deploy source tarballs from #{Pkg::Config.tar_staging_server} to #{Pkg::Config.tar_host}? [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do

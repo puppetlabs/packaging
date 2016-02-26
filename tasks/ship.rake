@@ -156,6 +156,17 @@ namespace :pl do
       end
     end
 
+    desc "Move swix repos from #{Pkg::Config.swix_staging_server} to #{Pkg::Config.swix_host}"
+    task :deploy_swix => 'pl:fetch' do
+      puts "Really run remote rsync to deploy Arista repos from #{Pkg::Config.swix_staging_server} to #{Pkg::Config.swix_host}? [y,n]"
+      if Pkg::Util.ask_yes_or_no
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.swix_path, target_host: Pkg::Config.swix_host, dryrun: ENV['DRYRUN'])
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.swix_staging_server, cmd)
+        end
+      end
+    end
+
     desc "Move signed deb repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}"
     task :deploy_apt_repo => 'pl:fetch' do
       puts "Really run remote rsync to deploy Debian repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}? [y,n]"
@@ -217,14 +228,14 @@ namespace :pl do
     end
   end if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
 
-  desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.tar_host}"
+  desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
   task :ship_swix => 'pl:fetch' do
     packages = Dir['pkg/eos/**/*.swix']
     if packages.empty?
       STDOUT.puts "There aren't any swix packages in pkg/eos. Maybe something went wrong?"
     else
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to("pkg/eos/", Pkg::Config.tar_host, Pkg::Config.swix_path)
+        Pkg::Util::Net.rsync_to("pkg/eos/", Pkg::Config.swix_staging_server, Pkg::Config.swix_path)
       end
     end
   end

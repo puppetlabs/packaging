@@ -25,7 +25,7 @@ module Pkg::Rpm::Repo
     def repo_creation_command(createrepo)
       cmd = 'for repodir in $(find ./ -name "*.rpm" | xargs -I {} dirname {}) ; do '
       cmd << "[ -d ${repodir} ] || continue; "
-      cmd << "pushd ${repodir} && #{createrepo} --checksum=sha --database --update . ; popd ; "
+      cmd << "pushd ${repodir} && #{createrepo} --checksum=sha --checkts --update --delta-workers=0 --database . ; popd ; "
       cmd << "done "
     end
 
@@ -204,7 +204,7 @@ module Pkg::Rpm::Repo
       cmd << "createrepo=$(which createrepo) ; "
       cmd << 'for repodir in $(find ./ -name "*.rpm" | xargs -I {} dirname {}) ; do '
       cmd << "[ -d ${repodir} ] || continue; "
-      cmd << "pushd ${repodir} && ${createrepo} --checksum=sha --database --update . ; popd ; "
+      cmd << "pushd ${repodir} && ${createrepo} --checksum=sha --checkts --update --delta-workers=0 --database . ; popd ; "
       cmd << "done ; popd "
 
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, cmd)

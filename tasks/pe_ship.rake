@@ -144,7 +144,7 @@ if Pkg::Config.build_pe
           # single line. By breaking it into a series of concatenated strings, we can maintain
           # a semblance of formatting and structure (nevermind readability).
           command  = %(for dir in #{repo_base_path}/{#{rpm_family_and_version.join(",")}}-*; do)
-          command += %(  sudo createrepo --checksum=sha --quiet --database --update $dir; )
+          command += %(  sudo createrepo --checksum=sha --checkts --update --delta-workers=0 --quiet --database --update $dir; )
           command += %(done; )
           command += %(sync)
 

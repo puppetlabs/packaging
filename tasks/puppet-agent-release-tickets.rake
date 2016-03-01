@@ -339,6 +339,8 @@ git push upstream
 
 After merging to stable, the jobs on jenkins may require updates (spec, acceptance, etc) when you merge master into stable. Please ensure that the jenkins jobs are updated if necessary.
 
+If any new agent platforms were added in this release, you will need to update the puppet-agent.yaml file in ci-job-configs to copy the new platforms to the stable branch.
+
 Note that when merging master into stable, the stable versions of the component config refs should be preferred should there be a merge conflict.
 
 Dependencies:

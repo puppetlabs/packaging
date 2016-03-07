@@ -86,8 +86,8 @@ module Pkg::Util::Net
         target_host: nil,
         extra_flags: ["--ignore-existing"],
         dryrun: false }.merge(opts)
-      origin = Pkg::Util.cleanpath(origin_path)
-      target = Pkg::Util.cleanpath(options[:target_path]) || origin.parent
+      origin = Pathname.new(origin_path)
+      target = options[:target_path] || origin.parent
 
       raise(ArgumentError, "Cannot sync between two remote hosts") if
         options[:origin_host] && options[:target_host]

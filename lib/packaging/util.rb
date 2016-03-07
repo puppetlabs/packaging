@@ -123,18 +123,6 @@ module Pkg::Util
     [options[:host], options[:path]].compact.join(':')
   end
 
-  # Use the Pathname class from Ruby's Stdlib to coerce a
-  # path into something relatively clean and concise.
-  # @return [Pathname, nil] the cleanest version of a passed path.
-  #   Returns nil if it is unable to parse or clean the passed path.
-  # @param [String] path a path that should be sanitized
-  def self.cleanpath(path)
-    return path.cleanpath if path.respond_to? :cleanpath
-    ::Pathname.new(path).cleanpath
-  rescue
-    nil
-  end
-
   def self.deprecate(old_cmd, new_cmd = nil)
     msg = "!! #{old_cmd} is deprecated."
     if new_cmd

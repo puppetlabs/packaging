@@ -16,7 +16,7 @@ namespace :pl do
           "pkg/#{dist}",
           Pkg::Config.yum_staging_server,
           Pkg::Config.yum_repo_path,
-          extra_flags
+          extra_flags: extra_flags
         )
 
         Pkg::Util::Net.remote_set_ownership(Pkg::Config.yum_staging_server, 'root', 'release', pkgs)
@@ -150,7 +150,7 @@ namespace :pl do
       puts "Really run remote rsync to deploy OS X repos from #{Pkg::Config.dmg_staging_server} to #{Pkg::Config.dmg_host}? [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.dmg_path, target_host: Pkg::Config.dmg_host, dryrun: ENV['DRYRUN'])
+          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.dmg_path, target_host: Pkg::Config.dmg_host)
           Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.dmg_staging_server, cmd)
         end
       end
@@ -161,7 +161,7 @@ namespace :pl do
       puts "Really run remote rsync to deploy Arista repos from #{Pkg::Config.swix_staging_server} to #{Pkg::Config.swix_host}? [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.swix_path, target_host: Pkg::Config.swix_host, dryrun: ENV['DRYRUN'])
+          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.swix_path, target_host: Pkg::Config.swix_host)
           Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.swix_staging_server, cmd)
         end
       end
@@ -172,7 +172,7 @@ namespace :pl do
       puts "Really run remote rsync to deploy source tarballs from #{Pkg::Config.tar_staging_server} to #{Pkg::Config.tar_host}? [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.tarball_path, target_host: Pkg::Config.tar_host, dryrun: ENV['DRYRUN'])
+          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.tarball_path, target_host: Pkg::Config.tar_host)
           Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.tar_staging_server, cmd)
         end
       end
@@ -345,7 +345,7 @@ namespace :pl do
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir --mode=775 -p #{project_basedir}")
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{artifact_dir}")
-        Pkg::Util::Net.rsync_to("#{local_dir}/", Pkg::Config.distribution_server, "#{artifact_dir}/", ["--ignore-existing", "--exclude repo_configs"])
+        Pkg::Util::Net.rsync_to("#{local_dir}/", Pkg::Config.distribution_server, "#{artifact_dir}/", extra_flags: ["--ignore-existing", "--exclude repo_configs"])
       end
 
       # If we just shipped a tagged version, we want to make it immutable

@@ -116,7 +116,7 @@ if Pkg::Config.build_pe
 
           unless Dir["pkg/pe/deb/#{dist}/*"].select { |i| i !~ /^.*\.deb$/ }.empty?
             # Ship source files to source dir, e.g. 'squeeze-source'
-            Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*", Pkg::Config.apt_host, "#{base_path}/#{dist}-source", ["--exclude '*.deb'", "--ignore-existing"])
+            Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*", Pkg::Config.apt_host, "#{base_path}/#{dist}-source", extra_flags: ["--exclude '*.deb'", "--ignore-existing"])
           end
 
           files = Dir["pkg/pe/deb/#{dist}/*{_#{arch},all}.deb"].map { |f| "#{archive_path}/#{File.basename(f)}" }

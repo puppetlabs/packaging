@@ -123,7 +123,7 @@ module Pkg::Util::Net
         target_path: nil,
         target_host: nil,
         extra_flags: ["--ignore-existing"],
-        dryrun: false }.merge(opts.delete_if { |_, value| value.nil? })
+        dryrun: ENV['DRYRUN'] }.merge(opts.delete_if { |_, value| value.nil? })
 
       Pkg::Util::Execution.ex(rsync_cmd(source, options), true)
     end

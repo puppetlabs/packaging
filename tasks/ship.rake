@@ -254,8 +254,13 @@ namespace :pl do
   if Pkg::Config.build_tar
     desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
     task :ship_tar => 'pl:fetch' do
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*", Pkg::Config.tar_staging_server, Pkg::Config.tarball_path)
+      files = Dir.glob("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*")
+      if files.empty?
+        puts "There are no tarballs to ship"
+      else
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          Pkg::Util::Net.rsync_to(files.join("\s"), Pkg::Config.tar_staging_server, Pkg::Config.tarball_path)
+        end
       end
     end
   end

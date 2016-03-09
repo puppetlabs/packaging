@@ -84,7 +84,7 @@ module Pkg::Util::Net
         origin_host: nil,
         target_path: nil,
         target_host: nil,
-        extra_flags: ["--ignore-existing"],
+        extra_flags: nil,
         dryrun: false }.merge(opts)
       origin = Pathname.new(origin_path)
       target = options[:target_path] || origin.parent
@@ -122,7 +122,7 @@ module Pkg::Util::Net
         origin_host: nil,
         target_path: nil,
         target_host: nil,
-        extra_flags: ["--ignore-existing"],
+        extra_flags: nil,
         dryrun: ENV['DRYRUN'] }.merge(opts.delete_if { |_, value| value.nil? })
 
       Pkg::Util::Execution.ex(rsync_cmd(source, options), true)
@@ -130,7 +130,7 @@ module Pkg::Util::Net
 
     # A wrapper method to maintain the existing interface for executing
     # outbound rsync commands with minimal changes to existing code.
-    def rsync_to(source, target_host, dest, opts = {})
+    def rsync_to(source, target_host, dest, opts = { extra_flags: ["--ignore-existing"] })
       rsync_exec(
         source,
         target_host: target_host,

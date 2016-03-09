@@ -170,9 +170,15 @@ describe "Pkg::Util::Net" do
       expect{ Pkg::Util::Net.rsync_from("foo", "bar", "boo") }.to raise_error(RuntimeError)
     end
 
+    it "should not include the flags '--ignore-existing' by default" do
+      Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
+      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} #{defaults} foo@bar:thing /home/foo", true)
+      Pkg::Util::Net.rsync_from("thing", "foo@bar", "/home/foo")
+    end
+
     it "should rsync 'thing' from 'foo@bar' to '/home/foo' with flags '#{defaults}'" do
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
-      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} #{defaults} --ignore-existing foo@bar:thing /home/foo", true)
+      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} #{defaults} foo@bar:thing /home/foo", true)
       Pkg::Util::Net.rsync_from("thing", "foo@bar", "/home/foo")
     end
 

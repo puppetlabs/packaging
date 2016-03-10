@@ -16,7 +16,7 @@ namespace :pl do
           "pkg/#{dist}",
           Pkg::Config.yum_staging_server,
           Pkg::Config.yum_repo_path,
-          extra_flags
+          extra_flags: extra_flags
         )
 
         Pkg::Util::Net.remote_set_ownership(Pkg::Config.yum_staging_server, 'root', 'release', pkgs)
@@ -145,6 +145,39 @@ namespace :pl do
       end
     end
 
+    desc "Move dmg repos from #{Pkg::Config.dmg_staging_server} to #{Pkg::Config.dmg_host}"
+    task :deploy_dmg_repo => 'pl:fetch' do
+      puts "Really run remote rsync to deploy OS X repos from #{Pkg::Config.dmg_staging_server} to #{Pkg::Config.dmg_host}? [y,n]"
+      if Pkg::Util.ask_yes_or_no
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.dmg_path, target_host: Pkg::Config.dmg_host)
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.dmg_staging_server, cmd)
+        end
+      end
+    end
+
+    desc "Move swix repos from #{Pkg::Config.swix_staging_server} to #{Pkg::Config.swix_host}"
+    task :deploy_swix_repo => 'pl:fetch' do
+      puts "Really run remote rsync to deploy Arista repos from #{Pkg::Config.swix_staging_server} to #{Pkg::Config.swix_host}? [y,n]"
+      if Pkg::Util.ask_yes_or_no
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.swix_path, target_host: Pkg::Config.swix_host)
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.swix_staging_server, cmd)
+        end
+      end
+    end
+
+    desc "Move tar repos from #{Pkg::Config.tar_staging_server} to #{Pkg::Config.tar_host}"
+    task :deploy_tar_repo => 'pl:fetch' do
+      puts "Really run remote rsync to deploy source tarballs from #{Pkg::Config.tar_staging_server} to #{Pkg::Config.tar_host}? [y,n]"
+      if Pkg::Util.ask_yes_or_no
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.tarball_path, target_host: Pkg::Config.tar_host)
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.tar_staging_server, cmd)
+        end
+      end
+    end
+
     desc "Move signed deb repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}"
     task :deploy_apt_repo => 'pl:fetch' do
       puts "Really run remote rsync to deploy Debian repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}? [y,n]"
@@ -195,34 +228,39 @@ namespace :pl do
     end
   end
 
-  desc "ship apple dmg to #{Pkg::Config.yum_host}"
+  desc "ship apple dmg to #{Pkg::Config.dmg_staging_server}"
   task :ship_dmg => 'pl:fetch' do
     if Dir['pkg/apple/**/*.dmg'].empty?
       STDOUT.puts "There aren't any dmg packages in pkg/apple. Maybe something went wrong?"
     else
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to('pkg/apple/', Pkg::Config.yum_host, Pkg::Config.dmg_path)
+        Pkg::Util::Net.rsync_to('pkg/apple/', Pkg::Config.dmg_staging_server, Pkg::Config.dmg_path)
       end
     end
   end if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
 
-  desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.tar_host}"
+  desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
   task :ship_swix => 'pl:fetch' do
     packages = Dir['pkg/eos/**/*.swix']
     if packages.empty?
       STDOUT.puts "There aren't any swix packages in pkg/eos. Maybe something went wrong?"
     else
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to("pkg/eos/", Pkg::Config.tar_host, Pkg::Config.swix_path)
+        Pkg::Util::Net.rsync_to("pkg/eos/", Pkg::Config.swix_staging_server, Pkg::Config.swix_path)
       end
     end
   end
 
   if Pkg::Config.build_tar
-    desc "ship tarball and signature to #{Pkg::Config.tar_host}"
+    desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
     task :ship_tar => 'pl:fetch' do
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*", Pkg::Config.tar_host, Pkg::Config.tarball_path)
+      files = Dir.glob("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*")
+      if files.empty?
+        puts "There are no tarballs to ship"
+      else
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          Pkg::Util::Net.rsync_to(files.join("\s"), Pkg::Config.tar_staging_server, Pkg::Config.tarball_path)
+        end
       end
     end
   end
@@ -312,7 +350,7 @@ namespace :pl do
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir --mode=775 -p #{project_basedir}")
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{artifact_dir}")
-        Pkg::Util::Net.rsync_to("#{local_dir}/", Pkg::Config.distribution_server, "#{artifact_dir}/", ["--ignore-existing", "--exclude repo_configs"])
+        Pkg::Util::Net.rsync_to("#{local_dir}/", Pkg::Config.distribution_server, "#{artifact_dir}/", extra_flags: ["--ignore-existing", "--exclude repo_configs"])
       end
 
       # If we just shipped a tagged version, we want to make it immutable

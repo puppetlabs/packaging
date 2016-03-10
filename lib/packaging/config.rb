@@ -266,7 +266,7 @@ module Pkg
         Pkg::Params::REASSIGNMENTS.each do |v|
           oldval = self.instance_variable_get("@#{v[:oldvar]}")
           newval = self.instance_variable_get("@#{v[:newvar]}")
-          if newval.nil? and !oldval.nil?
+          if newval.nil? && oldval
             self.instance_variable_set("@#{v[:newvar]}", oldval)
           end
         end
@@ -301,41 +301,6 @@ module Pkg
         # pupent-3.4-el5-i386 <= old style with PE_VER baked into the mock name
         # pupent-el5-i386     <= new style derived from a template
         mock.match(/pupent(-\d\.\d)?-([a-z]*)(\d*)-([^-]*)/)[2..4]
-      end
-
-      # We're overriding the accessor for @apt_signing_server so that
-      # a deprecation warning will be raised if @apt_host is used as a signing server.
-      #
-      # @return [String]
-      #   the hostname of the server where apt repos and/or
-      #   packages should be signed before being shipped.
-      def apt_signing_server
-        @apt_signing_server || deprecated_apt_signing_server
-      end
-
-      # We're overriding the accessor for @apt_repo_staging_path so that
-      # a deprecation warning will be raised if @apt_repo_path is used as a
-      # path for staged repos.
-      #
-      # @return [String]
-      #   the pathname on the signing server where apt packages copied to
-      #   before being signed and shipped.
-      def apt_repo_staging_path
-        @apt_repo_staging_path || deprecated_apt_repo_staging_path
-      end
-
-      # This function will hopefully go away once we've got build_data and
-      # build_defaults ironed out everywhere.
-      def deprecated_apt_signing_server
-        warn "using :apt_host to sign packages is deprecated. Please update build_defaults.yaml to use :apt_signing_server"
-        @apt_host
-      end
-
-      # This function will hopefully go away once we've got build_data and
-      # build_defaults ironed out everywhere.
-      def deprecated_apt_repo_staging_path
-        warn "using :apt_repo_path to ship packages is deprecated. Please update build_defaults.yaml to use :apt_repo_staging_path"
-        @apt_repo_path
       end
 
       def deb_build_targets

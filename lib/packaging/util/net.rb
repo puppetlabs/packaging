@@ -57,22 +57,101 @@ module Pkg::Util::Net
       end
     end
 
-    def rsync_to(source, target, dest, extra_flags = ["--ignore-existing"])
-      rsync = Pkg::Util::Tool.check_tool('rsync')
-      flags = "-rHlv -O --no-perms --no-owner --no-group"
-      unless extra_flags.empty?
-        flags << " " << extra_flags.join(" ")
-      end
-      Pkg::Util::Execution.ex("#{rsync} #{flags} #{source} #{target}:#{dest}", true)
+    # Construct a valid rsync command
+    # @return [String] a rsync command that can be used in shell or ssh methods
+    # @param [String, Pathname] origin_path the path to sync from; if opts[:target_path]
+    #   is not passed, then the parent directory of `origin_path` will be used to
+    #   construct a target path to sync to.
+    # @param [Hash] opts additional options that can be used to construct
+    #   the rsync command.
+    # @option opts [String] :bin ('rsync') the path to rsync
+    #   (can be relative or fully qualified).
+    # @option opts [String] :origin_host the remote host to sync data from; cannot
+    #   be specified alongside :target_host
+    # @option opts [String] :target_host the remote host to sync data to; cannot
+    #   be specified alongside :origin_host.
+    # @option opts [String] :extra_flags (["--ignore-existing"]) extra flags to
+    #   use when constructing an rsync command
+    # @option opts [String] :dryrun (false) tell rsync to perform a trial run
+    #   with no changes made.
+    # @raise [ArgumentError] if opts[:origin_host] and opts[:target_host] names
+    #   are both defined.
+    # @raise [ArgumentError] if :origin_path exists without opts[:target_path],
+    #   opts[:origin_host], remote target is defined.
+    def rsync_cmd(origin_path, opts = {})
+      options = {
+        bin: 'rsync',
+        origin_host: nil,
+        target_path: nil,
+        target_host: nil,
+        extra_flags: nil,
+        dryrun: false }.merge(opts)
+      origin = Pathname.new(origin_path)
+      target = options[:target_path] || origin.parent
+
+      raise(ArgumentError, "Cannot sync between two remote hosts") if
+        options[:origin_host] && options[:target_host]
+
+      raise(ArgumentError, "Cannot sync path '#{origin}' to itself") unless
+        options[:origin_host] || options[:target_host]
+
+      cmd = %W(
+        #{options[:bin]}
+        --recursive
+        --hard-links
+        --links
+        --verbose
+        --omit-dir-times
+        --no-perms
+        --no-owner
+        --no-group
+      ) + [*options[:extra_flags]]
+
+      cmd << '--dry-run' if options[:dryrun]
+      cmd << Pkg::Util.pseudo_uri(path: origin, host: options[:origin_host])
+      cmd << Pkg::Util.pseudo_uri(path: target, host: options[:target_host])
+
+      cmd.uniq.compact.join("\s")
     end
 
-    def rsync_from(source, target, dest, extra_flags = [])
-      rsync = Pkg::Util::Tool.check_tool('rsync')
-      flags = "-rHlv -O --no-perms --no-owner --no-group"
-      unless extra_flags.empty?
-        flags << " " << extra_flags.join(" ")
-      end
-      Pkg::Util::Execution.ex("#{rsync} #{flags} #{target}:#{source} #{dest}", true)
+    # A generic rsync execution method that wraps rsync_cmd in a
+    # call to Pkg::Util::Execution#ex()
+    def rsync_exec(source, opts = {})
+      options = {
+        bin: Pkg::Util::Tool.check_tool('rsync'),
+        origin_host: nil,
+        target_path: nil,
+        target_host: nil,
+        extra_flags: nil,
+        dryrun: ENV['DRYRUN'] }.merge(opts.delete_if { |_, value| value.nil? })
+
+      Pkg::Util::Execution.ex(rsync_cmd(source, options), true)
+    end
+
+    # A wrapper method to maintain the existing interface for executing
+    # outbound rsync commands with minimal changes to existing code.
+    def rsync_to(source, target_host, dest, opts = { extra_flags: ["--ignore-existing"] })
+      rsync_exec(
+        source,
+        target_host: target_host,
+        target_path: dest,
+        extra_flags: opts[:extra_flags],
+        dryrun: opts[:dryrun],
+        bin: opts[:bin],
+      )
+    end
+
+    # A wrapper method to maintain the existing interface for executing
+    # incoming rsync commands with minimal changes to existing code.
+    def rsync_from(source, origin_host, dest, opts = {})
+      rsync_exec(
+        source,
+        origin_host: origin_host,
+        target_path: dest,
+        extra_flags: opts[:extra_flags],
+        dryrun: opts[:dryrun],
+        bin: opts[:bin],
+      )
     end
 
     def s3sync_to(source, target_bucket, target_directory = "", flags = [])

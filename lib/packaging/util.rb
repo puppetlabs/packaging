@@ -101,6 +101,28 @@ module Pkg::Util
     Pkg::Util.ask_yes_or_no
   end
 
+  # Construct a probably-correct (or correct-enough) URI for
+  # tools like ssh or rsync. Currently lacking support for intuitive
+  # joins, ports, protocols, fragments, or 75% of what Addressable::URI
+  # or URI would provide out of the box. The "win" here is that
+  # the returned String should "just work".
+  # @private pseudo_uri
+  # @return [String, nil] a string representing either a hostname:/path pair,
+  #   a hostname without a path, or a path without a hostname. Returns nil
+  #   if it is unable to construct a useful URI-like string.
+  # @param [Hash] opts fragments used to build the pseudo URI
+  # @option opts [String] :path URI-ish path component
+  # @option opts [String] :host URI-ish host component
+  def self.pseudo_uri(opts = {})
+    options = { path: nil, host: nil }.merge(opts)
+
+    # Prune empty values to determine what is returned
+    options.delete_if { |_, v| v.to_s.empty? }
+    return nil if options.empty?
+
+    [options[:host], options[:path]].compact.join(':')
+  end
+
   def self.deprecate(old_cmd, new_cmd = nil)
     msg = "!! #{old_cmd} is deprecated."
     if new_cmd

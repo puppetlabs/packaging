@@ -289,8 +289,8 @@ describe "Pkg::Config" do
       Pkg::Config.tar_host = prev_tar_host
     end
 
-    it "should set tar_host to yum_host" do
-      Pkg::Config.config_from_hash({ :yum_host => 'foo' })
+    it "should set tar_host to staging_server" do
+      Pkg::Config.config_from_hash({ :staging_server => 'foo' })
       Pkg::Config.issue_reassignments
       Pkg::Config.tar_host.should eq("foo")
     end

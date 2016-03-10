@@ -108,28 +108,29 @@ describe "Pkg::Util::Net" do
   end
 
   describe "#rsync_to" do
+    defaults = "--recursive --hard-links --links --verbose --omit-dir-times --no-perms --no-owner --no-group"
     it "should fail if rsync is not present" do
       Pkg::Util::Tool.stub(:find_tool).with("rsync") { fail }
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_raise(RuntimeError)
       expect{ Pkg::Util::Net.rsync_to("foo", "bar", "boo") }.to raise_error(RuntimeError)
     end
 
-    it "should rsync 'thing' to 'foo@bar:/home/foo' with flags '-rHlv -O --no-perms --no-owner --no-group --ignore-existing'" do
+    it "should rsync 'thing' to 'foo@bar:/home/foo' with flags '#{defaults} --ignore-existing'" do
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
-      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} -rHlv -O --no-perms --no-owner --no-group --ignore-existing thing foo@bar:/home/foo", true)
+      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} #{defaults} --ignore-existing thing foo@bar:/home/foo", true)
       Pkg::Util::Net.rsync_to("thing", "foo@bar", "/home/foo")
     end
 
     it "rsyncs 'thing' to 'foo@bar:/home/foo' with flags that don't include --ignore-existing" do
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
-      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} -rHlv -O --no-perms --no-owner --no-group thing foo@bar:/home/foo", true)
-      Pkg::Util::Net.rsync_to("thing", "foo@bar", "/home/foo", [])
+      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} #{defaults} thing foo@bar:/home/foo", true)
+      Pkg::Util::Net.rsync_to("thing", "foo@bar", "/home/foo", extra_flags: [])
     end
 
     it "rsyncs 'thing' to 'foo@bar:/home/foo' with flags that don't include arbitrary flags" do
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
-      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} -rHlv -O --no-perms --no-owner --no-group --foo-bar --and-another-flag thing foo@bar:/home/foo", true)
-      Pkg::Util::Net.rsync_to("thing", "foo@bar", "/home/foo", ["--foo-bar", "--and-another-flag"])
+      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} #{defaults} --foo-bar --and-another-flag thing foo@bar:/home/foo", true)
+      Pkg::Util::Net.rsync_to("thing", "foo@bar", "/home/foo", extra_flags: ["--foo-bar", "--and-another-flag"])
     end
   end
 
@@ -162,22 +163,29 @@ describe "Pkg::Util::Net" do
   end
 
   describe "#rsync_from" do
+    defaults = "--recursive --hard-links --links --verbose --omit-dir-times --no-perms --no-owner --no-group"
     it "should fail if rsync is not present" do
       Pkg::Util::Tool.stub(:find_tool).with("rsync") { fail }
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_raise(RuntimeError)
       expect{ Pkg::Util::Net.rsync_from("foo", "bar", "boo") }.to raise_error(RuntimeError)
     end
 
-    it "should rsync 'thing' from 'foo@bar' to '/home/foo' with flags '-rHlv -O --no-perms --no-owner --no-group'" do
+    it "should not include the flags '--ignore-existing' by default" do
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
-      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} -rHlv -O --no-perms --no-owner --no-group foo@bar:thing /home/foo", true)
+      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} #{defaults} foo@bar:thing /home/foo", true)
+      Pkg::Util::Net.rsync_from("thing", "foo@bar", "/home/foo")
+    end
+
+    it "should rsync 'thing' from 'foo@bar' to '/home/foo' with flags '#{defaults}'" do
+      Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
+      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} #{defaults} foo@bar:thing /home/foo", true)
       Pkg::Util::Net.rsync_from("thing", "foo@bar", "/home/foo")
     end
 
     it "rsyncs 'thing' from 'foo@bar:/home/foo' with flags that don't include arbitrary flags" do
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
-      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} -rHlv -O --no-perms --no-owner --no-group --foo-bar --and-another-flag foo@bar:thing /home/foo", true)
-      Pkg::Util::Net.rsync_from("thing", "foo@bar", "/home/foo", ["--foo-bar", "--and-another-flag"])
+      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} #{defaults} --foo-bar --and-another-flag foo@bar:thing /home/foo", true)
+      Pkg::Util::Net.rsync_from("thing", "foo@bar", "/home/foo", extra_flags: ["--foo-bar", "--and-another-flag"])
     end
   end
 

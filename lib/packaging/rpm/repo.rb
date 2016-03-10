@@ -44,8 +44,8 @@ module Pkg::Rpm::Repo
     # @return [String] an rsync command that can be executed on a remote host
     #   to copy local content from that host to a remote node.
     def repo_deployment_command(origin_path, destination_path, destination, dryrun = false)
-      path = Pathname.new(origin_path).cleanpath
-      dest_path = Pathname.new(destination_path).cleanpath
+      path = Pathname.new(origin_path)
+      dest_path = Pathname.new(destination_path)
 
       # You may think "rsync doesn't actually remove the sticky bit, let's
       # remove the Dugo-s from the chmod". However, that will make your rsyncs

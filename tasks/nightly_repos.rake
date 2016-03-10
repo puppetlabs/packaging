@@ -164,7 +164,7 @@ namespace :pl do
       # First we ship the latest and clean up any repo-configs that are no longer valid with --delete-after
       Pkg::Util::Execution.ex(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}-latest/#{path}" }.join(' ') } | sort > include_file_latest))
       Pkg::Util::Execution.ex(%(mkdir -p tmp_latest && tar -T include_file_latest -cf - | (cd ./tmp_latest && tar -xf -)))
-      Pkg::Util::Net.rsync_to("tmp_latest/pkg/#{Pkg::Config.project}-latest", target_host, target_basedir, ["--delete-after"])
+      Pkg::Util::Net.rsync_to("tmp_latest/pkg/#{Pkg::Config.project}-latest", target_host, target_basedir, extra_flags: ["--delete-after"])
       # Then we ship the sha version with default rsync flags
       Pkg::Util::Execution.ex(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}/**/#{path}" }.join(' ') } | sort > include_file))
       Pkg::Util::Execution.ex(%(mkdir -p tmp && tar -T include_file -cf - | (cd ./tmp && tar -xf -)))

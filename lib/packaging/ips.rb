@@ -23,12 +23,12 @@ module Pkg::IPS
         # And import all the packages into the repo.
         Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgrecv -s #{unsigned_dir}/#{File.basename(p5p)} -d #{repo_dir} '*'")
         # We sign the entire repo
-        Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgsign \
-                                          -c #{Pkg::Config.ips_signing_cert} \
-                                          -i #{Pkg::Config.ips_inter_cert} \
-                                          -i #{Pkg::Config.ips_root_cert} \
-                                          -k #{Pkg::Config.ips_signing_key} \
-                                          -s 'file://#{work_dir}/repo' '*'")
+        Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, %(sudo -E /usr/bin/pkgsign \
+                                          -c "#{Pkg::Config.ips_signing_cert}" \
+                                          -i "#{Pkg::Config.ips_inter_cert}" \
+                                          -i "#{Pkg::Config.ips_root_cert}" \
+                                          -k "#{Pkg::Config.ips_signing_key}" \
+                                          -s 'file://#{work_dir}/repo' '*'))
         # pkgrecv with -a will pull packages out of the repo, so we need to do that too to actually get the packages we signed
         Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgrecv -d #{signed_dir}/#{File.basename(p5p)} -a -s #{repo_dir} '*'")
         begin

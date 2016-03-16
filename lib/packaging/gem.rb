@@ -13,8 +13,13 @@ module Pkg::Gem
     # you've lost the ability to feel joy anymore.
     def ship_to_stickler(file)
       Pkg::Util::Tool.check_tool("stickler")
-      Pkg::Util::Execution.ex("stickler push #{file} --server=#{Pkg::Config.internal_gem_host} 2>/dev/null")
-      puts "#{file} pushed to stickler server at #{Pkg::Config.internal_gem_host}"
+      cmd = "stickler push #{file} --server=#{Pkg::Config.internal_gem_host} 2>/dev/null"
+      if ENV['DRYRUN']
+        puts "[DRY-RUN] #{cmd}"
+      else
+        Pkg::Util::Execution.ex(cmd)
+        puts "#{file} pushed to stickler server at #{Pkg::Config.internal_gem_host}"
+      end
     rescue
       puts "###########################################"
       puts "#  Stickler failed, ensure it's installed"
@@ -25,7 +30,7 @@ module Pkg::Gem
     # Use rsync to deploy a file and any associated detached signatures,
     # checksums, or other glob-able artifacts to an external download server.
     def rsync_to_downloads(file)
-      Pkg::Util::Net.rsync_to("#{file}*", Pkg::Config.gem_host, Pkg::Config.gem_path)
+      Pkg::Util::Net.rsync_to("#{file}*", Pkg::Config.gem_host, Pkg::Config.gem_path, dryrun: ENV['DRYRUN'])
     end
 
     # Ship a Ruby gem file to rubygems.org. Requires the existence

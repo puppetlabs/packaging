@@ -280,8 +280,11 @@ namespace :pl do
     if Dir['pkg/apple/**/*.dmg'].empty?
       STDOUT.puts "There aren't any dmg packages in pkg/apple. Maybe something went wrong?"
     else
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to('pkg/apple/', Pkg::Config.dmg_staging_server, Pkg::Config.dmg_path)
+      puts "Do you want to ship dmg files to (#{Pkg::Config.dmg_staging_server})?"
+      if Pkg::Util.ask_yes_or_no
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          Pkg::Util::Net.rsync_to('pkg/apple/', Pkg::Config.dmg_staging_server, Pkg::Config.dmg_path)
+        end
       end
     end
   end if Pkg::Config.build_dmg || Pkg::Config.vanagon_project

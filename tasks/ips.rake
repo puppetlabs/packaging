@@ -104,7 +104,7 @@ if @build_ips
         Rake::Task['package:ips:receive'].invoke
         # clean up the workdir area
         Rake::Task['package:ips:clean'].invoke
-        STDOUT.puts "Created #{Dir['pkg/ips/pkgs/*']}"
+        $stdout.puts "Created #{Dir['pkg/ips/pkgs/*']}"
       end
     end
 

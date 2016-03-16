@@ -41,7 +41,7 @@ namespace :pl do
         __GPG_KEY__: Pkg::Config.gpg_key,
       }
 
-      STDOUT.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
+      $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       if Pkg::Util.ask_yes_or_no
         if Pkg::Config.yum_repo_command
           Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_staging_server, Pkg::Util::Misc.search_and_replace(Pkg::Config.yum_repo_command, yum_whitelist))
@@ -64,7 +64,7 @@ namespace :pl do
         __GPG_KEY__: Pkg::Config.gpg_key,
       }
 
-      STDOUT.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
+      $stdout.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
       if Pkg::Util.ask_yes_or_no
         if Pkg::Config.apt_repo_command
           Pkg::Util::Net.remote_ssh_cmd(
@@ -121,7 +121,7 @@ namespace :pl do
     desc "Update remote ips repository on #{Pkg::Config.ips_host}"
     task :update_ips_repo  => 'pl:fetch' do
       if Dir['pkg/ips/pkgs/**/*'].empty? && Dir['pkg/solaris/11/**/*'].empty?
-        STDOUT.puts "There aren't any p5p packages in pkg/ips/pkgs or pkg/solaris/11. Maybe something went wrong?"
+        $stdout.puts "There aren't any p5p packages in pkg/ips/pkgs or pkg/solaris/11. Maybe something went wrong?"
       else
 
         if !Dir['pkg/ips/pkgs/**/*'].empty?
@@ -229,7 +229,7 @@ namespace :pl do
           Rake::Task["pl:ship_gem_to_downloads"].invoke
         end
       else
-        STDERR.puts "Not shipping development gem using odd_even strategy for the sake of your users."
+        $stderr.puts "Not shipping development gem using odd_even strategy for the sake of your users."
       end
     end
 
@@ -278,7 +278,7 @@ namespace :pl do
   desc "ship apple dmg to #{Pkg::Config.dmg_staging_server}"
   task :ship_dmg => 'pl:fetch' do
     if Dir['pkg/apple/**/*.dmg'].empty?
-      STDOUT.puts "There aren't any dmg packages in pkg/apple. Maybe something went wrong?"
+      $stdout.puts "There aren't any dmg packages in pkg/apple. Maybe something went wrong?"
     else
       puts "Do you want to ship dmg files to (#{Pkg::Config.dmg_staging_server})?"
       if Pkg::Util.ask_yes_or_no
@@ -293,7 +293,7 @@ namespace :pl do
   task :ship_swix => 'pl:fetch' do
     packages = Dir['pkg/eos/**/*.swix']
     if packages.empty?
-      STDOUT.puts "There aren't any swix packages in pkg/eos. Maybe something went wrong?"
+      $stdout.puts "There aren't any swix packages in pkg/eos. Maybe something went wrong?"
     else
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
         Pkg::Util::Net.rsync_to("pkg/eos/", Pkg::Config.swix_staging_server, Pkg::Config.swix_path)
@@ -319,7 +319,7 @@ namespace :pl do
   task :ship_nuget => 'pl:fetch' do
     packages = Dir['pkg/windows/**/*.nupkg']
     if packages.empty?
-      STDOUT.puts "There aren't any nuget packages in pkg/windows. Maybe something went wrong?"
+      $stdout.puts "There aren't any nuget packages in pkg/windows. Maybe something went wrong?"
     else
       Pkg::Nuget.ship(packages)
     end

@@ -47,7 +47,7 @@ module Pkg
       patterns =
         case @files
         when String
-          STDERR.puts "warning: `files` should be an array, not a string"
+          $stderr.puts "warning: `files` should be an array, not a string"
           @files.split(' ')
         when Array
           @files

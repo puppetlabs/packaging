@@ -23,7 +23,7 @@ namespace :pl do
   end
 
   ##
-  # Print all build parameters to STDOUT.
+  # Print all build parameters to $stdout.
   #
   desc "Print all package build parameters"
   task :print_build_params do
@@ -31,7 +31,7 @@ namespace :pl do
   end
 
   ##
-  # Print a parameter passed as an argument to STDOUT.
+  # Print a parameter passed as an argument to $stdout.
   desc "Print a build parameter"
   task :print_build_param, :param do |t, args|
     # We want a string that is the from "@<param name>"

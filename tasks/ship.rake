@@ -210,20 +210,59 @@ namespace :pl do
     end
   end
 
-  # We want to ship a gem only for projects that build gems
+  # We want to ship a Gem only for projects that build gems, so
+  # all of the Gem shipping tasks are wrapped in an `if`.
   if Pkg::Config.build_gem
-    desc "Ship built gem to rubygems"
+    desc "Ship built gem to rubygems.org, internal Gem mirror, and public file server"
     task :ship_gem => 'pl:fetch' do
       # Even if a project builds a gem, if it uses the odd_even or zero-based
       # strategies, we only want to ship final gems because otherwise a
       # development gem would be preferred over the last final gem
       if Pkg::Config.version_strategy !~ /odd_even|zero_based/ || Pkg::Util::Version.is_final?
-        FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |f|
-          puts "Shipping gem #{f} to rubygems"
-          Pkg::Gem.ship(f)
+        FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |file|
+          puts "This will ship to an internal gem mirror, a public file server, and rubygems.org"
+          puts "Do you want to start shipping the rubygem '#{file}'?"
+          next unless Pkg::Util.ask_yes_or_no
+
+          Rake::Task["pl:ship_gem_to_rubygems"].invoke
+          Rake::Task["pl:ship_gem_to_internal_mirror"].invoke
+          Rake::Task["pl:ship_gem_to_downloads"].invoke
         end
       else
         STDERR.puts "Not shipping development gem using odd_even strategy for the sake of your users."
+      end
+    end
+
+    desc "Ship built gem to rubygems.org"
+    task :ship_gem_to_rubygems => 'pl:fetch' do
+      puts "Do you want to ship #{file} to rubygems.org?"
+      if Pkg::Util.ask_yes_or_no
+        puts "Shipping gem #{file} to rubygems.org"
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          Pkg::Gem.ship_to_rubygems(gem)
+        end
+      end
+    end
+
+    desc "Ship built gems to internal Gem server (#{Pkg::Config.internal_gem_host})"
+    task :ship_gem_to_internal_mirror => 'pl:fetch' do
+      puts "Do you want to ship #{file} to the internal Gem server?"
+      if Pkg::Util.ask_yes_or_no
+        puts "Shipping gem #{file} to internal Gem server (#{Pkg::Config.internal_gem_host})"
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          Pkg::Gem.ship_to_stickler(gem)
+        end
+      end
+    end
+
+    desc "Ship built gems to public Downloads server (#{Pkg::Config.gem_host})"
+    task :ship_gem_to_downloads => 'pl:fetch' do
+      puts "Do you want to ship #{file} to public file server (#{Pkg::Config.gem_host})?"
+      if Pkg::Util.ask_yes_or_no
+        puts "Shipping gem #{file} to public file server (#{Pkg::Config.gem_host})"
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          Pkg::Gem.ship_to_stickler(gem)
+        end
       end
     end
   end

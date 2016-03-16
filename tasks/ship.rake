@@ -282,12 +282,12 @@ namespace :pl do
       Rake::Task["pl:ship_gem"].invoke if Pkg::Config.build_gem
       Rake::Task["pl:ship_rpms"].invoke if Pkg::Config.final_mocks || Pkg::Config.vanagon_project
       Rake::Task["pl:ship_debs"].invoke if Pkg::Config.cows || Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_dmg"].execute if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_swix"].execute if Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_nuget"].execute if Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_tar"].execute if Pkg::Config.build_tar
-      Rake::Task["pl:ship_svr4"].execute if Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_p5p"].execute if Pkg::Config.build_ips || Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_dmg"].invoke if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_swix"].invoke if Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_nuget"].invoke if Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_tar"].invoke if Pkg::Config.build_tar
+      Rake::Task["pl:ship_svr4"].invoke if Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_p5p"].invoke if Pkg::Config.build_ips || Pkg::Config.vanagon_project
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
       add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark
       post_shipped_metrics if Pkg::Config.benchmark

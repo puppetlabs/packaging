@@ -270,8 +270,13 @@ namespace :pl do
       uber_tasks.delete("remote:deploy_swix_rep") if Pkg::Config.swix_host == Pkg::Config.swix_staging_server
       uber_tasks.delete("remote:deploy_tar_repo") if Pkg::Config.tar_host == Pkg::Config.tar_staging_server
 
-      uber_tasks.map { |t| "pl:#{t}" }.each { |t| Rake::Task[t].invoke }
-      Rake::Task["pl:jenkins:ship"].invoke("shipped")
+      uber_tasks.map { |t| "pl:#{t}" }.each do |t|
+        puts "Do you want run #{t}?"
+        Rake::Task[t].invoke if Pkg::Util.ask_yes_or_no
+      end
+
+      puts "Do you want to mark this release as successfully shipped?"
+      Rake::Task["pl:jenkins:ship"].invoke("shipped") if Pkg::Util.ask_yes_or_no
     end
   end
 end

@@ -246,6 +246,10 @@ namespace :pl do
 
     desc "Ship built gems to internal Gem server (#{Pkg::Config.internal_gem_host})"
     task :ship_gem_to_internal_mirror => 'pl:fetch' do
+      unless Pkg::Config.internal_gem_host
+        warn "Value `Pkg::Config.internal_gem_host` not defined; skipping internal ship"
+      end
+
       puts "Do you want to ship #{file} to the internal Gem server?"
       if Pkg::Util.ask_yes_or_no
         puts "Shipping gem #{file} to internal Gem server (#{Pkg::Config.internal_gem_host})"
@@ -257,6 +261,10 @@ namespace :pl do
 
     desc "Ship built gems to public Downloads server (#{Pkg::Config.gem_host})"
     task :ship_gem_to_downloads => 'pl:fetch' do
+      unless Pkg::Config.gem_host
+        warn "Value `Pkg::Config.gem_host` not defined; skipping shipping to public Download server"
+      end
+
       puts "Do you want to ship #{file} to public file server (#{Pkg::Config.gem_host})?"
       if Pkg::Util.ask_yes_or_no
         puts "Shipping gem #{file} to public file server (#{Pkg::Config.gem_host})"

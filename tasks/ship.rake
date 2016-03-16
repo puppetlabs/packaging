@@ -224,14 +224,14 @@ namespace :pl do
       # strategies, we only want to ship final gems because otherwise a
       # development gem would be preferred over the last final gem
       if Pkg::Config.version_strategy !~ /odd_even|zero_based/ || Pkg::Util::Version.is_final?
-        FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |file|
+        FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |gem_file|
           puts "This will ship to an internal gem mirror, a public file server, and rubygems.org"
-          puts "Do you want to start shipping the rubygem '#{file}'?"
-          next unless Pkg::Util.ask_yes_or_no
-
-          Rake::Task["pl:ship_gem_to_rubygems"].invoke(file)
-          Rake::Task["pl:ship_gem_to_internal_mirror"].invoke(file)
-          Rake::Task["pl:ship_gem_to_downloads"].invoke(file)
+          puts "Do you want to start shipping the rubygem '#{gem_file}'?"
+          if Pkg::Util.ask_yes_or_no
+            Rake::Task["pl:ship_gem_to_rubygems"].execute(file: gem_file)
+            Rake::Task["pl:ship_gem_to_internal_mirror"].execute(file: gem_file)
+            Rake::Task["pl:ship_gem_to_downloads"].execute(file: gem_file)
+          end
         end
       else
         $stderr.puts "Not shipping development gem using odd_even strategy for the sake of your users."

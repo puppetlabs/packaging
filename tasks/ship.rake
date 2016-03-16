@@ -171,9 +171,14 @@ namespace :pl do
     task :deploy_tar_repo => 'pl:fetch' do
       puts "Really run remote rsync to deploy source tarballs from #{Pkg::Config.tar_staging_server} to #{Pkg::Config.tar_host}? [y,n]"
       if Pkg::Util.ask_yes_or_no
-        Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.tarball_path, target_host: Pkg::Config.tar_host)
-          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.tar_staging_server, cmd)
+        files = Dir.glob("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*")
+        if files.empty?
+          puts "There are no tarballs to ship"
+        else
+          Pkg::Util::Execution.retry_on_fail(:times => 3) do
+            cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.tarball_path, target_host: Pkg::Config.tar_host)
+            Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.tar_staging_server, cmd)
+          end
         end
       end
     end

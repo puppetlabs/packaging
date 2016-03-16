@@ -229,9 +229,9 @@ namespace :pl do
           puts "Do you want to start shipping the rubygem '#{file}'?"
           next unless Pkg::Util.ask_yes_or_no
 
-          Rake::Task["pl:ship_gem_to_rubygems"].invoke
-          Rake::Task["pl:ship_gem_to_internal_mirror"].invoke
-          Rake::Task["pl:ship_gem_to_downloads"].invoke
+          Rake::Task["pl:ship_gem_to_rubygems"].invoke(file)
+          Rake::Task["pl:ship_gem_to_internal_mirror"].invoke(file)
+          Rake::Task["pl:ship_gem_to_downloads"].invoke(file)
         end
       else
         $stderr.puts "Not shipping development gem using odd_even strategy for the sake of your users."
@@ -239,42 +239,42 @@ namespace :pl do
     end
 
     desc "Ship built gem to rubygems.org"
-    task :ship_gem_to_rubygems => 'pl:fetch' do
-      puts "Do you want to ship #{file} to rubygems.org?"
+    task :ship_gem_to_rubygems, [:file] => 'pl:fetch' do |t, args|
+      puts "Do you want to ship #{args[:file]} to rubygems.org?"
       if Pkg::Util.ask_yes_or_no
-        puts "Shipping gem #{file} to rubygems.org"
+        puts "Shipping gem #{args[:file]} to rubygems.org"
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          Pkg::Gem.ship_to_rubygems(gem)
+          Pkg::Gem.ship_to_rubygems(args[:file])
         end
       end
     end
 
     desc "Ship built gems to internal Gem server (#{Pkg::Config.internal_gem_host})"
-    task :ship_gem_to_internal_mirror => 'pl:fetch' do
+    task :ship_gem_to_internal_mirror, [:file] => 'pl:fetch' do |t, args|
       unless Pkg::Config.internal_gem_host
         warn "Value `Pkg::Config.internal_gem_host` not defined; skipping internal ship"
       end
 
-      puts "Do you want to ship #{file} to the internal Gem server?"
+      puts "Do you want to ship #{args[:file]} to the internal Gem server?"
       if Pkg::Util.ask_yes_or_no
-        puts "Shipping gem #{file} to internal Gem server (#{Pkg::Config.internal_gem_host})"
+        puts "Shipping gem #{args[:file]} to internal Gem server (#{Pkg::Config.internal_gem_host})"
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          Pkg::Gem.ship_to_stickler(gem)
+          Pkg::Gem.ship_to_stickler(args[:file])
         end
       end
     end
 
     desc "Ship built gems to public Downloads server (#{Pkg::Config.gem_host})"
-    task :ship_gem_to_downloads => 'pl:fetch' do
+    task :ship_gem_to_downloads, [:file] => 'pl:fetch' do |t, args|
       unless Pkg::Config.gem_host
         warn "Value `Pkg::Config.gem_host` not defined; skipping shipping to public Download server"
       end
 
-      puts "Do you want to ship #{file} to public file server (#{Pkg::Config.gem_host})?"
+      puts "Do you want to ship #{args[:file]} to public file server (#{Pkg::Config.gem_host})?"
       if Pkg::Util.ask_yes_or_no
-        puts "Shipping gem #{file} to public file server (#{Pkg::Config.gem_host})"
+        puts "Shipping gem #{args[:file]} to public file server (#{Pkg::Config.gem_host})"
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          Pkg::Gem.ship_to_stickler(gem)
+          Pkg::Gem.ship_to_stickler(args[:file])
         end
       end
     end

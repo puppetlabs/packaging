@@ -333,7 +333,6 @@ namespace :pl do
   desc "UBER ship: ship all the things in pkg"
   task :uber_ship => 'pl:fetch' do
     if Pkg::Util.confirm_ship(FileList["pkg/**/*"])
-      ENV['ANSWER_OVERRIDE'] = 'yes'
       Rake::Task["pl:ship_gem"].invoke if Pkg::Config.build_gem
       Rake::Task["pl:ship_rpms"].invoke if Pkg::Config.final_mocks || Pkg::Config.vanagon_project
       Rake::Task["pl:ship_debs"].invoke if Pkg::Config.cows || Pkg::Config.vanagon_project

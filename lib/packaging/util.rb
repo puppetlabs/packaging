@@ -95,9 +95,9 @@ module Pkg::Util
   end
 
   def self.confirm_ship(files)
-    STDOUT.puts "The following files have been built and are ready to ship:"
+    $stdout.puts "The following files have been built and are ready to ship:"
     files.each { |file| puts "\t#{file}\n" unless File.directory?(file) }
-    STDOUT.puts "Ship these files?? [y,n]"
+    $stdout.puts "Ship these files?? [y,n]"
     Pkg::Util.ask_yes_or_no
   end
 
@@ -128,6 +128,6 @@ module Pkg::Util
     if new_cmd
       msg << " Please use #{new_cmd} instead."
     end
-    STDOUT.puts("\n#{msg}\n")
+    $stdout.puts("\n#{msg}\n")
   end
 end

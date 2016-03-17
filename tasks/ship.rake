@@ -41,7 +41,7 @@ namespace :pl do
         __GPG_KEY__: Pkg::Config.gpg_key,
       }
 
-      STDOUT.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
+      $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       if Pkg::Util.ask_yes_or_no
         if Pkg::Config.yum_repo_command
           Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_staging_server, Pkg::Util::Misc.search_and_replace(Pkg::Config.yum_repo_command, yum_whitelist))
@@ -64,7 +64,7 @@ namespace :pl do
         __GPG_KEY__: Pkg::Config.gpg_key,
       }
 
-      STDOUT.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
+      $stdout.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
       if Pkg::Util.ask_yes_or_no
         if Pkg::Config.apt_repo_command
           Pkg::Util::Net.remote_ssh_cmd(
@@ -121,7 +121,7 @@ namespace :pl do
     desc "Update remote ips repository on #{Pkg::Config.ips_host}"
     task :update_ips_repo  => 'pl:fetch' do
       if Dir['pkg/ips/pkgs/**/*'].empty? && Dir['pkg/solaris/11/**/*'].empty?
-        STDOUT.puts "There aren't any p5p packages in pkg/ips/pkgs or pkg/solaris/11. Maybe something went wrong?"
+        $stdout.puts "There aren't any p5p packages in pkg/ips/pkgs or pkg/solaris/11. Maybe something went wrong?"
       else
 
         if !Dir['pkg/ips/pkgs/**/*'].empty?
@@ -171,9 +171,14 @@ namespace :pl do
     task :deploy_tar_repo => 'pl:fetch' do
       puts "Really run remote rsync to deploy source tarballs from #{Pkg::Config.tar_staging_server} to #{Pkg::Config.tar_host}? [y,n]"
       if Pkg::Util.ask_yes_or_no
-        Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.tarball_path, target_host: Pkg::Config.tar_host)
-          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.tar_staging_server, cmd)
+        files = Dir.glob("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*")
+        if files.empty?
+          puts "There are no tarballs to ship"
+        else
+          Pkg::Util::Execution.retry_on_fail(:times => 3) do
+            cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.tarball_path, target_host: Pkg::Config.tar_host)
+            Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.tar_staging_server, cmd)
+          end
         end
       end
     end
@@ -210,20 +215,67 @@ namespace :pl do
     end
   end
 
-  # We want to ship a gem only for projects that build gems
+  # We want to ship a Gem only for projects that build gems, so
+  # all of the Gem shipping tasks are wrapped in an `if`.
   if Pkg::Config.build_gem
-    desc "Ship built gem to rubygems"
+    desc "Ship built gem to rubygems.org, internal Gem mirror, and public file server"
     task :ship_gem => 'pl:fetch' do
       # Even if a project builds a gem, if it uses the odd_even or zero-based
       # strategies, we only want to ship final gems because otherwise a
       # development gem would be preferred over the last final gem
       if Pkg::Config.version_strategy !~ /odd_even|zero_based/ || Pkg::Util::Version.is_final?
-        FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |f|
-          puts "Shipping gem #{f} to rubygems"
-          Pkg::Gem.ship(f)
+        FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |gem_file|
+          puts "This will ship to an internal gem mirror, a public file server, and rubygems.org"
+          puts "Do you want to start shipping the rubygem '#{gem_file}'?"
+          if Pkg::Util.ask_yes_or_no
+            Rake::Task["pl:ship_gem_to_rubygems"].execute(file: gem_file)
+            Rake::Task["pl:ship_gem_to_internal_mirror"].execute(file: gem_file)
+            Rake::Task["pl:ship_gem_to_downloads"].execute(file: gem_file)
+          end
         end
       else
-        STDERR.puts "Not shipping development gem using odd_even strategy for the sake of your users."
+        $stderr.puts "Not shipping development gem using odd_even strategy for the sake of your users."
+      end
+    end
+
+    desc "Ship built gem to rubygems.org"
+    task :ship_gem_to_rubygems, [:file] => 'pl:fetch' do |t, args|
+      puts "Do you want to ship #{args[:file]} to rubygems.org?"
+      if Pkg::Util.ask_yes_or_no
+        puts "Shipping gem #{args[:file]} to rubygems.org"
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          Pkg::Gem.ship_to_rubygems(args[:file])
+        end
+      end
+    end
+
+    desc "Ship built gems to internal Gem server (#{Pkg::Config.internal_gem_host})"
+    task :ship_gem_to_internal_mirror, [:file] => 'pl:fetch' do |t, args|
+      unless Pkg::Config.internal_gem_host
+        warn "Value `Pkg::Config.internal_gem_host` not defined; skipping internal ship"
+      end
+
+      puts "Do you want to ship #{args[:file]} to the internal Gem server?"
+      if Pkg::Util.ask_yes_or_no
+        puts "Shipping gem #{args[:file]} to internal Gem server (#{Pkg::Config.internal_gem_host})"
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          Pkg::Gem.ship_to_stickler(args[:file])
+        end
+      end
+    end
+
+    desc "Ship built gems to public Downloads server (#{Pkg::Config.gem_host})"
+    task :ship_gem_to_downloads, [:file] => 'pl:fetch' do |t, args|
+      unless Pkg::Config.gem_host
+        warn "Value `Pkg::Config.gem_host` not defined; skipping shipping to public Download server"
+      end
+
+      puts "Do you want to ship #{args[:file]} to public file server (#{Pkg::Config.gem_host})?"
+      if Pkg::Util.ask_yes_or_no
+        puts "Shipping gem #{args[:file]} to public file server (#{Pkg::Config.gem_host})"
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          Pkg::Gem.ship_to_stickler(args[:file])
+        end
       end
     end
   end
@@ -231,10 +283,13 @@ namespace :pl do
   desc "ship apple dmg to #{Pkg::Config.dmg_staging_server}"
   task :ship_dmg => 'pl:fetch' do
     if Dir['pkg/apple/**/*.dmg'].empty?
-      STDOUT.puts "There aren't any dmg packages in pkg/apple. Maybe something went wrong?"
+      $stdout.puts "There aren't any dmg packages in pkg/apple. Maybe something went wrong?"
     else
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to('pkg/apple/', Pkg::Config.dmg_staging_server, Pkg::Config.dmg_path)
+      puts "Do you want to ship dmg files to (#{Pkg::Config.dmg_staging_server})?"
+      if Pkg::Util.ask_yes_or_no
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          Pkg::Util::Net.rsync_to('pkg/apple/', Pkg::Config.dmg_staging_server, Pkg::Config.dmg_path)
+        end
       end
     end
   end if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
@@ -243,7 +298,7 @@ namespace :pl do
   task :ship_swix => 'pl:fetch' do
     packages = Dir['pkg/eos/**/*.swix']
     if packages.empty?
-      STDOUT.puts "There aren't any swix packages in pkg/eos. Maybe something went wrong?"
+      $stdout.puts "There aren't any swix packages in pkg/eos. Maybe something went wrong?"
     else
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
         Pkg::Util::Net.rsync_to("pkg/eos/", Pkg::Config.swix_staging_server, Pkg::Config.swix_path)
@@ -269,7 +324,7 @@ namespace :pl do
   task :ship_nuget => 'pl:fetch' do
     packages = Dir['pkg/windows/**/*.nupkg']
     if packages.empty?
-      STDOUT.puts "There aren't any nuget packages in pkg/windows. Maybe something went wrong?"
+      $stdout.puts "There aren't any nuget packages in pkg/windows. Maybe something went wrong?"
     else
       Pkg::Nuget.ship(packages)
     end
@@ -278,16 +333,15 @@ namespace :pl do
   desc "UBER ship: ship all the things in pkg"
   task :uber_ship => 'pl:fetch' do
     if Pkg::Util.confirm_ship(FileList["pkg/**/*"])
-      ENV['ANSWER_OVERRIDE'] = 'yes'
       Rake::Task["pl:ship_gem"].invoke if Pkg::Config.build_gem
       Rake::Task["pl:ship_rpms"].invoke if Pkg::Config.final_mocks || Pkg::Config.vanagon_project
       Rake::Task["pl:ship_debs"].invoke if Pkg::Config.cows || Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_dmg"].execute if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_swix"].execute if Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_nuget"].execute if Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_tar"].execute if Pkg::Config.build_tar
-      Rake::Task["pl:ship_svr4"].execute if Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_p5p"].execute if Pkg::Config.build_ips || Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_dmg"].invoke if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_swix"].invoke if Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_nuget"].invoke if Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_tar"].invoke if Pkg::Config.build_tar
+      Rake::Task["pl:ship_svr4"].invoke if Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_p5p"].invoke if Pkg::Config.build_ips || Pkg::Config.vanagon_project
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
       add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark
       post_shipped_metrics if Pkg::Config.benchmark

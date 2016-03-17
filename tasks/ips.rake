@@ -103,8 +103,8 @@ if @build_ips
         # retrieve the signed package in a .p5p archive file format
         Rake::Task['package:ips:receive'].invoke
         # clean up the workdir area
-        Rake::Task['package:ips:clean'].execute
-        STDOUT.puts "Created #{Dir['pkg/ips/pkgs/*']}"
+        Rake::Task['package:ips:clean'].invoke
+        $stdout.puts "Created #{Dir['pkg/ips/pkgs/*']}"
       end
     end
 

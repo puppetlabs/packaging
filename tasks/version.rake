@@ -26,7 +26,7 @@ namespace :package do
   # A set of tasks for printing the version
   [:version, :rpmversion, :rpmrelease, :debversion, :release].each do |task|
     task "#{task}" do
-      STDOUT.puts Pkg::Config.instance_variable_get("@#{task}")
+      $stdout.puts Pkg::Config.instance_variable_get("@#{task}")
     end
   end
 end

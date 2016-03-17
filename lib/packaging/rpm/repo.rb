@@ -59,10 +59,12 @@ module Pkg::Rpm::Repo
         --itemize-changes
         --progress
         --verbose
-        --perms
-        --chmod='Dugo-s,Dug=rwx,Do=rx,Fug=rw,Fo=r'
+        --super
+        --delay-updates
         --omit-dir-times
-        --no-times
+        --no-perms
+        --no-owner
+        --no-group
         --delay-updates
       )
 

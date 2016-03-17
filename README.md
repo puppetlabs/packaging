@@ -380,7 +380,7 @@ if File.exist?(build_defs_file)
     require 'yaml'
     @build_defaults ||= YAML.load_file(build_defs_file)
   rescue Exception => e
-    STDERR.puts "Unable to load yaml from #{build_defs_file}:"
+    $stderr.puts "Unable to load yaml from #{build_defs_file}:"
     raise e
   end
   @packaging_url  = @build_defaults['packaging_url']
@@ -908,14 +908,14 @@ files:
 
 * **pl:print_build_params**
 
-    Print all build parameters to STDOUT as they would be used in a package
+    Print all build parameters to $stdout as they would be used in a package
     build. This prints data that is loaded from `ext/build_defaults.yaml` and
     `ext/project_data.yaml`, as well as whatever is overridden with environment
     variables. Useful for debugging problems with parameter values.
 
 * **pl:print_build_param[param]**
 
-    Print a specific build parameter to STDOUT as it would be used in a package
+    Print a specific build parameter to $stdout as it would be used in a package
     build. This prints data that is loaded from `ext/build_defaults.yaml` and
     `ext/project_data.yaml`, as well as whatever is overridden with environment
     variables. Useful for debugging problems with parameter values. param
@@ -1017,7 +1017,7 @@ files:
     build_extras.yaml(s) via `pl:fetch`, and any environment variables. This
     file can be used by the packaging repo as a single source of truth for
     build data via `pl:build_from_params`. By default it is written to a
-    temporary location and its location is printed to STDOUT. To override the
+    temporary location and its location is printed to $stdout. To override the
     destination, pass OUTPUT_DIR as a environment variable to the task. By
     default, the name of the file will be either the git tag, if HEAD of the
     project repository is a tag, or the git sha of HEAD.

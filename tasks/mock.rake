@@ -44,10 +44,10 @@ def mock_artifact(mock_config, cmd_args, mockfile)
     content   = File.read(build_log) if File.readable?(build_log)
 
     if File.readable?(root_log)
-      STDERR.puts File.read(root_log)
+      $stderr.puts File.read(root_log)
     end
     if content and content.lines.count > 2
-      STDERR.puts content
+      $stderr.puts content
     end
 
     # Any useful info has now been gleaned from the logs in the case of a

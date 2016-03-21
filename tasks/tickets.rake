@@ -256,19 +256,6 @@ Dependencies:
   * Packages pushed
 DOC
 
-  description[:update_pe_promotion] = <<-DOC
-Update promotion to proper PE pipeline version(s).
-
-  * Review promotion of branch pipelines to PE
-  * Update PE pipeline version(s) as needed in ci-job-configs.
-    These updates typically occur in coordination with a significant release of PE
-      * stable branch should promote to pipelines for previously released significant versions of PE (e.g 2015.3.x)
-      * master branch should promote to pipelines for unreleased significant versions of PE
-
-Dependencies:
-  * Packages pushed
-DOC
-
   description[:update_dujour] = <<-DOC
 Update dujour to notify users to use #{vars[:release]}.
 
@@ -293,6 +280,32 @@ Dependencies:
   * Packages pushed
 DOC
 
+  description[:create_release_branch] = <<-DOC
+Create the release branch for the release and switch PE promotions on the PE release being targeted to the release branch in ci-job-configs.
+
+https://confluence.puppetlabs.com/display/RE/Puppet+Agent+Release+Branching
+
+Dependencies:
+  * Components tagged or ready for tags
+DOC
+
+  description[:destroy_release_branch] = <<-DOC
+Merge the release branch back up to stable, update promotions and delete the branch
+
+https://confluence.puppetlabs.com/display/RE/Puppet+Agent+Release+Branching
+
+* Merge the release branch back into stable
+* Review promotion of branch pipelines to PE
+* Update PE pipeline version(s) as needed in ci-job-configs.
+  These updates typically occur in coordination with a significant release of PE
+    * stable branch should promote to pipelines for previously released significant versions of PE (e.g 2015.3.x)
+    * master branch should promote to pipelines for unreleased significant versions of PE
+* Delete the release branch
+
+Dependencies:
+  * Packages pushed
+DOC
+
   # The subtickets to create for the individual tasks
   subtickets =
   [
@@ -300,6 +313,12 @@ DOC
       :summary     => 'Is the code ready for release?',
       :description => description[:code_ready],
       :assignee    => vars[:developer]
+    },
+    {
+      :projects    => ['PA'],  # Only Puppet Agent has this step
+      :summary     => "Create release branch.",
+      :description => description[:create_release_branch],
+      :assignee    => vars[:builder]
     },
     {
       :summary     => 'Reconcile git commits and JIRA tickets',
@@ -342,9 +361,9 @@ DOC
       :assignee    => vars[:developer]
     },
     {
-        :summary     => 'Push tag',
-        :description => description[:push_tag],
-        :assignee    => vars[:builder]
+      :summary     => 'Push tag',
+      :description => description[:push_tag],
+      :assignee    => vars[:builder]
     },
     {
       :summary     => 'Packages pushed',
@@ -352,20 +371,20 @@ DOC
       :assignee    => vars[:builder]
     },
     {
-        :summary     => 'Docs pushed',
-        :description => description[:push_docs],
-        :assignee    => vars[:writer]
+      :projects    => ['PA'],  # Only Puppet Agent has this step
+      :summary     => "Destroy release branch.",
+      :description => description[:destroy_release_branch],
+      :assignee    => vars[:builder]
+    },
+    {
+      :summary     => 'Docs pushed',
+      :description => description[:push_docs],
+      :assignee    => vars[:writer]
     },
     {
       :summary     => 'Send out announcements',
       :description => description[:send_announcements],
       :assignee    => vars[:owner]
-    },
-    {
-      :projects    => ['PA'],  # Only Puppet Agent has this step
-      :summary     => "Update branch promotion to proper PE version(s)",
-      :description => description[:update_pe_promotion],
-      :assignee    => vars[:tester]
     },
     {
       :projects    => ['PDB', 'SERVER'],  # Only PDB and puppet-server have this step
@@ -484,4 +503,3 @@ EOS
     create_release_tickets(jira, vars)
   end
 end
-

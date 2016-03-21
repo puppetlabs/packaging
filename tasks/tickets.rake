@@ -337,7 +337,7 @@ DOC
       :assignee    => vars[:developer]
     },
     {
-      :summary     => 'Go/no-go meeting (before 4pm)',
+      :summary     => 'Go/no-go meeting (before noon PST)',
       :description => description[:go_no_go],
       :assignee    => vars[:developer]
     },

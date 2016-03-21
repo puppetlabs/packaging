@@ -112,6 +112,15 @@ Lists JIRA tickets have a git commit, but the ticket is not resolved. Usually th
   * Make note in a comment of any tickets in git not found in JIRA (or visa versa) with an explanation of why the ticket is in that state.
 DOC
 
+  description[:create_release_branch] = <<-DOC
+Create the release branch for the release and switch PE promotions on the PE release being targeted to the release branch in ci-job-configs.
+
+https://confluence.puppetlabs.com/display/RE/Puppet+Agent+Release+Branching
+
+Dependencies:
+  * Components tagged or ready for tags
+DOC
+
   description[:code_ready] = <<-DOC
 1) Check that the version number in source for each component is correct for the current release. This should have been done as the last step of the previous release.
   * Puppet: check {{lib/puppet/version.rb}} for the {{PUPPETVERSION}} variable.
@@ -303,6 +312,23 @@ Dependencies:
   * Packages pushed
 DOC
 
+  description[:destroy_release_branch] = <<-DOC
+Merge the release branch back up to stable, update promotions and delete the branch
+
+https://confluence.puppetlabs.com/display/RE/Puppet+Agent+Release+Branching
+
+* Merge the release branch back into stable
+* Review promotion of branch pipelines to PE
+* Update PE pipeline version(s) as needed in ci-job-configs.
+  These updates typically occur in coordination with a significant release of PE
+    * stable branch should promote to pipelines for previously released significant versions of PE (e.g 2015.3.x)
+    * master branch should promote to pipelines for unreleased significant versions of PE
+* Delete the release branch
+
+Dependencies:
+  * Packages pushed
+DOC
+
   description[:code_post_release] = <<-DOC
 Bump the version number in source for each component in preparation for the next release.
 
@@ -344,6 +370,7 @@ If any new agent platforms were added in this release, you will need to update t
 Note that when merging master into stable, the stable versions of the component config refs should be preferred should there be a merge conflict.
 
 Dependencies:
+  * Destroy release branch
   * Is the code ready for release?
   * Reconcile git commits and JIRA tickets
 DOC
@@ -365,6 +392,11 @@ DOC
       :summary     => 'Is the code ready for release?',
       :description => description[:code_ready],
       :assignee    => vars[:developer]
+    },
+    {
+      :summary     => 'Create Release Branch',
+      :description => description[:create_release_branch],
+      :assignee    => vars[:builder]
     },
     {
       :summary     => 'Prepare long form release notes and short form release story',
@@ -405,6 +437,11 @@ DOC
       :summary     => 'Close all resolved tickets in Jira',
       :description => description[:close_tickets],
       :assignee    => vars[:project_manager]
+    },
+    {
+      :summary     => '"Destroy release branch.',
+      :description => description[:destroy_release_branch],
+      :assignee    => vars[:builder]
     },
     {
       :summary     => 'Prepare code for next release',

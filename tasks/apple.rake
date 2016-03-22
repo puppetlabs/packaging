@@ -30,9 +30,9 @@ task :setup do
                            Pkg::Config.version.split('.')[2].split('-')[0].split('rc')[0]
   @pm_restart            = 'None'
   @build_date            = Time.new.strftime("%Y-%m-%dT%H:%M:%SZ")
-  @apple_bindir          = '/usr/bin'
+  @apple_bindir          = File.join('/', @source_files['directories']['bin']['path'])
   @apple_sbindir         = '/usr/sbin'
-  @apple_libdir          = '/usr/lib/ruby/site_ruby'
+  @apple_libdir          = File.join('/', @source_files['directories']['lib']['path'])
   @apple_old_libdir      = '/usr/lib/ruby/site_ruby/1.8'
   @apple_docdir          = '/usr/share/doc'
 end

@@ -1,7 +1,7 @@
 module Pkg::IPS
   class << self
     def sign(target_dir = 'pkg')
-      use_identity = "-i #{Pkg::Config.ips_signing_ssh_key}" unless Pkg::Config.ips_signing_key.nil?
+      use_identity = "-i #{Pkg::Config.ips_signing_ssh_key}" unless Pkg::Config.ips_signing_ssh_key.nil?
 
       ssh_host_string = "#{use_identity} #{ENV['USER']}@#{Pkg::Config.ips_signing_server}"
       rsync_host_string = "-e 'ssh #{use_identity}' #{ENV['USER']}@#{Pkg::Config.ips_signing_server}"

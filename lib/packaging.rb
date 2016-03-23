@@ -14,6 +14,7 @@ module Pkg
   require 'packaging/ips'
   require 'packaging/nuget'
   require 'packaging/gem'
+  require 'packaging/msi'
 
   # Load configuration defaults
   Pkg::Config.load_defaults

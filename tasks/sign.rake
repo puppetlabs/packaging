@@ -170,6 +170,11 @@ namespace :pl do
     Pkg::OSX.sign unless Dir['pkg/apple/**/*.dmg'].empty?
   end
 
+  desc "Sign MSI packages"
+  task :sign_msi => "pl:fetch" do
+    Pkg::MSI.sign unless Dir['pkg/windows/**/*.msi'].empty?
+  end
+
   ##
   # This crazy piece of work establishes a remote repo on the distribution
   # server, ships our packages out to it, signs them, and brings them back.
@@ -198,6 +203,7 @@ namespace :pl do
       sign_tasks    << "pl:sign_swix" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_svr4" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_ips" if Pkg::Config.vanagon_project
+      sign_tasks    << "pl:sign_msi" if Pkg::Config.build_msi || Pkg::Config.vanagon_project
       remote_repo   = Pkg::Util::Net.remote_bootstrap(Pkg::Config.distribution_server, 'HEAD', nil, signing_bundle)
       build_params  = Pkg::Util::Net.remote_buildparams(Pkg::Config.distribution_server, Pkg::Config)
       Pkg::Util::Net.rsync_to('pkg', Pkg::Config.distribution_server, remote_repo)

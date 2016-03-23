@@ -203,7 +203,7 @@ namespace :pl do
       sign_tasks    << "pl:sign_swix" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_svr4" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_ips" if Pkg::Config.vanagon_project
-      sign_tasks    << "pl:sign_msi" if Pkg::Config.vanagon_project
+      sign_tasks    << "pl:sign_msi" if Pkg::Config.build_msi || Pkg::Config.vanagon_project
       remote_repo   = Pkg::Util::Net.remote_bootstrap(Pkg::Config.distribution_server, 'HEAD', nil, signing_bundle)
       build_params  = Pkg::Util::Net.remote_buildparams(Pkg::Config.distribution_server, Pkg::Config)
       Pkg::Util::Net.rsync_to('pkg', Pkg::Config.distribution_server, remote_repo)

@@ -10,6 +10,57 @@ module Pkg::MSI
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "mkdir -p C:/#{work_dir}")
       msis = Dir.glob("#{target_dir}/windows/**/*.msi")
       Pkg::Util::Net.rsync_to(msis.join(" "), rsync_host_string, "/cygdrive/c/#{work_dir}")
+
+      # Please Note:
+      # We are currently adding two signatures to the msi.
+      #
+      # Microsoft compatable Signatures are composed of three different
+      # elements.
+      #   1) The Certificate used to sign the package. This is the element that
+      #     is attached to organization. The certificate has an associated
+      #     algorithm. We recently (February 2016) had to switch from a sha1 to
+      #     a sha256 certificate. Sha1 was deprecated by many Microsoft
+      #     elements on 2016-01-01, which forced us to switch to a sha256 cert.
+      #     This sha256 certificate is recognized by all currently supported
+      #     windows platforms (Windows 8/Vista forward).
+      #   2) The signature used to attach the certificate to the package. This
+      #     can be a done with a variety of digest algorithms. Older platforms
+      #     (i.e., Windows 8 and Windows Vista) don't recognize later
+      #     algorithms like sha256.
+      #   3) The timestamp used to validate when the package was signed. This
+      #     comes from an external source and can be delivered with a variety
+      #     of digest algorithms. Older platforms do not recognize newer
+      #     algorithms like sha256.
+      #
+      # We could have only one signature with the Sha256 Cert, Sha1 Signature,
+      # and Sha1 Timestamp, but that would be too easy. The sha256 signature
+      # and timestamp add more security to our packages. We can't have only
+      # sha256 elements in our package signature, though, because Windows 8
+      # and Windows Vista just don't recognize them at all.
+      #
+      # In order to add two signatures to an MSI, we also need to change the
+      # tool we use to sign packages with. Previously, we were using SignTool
+      # which is the Microsoft blessed program used to sign packages. However,
+      # this tool isn't able to add two signatures to an MSI specifically. It
+      # can dual-sign an exe, just not an MSI. In order to get the dual-signed
+      # packages, we decided to switch over to using osslsigncode. The original
+      # project didn't have support to compile on a windows system, so we
+      # decided to use this fork. The binaries on the signer were pulled from
+      # https://sourceforge.net/u/keeely/osslsigncode/ci/master/tree/
+      #
+      # These are our signatures:
+      # The first signature:
+      #   * Sha256 Certificate
+      #   * Sha1 Signature
+      #   * Sha1 Timestamp
+      #
+      # The second signature:
+      #   * Sha256 Certificate
+      #   * Sha256 Signature
+      #   * Sha256 Timestamp
+      #
+      # Once we no longer support Windows 8/Windows Vista, we can remove the
+      # first Sha1 signature.
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, %Q(for msi in #{msis.map { |d| File.basename(d) }.join(" ")}; do
         "/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe" sign \
           -n "Puppet" -i "http://www.puppetlabs.com" \

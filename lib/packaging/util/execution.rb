@@ -23,11 +23,6 @@ module Pkg::Util::Execution
     # while also raising an exception if a command does not succeed (ala `sh "cmd"`).
     def ex(command, debug = false)
       puts "Executing '#{command}'..." if debug
-      if ENV['DRYRUN']
-        puts "[DRY-RUN] #{command}"
-        return true
-      end
-
       ret = `#{command}`
       unless Pkg::Util::Execution.success?
         raise RuntimeError

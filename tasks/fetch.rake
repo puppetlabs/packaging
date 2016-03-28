@@ -39,7 +39,8 @@ namespace :pl do
       begin
         tempdir = Pkg::Util::File.mktemp
         %x(curl --fail --silent #{flag} #{url}/#{Pkg::Config.builder_data_file} > #{tempdir}/#{Pkg::Config.builder_data_file})
-        case $?.exitstatus
+        status = $?.exitstatus
+        case status
         when 0
           Pkg::Util::RakeUtils.invoke_task("pl:load_extras", tempdir)
         when 22
@@ -49,7 +50,7 @@ namespace :pl do
             puts "No build data file for #{Pkg::Config.project}, skipping load of extra build data."
           end
         else
-          fail "There was an error fetching the builder extras data from #{url}."
+          fail "There was an error fetching the builder extras data: #{url}/#{Pkg::Config.builder_data_file} - Exit code #{status}"
         end
       ensure
         rm_rf tempdir

@@ -261,6 +261,7 @@ namespace :pl do
         remote:update_ips_repo
         remote:deploy_dmg_repo
         remote:deploy_swix_repo
+        remote:deploy_msi_repo
         remote:deploy_tar_repo
       )
       # Some projects such as pl-build-tools do not stage to a separate server - so we do to deploy

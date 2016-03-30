@@ -183,6 +183,22 @@ namespace :pl do
       end
     end
 
+    desc "Move MSI repos from #{Pkg::Config.msi_staging_server} to #{Pkg::Config.msi_host}"
+    task :deploy_msi_repo => 'pl:fetch' do
+      puts "Really run remote rsync to deploy source MSIs from #{Pkg::Config.msi_staging_server} to #{Pkg::Config.msi_host}? [y,n]"
+      if Pkg::Util.ask_yes_or_no
+        files = Dir.glob("pkg/windows/**/*.msi")
+        if files.empty?
+          puts "There are no MSIs to ship"
+        else
+          Pkg::Util::Execution.retry_on_fail(:times => 3) do
+            cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.msi_path, target_host: Pkg::Config.msi_host)
+            Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.msi_staging_server, cmd)
+          end
+        end
+      end
+    end
+
     desc "Move signed deb repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}"
     task :deploy_apt_repo => 'pl:fetch' do
       puts "Really run remote rsync to deploy Debian repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}? [y,n]"
@@ -330,6 +346,30 @@ namespace :pl do
     end
   end
 
+  desc "Ship MSI packages to #{Pkg::Config.msi_staging_server}"
+  task :ship_msi => 'pl:fetch' do
+    files = Dir["pkg/windows/**/#{Pkg::Config.project}-#{Pkg::Config.version}*.msi"]
+    if files.empty?
+      $stdout.puts "There aren't any MSI packages in pkg/windows. Maybe something went wrong?"
+    else
+      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+        if File.directory?("pkg/windows")
+          Pkg::Util::Net.rsync_to(
+            'pkg/windows',
+            Pkg::Config.msi_staging_server,
+            Pkg::Config.msi_path,
+            extra_flags: %W(
+              --ignore-existing
+              --include="*#{Pkg::Config.project}-#{Pkg::Config.version}*.msi"
+              --include="*/"
+              --exclude="*"
+            )
+          )
+        end
+      end
+    end
+  end
+
   desc "UBER ship: ship all the things in pkg"
   task :uber_ship => 'pl:fetch' do
     if Pkg::Util.confirm_ship(FileList["pkg/**/*"])
@@ -342,6 +382,7 @@ namespace :pl do
       Rake::Task["pl:ship_tar"].invoke if Pkg::Config.build_tar
       Rake::Task["pl:ship_svr4"].invoke if Pkg::Config.vanagon_project
       Rake::Task["pl:ship_p5p"].invoke if Pkg::Config.build_ips || Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_msi"].invoke if Pkg::Config.build_msi || Pkg::Config.vanagon_project
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
       add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark
       post_shipped_metrics if Pkg::Config.benchmark

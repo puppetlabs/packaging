@@ -47,6 +47,9 @@ module Pkg::Util
       if options_hash[:story_points]
         fields['customfield_10002'] = options_hash[:story_points].to_i
       end
+      if options_hash[:scrum_team]
+        fields['customfield_11500'] = { 'value' => options_hash[:scrum_team] }
+      end
 
       if options_hash[:components]
         fields['components'] = []

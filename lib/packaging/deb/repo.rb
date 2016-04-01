@@ -94,7 +94,7 @@ module Pkg::Deb::Repo
 Origin: Puppet Labs
 Label: Puppet Labs
 Codename: $dist
-Architectures: i386 amd64
+Architectures: i386 amd64 arm64 armel armhf powerpc sparc mips mipsel
 Components: #{subrepo}
 Description: Apt repository for acceptance testing" >> conf/distributions ; )
 

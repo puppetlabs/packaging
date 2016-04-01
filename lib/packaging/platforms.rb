@@ -17,7 +17,7 @@ module Pkg
       'debian' => {
         '6' => { :codename => 'squeeze', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
         '7' => { :codename => 'wheezy', :architectures  => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
-        '8' => { :codename => 'jessie', :architectures  => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
+        '8' => { :codename => 'jessie', :architectures  => ['i386', 'amd64', 'powerpc'], :repo => true, :package_format => 'deb', },
         '9' => { :codename => 'stretch', :architectures  => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
       },
 

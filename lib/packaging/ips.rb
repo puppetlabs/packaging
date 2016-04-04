@@ -8,14 +8,14 @@ module Pkg::IPS
 
       p5ps = Dir.glob("#{target_dir}/solaris/11/**/*.p5p")
 
-      work_dir     = "/tmp/#{Pkg::Util.rand_string}"
-      unsigned_dir = "#{work_dir}/unsigned"
-      repo_dir     = "#{work_dir}/repo"
-      signed_dir   = "#{work_dir}/pkgs"
-
       p5ps.each do |p5p|
+        work_dir     = "/tmp/#{Pkg::Util.rand_string}"
+        unsigned_dir = "#{work_dir}/unsigned"
+        repo_dir     = "#{work_dir}/repo"
+        signed_dir   = "#{work_dir}/pkgs"
+
         Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "mkdir -p #{repo_dir} #{unsigned_dir} #{signed_dir}")
-        Pkg::Util::Net.rsync_to(p5ps.join(" "), rsync_host_string, unsigned_dir)
+        Pkg::Util::Net.rsync_to(p5p, rsync_host_string, unsigned_dir)
 
         # Before we can get started with signing packages we need to create a repo
         Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgrepo create #{repo_dir}")

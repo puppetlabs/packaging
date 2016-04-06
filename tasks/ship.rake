@@ -383,7 +383,6 @@ namespace :pl do
       Rake::Task["pl:ship_svr4"].invoke if Pkg::Config.vanagon_project
       Rake::Task["pl:ship_p5p"].invoke if Pkg::Config.build_ips || Pkg::Config.vanagon_project
       Rake::Task["pl:ship_msi"].invoke if Pkg::Config.build_msi || Pkg::Config.vanagon_project
-      Rake::Task["pl:jenkins:ship"].invoke("shipped")
       add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark
       post_shipped_metrics if Pkg::Config.benchmark
     else

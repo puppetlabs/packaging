@@ -87,6 +87,7 @@ module Pkg::Util::RakeUtils
         'pe_ship.rake',
         'pe_sign.rake',
         'pe_tar.rake',
+        'platform-removal.rake',
         'retrieve.rake',
         'rpm.rake',
         'rpm_repos.rake',

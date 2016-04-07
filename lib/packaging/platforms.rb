@@ -64,6 +64,7 @@ module Pkg
         '14.04' => { :codename => 'trusty', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
         '15.04' => { :codename => 'vivid', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
         '15.10' => { :codename => 'wily', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
+        '16.04' => { :codename => 'xenial', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
       },
 
       'windows' => {

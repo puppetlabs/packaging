@@ -81,6 +81,9 @@ DOC
 
   description[:graphite_vmpooler] = <<-DOC
 Remove platform from graphite
+
+**NOTE**
+This task is optional. Graphite will automatically clears after 2 weeks.
 DOC
 
   description[:repositories] = <<-DOC

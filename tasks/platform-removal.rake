@@ -32,6 +32,16 @@ DOC
 Platform needs to be removed from puppet-agent pipelines.
 DOC
 
+  description[:s3_ship] = <<-DOC
+Edit the job configuration at http://jenkins-compose.delivery.puppetlabs.net/job/puppet-agent_s3-ship/configure to remove #{vars[:platform_tag]}.
+This will disable shipping agent builds for #{vars[:platform_tag]} to S3.
+DOC
+
+  description[:internal_ship] = <<-DOC
+Edit the job configuration at http://jenkins-compose.delivery.puppetlabs.net/job/internal_puppet-agent_ship/configure to remove #{vars[:platform_tag]}.
+This will disable shipping agent builds for #{vars[:platform_tag]} to http://agent-downloads.delivery.puppetlabs.net.
+DOC
+
   description[:beaker_hostgenerator] = <<-DOC
 The platform definition and any special tweaks need to be removed from https://github.com/puppetlabs/beaker-hostgenerator
 DOC
@@ -45,6 +55,11 @@ DOC
   description[:puppet_agent] = <<-DOC
 Remove platform definition and any special tweaks from puppet-agent https://github.com/puppetlabs/puppet-agent/tree/master/configs/platforms
 DOC
+
+  description[:puppet_agent_whitelist] = <<-DOC
+Update either the foss_platforms or pe_platforms list in puppet-agent ext/build_defaults.yaml so it can be properly whitelisted for nightly builds.
+DOC
+
 
   description[:pl_build_tools_vanagon] = <<-DOC
 Remove platform definition and any special tweaks from pl-build-tools-vanagon https://github.com/puppetlabs/pl-build-tools-vanagon/tree/master/configs/platforms
@@ -66,6 +81,9 @@ DOC
 
   description[:graphite_vmpooler] = <<-DOC
 Remove platform from graphite
+
+**NOTE**
+This task is optional. Graphite will automatically clears after 2 weeks.
 DOC
 
   description[:repositories] = <<-DOC
@@ -115,6 +133,22 @@ DOC
       :blocked_by   => ['pe_pipeline'],
     },
     {
+      :short_name   => 's3_ship',
+      :project      => 'RE',
+      :summary      => "Remove #{vars[:platform_tag]} from puppet-agent s3 ship",
+      :description  => description[:s3_ship],
+      :story_points => '1',
+      :blocked_by   => ['pa_pipeline'],
+    },
+    {
+      :short_name   => 'internal_ship',
+      :project      => 'RE',
+      :summary      => "Remove #{vars[:platform_tag]} from agent-downloads ship job",
+      :description  => description[:internal_ship],
+      :story_points => '1',
+      :blocked_by   => ['pa_pipeline'],
+    },
+    {
       :short_name   => 'beaker_hostgenerator',
       :project      => 'QENG',
       :summary      => "Remove #{vars[:platform_tag]} from beaker-hostgenerator",
@@ -135,6 +169,14 @@ DOC
       :project      => 'RE',
       :summary      => "Remove #{vars[:platform_tag]} platform definition from puppet-agent",
       :description  => description[:puppet_agent],
+      :story_points => '1',
+      :blocked_by   => ['pa_pipeline'],
+    },
+    {
+      :short_name   => 'puppet_agent_whitelist',
+      :project      => 'RE',
+      :summary      => "Remove #{vars[:platform_tag]} from puppet-agent build_defaults whitelist",
+      :description  => description[:puppet_agent_whitelist],
       :story_points => '1',
       :blocked_by   => ['pa_pipeline'],
     },

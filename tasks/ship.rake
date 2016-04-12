@@ -276,6 +276,7 @@ namespace :pl do
         puts "Shipping gem #{args[:file]} to internal Gem server (#{Pkg::Config.internal_gem_host})"
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
           Pkg::Gem.ship_to_stickler(args[:file])
+          Pkg::Gem.ship_to_nexus(args[:file])
         end
       end
     end

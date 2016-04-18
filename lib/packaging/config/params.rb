@@ -246,6 +246,7 @@ module Pkg::Params
               { :var => :yum_host,                :envvar => :YUM_HOST },
               { :var => :yum_repo_path,           :envvar => :YUM_REPO },
               { :var => :yum_staging_server,      :envvar => :YUM_STAGING_SERVER },
+              { :var => :internal_gem_host,       :envvar => :INTERNAL_GEM_HOST },
              ]
   # Default values that are supplied if the user does not supply them
   #

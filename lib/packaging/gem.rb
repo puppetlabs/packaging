@@ -6,7 +6,7 @@ module Pkg::Gem
     # yet; I'm not entirely sure I've fixed everything that might attempt
     # to call this method so this is now a wrapper for a wrapper.
     def ship(file)
-      ship_stickler(file)
+      ship_to_stickler(file)
       ship_to_nexus(file)
       rsync_to_downloads(file)
       ship_to_rubygems(file)

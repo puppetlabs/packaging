@@ -291,7 +291,7 @@ namespace :pl do
       if Pkg::Util.ask_yes_or_no
         puts "Shipping gem #{args[:file]} to public file server (#{Pkg::Config.gem_host})"
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          Pkg::Gem.ship_to_stickler(args[:file])
+          Pkg::Gem.rsync_to_downloads(args[:file])
         end
       end
     end

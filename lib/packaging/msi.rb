@@ -63,7 +63,7 @@ module Pkg::MSI
       # first Sha1 signature.
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, %Q(for msi in #{msis.map { |d| File.basename(d) }.join(" ")}; do
         "/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe" sign \
-          -n "Puppet" -i "http://www.puppetlabs.com" \
+          -n "Puppet" -i "http://www.puppet.com" \
           -h sha1 \
           -pkcs12 "#{Pkg::Config.msi_signing_cert}" \
           -pass "#{Pkg::Config.msi_signing_cert_pw}" \
@@ -71,7 +71,7 @@ module Pkg::MSI
           -in "C:/#{work_dir}/$msi" \
           -out "C:/#{work_dir}/signed-$msi"
         "/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe" sign \
-          -n "Puppet" -i "http://www.puppetlabs.com" \
+          -n "Puppet" -i "http://www.puppet.com" \
           -nest -h sha256 \
           -pkcs12 "#{Pkg::Config.msi_signing_cert}" \
           -pass "#{Pkg::Config.msi_signing_cert_pw}" \

@@ -1,3 +1,5 @@
+require 'pp'
+
 # This rake task creates tickets in jira for a release.
 #
 
@@ -485,7 +487,6 @@ EOS
     validate_release_ticket_vars(jira, vars)
 
     puts "Creating release tickets based on:"
-    require 'pp'
     pp vars.select { |k, v| k != :password }
 
     create_release_tickets(jira, vars)

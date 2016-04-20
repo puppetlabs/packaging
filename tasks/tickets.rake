@@ -319,7 +319,7 @@ DOC
     {
       :summary     => 'Is the Jira tidy-up done for this release and prepared for the next one?',
       :description => description[:jira_maintenance],
-     :assignee    => vars[:developer]
+      :assignee    => vars[:developer]
     },
     {
       :summary     => 'Prepare long form release notes and short form release story',

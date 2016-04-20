@@ -1,6 +1,10 @@
 # This rake task creates tickets in jira for a release.
 #
 
+# Magic transition ID for "Ready for Engineering" state in jira
+# (for the full list, see https://tickets.puppetlabs.com/rest/api/2/issue/$ticket_number/transitions)
+READY_FOR_ENGINEERING = 111
+
 def get_release_ticket_vars
   vars = {}
 
@@ -385,6 +389,7 @@ DOC
   subtickets.each {|t|
     t[:summary] << " (#{vars[:project]} #{vars[:release]})"
     t[:description] = "(Initial planned release date: #{vars[:date]})\n\n" + t[:description]
+    t[:status] = READY_FOR_ENGINEERING
   }
 
   # Use the human-friendly project name in the summary
@@ -410,6 +415,7 @@ DOC
     :description => description[:top_level_ticket],
     :project => project,
     :assignee => assignee,
+    :status => READY_FOR_ENGINEERING,
   }
 
   # Create the main ticket
@@ -441,6 +447,7 @@ DOC
     :summary => "Release #{Pkg::Config.project} #{vars[:release]} (#{vars[:date]})",
     :project => 'RE',
     :assignee => vars[:builder],
+    :status => READY_FOR_ENGINEERING,
   }
 
   release_key, _ = jira.create_issue(release_ticket)

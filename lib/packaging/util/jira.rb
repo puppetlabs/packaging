@@ -156,7 +156,7 @@ module Pkg::Util
 
       if options_hash[:status]
         transition = issue.transitions.build
-        transition.save!("transition" => {"id" => options_hash[:status]})
+        transition.save!("transition" => { "id" => options_hash[:status] })
       end
 
       return issue.key, issue.id

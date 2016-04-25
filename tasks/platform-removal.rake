@@ -28,6 +28,14 @@ DOC
 Platform needs to be removed from PE pipelines.
 DOC
 
+  description[:pe_repo_deprecation] = <<-DOC
+The pe_repo::platforms::<platform> class needs to be deprecated in the puppetlabs-pe_repo module.  It should raise a warning, letting users know that the platform is no longer available and the class should be removed.  It cannot be deleted yet as this would cause compilation failures on upgraded installations which had made use of the removed platform.
+DOC
+
+  description[:pe_repo_removal] = <<-DOC
+Ticket needs to be filed for next major PE release to remove the deprecated platfrom from pe_repo.
+DOC
+
   description[:pa_pipeline] = <<-DOC
 Platform needs to be removed from puppet-agent pipelines.
 DOC
@@ -122,6 +130,22 @@ DOC
       :summary      => "Remove #{vars[:platform_tag]} from PE integration pipelines",
       :description  => description[:pe_pipeline],
       :story_points => '3',
+      :blocked_by   => ['initial_email', 'pe_repo_deprecation'],
+    },
+    {
+      :short_name   => 'pe_repo_deprecation',
+      :project      => 'PE',
+      :summary      => "Deprecate #{vars[:platform_tag]} from puppetlabs-pe_repo",
+      :description  => description[:pe_repo_deprecation],
+      :story_points => '2',
+      :blocked_by   => ['initial_email'],
+    },
+    {
+      :short_name   => 'pe_repo_removal',
+      :project      => 'PE',
+      :summary      => "File future ticket to remove #{vars[:platform_tag]} classes puppetlabs-pe_repo in next major release",
+      :description  => description[:pe_repo_removal],
+      :story_points => '1',
       :blocked_by   => ['initial_email'],
     },
     {

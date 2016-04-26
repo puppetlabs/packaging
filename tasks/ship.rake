@@ -271,11 +271,18 @@ namespace :pl do
         warn "Value `Pkg::Config.internal_gem_host` not defined; skipping internal ship"
       end
 
-      puts "Do you want to ship #{args[:file]} to the internal Gem server?"
+      puts "Do you want to ship #{args[:file]} to the internal stickler server(#{Pkg::Config.internal_stickler_host})?"
       if Pkg::Util.ask_yes_or_no
-        puts "Shipping gem #{args[:file]} to internal Gem server (#{Pkg::Config.internal_gem_host})"
+        puts "Shipping gem #{args[:file]} to internal Gem server (#{Pkg::Config.internal_stickler_host})"
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
           Pkg::Gem.ship_to_stickler(args[:file])
+        end
+      end
+
+      puts "Do you want to ship #{args[:file]} to the internal nexus server(#{Pkg::Config.internal_nexus_host})?"
+      if Pkg::Util.ask_yes_or_no
+        puts "Shipping gem #{args[:file]} to internal Gem server (#{Pkg::Config.internal_nexus_host})"
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
           Pkg::Gem.ship_to_nexus(args[:file])
         end
       end

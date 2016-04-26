@@ -356,7 +356,7 @@ namespace :pl do
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
         if File.directory?("pkg/windows")
           Pkg::Util::Net.rsync_to(
-            'pkg/windows',
+            'pkg/windows/',
             Pkg::Config.msi_staging_server,
             Pkg::Config.msi_path,
             extra_flags: %W(

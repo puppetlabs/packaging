@@ -53,6 +53,8 @@ if Pkg::Config.build_gem
       s.files = glob_gem_files                                         unless glob_gem_files.nil?
       s.executables = Pkg::Config.gem_executables                      unless Pkg::Config.gem_executables.nil?
       s.require_path = Pkg::Config.gem_require_path                    unless Pkg::Config.gem_require_path.nil?
+      s.required_ruby_version = Pkg::Config.gem_required_ruby_version  unless Pkg::Config.gem_required_ruby_version.nil?
+      s.required_rubygems_version = Pkg::Config.gem_required_rubygems_version unless Pkg::Config.gem_required_rubygems_version.nil?
       s.test_files = FileList[Pkg::Config.gem_test_files.split(' ')]   unless Pkg::Config.gem_test_files.nil?
       s.rubyforge_project = Pkg::Config.gem_forge_project              unless Pkg::Config.gem_forge_project.nil?
       Pkg::Config.gem_rdoc_options.each do |option|

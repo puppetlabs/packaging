@@ -154,6 +154,11 @@ module Pkg::Util
       issue = @client.Issue.build
       issue.save!({ 'fields' => fields })
 
+      if options_hash[:status]
+        transition = issue.transitions.build
+        transition.save!("transition" => { "id" => options_hash[:status] })
+      end
+
       return issue.key, issue.id
     rescue Exception => e
       fail "Cannot create Jira Ticket with fields #{fields}"

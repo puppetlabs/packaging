@@ -62,6 +62,8 @@ module Pkg::Params
                   :gem_platform_dependencies,
                   :gem_rdoc_options,
                   :gem_require_path,
+                  :gem_required_ruby_version,
+                  :gem_required_rubygems_version,
                   :gem_runtime_dependencies,
                   :gem_summary,
                   :gem_test_files,

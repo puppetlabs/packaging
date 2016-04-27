@@ -52,7 +52,8 @@ module Pkg::Rpm::Repo
       # fail due to permission errors.
       options = %w(
         rsync
-        --archive
+        --recursive
+        --links
         --hard-links
         --update
         --human-readable
@@ -65,7 +66,6 @@ module Pkg::Rpm::Repo
         --no-perms
         --no-owner
         --no-group
-        --delay-updates
       )
 
       options << '--dry-run' if dryrun

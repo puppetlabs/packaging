@@ -1,6 +1,6 @@
 # This rake task creates tickets in jira for removing a platform.
 #
-def get_platform_ticket_vars
+def get_platform_removal_vars
   vars = {}
 
   # configuration
@@ -18,7 +18,7 @@ def get_platform_ticket_vars
   vars.merge(Pkg::Util::Jira.get_auth_vars)
 end
 
-def create_platform_tickets(jira, vars)
+def create_removal_tickets(jira, vars)
   description = {}
   description[:initial_email] = <<-DOC
 Email should be sent out to puppet-users, puppet-dev, and puppet-announce notifying users the platform will no longer be supported.
@@ -125,20 +125,20 @@ DOC
       :story_points => '1',
     },
     {
-      :short_name   => 'pe_pipeline',
-      :project      => 'PE',
-      :summary      => "Remove #{vars[:platform_tag]} from PE integration pipelines",
-      :description  => description[:pe_pipeline],
-      :story_points => '3',
-      :blocked_by   => ['initial_email', 'pe_repo_deprecation'],
-    },
-    {
       :short_name   => 'pe_repo_deprecation',
       :project      => 'PE',
       :summary      => "Deprecate #{vars[:platform_tag]} from puppetlabs-pe_repo",
       :description  => description[:pe_repo_deprecation],
       :story_points => '2',
       :blocked_by   => ['initial_email'],
+    },
+    {
+      :short_name   => 'pe_pipeline',
+      :project      => 'PE',
+      :summary      => "Remove #{vars[:platform_tag]} from PE integration pipelines",
+      :description  => description[:pe_pipeline],
+      :story_points => '3',
+      :blocked_by   => ['initial_email', 'pe_repo_deprecation'],
     },
     {
       :short_name   => 'pe_repo_removal',
@@ -407,7 +407,7 @@ Create tickets to remove supported platform
 EOS
 
   task :platform_removal do
-    vars = get_platform_ticket_vars
+    vars = get_platform_removal_vars
     jira = Pkg::Util::Jira.new(vars[:username], vars[:site])
 
     vars[:base64_encoding] = Pkg::Util.base64_encode("#{vars[:username]}:#{jira.client.options[:password]}")
@@ -416,6 +416,6 @@ EOS
     require 'pp'
     pp vars.select { |k, v| k != :password }
 
-    create_platform_tickets(jira, vars)
+    create_removal_tickets(jira, vars)
   end
 end

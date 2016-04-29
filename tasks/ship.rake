@@ -231,11 +231,11 @@ namespace :pl do
     end
   end
 
-  # We want to ship a Gem only for projects that build gems, so
-  # all of the Gem shipping tasks are wrapped in an `if`.
-  if Pkg::Config.build_gem
-    desc "Ship built gem to rubygems.org, internal Gem mirror, and public file server"
-    task :ship_gem => 'pl:fetch' do
+  desc "Ship built gem to rubygems.org, internal Gem mirror, and public file server"
+  task :ship_gem => 'pl:fetch' do
+    # We want to ship a Gem only for projects that build gems, so
+    # all of the Gem shipping tasks are wrapped in an `if`.
+    if Pkg::Config.build_gem
       # Even if a project builds a gem, if it uses the odd_even or zero-based
       # strategies, we only want to ship final gems because otherwise a
       # development gem would be preferred over the last final gem
@@ -253,53 +253,53 @@ namespace :pl do
         $stderr.puts "Not shipping development gem using odd_even strategy for the sake of your users."
       end
     end
+  end
 
-    desc "Ship built gem to rubygems.org"
-    task :ship_gem_to_rubygems, [:file] => 'pl:fetch' do |t, args|
-      puts "Do you want to ship #{args[:file]} to rubygems.org?"
-      if Pkg::Util.ask_yes_or_no
-        puts "Shipping gem #{args[:file]} to rubygems.org"
-        Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          Pkg::Gem.ship_to_rubygems(args[:file])
-        end
+  desc "Ship built gem to rubygems.org"
+  task :ship_gem_to_rubygems, [:file] => 'pl:fetch' do |t, args|
+    puts "Do you want to ship #{args[:file]} to rubygems.org?"
+    if Pkg::Util.ask_yes_or_no
+      puts "Shipping gem #{args[:file]} to rubygems.org"
+      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+        Pkg::Gem.ship_to_rubygems(args[:file])
+      end
+    end
+  end
+
+  desc "Ship built gems to internal Gem server (#{Pkg::Config.internal_gem_host})"
+  task :ship_gem_to_internal_mirror, [:file] => 'pl:fetch' do |t, args|
+    unless Pkg::Config.internal_gem_host
+      warn "Value `Pkg::Config.internal_gem_host` not defined; skipping internal ship"
+    end
+
+    puts "Do you want to ship #{args[:file]} to the internal stickler server(#{Pkg::Config.internal_stickler_host})?"
+    if Pkg::Util.ask_yes_or_no
+      puts "Shipping gem #{args[:file]} to internal Gem server (#{Pkg::Config.internal_stickler_host})"
+      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+        Pkg::Gem.ship_to_stickler(args[:file])
       end
     end
 
-    desc "Ship built gems to internal Gem server (#{Pkg::Config.internal_gem_host})"
-    task :ship_gem_to_internal_mirror, [:file] => 'pl:fetch' do |t, args|
-      unless Pkg::Config.internal_gem_host
-        warn "Value `Pkg::Config.internal_gem_host` not defined; skipping internal ship"
-      end
-
-      puts "Do you want to ship #{args[:file]} to the internal stickler server(#{Pkg::Config.internal_stickler_host})?"
-      if Pkg::Util.ask_yes_or_no
-        puts "Shipping gem #{args[:file]} to internal Gem server (#{Pkg::Config.internal_stickler_host})"
-        Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          Pkg::Gem.ship_to_stickler(args[:file])
-        end
-      end
-
-      puts "Do you want to ship #{args[:file]} to the internal nexus server(#{Pkg::Config.internal_nexus_host})?"
-      if Pkg::Util.ask_yes_or_no
-        puts "Shipping gem #{args[:file]} to internal Gem server (#{Pkg::Config.internal_nexus_host})"
-        Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          Pkg::Gem.ship_to_nexus(args[:file])
-        end
+    puts "Do you want to ship #{args[:file]} to the internal nexus server(#{Pkg::Config.internal_nexus_host})?"
+    if Pkg::Util.ask_yes_or_no
+      puts "Shipping gem #{args[:file]} to internal Gem server (#{Pkg::Config.internal_nexus_host})"
+      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+        Pkg::Gem.ship_to_nexus(args[:file])
       end
     end
+  end
 
-    desc "Ship built gems to public Downloads server (#{Pkg::Config.gem_host})"
-    task :ship_gem_to_downloads, [:file] => 'pl:fetch' do |t, args|
-      unless Pkg::Config.gem_host
-        warn "Value `Pkg::Config.gem_host` not defined; skipping shipping to public Download server"
-      end
+  desc "Ship built gems to public Downloads server (#{Pkg::Config.gem_host})"
+  task :ship_gem_to_downloads, [:file] => 'pl:fetch' do |t, args|
+    unless Pkg::Config.gem_host
+      warn "Value `Pkg::Config.gem_host` not defined; skipping shipping to public Download server"
+    end
 
-      puts "Do you want to ship #{args[:file]} to public file server (#{Pkg::Config.gem_host})?"
-      if Pkg::Util.ask_yes_or_no
-        puts "Shipping gem #{args[:file]} to public file server (#{Pkg::Config.gem_host})"
-        Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          Pkg::Gem.rsync_to_downloads(args[:file])
-        end
+    puts "Do you want to ship #{args[:file]} to public file server (#{Pkg::Config.gem_host})?"
+    if Pkg::Util.ask_yes_or_no
+      puts "Shipping gem #{args[:file]} to public file server (#{Pkg::Config.gem_host})"
+      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+        Pkg::Gem.rsync_to_downloads(args[:file])
       end
     end
   end
@@ -381,16 +381,16 @@ namespace :pl do
   desc "UBER ship: ship all the things in pkg"
   task :uber_ship => 'pl:fetch' do
     if Pkg::Util.confirm_ship(FileList["pkg/**/*"])
-      Rake::Task["pl:ship_gem"].invoke if Pkg::Config.build_gem
-      Rake::Task["pl:ship_rpms"].invoke if Pkg::Config.final_mocks || Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_debs"].invoke if Pkg::Config.cows || Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_dmg"].invoke if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_swix"].invoke if Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_nuget"].invoke if Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_tar"].invoke if Pkg::Config.build_tar
-      Rake::Task["pl:ship_svr4"].invoke if Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_p5p"].invoke if Pkg::Config.build_ips || Pkg::Config.vanagon_project
-      Rake::Task["pl:ship_msi"].invoke if Pkg::Config.build_msi || Pkg::Config.vanagon_project
+      Rake::Task["pl:ship_gem"].invoke
+      Rake::Task["pl:ship_rpms"].invoke
+      Rake::Task["pl:ship_debs"].invoke
+      Rake::Task["pl:ship_dmg"].invoke
+      Rake::Task["pl:ship_swix"].invoke
+      Rake::Task["pl:ship_nuget"].invoke
+      Rake::Task["pl:ship_tar"].invoke
+      Rake::Task["pl:ship_svr4"].invoke
+      Rake::Task["pl:ship_p5p"].invoke
+      Rake::Task["pl:ship_msi"].invoke
       add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark
       post_shipped_metrics if Pkg::Config.benchmark
     else

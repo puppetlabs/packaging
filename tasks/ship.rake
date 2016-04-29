@@ -316,7 +316,7 @@ namespace :pl do
         end
       end
     end
-  end if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
+  end
 
   desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
   task :ship_swix => 'pl:fetch' do

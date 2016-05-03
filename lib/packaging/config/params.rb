@@ -72,6 +72,8 @@ module Pkg::Params
                   :gpg_name,
                   :homepage,
                   :internal_gem_host,
+                  :internal_nexus_host,
+                  :internal_stickler_host,
                   :ips_build_host,
                   :ips_host,
                   :ips_inter_cert,
@@ -249,6 +251,8 @@ module Pkg::Params
               { :var => :yum_repo_path,           :envvar => :YUM_REPO },
               { :var => :yum_staging_server,      :envvar => :YUM_STAGING_SERVER },
               { :var => :internal_gem_host,       :envvar => :INTERNAL_GEM_HOST },
+              { :var => :internal_nexus_host,     :envvar => :INTERNAL_NEXUS_HOST },
+              { :var => :internal_stickler_host,  :envvar => :INTERNAL_STICKLER_HOST },
              ]
   # Default values that are supplied if the user does not supply them
   #
@@ -282,6 +286,8 @@ module Pkg::Params
   # in case it is not set.
   #
   REASSIGNMENTS = [
+                    { :oldvar => :internal_gem_host,      :newvar => :internal_nexus_host },
+                    { :oldvar => :internal_gem_host,      :newvar => :internal_stickler_host },
                     # These are fall-through values for shipping endpoints
                     { :oldvar => :staging_server,         :newvar => :apt_staging_server },
                     { :oldvar => :staging_server,         :newvar => :dmg_staging_server },

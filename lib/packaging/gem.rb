@@ -28,8 +28,8 @@ module Pkg::Gem
         password = Pkg::Util.get_input(false)
         hash["GEM_INTERNAL"] = { :authorization => "Basic #{Pkg::Util.base64_encode("#{username}:#{password}")}" }
       end
-      if hash["GEM_INTERNAL"][:url].nil? || hash["GEM_INTERNAL"][:url] != Pkg::Config.internal_gem_host
-        hash["GEM_INTERNAL"][:url] = Pkg::Config.internal_gem_host
+      if hash["GEM_INTERNAL"][:url].nil? || hash["GEM_INTERNAL"][:url] != Pkg::Config.internal_nexus_host
+        hash["GEM_INTERNAL"][:url] = Pkg::Config.internal_nexus_host
       end
       File.open(@nexus_config, "w") do |file|
         file.write(hash.to_yaml)
@@ -52,12 +52,12 @@ module Pkg::Gem
         # to debug the failure, and potentially update this fail case if
         # needed.
         fail unless ret.include? "Created"
-        puts "#{file} pushed to nexus server at #{Pkg::Config.internal_gem_host}"
+        puts "#{file} pushed to nexus server at #{Pkg::Config.internal_nexus_host}"
       end
     rescue
       puts "###########################################"
       puts "#  Nexus failed, ensure the nexus gem is installed,"
-      puts "#  you have access to #{Pkg::Config.internal_gem_host}"
+      puts "#  you have access to #{Pkg::Config.internal_nexus_host}"
       puts "#  and your settings in #{@nexus_config} are correct"
       puts "###########################################"
     end
@@ -66,17 +66,17 @@ module Pkg::Gem
     # you've lost the ability to feel joy anymore.
     def ship_to_stickler(file)
       Pkg::Util::Tool.check_tool("stickler")
-      cmd = "stickler push #{file} --server=#{Pkg::Config.internal_gem_host} 2>/dev/null"
+      cmd = "stickler push #{file} --server=#{Pkg::Config.internal_stickler_host} 2>/dev/null"
       if ENV['DRYRUN']
         puts "[DRY-RUN] #{cmd}"
       else
         Pkg::Util::Execution.ex(cmd)
-        puts "#{file} pushed to stickler server at #{Pkg::Config.internal_gem_host}"
+        puts "#{file} pushed to stickler server at #{Pkg::Config.internal_stickler_host}"
       end
     rescue
       puts "###########################################"
       puts "#  Stickler failed, ensure it's installed"
-      puts "#  and you have access to #{Pkg::Config.internal_gem_host}"
+      puts "#  and you have access to #{Pkg::Config.internal_stickler_host}"
       puts "###########################################"
     end
 

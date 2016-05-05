@@ -74,6 +74,7 @@ module Pkg::Util::RakeUtils
         'deb.rake',
         'deb_repos.rake',
         'doc.rake',
+        'education.rake',
         'fetch.rake',
         'gem.rake',
         'ips.rake',

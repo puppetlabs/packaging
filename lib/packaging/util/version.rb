@@ -1,4 +1,5 @@
 # Utility methods used for versioning projects for various kinds of packaging
+require 'json'
 
 module Pkg::Util::Version
   class << self
@@ -311,5 +312,33 @@ module Pkg::Util::Version
       # ...and write it back on out.
       File.open(version_file, 'w') { |f| f.write contents }
     end
+
+    # Human readable output for json tags reporting. This will load the
+    # input json file and output if it "looks tagged" or not
+    #
+    # @param json_data [hash] json data hash containing the ref to check
+    def report_json_tags(json_data)
+      puts "component: " + File.basename(json_data["url"])
+      puts "ref: " + json_data["ref"].to_s
+      if tagged?(json_data["url"], json_data["ref"].to_s)
+        tagged = "Tagged? [ Yes ]"
+      else
+        tagged = "Tagged? [ No  ]"
+      end
+      col_len = (ENV["COLUMNS"] || 70).to_i
+      puts format("\n%#{col_len}s\n\n", tagged)
+      puts ("*" * col_len)
+    end
+
+    # Reports if a ref and it's corresponding git repo points to
+    # a git tag.
+    #
+    # @param url [string] url of repo grabbed from json file
+    # @param ref [string] ref grabbed from json file
+    def tagged?(url, ref)
+      reference = Pkg::Util::Git_tag.new(url, ref)
+      reference.tag?
+    end
+
   end
 end

@@ -102,6 +102,7 @@ module Pkg::Util::RakeUtils
         'version.rake',
         'z_data_dump.rake',
         'config.rake',
+        'vanagon.rake',
       ]
 
       tasks.each do |task|

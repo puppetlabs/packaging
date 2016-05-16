@@ -204,24 +204,6 @@ Dependencies:
   * Every ticket before this except for release notes.
 DOC
 
-  description[:smoke_test] = <<-DOC
-Procedure may vary by project and point in the release cycle. Ask around.
-
-Our automated acceptance pipelines generally cover most basic scenarios, so in general we don't need to manually smoke test our packages. We may want to smoke test component tarballs, as they are not automatically tested.
-
-1) Test the new puppet gems
-  * {{cd work/puppet/acceptance}}
-  * {{bundle install --path .bundle}}
-  * {{bundle exec rake ci:test:gem SHA=#{vars[:puppet_release]}}}
-  * When finished, leave a comment indicating so, or alert the team if they fail.
-
-2) Manual package smoketesting
-  * If manual testing is desired (not mandatory), packages can be found at: builds.delivery.puppetlabs.net/puppet-agent/#{vars[:puppet_agent_release]}
-
-Dependencies:
-  * Tag and create packages
-DOC
-
   description[:go_no_go] = <<-DOC
 This should happen Monday-Thursday, before 4pm. We should not be shipping anything on a Friday both. In addition, having the go-no-go meeting completed by 4PM is prerequisite to continuing the release process. If it is not, we'll need to wait until tomorrow to continue.
 
@@ -231,7 +213,7 @@ This meeting is informal, over chat, and usually happens right before packages a
 Keep in mind that we typically do not ship releases on Friday.
 
 Dependencies:
-  * Smoke testing
+  * Tag and create packages
 
 Participants:
   * [~#{vars[:developer]}]
@@ -407,11 +389,6 @@ DOC
       :summary     => 'Tag the release and create packages',
       :description => description[:tag_package],
       :assignee    => vars[:builder]
-    },
-    {
-      :summary     => 'Smoke test packages',
-      :description => description[:smoke_test],
-      :assignee    => vars[:developer]
     },
     {
       :summary     => 'Go/no-go meeting (before 4pm)',

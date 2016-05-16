@@ -178,7 +178,7 @@ Tag and create packages
     * You need to know the pass phrase for this to complete successfully. It's important that we make sure all releases are signed to verify authenticity.
   * {{git describe}} will show you the tag. Make sure you're building what you think you're building.
   * Make sure you look over the code that has changed since the previous release so we know what's going out the door.
-  * run {{rake package:implode package:bootstrap pl:jenkins:uber_build}} when you've verified what version you're building (this uses the latest version of the packaging repo to build the packages).
+  * run {{rake package:implode package:bootstrap vanagon:build_all}} when you've verified what version you're building (this uses the latest version of the packaging repo to build the packages).
   * Push the tag.
 
 3) [~#{vars[:builder]}]: make a pull request against puppet-agent#stable to bump each component to the freshly pushed tags from above:

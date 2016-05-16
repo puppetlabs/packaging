@@ -489,7 +489,6 @@ DOC
 
   # Create subtasks for each step of the release process
   subticket_idx = 1
-  release_tickets = []
   subtickets.each do |subticket|
 
     next if subticket[:projects] && !subticket[:projects].include?(vars[:project])
@@ -500,23 +499,9 @@ DOC
     key, _ = jira.create_issue(subticket)
     puts "\tSubticket #{subticket_idx.to_s.rjust(2)}: #{key} (#{subticket[:assignee]}) - #{subticket[:summary]}"
 
-    release_tickets << key if subticket[:assignee] == vars[:builder]
-
     subticket_idx += 1
   end
 
-  # Create an RE ticket for this release so the RE team can plan
-  release_ticket = {
-    :summary => "Release #{Pkg::Config.project} #{vars[:puppet_agent_release]} (#{vars[:date]})",
-    :project => 'RE',
-    :assignee => vars[:builder],
-  }
-
-  release_key, _ = jira.create_issue(release_ticket)
-
-  release_tickets.each do |ticket|
-    Pkg::Util::Jira.link_issues(ticket, release_key, vars[:site], Pkg::Util.base64_encode("#{vars[:username]}:#{jira.client.options[:password]}"))
-  end
 end
 
 namespace :pl do

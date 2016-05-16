@@ -21,5 +21,21 @@ module Pkg::Util::Misc
 
       search_string
     end
+
+    # Loads and parses json from a file. Will treat the keys in the
+    # json as methods to invoke on the component in question
+    #
+    # @param file [String] Path to the json file
+    # @raise [RuntimeError] exceptions are raised if there is no file, if it refers to methods that don't exist, or if it does not contain a Hash
+    def load_from_json(file)
+      data = JSON.parse(File.read(file))
+      unless data.is_a?(Hash)
+        raise "Hash required. Got '#{data.class}' when parsing '#{file}'"
+      end
+      # We explicity return data here b/c the unless clause above will cause the
+      # Function to return nil.
+      #               -Sean P. M. 05/11/2016
+      data
+    end
   end
 end

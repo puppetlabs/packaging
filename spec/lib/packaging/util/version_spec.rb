@@ -96,4 +96,15 @@ describe "Pkg::Util::Version" do
       end
     end
   end
+
+
+  context "#tagged?" do
+    it "reports Yes on tagged component" do
+      expect(Pkg::Util::Version.tagged?("git://github.com/puppetlabs/leatherman.git", "refs/tags/0.6.2")).to be(true)
+    end
+
+    it "reports No on non-tagged component" do
+      expect(Pkg::Util::Version.tagged?("git://github.com/puppetlabs/leatherman.git", "4eef05389ebf418b62af17406c7f9f13fa51f975")).to be(false)
+    end
+  end
 end

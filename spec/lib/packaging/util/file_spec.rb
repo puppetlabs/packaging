@@ -51,6 +51,17 @@ describe "Pkg::Util::File" do
     end
   end
 
+  describe "#files_with_ext" do
+    it "returns nothing if there are no files with that extension" do
+      Pkg::Util::File.files_with_ext("./spec/fixtures/configs/components", ".fake").should be_empty
+    end
+
+    it "returns only the files with that extension" do
+      expect(Pkg::Util::File.files_with_ext("./spec/fixtures/configs/components", ".json")).to include("./spec/fixtures/configs/components/test_file.json")
+      expect(Pkg::Util::File.files_with_ext("./spec/fixtures/configs/components", ".json")).to include("./spec/fixtures/configs/components/test_file_2.json")
+    end
+  end
+
   describe "#install_files_into_dir" do
     it "selects the correct files to install" do
       Pkg::Config.load_defaults

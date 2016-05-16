@@ -32,6 +32,12 @@ module Pkg::Util::File
       end
     end
 
+    # Returns an array of all files with #{ext} inside #{dir}
+    def files_with_ext(dir, ext)
+      Dir.glob("#{dir}/**/*#{ext}")
+    end
+
+
     def file_exists?(file, args = { :required => false })
       exists = File.exist? file
       if !exists and args[:required]

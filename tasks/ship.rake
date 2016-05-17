@@ -330,9 +330,9 @@ namespace :pl do
     end
   end
 
-  if Pkg::Config.build_tar
-    desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
-    task :ship_tar => 'pl:fetch' do
+  desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
+  task :ship_tar => 'pl:fetch' do
+    if Pkg::Config.build_tar
       files = Dir.glob("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*")
       if files.empty?
         puts "There are no tarballs to ship"

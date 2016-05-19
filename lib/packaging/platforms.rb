@@ -24,8 +24,8 @@ module Pkg
       'el' => {
         '4' => { :architectures => ['i386', 'x86_64'], :repo => false, :package_format => 'rpm', :signature_format => 'v3', },
         '5' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v3', },
-        '6' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
-        '7' => { :architectures => ['x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
+        '6' => { :architectures => ['i386', 'x86_64', 's390x'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
+        '7' => { :architectures => ['x86_64', 's390x'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
       },
 
       'eos' => {

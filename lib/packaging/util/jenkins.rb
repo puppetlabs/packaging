@@ -34,6 +34,7 @@ module Pkg::Util::Jenkins
     # @param log_frequency [Int] Frequency in seconds of polling log
     #
     def wait_for_build(build_url, polling_interval = 2, log_frequency = 60)
+      $stdout.sync = true
       build_hash = get_jenkins_info(build_url)
       total_time = 0
       while build_hash['building']
@@ -41,10 +42,11 @@ module Pkg::Util::Jenkins
         sleep polling_interval
         total_time += polling_interval
         if total_time >= log_frequency
-          puts "Polling #{build_url}..."
+          $stdout.puts "Polling #{build_url}..."
           total_time = 0
         end
       end
+      $stdout.sync = false
       return build_hash
     end
 

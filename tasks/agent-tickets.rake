@@ -67,6 +67,14 @@ This means you'll have to verify the build to resolve this ticket. If vanagon do
 you need to create a new ticket, block this ticket against that one, and add in vanagon support!
 DOC
 
+  description[:facter_java] = <<-DOC
+Facter, in order to properly interact with the Clojure Puppet Server, must be compiled with Java.
+
+Edit config/component/facter.rb to ensure the new platform has java as a build time dependency.
+This is only strictly required for platforms that will also be a new master platform, however it
+it a good thing to be consistent about providing facter.jar
+DOC
+
   description[:hostgenerator] = <<-DOC
 Update beaker-hostgenerator (https://github.com/puppetlabs/beaker-hostgenerator) for #{vars[:platform_tag]}.
 DOC
@@ -201,6 +209,14 @@ DOC
       :description  => description[:puppet_agent_configuration],
       :story_points => '2',
       :blocked_by   => ['c_toolchain'],
+    },
+    {
+      :short_name   => 'build_facter_with_java',
+      :project      => 'PA',
+      :summary      => "Ensure Facter is compiled with Java JNI support and is producing facter.jar",
+      :description  => description[:facter_java],
+      :story_points => '2',
+      :blocked_by   => ['puppet_agent_configuration'],
     },
     {
       :short_name   => 'hostgenerator',

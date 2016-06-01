@@ -67,6 +67,7 @@ module Pkg::Util::RakeUtils
         '00_utils.rake',
         '30_metrics.rake',
         'agent-tickets.rake',
+        'new-server-platform-tickets.rake',
         'puppet-agent-release-tickets.rake',
         'apple.rake',
         'build.rake',

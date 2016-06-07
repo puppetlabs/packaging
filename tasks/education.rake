@@ -12,5 +12,18 @@ namespace :pl do
 
       puts "'#{vm}' and '#{md5}' have been shipped via s3 to '#{target_bucket}/#{target_directory}'"
     end
+
+    task :deploy_training_vm, [:vm, :md5, :target_host, :target_directory] => "pl:fetch" do |t, args|
+
+      vm = args.vm or fail ":vm is a required argument for #{t}"
+      md5 = args.md5 or fail ":md5 is a required argument for #{t}"
+      target_host = args.target_host or fail ":target_host is a required argument for #{t}"
+      target_directory = args.target_directory or fail ":target_directory is a required argument for #{t}"
+
+      Pkg::Util::Net.rsync_to(vm, target_host, target_directory)
+      Pkg::Util::Net.rsync_to(md5, target_host, target_directory)
+
+      puts "'#{vm}' and '#{md5}' have been shipped via rsync to '#{target_host}/#{target_directory}'"
+    end
   end
 end

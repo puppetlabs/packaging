@@ -239,7 +239,7 @@ Push packages
     ** This is a manual process and the ship task doesn't ship or build the msi so talk to Melissa, Morgan or Ryan for more details.
     ** RE-4364 has been filed to automate signing and shipping MSIs. This step can be removed when it is completed.
 
-2) Verify that each component has had the correct bits pushed by the uber_ship. I.e, http://builds.puppetlabs.lan/puppet/#{vars[:puppet_release]}/shipped/ should include the gems and the tarball.
+2) Verify that each component has had the correct bits pushed by the uber_ship. I.e, http://builds.delivery.puppetlabs.net/puppet/#{vars[:puppet_release]}/shipped/ should include the gems and the tarball.
 
 3) Push the agent packages up to S3 for inclusion in the corect branch of PE. Do that by running the jenkins job at http://jenkins-compose.delivery.puppetlabs.net/job/puppet-agent_s3-ship.
 

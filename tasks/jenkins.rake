@@ -271,6 +271,37 @@ namespace :pl do
       uber_tasks.delete("remote:deploy_swix_rep") if Pkg::Config.swix_host == Pkg::Config.swix_staging_server
       uber_tasks.delete("remote:deploy_tar_repo") if Pkg::Config.tar_host == Pkg::Config.tar_staging_server
 
+      #Don't update and deploy repos if packages don't exist
+      if Dir["pkg/**/*.deb"].empty?
+        uber_tasks.delete("remote:update_apt_repo")
+        uber_tasks.delete("remote:deploy_apt_repo")
+      end
+
+      if Dir["pkg/**/*.rpm"].empty?
+        uber_tasks.delete("remote:update_yum_repo")
+        uber_tasks.delete("remote:deploy_yum_repo")
+      end
+
+      if Dir["pkg/**/*.p5p"].empty?
+        uber_tasks.delete("remote:update_ips_repo")
+      end
+
+      if Dir["pkg/**/*.dmg"].empty?
+        uber_tasks.delete("remote:deploy_dmg_repo")
+      end
+
+      if Dir["pkg/**/*.swix"].empty?
+        uber_tasks.delete("remote:deploy_swix_repo")
+      end
+
+      if Dir["pkg/**/*.msi"].empty?
+        uber_tasks.delete("remote:deploy_msi_repo")
+      end
+
+      if Dir["pkg/*.tar.gz"].empty?
+        uber_tasks.delete("remote:deploy_tar_repo")
+      end
+
       uber_tasks.map { |t| "pl:#{t}" }.each do |t|
         puts "Do you want run #{t}?"
         Rake::Task[t].invoke if Pkg::Util.ask_yes_or_no

@@ -28,6 +28,7 @@ module Pkg::IPS
                     -i \"#{Pkg::Config.ips_root_cert}\" \
                     -k \"#{Pkg::Config.ips_signing_key}\" \
                     -s 'file://#{work_dir}/repo' '*'"
+        puts "About to sign #{p5p} with #{sign_cmd} in #{work_dir}"
         Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, sign_cmd.squeeze(' '))
         # pkgrecv with -a will pull packages out of the repo, so we need to do that too to actually get the packages we signed
         Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgrecv -d #{signed_dir}/#{File.basename(p5p)} -a -s #{repo_dir} '*'")

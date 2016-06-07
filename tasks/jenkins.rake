@@ -303,7 +303,7 @@ namespace :pl do
       end
 
       uber_tasks.map { |t| "pl:#{t}" }.each do |t|
-        puts "Do you want run #{t}?"
+        puts "Do you want to run #{t}?"
         Rake::Task[t].invoke if Pkg::Util.ask_yes_or_no
       end
 

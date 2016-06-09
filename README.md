@@ -337,7 +337,7 @@ uber_build job although it is still possible to do so.
 
 ## Task Explanations
 For a listing of all available tasks and their functions, see the [Task
-Dictionary](https://github.com/puppetlabs/packaging/tree/more_documentation#task-dictionary)
+Dictionary](https://github.com/puppetlabs/packaging#task-dictionary)
 at the end of this README.
 
 ## Modules

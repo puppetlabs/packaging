@@ -12,5 +12,35 @@ namespace :pl do
 
       puts "'#{vm}' and '#{md5}' have been shipped via s3 to '#{target_bucket}/#{target_directory}'"
     end
+
+    task :deploy_training_vm, [:vm, :md5, :target_host, :target_directory] => "pl:fetch" do |t, args|
+
+      vm = args.vm or fail ":vm is a required argument for #{t}"
+      md5 = args.md5 or fail ":md5 is a required argument for #{t}"
+      target_host = args.target_host or fail ":target_host is a required argument for #{t}"
+      target_directory = args.target_directory or fail ":target_directory is a required argument for #{t}"
+
+      # Determine VM we are trying to ship and set our link_target accordingly
+      case vm
+      when /student/
+        link_target = "puppet-student.ova"
+      when /master/
+        link_target = "puppet-master.ova"
+      when /training/
+        link_target = "puppet-training.ova"
+      else
+        fail "We do not know the type of VM you are trying to ship. Cannot update symlinks"
+      end
+
+      # Ship VM and md5 to host
+      Pkg::Util::Net.rsync_to(vm, target_host, target_directory)
+      Pkg::Util::Net.rsync_to(md5, target_host, target_directory)
+
+      # Update symlink to point to the VM we just shipped
+      Pkg::Util::Net.remote_ssh_cmd(target_host, "cd #{target_directory} ; ln -sf #{File.basename(vm)} #{link_target}")
+      Pkg::Util::Net.remote_ssh_cmd(target_host, "cd #{target_directory} ; ln -sf #{File.basename(md5)} #{link_target}.md5")
+
+      puts "'#{vm}' and '#{md5}' have been shipped via rsync to '#{target_host}/#{target_directory}'"
+    end
   end
 end

@@ -35,6 +35,7 @@ namespace :pl do
       Pkg::Deb::Repo.sign_repos('repos', 'Apt repository for signed builds')
       Pkg::OSX.sign('repos') unless Dir['repos/apple/**/*.dmg'].empty?
       Pkg::IPS.sign('repos') unless Dir['repos/solaris/11/**/*.p5p'].empty?
+      Pkg::MSI.sign('repos') unless Dir['repos/windows/**/*.msi'].empty?
     end
 
     task :ship_signed_repos, [:target_prefix] => "pl:fetch" do |t, args|

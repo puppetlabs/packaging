@@ -271,34 +271,35 @@ namespace :pl do
       uber_tasks.delete("remote:deploy_swix_rep") if Pkg::Config.swix_host == Pkg::Config.swix_staging_server
       uber_tasks.delete("remote:deploy_tar_repo") if Pkg::Config.tar_host == Pkg::Config.tar_staging_server
 
-      #Don't update and deploy repos if packages don't exist
-      if Dir["pkg/**/*.deb"].empty?
+      # Don't update and deploy repos if packages don't exist
+      # If we can't find a certain file type, delete the task
+      unless Dir.glob("pkg/**/*.deb")
         uber_tasks.delete("remote:update_apt_repo")
         uber_tasks.delete("remote:deploy_apt_repo")
       end
 
-      if Dir["pkg/**/*.rpm"].empty?
+      unless Dir.glob("pkg/**/*.rpm")
         uber_tasks.delete("remote:update_yum_repo")
         uber_tasks.delete("remote:deploy_yum_repo")
       end
 
-      if Dir["pkg/**/*.p5p"].empty?
+      unless Dir.glob("pkg/**/*.p5p")
         uber_tasks.delete("remote:update_ips_repo")
       end
 
-      if Dir["pkg/**/*.dmg"].empty?
+      unless Dir.glob("pkg/**/*.dmg")
         uber_tasks.delete("remote:deploy_dmg_repo")
       end
 
-      if Dir["pkg/**/*.swix"].empty?
+      unless Dir.glob("pkg/**/*.swix")
         uber_tasks.delete("remote:deploy_swix_repo")
       end
 
-      if Dir["pkg/**/*.msi"].empty?
+      unless Dir.glob("pkg/**/*.msi")
         uber_tasks.delete("remote:deploy_msi_repo")
       end
 
-      if Dir["pkg/*.tar.gz"].empty?
+      unless Dir.glob("pkg/*.tar.gz")
         uber_tasks.delete("remote:deploy_tar_repo")
       end
 

@@ -22,6 +22,13 @@ module Pkg::IPS
         Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgrepo set -s #{repo_dir} publisher/prefix=puppetlabs.com")
         # And import all the packages into the repo.
         Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgrecv -s #{unsigned_dir}/#{File.basename(p5p)} -d #{repo_dir} '*'")
+        # Check the environment
+        puts "Echo the environment variables we're picking up on the signing server"
+        debug_cmd = "sudo -E echo \"signing == #{Pkg::Config.ips_signing_cert} \
+                       inter == #{Pkg::Config.ips_inter_cert} \
+                       root == #{Pkg::Config.ips_root_cert} \
+                       key == #{Pkg::Config.ips_signing_key}\""
+        Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, debug_cmd.squeeze(' '))
         # We sign the entire repo
         sign_cmd = "sudo -E /usr/bin/pkgsign -c \"#{Pkg::Config.ips_signing_cert}\" \
                     -i \"#{Pkg::Config.ips_inter_cert}\" \

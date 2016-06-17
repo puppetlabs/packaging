@@ -145,6 +145,8 @@ namespace :pl do
         FileUtils.ln_s(File.join("..", local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"), :verbose => true)
         puts "THE FOLLOWING LINE IS THE LOCAL TARGET"
         puts local_target
+        puts "THE FOLLOWING LINE IS OUR CURRENT DIRECTORY"
+        puts Dir.pwd
       end
     end
 

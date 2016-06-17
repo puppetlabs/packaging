@@ -141,7 +141,9 @@ namespace :pl do
         end
 
         # Make a latest symlink for the project
+        puts "ABOUT TO SET THE SYM LINK"
         FileUtils.ln_s(File.join("..", local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"), :verbose => true)
+        puts "THE FOLLOWING LINE IS THE LOCAL TARGET"
         puts local_target
       end
     end

@@ -86,7 +86,7 @@ namespace :pl do
           local_target = File.join(Pkg::Config.project, Pkg::Util::Version.get_dot_version)
         end
 
-        FileUtils.mkdir_p([local_target, Pkg::Config.project + "-latest"])
+        FileUtils.mkdir([local_target, Pkg::Config.project + "-latest"])
 
         # Rake task dependencies with arguments are nuts, so we just directly
         # invoke them here.  We want the signed_* directories staged as

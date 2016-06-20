@@ -181,7 +181,7 @@ namespace :pl do
 
       Dir.chdir("tmp/pkg") do
         # Link the latest repo that was trimmed down
-        local_target = Dir.glob(File.join(Pkg::Config.project, "/*/repos"))[0].split("/")[-2]
+        local_target = Dir.glob(File.join(Pkg::Config.project, "repos"))[0].split("/")[-2]
         FileUtils.ln_s(File.join("..", Pkg::Config.project, local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"))
 
         #test print for local_target

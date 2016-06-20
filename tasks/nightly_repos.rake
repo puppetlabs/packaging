@@ -187,6 +187,10 @@ namespace :pl do
         local_target = Dir.glob(File.join(Pkg::Config.project, "/*/repos"))[0].split("/")[-2]
         FileUtils.ln_s(File.join("..", Pkg::Config.project, local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"))
 
+        #test print for local_target
+        puts "HERE IS OUR SECOND PRINT OF LOCAL TARGET BELOW"
+        puts local_target
+
         # Ship it to the target for consumption
         # First we ship the latest and clean up any repo-configs that are no longer valid with --delete-after
         Pkg::Util::Net.rsync_to("#{Pkg::Config.project}-latest", target_host, target_basedir, extra_flags: ["--delete-after", "--keep-dirlinks"])

@@ -86,7 +86,14 @@ namespace :pl do
           local_target = File.join(Pkg::Config.project, Pkg::Util::Version.get_dot_version)
         end
 
-        FileUtils.mkdir_p([local_target, Pkg::Config.project + "-latest"])
+        if Dir.exists?(local_target)
+          FileUtils.mkdir_p([Pkg::Config.project + "-latest"])
+        else
+          FileUtils.mkdir_p([local_target, Pkg::Config.project + "-latest"])
+          puts "THE FOLLOWING LINE IS THE LOCAL_TARGET (when making the dir)"
+          puts local_target
+        end
+
 
         # Rake task dependencies with arguments are nuts, so we just directly
         # invoke them here.  We want the signed_* directories staged as

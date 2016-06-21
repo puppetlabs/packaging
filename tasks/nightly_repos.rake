@@ -173,20 +173,29 @@ namespace :pl do
       # Get the directories together - we need to figure out which bits to ship based on the include_path
       # First we get the build itself
       Pkg::Util::Execution.ex(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}/**/#{path}" }.join(' ') } | sort > include_file))
-      Pkg::Util::Execution.ex(%(cat include_file))
 
       #debugging: looking at file contents
+      puts "THE FOLLOWING IS THE CONTENTS OF THE INCLUDE_FILE"
+      Pkg::Util::Execution.ex(%(cat include_file))
+
+
       Pkg::Util::Execution.ex(%(mkdir -p tmp && tar -T include_file -cf - | (cd ./tmp && tar -xf -)))
 
       # Then we find grab the appropriate meta-data only
       Pkg::Util::Execution.ex(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}-latest/#{path}" unless path.include? "repos" }.join(' ') } | sort > include_file_latest))
 
       #debugging: looking at file contents
+      puts "THE FOLLOWING IS THE CONTENTS OF INCLUDE_FILE_LATEST"
       Pkg::Util::Execution.ex(%(cat include_file_latest))
 
       Pkg::Util::Execution.ex(%(tar -T include_file_latest -cf - | (cd ./tmp && tar -xf -)))
 
       Dir.chdir("tmp/pkg") do
+
+        # debugging: looking at contents of directory
+        puts "THE FOLLOWING IS OUR CONTENTS OF THE DIRECTORY"
+        Pkg::Util::Execution.ex(%(find .))
+
         # Link the latest repo that was trimmed down
         local_target = Dir.glob(File.join(Pkg::Config.project, "/*/repos"))[0].split("/")[-2]
         FileUtils.ln_s(File.join("..", Pkg::Config.project, local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"))

@@ -173,10 +173,17 @@ namespace :pl do
       # Get the directories together - we need to figure out which bits to ship based on the include_path
       # First we get the build itself
       Pkg::Util::Execution.ex(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}/**/#{path}" }.join(' ') } | sort > include_file))
+      Pkg::Util::Execution.ex(%(cat include_file))
+
+      #debugging: looking at file contents
       Pkg::Util::Execution.ex(%(mkdir -p tmp && tar -T include_file -cf - | (cd ./tmp && tar -xf -)))
 
       # Then we find grab the appropriate meta-data only
       Pkg::Util::Execution.ex(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}-latest/#{path}" unless path.include? "repos" }.join(' ') } | sort > include_file_latest))
+
+      #debugging: looking at file contents
+      Pkg::Util::Execution.ex(%(cat include_file_latest))
+
       Pkg::Util::Execution.ex(%(tar -T include_file_latest -cf - | (cd ./tmp && tar -xf -)))
 
       Dir.chdir("tmp/pkg") do
@@ -184,7 +191,7 @@ namespace :pl do
         local_target = Dir.glob(File.join(Pkg::Config.project, "/*/repos"))[0].split("/")[-2]
         FileUtils.ln_s(File.join("..", Pkg::Config.project, local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"))
 
-        #test print for local_target
+        #test print for local_target (can be deleted)
         puts "HERE IS OUR SECOND PRINT OF LOCAL TARGET BELOW"
         puts local_target
 

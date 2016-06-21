@@ -11,7 +11,6 @@ module Pkg::Util
   require 'packaging/util/git'
   require 'packaging/util/gpg'
   require 'packaging/util/jenkins'
-  require 'packaging/util/jira'
   require 'packaging/util/misc'
   require 'packaging/util/net'
   require 'packaging/util/os'

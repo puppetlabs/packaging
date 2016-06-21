@@ -176,7 +176,7 @@ namespace :pl do
 
       #debugging: looking at file contents
       puts "THE FOLLOWING IS THE CONTENTS OF THE INCLUDE_FILE"
-      Pkg::Util::Execution.ex(%(cat include_file))
+      Pkg::Util::Execution.ex(%(cat include_file), true)
 
 
       Pkg::Util::Execution.ex(%(mkdir -p tmp && tar -T include_file -cf - | (cd ./tmp && tar -xf -)))
@@ -186,7 +186,7 @@ namespace :pl do
 
       #debugging: looking at file contents
       puts "THE FOLLOWING IS THE CONTENTS OF INCLUDE_FILE_LATEST"
-      Pkg::Util::Execution.ex(%(cat include_file_latest))
+      Pkg::Util::Execution.ex(%(cat include_file_latest), true)
 
       Pkg::Util::Execution.ex(%(tar -T include_file_latest -cf - | (cd ./tmp && tar -xf -)))
 
@@ -194,7 +194,7 @@ namespace :pl do
 
         # debugging: looking at contents of directory
         puts "THE FOLLOWING IS OUR CONTENTS OF THE DIRECTORY"
-        Pkg::Util::Execution.ex(%(find .))
+        Pkg::Util::Execution.ex(%(find .), true)
 
         # Link the latest repo that was trimmed down
         local_target = Dir.glob(File.join(Pkg::Config.project, "/*/repos"))[0].split("/")[-2]

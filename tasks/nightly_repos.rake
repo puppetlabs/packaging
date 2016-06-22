@@ -172,7 +172,11 @@ namespace :pl do
         include_paths = ["./"]
       end
 
+      Pkg::Util::Execution.ex(%(ls -l pkg/#{File.join(Pkg::Config.project, "*", "repos")}), true)
 
+      Pkg::Util::Execution.ex(%(ls -l pkg/#{File.join(Pkg::Config.project + "-latest", "repos")}), true)
+
+      #debugging: can delete
       puts "THE FOLLOWING LINE IS OUR CURRENT DIRECTORY dsr2"
       puts Dir.pwd
       # Get the directories together - we need to figure out which bits to ship based on the include_path
@@ -197,15 +201,27 @@ namespace :pl do
 
       Dir.chdir("tmp/pkg") do
 
-        # debugging: looking at contents of directory
+        # debugging: can be deleted
         puts "THE FOLLOWING IS OUR CONTENTS OF THE DIRECTORY"
         Pkg::Util::Execution.ex(%(find .), true)
 
         # Link the latest repo that was trimmed down
         local_target = Dir.glob(File.join(Pkg::Config.project, "/*/repos"))[0].split("/")[-2]
-        FileUtils.ln_s(File.join("..", Pkg::Config.project, local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"))
 
-        #test print for local_target (can be deleted)
+        # debugging: can delete
+        puts "ABOUT TO SET THE SYM 2nd CHECK"
+
+        Pkg::Util::Execution.ex(%(ls -l #{File.join(Pkg::Config.project, local_target, "repos")}), true)
+
+        Pkg::Util::Execution.ex(%(ls -l #{File.join(Pkg::Config.project + "-latest", "repos")}), true)
+
+        FileUtils.ln_s(File.join("..", Pkg::Config.project, local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"), :verbose => true)
+
+        Pkg::Util::Execution.ex(%(ls -l #{File.join(Pkg::Config.project, local_target, "repos")}), true)
+
+        Pkg::Util::Execution.ex(%(ls -l #{File.join(Pkg::Config.project + "-latest", "repos")}), true)
+
+        #debugging: can be deleted
         puts "HERE IS OUR SECOND PRINT OF LOCAL TARGET BELOW"
         puts local_target
 

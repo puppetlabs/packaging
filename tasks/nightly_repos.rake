@@ -209,7 +209,7 @@ namespace :pl do
       Dir.chdir("tmp/pkg") do
 
 
-        Pkg::Util::Execution.ex(%(ls -l #{File.join(Pkg::Config.project, local_target, "repos")}), true)
+        Pkg::Util::Execution.ex(%(ls -l #{File.join(Pkg::Config.project, "*", "repos")}), true)
 
         Pkg::Util::Execution.ex(%(ls -l #{File.join(Pkg::Config.project + "-latest", "repos")}), true)
 

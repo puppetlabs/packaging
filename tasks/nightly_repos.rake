@@ -86,9 +86,11 @@ namespace :pl do
           local_target = File.join(Pkg::Config.project, Pkg::Util::Version.get_dot_version)
         end
 
-          FileUtils.mkdir_p([local_target, Pkg::Config.project + "-latest"])
-          puts "THE FOLLOWING LINE IS THE LOCAL_TARGET (when making the dir)"
-          puts local_target
+        FileUtils.mkdir_p([local_target, Pkg::Config.project + "-latest"])
+
+        #debugging: can delete
+        puts "THE FOLLOWING LINE IS THE LOCAL_TARGET (when making the dir)"
+        puts local_target
 
 
 
@@ -146,7 +148,9 @@ namespace :pl do
 
         # Make a latest symlink for the project
         puts "ABOUT TO SET THE SYM LINK"
+
         FileUtils.ln_s(File.join("..", local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"), :verbose => true)
+
         puts "THE FOLLOWING LINE IS THE LOCAL TARGET"
         puts local_target
         puts "THE FOLLOWING LINE IS OUR CURRENT DIRECTORY"
@@ -155,8 +159,11 @@ namespace :pl do
     end
 
     task :deploy_signed_repos, [:target_host, :target_basedir, :foss_only] => "pl:fetch" do |t, args|
+
+      #debugging: can delete
       puts "THE FOLLOWING LINE IS OUR CURRENT DIRECTORY dsr1"
-        puts Dir.pwd
+      puts Dir.pwd
+
       target_host = args.target_host or fail ":target_host is a required argument to #{t}"
       target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
       include_paths = []
@@ -201,29 +208,11 @@ namespace :pl do
 
       Dir.chdir("tmp/pkg") do
 
-        # debugging: can be deleted
-        puts "THE FOLLOWING IS OUR CONTENTS OF THE DIRECTORY"
-        Pkg::Util::Execution.ex(%(find .), true)
-
-        # Link the latest repo that was trimmed down
-        local_target = Dir.glob(File.join(Pkg::Config.project, "/*/repos"))[0].split("/")[-2]
-
-        # debugging: can delete
-        puts "ABOUT TO SET THE SYM 2nd CHECK"
 
         Pkg::Util::Execution.ex(%(ls -l #{File.join(Pkg::Config.project, local_target, "repos")}), true)
 
         Pkg::Util::Execution.ex(%(ls -l #{File.join(Pkg::Config.project + "-latest", "repos")}), true)
 
-        FileUtils.ln_s(File.join("..", Pkg::Config.project, local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"), :verbose => true)
-
-        Pkg::Util::Execution.ex(%(ls -l #{File.join(Pkg::Config.project, local_target, "repos")}), true)
-
-        Pkg::Util::Execution.ex(%(ls -l #{File.join(Pkg::Config.project + "-latest", "repos")}), true)
-
-        #debugging: can be deleted
-        puts "HERE IS OUR SECOND PRINT OF LOCAL TARGET BELOW"
-        puts local_target
 
         # Ship it to the target for consumption
         # First we ship the latest and clean up any repo-configs that are no longer valid with --delete-after

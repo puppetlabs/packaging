@@ -88,12 +88,6 @@ namespace :pl do
 
         FileUtils.mkdir_p([local_target, Pkg::Config.project + "-latest"])
 
-        #debugging: can delete
-        puts "THE FOLLOWING LINE IS THE LOCAL_TARGET (when making the dir)"
-        puts local_target
-
-
-
         # Rake task dependencies with arguments are nuts, so we just directly
         # invoke them here.  We want the signed_* directories staged as
         # repos/repo_configs, because that's how we want them on the public
@@ -146,23 +140,11 @@ namespace :pl do
           end
         end
 
-        # Make a latest symlink for the project
-        puts "ABOUT TO SET THE SYM LINK"
-
         FileUtils.ln_s(File.join("..", local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"), :verbose => true)
-
-        puts "THE FOLLOWING LINE IS THE LOCAL TARGET"
-        puts local_target
-        puts "THE FOLLOWING LINE IS OUR CURRENT DIRECTORY"
-        puts Dir.pwd
       end
     end
 
     task :deploy_signed_repos, [:target_host, :target_basedir, :foss_only] => "pl:fetch" do |t, args|
-
-      #debugging: can delete
-      puts "THE FOLLOWING LINE IS OUR CURRENT DIRECTORY dsr1"
-      puts Dir.pwd
 
       target_host = args.target_host or fail ":target_host is a required argument to #{t}"
       target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
@@ -179,48 +161,23 @@ namespace :pl do
         include_paths = ["./"]
       end
 
-      Pkg::Util::Execution.ex(%(ls -l pkg/#{File.join(Pkg::Config.project, "*", "repos")}), true)
-
-      Pkg::Util::Execution.ex(%(ls -l pkg/#{File.join(Pkg::Config.project + "-latest", "repos")}), true)
-
-      #debugging: can delete
-      puts "THE FOLLOWING LINE IS OUR CURRENT DIRECTORY dsr2"
-      puts Dir.pwd
       # Get the directories together - we need to figure out which bits to ship based on the include_path
       # First we get the build itself
       Pkg::Util::Execution.ex(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}/**/#{path}" }.join(' ') } | sort > include_file))
-
-      #debugging: looking at file contents
-      puts "THE FOLLOWING IS THE CONTENTS OF THE INCLUDE_FILE"
-      Pkg::Util::Execution.ex(%(cat include_file), true)
-
 
       Pkg::Util::Execution.ex(%(mkdir -p tmp && tar -T include_file -cf - | (cd ./tmp && tar -xf -)))
 
       # Then we find grab the appropriate meta-data only
       Pkg::Util::Execution.ex(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}-latest/#{path}" unless path.include? "repos" }.join(' ') } | sort > include_file_latest))
 
-      #debugging: looking at file contents
-      puts "THE FOLLOWING IS THE CONTENTS OF INCLUDE_FILE_LATEST"
-      Pkg::Util::Execution.ex(%(cat include_file_latest), true)
-
       Pkg::Util::Execution.ex(%(tar -T include_file_latest -cf - | (cd ./tmp && tar -xf -)))
 
       Dir.chdir("tmp/pkg") do
 
-
-        Pkg::Util::Execution.ex(%(ls -l #{File.join(Pkg::Config.project, "*", "repos")}), true)
-
-        Pkg::Util::Execution.ex(%(ls -l #{File.join(Pkg::Config.project + "-latest", "repos")}), true)
-
-
         # Ship it to the target for consumption
         # First we ship the latest and clean up any repo-configs that are no longer valid with --delete-after
-
-        puts "THE FOLLOWING LINE IS OUR CURRENT DIRECTORY dsr3"
-        puts Dir.pwd
-
         Pkg::Util::Net.rsync_to("#{Pkg::Config.project}-latest", target_host, target_basedir, extra_flags: ["--delete-after", "--keep-dirlinks"])
+
         # Then we ship the sha version with default rsync flags
         Pkg::Util::Net.rsync_to("#{Pkg::Config.project}", target_host, target_basedir)
       end

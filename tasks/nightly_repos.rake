@@ -141,7 +141,7 @@ namespace :pl do
         end
 
         # Make a latest symlink for the project
-        FileUtils.ln_s(File.join("..", local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"), :verbose => true)
+        FileUtils.ln_sf(File.join("..", local_target, "repos"), File.join(Pkg::Config.project + "-latest"), :verbose => true)
       end
     end
 
@@ -168,13 +168,12 @@ namespace :pl do
 
       # Then we find grab the appropriate meta-data only
       Pkg::Util::Execution.ex(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}-latest/#{path}" unless path.include? "repos" }.join(' ') } | sort > include_file_latest))
+
+      #include /repos in the include_file_latest so we correctly include the symlink in the final file list to ship
+      Pkg::Util::Execution.ex(%(echo "pkg/#{Pkg::Config.project}-latest/repos" >> include_file_latest))
       Pkg::Util::Execution.ex(%(tar -T include_file_latest -cf - | (cd ./tmp && tar -xf -)))
 
       Dir.chdir("tmp/pkg") do
-        # Link the latest repo that was trimmed down
-        local_target = Dir.glob(File.join(Pkg::Config.project, "/*/repos"))[0].split("/")[-2]
-        FileUtils.ln_s(File.join("..", Pkg::Config.project, local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"))
-
         # Ship it to the target for consumption
         # First we ship the latest and clean up any repo-configs that are no longer valid with --delete-after
         Pkg::Util::Net.rsync_to("#{Pkg::Config.project}-latest", target_host, target_basedir, extra_flags: ["--delete-after", "--keep-dirlinks"])
@@ -244,7 +243,7 @@ namespace :pl do
       pa_source = File.join(remote_dir, Pkg::Config.project)
       pe_target = File.join(remote_dir, pe_version, Pkg::Config.project)
       local_pa = File.join(pa_source, version_string)
-      local_pe = File.join(pe_target, version_string)
+      local_pe = pe_target
       local_pa_latest = "#{pa_source}-latest"
       local_pe_latest = "#{pe_target}-latest"
 

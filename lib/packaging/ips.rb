@@ -33,7 +33,7 @@ module Pkg::IPS
         sign_cmd = "sudo -E /usr/bin/pkgsign -c /root/signing/signing_cert_interim_SHA1.pem \
                     -i /root/signing/Thawte_Code_Signing_Certificate_interim_SHA1.pem \
                     -i /root/signing/Thawte_Primary_Root_CA_interim_SHA1.pem \
-                    -k /root/signing/signing_key_interim_SHA1.pems \
+                    -k /root/signing/signing_key_interim_SHA1.pem \
                     -s 'file://#{work_dir}/repo' '*'"
         puts "About to sign #{p5p} with #{sign_cmd} in #{work_dir}"
         Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, sign_cmd.squeeze(' '))

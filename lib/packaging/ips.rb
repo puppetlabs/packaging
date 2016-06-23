@@ -22,18 +22,18 @@ module Pkg::IPS
         Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgrepo set -s #{repo_dir} publisher/prefix=puppetlabs.com")
         # And import all the packages into the repo.
         Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgrecv -s #{unsigned_dir}/#{File.basename(p5p)} -d #{repo_dir} '*'")
-        # Check the environment
-        puts "Echo the environment variables we're picking up on the signing server"
-        debug_cmd = "sudo -E echo \"signing == #{Pkg::Config.ips_signing_cert} \
-                       inter == #{Pkg::Config.ips_inter_cert} \
-                       root == #{Pkg::Config.ips_root_cert} \
-                       key == #{Pkg::Config.ips_signing_key}\""
-        Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, debug_cmd.squeeze(' '))
+        # We are going to hard code the values for signing cert locations for now.
+        # This autmation will require an update to actually become reusable, but
+        # for now these values will stay this way so solaris signing will stop
+        # failing. Please update soon. 06/23/16
+        #
+        #            - Sean P. McDonald
+        #
         # We sign the entire repo
-        sign_cmd = "sudo -E /usr/bin/pkgsign -c \"#{Pkg::Config.ips_signing_cert}\" \
-                    -i \"#{Pkg::Config.ips_inter_cert}\" \
-                    -i \"#{Pkg::Config.ips_root_cert}\" \
-                    -k \"#{Pkg::Config.ips_signing_key}\" \
+        sign_cmd = "sudo -E /usr/bin/pkgsign -c /root/signing/signing_cert_interim_SHA1.pem \
+                    -i /root/signing/Thawte_Code_Signing_Certificate_interim_SHA1.pem \
+                    -i /root/signing/Thawte_Primary_Root_CA_interim_SHA1.pem \
+                    -k /root/signing/signing_key_interim_SHA1.pems \
                     -s 'file://#{work_dir}/repo' '*'"
         puts "About to sign #{p5p} with #{sign_cmd} in #{work_dir}"
         Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, sign_cmd.squeeze(' '))

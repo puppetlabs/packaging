@@ -140,12 +140,12 @@ namespace :pl do
           end
         end
 
-        # Make a latest symlink for the project
         FileUtils.ln_s(File.join("..", local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"), :verbose => true)
       end
     end
 
     task :deploy_signed_repos, [:target_host, :target_basedir, :foss_only] => "pl:fetch" do |t, args|
+
       target_host = args.target_host or fail ":target_host is a required argument to #{t}"
       target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
       include_paths = []
@@ -164,20 +164,20 @@ namespace :pl do
       # Get the directories together - we need to figure out which bits to ship based on the include_path
       # First we get the build itself
       Pkg::Util::Execution.ex(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}/**/#{path}" }.join(' ') } | sort > include_file))
+
       Pkg::Util::Execution.ex(%(mkdir -p tmp && tar -T include_file -cf - | (cd ./tmp && tar -xf -)))
 
       # Then we find grab the appropriate meta-data only
       Pkg::Util::Execution.ex(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}-latest/#{path}" unless path.include? "repos" }.join(' ') } | sort > include_file_latest))
+
       Pkg::Util::Execution.ex(%(tar -T include_file_latest -cf - | (cd ./tmp && tar -xf -)))
 
       Dir.chdir("tmp/pkg") do
-        # Link the latest repo that was trimmed down
-        local_target = Dir.glob(File.join(Pkg::Config.project, "/*/repos"))[0].split("/")[-2]
-        FileUtils.ln_s(File.join("..", Pkg::Config.project, local_target, "repos"), File.join(Pkg::Config.project + "-latest", "repos"))
 
         # Ship it to the target for consumption
         # First we ship the latest and clean up any repo-configs that are no longer valid with --delete-after
         Pkg::Util::Net.rsync_to("#{Pkg::Config.project}-latest", target_host, target_basedir, extra_flags: ["--delete-after", "--keep-dirlinks"])
+
         # Then we ship the sha version with default rsync flags
         Pkg::Util::Net.rsync_to("#{Pkg::Config.project}", target_host, target_basedir)
       end

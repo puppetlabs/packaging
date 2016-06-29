@@ -23,11 +23,11 @@ namespace :pl do
       # Determine VM we are trying to ship and set our link_target accordingly
       case vm
       when /student/
-        link_target = "puppet-student.ova"
+        link_target = ["puppet-student.ova", "puppet-vbox.zip", "puppet-vmware.zip"]
       when /master/
-        link_target = "puppet-master.ova"
+        link_target = ["puppet-master.ova"]
       when /training/
-        link_target = "puppet-training.ova"
+        link_target = ["puppet-training.ova"]
       else
         fail "We do not know the type of VM you are trying to ship. Cannot update symlinks"
       end
@@ -37,8 +37,10 @@ namespace :pl do
       Pkg::Util::Net.rsync_to(md5, target_host, target_directory)
 
       # Update symlink to point to the VM we just shipped
-      Pkg::Util::Net.remote_ssh_cmd(target_host, "cd #{target_directory} ; ln -sf #{File.basename(vm)} #{link_target}")
-      Pkg::Util::Net.remote_ssh_cmd(target_host, "cd #{target_directory} ; ln -sf #{File.basename(md5)} #{link_target}.md5")
+      link_target.each do |link|
+        Pkg::Util::Net.remote_ssh_cmd(target_host, "cd #{target_directory} ; ln -sf #{File.basename(vm)} #{link}")
+        Pkg::Util::Net.remote_ssh_cmd(target_host, "cd #{target_directory} ; ln -sf #{File.basename(md5)} #{link}.md5")
+      end
 
       puts "'#{vm}' and '#{md5}' have been shipped via rsync to '#{target_host}/#{target_directory}'"
     end

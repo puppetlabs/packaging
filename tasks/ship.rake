@@ -150,7 +150,7 @@ namespace :pl do
       puts "Really run remote rsync to deploy OS X repos from #{Pkg::Config.dmg_staging_server} to #{Pkg::Config.dmg_host}? [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.dmg_path, target_host: Pkg::Config.dmg_host)
+          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.dmg_path, target_host: Pkg::Config.dmg_host, extra_flags: ["--update"])
           Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.dmg_staging_server, cmd)
         end
       end
@@ -161,7 +161,7 @@ namespace :pl do
       puts "Really run remote rsync to deploy Arista repos from #{Pkg::Config.swix_staging_server} to #{Pkg::Config.swix_host}? [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.swix_path, target_host: Pkg::Config.swix_host)
+          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.swix_path, target_host: Pkg::Config.swix_host, extra_flags: ["--update"])
           Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.swix_staging_server, cmd)
         end
       end
@@ -176,7 +176,7 @@ namespace :pl do
           puts "There are no tarballs to ship"
         else
           Pkg::Util::Execution.retry_on_fail(:times => 3) do
-            cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.tarball_path, target_host: Pkg::Config.tar_host)
+            cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.tarball_path, target_host: Pkg::Config.tar_host, extra_flags: ["--update"])
             Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.tar_staging_server, cmd)
           end
         end
@@ -192,7 +192,7 @@ namespace :pl do
           puts "There are no MSIs to ship"
         else
           Pkg::Util::Execution.retry_on_fail(:times => 3) do
-            cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.msi_path, target_host: Pkg::Config.msi_host)
+            cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.msi_path, target_host: Pkg::Config.msi_host, extra_flags: ["--update"])
             Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.msi_staging_server, cmd)
           end
         end

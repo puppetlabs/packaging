@@ -99,6 +99,7 @@ module Pkg::Util::RakeUtils
         'z_data_dump.rake',
         'config.rake',
         'vanagon.rake',
+        'deprecated.rake'
       ]
 
       tasks.each do |task|

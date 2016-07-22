@@ -174,13 +174,24 @@ if Pkg::Config.build_pe
         incoming_dir = args.incoming
         incoming_dir or fail "Adding packages to apt repo requires an incoming directory"
         Pkg::Util::RakeUtils.invoke_task("pl:fetch")
-        stdout, stderr = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "/usr/bin/repsimple add_all \
-            --confdir #{reprepro_confdir} \
-            --basedir #{reprepro_basedir} \
-            --databasedir #{reprepro_dbdir} \
-            --incomingdir #{incoming_dir} \
-            --verbose", true)
 
+        # test aptly
+        if Pkg::Config::pe_version == '2015.2'
+          stdout, stderr = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "aptly repo add -remove-files #{Pkg::Config::pe_version}-#{dist} #{incoming}/#{dist}
+            if [ -d /opt/tools/aptly/public/#{Pkg::Config::pe_version}/dists/#{dist} ]; then
+              aptly publish update #{dist} #{Pkg::Config::pe_version}
+            else
+              aptly publish repo #{Pkg::Config::pe_version}-#{dist} #{Pkg::Config::pe_version}
+            fi
+            ")
+        else
+          stdout, stderr = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "/usr/bin/repsimple add_all \
+              --confdir #{reprepro_confdir} \
+              --basedir #{reprepro_basedir} \
+              --databasedir #{reprepro_dbdir} \
+              --incomingdir #{incoming_dir} \
+              --verbose", true)
+        end
         output = stdout + stderr
 
         if output.include?("Skipping inclusion")

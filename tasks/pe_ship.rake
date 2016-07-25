@@ -183,7 +183,7 @@ if Pkg::Config.build_pe
             else
               aptly publish repo #{Pkg::Config::pe_version}-#{dist} #{Pkg::Config::pe_version}
             fi
-            ")
+            ", true)
         else
           stdout, stderr = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "/usr/bin/repsimple add_all \
               --confdir #{reprepro_confdir} \

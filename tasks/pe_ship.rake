@@ -177,11 +177,11 @@ if Pkg::Config.build_pe
 
         # test aptly
         if Pkg::Config::pe_version == '2015.2'
-          stdout, stderr = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "aptly repo add -remove-files #{Pkg::Config::pe_version}-#{dist} #{incoming}/#{dist}
+          stdout, stderr = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "aptly repo add -remove-files #{Pkg::Config::pe_version}-#{dist} #{incoming_dir}/#{dist}
             if [ -d /opt/tools/aptly/public/#{Pkg::Config::pe_version}/dists/#{dist} ]; then
-              aptly publish update #{dist} #{Pkg::Config::pe_version}
+              aptly publish update -gpg-key=\"8BBEB79B\" #{dist} #{Pkg::Config::pe_version}
             else
-              aptly publish repo #{Pkg::Config::pe_version}-#{dist} #{Pkg::Config::pe_version}
+              aptly publish repo -gpg-key=\"8BBEB79B\" #{Pkg::Config::pe_version}-#{dist} #{Pkg::Config::pe_version}
             fi
             ", true)
         else

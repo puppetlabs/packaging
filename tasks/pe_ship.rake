@@ -38,11 +38,11 @@ if Pkg::Config.build_pe
           target_path = %x(ssh -t #{Pkg::Config.apt_host} 'mktemp -d -t incoming-XXXXXX').chomp
         end
 
-        #   For aptly, we ship just the debs into an incoming dir. On the remote end,
-        #   aptly will pull these debs in and add them to the repositories based on the
+        #   For reprepro, we ship just the debs into an incoming dir. On the remote end,
+        #   reprepro will pull these debs in and add them to the repositories based on the
         #   dist, e.g. lucid, architecture notwithstanding.
         #
-        #   The layout that the aptly library will expect is:
+        #   The layout that the reprepro library will expect is:
         #
         #     incoming_dir/{$dists}/*.deb
         #
@@ -152,30 +152,57 @@ if Pkg::Config.build_pe
         end
       end
 
+      #   the repsimple application is a small wrapper around reprepro, the purpose of
+      #   which is largely to limit the surface area and functionality of reprepro to
+      #   some very basic tasks - add, remove, and add all in a directory. The add_all
+      #   command expects an incoming directory option containing .deb files.
+      #   Per previous comments, the incoming directory must contain subdirectories named
+      #   for debian distributions.
       desc "Remotely add shipped packages to apt repo on #{Pkg::Config.apt_host}"
       task :apt, :incoming, :dist do |t, args|
         dist = args.dist
+        if dist =~ /cumulus/
+          reprepro_confdir = "/etc/reprepro/networking/#{Pkg::Config.pe_version}/cumulus"
+          reprepro_basedir = "/opt/enterprise/networking/#{Pkg::Config.pe_version}/cumulus"
+          reprepro_dbdir = "/var/lib/reprepro/networking/#{Pkg::Config.pe_version}/cumulus"
+        else
+          reprepro_confdir = "/etc/reprepro/#{Pkg::Config.pe_version}"
+          reprepro_basedir = "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/repos/debian"
+          reprepro_dbdir = "/var/lib/reprepro/#{Pkg::Config.pe_version}"
+        end
+
         incoming_dir = args.incoming
         incoming_dir or fail "Adding packages to apt repo requires an incoming directory"
         Pkg::Util::RakeUtils.invoke_task("pl:fetch")
 
-        stdout, stderr = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "aptly repo add -remove-files #{Pkg::Config::pe_version}-#{dist} #{incoming_dir}/#{dist}
-          if [ -d /opt/tools/aptly/public/#{Pkg::Config::pe_version}/dists/#{dist} ]; then
-            aptly publish update -gpg-key=\"8BBEB79B\" #{dist} #{Pkg::Config::pe_version}
-          else
-            aptly publish repo -gpg-key=\"8BBEB79B\" #{Pkg::Config::pe_version}-#{dist} #{Pkg::Config::pe_version}
-          fi
-          ", true)
-
+        # test aptly
+        if Pkg::Config::pe_version == '2015.2'
+          stdout, stderr = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "aptly repo add -remove-files #{Pkg::Config::pe_version}-#{dist} #{incoming_dir}/#{dist}
+            if [ -d /opt/tools/aptly/public/#{Pkg::Config::pe_version}/dists/#{dist} ]; then
+              aptly publish update -gpg-key=\"8BBEB79B\" #{dist} #{Pkg::Config::pe_version}
+            else
+              aptly publish repo -gpg-key=\"8BBEB79B\" #{Pkg::Config::pe_version}-#{dist} #{Pkg::Config::pe_version}
+            fi
+            ", true)
+        else
+          stdout, stderr = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "/usr/bin/repsimple add_all \
+              --confdir #{reprepro_confdir} \
+              --basedir #{reprepro_basedir} \
+              --databasedir #{reprepro_dbdir} \
+              --incomingdir #{incoming_dir} \
+              --verbose", true)
+        end
         output = stdout + stderr
 
-        if output.include?("ERROR:") || output.include?("There have been errors!")
-          # We shouldn't ever get here if aptly returns non-zero on failure, but just in case...
+        if output.include?("Skipping inclusion")
+          fail "Unable to add packages to debian repo because it already contains identical files. Perhaps you are trying to ship a deb that already exists. Verify the debs are a newer version than what already exists in #{reprepro_basedir} on #{Pkg::Config.apt_host}"
+        elsif output.include?("ERROR:") || output.include?("There have been errors!")
+          # We shouldn't ever get here if repsimple returns non-zero on failure, but just in case...
           fail "Unable to add packages to debian repo. Hopefully the output has some helpful information. Output: #{output}"
         end
 
         puts
-        puts "Aptly output: #{output}"
+        puts "Repsimple output: #{output}"
         puts
 
         puts "Cleaning up apt repo 'incoming' dir on #{Pkg::Config.apt_host}"

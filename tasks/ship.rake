@@ -449,6 +449,21 @@ namespace :pl do
         mv(packaging_bundle, local_dir)
       end
 
+      # This is functionality to add the project-arch.msi symlinks that have no
+      # version. The code itself looks for the symlink (if it's there already)
+      # and if the source package exists before symlinking. Searching for the
+      # packages has been restricted specifically to just the pkg/windows dir
+      # on purpose, as this is where we currently have all windows packages
+      # building to. Once we move the Metadata about the output location in
+      # to one source of truth we can refactor this to use that to search
+      #                                           -Sean P. M. 08/12/16
+      packages = Dir["#{local_dir}/windows/*"]
+      ["x86", "x64"].each do |arch|
+        if !packages.include?(File.join("#{local_dir}", "windows", "#{Pkg::Config.project}-#{arch}.msi")) && packages.include?(File.join("#{local_dir}", "windows", "#{Pkg::Config.project}-#{Pkg::Config.version}-#{arch}.msi"))
+          File.symlink(File.join("#{local_dir}", "windows", "#{Pkg::Config.project}-#{Pkg::Config.version}-#{arch}.msi"), File.join("#{local_dir}", "windows", "#{Pkg::Config.project}-#{arch}.msi"))
+        end
+      end
+
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir --mode=775 -p #{project_basedir}")
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{artifact_dir}")

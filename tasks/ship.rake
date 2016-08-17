@@ -459,8 +459,12 @@ namespace :pl do
       #                                           -Sean P. M. 08/12/16
       packages = Dir["#{local_dir}/windows/*"]
       ["x86", "x64"].each do |arch|
-        if !packages.include?(File.join("#{local_dir}", "windows", "#{Pkg::Config.project}-#{arch}.msi")) && packages.include?(File.join("#{local_dir}", "windows", "#{Pkg::Config.project}-#{Pkg::Config.version}-#{arch}.msi"))
-          File.symlink(File.join("#{local_dir}", "windows", "#{Pkg::Config.project}-#{Pkg::Config.version}-#{arch}.msi"), File.join("#{local_dir}", "windows", "#{Pkg::Config.project}-#{arch}.msi"))
+        package_version = Pkg::Util::Version.git_describe.tr('-', '.')
+        package_filename = File.join(local_dir, "windows", "#{Pkg::Config.project}-#{package_version}-#{arch}.msi")
+        link_filename = File.join(local_dir, "windows", "#{Pkg::Config.project}-#{arch}.msi")
+
+        if !packages.include?(link_filename) && packages.include?(package_filename)
+          File.symlink(package_filename, link_filename)
         end
       end
 

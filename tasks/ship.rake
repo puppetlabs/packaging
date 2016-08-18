@@ -449,9 +449,9 @@ namespace :pl do
         mv(packaging_bundle, local_dir)
       end
 
-      # This is functionality to add the project-arch.msi symlinks that have no
-      # version. The code itself looks for the symlink (if it's there already)
-      # and if the source package exists before symlinking. Searching for the
+      # This is functionality to add the project-arch.msi links that have no
+      # version. The code itself looks for the link (if it's there already)
+      # and if the source package exists before linking. Searching for the
       # packages has been restricted specifically to just the pkg/windows dir
       # on purpose, as this is where we currently have all windows packages
       # building to. Once we move the Metadata about the output location in
@@ -460,12 +460,17 @@ namespace :pl do
       packages = Dir["#{local_dir}/windows/*"]
       ["x86", "x64"].each do |arch|
         package_version = Pkg::Util::Version.git_describe.tr('-', '.')
-        package_name = "#{Pkg::Config.project}-#{package_version}-#{arch}.msi"
-        package_filename = File.join(local_dir, "windows", "#{package_name}")
+        package_filename = File.join(local_dir, "windows", "#{Pkg::Config.project}-#{package_version}-#{arch}.msi")
         link_filename = File.join(local_dir, "windows", "#{Pkg::Config.project}-#{arch}.msi")
 
         if !packages.include?(link_filename) && packages.include?(package_filename)
-          File.symlink(package_name, link_filename)
+          # Dear future code spelunkers:
+          # Using symlinks instead of hard links causes failures when we try
+          # to set these files to be immutable. Also be wary of whether the
+          # linking utility you're using expects the source path to be relative
+          # to the link target or pwd.
+          #
+          FileUtils.ln(package_filename, link_filename)
         end
       end
 

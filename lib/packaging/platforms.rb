@@ -47,6 +47,7 @@ module Pkg
         '10.9' => { :architectures => ['x86_64'], :repo => false, :package_format => 'dmg', },
         '10.10' => { :architectures => ['x86_64'], :repo => false, :package_format => 'dmg', },
         '10.11' => { :architectures => ['x86_64'], :repo => false, :package_format => 'dmg', },
+        '10.12' => { :architectures => ['x86_64'], :repo => false, :package_format => 'dmg', },
       },
 
       'sles' => {

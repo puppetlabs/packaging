@@ -76,7 +76,7 @@ describe "Pkg::Deb::Repo" do
 
     it "returns a command to make repos" do
       command = Pkg::Deb::Repo.repo_creation_command(prefix, artifact_directory)
-      command.should match(/reprepro/)
+      command.should match(/aptly/)
       command.should match(/#{prefix}/)
       command.should match(/#{artifact_directory}/)
     end
@@ -119,16 +119,43 @@ describe "Pkg::Deb::Repo" do
   end
 
   describe "#sign_repos" do
-    it "fails without reprepro" do
-      Pkg::Util::Tool.should_receive(:find_tool).with('reprepro', {:required => true}).and_raise(RuntimeError)
+    it "fails without aptly" do
+      Pkg::Util::Tool.should_receive(:find_tool).with('keychain').and_return(false)
+      File.should_receive(:exists?).with('../.aptly.conf').and_return(true)
+      Pkg::Util::Tool.should_receive(:find_tool).with('aptly', {:required => true}).and_raise(RuntimeError)
+      Pkg::Util::Tool.should_not_receive(:find_tool).with('reprepro', {:required => true})
       expect { Pkg::Deb::Repo.sign_repos }.to raise_error(RuntimeError)
     end
 
-    it "makes a repo for each dist" do
+    it "fails without reprepro" do
+      Pkg::Util::Tool.should_receive(:find_tool).with('keychain').and_return(false)
+      File.should_receive(:exists?).with('../.aptly.conf').and_return(false)
+      Pkg::Util::Tool.should_receive(:find_tool).with('reprepro', {:required => true}).and_raise(RuntimeError)
+      Pkg::Util::Tool.should_not_receive(:find_tool).with('aptly', {:required => true})
+      expect { Pkg::Deb::Repo.sign_repos }.to raise_error(RuntimeError)
+    end
+
+    it "makes a repo for each dist using aptly when aptly.conf exists" do
+      dists = cows.reject { |cow| cow.empty? }
+      aptly = "/bin/aptly"
+      Pkg::Util::File.should_receive(:directories).with("repos/apt").and_return(dists)
+      File.should_receive(:exists?).with('../.aptly.conf').and_return(true)
+      Pkg::Util::Tool.should_receive(:check_tool).with("aptly").and_return(aptly)
+
+      dists.each do |dist|
+        Dir.should_receive(:chdir).with("repos/apt/#{dist}").and_yield
+        Pkg::Util::Execution.should_receive(:ex).exactly(1).times.with("#{aptly} -config='../.aptly.conf' publish update -gpg-key=\"#{Pkg::Config.gpg_key}\" #{dist} \"#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}\"")
+      end
+
+      Pkg::Deb::Repo.sign_repos
+    end
+
+    it "makes a repo for each dist using reprepro when aptly.conf does not exist" do
       dists = cows.reject { |cow| cow.empty? }
       distfiles = {}
       reprepro = "/bin/reprepro"
       Pkg::Util::File.should_receive(:directories).with("repos/apt").and_return(dists)
+      File.should_receive(:exists?).with('../.aptly.conf').and_return(false)
       Pkg::Util::Tool.should_receive(:check_tool).with("reprepro").and_return(reprepro)
       Pkg::Util::Execution.should_receive(:ex).exactly(4).times.with("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
 

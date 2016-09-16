@@ -121,6 +121,10 @@ describe "Pkg::Deb::Repo" do
   describe "#sign_repos" do
     it "fails without aptly" do
       Pkg::Util::Tool.should_receive(:find_tool).with('keychain').and_return(false)
+      dists = cows.reject { |cow| cow.empty? }
+      Pkg::Util::File.should_receive(:directories).with("repos/apt").and_return(dists)
+
+      Dir.should_receive(:chdir).with("repos/apt/#{dists[0]}").and_yield
       File.should_receive(:exists?).with('../.aptly.conf').and_return(true)
       Pkg::Util::Tool.should_receive(:find_tool).with('aptly', {:required => true}).and_raise(RuntimeError)
       Pkg::Util::Tool.should_not_receive(:find_tool).with('reprepro', {:required => true})
@@ -129,6 +133,10 @@ describe "Pkg::Deb::Repo" do
 
     it "fails without reprepro" do
       Pkg::Util::Tool.should_receive(:find_tool).with('keychain').and_return(false)
+      dists = cows.reject { |cow| cow.empty? }
+      Pkg::Util::File.should_receive(:directories).with("repos/apt").and_return(dists)
+
+      Dir.should_receive(:chdir).with("repos/apt/#{dists[0]}").and_yield
       File.should_receive(:exists?).with('../.aptly.conf').and_return(false)
       Pkg::Util::Tool.should_receive(:find_tool).with('reprepro', {:required => true}).and_raise(RuntimeError)
       Pkg::Util::Tool.should_not_receive(:find_tool).with('aptly', {:required => true})
@@ -139,12 +147,12 @@ describe "Pkg::Deb::Repo" do
       dists = cows.reject { |cow| cow.empty? }
       aptly = "/bin/aptly"
       Pkg::Util::File.should_receive(:directories).with("repos/apt").and_return(dists)
-      File.should_receive(:exists?).with('../.aptly.conf').and_return(true)
-      Pkg::Util::Tool.should_receive(:check_tool).with("aptly").and_return(aptly)
 
       dists.each do |dist|
         Dir.should_receive(:chdir).with("repos/apt/#{dist}").and_yield
-        Pkg::Util::Execution.should_receive(:ex).exactly(1).times.with("#{aptly} -config='../.aptly.conf' publish update -gpg-key=\"#{Pkg::Config.gpg_key}\" #{dist} \"#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}\"")
+        File.should_receive(:exists?).with('../.aptly.conf').and_return(true)
+        Pkg::Util::Tool.should_receive(:check_tool).with("aptly").and_return(aptly)
+        Pkg::Util::Execution.should_receive(:ex).with("#{aptly} -config='../.aptly.conf' publish update -gpg-key=\"#{Pkg::Config.gpg_key}\" #{dist} \"#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}\"")
       end
 
       Pkg::Deb::Repo.sign_repos
@@ -155,13 +163,13 @@ describe "Pkg::Deb::Repo" do
       distfiles = {}
       reprepro = "/bin/reprepro"
       Pkg::Util::File.should_receive(:directories).with("repos/apt").and_return(dists)
-      File.should_receive(:exists?).with('../.aptly.conf').and_return(false)
-      Pkg::Util::Tool.should_receive(:check_tool).with("reprepro").and_return(reprepro)
-      Pkg::Util::Execution.should_receive(:ex).exactly(4).times.with("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
 
       dists.each do |dist|
         distfiles[dist] = double
         Dir.should_receive(:chdir).with("repos/apt/#{dist}").and_yield
+        File.should_receive(:exists?).with('../.aptly.conf').and_return(false)
+        Pkg::Util::Tool.should_receive(:check_tool).with("reprepro").and_return(reprepro)
+        Pkg::Util::Execution.should_receive(:ex).with("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
         File.should_receive(:open).with("conf/distributions", "w").and_yield(distfiles[dist])
         distfiles[dist].should_receive(:puts)
       end

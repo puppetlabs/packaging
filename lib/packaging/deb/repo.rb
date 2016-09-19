@@ -89,49 +89,21 @@ module Pkg::Deb::Repo
 
       # Make the conf directory and write out our configuration file
       cmd << "rm -rf apt && mkdir -p apt ; pushd apt ; "
+      cmd << %Q(for dist in $dists ; do mkdir -p $dist/conf ; pushd $dist ;
+      echo "
+Origin: Puppet Labs
+Label: Puppet Labs
+Codename: $dist
+Architectures: i386 amd64 arm64 armel armhf powerpc sparc mips mipsel
+Components: #{subrepo}
+Description: Apt repository for acceptance testing" >> conf/distributions ; )
 
-      # Write out aptly configuration file
-      # We need a unique config for each project sha/ref we ship so that we can
-      # deliver these directories bundled up and the relative links will still work
-      architectures = %w(i386 amd64 arm64 armel armhf powerpc sparc mips mipsel)
-      description = "Apt repository for acceptance testing"
-      aptly_config_path = "#{artifact_directory}/repos/apt"
-      aptly_config_file = "#{aptly_config_path}/.aptly.conf"
-      aptly_flags = "-config='#{aptly_config_file}' -component='#{subrepo}' -distribution=$dist"
-      aptly_config_contents = {
-        :rootDir => File.join(aptly_config_path, '.aptly'),
-        :architectures => architectures
-      }
-      cmd << %Q(echo '#{aptly_config_contents.to_json}' > #{aptly_config_file} ; )
-
-      cmd << %Q(for dist in $dists ; do mkdir -p $dist ; pushd $dist ; )
-
-      # Create the repositories using aptly. Since these are for acceptance
+      # Create the repositories using reprepro. Since these are for acceptance
       # testing only, we'll just add the debs and ignore source files for now.
-      cmd << "aptly=$(which aptly) ; "
-      cmd << %Q([[ -z "$aptly" ]] && echo "Unable to find the aptly command. Unable to create a repo." && exit 1 ; )
-
-      # First we need to create the aptly repo to ship to
-      cmd << %Q($aptly repo create #{aptly_flags} -comment='#{description}' #{Pkg::Config.project}-#{Pkg::Config.ref}-$dist ; )
-
-      # Next we add the package to the newly created repo
-      # the packages we want to add may or may not live in a subdirectory, hence
-      # the extra complexity here
-      file_glob = "*.deb"
-      file_glob = File.join(subrepo, file_glob) if Pkg::Config.apt_repo_name
-      deb_packages = File.join('..', '..', prefix, 'deb', '$dist', file_glob)
-      cmd << %Q($aptly repo add -config="#{aptly_config_file}" #{Pkg::Config.project}-#{Pkg::Config.ref}-$dist #{deb_packages} ; )
-
-      # Now we have to publish the repo to make it available
-      cmd << %Q($aptly publish repo #{aptly_flags} --skip-signing #{Pkg::Config.project}-#{Pkg::Config.ref}-$dist #{Pkg::Config.project}-#{Pkg::Config.ref}-$dist; )
-
-      # Aptly publishes repos under a public directory in the .aptly dir. We
-      # need to add symlinks from this directory in order to maintain the
-      # currently expected structure. Otherwise, this would break a lot of
-      # code currently in use.
-      cmd << %Q(ln -s ../.aptly/public/#{Pkg::Config.project}-#{Pkg::Config.ref}-$dist/dists ; )
-      cmd << %Q(ln -s ../.aptly/public/#{Pkg::Config.project}-#{Pkg::Config.ref}-$dist/pool ; )
-      cmd << "popd ; done ; popd ; popd "
+      #
+      cmd << "reprepro=$(which reprepro) ; "
+      cmd << %Q($reprepro includedeb $dist ../../#{prefix}deb/$dist#{Pkg::Config.apt_repo_name ? "/#{subrepo}" : ""}/*.deb ; popd ; done ; )
+      cmd << "popd ; popd "
 
       return cmd
     end
@@ -174,37 +146,25 @@ module Pkg::Deb::Repo
 
     def sign_repos(target = "repos", message = "Signed apt repository")
       subrepo = Pkg::Config.apt_repo_name || 'main'
+      reprepro = Pkg::Util::Tool.check_tool('reprepro')
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
 
       dists = Pkg::Util::File.directories("#{target}/apt")
 
-      if File.exists?("../.aptly.conf")
-        aptly = Pkg::Util::Tool.check_tool('aptly')
-      else
-        reprepro = Pkg::Util::Tool.check_tool('reprepro')
-      end
-
       if dists
         dists.each do |dist|
           Dir.chdir("#{target}/apt/#{dist}") do
-            if aptly
-              Pkg::Util::Execution.ex(%Q(#{aptly} -config='../.aptly.conf' publish update -gpg-key="#{Pkg::Config.gpg_key}" #{dist} "#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}"))
-            elsif reprepro
-              # This block can be removed once we are sure there are no more
-              # reprepro based repos that need to be signed.
-              File.open("conf/distributions", "w") do |f|
-                f.puts "Origin: Puppet Labs
+            File.open("conf/distributions", "w") do |f|
+              f.puts "Origin: Puppet Labs
 Label: Puppet Labs
 Codename: #{dist}
 Architectures: i386 amd64 arm64 armel armhf powerpc sparc mips mipsel
 Components: #{subrepo}
 Description: #{message} for #{dist}
 SignWith: #{Pkg::Config.gpg_key}"
-              end
-              Pkg::Util::Execution.ex("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
-            else
-              fail "Neither aptly nor reprepro found. Cannot sign repos"
             end
+
+            Pkg::Util::Execution.ex("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
           end
         end
       else

@@ -98,8 +98,13 @@ module Pkg::Deb::Repo
       aptly_config_path = "#{artifact_directory}/repos/apt"
       aptly_config_file = "#{aptly_config_path}/aptly.conf"
       aptly_flags = "-config='#{aptly_config_file}' -component='#{subrepo}' -distribution=$dist"
+
+      # This assumes aptly is being called from a different directory. We need
+      # the relative path, but it needs to be relative to where the aptly
+      # command is run. In most situations, aptly should be called from one
+      # directory below where aptly.conf lives.
       aptly_config_contents = {
-        :rootDir => File.join(aptly_config_path, 'aptly'),
+        :rootDir => '../aptly',
         :architectures => architectures
       }
       cmd << %Q(echo '#{aptly_config_contents.to_json}' > #{aptly_config_file} ; )

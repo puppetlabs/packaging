@@ -96,10 +96,10 @@ module Pkg::Deb::Repo
       architectures = %w(i386 amd64 arm64 armel armhf powerpc sparc mips mipsel)
       description = "Apt repository for acceptance testing"
       aptly_config_path = "#{artifact_directory}/repos/apt"
-      aptly_config_file = "#{aptly_config_path}/.aptly.conf"
+      aptly_config_file = "#{aptly_config_path}/aptly.conf"
       aptly_flags = "-config='#{aptly_config_file}' -component='#{subrepo}' -distribution=$dist"
       aptly_config_contents = {
-        :rootDir => File.join(aptly_config_path, '.aptly'),
+        :rootDir => File.join(aptly_config_path, 'aptly'),
         :architectures => architectures
       }
       cmd << %Q(echo '#{aptly_config_contents.to_json}' > #{aptly_config_file} ; )
@@ -125,12 +125,12 @@ module Pkg::Deb::Repo
       # Now we have to publish the repo to make it available
       cmd << %Q($aptly publish repo #{aptly_flags} --skip-signing #{Pkg::Config.project}-#{Pkg::Config.ref}-$dist #{Pkg::Config.project}-#{Pkg::Config.ref}-$dist; )
 
-      # Aptly publishes repos under a public directory in the .aptly dir. We
+      # Aptly publishes repos under a public directory in the aptly dir. We
       # need to add symlinks from this directory in order to maintain the
       # currently expected structure. Otherwise, this would break a lot of
       # code currently in use.
-      cmd << %Q(ln -s ../.aptly/public/#{Pkg::Config.project}-#{Pkg::Config.ref}-$dist/dists ; )
-      cmd << %Q(ln -s ../.aptly/public/#{Pkg::Config.project}-#{Pkg::Config.ref}-$dist/pool ; )
+      cmd << %Q(ln -s ../aptly/public/#{Pkg::Config.project}-#{Pkg::Config.ref}-$dist/dists ; )
+      cmd << %Q(ln -s ../aptly/public/#{Pkg::Config.project}-#{Pkg::Config.ref}-$dist/pool ; )
       cmd << "popd ; done ; popd ; popd "
 
       return cmd
@@ -181,14 +181,14 @@ module Pkg::Deb::Repo
       if dists
         dists.each do |dist|
           Dir.chdir("#{target}/apt/#{dist}") do
-            if File.exists?("../.aptly.conf")
+            if File.exists?("../aptly.conf")
               aptly = Pkg::Util::Tool.check_tool('aptly')
             else
               reprepro = Pkg::Util::Tool.check_tool('reprepro')
             end
 
             if aptly
-              Pkg::Util::Execution.ex(%Q(#{aptly} -config='../.aptly.conf' publish update -gpg-key="#{Pkg::Config.gpg_key}" #{dist} "#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}"))
+              Pkg::Util::Execution.ex(%Q(#{aptly} -config='../aptly.conf' publish update -gpg-key="#{Pkg::Config.gpg_key}" #{dist} "#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}"))
             elsif reprepro
               # This block can be removed once we are sure there are no more
               # reprepro based repos that need to be signed.

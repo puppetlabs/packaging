@@ -178,15 +178,15 @@ module Pkg::Deb::Repo
 
       dists = Pkg::Util::File.directories("#{target}/apt")
 
-      if File.exists?("../.aptly.conf")
-        aptly = Pkg::Util::Tool.check_tool('aptly')
-      else
-        reprepro = Pkg::Util::Tool.check_tool('reprepro')
-      end
-
       if dists
         dists.each do |dist|
           Dir.chdir("#{target}/apt/#{dist}") do
+            if File.exists?("../.aptly.conf")
+              aptly = Pkg::Util::Tool.check_tool('aptly')
+            else
+              reprepro = Pkg::Util::Tool.check_tool('reprepro')
+            end
+
             if aptly
               Pkg::Util::Execution.ex(%Q(#{aptly} -config='../.aptly.conf' publish update -gpg-key="#{Pkg::Config.gpg_key}" #{dist} "#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}"))
             elsif reprepro

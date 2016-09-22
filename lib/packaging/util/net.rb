@@ -49,10 +49,10 @@ module Pkg::Util::Net
       if capture_output
         require 'open3'
         stdout, stderr, exitstatus = Open3.capture3(cmd)
-        Pkg::Util::Execution.success?(exitstatus) or raise "Remote ssh command failed."
-        return stdout, stderr
+        Pkg::Util::Execution.success?(exitstatus) or raise "Remote ssh command failed: #{stdout} #{stderr}"
+        puts stdout, stderr
       else
-        Kernel.system(cmd)
+        Kernel.system("#{cmd} > /dev/null 2>&1")
         Pkg::Util::Execution.success? or raise "Remote ssh command failed."
       end
     end

@@ -167,7 +167,7 @@ if Pkg::Config.build_pe
           fi
           ", true)
 
-        output = stdout + stderr
+        output = stdout.to_s + stderr.to_s
 
         if output.include?("ERROR:") || output.include?("There have been errors!")
           # We shouldn't ever get here if aptly returns non-zero on failure, but just in case...

@@ -13,16 +13,15 @@ module Pkg::OSX
       dmgs = Dir.glob("#{target_dir}/apple/**/*.dmg")
       Pkg::Util::Net.rsync_to(dmgs.join(" "), rsync_host_string, work_dir)
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, %Q[for dmg in #{dmgs.map { |d| File.basename(d, ".dmg") }.join(" ")}; do
-        /usr/bin/hdiutil attach #{work_dir}/${dmg}.dmg -mountpoint #{mount} -nobrowse -quiet &&
-        /usr/bin/security -v unlock-keychain -p "#{Pkg::Config.osx_signing_keychain_pw}" "#{Pkg::Config.osx_signing_keychain}" &&
+        /usr/bin/hdiutil attach #{work_dir}/$dmg.dmg -mountpoint #{mount} -nobrowse -quiet ;
+        /usr/bin/security -v unlock-keychain -p "#{Pkg::Config.osx_signing_keychain_pw}" "#{Pkg::Config.osx_signing_keychain}" ;
           for pkg in $(ls #{mount}/*.pkg | xargs -n 1 basename); do
-            /usr/bin/productsign --keychain "#{Pkg::Config.osx_signing_keychain}" --sign "#{Pkg::Config.osx_signing_cert}" #{mount}/${pkg} #{signed}/${pkg} &&
-            /usr/sbin/pkgutil --check-signature #{signed}/${pkg}
-          done &&
-        /usr/bin/hdiutil detach #{mount} -quiet &&
-        /bin/rm #{work_dir}/${dmg}.dmg &&
-        /usr/bin/hdiutil create -volname ${dmg} -srcfolder #{signed}/ #{work_dir}/${dmg}.dmg &&
-        /bin/rm #{signed}/* ; done], false)
+            /usr/bin/productsign --keychain "#{Pkg::Config.osx_signing_keychain}" --sign "#{Pkg::Config.osx_signing_cert}" #{mount}/$pkg #{signed}/$pkg ;
+          done
+        /usr/bin/hdiutil detach #{mount} -quiet ;
+        /bin/rm #{work_dir}/$dmg.dmg ;
+        /usr/bin/hdiutil create -volname $dmg -srcfolder #{signed}/ #{work_dir}/$dmg.dmg ;
+        /bin/rm #{signed}/* ; done])
       dmgs.each do | dmg |
         Pkg::Util::Net.rsync_from("#{work_dir}/#{File.basename(dmg)}", rsync_host_string, File.dirname(dmg))
       end

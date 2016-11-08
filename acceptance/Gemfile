@@ -1,0 +1,4 @@
+source ENV['GEM_SOURCE'] || 'https://rubygems.org'
+
+gem 'beaker', '~> 3.0'
+gem 'rake', '~> 11.0'

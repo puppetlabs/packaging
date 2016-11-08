@@ -1,0 +1,10 @@
+# beaker logs
+junit
+log
+
+# generic ruby things
+.bundle
+Gemfile.lock
+
+# IDE-specific things
+.idea

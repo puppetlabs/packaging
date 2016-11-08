@@ -254,6 +254,7 @@ namespace :pl do
         jenkins:retrieve
         jenkins:sign_all
         uber_ship
+        ship_gem
         remote:update_apt_repo
         remote:deploy_apt_repo
         remote:update_yum_repo

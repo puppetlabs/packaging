@@ -33,21 +33,16 @@ namespace :pl do
           end
         end
         if Pkg::Config.foss_only && Pkg::Config.foss_platforms && remote_target == 'artifacts'
-          urls = Hash.new
           Pkg::Config.foss_platforms.each do |platform|
             platform_path = Pkg::Util::Platform.artifacts_path(platform, package_url)
+            _, _, arch = Pkg::Util::Platform.parse_platform_tag(platform)
             url = "#{package_url}/#{platform_path}"
-            if urls.has_key? url
-              puts "Skipping fetch for #{platform}, #{url} has already been fetched"
-            else
-              urls[url] = true
-              puts "Fetching: Platform = #{platform}, URL = #{url}"
-              sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' #{url}/"
-            end
+            puts "Fetching: Platform = #{platform}, URL = #{url}"
+            sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*#{arch}*' #{url}/"
           end
           # also want to fetch the yaml and the signing bundle
-          sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' -A '*.yaml' #{package_url}/#{remote_target}/"
-          sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' -A '*.tar.gz' #{package_url}/#{remote_target}/"
+          sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*.yaml' #{package_url}/#{remote_target}/"
+          sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*.tar.gz' #{package_url}/#{remote_target}/"
         else
           # For the next person who needs to look these flags up:
           # -r = recursive

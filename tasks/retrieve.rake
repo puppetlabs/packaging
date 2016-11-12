@@ -34,11 +34,16 @@ namespace :pl do
         end
         if Pkg::Config.foss_only && Pkg::Config.foss_platforms && remote_target == 'artifacts'
           Pkg::Config.foss_platforms.each do |platform|
-            platform_path = Pkg::Util::Platform.artifacts_path(platform, package_url)
-            _, _, arch = Pkg::Util::Platform.parse_platform_tag(platform)
-            url = "#{package_url}/#{platform_path}"
-            puts "Fetching: Platform = #{platform}, URL = #{url}"
-            sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*#{arch}*' #{url}/"
+            begin
+              platform_path = Pkg::Util::Platform.artifacts_path(platform, package_url)
+              _, _, arch = Pkg::Util::Platform.parse_platform_tag(platform)
+              url = "#{package_url}/#{platform_path}"
+              puts "Fetching: Platform = #{platform}, URL = #{url}"
+              sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*#{arch}*' #{url}/"
+            rescue => e
+              warn "Encountered error fetching #{platform}:"
+              warn e
+            end
           end
           # also want to fetch the yaml and the signing bundle
           sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*.yaml' #{package_url}/#{remote_target}/"

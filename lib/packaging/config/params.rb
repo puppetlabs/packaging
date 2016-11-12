@@ -196,7 +196,7 @@ module Pkg::Params
               { :var => :dmg_host,                :envvar => :DMG_HOST },
               { :var => :dmg_staging_server,      :envvar => :DMG_STAGING_SERVER },
               { :var => :final_mocks,             :envvar => :MOCK },
-              { :var => :foss_only,               :envvar => :FOSS_ONLY },
+              { :var => :foss_only,               :envvar => :FOSS_ONLY,       :type => :bool },
               { :var => :foss_platforms,          :envvar => :FOSS_PLATFORMS,  :type => :array },
               { :var => :gem_host,                :envvar => :GEM_HOST },
               { :var => :gpg_key,                 :envvar => :GPG_KEY },

@@ -21,13 +21,13 @@ namespace :pl do
       if wget = Pkg::Util::Tool.find_tool("wget")
         if Pkg::Config.foss_only && !Pkg::Config.foss_platforms
           warn "FOSS_ONLY specified, but I don't know anything about FOSS_PLATFORMS. Fetch everything?"
-          unless Pkg::Util.ask_yes_or_no
+          unless Pkg::Util.ask_yes_or_no(true)
             warn "Retrieve cancelled"
             exit
           end
         elsif Pkg::Config.foss_only && remote_target != 'artifacts'
           warn "I only know how to fetch from remote_target 'artifacts' with FOSS_ONLY. Fetch everything?"
-          unless Pkg::Util.ask_yes_or_no
+          unless Pkg::Util.ask_yes_or_no(true)
             warn "Retrieve cancelled"
             exit
           end

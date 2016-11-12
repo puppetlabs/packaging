@@ -265,6 +265,11 @@ namespace :pl do
         remote:deploy_msi_repo
         remote:deploy_tar_repo
       )
+
+      if ENV['ANSWER_OVERRIDE'] && ! Pkg::Config.foss_only
+        fail "Using ANSWER_OVERRIDE without FOSS_ONLY=true is dangerous!"
+      end
+
       # Some projects such as pl-build-tools do not stage to a separate server - so we do to deploy
       uber_tasks.delete("remote:deploy_apt_repo") if Pkg::Config.apt_host == Pkg::Config.apt_signing_server
       uber_tasks.delete("remote:deploy_yum_repo") if Pkg::Config.yum_host == Pkg::Config.yum_staging_server

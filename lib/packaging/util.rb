@@ -87,7 +87,7 @@ module Pkg::Util
 
   def self.ask_yes_or_no(force = false)
     unless force
-      return Pkg::Util.boolean_value(ENV['ANSWER_OVERRIDE']) unless ENV['ANSWER_OVERRIDE'].nil?
+      return Pkg::Util.boolean_value(Pkg::Config.answer_override) unless Pkg::Config.answer_override.nil?
     end
 
     answer = Pkg::Util.get_input

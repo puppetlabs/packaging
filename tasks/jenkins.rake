@@ -266,7 +266,7 @@ namespace :pl do
         remote:deploy_tar_repo
       )
 
-      if ENV['ANSWER_OVERRIDE'] && ! Pkg::Config.foss_only
+      if Pkg::Util.boolean_value(Pkg::Config.answer_override) && !Pkg::Config.foss_only
         fail "Using ANSWER_OVERRIDE without FOSS_ONLY=true is dangerous!"
       end
 

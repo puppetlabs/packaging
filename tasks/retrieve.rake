@@ -39,15 +39,15 @@ namespace :pl do
               _, _, arch = Pkg::Util::Platform.parse_platform_tag(platform)
               url = "#{package_url}/#{platform_path}"
               puts "Fetching: Platform = #{platform}, URL = #{url}"
-              sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*#{arch}*' #{url}/"
+              sh "#{wget} --quiet -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*#{arch}*' #{url}/"
             rescue => e
               warn "Encountered error fetching #{platform}:"
               warn e
             end
           end
           # also want to fetch the yaml and the signing bundle
-          sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*.yaml' #{package_url}/#{remote_target}/"
-          sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*.tar.gz' #{package_url}/#{remote_target}/"
+          sh "#{wget} --quiet -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*.yaml' #{package_url}/#{remote_target}/"
+          sh "#{wget} --quiet -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*.tar.gz' #{package_url}/#{remote_target}/"
         else
           # For the next person who needs to look these flags up:
           # -r = recursive
@@ -57,7 +57,7 @@ namespace :pl do
           # -nH = Discard http://#{Pkg::Config.builds_server} when saving to disk
           # --reject = Reject all hits that match the supplied regex
           # -P = where to save to disk (defaults to ./)
-          sh "#{wget} -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' #{package_url}/#{remote_target}/"
+          sh "#{wget} --quiet -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' #{package_url}/#{remote_target}/"
         end
       else
         warn "Could not find `wget` tool. Falling back to rsyncing from #{Pkg::Config.distribution_server}"

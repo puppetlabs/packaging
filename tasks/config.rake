@@ -8,7 +8,7 @@ namespace :config do
 
   task :print_hosts => 'pl:fetch' do
     Pkg::Util.filter_configs('host').each do |key, value|
-        puts "#{key}: #{value}"
+      puts "#{key}: #{value}"
     end
   end
 

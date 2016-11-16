@@ -98,6 +98,10 @@ module Pkg::Util
   end
 
   def self.confirm_ship(files)
+    $stdout.puts "Artifacts will be shipped to the following hosts:"
+    Pkg::Util.filter_configs('host').each { |key, value| puts "#{key}: #{value}" }
+    $stdout.puts "Does this look right?? [y,n]"
+    Pkg::Util.ask_yes_or_no(true)
     $stdout.puts "The following files have been built and are ready to ship:"
     files.each { |file| puts "\t#{file}\n" unless File.directory?(file) }
     $stdout.puts "Ship these files?? [y,n]"

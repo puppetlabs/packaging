@@ -85,8 +85,11 @@ module Pkg::Util
     rand.to_s.split('.')[1]
   end
 
-  def self.ask_yes_or_no
-    return Pkg::Util.boolean_value(ENV['ANSWER_OVERRIDE']) unless ENV['ANSWER_OVERRIDE'].nil?
+  def self.ask_yes_or_no(force = false)
+    unless force
+      return Pkg::Util.boolean_value(Pkg::Config.answer_override) unless Pkg::Config.answer_override.nil?
+    end
+
     answer = Pkg::Util.get_input
     return true if answer =~ /^y$|^yes$/
     return false if answer =~ /^n$|^no$/
@@ -98,7 +101,7 @@ module Pkg::Util
     $stdout.puts "The following files have been built and are ready to ship:"
     files.each { |file| puts "\t#{file}\n" unless File.directory?(file) }
     $stdout.puts "Ship these files?? [y,n]"
-    Pkg::Util.ask_yes_or_no
+    Pkg::Util.ask_yes_or_no(true)
   end
 
   # Construct a probably-correct (or correct-enough) URI for

@@ -3,7 +3,8 @@ require "packaging/platforms"
 # These are all of the parameters known to our packaging system.
 # They are ingested by the config class as class instance variables
 module Pkg::Params
-  BUILD_PARAMS = [:apt_host,
+  BUILD_PARAMS = [:answer_override,
+                  :apt_host,
                   :apt_releases,
                   :apt_repo_command,
                   :apt_repo_name,
@@ -174,6 +175,7 @@ module Pkg::Params
   #           Note: :type is assumed :string if not present
   #
   ENV_VARS = [
+              { :var => :answer_override,         :envvar => :ANSWER_OVERRIDE },
               { :var => :apt_host,                :envvar => :APT_HOST },
               { :var => :apt_releases,            :envvar => :APT_RELEASES,    :type => :array },
               { :var => :apt_repo_path,           :envvar => :APT_REPO },
@@ -196,7 +198,7 @@ module Pkg::Params
               { :var => :dmg_host,                :envvar => :DMG_HOST },
               { :var => :dmg_staging_server,      :envvar => :DMG_STAGING_SERVER },
               { :var => :final_mocks,             :envvar => :MOCK },
-              { :var => :foss_only,               :envvar => :FOSS_ONLY },
+              { :var => :foss_only,               :envvar => :FOSS_ONLY,       :type => :bool },
               { :var => :foss_platforms,          :envvar => :FOSS_PLATFORMS,  :type => :array },
               { :var => :gem_host,                :envvar => :GEM_HOST },
               { :var => :gpg_key,                 :envvar => :GPG_KEY },

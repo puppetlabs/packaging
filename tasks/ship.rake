@@ -381,7 +381,6 @@ namespace :pl do
   desc "UBER ship: ship all the things in pkg"
   task :uber_ship => 'pl:fetch' do
     if Pkg::Util.confirm_ship(FileList["pkg/**/*"])
-      Rake::Task["pl:ship_gem"].invoke
       Rake::Task["pl:ship_rpms"].invoke
       Rake::Task["pl:ship_debs"].invoke
       Rake::Task["pl:ship_dmg"].invoke

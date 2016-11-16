@@ -254,6 +254,7 @@ namespace :pl do
         jenkins:retrieve
         jenkins:sign_all
         uber_ship
+        ship_gem
         remote:update_apt_repo
         remote:deploy_apt_repo
         remote:update_yum_repo
@@ -264,6 +265,11 @@ namespace :pl do
         remote:deploy_msi_repo
         remote:deploy_tar_repo
       )
+
+      if Pkg::Util.boolean_value(Pkg::Config.answer_override) && !Pkg::Config.foss_only
+        fail "Using ANSWER_OVERRIDE without FOSS_ONLY=true is dangerous!"
+      end
+
       # Some projects such as pl-build-tools do not stage to a separate server - so we do to deploy
       uber_tasks.delete("remote:deploy_apt_repo") if Pkg::Config.apt_host == Pkg::Config.apt_signing_server
       uber_tasks.delete("remote:deploy_yum_repo") if Pkg::Config.yum_host == Pkg::Config.yum_staging_server
@@ -273,33 +279,33 @@ namespace :pl do
 
       # Don't update and deploy repos if packages don't exist
       # If we can't find a certain file type, delete the task
-      unless Dir.glob("pkg/**/*.deb")
+      if Dir.glob("pkg/**/*.deb").empty?
         uber_tasks.delete("remote:update_apt_repo")
         uber_tasks.delete("remote:deploy_apt_repo")
       end
 
-      unless Dir.glob("pkg/**/*.rpm")
+      if Dir.glob("pkg/**/*.rpm").empty?
         uber_tasks.delete("remote:update_yum_repo")
         uber_tasks.delete("remote:deploy_yum_repo")
       end
 
-      unless Dir.glob("pkg/**/*.p5p")
+      if Dir.glob("pkg/**/*.p5p").empty?
         uber_tasks.delete("remote:update_ips_repo")
       end
 
-      unless Dir.glob("pkg/**/*.dmg")
+      if Dir.glob("pkg/**/*.dmg").empty?
         uber_tasks.delete("remote:deploy_dmg_repo")
       end
 
-      unless Dir.glob("pkg/**/*.swix")
+      if Dir.glob("pkg/**/*.swix").empty?
         uber_tasks.delete("remote:deploy_swix_repo")
       end
 
-      unless Dir.glob("pkg/**/*.msi")
+      if Dir.glob("pkg/**/*.msi").empty?
         uber_tasks.delete("remote:deploy_msi_repo")
       end
 
-      unless Dir.glob("pkg/*.tar.gz")
+      if Dir.glob("pkg/*.tar.gz").empty?
         uber_tasks.delete("remote:deploy_tar_repo")
       end
 

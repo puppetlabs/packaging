@@ -104,6 +104,12 @@ module Pkg::Util
     Pkg::Util.ask_yes_or_no(true)
   end
 
+  def self.filter_configs(filter = nil)
+    return Pkg::Config.instance_values.select { |key, _| key.match(/#{filter}/) } if filter
+    Pkg::Config.instance_values
+  end
+
+
   # Construct a probably-correct (or correct-enough) URI for
   # tools like ssh or rsync. Currently lacking support for intuitive
   # joins, ports, protocols, fragments, or 75% of what Addressable::URI

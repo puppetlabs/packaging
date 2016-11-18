@@ -98,11 +98,21 @@ module Pkg::Util
   end
 
   def self.confirm_ship(files)
+    $stdout.puts "Artifacts will be shipped to the following hosts:"
+    Pkg::Util.filter_configs('host').each { |key, value| puts "#{key}: #{value}" }
+    $stdout.puts "Does this look right?? [y,n]"
+    Pkg::Util.ask_yes_or_no(true)
     $stdout.puts "The following files have been built and are ready to ship:"
     files.each { |file| puts "\t#{file}\n" unless File.directory?(file) }
     $stdout.puts "Ship these files?? [y,n]"
     Pkg::Util.ask_yes_or_no(true)
   end
+
+  def self.filter_configs(filter = nil)
+    return Pkg::Config.instance_values.select { |key, _| key.match(/#{filter}/) } if filter
+    Pkg::Config.instance_values
+  end
+
 
   # Construct a probably-correct (or correct-enough) URI for
   # tools like ssh or rsync. Currently lacking support for intuitive

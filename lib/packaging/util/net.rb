@@ -29,9 +29,44 @@ module Pkg::Util::Net
       end
     end
 
-    def remote_ssh_cmd(target, command, capture_output = false)
+    # @param hosts - An array of hosts to try ssh-ing into
+    #  If the host needs a special username it should be passed
+    #  in as user@host
+    # @return an array of hosts where ssh access failed. Empty array if
+    #  successful
+    def check_host_ssh(hosts)
+      errs = []
+      Array(hosts).flatten.each do |host|
+        begin
+          remote_ssh_cmd(host, 'exit', false, '-oBatchMode=yes')
+        rescue
+          errs << host
+        end
+      end
+      return errs
+    end
+
+    # @param hosts - An array of hosts to check for gpg keys
+    #  If the host needs a special username it should be passed
+    #  in as user@host
+    # @param gpg - The gpg secret key to look for
+    # @return an array of hosts where ssh access failed. Empty array if
+    #  successful
+    def check_host_gpg(hosts, gpg)
+      errs = []
+      Array(hosts).flatten.each do |host|
+        begin
+          remote_ssh_cmd(host, "gpg --list-secret-keys #{gpg} > /dev/null 2&>1")
+        rescue
+          errs << host
+        end
+      end
+      return errs
+    end
+
+    def remote_ssh_cmd(target, command, capture_output = false, extra_options = '')
       ssh = Pkg::Util::Tool.check_tool('ssh')
-      cmd = "#{ssh} -t #{target} '#{command.gsub("'", "'\\\\''")}'"
+      cmd = "#{ssh} #{extra_options} -t #{target} '#{command.gsub("'", "'\\\\''")}'"
 
       # This is NOT a good way to support this functionality.
       # It needs to be refactored into a set of methods that

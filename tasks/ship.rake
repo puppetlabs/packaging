@@ -398,6 +398,81 @@ namespace :pl do
     end
   end
 
+  desc "Test out the ship requirements"
+  task :ship_check => 'pl:fetch' do
+    errs = []
+    ssh_errs = []
+    gpg_errs = []
+
+    # Check SSH access to the staging servers
+    ssh_errs << Pkg::Util::Net.check_host_ssh(Pkg::Util.filter_configs('staging_server').values.uniq)
+    # Check SSH access to the signing servers, with some windows special-ness
+    ssh_errs << Pkg::Util::Net.check_host_ssh(Pkg::Util.filter_configs('signing_server').values.uniq - [Pkg::Config.msi_signing_server])
+    ssh_errs << Pkg::Util::Net.check_host_ssh("Administrator@#{Pkg::Config.msi_signing_server}")
+    # Check SSH access to the final shipped hosts
+    ssh_errs << Pkg::Util::Net.check_host_ssh(Pkg::Util.filter_configs('^(?!.*(?=build|internal)).*_host$').values.uniq)
+    ssh_errs.flatten!
+    unless ssh_errs.empty?
+      ssh_errs.each do |host|
+        errs << "Unable to ssh to #{host}"
+      end
+    end
+
+    # Check for GPG on linux-y systems
+    gpg_errs << Pkg::Util::Net.check_host_gpg(Pkg::Config.apt_signing_server, Pkg::Config.gpg_key)
+    gpg_errs << Pkg::Util::Net.check_host_gpg(Pkg::Config.distribution_server, Pkg::Config.gpg_key)
+    gpg_errs.flatten!
+    unless gpg_errs.empty?
+      gpg_errs.each do |host|
+        errs << "Secret key #{Pkg::Config.gpg_key} not found on #{host}"
+      end
+    end
+
+    # For windows and solaris it looks like as long as you have ssh access
+    # to the signers you should be able to sign. If this changes in the future
+    # we should add more checks here, but for now it should be fine.
+    # Check for ability to sign OSX. Should just need to be able to unlock keychain
+    begin
+      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.osx_signing_server, %Q(/usr/bin/security -q unlock-keychain -p "#{Pkg::Config.osx_signing_keychain_pw}" "#{Pkg::Config.osx_signing_keychain}"))
+    rescue
+      errs << "Unlocking the OSX keychain failed! Check the password in your .bashrc on #{Pkg::Config.osx_signing_server}"
+    end
+    if Pkg::Config.build_gem
+      # Do we have stickler and nexus?
+      unless Pkg::Util::Misc.check_gem('stickler')
+        errs << "gem stickler not found"
+      end
+      unless Pkg::Util::Misc.check_gem('nexus')
+        errs << "gem nexus not found"
+      end
+      # Can we access the internal hosts?
+      %x(stickler list --server #{Pkg::Config.internal_stickler_host} > /dev/null 2>&1)
+      unless $? == 0
+        errs << "Listing gems at the stickler server #{Pkg::Config.internal_stickler_host} failed!"
+      end
+      %x(gem list --source #{Pkg::Config.internal_nexus_host} > /dev/null 2>&1)
+      unless $? == 0
+        errs << "Listing gems at the nexus server #{Pkg::Config.internal_nexus_host} failed!"
+      end
+      # Do we have rubygems access set up
+      Pkg::Util::File.file_exists?("#{ENV['HOME']}/.gem/credentials", :required => true)
+      # Do we have permissions to publish this gem on rubygems
+      unless Pkg::Util::Misc.check_rubygems_ownership(Pkg::Config.gem_name)
+        errs << "You don't own #{Pkg::Config.gem_name} on rubygems.org"
+      end
+    end
+
+    puts "\n\n"
+    if errs.empty?
+      puts "Hooray! You should be good for shipping!"
+    else
+      puts "Found #{errs.length} issues:"
+      errs.each do |err|
+        puts " * #{err}"
+      end
+    end
+  end
+
   # It is odd to namespace this ship task under :jenkins, but this task is
   # intended to be a component of the jenkins-based build workflow even if it
   # doesn't interact with jenkins directly. The :target argument is so that we

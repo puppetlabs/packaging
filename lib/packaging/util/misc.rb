@@ -37,5 +37,33 @@ module Pkg::Util::Misc
       #               -Sean P. M. 05/11/2016
       data
     end
+
+    # @param gem the name of the gem to see if it is installed
+    # @return boolean for whether or not the gem is installed
+    def check_gem(gem)
+      if %x(gem list -q #{gem}).chomp.empty?
+        return false
+      else
+        return true
+      end
+    end
+
+    # This loads your ~/.gem/credentials file and uses your api key
+    # to query rubygems.org for which gems you own. There may be better ways
+    # to query this but having to pull this information using curl is sort of
+    # gross. It works though, so ¯\_(ツ)_/¯
+    # @param gem_name the gem to check if you are an owner
+    # @return boolean whether or not you own the gem
+    def check_rubygems_ownership(gem_name)
+      require 'yaml'
+      credentials = YAML.load_file("#{ENV['HOME']}/.gem/credentials")
+      gems = YAML.load(%x(curl -H 'Authorization:#{credentials[:rubygems_api_key]}' https://rubygems.org/api/v1/gems.yaml))
+      gems.each do |gem|
+        if gem['name'] == gem_name
+          return true
+        end
+      end
+      return false
+    end
   end
 end

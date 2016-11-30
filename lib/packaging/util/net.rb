@@ -56,7 +56,7 @@ module Pkg::Util::Net
       errs = []
       Array(hosts).flatten.each do |host|
         begin
-          remote_ssh_cmd(host, "gpg --list-secret-keys #{gpg} > /dev/null 2&>1")
+          remote_ssh_cmd(host, "gpg --list-secret-keys #{gpg} > /dev/null 2&>1", false, '-oBatchMode=yes')
         rescue
           errs << host
         end

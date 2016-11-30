@@ -404,6 +404,13 @@ namespace :pl do
     ssh_errs = []
     gpg_errs = []
 
+    if ENV['TEAM']
+      unless ENV['TEAM'] == 'release'
+        errs << "TEAM environment variable is #{ENV['TEAM']}. It should be 'release'"
+      end
+    else
+      errs << 'TEAM environment variable is not set. This should be set to release'
+    end
     # Check SSH access to the staging servers
     ssh_errs << Pkg::Util::Net.check_host_ssh(Pkg::Util.filter_configs('staging_server').values.uniq)
     # Check SSH access to the signing servers, with some windows special-ness
@@ -422,6 +429,8 @@ namespace :pl do
     gpg_errs << Pkg::Util::Net.check_host_gpg(Pkg::Config.apt_signing_server, Pkg::Config.gpg_key)
     gpg_errs << Pkg::Util::Net.check_host_gpg(Pkg::Config.distribution_server, Pkg::Config.gpg_key)
     gpg_errs.flatten!
+    # ignore gpg errors for hosts we couldn't ssh into
+    gpg_errs -= ssh_errs
     unless gpg_errs.empty?
       gpg_errs.each do |host|
         errs << "Secret key #{Pkg::Config.gpg_key} not found on #{host}"
@@ -433,32 +442,40 @@ namespace :pl do
     # we should add more checks here, but for now it should be fine.
     # Check for ability to sign OSX. Should just need to be able to unlock keychain
     begin
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.osx_signing_server, %Q(/usr/bin/security -q unlock-keychain -p "#{Pkg::Config.osx_signing_keychain_pw}" "#{Pkg::Config.osx_signing_keychain}"))
+      unless ssh_errs.include?(Pkg::Config.osx_signing_server)
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.osx_signing_server, %Q(/usr/bin/security -q unlock-keychain -p "#{Pkg::Config.osx_signing_keychain_pw}" "#{Pkg::Config.osx_signing_keychain}"), false, '-oBatchMode=yes')
+      end
     rescue
       errs << "Unlocking the OSX keychain failed! Check the password in your .bashrc on #{Pkg::Config.osx_signing_server}"
     end
+
     if Pkg::Config.build_gem
       # Do we have stickler and nexus?
-      unless Pkg::Util::Misc.check_gem('stickler')
+      if Pkg::Util::Misc.check_gem('stickler')
+        %x(stickler list --server #{Pkg::Config.internal_stickler_host} > /dev/null 2>&1)
+        unless $? == 0
+          errs << "Listing gems at the stickler server #{Pkg::Config.internal_stickler_host} failed!"
+        end
+      else
         errs << "gem stickler not found"
       end
+
       unless Pkg::Util::Misc.check_gem('nexus')
         errs << "gem nexus not found"
-      end
-      # Can we access the internal hosts?
-      %x(stickler list --server #{Pkg::Config.internal_stickler_host} > /dev/null 2>&1)
-      unless $? == 0
-        errs << "Listing gems at the stickler server #{Pkg::Config.internal_stickler_host} failed!"
       end
       %x(gem list --source #{Pkg::Config.internal_nexus_host} > /dev/null 2>&1)
       unless $? == 0
         errs << "Listing gems at the nexus server #{Pkg::Config.internal_nexus_host} failed!"
       end
+
       # Do we have rubygems access set up
-      Pkg::Util::File.file_exists?("#{ENV['HOME']}/.gem/credentials", :required => true)
-      # Do we have permissions to publish this gem on rubygems
-      unless Pkg::Util::Misc.check_rubygems_ownership(Pkg::Config.gem_name)
-        errs << "You don't own #{Pkg::Config.gem_name} on rubygems.org"
+      if Pkg::Util::File.file_exists?("#{ENV['HOME']}/.gem/credentials")
+        # Do we have permissions to publish this gem on rubygems
+        unless Pkg::Util::Misc.check_rubygems_ownership(Pkg::Config.gem_name)
+          errs << "You don't own #{Pkg::Config.gem_name} on rubygems.org"
+        end
+      else
+        errs << "You haven't set up your .gem/credentials file for rubygems.org access"
       end
     end
 

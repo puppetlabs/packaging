@@ -23,9 +23,9 @@ module Pkg::Util::Execution
     # while also raising an exception if a command does not succeed (ala `sh "cmd"`).
     def ex(command, debug = false)
       puts "Executing '#{command}'..." if debug
-      ret = `#{command}`
+      ret = `#{command} 2>&1`
       unless Pkg::Util::Execution.success?
-        raise RuntimeError
+        raise "#{ret}"
       end
 
       if debug

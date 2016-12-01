@@ -39,7 +39,12 @@ namespace :pl do
               _, _, arch = Pkg::Util::Platform.parse_platform_tag(platform)
               url = "#{package_url}/#{platform_path}"
               puts "Fetching: Platform = #{platform}, URL = #{url}"
-              sh "#{wget} --quiet -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*#{arch}*' #{url}/"
+              #osx packages have no platform in their name
+              if platform =~ /^osx/
+                sh "#{wget} --quiet -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' #{url}/"
+              else
+                sh "#{wget} --quiet -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*#{arch}*' #{url}/"
+              end
             rescue => e
               warn "Encountered error fetching #{platform}:"
               warn e

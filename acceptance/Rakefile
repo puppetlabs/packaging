@@ -29,6 +29,17 @@ namespace :test do
     ]
     sh('beaker', *args)
   end
+
+  desc 'Tests basic artifact information w/packaging tools'
+  task :canary do
+    args = [
+      "--hosts=#{beaker_hosts}",
+      "--tests=tests/canary/",
+      keyfile_arg,
+      log_level_arg
+    ]
+    sh('beaker', *args)
+  end
 end
 
 # The default here is to provide a beaker-hostgenerator
@@ -41,7 +52,7 @@ end
 
 # This defaults to using all tests in the `tests` dir.
 def beaker_tests
-  ENV['TESTS'] || ENV['TEST'] || 'tests'
+  ENV['TESTS'] || ENV['TEST'] || 'tests/install'
 end
 
 # Default for keyfile is to not be provided keyfile is the

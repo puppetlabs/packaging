@@ -14,7 +14,7 @@ module Pkg::OSX
       Pkg::Util::Net.rsync_to(dmgs.join(" "), rsync_host_string, work_dir)
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, %Q[for dmg in #{dmgs.map { |d| File.basename(d, ".dmg") }.join(" ")}; do
         /usr/bin/hdiutil attach #{work_dir}/$dmg.dmg -mountpoint #{mount} -nobrowse -quiet ;
-        /usr/bin/security -v unlock-keychain -p "#{Pkg::Config.osx_signing_keychain_pw}" "#{Pkg::Config.osx_signing_keychain}" ;
+        /usr/bin/security -q unlock-keychain -p "#{Pkg::Config.osx_signing_keychain_pw}" "#{Pkg::Config.osx_signing_keychain}" ;
           for pkg in $(ls #{mount}/*.pkg | xargs -n 1 basename); do
             /usr/bin/productsign --keychain "#{Pkg::Config.osx_signing_keychain}" --sign "#{Pkg::Config.osx_signing_cert}" #{mount}/$pkg #{signed}/$pkg ;
           done

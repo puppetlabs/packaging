@@ -24,8 +24,8 @@ def debuild(args)
   results_dir = args[:work_dir]
   begin
     sh "debuild --no-lintian -uc -us"
-  rescue
-    fail "Something went wrong. Hopefully the backscroll or #{results_dir}/#{Pkg::Config.project}_#{Pkg::Config.debversion}.build file has a clue."
+  rescue => e
+    fail "Something went wrong. Hopefully the backscroll or #{results_dir}/#{Pkg::Config.project}_#{Pkg::Config.debversion}.build file has a clue.\n#{e}"
   end
 end
 

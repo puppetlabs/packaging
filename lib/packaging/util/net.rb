@@ -237,7 +237,8 @@ module Pkg::Util::Net
       end
       begin
         Pkg::Util::Execution.ex("#{curl} #{post_string}")
-      rescue RuntimeError
+      rescue RuntimeError => e
+        puts e
         return false
       end
     end

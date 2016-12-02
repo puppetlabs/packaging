@@ -1,0 +1,62 @@
+require 'rake'
+# This Rakefile is here to provide convenience for a few things:
+# 1. Getting a new user to easily be able to run acceptance tests
+#     for the first time
+# 2. Providing CI tasks, so that they're maintained in-repo, and
+#     that it's easy for a user to reproduce CI failures
+# 3. Providing shortcuts to the most often used test configs
+#
+# Providing a shortcut to a one-off beaker config that's not
+# used in automation or often by people should be suspect
+# and removed, if possible.
+
+desc 'default rake task, symlink -> "test:public"'
+task :default => ['test:public']
+# Couldn't specify a namespace default, looks like
+# I have to use the name twice. ugh. -ki 11.8.16
+desc 'test rake task, symlink -> "test:public"'
+task :test    => ['test:public']
+
+namespace :test do
+  desc 'Tests installs from publicly available build servers'
+  task :public do
+    args = [
+      "--hosts=#{beaker_hosts}",
+      "--tests=#{beaker_tests}",
+      '--pre-suite=pre_suite/public.rb',
+      keyfile_arg,
+      log_level_arg
+    ]
+    sh('beaker', *args)
+  end
+end
+
+# The default here is to provide a beaker-hostgenerator
+# string, which will use beaker's vmpooler hypervisor.
+# If that doesn't work for you, you'll need to use the
+# BEAKER_HOSTS env var to override this argument.
+def beaker_hosts
+  ENV['BEAKER_HOSTS'] || 'centos7-64a'
+end
+
+# This defaults to using all tests in the `tests` dir.
+def beaker_tests
+  ENV['TESTS'] || ENV['TEST'] || 'tests'
+end
+
+# Default for keyfile is to not be provided keyfile is the
+# key that beaker will use to SSH into the Systems Under
+# Test (SUTs).
+def keyfile_arg
+  return '' unless ENV['BEAKER_KEYFILE']
+  "--keyfile=#{ENV['BEAKER_KEYFILE']}"
+end
+
+# Beaker's log level argument
+# defaults to not being provided, so beaker's default
+# will be used.
+def log_level_arg
+  return '' unless ENV['BEAKER_LOG_LEVEL']
+  "--log-level=#{ENV['BEAKER_LOG_LEVEL']}"
+end
+

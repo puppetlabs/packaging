@@ -277,6 +277,19 @@ namespace :pl do
       uber_tasks.delete("remote:deploy_swix_rep") if Pkg::Config.swix_host == Pkg::Config.swix_staging_server
       uber_tasks.delete("remote:deploy_tar_repo") if Pkg::Config.tar_host == Pkg::Config.tar_staging_server
 
+      # I'm adding this check here because if we rework the task ordering we're
+      # probably going to need to muck about in here. -morgan
+      if uber_tasks.first == 'jenkins:retrieve'
+        # We need to run retrieve before we can delete tasks based on what
+        # packages were built. Before this we were deleting tasks based on files
+        # in a directory that hadn't been populated yet, so this would either
+        # fail since all tasks would be removed, or would be running based on
+        # files left over in packaging from the last ship.
+        puts 'Do you want to run pl:jenkins:retrieve?'
+        Rake::Task['pl:jenkins:retrieve'].invoke if Pkg::Util.ask_yes_or_no
+        uber_tasks.delete('jenkins:retrieve')
+      end
+
       # Don't update and deploy repos if packages don't exist
       # If we can't find a certain file type, delete the task
       if Dir.glob("pkg/**/*.deb").empty?

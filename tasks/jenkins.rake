@@ -277,6 +277,9 @@ namespace :pl do
       uber_tasks.delete("remote:deploy_swix_rep") if Pkg::Config.swix_host == Pkg::Config.swix_staging_server
       uber_tasks.delete("remote:deploy_tar_repo") if Pkg::Config.tar_host == Pkg::Config.tar_staging_server
 
+      # Delete the ship_gem task if we aren't building gems
+      uber_tasks.delete("ship_gem") unless Pkg::Config.build_gem
+
       # I'm adding this check here because if we rework the task ordering we're
       # probably going to need to muck about in here. -morgan
       if uber_tasks.first == 'jenkins:retrieve'

@@ -54,14 +54,12 @@ module Pkg::Gem
         fail unless ret.include? "Created"
         puts "#{file} pushed to nexus server at #{Pkg::Config.internal_nexus_host}"
       end
-    rescue => e
+    rescue
       puts "###########################################"
       puts "#  Nexus failed, ensure the nexus gem is installed,"
       puts "#  you have access to #{Pkg::Config.internal_nexus_host}"
       puts "#  and your settings in #{@nexus_config} are correct"
       puts "###########################################"
-      puts
-      puts e
     end
 
     # Ship a Ruby gem file to a Stickler server, because
@@ -75,13 +73,11 @@ module Pkg::Gem
         Pkg::Util::Execution.ex(cmd)
         puts "#{file} pushed to stickler server at #{Pkg::Config.internal_stickler_host}"
       end
-    rescue => e
+    rescue
       puts "###########################################"
       puts "#  Stickler failed, ensure it's installed"
       puts "#  and you have access to #{Pkg::Config.internal_stickler_host}"
       puts "###########################################"
-      puts
-      puts e
     end
 
     # Use rsync to deploy a file and any associated detached signatures,

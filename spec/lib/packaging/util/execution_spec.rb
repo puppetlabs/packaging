@@ -28,13 +28,13 @@ describe "Pkg::Util::Execution" do
 
   describe "#ex" do
     it "should raise an error if the command fails" do
-      Pkg::Util::Execution.should_receive(:`).with("#{command} 2>&1").and_return(true)
+      Pkg::Util::Execution.should_receive(:`).with(command).and_return(true)
       Pkg::Util::Execution.should_receive(:success?).and_return(false)
       expect{ Pkg::Util::Execution.ex(command) }.to raise_error(RuntimeError)
     end
 
     it "should return the output of the command for success" do
-      Pkg::Util::Execution.should_receive(:`).with("#{command} 2>&1").and_return(output)
+      Pkg::Util::Execution.should_receive(:`).with(command).and_return(output)
       Pkg::Util::Execution.should_receive(:success?).and_return(true)
       Pkg::Util::Execution.ex(command).should == output
     end

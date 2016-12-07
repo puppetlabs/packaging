@@ -10,6 +10,11 @@ module Pkg
         '7.1' => { :architectures => ['power'], :repo => false, :package_format => 'rpm', },
       },
 
+      'cisco-wrlinux' => {
+        '5' => { :architectures => ['x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
+        '7' => { :architectures => ['x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
+      },
+
       'cumulus' => {
         '2.2' => { :codename => 'cumulus', :architectures => ['amd64'], :repo => true, :package_format => 'deb', },
       },

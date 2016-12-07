@@ -50,9 +50,17 @@ namespace :pl do
               warn e
             end
           end
+
           # also want to fetch the yaml and the signing bundle
           sh "#{wget} --quiet -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*.yaml' #{package_url}/#{remote_target}/"
           sh "#{wget} --quiet -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' --accept '*.tar.gz' #{package_url}/#{remote_target}/"
+
+          # Recursively remove empty directories under pkg
+          Dir.glob("#{local_target}/**/*").select { |f| File.directory? f }.sort.uniq.reverse.each do |path|
+            if Dir["#{path}/*"].empty?
+              Dir.delete "#{path}"
+            end
+          end
         else
           # For the next person who needs to look these flags up:
           # -r = recursive

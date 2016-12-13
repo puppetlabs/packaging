@@ -39,4 +39,18 @@ describe "Pkg::Util::Execution" do
       Pkg::Util::Execution.ex(command).should == output
     end
   end
+
+  describe "#capture3" do
+    it "should raise an error if the command fails" do
+      Open3.should_receive(:capture3).with(command).and_return([output, '', 1])
+      Pkg::Util::Execution.should_receive(:success?).with(1).and_return(false)
+      expect{ Pkg::Util::Execution.capture3(command) }.to raise_error(RuntimeError, /#{output}/)
+    end
+
+    it "should return the output of the command for success" do
+      Open3.should_receive(:capture3).with(command).and_return([output, '', 0])
+      Pkg::Util::Execution.should_receive(:success?).with(0).and_return(true)
+      Pkg::Util::Execution.capture3(command).should == [output, '', 0]
+    end
+  end
 end

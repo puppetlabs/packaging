@@ -21,13 +21,15 @@ module Pkg::Util::Gpg
 
     def kill_keychain
       if keychain
-        Pkg::Util::Execution.ex("#{keychain} -k mine")
+        stdout, _, _ = Pkg::Util::Execution.capture3("#{keychain} -k mine")
+        stdout
       end
     end
 
     def start_keychain
       if keychain
-        keychain_output = Pkg::Util::Execution.ex("#{keychain} -q --agents gpg --eval #{Pkg::Config.gpg_key}").chomp
+        keychain_output, _, _ = Pkg::Util::Execution.capture3("#{keychain} -q --agents gpg --eval #{Pkg::Config.gpg_key}")
+        keychain_output.chomp!
         new_env = keychain_output.match(/GPG_AGENT_INFO=([^;]*)/)
         ENV["GPG_AGENT_INFO"] = new_env[1]
       else
@@ -40,7 +42,8 @@ module Pkg::Util::Gpg
 
       if gpg
         use_tty = "--no-tty --use-agent" if ENV['RPM_GPG_AGENT']
-        Pkg::Util::Execution.ex("#{gpg} #{use_tty} --armor --detach-sign -u #{Pkg::Config.gpg_key} #{file}")
+        stdout, _, _ = Pkg::Util::Execution.capture3("#{gpg} #{use_tty} --armor --detach-sign -u #{Pkg::Config.gpg_key} #{file}")
+        stdout
       else
         fail "No gpg available. Cannot sign #{file}."
       end

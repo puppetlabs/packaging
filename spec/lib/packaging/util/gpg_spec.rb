@@ -40,13 +40,13 @@ describe "Pkg::Util::Gpg" do
       ENV['RPM_GPG_AGENT'] = 'blerg'
       additional_flags = "--no-tty --use-agent"
       Pkg::Util::Tool.should_receive(:find_tool).with('gpg').and_return(gpg)
-      Pkg::Util::Execution.should_receive(:ex).with("#{gpg}\s#{additional_flags}\s--armor --detach-sign -u #{gpg_key} #{target_file}")
+      Pkg::Util::Execution.should_receive(:capture3).with("#{gpg}\s#{additional_flags}\s--armor --detach-sign -u #{gpg_key} #{target_file}")
       Pkg::Util::Gpg.sign_file(target_file)
     end
 
     it 'signs without extra flags when RPM_GPG_AGENT is not set' do
       Pkg::Util::Tool.should_receive(:find_tool).with('gpg').and_return(gpg)
-      Pkg::Util::Execution.should_receive(:ex).with("#{gpg}\s\s--armor --detach-sign -u #{gpg_key} #{target_file}")
+      Pkg::Util::Execution.should_receive(:capture3).with("#{gpg}\s\s--armor --detach-sign -u #{gpg_key} #{target_file}")
       Pkg::Util::Gpg.sign_file(target_file)
     end
   end

@@ -42,17 +42,17 @@ describe "Pkg::Rpm::Repo" do
 
     it "warns if there are no rpm repos available for the build" do
       Pkg::Util::Tool.should_receive(:find_tool).with("wget", {:required => true}).and_return(wget)
-      Pkg::Util::Execution.should_receive(:ex).with("#{wget} --spider -r -l 5 --no-parent #{base_url}/repos/ 2>&1").and_return("")
+      Pkg::Util::Execution.should_receive(:capture3).with("#{wget} --spider -r -l 5 --no-parent #{base_url}/repos/ 2>&1").and_return("")
       Pkg::Rpm::Repo.should_receive(:warn).with("No rpm repos were found to generate configs from!")
       Pkg::Rpm::Repo.generate_repo_configs
     end
 
     it "writes the expected repo configs to disk" do
       Pkg::Util::Tool.should_receive(:find_tool).with("wget", {:required => true}).and_return(wget)
-      Pkg::Util::Execution.should_receive(:ex).with("#{wget} --spider -r -l 5 --no-parent #{base_url}/repos/ 2>&1").and_return(wget_results + wget_garbage)
+      Pkg::Util::Execution.should_receive(:capture3).with("#{wget} --spider -r -l 5 --no-parent #{base_url}/repos/ 2>&1").and_return(wget_results + wget_garbage)
       wget_results.split.each do |result|
         cur_result = result.chomp('repodata/')
-        Pkg::Util::Execution.should_receive(:ex).with("#{wget} --spider -r -l 1 --no-parent #{cur_result} 2>&1").and_return("#{cur_result}/thing.rpm")
+        Pkg::Util::Execution.should_receive(:capture3).with("#{wget} --spider -r -l 1 --no-parent #{cur_result} 2>&1").and_return("#{cur_result}/thing.rpm")
       end
       FileUtils.should_receive(:mkdir_p).with("pkg/repo_configs/rpm")
       config = []
@@ -74,7 +74,7 @@ describe "Pkg::Rpm::Repo" do
     it "fails if there are no deb repos available for the build" do
       Pkg::Util::Tool.should_receive(:find_tool).with("wget", {:required => true}).and_return(wget)
       FileUtils.should_receive(:mkdir_p).with("pkg/repo_configs").and_return(true)
-      Pkg::Util::Execution.should_receive(:ex).with("#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{base_url}/repo_configs/rpm/").and_raise(RuntimeError)
+      Pkg::Util::Execution.should_receive(:capture3).with("#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{base_url}/repo_configs/rpm/").and_raise(RuntimeError)
       expect {Pkg::Rpm::Repo.retrieve_repo_configs}.to raise_error(RuntimeError, /Couldn't retrieve rpm yum repo configs/)
     end
   end
@@ -93,7 +93,7 @@ describe "Pkg::Rpm::Repo" do
       Dir.should_receive(:chdir).with(target_directory).and_yield
       Pkg::Util::Tool.should_receive(:find_tool).with('createrepo', :required => true).and_return(command)
       Pkg::Rpm::Repo.should_receive(:repo_creation_command).with(command).and_return("run this thing")
-      Pkg::Util::Execution.should_receive(:ex).with("bash -c 'run this thing'")
+      Pkg::Util::Execution.should_receive(:capture3).with("bash -c 'run this thing'")
       Pkg::Rpm::Repo.create_repos(target_directory)
     end
   end

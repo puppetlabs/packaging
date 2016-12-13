@@ -124,19 +124,19 @@ describe "Pkg::Util::Net" do
 
     it "should rsync 'thing' to 'foo@bar:/home/foo' with flags '#{defaults} --ignore-existing'" do
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
-      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} #{defaults} --ignore-existing thing foo@bar:/home/foo", true)
+      Pkg::Util::Execution.should_receive(:capture3).with("#{rsync} #{defaults} --ignore-existing thing foo@bar:/home/foo", true)
       Pkg::Util::Net.rsync_to("thing", "foo@bar", "/home/foo")
     end
 
     it "rsyncs 'thing' to 'foo@bar:/home/foo' with flags that don't include --ignore-existing" do
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
-      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} #{defaults} thing foo@bar:/home/foo", true)
+      Pkg::Util::Execution.should_receive(:capture3).with("#{rsync} #{defaults} thing foo@bar:/home/foo", true)
       Pkg::Util::Net.rsync_to("thing", "foo@bar", "/home/foo", extra_flags: [])
     end
 
     it "rsyncs 'thing' to 'foo@bar:/home/foo' with flags that don't include arbitrary flags" do
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
-      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} #{defaults} --foo-bar --and-another-flag thing foo@bar:/home/foo", true)
+      Pkg::Util::Execution.should_receive(:capture3).with("#{rsync} #{defaults} --foo-bar --and-another-flag thing foo@bar:/home/foo", true)
       Pkg::Util::Net.rsync_to("thing", "foo@bar", "/home/foo", extra_flags: ["--foo-bar", "--and-another-flag"])
     end
   end
@@ -144,7 +144,7 @@ describe "Pkg::Util::Net" do
   describe "#s3sync_to" do
     it "should fail if s3cmd is not present" do
       Pkg::Util::Tool.should_receive(:find_tool).with('s3cmd', :required => true).and_raise(RuntimeError)
-      Pkg::Util::Execution.should_not_receive(:ex).with("#{s3cmd} sync  'foo' s3://bar/boo/")
+      Pkg::Util::Execution.should_not_receive(:capture3).with("#{s3cmd} sync  'foo' s3://bar/boo/")
       expect{ Pkg::Util::Net.s3sync_to("foo", "bar", "boo") }.to raise_error(RuntimeError)
     end
 
@@ -157,14 +157,14 @@ describe "Pkg::Util::Net" do
     it "should s3 sync 'thing' to 's3://foo@bar/home/foo/' with no flags" do
       Pkg::Util::Tool.should_receive(:check_tool).with("s3cmd").and_return(s3cmd)
       Pkg::Util::File.should_receive(:file_exists?).with(File.join(ENV['HOME'], '.s3cfg')).and_return(true)
-      Pkg::Util::Execution.should_receive(:ex).with("#{s3cmd} sync  'thing' s3://foo@bar/home/foo/")
+      Pkg::Util::Execution.should_receive(:capture3).with("#{s3cmd} sync  'thing' s3://foo@bar/home/foo/")
       Pkg::Util::Net.s3sync_to("thing", "foo@bar", "home/foo")
     end
 
     it "should s3 sync 'thing' to 's3://foo@bar/home/foo/' with --delete-removed and --acl-public" do
       Pkg::Util::Tool.should_receive(:check_tool).with("s3cmd").and_return(s3cmd)
       Pkg::Util::File.should_receive(:file_exists?).with(File.join(ENV['HOME'], '.s3cfg')).and_return(true)
-      Pkg::Util::Execution.should_receive(:ex).with("#{s3cmd} sync --delete-removed --acl-public 'thing' s3://foo@bar/home/foo/")
+      Pkg::Util::Execution.should_receive(:capture3).with("#{s3cmd} sync --delete-removed --acl-public 'thing' s3://foo@bar/home/foo/")
       Pkg::Util::Net.s3sync_to("thing", "foo@bar", "home/foo", ["--delete-removed", "--acl-public"])
     end
   end
@@ -179,19 +179,19 @@ describe "Pkg::Util::Net" do
 
     it "should not include the flags '--ignore-existing' by default" do
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
-      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} #{defaults} foo@bar:thing /home/foo", true)
+      Pkg::Util::Execution.should_receive(:capture3).with("#{rsync} #{defaults} foo@bar:thing /home/foo", true)
       Pkg::Util::Net.rsync_from("thing", "foo@bar", "/home/foo")
     end
 
     it "should rsync 'thing' from 'foo@bar' to '/home/foo' with flags '#{defaults}'" do
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
-      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} #{defaults} foo@bar:thing /home/foo", true)
+      Pkg::Util::Execution.should_receive(:capture3).with("#{rsync} #{defaults} foo@bar:thing /home/foo", true)
       Pkg::Util::Net.rsync_from("thing", "foo@bar", "/home/foo")
     end
 
     it "rsyncs 'thing' from 'foo@bar:/home/foo' with flags that don't include arbitrary flags" do
       Pkg::Util::Tool.should_receive(:check_tool).with("rsync").and_return(rsync)
-      Pkg::Util::Execution.should_receive(:ex).with("#{rsync} #{defaults} --foo-bar --and-another-flag foo@bar:thing /home/foo", true)
+      Pkg::Util::Execution.should_receive(:capture3).with("#{rsync} #{defaults} --foo-bar --and-another-flag foo@bar:thing /home/foo", true)
       Pkg::Util::Net.rsync_from("thing", "foo@bar", "/home/foo", extra_flags: ["--foo-bar", "--and-another-flag"])
     end
   end
@@ -203,26 +203,26 @@ describe "Pkg::Util::Net" do
 
     it "should return false on failure" do
       Pkg::Util::Tool.should_receive(:check_tool).with("curl").and_return(curl)
-      Pkg::Util::Execution.should_receive(:ex).with("#{curl} -i #{target_uri}").and_return(false)
-      Pkg::Util::Net.curl_form_data(target_uri).should be_false
+      Pkg::Util::Execution.should_receive(:capture3).with("#{curl} -i #{target_uri}").and_return(['stdout', 'stderr', 1])
+      Pkg::Util::Net.curl_form_data(target_uri).should eq(['stdout', 1])
     end
 
 
     it "should curl with just the uri" do
       Pkg::Util::Tool.should_receive(:check_tool).with("curl").and_return(curl)
-      Pkg::Util::Execution.should_receive(:ex).with("#{curl} -i #{target_uri}")
+      Pkg::Util::Execution.should_receive(:capture3).with("#{curl} -i #{target_uri}")
       Pkg::Util::Net.curl_form_data(target_uri)
     end
 
     it "should curl with the form data and uri" do
       Pkg::Util::Tool.should_receive(:check_tool).with("curl").and_return(curl)
-      Pkg::Util::Execution.should_receive(:ex).with("#{curl} -i #{form_data[0]} #{target_uri}")
+      Pkg::Util::Execution.should_receive(:capture3).with("#{curl} -i #{form_data[0]} #{target_uri}")
       Pkg::Util::Net.curl_form_data(target_uri, form_data)
     end
 
     it "should curl with form data, uri, and be quiet" do
       Pkg::Util::Tool.should_receive(:check_tool).with("curl").and_return(curl)
-      Pkg::Util::Execution.should_receive(:ex).with("#{curl} -i #{form_data[0]} #{target_uri} >/dev/null 2>&1")
+      Pkg::Util::Execution.should_receive(:capture3).with("#{curl} -i #{form_data[0]} #{target_uri} >/dev/null 2>&1")
       Pkg::Util::Net.curl_form_data(target_uri, form_data, options)
     end
 

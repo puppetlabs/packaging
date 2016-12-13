@@ -154,7 +154,7 @@ module Pkg::Util::Net
     end
 
     # A generic rsync execution method that wraps rsync_cmd in a
-    # call to Pkg::Util::Execution#ex()
+    # call to Pkg::Util::Execution#capture3()
     def rsync_exec(source, opts = {})
       options = {
         bin: Pkg::Util::Tool.check_tool('rsync'),
@@ -164,7 +164,8 @@ module Pkg::Util::Net
         extra_flags: nil,
         dryrun: ENV['DRYRUN'] }.merge(opts.delete_if { |_, value| value.nil? })
 
-      Pkg::Util::Execution.ex(rsync_cmd(source, options), true)
+      stdout, _, _ = Pkg::Util::Execution.capture3(rsync_cmd(source, options), true)
+      stdout
     end
 
     # A wrapper method to maintain the existing interface for executing
@@ -197,7 +198,8 @@ module Pkg::Util::Net
       s3cmd = Pkg::Util::Tool.check_tool('s3cmd')
 
       if Pkg::Util::File.file_exists?(File.join(ENV['HOME'], '.s3cfg'))
-        Pkg::Util::Execution.ex("#{s3cmd} sync #{flags.join(' ')} '#{source}' s3://#{target_bucket}/#{target_directory}/")
+        stdout, _, _ = Pkg::Util::Execution.capture3("#{s3cmd} sync #{flags.join(' ')} '#{source}' s3://#{target_bucket}/#{target_directory}/")
+        stdout
       else
         fail "#{File.join(ENV['HOME'], '.s3cfg')} does not exist. It is required to ship files using s3cmd."
       end
@@ -236,7 +238,8 @@ module Pkg::Util::Net
         post_string << " >#{Pkg::Util::OS::DEVNULL} 2>&1"
       end
       begin
-        Pkg::Util::Execution.ex("#{curl} #{post_string}")
+        stdout, _, retval = Pkg::Util::Execution.capture3("#{curl} #{post_string}")
+        return stdout, retval
       rescue RuntimeError => e
         puts e
         return false
@@ -251,7 +254,8 @@ module Pkg::Util::Net
         '--write-out "%{http_code}"',
         '--output /dev/null'
       ]
-      Pkg::Util::Net.curl_form_data(uri, data)
+      stdout, _ = Pkg::Util::Net.curl_form_data(uri, data)
+      stdout
     end
 
     # Use the provided URL string to print important information with

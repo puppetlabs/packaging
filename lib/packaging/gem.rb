@@ -44,14 +44,14 @@ module Pkg::Gem
       if ENV['DRYRUN']
         puts "[DRY-RUN] #{cmd}"
       else
-        ret = Pkg::Util::Execution.ex(cmd, true)
+        stdout, _, _ = Pkg::Util::Execution.capture3(cmd, true)
         # The `gem nexus` command always returns `0` regardless of what the
         # command results in. In order to properly handle fail cases, this
         # checks for the success case and fails otherwise. The `ex` command
         # above will print any output, so the user should have enough info
         # to debug the failure, and potentially update this fail case if
         # needed.
-        fail unless ret.include? "Created"
+        fail unless stdout.include? "Created"
         puts "#{file} pushed to nexus server at #{Pkg::Config.internal_nexus_host}"
       end
     rescue => e
@@ -72,7 +72,7 @@ module Pkg::Gem
       if ENV['DRYRUN']
         puts "[DRY-RUN] #{cmd}"
       else
-        Pkg::Util::Execution.ex(cmd)
+        Pkg::Util::Execution.capture3(cmd)
         puts "#{file} pushed to stickler server at #{Pkg::Config.internal_stickler_host}"
       end
     rescue => e
@@ -95,7 +95,7 @@ module Pkg::Gem
     # any idea who you are.
     def ship_to_rubygems(file)
       Pkg::Util::File.file_exists?("#{ENV['HOME']}/.gem/credentials", :required => true)
-      Pkg::Util::Execution.ex("gem push #{file}")
+      Pkg::Util::Execution.capture3("gem push #{file}")
     end
   end
 end

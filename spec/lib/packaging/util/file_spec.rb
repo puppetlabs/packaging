@@ -18,35 +18,35 @@ describe "Pkg::Util::File" do
 
     it "raises an exception if the source doesn't exist" do
       Pkg::Util::File.should_receive(:file_exists?).with(source, {:required => true}).and_raise(RuntimeError)
-      Pkg::Util::Execution.should_not_receive(:ex)
+      Pkg::Util::Execution.should_not_receive(:capture3)
       expect { Pkg::Util::File.untar_into(source) }.to raise_error(RuntimeError)
     end
 
     it "unpacks the tarball to the current directory if no target is passed" do
       Pkg::Util::File.should_receive(:file_exists?).with(source, {:required => true}) { true }
-      Pkg::Util::Execution.should_receive(:ex).with("#{tar}   -xf #{source}")
+      Pkg::Util::Execution.should_receive(:capture3).with("#{tar}   -xf #{source}")
       Pkg::Util::File.untar_into(source)
     end
 
     it "unpacks the tarball to the current directory with options if no target is passed" do
       Pkg::Util::File.should_receive(:file_exists?).with(source, {:required => true}) { true }
-      Pkg::Util::Execution.should_receive(:ex).with("#{tar} #{options}  -xf #{source}")
+      Pkg::Util::Execution.should_receive(:capture3).with("#{tar} #{options}  -xf #{source}")
       Pkg::Util::File.untar_into(source, nil, options)
     end
 
     it "unpacks the tarball into the target" do
-      File.stub(:exist?).with(source) { true }
+      File.stub(:capture3ist?).with(source) { true }
       Pkg::Util::File.should_receive(:file_exists?).with(source, {:required => true}) { true }
       Pkg::Util::File.should_receive(:file_writable?).with(target) { true }
-      Pkg::Util::Execution.should_receive(:ex).with("#{tar}  -C #{target} -xf #{source}")
+      Pkg::Util::Execution.should_receive(:capture3).with("#{tar}  -C #{target} -xf #{source}")
       Pkg::Util::File.untar_into(source, target)
     end
 
     it "unpacks the tarball into the target with options passed" do
-      File.stub(:exist?).with(source) { true }
+      File.stub(:capture3ist?).with(source) { true }
       Pkg::Util::File.should_receive(:file_exists?).with(source, {:required => true}) { true }
       Pkg::Util::File.should_receive(:file_writable?).with(target) { true }
-      Pkg::Util::Execution.should_receive(:ex).with("#{tar} #{options} -C #{target} -xf #{source}")
+      Pkg::Util::Execution.should_receive(:capture3).with("#{tar} #{options} -C #{target} -xf #{source}")
       Pkg::Util::File.untar_into(source, target, options)
     end
   end

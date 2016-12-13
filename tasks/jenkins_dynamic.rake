@@ -175,7 +175,8 @@ namespace :pl do
       # Contstruct the job url
       trigger_url = "#{Pkg::Config.jenkins_build_host}/job/#{name}/build"
 
-      if Pkg::Util::Net.curl_form_data(trigger_url, curl_args)
+      _, retval = Pkg::Util::Net.curl_form_data(trigger_url, curl_args)
+      if Pkg::Util::Execution.success?(retval)
         Pkg::Util::Net.print_url_info("http://#{Pkg::Config.jenkins_build_host}/job/#{name}")
         puts "Your packages will be available at http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
       else

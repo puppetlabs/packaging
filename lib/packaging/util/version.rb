@@ -9,21 +9,22 @@ module Pkg::Util::Version
 
     def git_co(ref)
       Pkg::Util.in_project_root do
-        Pkg::Util::Execution.ex("#{GIT} reset --hard ; #{GIT} checkout #{ref}")
-        $?.success? or fail "Could not checkout #{ref} git branch to build package from...exiting"
+        _, _, ret = Pkg::Util::Execution.capture3("#{GIT} reset --hard ; #{GIT} checkout #{ref}")
+        Pkg::Util::Execution.success?(ret) or fail "Could not checkout #{ref} git branch to build package from...exiting"
       end
     end
 
     def git_tagged?
       Pkg::Util.in_project_root do
-        Pkg::Util::Execution.ex("#{GIT} describe >#{DEVNULL} 2>&1")
-        $?.success?
+        _, _, ret = Pkg::Util::Execution.capture3("#{GIT} describe >#{DEVNULL} 2>&1")
+        Pkg::Util::Execution.success?(ret)
       end
     end
 
     def git_describe
       Pkg::Util.in_project_root do
-        Pkg::Util::Execution.ex("#{GIT} describe").strip
+        stdout, _, _ = Pkg::Util::Execution.capture3("#{GIT} describe")
+        stdout.strip
       end
     end
 
@@ -34,14 +35,16 @@ module Pkg::Util::Version
     # but I'll leave that discretion up to you.
     def git_sha(length = 40)
       Pkg::Util.in_project_root do
-        Pkg::Util::Execution.ex("#{GIT} rev-parse --short=#{length} HEAD").strip
+        stdout, _, _ = Pkg::Util::Execution.capture3("#{GIT} rev-parse --short=#{length} HEAD")
+        stdout.strip
       end
     end
 
     # Return the ref type of HEAD on the current branch
     def git_ref_type
       Pkg::Util.in_project_root do
-        Pkg::Util::Execution.ex("#{GIT} cat-file -t #{git_describe}").strip
+        stdout, _, _ = Pkg::Util::Execution.capture3("#{GIT} cat-file -t #{git_describe}")
+        stdout.strip
       end
     end
 
@@ -57,8 +60,8 @@ module Pkg::Util::Version
     # Return true if we're in a git repo, otherwise false
     def is_git_repo?
       Pkg::Util.in_project_root do
-        Pkg::Util::Execution.ex("#{GIT} rev-parse --git-dir > #{DEVNULL} 2>&1")
-        $?.success?
+        _, _, ret = Pkg::Util::Execution.capture3("#{GIT} rev-parse --git-dir > #{DEVNULL} 2>&1")
+        Pkg::Util::Execution.success?(ret)
       end
     end
 
@@ -67,7 +70,8 @@ module Pkg::Util::Version
     # Return the basename of the project repo
     def git_project_name
       Pkg::Util.in_project_root do
-        Pkg::Util::Execution.ex("#{GIT} config --get remote.origin.url").split('/')[-1].chomp(".git").chomp
+        stdout, _, _ = Pkg::Util::Execution.capture3("#{GIT} config --get remote.origin.url")
+        stdout.split('/')[-1].chomp(".git").chomp
       end
     end
 
@@ -101,8 +105,8 @@ module Pkg::Util::Version
     # This is a stub to ease testing...
     def run_git_describe_internal
       Pkg::Util.in_project_root do
-        raw = Pkg::Util::Execution.ex("#{GIT} describe --tags --dirty 2>#{DEVNULL}")
-        $?.success? ? raw : nil
+        raw, _, ret = Pkg::Util::Execution.capture3("#{GIT} describe --tags --dirty 2>#{DEVNULL}")
+        Pkg::Util::Execution.success?(ret) ? raw : nil
       end
     end
 
@@ -116,7 +120,8 @@ module Pkg::Util::Version
 
     def uname_r
       uname = Pkg::Util::Tool.find_tool('uname', :required => true)
-      Pkg::Util::Execution.ex("#{uname} -r").chomp
+      stdout, _, _ = Pkg::Util::Execution.capture3("#{uname} -r")
+      stdout.chomp
     end
 
     def get_ips_version
@@ -268,7 +273,8 @@ module Pkg::Util::Version
         nil
       elsif File.exists?('/etc/redhat-release')
         rpm = Pkg::Util::Tool.find_tool('rpm', :required => true)
-        return Pkg::Util::Execution.ex("#{rpm} -q --qf \"%{VERSION}\" $(#{rpm} -q --whatprovides /etc/redhat-release )")
+        stdout, _, _ = Pkg::Util::Execution.capture3("#{rpm} -q --qf \"%{VERSION}\" $(#{rpm} -q --whatprovides /etc/redhat-release )")
+        stdout
       end
     end
 

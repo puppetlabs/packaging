@@ -29,14 +29,14 @@ module Pkg::Deb::Repo
       # First test if the directory even exists
       #
       begin
-        wget_results = Pkg::Util::Execution.ex("#{wget} --spider -r -l 1 --no-parent #{repo_base} 2>&1")
+        stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} --spider -r -l 1 --no-parent #{repo_base} 2>&1")
       rescue RuntimeError
         warn "No debian repos available for #{Pkg::Config.project} at #{Pkg::Config.ref}."
         return
       end
 
       # We want to exclude index and robots files and only include the http: prefixed elements
-      repo_urls = wget_results.split.uniq.reject { |x| x =~ /\?|index|robots/ }.select { |x| x =~ /http:/ }.map { |x| x.chomp('/') }
+      repo_urls = stdout.split.uniq.reject { |x| x =~ /\?|index|robots/ }.select { |x| x =~ /http:/ }.map { |x| x.chomp('/') }
 
 
       # Create apt sources.list files that can be added to hosts for installing
@@ -61,9 +61,10 @@ module Pkg::Deb::Repo
       FileUtils.mkdir_p("pkg/#{target}")
       config_url = "#{base_url}/#{target}/deb/"
       begin
-        Pkg::Util::Execution.ex("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
-      rescue
-        fail "Couldn't retrieve deb apt repo configs. See preceding http response for more info."
+        stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
+        stdout
+      rescue => e
+        fail "Couldn't retrieve deb apt repo configs.\n#{e}"
       end
     end
 
@@ -164,7 +165,8 @@ Description: #{message} for #{dist}
 SignWith: #{Pkg::Config.gpg_key}"
             end
 
-            Pkg::Util::Execution.ex("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
+            stdout, _, _ = Pkg::Util::Execution.capture3("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
+            stdout
           end
         end
       else

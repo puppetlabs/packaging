@@ -50,19 +50,19 @@ describe "Pkg::Util::Version" do
 
     it "returns a sha if the repo is not tagged" do
       Pkg::Util::Version.should_receive(:git_ref_type).and_return("sha")
-      Pkg::Util::Execution.should_receive(:ex).with("#{Pkg::Util::Tool::GIT} rev-parse --short=40 HEAD").and_return(sha)
+      Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} rev-parse --short=40 HEAD").and_return(sha)
       Pkg::Util::Version.git_sha_or_tag
     end
 
     it "returns a short sha if the repo is not tagged and short is specified" do
       Pkg::Util::Version.should_receive(:git_ref_type).and_return("sha")
-      Pkg::Util::Execution.should_receive(:ex).with("#{Pkg::Util::Tool::GIT} rev-parse --short=7 HEAD").and_return(short_sha)
+      Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} rev-parse --short=7 HEAD").and_return(short_sha)
       Pkg::Util::Version.git_sha_or_tag(7)
     end
 
     it "returns a tag if the repo is tagged" do
       Pkg::Util::Version.should_receive(:git_ref_type).and_return("tag")
-      Pkg::Util::Execution.should_receive(:ex).with("#{Pkg::Util::Tool::GIT} describe").and_return(tag)
+      Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} describe").and_return(tag)
       Pkg::Util::Version.git_sha_or_tag
     end
   end

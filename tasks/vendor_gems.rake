@@ -100,11 +100,15 @@ if Pkg::Config.pre_tar_task
       # Cache the gems
       definition.specs.each do |spec|
         # Fetch Rubygem specs
-        Bundler::Fetcher.fetch(spec) if spec.source.is_a?(Bundler::Source::Rubygems)
+        if spec.source.respond_to?(:fetch_gem, true)
+          spec.source.send(:fetch_gem, spec) if spec.source.is_a?(Bundler::Source::Rubygems)
+        elsif Bundler::Fetcher.respond_to?(:fetch, true)
+          # Retain this call in case we are dealing with an older version of bundler.
+          Bundler::Fetcher.fetch(spec) if spec.source.is_a?(Bundler::Source::Rubygems)
+        end
         # Cache everything but bundler itself...
         spec.source.cache(spec) unless spec.name == "bundler"
       end
-
     end
   end
 end

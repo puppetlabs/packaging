@@ -105,6 +105,9 @@ if Pkg::Config.pre_tar_task
         elsif Bundler::Fetcher.respond_to?(:fetch, true)
           # Retain this call in case we are dealing with an older version of bundler.
           Bundler::Fetcher.fetch(spec) if spec.source.is_a?(Bundler::Source::Rubygems)
+        else
+          # shrug
+          fail "Cannot find a way to download the gem for caching! Did the `fetch_gem` method move?"
         end
         # Cache everything but bundler itself...
         spec.source.cache(spec) unless spec.name == "bundler"

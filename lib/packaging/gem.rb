@@ -96,6 +96,13 @@ module Pkg::Gem
     def ship_to_rubygems(file)
       Pkg::Util::File.file_exists?("#{ENV['HOME']}/.gem/credentials", :required => true)
       Pkg::Util::Execution.capture3("gem push #{file}")
+    rescue => e
+      puts "###########################################"
+      puts "#  Publishing to rubygems failed. Make sure your .gem/credentials"
+      puts "#  file is set up and you are an owner of #{Pkg::Config.gem_name}"
+      puts "###########################################"
+      puts
+      puts e
     end
   end
 end

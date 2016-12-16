@@ -258,12 +258,12 @@ module Pkg::Util::Net
     end
 
     def remote_set_ownership(host, owner, group, files)
-      remote_cmd = "for file in #{files.join(" ")}; do lsattr $file | grep -q '\\-i\\-'; if [ $? -eq 1 ]; then sudo chown #{owner}:#{group} $file; else echo \"$file is immutable\"; fi; done"
+      remote_cmd = "for file in #{files.join(" ")}; do if ! `lsattr $file | grep -q '\\-i\\-'`; then sudo chown #{owner}:#{group} $file; else echo \"$file is immutable\"; fi; done"
       Pkg::Util::Net.remote_ssh_cmd(host, remote_cmd)
     end
 
     def remote_set_permissions(host, permissions, files)
-      remote_cmd = "for file in #{files.join(" ")}; do lsattr $file | grep -q '\\-i\\-'; if [ $? -eq 1 ]; then sudo chmod #{permissions} $file; else echo \"$file is immutable\"; fi; done"
+      remote_cmd = "for file in #{files.join(" ")}; do if ! `lsattr $file | grep -q '\\-i\\-'`; then sudo chmod #{permissions} $file; else echo \"$file is immutable\"; fi; done"
       Pkg::Util::Net.remote_ssh_cmd(host, remote_cmd)
     end
 

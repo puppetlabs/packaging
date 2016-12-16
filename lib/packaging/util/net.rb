@@ -64,8 +64,12 @@ module Pkg::Util::Net
       return errs
     end
 
-    def remote_ssh_cmd(target, command, capture_output = false, extra_options = '')
+    def remote_ssh_cmd(target, command, capture_output = false, extra_options = '', fail_fast = true)
       ssh = Pkg::Util::Tool.check_tool('ssh')
+
+      # we pass some pretty complicated commands in via ssh. We need this to fail
+      # if any part of the remote ssh command fails.
+      command = "set -e; #{command}" if fail_fast
       cmd = "#{ssh} #{extra_options} -t #{target} '#{command.gsub("'", "'\\\\''")}'"
 
       # This is NOT a good way to support this functionality.

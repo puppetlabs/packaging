@@ -42,6 +42,7 @@ module Pkg
         'f22' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
         'f23' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
         'f24' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
+        'f25' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
       },
 
       'huaweios' => {
@@ -73,6 +74,7 @@ module Pkg
         '15.04' => { :codename => 'vivid', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
         '15.10' => { :codename => 'wily', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
         '16.04' => { :codename => 'xenial', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
+        '16.10' => { :codename => 'yakkety', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
       },
 
       'windows' => {

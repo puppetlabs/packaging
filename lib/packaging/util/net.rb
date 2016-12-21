@@ -64,12 +64,8 @@ module Pkg::Util::Net
       return errs
     end
 
-    def remote_ssh_cmd(target, command, capture_output = false, extra_options = '', fail_fast = true)
+    def remote_ssh_cmd(target, command, capture_output = false, extra_options = '')
       ssh = Pkg::Util::Tool.check_tool('ssh')
-
-      # we pass some pretty complicated commands in via ssh. We need this to fail
-      # if any part of the remote ssh command fails.
-      command = "set -e; #{command}" if fail_fast
       cmd = "#{ssh} #{extra_options} -t #{target} '#{command.gsub("'", "'\\\\''")}'"
 
       # This is NOT a good way to support this functionality.
@@ -262,12 +258,12 @@ module Pkg::Util::Net
     end
 
     def remote_set_ownership(host, owner, group, files)
-      remote_cmd = "for file in #{files.join(" ")}; do if ! `lsattr $file | grep -q '\\-i\\-'`; then sudo chown #{owner}:#{group} $file; else echo \"$file is immutable\"; fi; done"
+      remote_cmd = "for file in #{files.join(" ")}; do lsattr $file | grep -q '\\-i\\-'; if [ $? -eq 1 ]; then sudo chown #{owner}:#{group} $file; else echo \"$file is immutable\"; fi; done"
       Pkg::Util::Net.remote_ssh_cmd(host, remote_cmd)
     end
 
     def remote_set_permissions(host, permissions, files)
-      remote_cmd = "for file in #{files.join(" ")}; do if ! `lsattr $file | grep -q '\\-i\\-'`; then sudo chmod #{permissions} $file; else echo \"$file is immutable\"; fi; done"
+      remote_cmd = "for file in #{files.join(" ")}; do lsattr $file | grep -q '\\-i\\-'; if [ $? -eq 1 ]; then sudo chmod #{permissions} $file; else echo \"$file is immutable\"; fi; done"
       Pkg::Util::Net.remote_ssh_cmd(host, remote_cmd)
     end
 

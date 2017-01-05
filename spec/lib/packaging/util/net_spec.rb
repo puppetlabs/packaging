@@ -91,23 +91,23 @@ describe "Pkg::Util::Net" do
     end
 
     context "with output captured" do
-      it "should execute a command :foo on a host :bar using Open3" do
+      it "should execute a command :foo on a host :bar using Pkg::Util::Execution.capture3" do
         Pkg::Util::Tool.should_receive(:check_tool).with("ssh").and_return(ssh)
-        Open3.should_receive(:capture3).with("#{ssh}  -t foo 'set -e; bar'")
+        Pkg::Util::Execution.should_receive(:capture3).with("#{ssh}  -t foo 'set -e; bar'")
         Pkg::Util::Execution.should_receive(:success?).and_return(true)
         Pkg::Util::Net.remote_ssh_cmd("foo", "bar", true)
       end
 
       it "should escape single quotes in the command" do
         Pkg::Util::Tool.should_receive(:check_tool).with("ssh").and_return(ssh)
-        Open3.should_receive(:capture3).with("#{ssh}  -t foo 'set -e; b'\\''ar'")
+        Pkg::Util::Execution.should_receive(:capture3).with("#{ssh}  -t foo 'set -e; b'\\''ar'")
         Pkg::Util::Execution.should_receive(:success?).and_return(true)
         Pkg::Util::Net.remote_ssh_cmd("foo", "b'ar", true)
       end
 
       it "should raise an error if ssh fails" do
         Pkg::Util::Tool.should_receive(:check_tool).with("ssh").and_return(ssh)
-        Open3.should_receive(:capture3).with("#{ssh}  -t foo 'set -e; bar'")
+        Pkg::Util::Execution.should_receive(:capture3).with("#{ssh}  -t foo 'set -e; bar'")
         Pkg::Util::Execution.should_receive(:success?).and_return(false)
         expect{ Pkg::Util::Net.remote_ssh_cmd("foo", "bar", true) }.to raise_error(RuntimeError, /Remote ssh command failed./)
       end

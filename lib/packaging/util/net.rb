@@ -86,8 +86,7 @@ module Pkg::Util::Net
 
       puts "Executing '#{command}' on #{target}"
       if capture_output
-        require 'open3'
-        stdout, stderr, exitstatus = Open3.capture3(cmd)
+        stdout, stderr, exitstatus = Pkg::Util::Execution.capture3(cmd)
         Pkg::Util::Execution.success?(exitstatus) or raise "Remote ssh command failed."
         return stdout, stderr
       else

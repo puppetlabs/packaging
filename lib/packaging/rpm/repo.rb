@@ -83,7 +83,8 @@ module Pkg::Rpm::Repo
     def create_repos(directory = "repos")
       Dir.chdir(directory) do
         createrepo = Pkg::Util::Tool.check_tool('createrepo')
-        Pkg::Util::Execution.ex("bash -c '#{repo_creation_command(createrepo)}'")
+        stdout, _, _ = Pkg::Util::Execution.capture3("bash -c '#{repo_creation_command(createrepo)}'")
+        stdout
       end
     end
 
@@ -99,9 +100,10 @@ module Pkg::Rpm::Repo
       FileUtils.mkdir_p("pkg/#{target}")
       config_url = "#{base_url}/#{target}/rpm/"
       begin
-        Pkg::Util::Execution.ex("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
-      rescue
-        fail "Couldn't retrieve rpm yum repo configs. See preceding http response for more info."
+        stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
+        stdout
+      rescue => e
+        fail "Couldn't retrieve rpm yum repo configs.\n#{e}"
       end
     end
 
@@ -130,14 +132,16 @@ module Pkg::Rpm::Repo
       # repodata folders in them, and second that those same directories also
       # contain rpms
       #
-      repo_urls = Pkg::Util::Execution.ex("#{wget} --spider -r -l 5 --no-parent #{repo_base} 2>&1").split.uniq.reject { |x| x =~ /\?|index/ }.select { |x| x =~ /http:.*repodata\/$/ }
+      stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} --spider -r -l 5 --no-parent #{repo_base} 2>&1")
+      stdout = stdout.split.uniq.reject { |x| x =~ /\?|index/ }.select { |x| x =~ /http:.*repodata\/$/ }
 
       # RPMs will always exist at the same directory level as the repodata
       # folder, which means if we go up a level we should find rpms
       #
       yum_repos = []
-      repo_urls.map { |x| x.chomp('repodata/') }.each do |url|
-        unless Pkg::Util::Execution.ex("#{wget} --spider -r -l 1 --no-parent #{url} 2>&1").split.uniq.reject { |x| x =~ /\?|index/ }.select { |x| x =~ /http:.*\.rpm$/ }.empty?
+      stdout.map { |x| x.chomp('repodata/') }.each do |url|
+        output, _, _ = Pkg::Util::Execution.capture3("#{wget} --spider -r -l 1 --no-parent #{url} 2>&1")
+        unless output.split.uniq.reject { |x| x =~ /\?|index/ }.select { |x| x =~ /http:.*\.rpm$/ }.empty?
           yum_repos << url
         end
       end

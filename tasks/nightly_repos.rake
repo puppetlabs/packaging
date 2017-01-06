@@ -67,7 +67,8 @@ namespace :pl do
           if Pkg::Util::File.empty_dir?(path_to_repo)
             warn "Skipping #{name_of_archive} because it (#{path_to_repo}) has no files"
           else
-            Pkg::Util::Execution.ex("#{tar} --owner=0 --group=0 --create --gzip --file #{File.join("repos", "#{name_of_archive}.tar.gz")} #{path_to_repo}")
+            stdout, _, _ = Pkg::Util::Execution.capture3("#{tar} --owner=0 --group=0 --create --gzip --file #{File.join("repos", "#{name_of_archive}.tar.gz")} #{path_to_repo}")
+            stdout
           end
         end
       end
@@ -163,15 +164,15 @@ namespace :pl do
 
       # Get the directories together - we need to figure out which bits to ship based on the include_path
       # First we get the build itself
-      Pkg::Util::Execution.ex(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}/**/#{path}" }.join(' ') } | sort > include_file))
-      Pkg::Util::Execution.ex(%(mkdir -p tmp && tar -T include_file -cf - | (cd ./tmp && tar -xf -)))
+      Pkg::Util::Execution.capture3(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}/**/#{path}" }.join(' ') } | sort > include_file))
+      Pkg::Util::Execution.capture3(%(mkdir -p tmp && tar -T include_file -cf - | (cd ./tmp && tar -xf -)))
 
       # Then we find grab the appropriate meta-data only
-      Pkg::Util::Execution.ex(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}-latest/#{path}" unless path.include? "repos" }.join(' ') } | sort > include_file_latest))
+      Pkg::Util::Execution.capture3(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}-latest/#{path}" unless path.include? "repos" }.join(' ') } | sort > include_file_latest))
 
       #include /repos in the include_file_latest so we correctly include the symlink in the final file list to ship
-      Pkg::Util::Execution.ex(%(echo "pkg/#{Pkg::Config.project}-latest/repos" >> include_file_latest))
-      Pkg::Util::Execution.ex(%(tar -T include_file_latest -cf - | (cd ./tmp && tar -xf -)))
+      Pkg::Util::Execution.capture3(%(echo "pkg/#{Pkg::Config.project}-latest/repos" >> include_file_latest))
+      Pkg::Util::Execution.capture3(%(tar -T include_file_latest -cf - | (cd ./tmp && tar -xf -)))
 
       Dir.chdir("tmp/pkg") do
         # Ship it to the target for consumption

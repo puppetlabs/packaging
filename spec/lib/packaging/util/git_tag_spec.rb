@@ -4,7 +4,7 @@ require 'spec_helper'
 describe "Pkg::Util::Git_tag" do
   context "parse_ref!" do
     it "fails for a ref that doesn't exist'" do
-      expect { Pkg::Util::Git_tag.new("git://github.com/puppetlabs/leatherman.git", "garbagegarbage") }.to raise_error(RuntimeError, "ERROR : Not a ref or sha!")
+      expect { Pkg::Util::Git_tag.new("git://github.com/puppetlabs/leatherman.git", "garbagegarbage") }.to raise_error(RuntimeError, /ERROR : Not a ref or sha!/)
     end
   end
 

@@ -23,7 +23,9 @@ module Pkg::Util::Jenkins
     def jenkins_job_exists?(name)
       job_url = "http://#{Pkg::Config.jenkins_build_host}/job/#{name}/config.xml"
       form_args = ["--silent", "--fail"]
-      Pkg::Util::Net.curl_form_data(job_url, form_args, :quiet => true)
+      output, retval = Pkg::Util::Net.curl_form_data(job_url, form_args, :quiet => true)
+      return output if retval.nil?
+      return Pkg::Util::Execution.success?(retval)
     end
 
     # Wait for last build of job to finish.

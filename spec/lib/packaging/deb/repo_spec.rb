@@ -37,14 +37,14 @@ describe "Pkg::Deb::Repo" do
 
     it "warns if there are no deb repos available for the build" do
       Pkg::Util::Tool.should_receive(:find_tool).with("wget", {:required => true}).and_return(wget)
-      Pkg::Util::Execution.should_receive(:ex).with("#{wget} --spider -r -l 1 --no-parent #{base_url}/repos/apt/ 2>&1").and_raise(RuntimeError)
+      Pkg::Util::Execution.should_receive(:capture3).with("#{wget} --spider -r -l 1 --no-parent #{base_url}/repos/apt/ 2>&1").and_raise(RuntimeError)
       Pkg::Deb::Repo.should_receive(:warn).with("No debian repos available for #{project} at #{ref}.")
       Pkg::Deb::Repo.generate_repo_configs
     end
 
     it "writes the expected repo configs to disk" do
       Pkg::Util::Tool.should_receive(:find_tool).with("wget", {:required => true}).and_return(wget)
-      Pkg::Util::Execution.should_receive(:ex).with("#{wget} --spider -r -l 1 --no-parent #{base_url}/repos/apt/ 2>&1").and_return(wget_results + wget_garbage)
+      Pkg::Util::Execution.should_receive(:capture3).with("#{wget} --spider -r -l 1 --no-parent #{base_url}/repos/apt/ 2>&1").and_return(wget_results + wget_garbage)
       FileUtils.should_receive(:mkdir_p).with("pkg/repo_configs/deb")
       config = []
       repo_configs.each_with_index do |repo_config, i|
@@ -65,7 +65,7 @@ describe "Pkg::Deb::Repo" do
     it "warns if there are no deb repos available for the build" do
       Pkg::Util::Tool.should_receive(:find_tool).with("wget", {:required => true}).and_return(wget)
       FileUtils.should_receive(:mkdir_p).with("pkg/repo_configs").and_return(true)
-      Pkg::Util::Execution.should_receive(:ex).with("#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{base_url}/repo_configs/deb/").and_raise(RuntimeError)
+      Pkg::Util::Execution.should_receive(:capture3).with("#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{base_url}/repo_configs/deb/").and_raise(RuntimeError)
       expect {Pkg::Deb::Repo.retrieve_repo_configs}.to raise_error(RuntimeError, /Couldn't retrieve deb apt repo configs/)
     end
   end
@@ -130,7 +130,7 @@ describe "Pkg::Deb::Repo" do
       reprepro = "/bin/reprepro"
       Pkg::Util::File.should_receive(:directories).with("repos/apt").and_return(dists)
       Pkg::Util::Tool.should_receive(:check_tool).with("reprepro").and_return(reprepro)
-      Pkg::Util::Execution.should_receive(:ex).exactly(4).times.with("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
+      Pkg::Util::Execution.should_receive(:capture3).exactly(4).times.with("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
 
       dists.each do |dist|
         distfiles[dist] = double

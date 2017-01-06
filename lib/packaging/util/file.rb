@@ -15,7 +15,8 @@ module Pkg::Util::File
 
     def mktemp
       mktemp = Pkg::Util::Tool.find_tool('mktemp', :required => true)
-      Pkg::Util::Execution.ex("#{mktemp} -d -t pkgXXXXXX").strip
+      stdout, _, _ = Pkg::Util::Execution.capture3("#{mktemp} -d -t pkgXXXXXX")
+      stdout.strip
     end
 
     def empty_dir?(dir)
@@ -78,7 +79,8 @@ module Pkg::Util::File
         target_opts = "-C #{target}"
       end
       if file_exists?(source, :required => true)
-        Pkg::Util::Execution.ex(%Q(#{tar} #{options} #{target_opts} -xf #{source}))
+        stdout, _, _ = Pkg::Util::Execution.capture3(%Q(#{tar} #{options} #{target_opts} -xf #{source}))
+        stdout
       end
     end
 

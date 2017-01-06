@@ -26,10 +26,13 @@ module Pkg::Nuget
         projname, version = File.basename(pkg).match(/^(.*)-([\d+\.]+)\.nupkg$/).captures
         package_form_data = ["--upload-file #{pkg}"]
         package_path = "#{projname}/#{version}/#{File.basename(pkg)}"
+        stdout = ''
+        retval = ''
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          Pkg::Util::Net.curl_form_data("#{uri}/#{package_path}", form_data + package_form_data)
+          stdout, retval = Pkg::Util::Net.curl_form_data("#{uri}/#{package_path}", form_data + package_form_data)
         end
-        fail "The Package upload (curl) failed with error #{$?.exitstatus}" unless $?.success?
+        fail "The Package upload (curl) failed with error #{retval}" unless Pkg::Util::Execution.success?(retval)
+        stdout
       end
     end
   end

@@ -36,6 +36,25 @@ module Pkg::Util::Execution
       ret
     end
 
+    # Turns out trying to change ex to use Open3 is SUPER DANGEROUS and destructive
+    # in ways I hadn't imagined. I'm going to add a new method here instead and start
+    # converting code to use that so I don't break more than I plan to.
+    def capture3(command, debug = false)
+      require 'open3'
+      puts "Executing '#{command}'..." if debug
+      stdout, stderr, ret = Open3.capture3(command)
+      unless Pkg::Util::Execution.success?(ret)
+        raise "#{stdout}#{stderr}"
+      end
+
+      if debug
+        puts "Command '#{command}' returned:"
+        puts stdout
+      end
+
+      return stdout, stderr, ret
+    end
+
     # Loop a block up to the number of attempts given, exiting when we receive success
     # or max attempts is reached. Raise an exception unless we've succeeded.
     def retry_on_fail(args, &blk)

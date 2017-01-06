@@ -76,8 +76,8 @@ namespace :pl do
         warn "Could not find `wget` tool. Falling back to rsyncing from #{Pkg::Config.distribution_server}"
         begin
           Pkg::Util::Net.rsync_from("#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{remote_target}/", Pkg::Config.distribution_server, "#{local_target}/")
-        rescue
-          fail "Couldn't download packages from distribution server. Try installing wget!"
+        rescue => e
+          fail "Couldn't download packages from distribution server.\n#{e}"
         end
       end
       puts "Packages staged in pkg"

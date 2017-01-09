@@ -233,11 +233,11 @@ module Pkg::Util::Net
       post_string << "#{uri}"
 
       # If this is quiet, we're going to silence all output
-      if options[:quiet]
-        post_string << " >#{Pkg::Util::OS::DEVNULL} 2>&1"
-      end
       begin
         stdout, _, retval = Pkg::Util::Execution.capture3("#{curl} #{post_string}")
+        if options[:quiet]
+          stdout = ''
+        end
         return stdout, retval
       rescue RuntimeError => e
         puts e

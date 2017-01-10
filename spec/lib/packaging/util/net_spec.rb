@@ -222,8 +222,8 @@ describe "Pkg::Util::Net" do
 
     it "should curl with form data, uri, and be quiet" do
       Pkg::Util::Tool.should_receive(:check_tool).with("curl").and_return(curl)
-      Pkg::Util::Execution.should_receive(:capture3).with("#{curl} -i #{form_data[0]} #{target_uri} >/dev/null 2>&1")
-      Pkg::Util::Net.curl_form_data(target_uri, form_data, options)
+      Pkg::Util::Execution.should_receive(:capture3).with("#{curl} -i #{form_data[0]} #{target_uri}").and_return(['stdout', 'stderr', 0])
+      Pkg::Util::Net.curl_form_data(target_uri, form_data, options).should eq(['', 0])
     end
 
   end

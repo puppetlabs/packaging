@@ -74,6 +74,60 @@ namespace :pl do
       end
     end
 
+    # This is pretty similar to the 'pack_signed_repo' task. The difference here is that instead
+    # of creating a tarball for each repo passed, it adds each repo to a single archive, creating
+    # one 'all' tarball with all of the repos. This is useful for cutomers who have a PE master with
+    # no internet access. They can unpack the puppet-agent-all tarball into the location that
+    # pe_repo expects and use simplified agent install without needing internet access, or having to
+    # manually download each agent that they need to feed to pe_repo.
+    # This task should be invoked after prepare_signed_repos, so that there are repos to pack up.
+    task :pack_all_signed_repos, [:path_to_repo, :name_of_archive, :versioning] => ["pl:fetch"] do |t, args|
+      # path_to_repo should be relative to ./pkg
+      name_of_archive = args.name_of_archive or fail ":name_of_archive is a required argument for #{t}"
+      versioning = args.versioning or fail ":versioning is a required argument for #{t}"
+      tar = Pkg::Util::Tool.check_tool('tar')
+
+      Dir.chdir("pkg") do
+        if versioning == 'ref'
+          local_target = File.join(Pkg::Config.project, Pkg::Config.ref, "repos")
+        elsif versioning == 'version'
+          local_target = File.join(Pkg::Config.project, Pkg::Util::Version.get_dot_version, "repos")
+        end
+
+        Dir.chdir(local_target) do
+          if !Pkg::Util::File.exist?("#{name_of_archive}.tar.gz")
+            warn "Skipping #{name_of_archive} because it (#{name_of_archive}.tar.gz) has no files"
+          else
+            if File.exist?("#{Pkg::Config.project}-all.tar")
+              tar_cmd = "--update"
+            else
+              tar_cmd = "--create"
+            end
+            Pkg::Util::Execution.ex("#{tar} --owner=0 --group=0 #{tar_cmd} --file #{Pkg::Config.project}-all.tar #{name_of_archive}.tar.gz")
+          end
+        end
+      end
+    end
+
+    # tar does not support adding or updating files in a compressed archive, so
+    # we have a task to compress the "all" tarball from the 'pack_all_signed_repos'
+    # task
+    task :compress_the_all_tarball, [:versioning] => ["pl:fetch"] do |t, args|
+      versioning = args.versioning or fail ":versioning is a required argument for #{t}"
+      gzip = Pkg::Util::Tool.check_tool('gzip')
+      Dir.chdir("pkg") do
+        if versioning == 'ref'
+          local_target = File.join(Pkg::Config.project, Pkg::Config.ref)
+        elsif versioning == 'version'
+          local_target = File.join(Pkg::Config.project, Pkg::Util::Version.get_dot_version)
+        end
+        Dir.chdir(local_target) do
+          Pkg::Util::Execution.ex("#{gzip} --fast #{File.join("repos", "#{Pkg::Config.project}-all.tar")}")
+        end
+      end
+    end
+
+
     task :prepare_signed_repos, [:target_host, :target_prefix, :versioning] => ["clean", "pl:fetch"] do |t, args|
       target_host = args.target_host or fail ":target_host is a required argument to #{t}"
       target_prefix = args.target_prefix or fail ":target_prefix is a required argument for #{t}"

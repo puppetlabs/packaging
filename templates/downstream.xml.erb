@@ -41,5 +41,7 @@ curl -v --fail -i &quot;<%= Pkg::Util::Net.escape_html(Pkg::Util::Net.add_param_
     </hudson.tasks.Shell>
   </builders>
   <publishers/>
-  <buildWrappers/>
+  <buildWrappers>
+    <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.4"/>
+  </buildWrappers>
 </project>

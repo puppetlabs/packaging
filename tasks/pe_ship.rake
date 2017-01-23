@@ -159,13 +159,19 @@ if Pkg::Config.build_pe
         incoming_dir or fail "Adding packages to apt repo requires an incoming directory"
         Pkg::Util::RakeUtils.invoke_task("pl:fetch")
 
-        stdout, stderr = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "aptly repo add -remove-files #{Pkg::Config::pe_version}-#{dist} #{incoming_dir}/#{dist}
+        cmd = <<-eos
+          if ! flock /opt/tools/aptly/db/LOCK --wait 1200 --command /bin/true; then
+            echo "Unable to acquire aptly lock, giving up" 1>&2
+            exit 1
+          fi
+          aptly repo add -remove-files #{Pkg::Config::pe_version}-#{dist} #{incoming_dir}/#{dist}
           if [ -d /opt/tools/aptly/public/#{Pkg::Config::pe_version}/dists/#{dist} ]; then
             aptly publish update -gpg-key=\"8BBEB79B\" #{dist} #{Pkg::Config::pe_version}
           else
             aptly publish repo -gpg-key=\"8BBEB79B\" #{Pkg::Config::pe_version}-#{dist} #{Pkg::Config::pe_version}
           fi
-          ", true)
+        eos
+        stdout, stderr = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, cmd, true)
 
         output = stdout.to_s + stderr.to_s
 

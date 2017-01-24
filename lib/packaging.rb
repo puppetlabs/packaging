@@ -15,6 +15,7 @@ module Pkg
   require 'packaging/nuget'
   require 'packaging/gem'
   require 'packaging/msi'
+  require 'packaging/repo'
 
   # Load configuration defaults
   Pkg::Config.load_defaults

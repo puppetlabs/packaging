@@ -125,6 +125,7 @@ module Pkg::Params
                   :pe_platforms,
                   :pe_version,
                   :pg_major_version,
+                  :platform_repos,
                   :pre_tar_task,
                   :pre_tasks,
                   :privatekey_pem,
@@ -324,5 +325,4 @@ module Pkg::Params
                   { :var => :gpg_name, :message => "
     DEPRECATED, 29-Jul-2014: 'gpg_name' has been replaced with 'gpg_key'.
                    Please update this field in your project_data.yaml" }]
-
 end

@@ -54,24 +54,13 @@ namespace :pl do
       path_to_repo = args.path_to_repo or fail ":path_to_repo is a required argument for #{t}"
       name_of_archive = args.name_of_archive or fail ":name_of_archive is a required argument for #{t}"
       versioning = args.versioning or fail ":versioning is a required argument for #{t}"
-      tar = Pkg::Util::Tool.check_tool('tar')
+      Pkg::Repo.create_signed_repo_archive(path_to_repo, name_of_archive, versioning)
+    end
 
-      Dir.chdir("pkg") do
-        if versioning == 'ref'
-          local_target = File.join(Pkg::Config.project, Pkg::Config.ref)
-        elsif versioning == 'version'
-          local_target = File.join(Pkg::Config.project, Pkg::Util::Version.get_dot_version)
-        end
-
-        Dir.chdir(local_target) do
-          if Pkg::Util::File.empty_dir?(path_to_repo)
-            warn "Skipping #{name_of_archive} because it (#{path_to_repo}) has no files"
-          else
-            stdout, _, _ = Pkg::Util::Execution.capture3("#{tar} --owner=0 --group=0 --create --gzip --file #{File.join("repos", "#{name_of_archive}.tar.gz")} #{path_to_repo}")
-            stdout
-          end
-        end
-      end
+    task :pack_all_signed_repos_individually, [:name_of_archive, :versioning] => ["pl:fetch"] do |t, args|
+      name_of_archive = args.name_of_archive or fail ":name_of_archive is a required argument for #{t}"
+      versioning = args.versioning or fail ":versioning is a required argument for #{t}"
+      Pkg::Repo.create_all_repo_archives(name_of_archive, versioning)
     end
 
     # This is pretty similar to the 'pack_signed_repo' task. The difference here is that instead

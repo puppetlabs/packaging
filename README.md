@@ -201,7 +201,7 @@ the task are:
       rake package:bootstrap && rake pl:fetch
 
       ### Perform the build
-      rake pl:load_extras pl:build_from_params PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
+      rake pl:build_from_params PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
 
       ### Send the results
       rake pl:jenkins:ship["artifacts"]
@@ -732,8 +732,8 @@ files:
 
 * **pl:ips**
 
-    Invoke package:ips, but do so after pl:fetch and pl:load_extras, which load
-    signing/certificate information. The resulting packages are signed. IPS
+    Invoke package:ips (but after pl:fetch, which will load
+    signing/certificate information). The resulting packages are signed. IPS
     packages are staged in `./pkg/ips/pkgs`
 
 * **pl:jenkins:deb**

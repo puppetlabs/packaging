@@ -78,7 +78,6 @@ module Pkg::Util::RakeUtils
         'ips.rake',
         'jenkins.rake',
         'jenkins_dynamic.rake',
-        'load_extras.rake',
         'mock.rake',
         'nightly_repos.rake',
         'pe_deb.rake',

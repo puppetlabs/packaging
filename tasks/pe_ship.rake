@@ -160,7 +160,7 @@ if Pkg::Config.build_pe
         Pkg::Util::RakeUtils.invoke_task("pl:fetch")
 
         cmd = <<-eos
-          if ! flock /opt/tools/aptly/db/LOCK --wait 1200 --command /bin/true; then
+          if ! flock --wait 1200 /opt/tools/aptly/db/LOCK --command /bin/true; then
             echo "Unable to acquire aptly lock, giving up" 1>&2
             exit 1
           fi

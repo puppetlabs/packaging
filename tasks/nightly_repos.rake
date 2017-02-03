@@ -254,10 +254,12 @@ namespace :pl do
 
     task :generate_signed_repos, [:target_prefix] => ["pl:fetch"] do |t, args|
       target_prefix = args.target_prefix || 'nightly'
-      ["pl:jenkins:remote_sign_repos", "pl:jenkins:ship_signed_repos", "pl:jenkins:generate_signed_repo_configs", "pl:jenkins:ship_signed_repo_configs"].each do |task|
-        Pkg::Util::RakeUtils.invoke_task(task, target_prefix)
+      Dir.chdir("pkg") do
+        ["pl:jenkins:remote_sign_repos", "pl:jenkins:ship_signed_repos", "pl:jenkins:generate_signed_repo_configs", "pl:jenkins:ship_signed_repo_configs"].each do |task|
+          Pkg::Util::RakeUtils.invoke_task(task, target_prefix)
+        end
+        puts "Shipped '#{Pkg::Config.ref}' (#{Pkg::Config.version}) of '#{Pkg::Config.project}' into the puppet-agent repos."
       end
-      puts "Shipped '#{Pkg::Config.ref}' (#{Pkg::Config.version}) of '#{Pkg::Config.project}' into the puppet-agent repos."
     end
 
     # We want to keep the puppet-agent repos at a higher level and them link

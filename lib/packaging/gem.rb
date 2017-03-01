@@ -62,6 +62,7 @@ module Pkg::Gem
       puts "###########################################"
       puts
       puts e
+      raise e
     end
 
     # Ship a Ruby gem file to a Stickler server, because
@@ -82,6 +83,7 @@ module Pkg::Gem
       puts "###########################################"
       puts
       puts e
+      raise e
     end
 
     # Use rsync to deploy a file and any associated detached signatures,
@@ -103,6 +105,7 @@ module Pkg::Gem
       puts "###########################################"
       puts
       puts e
+      raise e
     end
   end
 end

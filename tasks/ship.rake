@@ -510,6 +510,20 @@ namespace :pl do
       #
       Pkg::Config.config_to_yaml(local_dir)
 
+      # For EZBake builds, we also want to include the ezbake.manifest file to
+      # get a snapshot of this build and all dependencies. We eventually will
+      # create a yaml version of this file, but until that point we want to
+      # make the original ezbake.manifest available
+      #
+      ezbake_manifest = File.join("ext", "ezbake.manifest")
+      if File.exists?(ezbake_manifest)
+        cp(ezbake_manifest, File.join(local_dir, "#{Pkg::Config.ref}.ezbake.manifest"))
+      end
+      ezbake_yaml = File.join("ext", "ezbake.manifest.yaml")
+      if File.exists?(ezbake_yaml)
+        cp(ezbake_yaml File.join(local_dir, "#{Pkg::Config.ref}.ezbake.manifest.yaml"))
+      end
+
 
       # Sadly, the packaging repo cannot yet act on its own, without living
       # inside of a packaging-repo compatible project. This means in order to

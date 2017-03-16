@@ -75,7 +75,7 @@ module Pkg::MSI
           -nest -h sha256 \
           -pkcs12 "#{Pkg::Config.msi_signing_cert}" \
           -pass "#{Pkg::Config.msi_signing_cert_pw}" \
-          -ts "http://sha256timestamp.ws.symantec.com/sha256/timestamp" \
+          -ts "http://timestamp.geotrust.com" \
           -in "C:/#{work_dir}/signed-$msi" \
           -out "C:/#{work_dir}/$msi"
         rm "C:/#{work_dir}/signed-$msi"

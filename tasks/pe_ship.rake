@@ -11,8 +11,10 @@ if Pkg::Config.build_pe
 
         # If this is not a feature branch, we need to link the shipped packages into the feature repos,
         # then update their metadata as well.
-        Pkg::Util::RakeUtils.invoke_task("pe:remote:link_shipped_rpms_to_feature_repo") unless Pkg::Config.pe_feature_branch
-        Pkg::Util::RakeUtils.invoke_task("pe:remote:update_yum_repo")
+        unless Pkg::Config.pe_feature_branch
+          Pkg::Util::RakeUtils.invoke_task("pe:remote:link_shipped_rpms_to_feature_repo")
+          Pkg::Util::RakeUtils.invoke_task("pe:remote:update_yum_repo")
+        end
       end
     end
 
@@ -134,22 +136,18 @@ if Pkg::Config.build_pe
       desc "Update remote rpm repodata for PE on #{Pkg::Config.yum_host}"
       task :update_yum_repo => "pl:fetch" do
 
-        # Paths to the repos. If this is *not* a feature branch, we need to also
-        # Update the feature branch repos in addition to the primary repos.
-        repo_base_paths = Array[Pkg::Config.yum_target_path]
-        repo_base_paths << Pkg::Config.yum_target_path(true) unless Pkg::Config.pe_feature_branch
+        # Paths to the repos.
+        repo_base_path = Pkg::Config.yum_target_path
 
-        repo_base_paths.each do |repo_base_path|
-          # This entire command is going to be passed across SSH, but it's unwieldy on a
-          # single line. By breaking it into a series of concatenated strings, we can maintain
-          # a semblance of formatting and structure (nevermind readability).
-          command  = %(for dir in #{repo_base_path}/{#{rpm_family_and_version.join(",")}}-*; do)
-          command += %(  sudo createrepo --checksum=sha --checkts --update --delta-workers=0 --quiet --database --update $dir; )
-          command += %(done; )
-          command += %(sync)
+        # This entire command is going to be passed across SSH, but it's unwieldy on a
+        # single line. By breaking it into a series of concatenated strings, we can maintain
+        # a semblance of formatting and structure (nevermind readability).
+        command  = %(for dir in #{repo_base_path}/{#{rpm_family_and_version.join(",")}}-*; do)
+        command += %(  sudo createrepo --checksum=sha --checkts --update --delta-workers=0 --quiet --database --update $dir; )
+        command += %(done; )
+        command += %(sync)
 
-          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, command)
-        end
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, command)
       end
 
       desc "Remotely add shipped packages to apt repo on #{Pkg::Config.apt_host}"

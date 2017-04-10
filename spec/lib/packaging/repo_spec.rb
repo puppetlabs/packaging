@@ -5,8 +5,7 @@ describe "#Pkg::Repo" do
     [
       {"name"=>"el-4-i386", "repo_location"=>"repos/el/4/**/i386"},
       {"name"=>"el-5-i386", "repo_location"=>"repos/el/5/**/i386"},
-      {"name"=>"el-6-i386", "repo_location"=>"repos/el/6/**/i386"},
-      {"name"=>"windows-2012-x86"}
+      {"name"=>"el-6-i386", "repo_location"=>"repos/el/6/**/i386"}
     ]
   end
   describe "#create_signed_repo_archive" do
@@ -92,7 +91,6 @@ describe "#Pkg::Repo" do
       expect(Pkg::Repo).to receive(:create_signed_repo_archive).with("repos/el/4/**/i386", "project-el-4-i386", "version")
       expect(Pkg::Repo).to receive(:create_signed_repo_archive).with("repos/el/5/**/i386", "project-el-5-i386", "version")
       expect(Pkg::Repo).to receive(:create_signed_repo_archive).with("repos/el/6/**/i386", "project-el-6-i386", "version")
-      expect(Pkg::Repo).not_to receive(:create_signed_repo_archive).with(anything, "project-windows-2012-x86", "version")
       Pkg::Repo.create_all_repo_archives("project", "version")
     end
   end

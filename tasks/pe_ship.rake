@@ -5,13 +5,19 @@ if Pkg::Config.build_pe
       puts "Shipping packages to #{Pkg::Config.yum_target_path}"
       Pkg::Util::File.empty_dir?("pkg/pe/rpm") and fail "The 'pkg/pe/rpm' directory has no packages. Did you run rake pe:deb?"
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to('pkg/pe/rpm/', Pkg::Config.yum_host, Pkg::Config.yum_target_path)
+        if Pkg::Config.pe_feature_branch
+          puts "On a feature branch - overwrites alllowed"
+          Pkg::Util::Net.rsync_to('pkg/pe/rpm/', Pkg::Config.yum_host, Pkg::Config.yum_target_path, extra_flags: [])
+        else
+          Pkg::Util::Net.rsync_to('pkg/pe/rpm/', Pkg::Config.yum_host, Pkg::Config.yum_target_path)
+        end
       end
       if Pkg::Config.team == 'release'
 
         # If this is not a feature branch, we need to link the shipped packages into the feature repos,
         # then update their metadata as well.
         unless Pkg::Config.pe_feature_branch
+          puts "Linking RPMs to feature repo"
           Pkg::Util::RakeUtils.invoke_task("pe:remote:link_shipped_rpms_to_feature_repo")
           Pkg::Util::RakeUtils.invoke_task("pe:remote:update_yum_repo")
         end

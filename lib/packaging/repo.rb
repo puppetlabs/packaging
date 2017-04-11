@@ -29,7 +29,7 @@ module Pkg::Repo
       platforms = Pkg::Config.platform_repos
       platforms.each do |platform|
         archive_name = "#{project}-#{platform['name']}"
-        create_signed_repo_archive(platform['repo_location'], archive_name, versioning) if platform['repo_location']
+        create_signed_repo_archive(platform['repo_location'], archive_name, versioning)
       end
     end
   end

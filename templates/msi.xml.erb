@@ -131,7 +131,7 @@ REM Print the environment
 set
 
 set PKG_NAME=<%= Pkg::Config.msi_name || 'puppet' %>
-set AGENT_VERSION_STRING=<%= Pkg::Config.version %>
+set AGENT_VERSION_STRING=<%= Pkg::Util::Version.git_describe_version %>
 set ARCH=%ARCH%
 set SUFFIX=-%ARCH%
 if &quot;%ARCH%&quot; == &quot;x86&quot; (

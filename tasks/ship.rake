@@ -586,7 +586,7 @@ namespace :pl do
       end
 
       # If we just shipped a tagged version, we want to make it immutable
-      files = Dir.glob("#{local_dir}/**/*").select { |f| File.file?(f) }.map do |file|
+      files = Dir.glob("#{local_dir}/**/*").select { |f| File.file?(f) && !File.symlink?(f) }.map do |file|
         "#{artifact_dir}/#{file.sub(/^#{local_dir}\//, '')}"
       end
 

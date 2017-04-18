@@ -1,4 +1,5 @@
 require "packaging/platforms"
+require "packaging/util"
 
 # These are all of the parameters known to our packaging system.
 # They are ingested by the config class as class instance variables

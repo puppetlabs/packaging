@@ -7,6 +7,7 @@ module Pkg
 
   require 'packaging/util'
   require 'packaging/config'
+  require 'packaging/config/build_params'
   require 'packaging/tar'
   require 'packaging/deb'
   require 'packaging/rpm'

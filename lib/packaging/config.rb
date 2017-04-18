@@ -1,3 +1,6 @@
+require 'yaml'
+require 'packaging/config/params'
+
 module Pkg
   ##
   #   This class is meant to encapsulate all of the data we know about a build invoked with
@@ -5,9 +8,6 @@ module Pkg
   #   have it set via accessors, and serialize it back to yaml for easy transport.
   #
   class Config
-    require 'packaging/config/params.rb'
-    require 'yaml'
-
     class << self
       ##
       #   Returns a hash with string keys that maps instance variable
@@ -29,6 +29,11 @@ module Pkg
       #
       def get_binding
         return binding
+      end
+
+      def load_extras(tempdir)
+        # load any retrieved extra config/settings
+        Pkg::Config.config_from_yaml("#{tempdir}/#{Pkg::Config.builder_data_file}")
       end
 
       ##
@@ -72,11 +77,9 @@ module Pkg
       # Return a hash of all build parameters and their values, nil if unassigned.
       #
       def config_to_hash
-        data = {}
-        Pkg::Params::BUILD_PARAMS.each do |param|
-          data.store(param, self.instance_variable_get("@#{param}"))
+        Pkg::Params::BUILD_PARAMS.each_with_object({}) do |param, hsh|
+          hsh[param] = self.instance_variable_get("@#{param}")
         end
-        data
       end
 
       ##

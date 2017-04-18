@@ -96,12 +96,34 @@ module Pkg
       end
 
       ##
+      # Manipulate platform_data above to follow the PC1 directory structure
+      # for artifacts
+      #
+      def platform_data_pc1
+        platform_data.each { |platform|
+          dirs = platform["artifact"].split('/')
+          dirs.delete("puppet")
+          if dirs[1] == 'fedora'
+            dirs[2].prepend("f")
+            dirs.last.sub("fc", "fedoraf")
+            platform["repo_config"].sub("fedora-", "fedora-f")
+          end
+          dirs.insert(3, "PC1") unless dirs[1] == 'windows'
+          platform["artifact"] = dirs.join('/')
+        }
+      end
+
+      ##
       # Load a yaml file and use its contents to set the values for Pkg::Config
       # class instance variables
       #
       def config_from_yaml(file)
         build_data = Pkg::Util::Serialization.load_yaml(file)
-        build_data[:platform_data] = platform_data
+        if self.apt_repo_name == 'PC1'
+          build_data[:platform_data] = platform_data_pc1
+        else
+          build_data[:platform_data] = platform_data
+        end
         config_from_hash(build_data)
       end
 

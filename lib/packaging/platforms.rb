@@ -20,14 +20,12 @@ module Pkg
       },
 
       'debian' => {
-        '6' => { :codename => 'squeeze', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
         '7' => { :codename => 'wheezy', :architectures  => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
         '8' => { :codename => 'jessie', :architectures  => ['i386', 'amd64', 'powerpc'], :repo => true, :package_format => 'deb', },
         '9' => { :codename => 'stretch', :architectures  => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
       },
 
       'el' => {
-        '4' => { :architectures => ['i386', 'x86_64'], :repo => false, :package_format => 'rpm', :signature_format => 'v3', },
         '5' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v3', },
         '6' => { :architectures => ['i386', 'x86_64', 's390x'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
         '7' => { :architectures => ['x86_64', 's390x'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
@@ -38,9 +36,6 @@ module Pkg
       },
 
       'fedora' => {
-        'f21' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
-        'f22' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
-        'f23' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
         'f24' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
         'f25' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
       },
@@ -50,14 +45,12 @@ module Pkg
       },
 
       'osx' => {
-        '10.9' => { :architectures => ['x86_64'], :repo => false, :package_format => 'dmg', },
         '10.10' => { :architectures => ['x86_64'], :repo => false, :package_format => 'dmg', },
         '10.11' => { :architectures => ['x86_64'], :repo => false, :package_format => 'dmg', },
         '10.12' => { :architectures => ['x86_64'], :repo => false, :package_format => 'dmg', },
       },
 
       'sles' => {
-        '10' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v3', },
         '11' => { :architectures => ['i386', 'x86_64', 's390x'], :repo => true, :package_format => 'rpm', :signature_format => 'v3', },
         '12' => { :architectures => ['x86_64', 's390x'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
       },
@@ -68,11 +61,7 @@ module Pkg
       },
 
       'ubuntu' => {
-        '10.04' => { :codename => 'lucid', :architectures   => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
-        '12.04' => { :codename => 'precise', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
         '14.04' => { :codename => 'trusty', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
-        '15.04' => { :codename => 'vivid', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
-        '15.10' => { :codename => 'wily', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
         '16.04' => { :codename => 'xenial', :architectures => ['i386', 'amd64', 'ppc64el'], :repo => true, :package_format => 'deb', },
         '16.10' => { :codename => 'yakkety', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
       },

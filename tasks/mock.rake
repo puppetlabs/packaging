@@ -226,7 +226,7 @@ def build_rpm_with_mock(mocks)
               FileUtils.cp_r(rpm, "pkg/pe/rpm/#{family}-#{version}-i386", { :preserve => true })
               FileUtils.ln("pkg/pe/rpm/#{family}-#{version}-i386/#{File.basename(rpm)}", "pkg/pe/rpm/#{family}-#{version}-x86_64/", :force => true, :verbose => true)
           end
-        else
+        elsif subdir == 'PC1'
           %x(mkdir -p pkg/#{family}/#{version}/#{subdir}/{SRPMS,i386,x86_64})
           case File.basename(rpm)
             when /debuginfo/
@@ -240,6 +240,21 @@ def build_rpm_with_mock(mocks)
             when /noarch/
               FileUtils.cp_r(rpm, "pkg/#{family}/#{version}/#{subdir}/i386", { :preserve => true })
               FileUtils.ln("pkg/#{family}/#{version}/#{subdir}/i386/#{File.basename(rpm)}", "pkg/#{family}/#{version}/#{subdir}/x86_64/", :force => true, :verbose => true)
+          end
+        else
+          %x(mkdir -p pkg/#{subdir}/#{family}/#{version}/{SRPMS,i386,x86_64})
+          case File.basename(rpm)
+            when /debuginfo/
+              rm_rf(rpm)
+            when /src\.rpm/
+              FileUtils.cp_r(rpm, "pkg/#{subdir}/#{family}/#{version}/SRPMS", { :preserve => true })
+            when /i.?86/
+              FileUtils.cp_r(rpm, "pkg/#{subdir}/#{family}/#{version}/i386", { :preserve => true })
+            when /x86_64/
+              FileUtils.cp_r(rpm, "pkg/#{subdir}/#{family}/#{version}/x86_64", { :preserve => true })
+            when /noarch/
+              FileUtils.cp_r(rpm, "pkg/#{subdir}/#{family}/#{version}/i386", { :preserve => true })
+              FileUtils.ln("pkg/#{subdir}/#{family}/#{version}/i386/#{File.basename(rpm)}", "pkg/#{subdir}/#{family}/#{version}/x86_64/", :force => true, :verbose => true)
           end
         end
       end

@@ -4,7 +4,7 @@
 # also has a data file for information specific to it. If the project builds
 # both PE and not PE, it has two files, one for PE, and the other for FOSS
 #
-data_repo = 'https://github.com/puppetlabs/build-data.git'
+data_repo = Pkg::Config.build_data_repo
 
 if Pkg::Config.dev_build
   puts "NOTICE: This is a dev build!"
@@ -36,18 +36,16 @@ namespace :pl do
     begin
       temp_build_data_dir = Pkg::Util::File.mktemp
       %x(git clone --depth 1 #{data_repo} #{temp_build_data_dir})
-      status = $?.exitstatus
-      case status
+      case $?.success
       when 0
         Dir.chdir(temp_build_data_dir) do
           [team_data_branch, project_data_branch].each do |branch|
             %x(git checkout #{branch})
-            status = $?.exitstatus
-            case status
+            case $?.success
             when 0
               Pkg::Util::RakeUtils.invoke_task("pl:load_extras", temp_build_data_dir)
             else
-              puts "Unable to load build_defaults from branch '#{branch}' in '#{data_repo}'. Skipping."
+              warn "Unable to load build_defaults from branch '#{branch}' in '#{data_repo}'. Skipping."
             end
           end
         end

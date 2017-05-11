@@ -46,33 +46,51 @@ module Pkg::Util::Platform
       package_format = PLATFORM_INFO[platform][version][:package_format]
 
       case package_format
-      when 'rpm', 'swix'
+      when 'rpm'
         # el/7/PC1/x86_64 for example
-        File.join('artifacts', platform, version)
+        if Pkg::Rpm::Repo.repo_name == 'puppet5' ||  Pkg::Rpm::Repo.repo_name == 'puppet5-nightly'
+          File.join('artifacts', Pkg::Rpm::Repo.repo_name, platform, version)
+        else
+          File.join('artifacts', platform, version)
+        end
+      when 'swix'
+        if Pkg::Rpm::Repo.repo_name == 'puppet5' ||  Pkg::Rpm::Repo.repo_name == 'puppet5-nightly'
+          File.join('artifacts', platform, Pkg::Rpm::Repo.repo_name, version)
+        else
+          File.join('artifacts', platform, version)
+        end
       when 'deb'
         File.join('artifacts', 'deb', get_attribute(platform_tag, :codename))
       when 'svr4', 'ips'
         # solaris/10/PC1 for example
         File.join('artifacts', 'solaris', version)
       when 'dmg'
-        # We don't consistently ship OSX artifacts to the same path
-        # vanagon ships things under a version number, and standard
-        # packaging excludes the version number. We should fix that, but in
-        # the interim we can check whether or not the versioned path exists
-        # and fail back to the unversioned path if needed.
-        version_path = File.join('artifacts', 'apple', version)
-        if package_url.nil?
-          version_path
+        if Pkg::Rpm::Repo.repo_name == 'puppet5' ||  Pkg::Rpm::Repo.repo_name == 'puppet5-nightly'
+          File.join('artifacts', 'apple', Pkg::Rpm::Repo.repo_name, version)
         else
-          code = Pkg::Util::Net.uri_status_code("#{package_url}/#{version_path}")
-          if code == '200'
+          # We don't consistently ship OSX artifacts to the same path
+          # vanagon ships things under a version number, and standard
+          # packaging excludes the version number. We should fix that, but in
+          # the interim we can check whether or not the versioned path exists
+          # and fail back to the unversioned path if needed.
+          version_path = File.join('artifacts', 'apple', version)
+          if package_url.nil?
             version_path
           else
-            File.join('artifacts', 'apple')
+            code = Pkg::Util::Net.uri_status_code("#{package_url}/#{version_path}")
+            if code == '200'
+              version_path
+            else
+              File.join('artifacts', 'apple')
+            end
           end
         end
       when 'msi'
-        File.join('artifacts', 'windows')
+        if Pkg::Rpm::Repo.repo_name == 'puppet5' ||  Pkg::Rpm::Repo.repo_name == 'puppet5-nightly'
+          File.join('artifacts', 'windows', Pkg::Rpm::Repo.repo_name)
+        else
+          File.join('artifacts', 'windows')
+        end
       else
         fail "Not sure where to find packages with a package format of '#{package_format}'"
       end

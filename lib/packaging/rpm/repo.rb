@@ -8,6 +8,18 @@ module Pkg::Rpm::Repo
       "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
     end
 
+    def repo_name
+      if Pkg::Config.yum_nonfinal_repo_name && !Pkg::Util::Version.is_final?
+        Pkg::Config.yum_nonfinal_repo_name
+      elsif Pkg::Config.yum_repo_name
+        Pkg::Config.yum_repo_name
+      elsif Pkg::Util::Version.is_final?
+        "products"
+      else
+        "devel"
+      end
+    end
+
     def ship_repo_configs(target = "repo_configs")
       if Pkg::Util::File.empty_dir?("pkg/#{target}/rpm")
         warn "No repo configs have been generated! Try pl:rpm_repo_configs."

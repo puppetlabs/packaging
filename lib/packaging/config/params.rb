@@ -5,6 +5,7 @@ require "packaging/platforms"
 module Pkg::Params
   BUILD_PARAMS = [:answer_override,
                   :apt_host,
+                  :apt_nonfinal_repo_name,
                   :apt_releases,
                   :apt_repo_command,
                   :apt_repo_name,
@@ -163,6 +164,7 @@ module Pkg::Params
                   :version_file,
                   :version_strategy,
                   :yum_host,
+                  :yum_nonfinal_repo_name,
                   :yum_repo_command,
                   :yum_repo_name,
                   :yum_repo_path,

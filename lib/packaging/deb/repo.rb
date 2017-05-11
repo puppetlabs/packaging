@@ -8,6 +8,20 @@ module Pkg::Deb::Repo
       "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
     end
 
+    # Assign repo name
+    # If we are shipping development/beta/non-final packages, they should be
+    # shipped to the development/beta/non-final repo, if there is one defined.
+    # Otherwise, we probably shouldn't be shipping them...
+    def repo_name
+      if Pkg::Config.apt_nonfinal_repo_name && !Pkg::Util::Version.is_final?
+        Pkg::Config.apt_nonfinal_repo_name
+      elsif Pkg::Config.apt_repo_name
+        Pkg::Config.apt_repo_name
+      else
+        "main"
+      end
+    end
+
     # Generate apt configuration files that point to the repositories created
     # on the distribution server with packages created from the current source
     # repo commit. There is one for each dist that is packaged for (e.g. lucid,
@@ -16,7 +30,6 @@ module Pkg::Deb::Repo
     # enable clients to install these packages.
     #
     def generate_repo_configs(source = "repos", target = "repo_configs")
-      subrepo = Pkg::Config.apt_repo_name || "main"
       # We use wget to obtain a directory listing of what are presumably our deb repos
       #
       wget = Pkg::Util::Tool.check_tool("wget")
@@ -49,7 +62,7 @@ module Pkg::Deb::Repo
         next if "#{url}/" == repo_base
         dist = url.split('/').last
         repoconfig = ["# Packages for #{Pkg::Config.project} built from ref #{Pkg::Config.ref}",
-                      "deb #{url} #{dist} #{subrepo}"]
+                      "deb #{url} #{dist} #{repo_name}"]
         config = File.join("pkg", target, "deb", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}.list")
         File.open(config, 'w') { |f| f.puts repoconfig }
       end
@@ -69,7 +82,6 @@ module Pkg::Deb::Repo
     end
 
     def repo_creation_command(prefix, artifact_directory)
-      subrepo = Pkg::Config.apt_repo_name || 'main'
       # First, we test that artifacts exist and set up the repos directory
       cmd = 'echo " Checking for deb build artifacts. Will exit if not found.." ; '
       cmd << "[ -d #{artifact_directory}/artifacts/#{prefix}deb ] || exit 1 ; "
@@ -96,14 +108,14 @@ Origin: Puppet Labs
 Label: Puppet Labs
 Codename: $dist
 Architectures: i386 amd64 arm64 armel armhf powerpc ppc64el sparc mips mipsel
-Components: #{subrepo}
+Components: #{repo_name}
 Description: Apt repository for acceptance testing" >> conf/distributions ; )
 
       # Create the repositories using reprepro. Since these are for acceptance
       # testing only, we'll just add the debs and ignore source files for now.
       #
       cmd << "reprepro=$(which reprepro) ; "
-      cmd << %Q($reprepro includedeb $dist ../../#{prefix}deb/$dist#{Pkg::Config.apt_repo_name ? "/#{subrepo}" : ""}/*.deb ; popd ; done ; )
+      cmd << %Q($reprepro includedeb $dist ../../#{prefix}deb/$dist#{repo_name == "main" ? '' : "/#{repo_name}" }/*.deb ; popd ; done ; )
       cmd << "popd ; popd "
 
       return cmd
@@ -146,7 +158,6 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
     end
 
     def sign_repos(target = "repos", message = "Signed apt repository")
-      subrepo = Pkg::Config.apt_repo_name || 'main'
       reprepro = Pkg::Util::Tool.check_tool('reprepro')
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
 
@@ -160,7 +171,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
 Label: Puppet Labs
 Codename: #{dist}
 Architectures: i386 amd64 arm64 armel armhf powerpc ppc64el sparc mips mipsel
-Components: #{subrepo}
+Components: #{repo_name}
 Description: #{message} for #{dist}
 SignWith: #{Pkg::Config.gpg_key}"
             end

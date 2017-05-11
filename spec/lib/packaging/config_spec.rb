@@ -6,6 +6,7 @@ describe "Pkg::Config" do
 
   Build_Params = [:apt_host,
                   :apt_releases,
+                  :apt_nonfinal_repo_name,
                   :apt_repo_path,
                   :apt_repo_url,
                   :apt_repo_name,
@@ -116,6 +117,7 @@ describe "Pkg::Config" do
                   :version_file,
                   :version_strategy,
                   :yum_host,
+                  :yum_nonfinal_repo_name,
                   :yum_repo_path,
                   :yum_repo_name,
                   :yum_repo_command,

@@ -146,7 +146,7 @@ namespace :pl do
 
   desc "Ship cow-built debs to #{Pkg::Config.apt_signing_server}"
   task :ship_debs => 'pl:fetch' do
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.debian.tar.gz', 'pkg/**/*.orig.tar.gz','pkg/**/*.dsc', 'pkg/**/*.deb', 'pkg/**/*.changes'], Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path, {addtl_path_to_sub: '/deb', chattr: false})
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.debian.tar.gz', 'pkg/**/*.orig.tar.gz', 'pkg/**/*.dsc', 'pkg/**/*.deb', 'pkg/**/*.changes'], Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path, { addtl_path_to_sub: '/deb', chattr: false })
   end
 
   desc "Ship built gem to rubygems.org, internal Gem mirror, and public file server"
@@ -224,18 +224,18 @@ namespace :pl do
 
   desc "ship apple dmg to #{Pkg::Config.dmg_staging_server}"
   task :ship_dmg => 'pl:fetch' do
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.dmg'], Pkg::Config.dmg_staging_server, Pkg::Config.dmg_path, {addtl_path_to_sub: '/apple'})
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.dmg'], Pkg::Config.dmg_staging_server, Pkg::Config.dmg_path, { addtl_path_to_sub: '/apple' })
   end
 
   desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
   task :ship_swix => 'pl:fetch' do
-    Pkg::Util::Ship.ship_pkgs(["pkg/**/*.swix*"], Pkg::Config.swix_staging_server, Pkg::Config.swix_path, {addtl_path_to_sub: '/eos'})
+    Pkg::Util::Ship.ship_pkgs(["pkg/**/*.swix*"], Pkg::Config.swix_staging_server, Pkg::Config.swix_path, { addtl_path_to_sub: '/eos' })
   end
 
   desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
   task :ship_tar => 'pl:fetch' do
     if Pkg::Config.build_tar
-      Pkg::Util::Ship.ship_pkgs(["pkg/*.tar.gz*"], Pkg::Config.tar_staging_server, Pkg::Config.tarball_path, {excludes: ['signing_bundle', 'packaging-bundle']})
+      Pkg::Util::Ship.ship_pkgs(["pkg/*.tar.gz*"], Pkg::Config.tar_staging_server, Pkg::Config.tarball_path, { excludes: ['signing_bundle', 'packaging-bundle'] })
     end
   end
 
@@ -251,7 +251,7 @@ namespace :pl do
 
   desc "Ship MSI packages to #{Pkg::Config.msi_staging_server}"
   task :ship_msi => 'pl:fetch' do
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.msi'], Pkg::Config.msi_staging_server, Pkg::Config.msi_path, {addtl_path_to_sub: '/windows', excludes: ["#{Pkg::Config.project}-x(86|64).msi"]})
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.msi'], Pkg::Config.msi_staging_server, Pkg::Config.msi_path, { addtl_path_to_sub: '/windows', excludes: ["#{Pkg::Config.project}-x(86|64).msi"] })
   end
 
   desc "UBER ship: ship all the things in pkg"

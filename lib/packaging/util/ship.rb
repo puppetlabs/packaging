@@ -1,6 +1,6 @@
 module Pkg::Util::Ship
   class << self
-    def ship_pkgs(pkg_exts, staging_server, pkg_path, options = { addtl_path_to_sub: '', excludes: [], chattr: true } )
+    def ship_pkgs(pkg_exts, staging_server, pkg_path, options = { addtl_path_to_sub: '', excludes: [], chattr: true })
       #if pkg_exts.include?(".deb")
       #  pkg_type = 'deb'
       #  repo_name = Pkg::Deb::Repo.repo_name

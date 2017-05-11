@@ -24,7 +24,7 @@ def sign_rpm(rpm, sign_flags = nil)
     # accept extra flags to override certain signing behavior for older
     # versions of rpm, e.g. specifying V3 signatures instead of V4.
     #
-    sh "#{rpm_cmd} #{gpg_check_cmd} --define '%_gpg_name #{Pkg::Config.gpg_key}' --define '%__gpg_sign_cmd %{__gpg} gpg #{sign_flags} #{input_flag} --batch --no-verbose --no-armor --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm}"
+    sh "#{rpm_cmd} #{gpg_check_cmd} --define '%_gpg_name #{Pkg::Util::Gpg.get_key}' --define '%__gpg_sign_cmd %{__gpg} gpg #{sign_flags} #{input_flag} --batch --no-verbose --no-armor --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm}"
   end
 
 end
@@ -34,14 +34,14 @@ def sign_legacy_rpm(rpm)
 end
 
 def rpm_has_sig(rpm)
-  %x(rpm -Kv #{rpm} | grep "#{Pkg::Config.gpg_key.downcase}" &> /dev/null)
+  %x(rpm -Kv #{rpm} | grep "#{Pkg::Util::Gpg.get_key.downcase}" &> /dev/null)
   $?.success?
 end
 
 def sign_deb_changes(file)
   # Lazy lazy lazy lazy lazy
   sign_program = "-p'gpg --use-agent --no-tty'" if ENV['RPM_GPG_AGENT']
-  sh "debsign #{sign_program} --re-sign -k#{Pkg::Config.gpg_key} #{file}"
+  sh "debsign #{sign_program} --re-sign -k#{Pkg::Util::Gpg.get_key} #{file}"
 end
 
 namespace :pl do

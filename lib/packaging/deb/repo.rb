@@ -173,7 +173,7 @@ Codename: #{dist}
 Architectures: i386 amd64 arm64 armel armhf powerpc ppc64el sparc mips mipsel
 Components: #{repo_name}
 Description: #{message} for #{dist}
-SignWith: #{Pkg::Config.gpg_key}"
+SignWith: #{Pkg::Util::Gpg.get_key}"
             end
 
             stdout, _, _ = Pkg::Util::Execution.capture3("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")

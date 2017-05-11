@@ -15,7 +15,7 @@ module Pkg::Util::Git
 
     def git_tag(version)
       fail unless Pkg::Util::Version.is_git_repo?
-      stdout, _, _ = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} tag -s -u #{Pkg::Config.gpg_key} -m '#{version}' #{version}")
+      stdout, _, _ = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} tag -s -u #{Pkg::Util::Gpg.get_key} -m '#{version}' #{version}")
       stdout
     end
 

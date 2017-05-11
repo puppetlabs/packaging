@@ -1,6 +1,14 @@
 module Pkg::Util::Gpg
   class << self
 
+    def get_key
+      if Pkg::Config.nonfinal_gpg_key && !Pkg::Util::Version.is_final?
+        Pkg::Config.nonfinal_gpg_key
+      else
+        Pkg::Config.gpg_key
+      end
+    end
+
     def keychain
       if @keychain.nil?
         @keychain = Pkg::Util::Tool.find_tool('keychain')

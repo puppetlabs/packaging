@@ -194,7 +194,7 @@ module Pkg::Util::Version
     # There are currently two supported version strategies.
     #
     # This method calls down to the version strategy indicated, defaulting to the
-    # rc_final strategy. The methods themselves will return false if it is a final
+    # checking the tag. The methods themselves will return false if it is a final
     # release, so their return values are collected and then inverted before being
     # returned.
     def is_final?
@@ -207,12 +207,22 @@ module Pkg::Util::Version
         when "zero_based"
           ret = is_less_than_one?
         when nil
-          ret = is_rc?
+          ret = !is_tagged?
       end
       return (!ret)
     end
 
-    # the rc_final strategy (default)
+    # The tag version strategy
+    # If the git repo is on a tag, the tag incicates a final version
+    def is_tagged?
+      if git_ref_type == "tag"
+        true
+      else
+        false
+      end
+    end
+
+    # the rc_final strategy
     # Assumes version strings in the formats:
     # final:
     # '0.7.0'
@@ -228,7 +238,7 @@ module Pkg::Util::Version
       case get_dash_version
       when /^\d+\.\d+\.\d+-*rc\d+/
         TRUE
-      when /^\d+\.\d+\.\d+\.SNAPSHOT\.\d{4}\.\d{2}\.\d{2}T\d{4}/
+      when /^\d+\.\d+\.\d+\.\D*SNAPSHOT\.\d{4}\.\d{2}\.\d{2}T\d{4}/
         TRUE
       else
         FALSE

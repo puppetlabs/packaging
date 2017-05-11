@@ -8,7 +8,7 @@ module Pkg::MSI
 
       work_dir = "Windows/Temp/#{Pkg::Util.rand_string}"
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "mkdir -p C:/#{work_dir}")
-      msis = Dir.glob("#{target_dir}/windows/**/*.msi")
+      msis = Dir.glob("#{target_dir}/**/*.msi")
       Pkg::Util::Net.rsync_to(msis.join(" "), rsync_host_string, "/cygdrive/c/#{work_dir}")
 
       # Please Note:

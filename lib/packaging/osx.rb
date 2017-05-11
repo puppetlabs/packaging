@@ -10,7 +10,7 @@ module Pkg::OSX
       mount     = File.join(work_dir, "mount")
       signed    = File.join(work_dir, "signed")
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "mkdir -p #{mount} #{signed}")
-      dmgs = Dir.glob("#{target_dir}/apple/**/*.dmg")
+      dmgs = Dir.glob("#{target_dir}/**/*.dmg")
       Pkg::Util::Net.rsync_to(dmgs.join(" "), rsync_host_string, work_dir)
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, %Q[for dmg in #{dmgs.map { |d| File.basename(d, ".dmg") }.join(" ")}; do
         /usr/bin/hdiutil attach #{work_dir}/$dmg.dmg -mountpoint #{mount} -nobrowse -quiet ;

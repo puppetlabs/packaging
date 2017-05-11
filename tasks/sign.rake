@@ -48,15 +48,19 @@ namespace :pl do
   desc "Sign the tarball, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_tar do
     unless Pkg::Config.vanagon_project
-      File.exist?("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz") or fail "No tarball exists. Try rake package:tar?"
+      packages = Dir["pkg/#{Pkg::Config.project}*.tar.gz"]
+      packages.delete_if { |p| p.match?(/signing_bundle|packaging-bundle/) }
+      fail "No tarball exists. Try rake package:tar?" if packages.empty?
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-      Pkg::Util::Gpg.sign_file "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
+      packages.each do |pkg|
+        Pkg::Util::Gpg.sign_file pkg
+      end
     end
   end
 
   desc "Sign the Arista EOS swix packages, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_swix do
-    packages = Dir["pkg/eos/**/*.swix"]
+    packages = Dir["pkg/**/*.swix"]
     unless packages.empty?
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
       packages.each do |swix_package|
@@ -67,9 +71,9 @@ namespace :pl do
 
   desc "Detach sign any solaris svr4 packages"
   task :sign_svr4 do
-    unless Dir["pkg/solaris/10/**/*.pkg.gz"].empty?
+    unless Dir["pkg/**/*.pkg.gz"].empty?
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-      Dir["pkg/solaris/10/**/*.pkg.gz"].each do |pkg|
+      Dir["pkg/**/*.pkg.gz"].each do |pkg|
         Pkg::Util::Gpg.sign_file pkg
       end
     end
@@ -83,21 +87,21 @@ namespace :pl do
     rm_r Dir["#{rpm_dir}/*/*/*/i386/*.noarch.rpm"]
     # We'll sign the remaining noarch
     all_rpms = Dir["#{rpm_dir}/**/*.rpm"]
-    old_rpms = Dir["#{rpm_dir}/el/4/**/*.rpm"] +
-      Dir["#{rpm_dir}/el/5/**/*.rpm"] +
-      Dir["#{rpm_dir}/sles/10/**/*.rpm"] +
-      Dir["#{rpm_dir}/sles/11/**/*.rpm"]
-    modern_rpms = Dir["#{rpm_dir}/el/6/**/*.rpm"] +
-      Dir["#{rpm_dir}/el/7/**/*.rpm"] +
-      Dir["#{rpm_dir}/fedora/**/*.rpm"] +
-      Dir["#{rpm_dir}/nxos/**/*.rpm"] +
-      Dir["#{rpm_dir}/cisco-wrlinux/**/*.rpm"] +
-      Dir["#{rpm_dir}/sles/12/**/*.rpm"] +
-      Dir["#{rpm_dir}/eos/**/**/*.rpm"]
+    old_rpms = Dir["#{rpm_dir}/**/el/4/**/*.rpm"] +
+      Dir["#{rpm_dir}/**/el/5/**/*.rpm"] +
+      Dir["#{rpm_dir}/**/sles/10/**/*.rpm"] +
+      Dir["#{rpm_dir}/**/sles/11/**/*.rpm"]
+    modern_rpms = Dir["#{rpm_dir}/**/el/6/**/*.rpm"] +
+      Dir["#{rpm_dir}/**/el/7/**/*.rpm"] +
+      Dir["#{rpm_dir}/**/fedora/**/*.rpm"] +
+      Dir["#{rpm_dir}/**/nxos/**/*.rpm"] +
+      Dir["#{rpm_dir}/**/cisco-wrlinux/**/*.rpm"] +
+      Dir["#{rpm_dir}/**/sles/12/**/*.rpm"] +
+      Dir["#{rpm_dir}/**/eos/**/**/*.rpm"]
 
     # We don't sign AIX rpms, but we don't want to fail because they
     # will be in the list
-    aix_rpms = Dir["#{rpm_dir}/aix/**/*.rpm"]
+    aix_rpms = Dir["#{rpm_dir}/**/aix/**/*.rpm"]
 
     unsigned_rpms = all_rpms - old_rpms - modern_rpms - aix_rpms
     unless unsigned_rpms.empty?
@@ -124,13 +128,13 @@ namespace :pl do
 
   desc "Sign ips package, uses PL certificates by default, update privatekey_pem, certificate_pem, and ips_inter_cert in project_data.yaml to override."
   task :sign_ips do
-    Pkg::IPS.sign unless Dir['pkg/solaris/11/**/*.p5p'].empty?
+    Pkg::IPS.sign unless Dir['pkg/**/*.p5p'].empty?
   end
 
   if Pkg::Config.build_gem
     desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
     task :sign_gem do
-      FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |gem|
+      FileList["pkg/#{Pkg::Config.gem_name}*.gem"].each do |gem|
         puts "signing gem #{gem}"
         Pkg::Util::Gpg.sign_file(gem)
       end
@@ -167,12 +171,12 @@ namespace :pl do
 
   desc "Sign OSX packages"
   task :sign_osx => "pl:fetch" do
-    Pkg::OSX.sign unless Dir['pkg/apple/**/*.dmg'].empty?
+    Pkg::OSX.sign unless Dir['pkg/**/*.dmg'].empty?
   end
 
   desc "Sign MSI packages"
   task :sign_msi => "pl:fetch" do
-    Pkg::MSI.sign unless Dir['pkg/windows/**/*.msi'].empty?
+    Pkg::MSI.sign unless Dir['pkg/**/*.msi'].empty?
   end
 
   ##

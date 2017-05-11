@@ -186,7 +186,7 @@ namespace :pl do
   namespace :jenkins do
     desc "Sign all locally staged packages on #{Pkg::Config.distribution_server}"
     task :sign_all => "pl:fetch" do
-      Dir["pkg/*"].empty? and fail "There were files found in pkg/. Maybe you wanted to build/retrieve something first?"
+      Dir["pkg/*"].empty? and fail "There are no files found in pkg/. Maybe you wanted to build/retrieve something first?"
 
       # Because rpms and debs are laid out differently in PE under pkg/ they
       # have a different sign task to address this. Rather than create a whole

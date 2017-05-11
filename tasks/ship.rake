@@ -1,31 +1,4 @@
 namespace :pl do
-  desc "Ship mocked rpms to #{Pkg::Config.yum_staging_server}"
-  task :ship_rpms => 'pl:fetch' do
-    ["aix", "cisco-wrlinux", "el", "eos", "fedora", "nxos", "sles"].each do |dist|
-      pkgs = Dir["pkg/#{dist}/**/*.rpm"]
-      next if pkgs.empty?
-
-      prefix = File.join(Pkg::Config.yum_repo_path, dist)
-      pkgs = pkgs.map { |f| f.gsub("pkg/#{dist}", prefix) }
-
-      extra_flags = ['--ignore-existing', '--delay-updates']
-      extra_flags << '--dry-run' if ENV['DRYRUN']
-
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to(
-          "pkg/#{dist}",
-          Pkg::Config.yum_staging_server,
-          Pkg::Config.yum_repo_path,
-          extra_flags: extra_flags
-        )
-
-        Pkg::Util::Net.remote_set_ownership(Pkg::Config.yum_staging_server, 'root', 'release', pkgs)
-        Pkg::Util::Net.remote_set_permissions(Pkg::Config.yum_staging_server, '0664', pkgs)
-        Pkg::Util::Net.remote_set_immutable(Pkg::Config.yum_staging_server, pkgs)
-      end
-    end
-  end
-
   namespace :remote do
     # These hacky bits execute a pre-existing rake task on the Pkg::Config.apt_host
     # The rake task takes packages in a specific directory and freights them
@@ -77,71 +50,6 @@ namespace :pl do
         else
           warn %(Pkg::Config#apt_repo_command returned something unexpected, so no attempt will be made to update remote repos)
         end
-      end
-    end
-  end
-
-  desc "Ship cow-built debs to #{Pkg::Config.apt_signing_server}"
-  task :ship_debs => 'pl:fetch' do
-    Pkg::Util::Execution.retry_on_fail(:times => 3) do
-      if File.directory?("pkg/deb")
-
-        pkgs = Dir["pkg/deb/**/*\.*"]
-        pkgs = pkgs.map { |f| f.gsub("pkg/deb", Pkg::Config.apt_repo_staging_path) }
-        puts "pkgs = #{pkgs}"
-
-        Pkg::Util::Net.rsync_to('pkg/deb/', Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path)
-        Pkg::Util::Net.remote_set_ownership(Pkg::Config.apt_signing_server, 'root', 'release', pkgs)
-        Pkg::Util::Net.remote_set_permissions(Pkg::Config.apt_signing_server, '0664', pkgs)
-      else
-        warn "No deb packages found to ship; nothing to do"
-      end
-    end
-  end
-
-  desc "Ship svr4 packages to #{Pkg::Config.svr4_host}"
-  task :ship_svr4 do
-    Pkg::Util::Execution.retry_on_fail(:times => 3) do
-      if File.directory?("pkg/solaris/10")
-        Pkg::Util::Net.rsync_to('pkg/solaris/10', Pkg::Config.svr4_host, Pkg::Config.svr4_path)
-      end
-    end
-  end
-
-  desc "Ship p5p packages to #{Pkg::Config.p5p_host}"
-  task :ship_p5p do
-    Pkg::Util::Execution.retry_on_fail(:times => 3) do
-      if File.directory?("pkg/solaris/11")
-        Pkg::Util::Net.rsync_to('pkg/solaris/11', Pkg::Config.p5p_host, Pkg::Config.p5p_path)
-      end
-    end
-  end
-
-  namespace :remote do
-    desc "Update remote ips repository on #{Pkg::Config.ips_host}"
-    task :update_ips_repo  => 'pl:fetch' do
-      if Dir['pkg/ips/pkgs/**/*'].empty? && Dir['pkg/solaris/11/**/*'].empty?
-        $stdout.puts "There aren't any p5p packages in pkg/ips/pkgs or pkg/solaris/11. Maybe something went wrong?"
-      else
-
-        if !Dir['pkg/ips/pkgs/**/*'].empty?
-          source_dir = 'pkg/ips/pkgs/'
-        else
-          source_dir = 'pkg/solaris/11/'
-        end
-
-        tmpdir, _ = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, 'mktemp -d -p /var/tmp', true)
-        tmpdir.chomp!
-
-        Pkg::Util::Net.rsync_to(source_dir, Pkg::Config.ips_host, tmpdir)
-
-        remote_cmd = %(for pkg in #{tmpdir}/*.p5p; do
-      sudo pkgrecv -s $pkg -d #{Pkg::Config.ips_path} '*';
-      done)
-
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, remote_cmd)
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "sudo pkgrepo refresh -s #{Pkg::Config.ips_path}")
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "sudo /usr/sbin/svcadm restart svc:/application/pkg/server:#{Pkg::Config.ips_repo || 'default'}")
       end
     end
 
@@ -231,6 +139,16 @@ namespace :pl do
     end
   end
 
+  desc "Ship mocked rpms to #{Pkg::Config.yum_staging_server}"
+  task :ship_rpms => 'pl:fetch' do
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.rpm', 'pkg/**/*.srpm'], Pkg::Config.yum_staging_server, Pkg::Config.yum_repo_path)
+  end
+
+  desc "Ship cow-built debs to #{Pkg::Config.apt_signing_server}"
+  task :ship_debs => 'pl:fetch' do
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.debian.tar.gz', 'pkg/**/*.orig.tar.gz','pkg/**/*.dsc', 'pkg/**/*.deb', 'pkg/**/*.changes'], Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path, {addtl_path_to_sub: '/deb', chattr: false})
+  end
+
   desc "Ship built gem to rubygems.org, internal Gem mirror, and public file server"
   task :ship_gem => 'pl:fetch' do
     # We want to ship a Gem only for projects that build gems, so
@@ -306,47 +224,24 @@ namespace :pl do
 
   desc "ship apple dmg to #{Pkg::Config.dmg_staging_server}"
   task :ship_dmg => 'pl:fetch' do
-    if Dir['pkg/apple/**/*.dmg'].empty?
-      $stdout.puts "There aren't any dmg packages in pkg/apple. Maybe something went wrong?"
-    else
-      puts "Do you want to ship dmg files to (#{Pkg::Config.dmg_staging_server})?"
-      if Pkg::Util.ask_yes_or_no
-        Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          Pkg::Util::Net.rsync_to('pkg/apple/', Pkg::Config.dmg_staging_server, Pkg::Config.dmg_path)
-        end
-      end
-    end
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.dmg'], Pkg::Config.dmg_staging_server, Pkg::Config.dmg_path, {addtl_path_to_sub: '/apple'})
   end
 
   desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
   task :ship_swix => 'pl:fetch' do
-    packages = Dir['pkg/eos/**/*.swix']
-    if packages.empty?
-      $stdout.puts "There aren't any swix packages in pkg/eos. Maybe something went wrong?"
-    else
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to("pkg/eos/", Pkg::Config.swix_staging_server, Pkg::Config.swix_path)
-      end
-    end
+    Pkg::Util::Ship.ship_pkgs(["pkg/**/*.swix*"], Pkg::Config.swix_staging_server, Pkg::Config.swix_path, {addtl_path_to_sub: '/eos'})
   end
 
   desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
   task :ship_tar => 'pl:fetch' do
     if Pkg::Config.build_tar
-      files = Dir.glob("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*")
-      if files.empty?
-        puts "There are no tarballs to ship"
-      else
-        Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          Pkg::Util::Net.rsync_to(files.join("\s"), Pkg::Config.tar_staging_server, Pkg::Config.tarball_path)
-        end
-      end
+      Pkg::Util::Ship.ship_pkgs(["pkg/*.tar.gz*"], Pkg::Config.tar_staging_server, Pkg::Config.tarball_path, {excludes: ['signing_bundle', 'packaging-bundle']})
     end
   end
 
   desc "ship Windows nuget packages to #{Pkg::Config.nuget_host}"
   task :ship_nuget => 'pl:fetch' do
-    packages = Dir['pkg/windows/**/*.nupkg']
+    packages = Dir['pkg/**/*.nupkg']
     if packages.empty?
       $stdout.puts "There aren't any nuget packages in pkg/windows. Maybe something went wrong?"
     else
@@ -356,26 +251,7 @@ namespace :pl do
 
   desc "Ship MSI packages to #{Pkg::Config.msi_staging_server}"
   task :ship_msi => 'pl:fetch' do
-    files = Dir["pkg/windows/**/#{Pkg::Config.project}-#{Pkg::Config.version}*.msi"]
-    if files.empty?
-      $stdout.puts "There aren't any MSI packages in pkg/windows. Maybe something went wrong?"
-    else
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        if File.directory?("pkg/windows")
-          Pkg::Util::Net.rsync_to(
-            'pkg/windows/',
-            Pkg::Config.msi_staging_server,
-            Pkg::Config.msi_path,
-            extra_flags: %W(
-              --ignore-existing
-              --include="*#{Pkg::Config.project}-#{Pkg::Config.version}*.msi"
-              --include="*/"
-              --exclude="*"
-            )
-          )
-        end
-      end
-    end
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.msi'], Pkg::Config.msi_staging_server, Pkg::Config.msi_path, {addtl_path_to_sub: '/windows', excludes: ["#{Pkg::Config.project}-x(86|64).msi"]})
   end
 
   desc "UBER ship: ship all the things in pkg"
@@ -387,8 +263,6 @@ namespace :pl do
       Rake::Task["pl:ship_swix"].invoke
       Rake::Task["pl:ship_nuget"].invoke
       Rake::Task["pl:ship_tar"].invoke
-      Rake::Task["pl:ship_svr4"].invoke
-      Rake::Task["pl:ship_p5p"].invoke
       Rake::Task["pl:ship_msi"].invoke
       add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark
       post_shipped_metrics if Pkg::Config.benchmark

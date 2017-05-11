@@ -16,6 +16,7 @@ module Pkg::Util
   require 'packaging/util/os'
   require 'packaging/util/platform'
   require 'packaging/util/serialization'
+  require 'packaging/util/ship'
   require 'packaging/util/tool'
   require 'packaging/util/rake_utils'
   require 'packaging/util/version'

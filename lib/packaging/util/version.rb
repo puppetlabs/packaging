@@ -206,6 +206,8 @@ module Pkg::Util::Version
           ret = is_odd?
         when "zero_based"
           ret = is_less_than_one?
+        when "snapshot"
+          ret = is_snapshot?
         when nil
           ret = !is_tagged?
       end
@@ -220,6 +222,10 @@ module Pkg::Util::Version
       else
         false
       end
+    end
+
+    def is_snapshot?
+      get_dash_version.match(/SNAPSHOT/)
     end
 
     # the rc_final strategy

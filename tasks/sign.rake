@@ -122,7 +122,7 @@ namespace :pl do
     end
   end
 
-  desc "Sign ips package, uses PL certificates by default, update privatekey_pem, certificate_pem, and ips_inter_cert in project_data.yaml to override."
+  desc "Sign ips package, uses PL certificates by default, update privatekey_pem, certificate_pem, and ips_inter_cert in build_defaults.yaml to override."
   task :sign_ips do
     Pkg::IPS.sign unless Dir['pkg/solaris/11/**/*.p5p'].empty?
   end

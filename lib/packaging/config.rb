@@ -181,23 +181,26 @@ module Pkg
       end
 
       def load_default_configs
-        default_project_data = File.join(@project_root, "ext", "project_data.yaml")
-        default_build_defaults = File.join(@project_root, "ext", "build_defaults.yaml")
+        got_config = false
+        default_project_data = { :path => File.join(@project_root, "ext", "project_data.yaml"), :required => false }
+        default_build_defaults = { :path => File.join(@project_root, "ext", "build_defaults.yaml"), :required => true }
 
         [default_project_data, default_build_defaults].each do |config|
-          if File.readable? config
-            self.config_from_yaml(config)
+          if File.readable? config[:path]
+            self.config_from_yaml(config[:path])
+            got_config = true if config[:required]
           else
-            puts "Skipping load of expected default config #{config}, cannot read file."
-            #   Since the default configuration files are not readable, most
-            #   likely not present, at this point we assume the project_root
-            #   isn't what we hoped it would be, and unset it.
-            @project_root = nil
+            puts "Skipping load of expected default config #{config[:path]}, cannot read file."
           end
         end
 
-        if @project_root
+        if got_config
           self.config
+        else
+          # Since the default configuration files are not readable, most
+          # likely not present, at this point we assume the project_root
+          # isn't what we hoped it would be, and unset it.
+          @project_root = nil
         end
       end
 

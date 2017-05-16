@@ -4,6 +4,7 @@ require 'json'
 module Pkg::Util::Version
   class << self
 
+    # This is used to set Pkg::Config.version
     def get_dash_version
       if info = Pkg::Util::Git.git_describe_version
         info.join('-')
@@ -11,20 +12,11 @@ module Pkg::Util::Version
     end
 
     def get_dot_version
-      get_dash_version.gsub('-', '.')
-    end
-
-    def get_branch_version
-      branch = Pkg::Util::Git.branch_name
-      if branch =~ /(\d+(\.\d+)+)/
-        return $1
-      else
-        fail "Can't find a version in your branch, make sure it matches <number>.<number>, like maint/1.7.0/fixing-some-bugs"
-      end
+      Pkg::Config.version.sub('-','.')
     end
 
     def get_base_pkg_version
-      dash = get_dash_version
+      dash = Pkg::Config.version
       if dash.include?("rc")
         # Grab the rc number
         rc_num = dash.match(/rc(\d+)/)[1]
@@ -48,69 +40,18 @@ module Pkg::Util::Version
     # release, so their return values are collected and then inverted before being
     # returned.
     def is_final?
-      ret = nil
-      case Pkg::Config.version_strategy
-        when "rc_final"
-          ret = is_rc?
-        when "odd_even"
-          ret = is_odd?
-        when "zero_based"
-          ret = is_less_than_one?
-        when nil
-          ret = is_rc?
-      end
-      return (!ret)
-    end
-
-    # the rc_final strategy (default)
-    # Assumes version strings in the formats:
-    # final:
-    # '0.7.0'
-    # '0.7.0-63'
-    # '0.7.0-63-dirty'
-    # development:
-    # '0.7.0rc1 (we don't actually use this format anymore, but once did)
-    # '0.7.0-rc1'
-    # '0.7.0-rc1-63'
-    # '0.7.0-rc1-63-dirty'
-    # '0.7.0.SNAPSHOT.2015.03.25T0146'
-    def is_rc?
-      case get_dash_version
-      when /^\d+\.\d+\.\d+-*rc\d+/
-        TRUE
-      when /^\d+\.\d+\.\d+\.SNAPSHOT\.\d{4}\.\d{2}\.\d{2}T\d{4}/
-        TRUE
+      case Pkg::Config.version
+      when /rc/
+        false
+      when /SNAPSHOT/
+        false
+      when /-dirty/
+        false
+      when /g[a-f0-9]{7}$/
+        false
       else
-        FALSE
+        true
       end
-    end
-
-    # the odd_even strategy (mcollective)
-    # final:
-    # '0.8.0'
-    # '1.8.0-63'
-    # '0.8.1-63-dirty'
-    # development:
-    # '0.7.0'
-    # '1.7.0-63'
-    # '0.7.1-63-dirty'
-    def is_odd?
-      return TRUE if get_dash_version.match(/^\d+\.(\d+)\.\d+/)[1].to_i.odd?
-      return FALSE
-    end
-
-    # the pre-1.0 strategy (node classifier)
-    # final:
-    # '1.8.0'
-    # '1.8.0-63'
-    # '1.8.1-63-dirty'
-    # development:
-    # '0.7.0'
-    # '0.7.0-63'
-    # '0.7.1-63-dirty'
-    def is_less_than_one?
-      return TRUE if get_dash_version.match(/^(\d+)\.\d+\.\d+/)[1].to_i.zero?
-      return FALSE
     end
 
     # This is to support packages that only burn-in the version number in the

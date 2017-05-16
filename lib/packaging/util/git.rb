@@ -24,7 +24,7 @@ module Pkg::Util::Git
 
     # Check if we are currently working on a tagged commit.
     def tagged?
-      return git_ref_type = "tag"
+      return git_ref_type == "tag"
     end
 
     # Reports if a ref and it's corresponding git repo points to

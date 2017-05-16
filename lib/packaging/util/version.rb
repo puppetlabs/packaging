@@ -15,6 +15,12 @@ module Pkg::Util::Version
     end
 
     def get_branch_version
+      branch = Pkg::Util::Git.branch_name
+      if branch =~ /(\d+(\.\d+)+)/
+        return $1
+      else
+        fail "Can't find a version in your branch, make sure it matches <number>.<number>, like maint/1.7.0/fixing-some-bugs"
+      end
     end
 
     def get_base_pkg_version

@@ -112,10 +112,17 @@ module Pkg::Util::Git
     alias :is_git_repo :is_git_repo?
 
     # Return the basename of the project repo
-    def git_project_name
+    def project_name
       Pkg::Util.in_project_root do
         stdout, _, _ = Pkg::Util::Execution.capture3("#{GIT} config --get remote.origin.url")
         stdout.split('/')[-1].chomp(".git").chomp
+      end
+    end
+
+    def branch_name
+      Pkg::Util.in_project_root do
+        stdout, _, _ = Pkg::Util::Execution.capture3("#{GIT} rev-parse --abbrev-ref HEAD")
+        stdout.strip
       end
     end
 

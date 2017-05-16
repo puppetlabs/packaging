@@ -200,8 +200,8 @@ module Pkg
       #   or is in a git repo, but there are no tags in the repo, in which case
       #   git-describe will fail.
       def load_versioning
-        if @project_root and Pkg::Util::Version.git_tagged?
-          @ref         = Pkg::Util::Version.git_sha_or_tag
+        if @project_root and Pkg::Util::Git.describe
+          @ref         = Pkg::Util::Git.git_sha_or_tag
           @short_ref   = Pkg::Util::Version.git_sha_or_tag(7)
           @version     = Pkg::Util::Version.get_dash_version
           @dotversion  = Pkg::Util::Version.get_dot_version

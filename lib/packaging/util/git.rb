@@ -22,16 +22,6 @@ module Pkg::Util::Git
       stdout
     end
 
-    # Check if the repo we are working in has at some point been tagged with an
-    # annotated tag. This does not tell us if we are currently working from a
-    # tag or not
-    def tagged?
-      Pkg::Util.in_project_root do
-        _, _, ret = Pkg::Util::Execution.capture3("#{GIT} describe")
-        Pkg::Util::Execution.success?(ret)
-      end
-    end
-
     # Check if we are currently working on a tagged commit.
     def tagged?
       return git_ref_type = "tag"
@@ -73,8 +63,12 @@ module Pkg::Util::Git
 
     def git_describe
       Pkg::Util.in_project_root do
-        stdout, _, _ = Pkg::Util::Execution.capture3("#{GIT} describe")
-        stdout.strip
+        stdout, _, ret = Pkg::Util::Execution.capture3("#{GIT} describe")
+        if Pkg::Util::Execution.success?(ret)
+          stdout.strip
+        else
+          false
+        end
       end
     end
 

@@ -63,26 +63,6 @@ def ln_sfT(src, dest)
   sh "ln -sfT #{src} #{dest}"
 end
 
-def git_commit_file(file, message = nil)
-  Pkg::Util.deprecate('git_commit_file', 'Pkg::Util::Git.git_commit_file')
-  Pkg::Util::Git.git_commit_file(file, message)
-end
-
-def git_bundle(treeish, appendix = nil, output_dir = nil)
-  Pkg::Util.deprecate('git_bundle', 'Pkg::Util::Git.git_bundle')
-  Pkg::Util::Git.git_bundle(treeish, appendix, output_dir)
-end
-
-def git_tag(version)
-  Pkg::Util.deprecate('git_tag', 'Pkg::Util::Git.git_tag')
-  Pkg::Util::Git.git_tag(version)
-end
-
-def git_pull(remote, branch)
-  Pkg::Util.deprecate('git_pull', 'Pkg::Util::Git.git_pull')
-  Pkg::Util::Git.git_pull(remote, branch)
-end
-
 def curl_form_data(uri, form_data = [], options = {})
   Pkg::Util.deprecate("curl_form_data", "Pkg::Util::Net.curl_form_data")
   Pkg::Util::Net.curl_form_data(uri, form_data, options)

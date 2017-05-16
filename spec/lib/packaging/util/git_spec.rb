@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 describe "Pkg::Util::Git" do
-  context "#git_commit_file" do
+  context "#commit_file" do
     let(:file) {"thing.txt"}
     let(:message) {"foo"}
 
@@ -10,14 +10,14 @@ describe "Pkg::Util::Git" do
       Pkg::Util::Version.should_receive(:is_git_repo?).and_return(true)
       Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} diff HEAD #{file}")
       Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} commit #{file} -m \"Commit changes in #{file}\" &> /dev/null")
-      Pkg::Util::Git.git_commit_file(file)
+      Pkg::Util::Git.commit_file(file)
     end
 
     it "should commit a file with foo as message" do
       Pkg::Util::Version.should_receive(:is_git_repo?).and_return(true)
       Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} diff HEAD #{file}")
       Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} commit #{file} -m \"Commit #{message} in #{file}\" &> /dev/null")
-      Pkg::Util::Git.git_commit_file(file, message)
+      Pkg::Util::Git.commit_file(file, message)
     end
   end
 
@@ -35,7 +35,7 @@ describe "Pkg::Util::Git" do
       Pkg::Util::Version.should_receive(:is_git_repo?).and_return(true)
       Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} tag -s -u #{gpg_key} -m '#{version}' #{version}")
       Pkg::Util::Git.should_not raise_error
-      Pkg::Util::Git.git_tag(version)
+      Pkg::Util::Git.tag(version)
     end
   end
 

@@ -42,7 +42,7 @@ if Pkg::Config.build_gem
     spec = Gem::Specification.new do |s|
       s.name = Pkg::Config.project                                     unless Pkg::Config.project.nil?
       s.name = Pkg::Config.gem_name                                    unless Pkg::Config.gem_name.nil?
-      s.version = Pkg::Config.gemversion                               unless Pkg::Config.gemversion.nil?
+      s.version = Pkg::Config.dotversion                               unless Pkg::Config.dotversion.nil?
       s.author = Pkg::Config.author                                    unless Pkg::Config.author.nil?
       s.email = Pkg::Config.email                                      unless Pkg::Config.email.nil?
       s.homepage = Pkg::Config.homepage                                unless Pkg::Config.homepage.nil?
@@ -85,7 +85,7 @@ if Pkg::Config.build_gem
         Rake::Task[:gem].reenable
         Rake::Task[:gem].invoke
         rm_rf File.join("pkg", gembuilddir)
-        mv Dir.glob("pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"), File.join(Pkg::Config.project_root, "pkg")
+        mv Dir.glob("pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.dotversion}*.gem"), File.join(Pkg::Config.project_root, "pkg")
       end
     end
 
@@ -95,7 +95,7 @@ if Pkg::Config.build_gem
 
   def create_default_gem
     spec = create_default_gem_spec
-    create_gem(spec, "#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}")
+    create_gem(spec, "#{Pkg::Config.gem_name}-#{Pkg::Config.dotversion}")
   end
 
   def unknown_gems_platform?(platform)
@@ -124,7 +124,7 @@ if Pkg::Config.build_gem
           spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => t)
         end
       end
-      create_gem(spec, "#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}-#{platform}")
+      create_gem(spec, "#{Pkg::Config.gem_name}-#{Pkg::Config.dotversion}-#{platform}")
     end
   end
 

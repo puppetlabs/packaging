@@ -22,12 +22,5 @@ namespace :package do
   task :versionbump, :workdir do |t, args|
     Pkg::Util::Version.versionbump(args.workdir)
   end
-
-  # A set of tasks for printing the version
-  [:version, :rpmversion, :rpmrelease, :debversion, :release].each do |task|
-    task "#{task}" do
-      $stdout.puts Pkg::Config.instance_variable_get("@#{task}")
-    end
-  end
 end
 

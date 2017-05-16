@@ -35,7 +35,7 @@ task :prep_deb_tars, :work_dir do |t, args|
   cd work_dir do
     sh "tar zxf #{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
     mv "#{Pkg::Config.project}-#{Pkg::Config.version}", "#{Pkg::Config.project}-#{Pkg::Config.debversion}"
-    mv "#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz", "#{Pkg::Config.project}_#{Pkg::Config.origversion}.orig.tar.gz"
+    mv "#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz", "#{Pkg::Config.project}_#{Pkg::Deb::Version.origversion}.orig.tar.gz"
   end
 
 

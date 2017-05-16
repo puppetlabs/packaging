@@ -11,8 +11,6 @@ describe "00_utils" do
         :get_dash_version           => '0.3.2-20140507.175526-5',
         :get_dot_version            => '0.3.2.20140507.175526.5',
         :get_debversion             => '0.3.2.20140507.175526.5-1puppetlabs1',
-        :get_rpmversion             => '0.3.2.20140507.175526.5',
-        :get_rpmrelease             => '1',
         :is_rc?                     => false,
         :is_odd?                    => true,
         :is_less_than_one?          => true,
@@ -26,8 +24,6 @@ describe "00_utils" do
         :get_ips_version            => '0.7.0,3.14159-0',
         :get_dot_version            => '0.7.0',
         :get_debversion             => '0.7.0-1puppetlabs1',
-        :get_rpmversion             => '0.7.0',
-        :get_rpmrelease             => '1',
         :is_rc?                     => false,
         :is_odd?                    => true,
         :is_less_than_one?          => true,
@@ -41,8 +37,6 @@ describe "00_utils" do
         :get_ips_version            => '0.8.0rc10,3.14159-0',
         :get_dot_version            => '0.8.0rc10',
         :get_debversion             => '0.8.0-0.1rc10puppetlabs1',
-        :get_rpmversion             => '0.8.0',
-        :get_rpmrelease             => '0.1rc10',
         :is_rc?                     => true,
         :is_odd?                    => false,
         :is_less_than_one?          => true,
@@ -56,8 +50,6 @@ describe "00_utils" do
         :get_ips_version            => '0.7.0,3.14159-0',
         :get_dot_version            => '0.7.0.rc1',
         :get_debversion             => '0.7.0-0.1rc1puppetlabs1',
-        :get_rpmversion             => '0.7.0',
-        :get_rpmrelease             => '0.1rc1',
         :is_rc?                     => true,
         :is_odd?                    => true,
         :is_less_than_one?          => true,
@@ -71,8 +63,6 @@ describe "00_utils" do
         :get_ips_version            => '0.7.0.SNAPSHOT.2015.03.25T0146,3.14159-0',
         :get_dot_version            => '0.7.0.SNAPSHOT.2015.03.25T0146',
         :get_debversion             => '0.7.0-0.1SNAPSHOT.2015.03.25T0146puppetlabs1',
-        :get_rpmversion             => '0.7.0',
-        :get_rpmrelease             => '0.1SNAPSHOT.2015.03.25T0146',
         :is_rc?                     => true,
         :is_odd?                    => true,
         :is_less_than_one?          => true,
@@ -86,8 +76,6 @@ describe "00_utils" do
         :get_ips_version            => '0.4.0,3.14159-63',
         :get_dot_version            => '0.4.0.rc1.63',
         :get_debversion             => '0.4.0-0.1rc1.63puppetlabs1',
-        :get_rpmversion             => '0.4.0',
-        :get_rpmrelease             => '0.1rc1.63',
         :is_rc?                     => true,
         :is_odd?                    => false,
         :is_less_than_one?          => true,
@@ -101,8 +89,6 @@ describe "00_utils" do
         :get_ips_version            => '0.6.0,3.14159-63-dirty',
         :get_dot_version            => '0.6.0.rc1.63.dirty',
         :get_debversion             => '0.6.0-0.1rc1.63dirtypuppetlabs1',
-        :get_rpmversion             => '0.6.0',
-        :get_rpmrelease             => '0.1rc1.63dirty',
         :is_rc?                     => true,
         :is_odd?                    => false,
         :is_less_than_one?          => true,
@@ -116,8 +102,6 @@ describe "00_utils" do
         :get_ips_version            => '0.7.0,3.14159-63',
         :get_dot_version            => '0.7.0.63',
         :get_debversion             => '0.7.0.63-1puppetlabs1',
-        :get_rpmversion             => '0.7.0.63',
-        :get_rpmrelease             => '1',
         :is_rc?                     => false,
         :is_odd?                    => true,
         :is_less_than_one?          => true,
@@ -131,8 +115,6 @@ describe "00_utils" do
         :get_ips_version            => '0.7.0,3.14159-63-dirty',
         :get_dot_version            => '0.7.0.63.dirty',
         :get_debversion             => '0.7.0.63.dirty-1puppetlabs1',
-        :get_rpmversion             => '0.7.0.63.dirty',
-        :get_rpmrelease             => '1',
         :is_rc?                     => false,
         :is_odd?                    => true,
         :is_less_than_one?          => true,
@@ -204,7 +186,6 @@ describe "00_utils" do
           elsif method.to_s.include?("rpm")
             Pkg::Util::Version.should_receive(:run_git_describe_internal).and_return(input)
           else
-            Pkg::Util::Version.stub(:uname_r) { "3.14159" }
             Pkg::Util::Version.stub(:is_git_repo) { true }
             Pkg::Util::Version.should_receive(:run_git_describe_internal).and_return(input)
           end

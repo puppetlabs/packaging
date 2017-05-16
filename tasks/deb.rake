@@ -25,7 +25,7 @@ def debuild(args)
   begin
     sh "debuild --no-lintian -uc -us"
   rescue => e
-    fail "Something went wrong. Hopefully the backscroll or #{results_dir}/#{Pkg::Config.project}_#{Pkg::Config.debversion}.build file has a clue.\n#{e}"
+    fail "Something went wrong. Hopefully the backscroll or #{results_dir}/#{Pkg::Config.project}_#{Pkg::Deb::Version.debversion}.build file has a clue.\n#{e}"
   end
 end
 
@@ -34,7 +34,7 @@ task :prep_deb_tars, :work_dir do |t, args|
   FileUtils.cp "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz", work_dir, { :preserve => true }
   cd work_dir do
     sh "tar zxf #{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
-    mv "#{Pkg::Config.project}-#{Pkg::Config.version}", "#{Pkg::Config.project}-#{Pkg::Config.debversion}"
+    mv "#{Pkg::Config.project}-#{Pkg::Config.version}", "#{Pkg::Config.project}-#{Pkg::Deb::Version.debversion}"
     mv "#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz", "#{Pkg::Config.project}_#{Pkg::Deb::Version.origversion}.orig.tar.gz"
   end
 
@@ -44,7 +44,7 @@ task :prep_deb_tars, :work_dir do |t, args|
   # Also, it turns out that invoking 'find' on a directory that doesn't exist
   # will fail in nasty ways, so we only do this if the target exists...
   if Pathname('ext/debian').directory?
-    pkg_dir = "#{work_dir}/#{Pkg::Config.project}-#{Pkg::Config.debversion}"
+    pkg_dir = "#{work_dir}/#{Pkg::Config.project}-#{Pkg::Deb::Version.debversion}"
     cd 'ext' do
       Pathname('debian').find do |file|
         case
@@ -76,7 +76,7 @@ task :build_deb, :deb_command, :cow do |t, args|
     deb_args  = { :work_dir => work_dir, :cow => cow }
     Rake::Task[:prep_deb_tars].reenable
     Rake::Task[:prep_deb_tars].invoke(work_dir)
-    cd "#{work_dir}/#{Pkg::Config.project}-#{Pkg::Config.debversion}" do
+    cd "#{work_dir}/#{Pkg::Config.project}-#{Pkg::Deb::Version.debversion}" do
       if !File.directory?('debian') and File.directory?('ext/debian')
         mv 'ext/debian', 'debian'
       end
@@ -96,7 +96,7 @@ task :build_deb, :deb_command, :cow do |t, args|
       FileUtils.cp_r(Dir.glob("ext/debian/*"), 'debian', { :preserve => true })
       send(deb_build, deb_args)
       cp FileList["#{work_dir}/*.deb", "#{work_dir}/*.dsc", "#{work_dir}/*.changes", "#{work_dir}/*.debian.tar.gz", "#{work_dir}/*.orig.tar.gz", "${work_dir}/*.diff.gz"], dest_dir
-      rm_rf "#{work_dir}/#{Pkg::Config.project}-#{Pkg::Config.debversion}"
+      rm_rf "#{work_dir}/#{Pkg::Config.project}-#{Pkg::Deb::Version.debversion}"
       rm_rf work_dir
     end
   end

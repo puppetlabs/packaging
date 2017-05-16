@@ -7,7 +7,7 @@ module Pkg::Deb::Version
     end
 
     def origversion
-      Pkg::Config.debversion.split('-')[0]
+      debversion.split('-')[0]
     end
   end
 end

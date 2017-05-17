@@ -69,40 +69,6 @@ module Pkg
       end
 
       ##
-      # For each platform we ship for, find paths to its artifact and repo_config (if applicable).
-      # This is to be consumed by beaker and later replaced with our metadata service.
-      #
-      def platform_data
-        if self.project && self.ref
-          dir = "/opt/jenkins-builds/#{self.project}/#{self.ref}"
-          cmd = "if [ -s \"#{dir}/artifacts\" ]; then cd #{dir}; find ./artifacts/ -mindepth 2 -type f; fi"
-          artifacts, _ = Pkg::Util::Net.remote_ssh_cmd(self.builds_server, cmd, true)
-          artifacts = artifacts.split("\n")
-          data = {}
-          Pkg::Util::Platform.platform_tags.each do |tag|
-            _, _, arch = Pkg::Util::Platform.parse_platform_tag(tag)
-            package_format = Pkg::Util::Platform.get_attribute(tag, :package_format)
-            case package_format
-            when 'deb'
-              artifact = artifacts.find { |e| e.include? Pkg::Util::Platform.artifacts_path(tag) and (e.include?("all") || e.include?("#{arch}.deb")) }
-              repo_config = "./repo_configs/deb/pl-#{self.project}-#{self.ref}-#{Pkg::Util::Platform.get_attribute(tag, :codename)}.list" if artifact
-            when 'rpm'
-              artifact = artifacts.find { |e| e.include? Pkg::Util::Platform.artifacts_path(tag) and e.include?(arch) }
-              repo_config = "./repo_configs/rpm/pl-#{self.project}-#{self.ref}-#{tag}.repo" if artifact
-            when 'swix', 'svr4', 'ips', 'dmg', 'msi'
-              artifact = artifacts.find { |e| e.include? Pkg::Util::Platform.artifacts_path(tag) and e.include?(arch) }
-            else
-              fail "Not sure what to do with packages with a package format of '#{package_format}' - maybe update PLATFORM_INFO?"
-            end
-            data[tag] = { :artifact => artifact,
-                          :repo_config => repo_config,
-                        } if artifact
-          end
-          data
-        end
-      end
-
-      ##
       # Return a hash of all build parameters and their values, nil if unassigned.
       #
       def config_to_hash
@@ -110,7 +76,6 @@ module Pkg
         Pkg::Params::BUILD_PARAMS.each do |param|
           data.store(param, self.instance_variable_get("@#{param}"))
         end
-        data.store(:platform_data, platform_data)
         data
       end
 
@@ -174,23 +139,26 @@ module Pkg
       end
 
       def load_default_configs
-        default_project_data = File.join(@project_root, "ext", "project_data.yaml")
-        default_build_defaults = File.join(@project_root, "ext", "build_defaults.yaml")
+        got_config = false
+        default_project_data = { :path => File.join(@project_root, "ext", "project_data.yaml"), :required => false }
+        default_build_defaults = { :path => File.join(@project_root, "ext", "build_defaults.yaml"), :required => true }
 
         [default_project_data, default_build_defaults].each do |config|
-          if File.readable? config
-            self.config_from_yaml(config)
+          if File.readable? config[:path]
+            self.config_from_yaml(config[:path])
+            got_config = true if config[:required]
           else
-            puts "Skipping load of expected default config #{config}, cannot read file."
-            #   Since the default configuration files are not readable, most
-            #   likely not present, at this point we assume the project_root
-            #   isn't what we hoped it would be, and unset it.
-            @project_root = nil
+            puts "Skipping load of expected default config #{config[:path]}, cannot read file."
           end
         end
 
-        if @project_root
+        if got_config
           self.config
+        else
+          # Since the default configuration files are not readable, most
+          # likely not present, at this point we assume the project_root
+          # isn't what we hoped it would be, and unset it.
+          @project_root = nil
         end
       end
 

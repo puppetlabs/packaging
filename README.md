@@ -412,7 +412,7 @@ rescue LoadError
 end
 ```
 
-Also in ext should be two files, build_defaults.yaml and project_data.yaml.
+Also in ext should be two files, build_defaults.yaml and project_data.yaml (optional).
 
 This is the sample build_defaults.yaml file from Hiera:
 ```yaml

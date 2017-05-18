@@ -69,6 +69,43 @@ module Pkg
       end
 
       ##
+      # For each platform we ship for, find paths to its artifact and repo_config (if applicable).
+      # This is to be consumed by beaker and later replaced with our metadata service.
+      #
+      def platform_data
+        if self.project && self.ref && Pkg::Util::Net.check_host_ssh([self.builds_server]).empty?
+          dir = "/opt/jenkins-builds/#{self.project}/#{self.ref}"
+          cmd = "if [ -s \"#{dir}/artifacts\" ]; then cd #{dir}; find ./artifacts/ -mindepth 2 -type f; fi"
+          artifacts, _ = Pkg::Util::Net.remote_ssh_cmd(self.builds_server, cmd, true)
+          artifacts = artifacts.split("\n")
+          data = {}
+          Pkg::Util::Platform.platform_tags.each do |tag|
+            _, _, arch = Pkg::Util::Platform.parse_platform_tag(tag)
+            package_format = Pkg::Util::Platform.get_attribute(tag, :package_format)
+            case package_format
+            when 'deb'
+              artifact = artifacts.find { |e| e.include? Pkg::Util::Platform.artifacts_path(tag) and (e.include?("all") || e.include?("#{arch}.deb")) }
+              repo_config = "./repo_configs/deb/pl-#{self.project}-#{self.ref}-#{Pkg::Util::Platform.get_attribute(tag, :codename)}.list" if artifact
+            when 'rpm'
+              artifact = artifacts.find { |e| e.include? Pkg::Util::Platform.artifacts_path(tag) and e.include?(arch) }
+              repo_config = "./repo_configs/rpm/pl-#{self.project}-#{self.ref}-#{tag}.repo" if artifact
+            when 'swix', 'svr4', 'ips', 'dmg', 'msi'
+              artifact = artifacts.find { |e| e.include? Pkg::Util::Platform.artifacts_path(tag) and e.include?(arch) }
+            else
+              fail "Not sure what to do with packages with a package format of '#{package_format}' - maybe update PLATFORM_INFO?"
+            end
+            data[tag] = { :artifact => artifact,
+                          :repo_config => repo_config,
+                        } if artifact
+          end
+          return data
+        else
+          warn "Skipping platform_data collection, but don't worry about it."
+          return nil
+        end
+      end
+
+      ##
       # Return a hash of all build parameters and their values, nil if unassigned.
       #
       def config_to_hash
@@ -76,6 +113,7 @@ module Pkg
         Pkg::Params::BUILD_PARAMS.each do |param|
           data.store(param, self.instance_variable_get("@#{param}"))
         end
+        data.store(:platform_data, platform_data)
         data
       end
 

@@ -43,7 +43,7 @@ module Pkg::Util::Git
       ref_type == 'tag'
     end
 
-    # Reports if a ref and it's corresponding git repo points to
+    # Reports if a ref and its corresponding git repo points to
     # a git tag.
     #
     # @param url [string] url of repo grabbed from json file
@@ -53,6 +53,8 @@ module Pkg::Util::Git
       reference.tag?
     end
 
+    # Checks out a specified ref. The ref must exist in the current repo.
+    # This also removes any uncommitted changes
     def checkout(ref)
       Pkg::Util.in_project_root do
         _, _, ret = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} reset --hard ; #{Pkg::Util::Tool::GIT} checkout #{ref}")

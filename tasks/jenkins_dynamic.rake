@@ -20,7 +20,7 @@ namespace :pl do
 
       # If we have a dirty source, bail, because changes won't get reflected in
       # the package builds
-      Pkg::Util::Version.fail_on_dirty_source
+      Pkg::Util::Git.fail_on_dirty_source
 
       # Use JSON to parse the json part of the submission, so we want to fail
       # here also if JSON isn't available
@@ -143,7 +143,7 @@ namespace :pl do
       name = args.name
 
       properties = Pkg::Config.config_to_yaml
-      bundle = Pkg::Util::Git.git_bundle('HEAD')
+      bundle = Pkg::Util::Git.bundle('HEAD')
 
       # Create a string of metrics to send to Jenkins for data analysis
       if Pkg::Config.pe_version

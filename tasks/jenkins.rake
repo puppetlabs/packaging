@@ -91,7 +91,7 @@ namespace :pl do
     #
     task :post_build, :build_task do |t, args|
       # Check for a dirty tree before allowing a remote build that is doomed to unexpected results
-      Pkg::Util::Version.fail_on_dirty_source
+      Pkg::Util::Git.fail_on_dirty_source
 
       # We use JSON for parsing the json part of the submission to JSON
       Pkg::Util.require_library_or_fail 'json'
@@ -145,7 +145,7 @@ namespace :pl do
       #
       # Create the data files to send to jenkins
       properties = Pkg::Config.config_to_yaml
-      bundle = Pkg::Util::Git.git_bundle('HEAD')
+      bundle = Pkg::Util::Git.bundle('HEAD')
 
       # Construct the parameters, which is an array of hashes we turn into JSON
       parameters = [{ "name" => "BUILD_PROPERTIES", "file"  => "file0" },

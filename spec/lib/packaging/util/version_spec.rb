@@ -35,38 +35,6 @@ describe "Pkg::Util::Version" do
     end
   end
 
-  context "#git_sha_or_tag" do
-
-    let(:sha) { "20a338b33e2fc1cbaee27b69de5eb2d06637a7c4" }
-    let(:short_sha) { "20a338b" }
-    let(:tag) { "2.0.4" }
-
-    around do |example|
-      orig_root = Pkg::Config.project_root
-      Pkg::Config.project_root = Pkg::Util::File.mktemp
-      example.run
-      Pkg::Config.project_root = orig_root
-    end
-
-    it "returns a sha if the repo is not tagged" do
-      Pkg::Util::Version.should_receive(:git_ref_type).and_return("sha")
-      Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} rev-parse --short=40 HEAD").and_return(sha)
-      Pkg::Util::Version.git_sha_or_tag
-    end
-
-    it "returns a short sha if the repo is not tagged and short is specified" do
-      Pkg::Util::Version.should_receive(:git_ref_type).and_return("sha")
-      Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} rev-parse --short=7 HEAD").and_return(short_sha)
-      Pkg::Util::Version.git_sha_or_tag(7)
-    end
-
-    it "returns a tag if the repo is tagged" do
-      Pkg::Util::Version.should_receive(:git_ref_type).and_return("tag")
-      Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} describe").and_return(tag)
-      Pkg::Util::Version.git_sha_or_tag
-    end
-  end
-
   context "#is_final?" do
 
     context "with version_strategy 'rc_final'" do
@@ -97,14 +65,4 @@ describe "Pkg::Util::Version" do
     end
   end
 
-
-  context "#tagged?" do
-    it "reports Yes on tagged component" do
-      expect(Pkg::Util::Version.tagged?("git://github.com/puppetlabs/leatherman.git", "refs/tags/0.6.2")).to be(true)
-    end
-
-    it "reports No on non-tagged component" do
-      expect(Pkg::Util::Version.tagged?("git://github.com/puppetlabs/leatherman.git", "4eef05389ebf418b62af17406c7f9f13fa51f975")).to be(false)
-    end
-  end
 end

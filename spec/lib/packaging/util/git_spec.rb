@@ -1,27 +1,32 @@
 # -*- ruby -*-
 require 'spec_helper'
+require 'packaging/util/git'
 
 describe "Pkg::Util::Git" do
-  context "#git_commit_file" do
+  #before :each do
+  #  allow(Pkg::Util::Tool::GIT).to_return { '#{Pkg::Util::Tool::GIT}' }
+  #end
+
+  context "#commit_file" do
     let(:file) {"thing.txt"}
     let(:message) {"foo"}
 
     it "should commit a file with no message, giving changes as the message instead" do
-      Pkg::Util::Version.should_receive(:is_git_repo?).and_return(true)
+      Pkg::Util::Git.should_receive(:is_repo?).and_return(true)
       Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} diff HEAD #{file}")
       Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} commit #{file} -m \"Commit changes in #{file}\" &> /dev/null")
-      Pkg::Util::Git.git_commit_file(file)
+      Pkg::Util::Git.commit_file(file)
     end
 
     it "should commit a file with foo as message" do
-      Pkg::Util::Version.should_receive(:is_git_repo?).and_return(true)
+      Pkg::Util::Git.should_receive(:is_repo?).and_return(true)
       Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} diff HEAD #{file}")
       Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} commit #{file} -m \"Commit #{message} in #{file}\" &> /dev/null")
-      Pkg::Util::Git.git_commit_file(file, message)
+      Pkg::Util::Git.commit_file(file, message)
     end
   end
 
-  context "#git_tag" do
+  context "#tag" do
     let(:version) { "1.2.3" }
     let(:gpg_key) {"1231242354asdfawd"}
     around do |example|
@@ -32,14 +37,14 @@ describe "Pkg::Util::Git" do
     end
 
     it "should not fail" do
-      Pkg::Util::Version.should_receive(:is_git_repo?).and_return(true)
+      Pkg::Util::Git.should_receive(:is_repo?).and_return(true)
       Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} tag -s -u #{gpg_key} -m '#{version}' #{version}")
       Pkg::Util::Git.should_not raise_error
-      Pkg::Util::Git.git_tag(version)
+      Pkg::Util::Git.tag(version)
     end
   end
 
-  context "#git_bundle" do
+  context "#bundle" do
     let(:treeish) { "foo" }
     let(:appendix) { "append" }
     let(:output_dir) { "/path/to/place" }
@@ -58,39 +63,81 @@ describe "Pkg::Util::Git" do
     end
 
     it "should create a git bundle with random appendix and random output directory" do
-      Pkg::Util::Version.should_receive(:is_git_repo?).and_return(true)
+      Pkg::Util::Git.should_receive(:is_repo?).and_return(true)
       Pkg::Util::File.should_receive(:mktemp).and_return(temp)
       Pkg::Util.should_receive(:rand_string).and_return(string)
       Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} bundle create #{temp}/#{project}-#{version}-#{string} #{treeish} --tags")
       Dir.should_receive(:chdir).with(temp)
-      Pkg::Util::Git.git_bundle(treeish)
+      Pkg::Util::Git.bundle(treeish)
     end
 
     it "should create a git bundle with random output directory" do
-      Pkg::Util::Version.should_receive(:is_git_repo?).and_return(true)
+      Pkg::Util::Git.should_receive(:is_repo?).and_return(true)
       Pkg::Util::File.should_receive(:mktemp).and_return(temp)
       Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} bundle create #{temp}/#{project}-#{version}-#{appendix} #{treeish} --tags")
       Dir.should_receive(:chdir).with(temp)
-      Pkg::Util::Git.git_bundle(treeish, appendix)
+      Pkg::Util::Git.bundle(treeish, appendix)
     end
 
     it "should create a git bundle" do
-      Pkg::Util::Version.should_receive(:is_git_repo?).and_return(true)
+      Pkg::Util::Git.should_receive(:is_repo?).and_return(true)
       Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} bundle create #{output_dir}/#{project}-#{version}-#{appendix} #{treeish} --tags")
       Dir.should_receive(:chdir).with(output_dir)
-      Pkg::Util::Git.git_bundle(treeish, appendix, output_dir)
+      Pkg::Util::Git.bundle(treeish, appendix, output_dir)
     end
   end
 
-  context "#git_pull" do
+  context "#pull" do
     let(:remote) {"rand.url"}
     let(:branch) {"foo"}
 
     it "should pull the branch" do
-      Pkg::Util::Version.should_receive(:is_git_repo?).and_return(true)
+      Pkg::Util::Git.should_receive(:is_repo?).and_return(true)
       Pkg::Util::Execution.should_receive(:capture3).with("#{Pkg::Util::Tool::GIT} pull #{remote} #{branch}")
-      Pkg::Util::Git.git_pull(remote, branch)
+      Pkg::Util::Git.pull(remote, branch)
+    end
+  end
+
+  context "#sha_or_tag" do
+
+    let(:sha) { "20a338b33e2fc1cbaee27b69de5eb2d06637a7c4" }
+    let(:tag) { "2.0.4" }
+
+    it "returns a sha if the repo is not tagged" do
+      allow(Pkg::Util::Git).to receive(:ref_type) { 'sha' }
+      allow(Pkg::Util::Git).to receive(:sha) { sha }
+      expect(Pkg::Util::Git.sha_or_tag).to eq sha
+    end
+
+    it "returns a tag if the repo is tagged" do
+      allow(Pkg::Util::Git).to receive(:ref_type) { 'tag' }
+      allow(Pkg::Util::Git).to receive(:describe) { tag }
+      expect(Pkg::Util::Git.sha_or_tag).to eq tag
+    end
+  end
+
+  context "#tagged?" do
+    let(:sha) { "20a338b33e2fc1cbaee27b69de5eb2d06637a7c4" }
+    let(:tag) { "2.0.4" }
+
+    it "returns false if we are working on a sha" do
+      allow(Pkg::Util::Git).to receive(:ref_type) { 'tag' }
+      expect(Pkg::Util::Git.tagged?).to be true
+    end
+
+    it "returns true if we are working on a tag" do
+      allow(Pkg::Util::Git).to receive(:ref_type) { 'sha' }
+      expect(Pkg::Util::Git.tagged?).to be false
+    end
+  end
+
+  context "#remote_tagged?" do
+    it "reports Yes on tagged component" do
+      expect(Pkg::Util::Git.remote_tagged?("git://github.com/puppetlabs/leatherman.git", "refs/tags/0.6.2")).to be(true)
+    end
+
+    it "reports No on non-tagged component" do
+      expect(Pkg::Util::Git.remote_tagged?("git://github.com/puppetlabs/leatherman.git", "4eef05389ebf418b62af17406c7f9f13fa51f975")).to be(false)
     end
   end
 end
-

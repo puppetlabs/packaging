@@ -20,50 +20,70 @@ describe 'Pkg::Util::Version' do
     end
   end
 
-  context "#is_less_than_one?" do
-    context "with a version that starts with '0'" do
-      it "should return true" do
-        Pkg::Util::Version.stub(:get_dash_version).and_return("0.0.1")
-        Pkg::Util::Version.is_less_than_one?.should be(true)
+  describe '#base_pkg_version' do
+    version_hash = {
+      '5.6' => ['5.6', '1'],
+      '1.0.0' => ['1.0.0', '1'],
+      '2017.6.5.3' => ['2017.6.5.3', '1'],
+      '4.99.0-22' => ['4.99.0.22', '0.1'],
+      '1.0.0-658-gabc1234' => ['1.0.0.658.gabc1234', '0.1'],
+      '5.0.0.master.SNAPSHOT.2017.05.16T1357' => ['5.0.0.master', '0.1SNAPSHOT.2017.05.16T1357'],
+      '5.9.7-rc4' => ['5.9.7', '0.1rc4'],
+      '5.9.7-rc4-65-gabc1234' => ['5.9.7.65.gabc1234', '0.1rc4'],
+      '5.9.7-rc4-65-gabc1234-dirty' => ['5.9.7.65.gabc1234', '0.1rc4dirty'],
+      '4.99.0-dirty' => ['4.99.0', '0.1dirty'],
+      '4.99.0-56-gabc1234-dirty' => ['4.99.0.56.gabc1234', '0.1dirty']
+    }
+    version_hash.each do |pre, post|
+      before do
+        allow(Pkg::Config).to receive(:version) { pre }
+        allow(Pkg::Config).to receive(:release) { '1' }
+        allow(Pkg::Config).to receive(:vanagon_project) { false }
       end
-    end
 
-    context "with a version that starts with '1' or greater" do
-      it "should return false" do
-        Pkg::Util::Version.stub(:get_dash_version).and_return("1.0.0")
-        Pkg::Util::Version.is_less_than_one?.should be(false)
-      end
-    end
-  end
-
-  context "#is_final?" do
-
-    context "with version_strategy 'rc_final'" do
-      it "should use 'is_rc?' and return the opposite" do
-        Pkg::Util::Version.stub(:is_rc?).and_return(false)
-        Pkg::Config.stub(:version_strategy).and_return("rc_final")
-        Pkg::Util::Version.should_receive(:is_rc?)
-        Pkg::Util::Version.is_final?.should be(true)
-      end
-    end
-
-    context "with version_strategy 'odd_even'" do
-      it "should use 'is_odd?' and return the opposite" do
-        Pkg::Util::Version.stub(:is_odd?).and_return(false)
-        Pkg::Config.stub(:version_strategy).and_return("odd_even")
-        Pkg::Util::Version.should_receive(:is_odd?)
-        Pkg::Util::Version.is_final?.should be(true)
-      end
-    end
-
-    context "with version_strategy 'zero_based'" do
-      it "should use 'is_less_than_one?' and return the opposite" do
-        Pkg::Util::Version.stub(:is_less_than_one?).and_return(false)
-        Pkg::Config.stub(:version_strategy).and_return("zero_based")
-        Pkg::Util::Version.should_receive(:is_less_than_one?)
-        Pkg::Util::Version.is_final?.should be(true)
+      it "transforms #{pre} to #{post}" do
+        expect(Pkg::Util::Version.base_pkg_version(pre)).to eq post
       end
     end
   end
 
+  describe "#final?" do
+    final_versions = [
+      '1.0.0',
+      '2017.6.5.3',
+      '0.6.8',
+      '2068.532.6',
+      '96.5'
+    ]
+
+    non_final_versions = [
+      '4.99.0-22',
+      '1.0.0-658-gabc1234',
+      '5.0.0.master.SNAPSHOT.2017.05.16T1357',
+      '5.9.7-rc4',
+      '4.99.0-56-dirty'
+    ]
+
+    final_versions.each do |version|
+      it "returns true when given #{version}" do
+        expect(Pkg::Util::Version.final?(version)).to be true
+      end
+    end
+
+    non_final_versions.each do |version|
+      it "returns false when given #{version}" do
+        expect(Pkg::Util::Version.final?(version)).to be false
+      end
+    end
+
+    it "correctly reads a final version from Pkg::Config.version" do
+      allow(Pkg::Config).to receive(:version) { '1.0.0' }
+      expect(Pkg::Util::Version.final?).to be true
+    end
+
+    it "correctly reads a non-final version from Pkg::Config.version" do
+      allow(Pkg::Config).to receive(:version) { '4.99.0-56-dirty' }
+      expect(Pkg::Util::Version.final?).to be false
+    end
+  end
 end

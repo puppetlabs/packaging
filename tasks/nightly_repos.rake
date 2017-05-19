@@ -80,7 +80,7 @@ namespace :pl do
         if versioning == 'ref'
           local_target = File.join(Pkg::Config.project, Pkg::Config.ref, "repos")
         elsif versioning == 'version'
-          local_target = File.join(Pkg::Config.project, Pkg::Util::Version.get_dot_version, "repos")
+          local_target = File.join(Pkg::Config.project, Pkg::Util::Version.dot_version, "repos")
         end
 
         Dir.chdir(local_target) do
@@ -108,7 +108,7 @@ namespace :pl do
         if versioning == 'ref'
           local_target = File.join(Pkg::Config.project, Pkg::Config.ref)
         elsif versioning == 'version'
-          local_target = File.join(Pkg::Config.project, Pkg::Util::Version.get_dot_version)
+          local_target = File.join(Pkg::Config.project, Pkg::Util::Version.dot_version)
         end
         Dir.chdir(local_target) do
           Pkg::Util::Execution.ex("#{gzip} --fast #{File.join("repos", "#{Pkg::Config.project}-all.tar")}")
@@ -127,7 +127,7 @@ namespace :pl do
         if versioning == 'ref'
           local_target = File.join(Pkg::Config.project, Pkg::Config.ref)
         elsif versioning == 'version'
-          local_target = File.join(Pkg::Config.project, Pkg::Util::Version.get_dot_version)
+          local_target = File.join(Pkg::Config.project, Pkg::Util::Version.dot_version)
         end
 
         FileUtils.mkdir_p([local_target, Pkg::Config.project + "-latest"])
@@ -172,15 +172,15 @@ namespace :pl do
 
         # If we're using the version strategy instead of ref, here we shuffle
         # around directories and munge repo_configs to replace the ref with the
-        # version. In the case that get_dot_version and ref are the same, we
+        # version. In the case that dot_version and ref are the same, we
         # have nothing to do, so the conditional is skipped.
-        if versioning == 'version' && Pkg::Util::Version.get_dot_version != Pkg::Config.ref
+        if versioning == 'version' && Pkg::Util::Version.dot_version != Pkg::Config.ref
           Dir.glob("#{local_target}/repo_configs/**/*").select { |t_config| File.file?(t_config) }.each do |config|
             new_contents = File.read(config)
-            new_contents.gsub!(%r{#{Pkg::Config.ref}}, Pkg::Util::Version.get_dot_version)
+            new_contents.gsub!(%r{#{Pkg::Config.ref}}, Pkg::Util::Version.dot_version)
 
             File.open(config, "w") { |file| file.puts new_contents }
-            FileUtils.mv(config, config.gsub(Pkg::Config.ref, Pkg::Util::Version.get_dot_version))
+            FileUtils.mv(config, config.gsub(Pkg::Config.ref, Pkg::Util::Version.dot_version))
           end
         end
 
@@ -283,7 +283,7 @@ namespace :pl do
       if versioning == 'ref'
         version_string = Pkg::Config.ref
       elsif versioning == 'version'
-        version_string =  Pkg::Util::Version.get_dot_version
+        version_string =  Pkg::Util::Version.dot_version
       end
 
       pa_source = File.join(remote_dir, Pkg::Config.project)

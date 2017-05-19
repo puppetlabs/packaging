@@ -4,14 +4,6 @@ require 'json'
 module Pkg::Util::Version
   class << self
 
-    def get_dash_version
-      if Pkg::Util::Git.describe
-        Pkg::Util::Git.describe
-      else
-        get_pwd_version
-      end
-    end
-
     def uname_r
       uname = Pkg::Util::Tool.find_tool('uname', :required => true)
       stdout, _, _ = Pkg::Util::Execution.capture3("#{uname} -r")
@@ -32,32 +24,12 @@ module Pkg::Util::Version
       end
     end
 
-    def get_dot_version
-      get_dash_version.gsub('-', '.')
-    end
-
     def get_pwd_version
       Dir.pwd.split('.')[-1]
     end
 
-    def get_base_pkg_version
-      dash = get_dash_version
-      if dash.include?("rc")
-        # Grab the rc number
-        rc_num = dash.match(/rc(\d+)/)[1]
-        ver = dash.sub(/-?rc[0-9]+/, "-0.#{Pkg::Config.release}rc#{rc_num}").gsub(/(rc[0-9]+)-(\d+)?-?/, '\1.\2')
-      elsif dash.include?("SNAPSHOT")
-        # Insert -0.#{release} between the version and the SNAPSHOT string
-        ver = dash.sub(/^(.*)\.(SNAPSHOT\..*)$/, "\\1-0.#{Pkg::Config.release}\\2")
-      else
-        ver = dash.gsub('-', '.') + "-#{Pkg::Config.release}"
-      end
-
-      ver.split('-')
-    end
-
     def get_debversion
-      get_base_pkg_version.join('-') << "#{Pkg::Config.packager}1"
+      base_pkg_version.join('-') << "#{Pkg::Config.packager}1"
     end
 
     def get_origversion
@@ -65,88 +37,88 @@ module Pkg::Util::Version
     end
 
     def get_rpmversion
-      get_base_pkg_version[0]
+      base_pkg_version[0]
     end
 
     def get_rpmrelease
-      get_base_pkg_version[1]
+      base_pkg_version[1]
     end
 
+    # This is used to set Pkg::Config.version
+    def dash_version
+      Pkg::Util::Git.describe
+    end
 
-    # Determines if this package is a final package via the
-    # selected version_strategy.
-    # There are currently two supported version strategies.
+    # This version is used for gems and platform types that do not support
+    # dashes in the package version
+    def dot_version(version = Pkg::Config.version)
+      version.tr('-', '.')
+    end
+
+    # We need to figure out what we use this for an if we can consolidate it
+    # 4.99.0.22.gf64bc49-1
+    # 4.4.1-0.1SNAPSHOT.2017.05.16T1005
+    # 4.99.0-1
+    # 4.99.0.29.g431768c-1
+    # 2.7.1-1
+    # 5.3.0.rc4-1
+    # 3.0.5.rc6.24.g431768c-1
     #
-    # This method calls down to the version strategy indicated, defaulting to the
-    # rc_final strategy. The methods themselves will return false if it is a final
-    # release, so their return values are collected and then inverted before being
-    # returned.
-    def is_final?
-      ret = nil
-      case Pkg::Config.version_strategy
-        when "rc_final"
-          ret = is_rc?
-        when "odd_even"
-          ret = is_odd?
-        when "zero_based"
-          ret = is_less_than_one?
-        when nil
-          ret = is_rc?
-      end
-      return (!ret)
-    end
+    # Given a version, reformat it to be appropriate for a final package
+    # version. This means we need to add a `0.` before the release version
+    # for non-final builds
+    #
+    # This only applies to packages that are built with the automation in this
+    # repo. This is invalid for all other build automation, like vanagon
+    #
+    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    def base_pkg_version(version = Pkg::Config.version)
+      return "#{dot_version(version)}-#{Pkg::Config.release}".split('-') if final?(version) || Pkg::Config.vanagon_project
 
-    # the rc_final strategy (default)
-    # Assumes version strings in the formats:
-    # final:
-    # '0.7.0'
-    # '0.7.0-63'
-    # '0.7.0-63-dirty'
-    # development:
-    # '0.7.0rc1 (we don't actually use this format anymore, but once did)
-    # '0.7.0-rc1'
-    # '0.7.0-rc1-63'
-    # '0.7.0-rc1-63-dirty'
-    # '0.7.0.SNAPSHOT.2015.03.25T0146'
-    def is_rc?
-      case get_dash_version
-      when /^\d+\.\d+\.\d+-*rc\d+/
-        TRUE
-      when /^\d+\.\d+\.\d+\.SNAPSHOT\.\d{4}\.\d{2}\.\d{2}T\d{4}/
-        TRUE
+      if version.include?('SNAPSHOT')
+        new_version = dot_version(version).sub(/\.SNAPSHOT/, "-0.#{Pkg::Config.release}SNAPSHOT")
+      elsif version.include?('rc')
+        rc_ver = dot_version(version).match(/\.?rc(\d+)/)[1]
+        new_version = dot_version(version).sub(/\.?rc(\d+)/, '') + "-0.#{Pkg::Config.release}rc#{rc_ver}"
       else
-        FALSE
+        new_version = dot_version(version) + "-0.#{Pkg::Config.release}"
+      end
+
+      if new_version.include?('dirty')
+        new_version = new_version.sub(/\.?dirty/, '') + 'dirty'
+      end
+
+      new_version.split('-')
+    end
+
+    # Determines if the version we are working with is or is not final
+    #
+    # The version here does not include the release version. Therefore, we
+    # assume that any version that includes a `-\d+` was not built from a tag
+    # and is a non-final version.
+    # Examples:
+    # Final
+    #   - 5.0.0
+    #   - 2016.5.6.7
+    # Nonfinal
+    #   - 4.99.0-22
+    #   - 1.0.0-658-gabc1234
+    #   - 5.0.0.master.SNAPSHOT.2017.05.16T1357
+    #   - 5.9.7-rc4
+    #   - 4.99.0-56-dirty
+    #
+    def final?(version = Pkg::Config.version)
+      case version
+      when /rc/, /SNAPSHOT/, /-dirty/
+        false
+      when /g[a-f0-9]{7}$/, /^(\d+\.)+\d+-\d+$/
+        false
+      when /^(\d+\.)+\d+$/
+        true
+      else
+        true
       end
     end
-
-    # the odd_even strategy (mcollective)
-    # final:
-    # '0.8.0'
-    # '1.8.0-63'
-    # '0.8.1-63-dirty'
-    # development:
-    # '0.7.0'
-    # '1.7.0-63'
-    # '0.7.1-63-dirty'
-    def is_odd?
-      return TRUE if get_dash_version.match(/^\d+\.(\d+)\.\d+/)[1].to_i.odd?
-      return FALSE
-    end
-
-    # the pre-1.0 strategy (node classifier)
-    # final:
-    # '1.8.0'
-    # '1.8.0-63'
-    # '1.8.1-63-dirty'
-    # development:
-    # '0.7.0'
-    # '0.7.0-63'
-    # '0.7.1-63-dirty'
-    def is_less_than_one?
-      return TRUE if get_dash_version.match(/^(\d+)\.\d+\.\d+/)[1].to_i.zero?
-      return FALSE
-    end
-
 
     # This is to support packages that only burn-in the version number in the
     # release artifact, rather than storing it two (or more) times in the

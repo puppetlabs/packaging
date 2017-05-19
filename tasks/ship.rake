@@ -239,7 +239,7 @@ namespace :pl do
       # Even if a project builds a gem, if it uses the odd_even or zero-based
       # strategies, we only want to ship final gems because otherwise a
       # development gem would be preferred over the last final gem
-      if Pkg::Config.version_strategy !~ /odd_even|zero_based/ || Pkg::Util::Version.is_final?
+      if Pkg::Config.version_strategy !~ /odd_even|zero_based/ || Pkg::Util::Version.final?
         FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |gem_file|
           puts "This will ship to an internal gem mirror, a public file server, and rubygems.org"
           puts "Do you want to start shipping the rubygem '#{gem_file}'?"
@@ -390,7 +390,7 @@ namespace :pl do
       Rake::Task["pl:ship_svr4"].invoke
       Rake::Task["pl:ship_p5p"].invoke
       Rake::Task["pl:ship_msi"].invoke
-      add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark
+      add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.final?)) if Pkg::Config.benchmark
       post_shipped_metrics if Pkg::Config.benchmark
     else
       puts "Ship canceled"

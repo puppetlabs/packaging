@@ -181,8 +181,8 @@ module Pkg
         if @project_root and Pkg::Util::Git.describe
           @ref         = Pkg::Util::Git.sha_or_tag
           @short_ref   = Pkg::Util::Git.sha_or_tag(7)
-          @version     = Pkg::Util::Version.get_dash_version
-          @gemversion  = Pkg::Util::Version.get_dot_version
+          @version     = Pkg::Util::Version.dash_version
+          @gemversion  = Pkg::Util::Version.dot_version
           @ipsversion  = Pkg::Util::Version.get_ips_version
           @debversion  = Pkg::Util::Version.get_debversion
           @origversion = Pkg::Util::Version.get_origversion

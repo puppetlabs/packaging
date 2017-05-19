@@ -1,6 +1,6 @@
-# Utility methods used for versioning projects for various kinds of packaging
 require 'json'
 
+# Utility methods used for versioning projects for various kinds of packaging
 module Pkg::Util::Version
   class << self
 
@@ -156,6 +156,10 @@ module Pkg::Util::Version
     #
     # If you invoke this the version will only be modified in the temporary copy,
     # with the intent that it never change the official source tree.
+    #
+    # rubocop:disable Metrics/AbcSize
+    # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable Metrics/PerceivedComplexity
     def versionbump(workdir = nil)
       version = ENV['VERSION'] || Pkg::Config.version.to_s.strip
       new_version = '"' + version + '"'
@@ -166,20 +170,20 @@ module Pkg::Util::Version
       contents = IO.read(version_file)
 
       # Match version files containing 'VERSION = "x.x.x"' and just x.x.x
-      if version_string = contents.match(/VERSION =.*/)
-        old_version = version_string.to_s.split[-1]
+      if contents =~ /VERSION =.*/
+        old_version = contents.match(/VERSION =.*/).to_s.split[-1]
       else
         old_version = contents
       end
 
       puts "Updating #{old_version} to #{new_version} in #{version_file}"
-      if contents.match("@DEVELOPMENT_VERSION@")
-        contents.gsub!("@DEVELOPMENT_VERSION@", version)
-      elsif contents.match('version\s*=\s*[\'"]DEVELOPMENT[\'"]')
+      if contents =~ /@DEVELOPMENT_VERSION@/
+        contents.gsub!('@DEVELOPMENT_VERSION@', version)
+      elsif contents =~ /version\s*=\s*[\'"]DEVELOPMENT[\'"]/
         contents.gsub!(/version\s*=\s*['"]DEVELOPMENT['"]/, "version = '#{version}'")
-      elsif contents.match("VERSION = #{old_version}")
+      elsif contents =~ /VERSION = #{old_version}/
         contents.gsub!("VERSION = #{old_version}", "VERSION = #{new_version}")
-      elsif contents.match("#{Pkg::Config.project.upcase}VERSION = #{old_version}")
+      elsif contents =~ /#{Pkg::Config.project.upcase}VERSION = #{old_version}/
         contents.gsub!("#{Pkg::Config.project.upcase}VERSION = #{old_version}", "#{Pkg::Config.project.upcase}VERSION = #{new_version}")
       else
         contents.gsub!(old_version, Pkg::Config.version)
@@ -193,17 +197,17 @@ module Pkg::Util::Version
     # input json file and output if it "looks tagged" or not
     #
     # @param json_data [hash] json data hash containing the ref to check
-    def report_json_tags(json_data)
-      puts "component: " + File.basename(json_data["url"])
-      puts "ref: " + json_data["ref"].to_s
+    def report_json_tags(json_data) # rubocop:disable Metrics/AbcSize
+      puts 'component: ' + File.basename(json_data['url'])
+      puts 'ref: ' + json_data['ref'].to_s
       if Pkg::Util::Git.remote_tagged?(json_data['url'], json_data['ref'].to_s)
-        tagged = "Tagged? [ Yes ]"
+        tagged = 'Tagged? [ Yes ]'
       else
-        tagged = "Tagged? [ No  ]"
+        tagged = 'Tagged? [ No  ]'
       end
-      col_len = (ENV["COLUMNS"] || 70).to_i
+      col_len = (ENV['COLUMNS'] || 70).to_i
       puts format("\n%#{col_len}s\n\n", tagged)
-      puts ("*" * col_len)
+      puts '*' * col_len
     end
   end
 end

@@ -10,20 +10,6 @@ module Pkg::Util::Version
       stdout.chomp
     end
 
-    def get_ips_version
-      if info = Pkg::Config.version
-        version, commits, dirty = info
-        if commits.to_s.match('^rc[\d]+')
-          commits = info[2]
-          dirty   = info[3]
-        end
-        osrelease = uname_r
-        "#{version},#{osrelease}-#{commits.to_i}#{dirty ? '-dirty' : ''}"
-      else
-        get_pwd_version
-      end
-    end
-
     def get_pwd_version
       Dir.pwd.split('.')[-1]
     end

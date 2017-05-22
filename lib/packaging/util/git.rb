@@ -5,7 +5,7 @@ module Pkg::Util::Git
   class << self
     # Git utility to create a new git commit
     def commit_file(file, message = 'changes')
-      raise unless is_repo?
+      fail_unless_repo
       puts 'Commiting changes:'
       puts
       diff, = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} diff HEAD #{file}")
@@ -16,14 +16,14 @@ module Pkg::Util::Git
 
     # Git utility to create a new git tag
     def tag(version)
-      raise unless is_repo?
+      fail_unless_repo
       stdout, = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} tag -s -u #{Pkg::Config.gpg_key} -m '#{version}' #{version}")
       stdout
     end
 
     # Git utility to create a new git bundle
     def bundle(treeish, appendix = Pkg::Util.rand_string, temp = Pkg::Util::File.mktemp)
-      raise unless is_repo?
+      fail_unless_repo
       Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} bundle create #{temp}/#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix} #{treeish} --tags")
       Dir.chdir(temp) do
         Pkg::Util::Execution.capture3("#{Pkg::Util::Tool.find_tool('tar')} -czf #{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix}.tar.gz #{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix}")
@@ -33,7 +33,7 @@ module Pkg::Util::Git
     end
 
     def pull(remote, branch)
-      raise unless is_repo?
+      fail_unless_repo
       stdout, = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} pull #{remote} #{branch}")
       stdout
     end
@@ -109,6 +109,13 @@ module Pkg::Util::Git
       Pkg::Util.in_project_root do
         _, _, ret = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} rev-parse --git-dir")
         Pkg::Util::Execution.success?(ret)
+      end
+    end
+
+    def fail_unless_repo
+      unless is_repo?
+        raise "Pkg::Config.project_root (#{Pkg::Config.project_root}) is not \
+          a valid git repository"
       end
     end
 

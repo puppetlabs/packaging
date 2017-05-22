@@ -1,6 +1,6 @@
-# Utility methods for handling git
 require 'fileutils'
 
+# Utility methods for handling git
 module Pkg::Util::Git
   class << self
     # Git utility to create a new git commit
@@ -22,6 +22,7 @@ module Pkg::Util::Git
     end
 
     # Git utility to create a new git bundle
+    # rubocop:disable Metrics/AbcSize
     def bundle(treeish, appendix = Pkg::Util.rand_string, temp = Pkg::Util::File.mktemp)
       fail_unless_repo
       Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} bundle create #{temp}/#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix} #{treeish} --tags")
@@ -105,15 +106,16 @@ module Pkg::Util::Git
     end
 
     # Return true if we're in a git repo, otherwise false
-    def is_repo?
+    def repo?
       Pkg::Util.in_project_root do
         _, _, ret = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} rev-parse --git-dir")
         Pkg::Util::Execution.success?(ret)
       end
     end
 
+    # rubocop:disable Style/GuardClause
     def fail_unless_repo
-      unless is_repo?
+      unless repo?
         raise "Pkg::Config.project_root (#{Pkg::Config.project_root}) is not \
           a valid git repository"
       end

@@ -183,10 +183,10 @@ module Pkg
           @short_ref   = Pkg::Util::Git.sha_or_tag(7)
           @version     = Pkg::Util::Version.dash_version
           @gemversion  = Pkg::Util::Version.dot_version
-          @debversion  = Pkg::Util::Version.get_debversion
-          @origversion = Pkg::Util::Version.get_origversion
-          @rpmversion  = Pkg::Util::Version.get_rpmversion
-          @rpmrelease  = Pkg::Util::Version.get_rpmrelease
+          @debversion  = Pkg::Util::Version.debversion
+          @origversion = Pkg::Util::Version.origversion
+          @rpmversion  = Pkg::Util::Version.rpmversion
+          @rpmrelease  = Pkg::Util::Version.rpmrelease
         else
           puts "Skipping determination of version via git describe, Pkg::Config.project_root is not set to the path of a tagged git repo."
         end

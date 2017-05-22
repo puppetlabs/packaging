@@ -2,6 +2,8 @@
 require 'spec_helper'
 
 # Spec tests for Pkg::Util::Version
+#
+# rubocop:disable Metrics/BlockLength
 describe 'Pkg::Util::Version' do
   context '#versionbump' do
     let(:version_file) { 'thing.txt' }
@@ -9,8 +11,8 @@ describe 'Pkg::Util::Version' do
     let(:orig_contents) { "abcd\nVERSION = @DEVELOPMENT_VERSION@\n" }
     let(:updated_contents) { "abcd\nVERSION = #{version}\n" }
 
-    it "should update the version file contents accordingly" do
-      Pkg::Config.config_from_hash({:project => "foo", :version_file => version_file})
+    it 'should update the version file contents accordingly' do
+      Pkg::Config.config_from_hash(project: 'foo', version_file: version_file)
       allow(IO).to receive(:read).with(version_file) { orig_contents }
       allow(Pkg::Config).to receive(:version) { version }
       version_file_to_write = double('file')
@@ -47,7 +49,7 @@ describe 'Pkg::Util::Version' do
     end
   end
 
-  describe "#final?" do
+  describe '#final?' do
     final_versions = [
       '1.0.0',
       '2017.6.5.3',
@@ -66,22 +68,24 @@ describe 'Pkg::Util::Version' do
 
     final_versions.each do |version|
       it "returns true when given #{version}" do
+        allow(Pkg::Config).to receive(:version) { nil }
         expect(Pkg::Util::Version.final?(version)).to be true
       end
     end
 
     non_final_versions.each do |version|
       it "returns false when given #{version}" do
+        allow(Pkg::Config).to receive(:version) { nil }
         expect(Pkg::Util::Version.final?(version)).to be false
       end
     end
 
-    it "correctly reads a final version from Pkg::Config.version" do
+    it 'correctly reads a final version from Pkg::Config.version' do
       allow(Pkg::Config).to receive(:version) { '1.0.0' }
       expect(Pkg::Util::Version.final?).to be true
     end
 
-    it "correctly reads a non-final version from Pkg::Config.version" do
+    it 'correctly reads a non-final version from Pkg::Config.version' do
       allow(Pkg::Config).to receive(:version) { '4.99.0-56-dirty' }
       expect(Pkg::Util::Version.final?).to be false
     end

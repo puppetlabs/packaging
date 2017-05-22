@@ -3,30 +3,29 @@ require 'json'
 # Utility methods used for versioning projects for various kinds of packaging
 module Pkg::Util::Version
   class << self
-
     def uname_r
-      uname = Pkg::Util::Tool.find_tool('uname', :required => true)
-      stdout, _, _ = Pkg::Util::Execution.capture3("#{uname} -r")
+      uname = Pkg::Util::Tool.find_tool('uname', required: true)
+      stdout, = Pkg::Util::Execution.capture3("#{uname} -r")
       stdout.chomp
     end
 
-    def get_pwd_version
+    def pwd_version
       Dir.pwd.split('.')[-1]
     end
 
-    def get_debversion
+    def debversion
       base_pkg_version.join('-') << "#{Pkg::Config.packager}1"
     end
 
-    def get_origversion
+    def origversion
       Pkg::Config.debversion.split('-')[0]
     end
 
-    def get_rpmversion
+    def rpmversion
       base_pkg_version[0]
     end
 
-    def get_rpmrelease
+    def rpmrelease
       base_pkg_version[1]
     end
 

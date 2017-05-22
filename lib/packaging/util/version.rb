@@ -55,7 +55,14 @@ module Pkg::Util::Version
       version.tr('-', '.')
     end
 
-    # We need to figure out what we use this for an if we can consolidate it
+    # Given a version, reformat it to be appropriate for a final package
+    # version. This means we need to add a `0.` before the release version
+    # for non-final builds
+    #
+    # This only applies to packages that are built with the automation in this
+    # repo. This is invalid for all other build automation, like vanagon
+    #
+    # Examples of output:
     # 4.99.0.22.gf64bc49-1
     # 4.4.1-0.1SNAPSHOT.2017.05.16T1005
     # 4.99.0-1
@@ -63,13 +70,6 @@ module Pkg::Util::Version
     # 2.7.1-1
     # 5.3.0.rc4-1
     # 3.0.5.rc6.24.g431768c-1
-    #
-    # Given a version, reformat it to be appropriate for a final package
-    # version. This means we need to add a `0.` before the release version
-    # for non-final builds
-    #
-    # This only applies to packages that are built with the automation in this
-    # repo. This is invalid for all other build automation, like vanagon
     #
     # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     def base_pkg_version(version = Pkg::Config.version)

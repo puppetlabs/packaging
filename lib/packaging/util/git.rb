@@ -147,5 +147,28 @@ module Pkg::Util::Git
          Please commit/discard changes and try again."
       end
     end
+
+    ##########################################################################
+    # DEPRECATED METHODS
+    #
+    def git_commit_file(file, message = "changes")
+      Pkg::Util.deprecate('Pkg::Util::Git.git_commit_file', 'Pkg::Util::Git.commit_file')
+      Pkg::Util::Git.commit_file(file, message)
+    end
+
+    def git_tag(version)
+      Pkg::Util.deprecate('Pkg::Util::Git.git_tag', 'Pkg::Util::Git.tag')
+      Pkg::Util::Git.tag(version)
+    end
+
+    def git_bundle(treeish, appendix = Pkg::Util.rand_string, temp = Pkg::Util::File.mktemp)
+      Pkg::Util.deprecate('Pkg::Util::Git.git_bundle', 'Pkg::Util::Git.bundle')
+      Pkg::Util::Git.bundle(treeish, appendix, temp)
+    end
+
+    def git_pull(remote, branch)
+      Pkg::Util.deprecate('Pkg::Util::Git.git_pull', 'Pkg::Util::Git.pull')
+      Pkg::Util::Git.pull(remote, branch)
+    end
   end
 end

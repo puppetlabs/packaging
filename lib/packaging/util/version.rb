@@ -166,5 +166,141 @@ module Pkg::Util::Version
       puts format("\n%#{col_len}s\n\n", tagged)
       puts '*' * col_len
     end
+
+    ##########################################################################
+    # DEPRECATED METHODS
+    #
+    def git_co(ref)
+      Pkg::Util.deprecate('Pkg::Util::Version.git_co', 'Pkg::Util::Git.checkout')
+      Pkg::Util::Git.checkout(ref)
+    end
+
+    def git_tagged?
+      Pkg::Util.deprecate('Pkg::Util::Version.git_tagged?', 'Pkg::Util::Git.tagged?')
+      Pkg::Util::Git.tagged?
+    end
+
+    def git_describe
+      Pkg::Util.deprecate('Pkg::Util::Version.git_describe', 'Pkg::Util::Git.describe')
+      Pkg::Util::Git.describe
+    end
+
+    def git_sha(length = 40)
+      Pkg::Util.deprecate('Pkg::Util::Version.git_sha', 'Pkg::Util::Git.sha')
+      Pkg::Util::Git.sha(length)
+    end
+
+    def git_ref_type
+      Pkg::Util.deprecate('Pkg::Util::Version.git_ref_type', 'Pkg::Util::Git.ref_type')
+      Pkg::Util::Git.ref_type
+    end
+
+    def git_sha_or_tag(length = 40)
+      Pkg::Util.deprecate('Pkg::Util::Version.git_sha_or_tag', 'Pkg::Util::Git.sha_or_tag')
+      Pkg::Util::Git.sha_or_tag(length)
+    end
+
+    def is_git_repo?
+      Pkg::Util.deprecate('Pkg::Util::Version.is_git_repo?', 'Pkg::Util::Git.repo?')
+      Pkg::Util::Git.repo?
+    end
+
+    def git_project_name
+      Pkg::Util.deprecate('Pkg::Util::Version.git_project_name', 'Pkg::Util::Git.project_name')
+      Pkg::Util::Git.project_name
+    end
+
+    def git_describe_version
+      Pkg::Util.deprecate('Pkg::Util::Version.git_describe_version', 'Pkg::Util::Git.describe')
+      Pkg::Util::Git.describe
+    end
+
+    def run_git_describe_internal
+      Pkg::Util.deprecate('Pkg::Util::Version.git_describe_version', 'Pkg::Util::Git.describe')
+      Pkg::Util::Git.describe
+    end
+
+    def get_dash_version
+      Pkg::Util.deprecate('Pkg::Util::Version.get_dash_version', 'Pkg::Util::Version.dash_version')
+      Pkg::Util::Version.dash_version
+    end
+
+    def get_ips_version
+      raise "The IPS build tasks have been removed from puppetlabs/packaging. Please port all Solaris projects to vanagon (https://github.com/puppetlabs/vanagon)"
+    end
+
+    def get_dot_version
+      Pkg::Util.deprecate('Pkg::Util::Version.get_dot_version', 'Pkg::Util::Version.dot_version')
+      Pkg::Util::Version.dot_version
+    end
+
+    def get_pwd_version
+      Pkg::Util.deprecate('Pkg::Util::Version.get_pwd_version', 'Pkg::Util::Version.pwd_version')
+      Pkg::Util::Version.pwd_version
+    end
+
+    def get_base_pkg_version
+      Pkg::Util.deprecate('Pkg::Util::Version.get_base_pkg_version', 'Pkg::Util::Version.base_pkg_version')
+      Pkg::Util::Version.base_pkg_version
+    end
+
+    def get_debversion
+      Pkg::Util.deprecate('Pkg::Util::Version.get_debversion', 'Pkg::Util::Version.debversion')
+      Pkg::Util::Version.debversion
+    end
+
+    def get_origversion
+      Pkg::Util.deprecate('Pkg::Util::Version.get_origversion', 'Pkg::Util::Version.origversion')
+      Pkg::Util::Version.origversion
+    end
+
+    def get_rpmversion
+      Pkg::Util.deprecate('Pkg::Util::Version.get_rpmversion', 'Pkg::Util::Version.rpmversion')
+      Pkg::Util::Version.rpmversion
+    end
+
+    def get_rpmrelease
+      Pkg::Util.deprecate('Pkg::Util::Version.get_rpmrelease', 'Pkg::Util::Version.rpmrelease')
+      Pkg::Util::Version.rpmrelease
+    end
+
+    def source_dirty?
+      Pkg::Util.deprecate('Pkg::Util::Version.source_dirty?', 'Pkg::Util::Git.source_dirty?')
+      Pkg::Util::Git.source_dirty?
+    end
+
+    def fail_on_dirty_source
+      Pkg::Util.deprecate('Pkg::Util::Version.fail_on_dirty_source', 'Pkg::Util::Git.fail_on_dirty_source')
+      Pkg::Util::Git.fail_on_dirty_source
+    end
+
+    def is_final?
+      Pkg::Util.deprecate('Pkg::Util::Version.is_final?', 'Pkg::Util::Version.final?')
+      Pkg::Util::Version.final?
+    end
+
+    def is_rc?
+      Pkg::Util.deprecate('Pkg::Util::Version.is_rc?', 'Pkg::Util::Version.final?')
+      Pkg::Util::Version.final?
+    end
+
+    def is_odd?
+      Pkg::Util.deprecate('Pkg::Util::Version.is_odd?', 'Pkg::Util::Version.final?')
+      Pkg::Util::Version.final?
+    end
+
+    def is_less_than_one?
+      Pkg::Util.deprecate('Pkg::Util::Version.is_less_than_one?', 'Pkg::Util::Version.final?')
+      Pkg::Util::Version.final?
+    end
+
+    def el_version
+      raise "Pkg::Util::Version.el_version has been removed"
+    end
+
+    def tagged?(url, ref)
+      Pkg::Util.deprecate('Pkg::Util::Version.tagged?', 'Pkg::Util::Git.remote_tagged?')
+      Pkg::Util::Git.remote_tagged?(url, ref)
+    end
   end
 end

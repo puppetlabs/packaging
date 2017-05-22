@@ -94,12 +94,16 @@ module Pkg::Util::Version
     #
     def final?(version = Pkg::Config.version)
       case version
-      when /rc/, /SNAPSHOT/, /-dirty/
+      when /rc/
         false
-      when /g[a-f0-9]{7}$/, /^(\d+\.)+\d+-\d+$/
+      when /SNAPSHOT/
         false
-      when /^(\d+\.)+\d+$/
-        true
+      when /-dirty/
+        false
+      when /g[a-f0-9]{7}$/
+        false
+      when /^(\d+\.)+\d+-\d+$/
+        false
       else
         true
       end

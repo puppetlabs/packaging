@@ -64,7 +64,7 @@ module Pkg::Util::Git
     end
 
     # Returns the value of `git describe`. If this is not a git repo or
-    # `git desribe` fails because there is no tag, this will return false
+    # `git describe` fails because there is no tag, this will return false
     def describe
       Pkg::Util.in_project_root do
         stdout, _, ret = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} describe --tags --dirty")

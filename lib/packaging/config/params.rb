@@ -88,7 +88,6 @@ module Pkg::Params
                   :ips_signing_server,
                   :ips_signing_ssh_key,
                   :ips_store,
-                  :ipsversion,
                   :jenkins_build_host,
                   :jenkins_packaging_job,
                   :jenkins_repo_path,

@@ -69,7 +69,6 @@ describe "Pkg::Config" do
                   :ips_path,
                   :ips_repo,
                   :ips_store,
-                  :ipsversion,
                   :jenkins_build_host,
                   :jenkins_packaging_job,
                   :jenkins_repo_path,

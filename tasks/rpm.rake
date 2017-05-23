@@ -26,12 +26,7 @@ end
 def build_rpm(buildarg = "-bs")
   Pkg::Util::Tool.check_tool('rpmbuild')
   workdir = prep_rpm_build_dir
-  if dist = Pkg::Util::Version.el_version
-    if dist.to_i < 6
-      dist_string = "--define \"%dist .el#{dist}"
-    end
-  end
-  rpm_define = "#{dist_string} --define \"%_topdir  #{workdir}\" "
+  rpm_define = "--define \"%_topdir  #{workdir}\" "
   rpm_old_version = '--define "_source_filedigest_algorithm 1" --define "_binary_filedigest_algorithm 1" \
      --define "_binary_payload w9.gzdio" --define "_source_payload w9.gzdio" \
      --define "_default_patch_fuzz 2"'

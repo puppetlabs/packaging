@@ -75,7 +75,6 @@ module Pkg::Util::RakeUtils
         'education.rake',
         'fetch.rake',
         'gem.rake',
-        'ips.rake',
         'jenkins.rake',
         'jenkins_dynamic.rake',
         'load_extras.rake',

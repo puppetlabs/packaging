@@ -1,279 +1,111 @@
-# Utility methods used for versioning projects for various kinds of packaging
 require 'json'
 
+# Utility methods used for versioning projects for various kinds of packaging
 module Pkg::Util::Version
   class << self
-
-    GIT = Pkg::Util::Tool::GIT
-
-    def git_co(ref)
-      Pkg::Util.in_project_root do
-        _, _, ret = Pkg::Util::Execution.capture3("#{GIT} reset --hard ; #{GIT} checkout #{ref}")
-        Pkg::Util::Execution.success?(ret) or fail "Could not checkout #{ref} git branch to build package from...exiting"
-      end
-    end
-
-    def git_tagged?
-      Pkg::Util.in_project_root do
-        _, _, ret = Pkg::Util::Execution.capture3("#{GIT} describe")
-        Pkg::Util::Execution.success?(ret)
-      end
-    end
-
-    def git_describe
-      Pkg::Util.in_project_root do
-        stdout, _, _ = Pkg::Util::Execution.capture3("#{GIT} describe")
-        stdout.strip
-      end
-    end
-
-    # return the sha of HEAD on the current branch
-    # You can specify the length you want from the sha. Default is 40, the
-    # length for sha1. If you specify anything higher, it will still return 40
-    # characters. Ideally, you're not going to specify anything under 7 characters,
-    # but I'll leave that discretion up to you.
-    def git_sha(length = 40)
-      Pkg::Util.in_project_root do
-        stdout, _, _ = Pkg::Util::Execution.capture3("#{GIT} rev-parse --short=#{length} HEAD")
-        stdout.strip
-      end
-    end
-
-    # Return the ref type of HEAD on the current branch
-    def git_ref_type
-      Pkg::Util.in_project_root do
-        stdout, _, _ = Pkg::Util::Execution.capture3("#{GIT} cat-file -t #{git_describe}")
-        stdout.strip
-      end
-    end
-
-    # If HEAD is a tag, return the tag. Otherwise return the sha of HEAD.
-    def git_sha_or_tag(length = 40)
-      if git_ref_type == "tag"
-        git_describe
-      else
-        git_sha(length)
-      end
-    end
-
-    # Return true if we're in a git repo, otherwise false
-    def is_git_repo?
-      Pkg::Util.in_project_root do
-        _, _, ret = Pkg::Util::Execution.capture3("#{GIT} rev-parse --git-dir")
-        Pkg::Util::Execution.success?(ret)
-      end
-    end
-
-    alias :is_git_repo :is_git_repo?
-
-    # Return the basename of the project repo
-    def git_project_name
-      Pkg::Util.in_project_root do
-        stdout, _, _ = Pkg::Util::Execution.capture3("#{GIT} config --get remote.origin.url")
-        stdout.split('/')[-1].chomp(".git").chomp
-      end
-    end
-
-    # Return information about the current tree, using `git describe`, ready for
-    # further processing.
-    #
-    # Returns an array of one to four elements, being:
-    # * version (three dot-joined numbers, leading `v` stripped)
-    # * the string 'rcX' (if the last tag was an rc release, where X is the rc number)
-    # * commits (string containing integer, number of commits since that version was tagged)
-    # * dirty (string 'dirty' if local changes exist in the repo)
-    def git_describe_version
-      return nil unless is_git_repo and raw = run_git_describe_internal
-      # reprocess that into a nice set of output data
-      # The elements we select potentially change if this is an rc
-      # For an rc with added commits our string will be something like '0.7.0-rc1-63-g51ccc51'
-      # and our return will be [0.7.0, rc1, 63, <dirty>]
-      # For a final with added commits, it will look like '0.7.0-63-g51ccc51'
-      # and our return will be [0.7.0, 64, <dirty>]
-      info = raw.chomp.sub(/^v/, '').split('-')
-      if git_ref_type == "tag"
-        version_string = info.compact
-      elsif info[1].to_s.match('^[\d]+')
-        version_string = info.values_at(0, 1, 3).compact
-      else
-        version_string = info.values_at(0, 1, 2, 4).compact
-      end
-      version_string
-    end
-
-    # This is a stub to ease testing...
-    def run_git_describe_internal
-      Pkg::Util.in_project_root do
-        raw, _, ret = Pkg::Util::Execution.capture3("#{GIT} describe --tags --dirty")
-        Pkg::Util::Execution.success?(ret) ? raw : nil
-      end
-    end
-
-    def get_dash_version
-      if info = git_describe_version
-        info.join('-')
-      else
-        get_pwd_version
-      end
-    end
-
     def uname_r
-      uname = Pkg::Util::Tool.find_tool('uname', :required => true)
-      stdout, _, _ = Pkg::Util::Execution.capture3("#{uname} -r")
+      uname = Pkg::Util::Tool.find_tool('uname', required: true)
+      stdout, = Pkg::Util::Execution.capture3("#{uname} -r")
       stdout.chomp
     end
 
-    def get_ips_version
-      if info = git_describe_version
-        version, commits, dirty = info
-        if commits.to_s.match('^rc[\d]+')
-          commits = info[2]
-          dirty   = info[3]
-        end
-        osrelease = uname_r
-        "#{version},#{osrelease}-#{commits.to_i}#{dirty ? '-dirty' : ''}"
-      else
-        get_pwd_version
-      end
-    end
-
-    def get_dot_version
-      get_dash_version.gsub('-', '.')
-    end
-
-    def get_pwd_version
+    def pwd_version
       Dir.pwd.split('.')[-1]
     end
 
-    def get_base_pkg_version
-      dash = get_dash_version
-      if dash.include?("rc")
-        # Grab the rc number
-        rc_num = dash.match(/rc(\d+)/)[1]
-        ver = dash.sub(/-?rc[0-9]+/, "-0.#{Pkg::Config.release}rc#{rc_num}").gsub(/(rc[0-9]+)-(\d+)?-?/, '\1.\2')
-      elsif dash.include?("SNAPSHOT")
-        # Insert -0.#{release} between the version and the SNAPSHOT string
-        ver = dash.sub(/^(.*)\.(SNAPSHOT\..*)$/, "\\1-0.#{Pkg::Config.release}\\2")
-      else
-        ver = dash.gsub('-', '.') + "-#{Pkg::Config.release}"
-      end
-
-      ver.split('-')
+    def debversion
+      base_pkg_version.join('-') << "#{Pkg::Config.packager}1"
     end
 
-    def get_debversion
-      get_base_pkg_version.join('-') << "#{Pkg::Config.packager}1"
-    end
-
-    def get_origversion
+    def origversion
       Pkg::Config.debversion.split('-')[0]
     end
 
-    def get_rpmversion
-      get_base_pkg_version[0]
+    def rpmversion
+      base_pkg_version[0]
     end
 
-    def get_rpmrelease
-      get_base_pkg_version[1]
+    def rpmrelease
+      base_pkg_version[1]
     end
 
-    def source_dirty?
-      git_describe_version.include?('dirty')
+    # This is used to set Pkg::Config.version
+    def dash_version
+      Pkg::Util::Git.describe
     end
 
-    def fail_on_dirty_source
-      if source_dirty?
-        fail "
-    The source tree is dirty, e.g. there are uncommited changes. Please
-    commit/discard changes and try again."
-      end
+    # This version is used for gems and platform types that do not support
+    # dashes in the package version
+    def dot_version(version = Pkg::Config.version)
+      version.tr('-', '.')
     end
 
-    # Determines if this package is a final package via the
-    # selected version_strategy.
-    # There are currently two supported version strategies.
+    # Given a version, reformat it to be appropriate for a final package
+    # version. This means we need to add a `0.` before the release version
+    # for non-final builds
     #
-    # This method calls down to the version strategy indicated, defaulting to the
-    # rc_final strategy. The methods themselves will return false if it is a final
-    # release, so their return values are collected and then inverted before being
-    # returned.
-    def is_final?
-      ret = nil
-      case Pkg::Config.version_strategy
-        when "rc_final"
-          ret = is_rc?
-        when "odd_even"
-          ret = is_odd?
-        when "zero_based"
-          ret = is_less_than_one?
-        when nil
-          ret = is_rc?
-      end
-      return (!ret)
-    end
+    # This only applies to packages that are built with the automation in this
+    # repo. This is invalid for all other build automation, like vanagon
+    #
+    # Examples of output:
+    # 4.99.0.22.gf64bc49-1
+    # 4.4.1-0.1SNAPSHOT.2017.05.16T1005
+    # 4.99.0-1
+    # 4.99.0.29.g431768c-1
+    # 2.7.1-1
+    # 5.3.0.rc4-1
+    # 3.0.5.rc6.24.g431768c-1
+    #
+    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    def base_pkg_version(version = Pkg::Config.version)
+      return "#{dot_version(version)}-#{Pkg::Config.release}".split('-') if final?(version) || Pkg::Config.vanagon_project
 
-    # the rc_final strategy (default)
-    # Assumes version strings in the formats:
-    # final:
-    # '0.7.0'
-    # '0.7.0-63'
-    # '0.7.0-63-dirty'
-    # development:
-    # '0.7.0rc1 (we don't actually use this format anymore, but once did)
-    # '0.7.0-rc1'
-    # '0.7.0-rc1-63'
-    # '0.7.0-rc1-63-dirty'
-    # '0.7.0.SNAPSHOT.2015.03.25T0146'
-    def is_rc?
-      case get_dash_version
-      when /^\d+\.\d+\.\d+-*rc\d+/
-        TRUE
-      when /^\d+\.\d+\.\d+\.SNAPSHOT\.\d{4}\.\d{2}\.\d{2}T\d{4}/
-        TRUE
+      if version.include?('SNAPSHOT')
+        new_version = dot_version(version).sub(/\.SNAPSHOT/, "-0.#{Pkg::Config.release}SNAPSHOT")
+      elsif version.include?('rc')
+        rc_ver = dot_version(version).match(/\.?rc(\d+)/)[1]
+        new_version = dot_version(version).sub(/\.?rc(\d+)/, '') + "-0.#{Pkg::Config.release}rc#{rc_ver}"
       else
-        FALSE
+        new_version = dot_version(version) + "-0.#{Pkg::Config.release}"
       end
+
+      if new_version.include?('dirty')
+        new_version = new_version.sub(/\.?dirty/, '') + 'dirty'
+      end
+
+      new_version.split('-')
     end
 
-    # the odd_even strategy (mcollective)
-    # final:
-    # '0.8.0'
-    # '1.8.0-63'
-    # '0.8.1-63-dirty'
-    # development:
-    # '0.7.0'
-    # '1.7.0-63'
-    # '0.7.1-63-dirty'
-    def is_odd?
-      return TRUE if get_dash_version.match(/^\d+\.(\d+)\.\d+/)[1].to_i.odd?
-      return FALSE
-    end
-
-    # the pre-1.0 strategy (node classifier)
-    # final:
-    # '1.8.0'
-    # '1.8.0-63'
-    # '1.8.1-63-dirty'
-    # development:
-    # '0.7.0'
-    # '0.7.0-63'
-    # '0.7.1-63-dirty'
-    def is_less_than_one?
-      return TRUE if get_dash_version.match(/^(\d+)\.\d+\.\d+/)[1].to_i.zero?
-      return FALSE
-    end
-
-    # Utility method to return the dist method if this is a redhat box. We use this
-    # in rpm packaging to define a dist macro, and we use it in the pl:fetch task
-    # to disable ssl checking for redhat 5 because it has a certs bundle so old by
-    # default that it's useless for our purposes.
-    def el_version
-      if File.exists?('/etc/fedora-release')
-        nil
-      elsif File.exists?('/etc/redhat-release')
-        rpm = Pkg::Util::Tool.find_tool('rpm', :required => true)
-        stdout, _, _ = Pkg::Util::Execution.capture3("#{rpm} -q --qf \"%{VERSION}\" $(#{rpm} -q --whatprovides /etc/redhat-release )")
-        stdout
+    # Determines if the version we are working with is or is not final
+    #
+    # The version here does not include the release version. Therefore, we
+    # assume that any version that includes a `-\d+` was not built from a tag
+    # and is a non-final version.
+    # Examples:
+    # Final
+    #   - 5.0.0
+    #   - 2016.5.6.7
+    # Nonfinal
+    #   - 4.99.0-22
+    #   - 1.0.0-658-gabc1234
+    #   - 5.0.0.master.SNAPSHOT.2017.05.16T1357
+    #   - 5.9.7-rc4
+    #   - 4.99.0-56-dirty
+    #
+    def final?(version = Pkg::Config.version)
+      case version
+      when /rc/
+        false
+      when /SNAPSHOT/
+        false
+      when /-dirty/
+        false
+      when /g[a-f0-9]{7}$/
+        false
+      when /^(\d+\.)+\d+-\d+$/
+        false
+      else
+        true
       end
     end
 
@@ -285,6 +117,10 @@ module Pkg::Util::Version
     #
     # If you invoke this the version will only be modified in the temporary copy,
     # with the intent that it never change the official source tree.
+    #
+    # rubocop:disable Metrics/AbcSize
+    # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable Metrics/PerceivedComplexity
     def versionbump(workdir = nil)
       version = ENV['VERSION'] || Pkg::Config.version.to_s.strip
       new_version = '"' + version + '"'
@@ -295,20 +131,20 @@ module Pkg::Util::Version
       contents = IO.read(version_file)
 
       # Match version files containing 'VERSION = "x.x.x"' and just x.x.x
-      if version_string = contents.match(/VERSION =.*/)
-        old_version = version_string.to_s.split[-1]
+      if contents =~ /VERSION =.*/
+        old_version = contents.match(/VERSION =.*/).to_s.split[-1]
       else
         old_version = contents
       end
 
       puts "Updating #{old_version} to #{new_version} in #{version_file}"
-      if contents.match("@DEVELOPMENT_VERSION@")
-        contents.gsub!("@DEVELOPMENT_VERSION@", version)
-      elsif contents.match('version\s*=\s*[\'"]DEVELOPMENT[\'"]')
+      if contents =~ /@DEVELOPMENT_VERSION@/
+        contents.gsub!('@DEVELOPMENT_VERSION@', version)
+      elsif contents =~ /version\s*=\s*[\'"]DEVELOPMENT[\'"]/
         contents.gsub!(/version\s*=\s*['"]DEVELOPMENT['"]/, "version = '#{version}'")
-      elsif contents.match("VERSION = #{old_version}")
+      elsif contents =~ /VERSION = #{old_version}/
         contents.gsub!("VERSION = #{old_version}", "VERSION = #{new_version}")
-      elsif contents.match("#{Pkg::Config.project.upcase}VERSION = #{old_version}")
+      elsif contents =~ /#{Pkg::Config.project.upcase}VERSION = #{old_version}/
         contents.gsub!("#{Pkg::Config.project.upcase}VERSION = #{old_version}", "#{Pkg::Config.project.upcase}VERSION = #{new_version}")
       else
         contents.gsub!(old_version, Pkg::Config.version)
@@ -322,28 +158,153 @@ module Pkg::Util::Version
     # input json file and output if it "looks tagged" or not
     #
     # @param json_data [hash] json data hash containing the ref to check
-    def report_json_tags(json_data)
-      puts "component: " + File.basename(json_data["url"])
-      puts "ref: " + json_data["ref"].to_s
-      if tagged?(json_data["url"], json_data["ref"].to_s)
-        tagged = "Tagged? [ Yes ]"
+    def report_json_tags(json_data) # rubocop:disable Metrics/AbcSize
+      puts 'component: ' + File.basename(json_data['url'])
+      puts 'ref: ' + json_data['ref'].to_s
+      if Pkg::Util::Git.remote_tagged?(json_data['url'], json_data['ref'].to_s)
+        tagged = 'Tagged? [ Yes ]'
       else
-        tagged = "Tagged? [ No  ]"
+        tagged = 'Tagged? [ No  ]'
       end
-      col_len = (ENV["COLUMNS"] || 70).to_i
+      col_len = (ENV['COLUMNS'] || 70).to_i
       puts format("\n%#{col_len}s\n\n", tagged)
-      puts ("*" * col_len)
+      puts '*' * col_len
     end
 
-    # Reports if a ref and it's corresponding git repo points to
-    # a git tag.
+    ##########################################################################
+    # DEPRECATED METHODS
     #
-    # @param url [string] url of repo grabbed from json file
-    # @param ref [string] ref grabbed from json file
-    def tagged?(url, ref)
-      reference = Pkg::Util::Git_tag.new(url, ref)
-      reference.tag?
+    def git_co(ref)
+      Pkg::Util.deprecate('Pkg::Util::Version.git_co', 'Pkg::Util::Git.checkout')
+      Pkg::Util::Git.checkout(ref)
     end
 
+    def git_tagged?
+      Pkg::Util.deprecate('Pkg::Util::Version.git_tagged?', 'Pkg::Util::Git.tagged?')
+      Pkg::Util::Git.tagged?
+    end
+
+    def git_describe
+      Pkg::Util.deprecate('Pkg::Util::Version.git_describe', 'Pkg::Util::Git.describe')
+      Pkg::Util::Git.describe
+    end
+
+    def git_sha(length = 40)
+      Pkg::Util.deprecate('Pkg::Util::Version.git_sha', 'Pkg::Util::Git.sha')
+      Pkg::Util::Git.sha(length)
+    end
+
+    def git_ref_type
+      Pkg::Util.deprecate('Pkg::Util::Version.git_ref_type', 'Pkg::Util::Git.ref_type')
+      Pkg::Util::Git.ref_type
+    end
+
+    def git_sha_or_tag(length = 40)
+      Pkg::Util.deprecate('Pkg::Util::Version.git_sha_or_tag', 'Pkg::Util::Git.sha_or_tag')
+      Pkg::Util::Git.sha_or_tag(length)
+    end
+
+    def is_git_repo?
+      Pkg::Util.deprecate('Pkg::Util::Version.is_git_repo?', 'Pkg::Util::Git.repo?')
+      Pkg::Util::Git.repo?
+    end
+
+    def git_project_name
+      Pkg::Util.deprecate('Pkg::Util::Version.git_project_name', 'Pkg::Util::Git.project_name')
+      Pkg::Util::Git.project_name
+    end
+
+    def git_describe_version
+      Pkg::Util.deprecate('Pkg::Util::Version.git_describe_version', 'Pkg::Util::Git.describe')
+      Pkg::Util::Git.describe
+    end
+
+    def run_git_describe_internal
+      Pkg::Util.deprecate('Pkg::Util::Version.git_describe_version', 'Pkg::Util::Git.describe')
+      Pkg::Util::Git.describe
+    end
+
+    def get_dash_version
+      Pkg::Util.deprecate('Pkg::Util::Version.get_dash_version', 'Pkg::Util::Version.dash_version')
+      Pkg::Util::Version.dash_version
+    end
+
+    def get_ips_version
+      raise "The IPS build tasks have been removed from puppetlabs/packaging. Please port all Solaris projects to vanagon (https://github.com/puppetlabs/vanagon)"
+    end
+
+    def get_dot_version
+      Pkg::Util.deprecate('Pkg::Util::Version.get_dot_version', 'Pkg::Util::Version.dot_version')
+      Pkg::Util::Version.dot_version
+    end
+
+    def get_pwd_version
+      Pkg::Util.deprecate('Pkg::Util::Version.get_pwd_version', 'Pkg::Util::Version.pwd_version')
+      Pkg::Util::Version.pwd_version
+    end
+
+    def get_base_pkg_version
+      Pkg::Util.deprecate('Pkg::Util::Version.get_base_pkg_version', 'Pkg::Util::Version.base_pkg_version')
+      Pkg::Util::Version.base_pkg_version
+    end
+
+    def get_debversion
+      Pkg::Util.deprecate('Pkg::Util::Version.get_debversion', 'Pkg::Util::Version.debversion')
+      Pkg::Util::Version.debversion
+    end
+
+    def get_origversion
+      Pkg::Util.deprecate('Pkg::Util::Version.get_origversion', 'Pkg::Util::Version.origversion')
+      Pkg::Util::Version.origversion
+    end
+
+    def get_rpmversion
+      Pkg::Util.deprecate('Pkg::Util::Version.get_rpmversion', 'Pkg::Util::Version.rpmversion')
+      Pkg::Util::Version.rpmversion
+    end
+
+    def get_rpmrelease
+      Pkg::Util.deprecate('Pkg::Util::Version.get_rpmrelease', 'Pkg::Util::Version.rpmrelease')
+      Pkg::Util::Version.rpmrelease
+    end
+
+    def source_dirty?
+      Pkg::Util.deprecate('Pkg::Util::Version.source_dirty?', 'Pkg::Util::Git.source_dirty?')
+      Pkg::Util::Git.source_dirty?
+    end
+
+    def fail_on_dirty_source
+      Pkg::Util.deprecate('Pkg::Util::Version.fail_on_dirty_source', 'Pkg::Util::Git.fail_on_dirty_source')
+      Pkg::Util::Git.fail_on_dirty_source
+    end
+
+    def is_final?
+      Pkg::Util.deprecate('Pkg::Util::Version.is_final?', 'Pkg::Util::Version.final?')
+      Pkg::Util::Version.final?
+    end
+
+    def is_rc?
+      Pkg::Util.deprecate('Pkg::Util::Version.is_rc?', 'Pkg::Util::Version.final?')
+      Pkg::Util::Version.final?
+    end
+
+    def is_odd?
+      Pkg::Util.deprecate('Pkg::Util::Version.is_odd?', 'Pkg::Util::Version.final?')
+      Pkg::Util::Version.final?
+    end
+
+    def is_less_than_one?
+      Pkg::Util.deprecate('Pkg::Util::Version.is_less_than_one?', 'Pkg::Util::Version.final?')
+      Pkg::Util::Version.final?
+    end
+
+    def el_version
+      raise "Pkg::Util::Version.el_version has been removed"
+    end
+
+    def tagged?(url, ref)
+      Pkg::Util.deprecate('Pkg::Util::Version.tagged?', 'Pkg::Util::Git.remote_tagged?')
+      Pkg::Util::Git.remote_tagged?(url, ref)
+    end
   end
 end

@@ -304,7 +304,7 @@ module Pkg::Util::Net
       unless tar = tar_cmd
         tar = 'tar'
       end
-      tarball ||= Pkg::Util::Git.git_bundle(treeish)
+      tarball ||= Pkg::Util::Git.bundle(treeish)
       tarball_name = File.basename(tarball).gsub('.tar.gz', '')
       Pkg::Util::Net.rsync_to(tarball, host, '/tmp')
       appendix = Pkg::Util.rand_string

@@ -8,7 +8,7 @@ namespace :package do
         $stderr.puts "Couldn't parse the packaging repo URL from 'ext/build_defaults.yaml'."
         $stderr.puts "Normally this is a string in the format git@github.com:<User>/<packaging_repo> --branch=<branch>"
       else
-        Pkg::Util::Git.git_pull(remote, branch)
+        Pkg::Util::Git.pull(remote, branch)
       end
     end
   end

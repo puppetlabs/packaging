@@ -12,7 +12,7 @@ describe "#Pkg::Repo" do
     it "should change to the correct dir" do
       allow(Pkg::Util::Tool).to receive(:check_tool).and_return("tarcommand")
       allow(Pkg::Config).to receive(:project).and_return("project")
-      allow(Pkg::Util::Version).to receive(:get_dot_version).and_return("1.1.1")
+      allow(Pkg::Util::Version).to receive(:dot_version).and_return("1.1.1")
       allow(Pkg::Util::File).to receive(:empty_dir?).and_return(false)
       allow(Pkg::Util::Execution).to receive(:capture3)
 
@@ -40,7 +40,7 @@ describe "#Pkg::Repo" do
       allow(Pkg::Util::Execution).to receive(:capture3)
 
       expect(Pkg::Config).to receive(:project).and_return("project")
-      expect(Pkg::Util::Version).to receive(:get_dot_version).and_return("1.1.1")
+      expect(Pkg::Util::Version).to receive(:dot_version).and_return("1.1.1")
       expect(Dir).to receive(:chdir).with("project/1.1.1").and_yield
       Pkg::Repo.create_signed_repo_archive("/path", "project-debian-6-i386", "version")
     end
@@ -48,7 +48,7 @@ describe "#Pkg::Repo" do
     it "should fail if ENV['FAIL_ON_MISSING_TARGET'] is true and empty_dir? is also true" do
       allow(Pkg::Util::Tool).to receive(:check_tool).and_return("tarcommand")
       allow(Pkg::Config).to receive(:project).and_return("project")
-      allow(Pkg::Util::Version).to receive(:get_dot_version).and_return("1.1.1")
+      allow(Pkg::Util::Version).to receive(:dot_version).and_return("1.1.1")
       allow(Pkg::Util::Execution).to receive(:capture3)
       allow(Dir).to receive(:chdir).with("pkg").and_yield
       allow(Dir).to receive(:chdir).with("project/1.1.1").and_yield
@@ -61,7 +61,7 @@ describe "#Pkg::Repo" do
     it "should only warn if ENV['FAIL_ON_MISSING_TARGET'] is false and empty_dir? is true" do
       allow(Pkg::Util::Tool).to receive(:check_tool).and_return("tarcommand")
       allow(Pkg::Config).to receive(:project).and_return("project")
-      allow(Pkg::Util::Version).to receive(:get_dot_version).and_return("1.1.1")
+      allow(Pkg::Util::Version).to receive(:dot_version).and_return("1.1.1")
       allow(Pkg::Util::Execution).to receive(:capture3)
       allow(Dir).to receive(:chdir).with("pkg").and_yield
       allow(Dir).to receive(:chdir).with("project/1.1.1").and_yield
@@ -74,7 +74,7 @@ describe "#Pkg::Repo" do
     it "should invoke tar correctly" do
       allow(Pkg::Util::Tool).to receive(:check_tool).and_return("tarcommand")
       allow(Pkg::Config).to receive(:project).and_return("project")
-      allow(Pkg::Util::Version).to receive(:get_dot_version).and_return("1.1.1")
+      allow(Pkg::Util::Version).to receive(:dot_version).and_return("1.1.1")
       allow(Dir).to receive(:chdir).with("pkg").and_yield
       allow(Dir).to receive(:chdir).with("project/1.1.1").and_yield
       allow(Pkg::Util::File).to receive(:empty_dir?).and_return(false)

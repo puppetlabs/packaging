@@ -191,7 +191,7 @@ def build_rpm_with_mock(mocks)
     subdir  = if Pkg::Config.yum_repo_name
                 Pkg::Config.yum_repo_name
               else
-                Pkg::Util::Version.is_final? ? 'products' : 'devel'
+                Pkg::Util::Version.final? ? 'products' : 'devel'
               end
     bench = Benchmark.realtime do
       # Set up the rpmbuild dir in a temp space, with our tarball and spec

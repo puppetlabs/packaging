@@ -7,7 +7,7 @@ module Pkg::Repo
         if versioning == 'ref'
           local_target = File.join(Pkg::Config.project, Pkg::Config.ref)
         elsif versioning == 'version'
-          local_target = File.join(Pkg::Config.project, Pkg::Util::Version.get_dot_version)
+          local_target = File.join(Pkg::Config.project, Pkg::Util::Version.dot_version)
         end
         Dir.chdir(local_target) do
           if Pkg::Util::File.empty_dir?(path_to_repo)

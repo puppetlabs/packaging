@@ -1,4 +1,4 @@
-#Packaging
+# Packaging
 
 [![Build Status](https://travis-ci.org/puppetlabs/packaging.png?branch=master)](https://travis-ci.org/puppetlabs/packaging)
 
@@ -11,7 +11,7 @@ flux, and it should not be considered to have a formal API. However, every
 effort is being made to ensure existing tasks/behavior are not broken as we
 continue to iterate and improve upon it.
 
-##Using the Packaging Repo
+## Using the Packaging Repo
 
 Several Puppet projects are using the packaging repo. They are:
 

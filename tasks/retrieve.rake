@@ -35,8 +35,8 @@ namespace :pl do
         if Pkg::Config.foss_only && Pkg::Config.foss_platforms && remote_target == 'artifacts'
           Pkg::Config.foss_platforms.each do |platform|
             begin
-              platform_path = Pkg::Util::Platform.artifacts_path(platform, package_url)
-              _, _, arch = Pkg::Util::Platform.parse_platform_tag(platform)
+              platform_path = Pkg::Paths.artifacts_path(platform, package_url)
+              _, _, arch = Pkg::Platforms.parse_platform_tag(platform)
               url = "#{package_url}/#{platform_path}"
               puts "Fetching: Platform = #{platform}, URL = #{url}"
               #osx packages have no platform in their name

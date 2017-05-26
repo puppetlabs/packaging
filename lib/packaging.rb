@@ -8,6 +8,7 @@ module Pkg
   require 'packaging/platforms'
   require 'packaging/util'
   require 'packaging/config'
+  require 'packaging/paths'
   require 'packaging/tar'
   require 'packaging/deb'
   require 'packaging/rpm'

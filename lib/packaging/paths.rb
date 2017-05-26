@@ -10,42 +10,32 @@ module Pkg::Paths
 
   # Given a path to an artifact, divine the appropriate platform tag associated
   # with the artifact and path
-  #
-  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
-  # rubocop:disable Metrics/MethodLength, Metrics/PerceivedComplexity
   def tag_from_artifact_path(path)
-    Pkg::Platforms.supported_platforms.each do |platform|
-      next unless path.include?(platform)
-      if platform == 'windows'
-        # Windows is special, we don't care about the version, so we put in
-        # 2012 here mainly as a place holder
-        Pkg::Platforms.arches_for_platform_version(platform, '2012').each do |architecture|
-          return "#{platform}-2012-#{architecture}" if path.include?(architecture)
-        end
-        # Default to 64bit if we can't find an architecture
-        return "#{platform}-2012-x64"
+    platform = Pkg::Platforms.supported_platforms.find { |p| path.include?(p) }
+    # if we didn't find a platform, probably a codename
+    if platform.nil?
+      codename = Pkg::Platforms.codenames('deb').find { |c| path.include?(c) }
+      fail "I can't find a codename or platform in #{path}, teach me?" if codename.nil?
+      platform, version = Pkg::Platforms.codename_to_platform_version(codename)
+      fail "I can't find a platform and version from #{codename}, teach me?" if platform.nil? || version.nil?
+      arch = Pkg::Platforms.arches_for_platform_version(platform, version).find { |a| path.include?(a) }
+      if arch.nil?
+        arch = 'amd64'
       end
-      Pkg::Platforms.versions_for_platform(platform).each do |version|
-        next unless path =~ /#{platform}(\/|-)?#{version}/
-        # Default to 64bit for no reason in particular
-        return "#{platform}-#{version}-x86_64" if path.include?('noarch')
-        Pkg::Platforms.arches_for_platform_version(platform, version).each do |architecture|
-          return "#{platform}-#{version}-#{architecture}" if path.include?(architecture)
-        end
+    elsif platform == 'windows' || platform == 'cumulus' || platform == 'huaweios'
+      version = Pkg::Platforms.versions_for_platform(platform)[0]
+      arch = Pkg::Platforms::arches_for_platform_version(platform, version).find { |a| path.include?(a) }
+      fail "I can't figure out the architecture for #{platform} #{version} from #{path}, teach me?" if arch.nil?
+    else
+      version = Pkg::Platforms.versions_for_platform(platform).find { |v|  path =~ /#{platform}(\/|-)?#{v}/ }
+      fail "I can't figure out the version for #{platform} from #{path}, teach me?" if version.nil?
+      arch = Pkg::Platforms::arches_for_platform_version(platform, version).find { |a| path.include?(a) }
+      if arch.nil?
+        arch = 'x86_64'
       end
     end
 
-    # If we haven't been able to match against a platform name, we're likely
-    # dealing with a codename
-    Pkg::Platforms.codenames('deb').each do |codename|
-      next unless path.include?(codename)
-      # Default to 64bit for no reason in particular
-      return "#{Pkg::Platforms.codename_to_platform_version(codename).join('-')}-amd64" if path.include?('all')
-      Pkg::Platforms.arches_for_codename(codename).each do |arch|
-        return "#{Pkg::Platforms.codename_to_platform_version(codename).join('-')}-#{arch}" if path.include?(arch)
-      end
-    end
-    raise "I couldn't figure out which platform tag corresponds to #{path}. Teach me?"
+    return "#{platform}-#{version}-#{arch}"
   end
 
   def artifacts_path(platform_tag, package_url = nil, path_prefix = 'artifacts')

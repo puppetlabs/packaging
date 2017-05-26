@@ -1,5 +1,4 @@
 # Utility methods used by the various rake tasks
-
 module Pkg::Util
   require 'erb'
   require 'benchmark'

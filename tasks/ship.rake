@@ -33,12 +33,12 @@ namespace :pl do
     # e.g., final vs devel vs PE vs FOSS packages
 
     desc "Update remote yum repository on '#{Pkg::Config.yum_staging_server}'"
-    task :update_yum_repo => 'pl:fetch' do
+    task update_yum_repo: 'pl:fetch' do
       yum_whitelist = {
-        __REPO_NAME__: Pkg::Config.yum_repo_name,
+        __REPO_NAME__: Pkg::Config.repo_name,
         __REPO_PATH__: Pkg::Config.yum_repo_path,
         __REPO_HOST__: Pkg::Config.yum_staging_server,
-        __GPG_KEY__: Pkg::Config.gpg_key,
+        __GPG_KEY__: Pkg::Config.gpg_key
       }
 
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
@@ -51,17 +51,17 @@ namespace :pl do
       end
     end
 
-    task :freight => :update_apt_repo
+    task freight: :update_apt_repo
 
     desc "Update remote apt repository on '#{Pkg::Config.apt_signing_server}'"
-    task :update_apt_repo => 'pl:fetch' do
+    task update_apt_repo: 'pl:fetch' do
       apt_whitelist = {
-        __REPO_NAME__: Pkg::Config.apt_repo_name,
+        __REPO_NAME__: Pkg::Config.repo_name,
         __REPO_PATH__: Pkg::Config.apt_repo_path,
         __REPO_URL__: Pkg::Config.apt_repo_url,
         __REPO_HOST__: Pkg::Config.apt_host,
         __APT_PLATFORMS__: Pkg::Config.apt_releases.join(' '),
-        __GPG_KEY__: Pkg::Config.gpg_key,
+        __GPG_KEY__: Pkg::Config.gpg_key
       }
 
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"

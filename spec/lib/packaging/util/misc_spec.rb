@@ -6,14 +6,14 @@ describe 'Pkg::Util::Misc' do
     let(:orig_string) { "#!/bin/bash\necho '__REPO_NAME__'" }
     let(:updated_string) { "#!/bin/bash\necho 'abcdefg'" }
     let(:good_replacements) do
-      { __REPO_NAME__: Pkg::Config.yum_repo_name }
+      { __REPO_NAME__: Pkg::Config.repo_name }
     end
     let(:warn_replacements) do
       { __REPO_NAME__: nil }
     end
 
     it 'replaces the token with the Pkg::Config variable' do
-      Pkg::Config.config_from_hash({:project => "foo", :yum_repo_name => 'abcdefg'})
+      Pkg::Config.config_from_hash({:project => "foo", :repo_name => 'abcdefg'})
       Pkg::Util::Misc.search_and_replace(orig_string, good_replacements).should eq(updated_string)
     end
 

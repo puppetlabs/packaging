@@ -5,6 +5,7 @@ module Pkg
   $:.unshift(LIBDIR) unless
     $:.include?(File.dirname(__FILE__)) || $:.include?(LIBDIR)
 
+  require 'packaging/platforms'
   require 'packaging/util'
   require 'packaging/config'
   require 'packaging/tar'

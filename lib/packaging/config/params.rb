@@ -197,6 +197,7 @@ module Pkg::Params
               { :var => :default_mock,            :envvar => :MOCK },
               { :var => :dev_build,               :envvar => :DEV_BUILD,       :type => :bool },
               { :var => :dmg_host,                :envvar => :DMG_HOST },
+              { :var => :dmg_path,                :envvar => :DMG_PATH },
               { :var => :dmg_staging_server,      :envvar => :DMG_STAGING_SERVER },
               { :var => :final_mocks,             :envvar => :MOCK },
               { :var => :foss_only,               :envvar => :FOSS_ONLY,       :type => :bool },

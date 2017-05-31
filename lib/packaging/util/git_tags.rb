@@ -1,6 +1,6 @@
 module Pkg::Util
   class Git_tag
-    attr_reader :address, :ref, :ref_name, :ref_type, :branch_name
+    attr_reader :address, :ref, :ref_name, :ref_type
 
     GIT = Pkg::Util::Tool::GIT
     DEVNULL = Pkg::Util::OS::DEVNULL
@@ -49,17 +49,9 @@ module Pkg::Util
       raise "ERROR : Not a ref or sha!\n#{e}"
     end
 
-    def branch_name
-      branch? ? ref_name : nil
-    end
-
     def ref?
       `#{GIT} check-ref-format #{ref} >#{DEVNULL} 2>&1`
       $?.success?
-    end
-
-    def branch?
-      ref_type.downcase == "heads"
     end
 
     def tag?
@@ -69,5 +61,6 @@ module Pkg::Util
     def sha?
       !!(ref =~ SHA1)
     end
+
   end
 end

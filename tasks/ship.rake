@@ -233,25 +233,21 @@ namespace :pl do
 
   desc "Ship built gem to rubygems.org, internal Gem mirror, and public file server"
   task :ship_gem => 'pl:fetch' do
-    # We want to ship a Gem only for projects that build gems, so
-    # all of the Gem shipping tasks are wrapped in an `if`.
-    if Pkg::Config.build_gem
-      # Even if a project builds a gem, if it uses the odd_even or zero-based
-      # strategies, we only want to ship final gems because otherwise a
-      # development gem would be preferred over the last final gem
-      if Pkg::Config.version_strategy !~ /odd_even|zero_based/ || Pkg::Util::Version.is_final?
-        FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |gem_file|
-          puts "This will ship to an internal gem mirror, a public file server, and rubygems.org"
-          puts "Do you want to start shipping the rubygem '#{gem_file}'?"
-          if Pkg::Util.ask_yes_or_no
-            Rake::Task["pl:ship_gem_to_rubygems"].execute(file: gem_file)
-            Rake::Task["pl:ship_gem_to_internal_mirror"].execute(file: gem_file)
-            Rake::Task["pl:ship_gem_to_downloads"].execute(file: gem_file)
-          end
+    # Even if a project builds a gem we only want to ship final gems because
+    # otherwise a development gem would be preferred over the last final gem
+    gems = Dir['pkg/**.gem*']
+    if Pkg::Util::Version.is_final? && !gems.empty?
+      gems.each do |gem_file|
+        puts "This will ship to an internal gem mirror, a public file server, and rubygems.org"
+        puts "Do you want to start shipping the rubygem '#{gem_file}'?"
+        if Pkg::Util.ask_yes_or_no
+          Rake::Task["pl:ship_gem_to_rubygems"].execute(file: gem_file)
+          Rake::Task["pl:ship_gem_to_internal_mirror"].execute(file: gem_file)
+          Rake::Task["pl:ship_gem_to_downloads"].execute(file: gem_file)
         end
-      else
-        $stderr.puts "Not shipping development gem using odd_even strategy for the sake of your users."
       end
+    else
+      $stderr.puts "Not shipping development gem for the sake of your users."
     end
   end
 
@@ -390,6 +386,7 @@ namespace :pl do
       Rake::Task["pl:ship_svr4"].invoke
       Rake::Task["pl:ship_p5p"].invoke
       Rake::Task["pl:ship_msi"].invoke
+      Rake::Task["pl:ship_gem"].invoke
       add_shipped_metrics(:pe_version => ENV['PE_VER'], :is_rc => (!Pkg::Util::Version.is_final?)) if Pkg::Config.benchmark
       post_shipped_metrics if Pkg::Config.benchmark
     else

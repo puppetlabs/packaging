@@ -61,6 +61,7 @@ describe "Pkg::Util::RakeUtils" do
   describe "#evaluate_pre_tasks" do
     context "Given a data file with :pre_tasks defined" do
       it "should, for each k=>v pair, add v as a dependency to k" do
+        Pkg::Util::Version.stub(:git_describe) { '1.2.3'}
         Pkg::Config.config_from_yaml(File.join(FIXTURES, 'util', 'pre_tasks.yaml'))
         expect(Pkg::Util::RakeUtils).to receive(:add_dependency)
         Pkg::Util::RakeUtils.evaluate_pre_tasks

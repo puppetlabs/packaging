@@ -89,6 +89,7 @@ describe "Pkg::Config" do
                   :pe_name,
                   :pe_version,
                   :pg_major_version,
+                  :platform_data,
                   :pre_tar_task,
                   :pre_tasks,
                   :privatekey_pem,
@@ -211,6 +212,7 @@ describe "Pkg::Config" do
         # apt_host: is set to "foo" in the fixture
         orig = Pkg::Config.apt_host
         Pkg::Config.apt_host = "bar"
+        Pkg::Util::Version.stub(:git_describe) { '1.2.3'}
         Pkg::Config.config_from_yaml(File.join(FIXTURES, 'config', 'params.yaml'))
         expect(Pkg::Config.apt_host).to eq("foo")
         Pkg::Config.apt_host = orig

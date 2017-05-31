@@ -46,11 +46,84 @@ module Pkg
       end
 
       ##
+      #   Array of platforms and relative paths to their artifacts and
+      #   repo_configs (where applicable)
+      #
+      def platform_data
+        [{ "name" => "aix-5.3-power", "artifact" => "./puppet/aix/5.3/ppc/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.aix5.3.ppc.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-aix-5.3-ppc.repo" },
+         { "name" => "aix-6.1-power", "artifact" => "./puppet/aix/6.1/ppc/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.aix6.1.ppc.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-aix-6.1-ppc.repo" },
+         { "name" => "aix-7.1-power", "artifact" => "./puppet/aix/7.1/ppc/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.aix7.1.ppc.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-aix-7.1-ppc.repo" },
+         { "name" => "cisco-wrlinux-5-x86_64", "artifact" => "./puppet/cisco-wrlinux/5/x86_64/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.cisco_wrlinux5.x86_64.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-cisco-wrlinux-5-x86_64.repo" },
+         { "name" => "cisco-wrlinux-7-x86_64", "artifact" => "./puppet/cisco-wrlinux/7/x86_64/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.cisco_wrlinux7.x86_64.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-cisco-wrlinux-7-x86_64.repo" },
+         { "name" => "cumulus-2.2-amd64", "artifact" => "./puppet/deb/cumulus/#{self.project}_#{Pkg::Util::Version.git_describe}-#{self.release}cumulus_amd64.deb", "repo_config" => "../repo_configs/deb/pl-#{self.project}-#{self.ref}-cumulus.list" },
+         { "name" => "debian-7-i386", "artifact" => "./puppet/deb/wheezy/#{self.project}_#{Pkg::Util::Version.git_describe}-#{self.release}wheezy_i386.deb", "repo_config" => "../repo_configs/deb/pl-#{self.project}-#{self.ref}-wheezy.list" },
+         { "name" => "debian-7-amd64", "artifact" => "./puppet/deb/wheezy/#{self.project}_#{Pkg::Util::Version.git_describe}-#{self.release}wheezy_amd64.deb", "repo_config" => "../repo_configs/deb/pl-#{self.project}-#{self.ref}-wheezy.list" },
+         { "name" => "debian-8-i386", "artifact" => "./puppet/deb/jessie/#{self.project}_#{Pkg::Util::Version.git_describe}-#{self.release}jessie_i386.deb", "repo_config" => "../repo_configs/deb/pl-#{self.project}-#{self.ref}-jessie.list" },
+         { "name" => "debian-8-amd64", "artifact" => "./puppet/deb/jessie/#{self.project}_#{Pkg::Util::Version.git_describe}-#{self.release}jessie_amd64.deb", "repo_config" => "../repo_configs/deb/pl-#{self.project}-#{self.ref}-jessie.list" },
+         { "name" => "el-5-i386", "artifact" => "./puppet/el/5/i386/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.el5.i386.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-el-5-i386.repo" },
+         { "name" => "el-5-x86_64", "artifact" => "./puppet/el/5/x86_64/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.el5.x86_64.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-el-5-x86_64.repo" },
+         { "name" => "el-6-i386", "artifact" => "./puppet/el/6/i386/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.el6.i386.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-el-6-i386.repo" },
+         { "name" => "el-6-x86_64", "artifact" => "./puppet/el/6/x86_64/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.el6.x86_64.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-el-6-x86_64.repo" },
+         { "name" => "el-6-s390x", "artifact" => "./puppet/el/6/s390x/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.el6.s390x.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-el-6-s390x.repo" },
+         { "name" => "el-7-x86_64", "artifact" => "./puppet/el/7/x86_64/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.el7.x86_64.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-el-7-x86_64.repo" },
+         { "name" => "el-7-s390x", "artifact" => "./puppet/el/7/s390x/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.el7.s390x.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-el-7-s390x.repo" },
+         { "name" => "eos-4-i386", "artifact" => "./puppet/eos/4/i386/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.eos4.i386.swix" },
+         { "name" => "fedora-24-i386", "artifact" => "./puppet/fedora/24/i386/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.fc24.i386.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-fedora-24-i386.repo" },
+         { "name" => "fedora-24-x86_64", "artifact" => "./puppet/fedora/24/x86_64/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.fc24.x86_64.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-fedora-24-x86_64.repo" },
+         { "name" => "fedora-25-i386", "artifact" => "./puppet/fedora/25/i386/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.fc25.i386.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-fedora-25-i386.repo" },
+         { "name" => "fedora-25-x86_64", "artifact" => "./puppet/fedora/25/x86_64/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.fc25.x86_64.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-fedora-25-x86_64.repo" },
+         { "name" => "huaweios-6-powerpc", "artifact" => "./puppet/deb/huaweios/#{self.project}_#{Pkg::Util::Version.git_describe}-#{self.release}huaweios_powerpc.deb", "repo_config" => "../repo_configs/deb/pl-#{self.project}-#{self.ref}-huaweios.list" },
+         { "name" => "osx-10.10-x86_64", "artifact" => "./puppet/apple/10.10/x86_64/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.osx10.10.dmg" },
+         { "name" => "osx-10.11-x86_64", "artifact" => "./puppet/apple/10.11/x86_64/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.osx10.11.dmg" },
+         { "name" => "osx-10.12-x86_64", "artifact" => "./puppet/apple/10.12/x86_64/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.osx10.12.dmg" },
+         { "name" => "sles-11-s390x", "artifact" => "./puppet/sles/11/s390x/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.sles11.s390x.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-sles-11-s390x.repo" },
+         { "name" => "sles-11-i386", "artifact" => "./puppet/sles/11/i386/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.sles11.i386.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-sles-11-i386.repo" },
+         { "name" => "sles-11-x86_64", "artifact" => "./puppet/sles/11/x86_64/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.sles11.x86_64.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-sles-11-x86_64.repo" },
+         { "name" => "sles-12-s390x", "artifact" => "./puppet/sles/12/s390x/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.sles12.s390x.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-sles-12-s390x.repo" },
+         { "name" => "sles-12-x86_64", "artifact" => "./puppet/sles/12/x86_64/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.sles12.x86_64.rpm", "repo_config" => "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-sles-12-x86_64.repo" },
+         { "name" => "solaris-10-i386", "artifact" => "./puppet/solaris/10/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.i386.pkg.gz" },
+         { "name" => "solaris-10-sparc", "artifact" => "./puppet/solaris/10/#{self.project}-#{Pkg::Util::Version.git_describe}-#{self.release}.sparc.pkg.gz" },
+         { "name" => "solaris-11-i386", "artifact" => "./puppet/solaris/11/#{self.project}@#{self.version},5.11-#{self.release}.i386.p5p" },
+         { "name" => "solaris-11-sparc", "artifact" => "./puppet/solaris/11/#{self.project}@#{self.version},5.11-#{self.release}.sparc.p5p" },
+         { "name" => "ubuntu-14.04-i386", "artifact" => "./puppet/deb/trusty/#{self.project}_#{Pkg::Util::Version.git_describe}-#{self.release}trusty_i386.deb", "repo_config" => "../repo_configs/deb/pl-#{self.project}-#{self.ref}-trusty.list" },
+         { "name" => "ubuntu-14.04-amd64", "artifact" => "./puppet/deb/trusty/#{self.project}_#{Pkg::Util::Version.git_describe}-#{self.release}trusty_amd64.deb", "repo_config" => "../repo_configs/deb/pl-#{self.project}-#{self.ref}-trusty.list" },
+         { "name" => "ubuntu-16.04-i386", "artifact" => "./puppet/deb/xenial/#{self.project}_#{Pkg::Util::Version.git_describe}-#{self.release}xenial_i386.deb", "repo_config" => "../repo_configs/deb/pl-#{self.project}-#{self.ref}-xenial.list" },
+         { "name" => "ubuntu-16.04-amd64", "artifact" => "./puppet/deb/xenial#{self.project}_#{Pkg::Util::Version.git_describe}-#{self.release}xenial_amd64.deb", "repo_config" => "../repo_configs/deb/pl-#{self.project}-#{self.ref}-xenial.list" },
+         { "name" => "ubuntu-16.10-i386", "artifact" => "./puppet/deb/yakkety/#{self.project}_#{Pkg::Util::Version.git_describe}-#{self.release}yakkety_i386.deb", "repo_config" => "../repo_configs/deb/pl-#{self.project}-#{self.ref}-yakkety.list" },
+         { "name" => "ubuntu-16.10-amd64", "artifact" => "./puppet/deb/yakkety/#{self.project}_#{Pkg::Util::Version.git_describe}-#{self.release}yakkety_amd64.deb", "repo_config" => "../repo_configs/deb/pl-#{self.project}-#{self.ref}-yakkety.list" },
+         { "name" => "windows-2012-x64", "artifact" => "./puppet/windows/#{self.project}-#{Pkg::Util::Version.git_describe}-x64.msi" },
+         { "name" => "windows-2012-x86", "artifact" => "./puppet/windows/#{self.project}-#{Pkg::Util::Version.git_describe}-x86.msi" }]
+      end
+
+      ##
+      # Manipulate platform_data above to follow the PC1 directory structure
+      # for artifacts
+      #
+      def platform_data_pc1
+        platform_data.each { |platform|
+          dirs = platform["artifact"].split('/')
+          dirs.delete("puppet")
+          if dirs[1] == 'fedora'
+            dirs[2].prepend("f")
+            dirs.last.sub("fc", "fedoraf")
+            platform["repo_config"].sub("fedora-", "fedora-f")
+          end
+          dirs.insert(3, "PC1") unless dirs[1] == 'windows'
+          platform["artifact"] = dirs.join('/')
+        }
+      end
+
+      ##
       # Load a yaml file and use its contents to set the values for Pkg::Config
       # class instance variables
       #
       def config_from_yaml(file)
         build_data = Pkg::Util::Serialization.load_yaml(file)
+        if self.apt_repo_name == 'PC1'
+          build_data[:platform_data] = platform_data_pc1
+        else
+          build_data[:platform_data] = platform_data
+        end
         config_from_hash(build_data)
       end
 

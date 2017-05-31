@@ -125,6 +125,7 @@ module Pkg::Params
                   :pe_platforms,
                   :pe_version,
                   :pg_major_version,
+                  :platform_data,
                   :platform_repos,
                   :pre_tar_task,
                   :pre_tasks,

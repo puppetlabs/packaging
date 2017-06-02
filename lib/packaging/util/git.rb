@@ -65,9 +65,9 @@ module Pkg::Util::Git
 
     # Returns the value of `git describe`. If this is not a git repo or
     # `git describe` fails because there is no tag, this will return false
-    def describe
+    def describe(extra_opts = ['--tags', '--dirty'])
       Pkg::Util.in_project_root do
-        stdout, _, ret = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} describe --tags --dirty")
+        stdout, _, ret = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} describe #{Array(extra_opts).join(' ')}")
         if Pkg::Util::Execution.success?(ret)
           stdout.strip
         else
@@ -91,7 +91,7 @@ module Pkg::Util::Git
     # Return the ref type of HEAD on the current branch
     def ref_type
       Pkg::Util.in_project_root do
-        stdout, = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} cat-file -t #{describe}")
+        stdout, = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} cat-file -t #{describe('')}")
         stdout.strip
       end
     end

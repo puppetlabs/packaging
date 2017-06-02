@@ -94,6 +94,23 @@ describe 'Pkg::Util::Git' do
     end
   end
 
+  context '#describe' do
+    let(:describe) { '0.5.0-25-g746e755-dirty' }
+    let(:describe_no_dirty) { '0.5.0-25-g746e755' }
+
+    it 'should default to --tags --dirty' do
+      expect(Pkg::Util::Execution).to receive(:capture3).with("#{Pkg::Util::Tool::GIT} describe --tags --dirty").and_return([describe, '', 0])
+      expect(Pkg::Util::Execution).to receive(:success?).with(0).and_return(true)
+      Pkg::Util::Git.describe
+    end
+
+    it 'should allow you to pass no arguments to describe' do
+      expect(Pkg::Util::Execution).to receive(:capture3).with("#{Pkg::Util::Tool::GIT} describe ").and_return([describe_no_dirty, '', 0])
+      expect(Pkg::Util::Execution).to receive(:success?).with(0).and_return(true)
+      Pkg::Util::Git.describe('')
+    end
+  end
+
   context '#sha_or_tag' do
     let(:sha) { '20a338b33e2fc1cbaee27b69de5eb2d06637a7c4' }
     let(:tag) { '2.0.4' }

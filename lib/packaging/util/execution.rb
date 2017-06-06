@@ -59,6 +59,7 @@ module Pkg::Util::Execution
     # or max attempts is reached. Raise an exception unless we've succeeded.
     def retry_on_fail(args, &blk)
       success = FALSE
+      exception = ''
 
       if args[:times].respond_to?(:times) and block_given?
         args[:times].times do |i|
@@ -70,14 +71,15 @@ module Pkg::Util::Execution
             blk.call
             success = TRUE
             break
-          rescue
+          rescue => err
             puts "An error was encountered evaluating block. Retrying.."
+            exception = err + "\n" + err.backtrace.join("\n")
           end
         end
       else
         fail "retry_on_fail requires and arg (:times => x) where x is an Integer/Fixnum, and a block to execute"
       end
-      fail "Block failed maximum of #{args[:times]} tries. Exiting.." unless success
+      fail "Block failed maximum of #{args[:times]} tries. Exiting..\nLast failure was: #{exception}" unless success
     end
   end
 end

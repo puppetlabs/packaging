@@ -265,6 +265,9 @@ namespace :pl do
         remote:deploy_swix_repo
         remote:deploy_msi_repo
         remote:deploy_tar_repo
+        remote:deploy_apt_repo_to_s3
+        remote:deploy_yum_repo_to_s3
+        remote:deploy_downloads_to_s3
       )
 
       if Pkg::Util.boolean_value(Pkg::Config.answer_override) && !Pkg::Config.foss_only

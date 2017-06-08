@@ -73,7 +73,7 @@ module Pkg::Util::Execution
             break
           rescue => err
             puts "An error was encountered evaluating block. Retrying.."
-            exception = err + "\n" + err.backtrace.join("\n")
+            exception = err.to_s + "\n" + err.backtrace.join("\n")
           end
         end
       else

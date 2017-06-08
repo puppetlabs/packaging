@@ -268,12 +268,12 @@ namespace :pl do
 
   desc "ship apple dmg to #{Pkg::Config.dmg_staging_server}"
   task ship_dmg: 'pl:fetch' do
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.dmg'], Pkg::Config.dmg_staging_server, Pkg::Config.dmg_path)
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.dmg'], Pkg::Config.dmg_staging_server, Pkg::Config.dmg_path, addtl_path_to_sub: '/mac')
   end
 
   desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
   task ship_swix: 'pl:fetch' do
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.swix*'], Pkg::Config.swix_staging_server, Pkg::Config.swix_path)
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.swix*'], Pkg::Config.swix_staging_server, Pkg::Config.swix_path, addtl_path_to_sub: '/eos')
   end
 
   desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
@@ -295,7 +295,7 @@ namespace :pl do
 
   desc "Ship MSI packages to #{Pkg::Config.msi_staging_server}"
   task ship_msi: 'pl:fetch' do
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.msi'], Pkg::Config.msi_staging_server, Pkg::Config.msi_path, excludes: ["#{Pkg::Config.project}-x(86|64).msi"])
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.msi'], Pkg::Config.msi_staging_server, Pkg::Config.msi_path, addtl_path_to_sub: '/windows', excludes: ["#{Pkg::Config.project}-x(86|64).msi"])
   end
 
   desc 'UBER ship: ship all the things in pkg'

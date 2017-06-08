@@ -257,10 +257,10 @@ namespace :pl do
         uber_ship
         ship_gem
         remote:update_apt_repo
-        remote:deploy_apt_repo
         remote:update_yum_repo
-        remote:deploy_yum_repo
         remote:update_ips_repo
+        remote:deploy_apt_repo
+        remote:deploy_yum_repo
         remote:deploy_dmg_repo
         remote:deploy_swix_repo
         remote:deploy_msi_repo

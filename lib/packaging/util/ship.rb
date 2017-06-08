@@ -5,6 +5,7 @@ module Pkg::Util::Ship
 
   def collect_packages(pkg_exts, excludes = []) # rubocop:disable Metrics/MethodLength
     pkgs = pkg_exts.map { |ext| Dir.glob(ext) }.flatten
+    return [] if pkgs.empty?
     excludes.each do |exclude|
       pkgs.delete_if { |p| p.match(exclude) }
     end if excludes
@@ -37,6 +38,7 @@ module Pkg::Util::Ship
     # First find the packages to be shipped. We must find them before moving
     # to our temporary staging directory
     local_packages = collect_packages(pkg_exts, options[:excludes])
+    return if local_packages.empty?
 
     tmpdir = Dir.mktmpdir
     staged_pkgs = reorganize_packages(local_packages, tmpdir)

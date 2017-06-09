@@ -188,11 +188,7 @@ def build_rpm_with_mock(mocks)
   mocks.split(' ').each do |mock_config|
     family  = mock_el_family(mock_config)
     version = mock_el_ver(mock_config)
-    subdir  = if Pkg::Config.repo_name
-                Pkg::Config.repo_name
-              else
-                Pkg::Util::Version.final? ? 'products' : 'devel'
-              end
+    subdir  = Pkg::Paths.repo_name || 'products'
     bench = Benchmark.realtime do
       # Set up the rpmbuild dir in a temp space, with our tarball and spec
       workdir = prep_rpm_build_dir

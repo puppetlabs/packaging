@@ -34,9 +34,34 @@ describe 'Pkg::Paths' do
     end
   end
 
+  describe '#repo_name' do
+
+    it 'should return repo_name for final version' do
+      allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
+      allow(Pkg::Util::Version).to receive(:final?).and_return(true)
+      expect(Pkg::Paths.repo_name).to eq('puppet5')
+    end
+
+    it 'should be nil if repo_name is not set for final version' do
+      allow(Pkg::Util::Version).to receive(:final?).and_return(true)
+      expect(Pkg::Paths.repo_name).to be_nil
+    end
+
+    it 'should return non_final_repo_name for non-final version' do
+      allow(Pkg::Config).to receive(:non_final_repo_name).and_return('puppet5-nightly')
+      allow(Pkg::Util::Version).to receive(:final?).and_return(false)
+      expect(Pkg::Paths.repo_name).to eq('puppet5-nightly')
+    end
+
+    it 'should fail if non_final_repo_name is not set for non-final version' do
+      allow(Pkg::Util::Version).to receive(:final?).and_return(false)
+      expect { Pkg::Paths.repo_name }.to raise_error
+    end
+  end
+
   describe '#artifacts_path' do
     before :each do
-      allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
+      allow(Pkg::Paths).to receive(:repo_name).and_return('puppet5')
     end
 
     it 'should be correct for el7' do
@@ -68,7 +93,7 @@ describe 'Pkg::Paths' do
 
   describe '#repo_path' do
     before :each do
-      allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
+      allow(Pkg::Paths).to receive(:repo_name).and_return('puppet5')
     end
 
     it 'should be correct' do

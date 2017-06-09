@@ -63,7 +63,7 @@ task :prep_deb_tars, :work_dir do |t, args|
 end
 
 task :build_deb, :deb_command, :cow do |t, args|
-  subrepo = Pkg::Config.repo_name
+  subrepo = Pkg::Paths.repo_name
   bench = Benchmark.realtime do
     deb_build = args.deb_command
     cow       = args.cow

@@ -44,23 +44,42 @@ module Pkg::Paths
     return "#{platform}-#{version}-#{arch}"
   end
 
+  # Assign repo name
+  # If we are shipping development/beta/non-final packages, they should be
+  # shipped to the development/beta/non-final repo, if there is one defined.
+  # Otherwise, we probably shouldn't be shipping them...
+  def repo_name
+    if Pkg::Util::Version.final?
+      # This will be nil if repo_name is not defined, which is consistent with
+      # our previous implementation. This will allow for easy switching between
+      # `main` (for deb) and `products`/`devel` (for rpm) if repo_name is undefined.
+      Pkg::Config.repo_name
+    else
+      if Pkg::Config.non_final_repo_name
+        Pkg::Config.non_final_repo_name
+      else
+        fail "You are attempting to ship a non-final build without specifying a non-final repo destination. Either make sure you are shipping a final version or define `non_final_repo_name` in your build_defaults."
+      end
+    end
+  end
+
   def artifacts_path(platform_tag, package_url = nil, path_prefix = 'artifacts')
     platform, version, architecture = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
 
     case package_format
     when 'rpm'
-      File.join(path_prefix, Pkg::Config.repo_name, platform, version, architecture)
+      File.join(path_prefix, repo_name, platform, version, architecture)
     when 'swix'
-      File.join(path_prefix, platform, Pkg::Config.repo_name, version, architecture)
+      File.join(path_prefix, platform, repo_name, version, architecture)
     when 'deb'
-      File.join(path_prefix, 'deb', Pkg::Platforms.get_attribute(platform_tag, :codename), Pkg::Config.repo_name)
+      File.join(path_prefix, 'deb', Pkg::Platforms.get_attribute(platform_tag, :codename), repo_name)
     when 'svr4', 'ips'
-      File.join(path_prefix, 'solaris', Pkg::Config.repo_name, version)
+      File.join(path_prefix, 'solaris', repo_name, version)
     when 'dmg'
-      File.join(path_prefix, 'mac', Pkg::Config.repo_name, version, architecture)
+      File.join(path_prefix, 'mac', repo_name, version, architecture)
     when 'msi'
-      File.join(path_prefix, 'windows', Pkg::Config.repo_name)
+      File.join(path_prefix, 'windows', repo_name)
     else
       raise "Not sure where to find packages with a package format of '#{package_format}'"
     end
@@ -72,15 +91,15 @@ module Pkg::Paths
 
     case package_format
     when 'rpm', 'swix'
-      File.join('repos', Pkg::Config.repo_name, platform, version, arch)
+      File.join('repos', repo_name, platform, version, arch)
     when 'deb'
-      File.join('repos', 'apt', Pkg::Platforms.get_attribute(platform_tag, :codename), 'pool', Pkg::Config.repo_name)
+      File.join('repos', 'apt', Pkg::Platforms.get_attribute(platform_tag, :codename), 'pool', repo_name)
     when 'svr4', 'ips'
-      File.join('repos', 'solaris', Pkg::Config.repo_name, version)
+      File.join('repos', 'solaris', repo_name, version)
     when 'dmg'
-      File.join('repos', 'mac', Pkg::Config.repo_name, version, arch)
+      File.join('repos', 'mac', repo_name, version, arch)
     when 'msi'
-      File.join('repos', 'windows', Pkg::Config.repo_name)
+      File.join('repos', 'windows', repo_name)
     else
       raise "Not sure what to do with a package format of '#{package_format}'"
     end

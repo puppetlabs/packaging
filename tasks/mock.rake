@@ -226,7 +226,7 @@ def build_rpm_with_mock(mocks)
               FileUtils.cp_r(rpm, "pkg/pe/rpm/#{family}-#{version}-i386", { :preserve => true })
               FileUtils.ln("pkg/pe/rpm/#{family}-#{version}-i386/#{File.basename(rpm)}", "pkg/pe/rpm/#{family}-#{version}-x86_64/", :force => true, :verbose => true)
           end
-        elsif subdir == 'PC1'
+        elsif subdir == 'PC1' || !Pkg::Config.yum_repo_name
           %x(mkdir -p pkg/#{family}/#{version}/#{subdir}/{SRPMS,i386,x86_64})
           case File.basename(rpm)
             when /debuginfo/

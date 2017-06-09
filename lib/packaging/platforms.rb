@@ -31,7 +31,7 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
     'el' => {
       '5' => { architectures: ['i386', 'x86_64'], repo: true, package_format: 'rpm', signature_format: 'v3' },
       '6' => { architectures: ['i386', 'x86_64', 's390x'], repo: true, package_format: 'rpm', signature_format: 'v4' },
-      '7' => { architectures: ['x86_64', 's390x'], repo: true, package_format: 'rpm', signature_format: 'v4' }
+      '7' => { architectures: ['x86_64', 's390x', 'ppc64le'], repo: true, package_format: 'rpm', signature_format: 'v4' }
     },
 
     'eos' => {

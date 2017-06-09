@@ -423,11 +423,6 @@ namespace :pl do
       project_basedir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
       artifact_dir = "#{project_basedir}/#{target}"
 
-      # In order to get a snapshot of what this build looked like at the time
-      # of shipping, we also generate and ship the params file
-      #
-      Pkg::Config.config_to_yaml(local_dir)
-
       # For EZBake builds, we also want to include the ezbake.manifest file to
       # get a snapshot of this build and all dependencies. We eventually will
       # create a yaml version of this file, but until that point we want to
@@ -501,8 +496,16 @@ namespace :pl do
         Pkg::Util::Net.rsync_to("#{local_dir}/", Pkg::Config.distribution_server, "#{artifact_dir}/", extra_flags: ['--ignore-existing', '--exclude repo_configs'])
       end
 
+      # In order to get a snapshot of what this build looked like at the time
+      # of shipping, we also generate and ship the params file
+      #
+      Pkg::Config.config_to_yaml(local_dir)
+      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+        Pkg::Util::Net.rsync_to("#{local_dir}/#{Pkg::Config.ref}.yaml", Pkg::Config.distribution_server, "#{artifact_dir}/", extra_flags: ["--exclude repo_configs"])
+      end
+
       # If we just shipped a tagged version, we want to make it immutable
-      files = Dir.glob("#{local_dir}/**/*").select { |f| File.file?(f) }.map do |file|
+      files = Dir.glob("#{local_dir}/**/*").select { |f| File.file?(f) and !f.include? "#{Pkg::Config.ref}.yaml" }.map do |file|
         "#{artifact_dir}/#{file.sub(/^#{local_dir}\//, '')}"
       end
 

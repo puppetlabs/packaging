@@ -12,8 +12,25 @@ module Pkg::Paths
   # with the artifact and path
   def tag_from_artifact_path(path)
     platform = Pkg::Platforms.supported_platforms.find { |p| path.include?(p) }
-    # if we didn't find a platform, probably a codename
-    if platform.nil?
+    if platform == 'windows'
+      version = '2012'
+      arch = Pkg::Platforms::arches_for_platform_version(platform, version).find { |a| path.include?(a) }
+      if arch.nil?
+        arch = 'x64'
+      end
+    elsif !platform.nil?
+      version = Pkg::Platforms.versions_for_platform(platform).find { |v|  path =~ /#{platform}(\/|-)?#{v}/ }
+      unless version.nil?
+        arch = Pkg::Platforms::arches_for_platform_version(platform, version).find { |a| path.include?(a) }
+        if arch.nil? && path.include?('ppc')
+          arch = 'power'
+        elsif arch.nil?
+          arch = 'x86_64'
+        end
+      end
+    end
+    # if we didn't find a platform or a version, probably a codename
+    if platform.nil? || version.nil?
       codename = Pkg::Platforms.codenames('deb').find { |c| path.include?(c) }
       fail "I can't find a codename or platform in #{path}, teach me?" if codename.nil?
       platform, version = Pkg::Platforms.codename_to_platform_version(codename)
@@ -21,17 +38,6 @@ module Pkg::Paths
       arch = Pkg::Platforms.arches_for_platform_version(platform, version).find { |a| path.include?(a) }
       if arch.nil?
         arch = 'amd64'
-      end
-    elsif platform == 'windows' || platform == 'cumulus' || platform == 'huaweios'
-      version = Pkg::Platforms.versions_for_platform(platform)[0]
-      arch = Pkg::Platforms::arches_for_platform_version(platform, version).find { |a| path.include?(a) }
-      fail "I can't figure out the architecture for #{platform} #{version} from #{path}, teach me?" if arch.nil?
-    else
-      version = Pkg::Platforms.versions_for_platform(platform).find { |v|  path =~ /#{platform}(\/|-)?#{v}/ }
-      fail "I can't figure out the version for #{platform} from #{path}, teach me?" if version.nil?
-      arch = Pkg::Platforms::arches_for_platform_version(platform, version).find { |a| path.include?(a) }
-      if arch.nil?
-        arch = 'x86_64'
       end
     end
 

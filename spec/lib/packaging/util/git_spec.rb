@@ -95,6 +95,11 @@ describe 'Pkg::Util::Git' do
   end
 
   context '#describe' do
+    before(:each) do
+      @project_root = Dir.pwd
+      Pkg::Config.project_root = @project_root
+    end
+
     let(:describe) { '0.5.0-25-g746e755-dirty' }
     let(:describe_no_dirty) { '0.5.0-25-g746e755' }
 

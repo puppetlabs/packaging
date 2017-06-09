@@ -135,6 +135,7 @@ module Pkg::Params
                   :redis_hostname,
                   :ref,
                   :release,
+                  :repo_name,
                   :rpm_build_host,
                   :rpm_targets,
                   :rpmrelease,
@@ -196,6 +197,7 @@ module Pkg::Params
               { :var => :default_mock,            :envvar => :MOCK },
               { :var => :dev_build,               :envvar => :DEV_BUILD,       :type => :bool },
               { :var => :dmg_host,                :envvar => :DMG_HOST },
+              { :var => :dmg_path,                :envvar => :DMG_PATH },
               { :var => :dmg_staging_server,      :envvar => :DMG_STAGING_SERVER },
               { :var => :final_mocks,             :envvar => :MOCK },
               { :var => :foss_only,               :envvar => :FOSS_ONLY,       :type => :bool },
@@ -238,6 +240,7 @@ module Pkg::Params
               { :var => :random_mockroot,         :envvar => :RANDOM_MOCKROOT, :type => :bool },
               { :var => :rc_mocks,                :envvar => :MOCK },
               { :var => :release,                 :envvar => :RELEASE },
+              { :var => :repo_name,               :envvar => :REPO_NAME },
               { :var => :sign_tar,                :envvar => :SIGN_TAR,        :type => :bool },
               { :var => :signing_server,          :envvar => :SIGNING_SERVER },
               { :var => :staging_server,          :envvar => :STAGING_SERVER },
@@ -312,6 +315,8 @@ module Pkg::Params
                     { :oldvar => :yum_host,               :newvar => :swix_host },
                     { :oldvar => :yum_host,               :newvar => :dmg_host },
                     { :oldvar => :yum_host,               :newvar => :tar_host },
+                    { :oldvar => :apt_repo_name,          :newvar => :repo_name },
+                    { :oldvar => :yum_repo_name,          :newvar => :repo_name },
                  ]
 
   # These are variables that we have deprecated. If they are encountered in a
@@ -323,5 +328,11 @@ module Pkg::Params
     build_defaults.yaml or project_data.yaml" },
                   { :var => :gpg_name, :message => "
     DEPRECATED, 29-Jul-2014: 'gpg_name' has been replaced with 'gpg_key'.
-                   Please update this field in your build_defaults.yaml" }]
+                   Please update this field in your build_defaults.yaml" },
+                  { :var => :apt_repo_name, :message => "
+    DEPRECATED, 25-May-2017: 'apt_repo_name' has been replaced with 'repo_name'.
+                   Please update this field in your builds_defaults.yaml" },
+                  { :var => :yum_repo_name, :message => "
+    DEPRECATED, 25-May-2017: 'yum_repo_name' has been replaced with 'repo_name'.
+                   Please update this field in your builds_defaults.yaml" }]
 end

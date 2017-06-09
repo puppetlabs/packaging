@@ -16,7 +16,7 @@ module Pkg::Deb::Repo
     # enable clients to install these packages.
     #
     def generate_repo_configs(source = "repos", target = "repo_configs")
-      subrepo = Pkg::Config.apt_repo_name || "main"
+      subrepo = Pkg::Config.repo_name || "main"
       # We use wget to obtain a directory listing of what are presumably our deb repos
       #
       wget = Pkg::Util::Tool.check_tool("wget")
@@ -69,7 +69,7 @@ module Pkg::Deb::Repo
     end
 
     def repo_creation_command(prefix, artifact_directory)
-      subrepo = Pkg::Config.apt_repo_name || 'main'
+      subrepo = Pkg::Config.repo_name || 'main'
       # First, we test that artifacts exist and set up the repos directory
       cmd = 'echo " Checking for deb build artifacts. Will exit if not found.." ; '
       cmd << "[ -d #{artifact_directory}/artifacts/#{prefix}deb ] || exit 1 ; "
@@ -103,7 +103,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
       # testing only, we'll just add the debs and ignore source files for now.
       #
       cmd << "reprepro=$(which reprepro) ; "
-      cmd << %Q($reprepro includedeb $dist ../../#{prefix}deb/$dist#{Pkg::Config.apt_repo_name ? "/#{subrepo}" : ""}/*.deb ; popd ; done ; )
+      cmd << %Q($reprepro includedeb $dist ../../#{prefix}deb/$dist#{Pkg::Config.repo_name ? "/#{subrepo}" : ""}/*.deb ; popd ; done ; )
       cmd << "popd ; popd "
 
       return cmd
@@ -146,7 +146,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
     end
 
     def sign_repos(target = "repos", message = "Signed apt repository")
-      subrepo = Pkg::Config.apt_repo_name || 'main'
+      subrepo = Pkg::Config.repo_name || 'main'
       reprepro = Pkg::Util::Tool.check_tool('reprepro')
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
 

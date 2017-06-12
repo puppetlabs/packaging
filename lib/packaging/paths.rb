@@ -50,10 +50,7 @@ module Pkg::Paths
   # Otherwise, we probably shouldn't be shipping them...
   def repo_name
     if Pkg::Util::Version.final?
-      # This will be nil if repo_name is not defined, which is consistent with
-      # our previous implementation. This will allow for easy switching between
-      # `main` (for deb) and `products`/`devel` (for rpm) if repo_name is undefined.
-      Pkg::Config.repo_name
+      Pkg::Config.repo_name || ""
     else
       if Pkg::Config.non_final_repo_name
         Pkg::Config.non_final_repo_name

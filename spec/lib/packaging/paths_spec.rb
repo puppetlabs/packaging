@@ -42,9 +42,10 @@ describe 'Pkg::Paths' do
       expect(Pkg::Paths.repo_name).to eq('puppet5')
     end
 
-    it 'should be nil if repo_name is not set for final version' do
+    it 'should be empty string if repo_name is not set for final version' do
+      allow(Pkg::Config).to receive(:repo_name).and_return(nil)
       allow(Pkg::Util::Version).to receive(:final?).and_return(true)
-      expect(Pkg::Paths.repo_name).to be_nil
+      expect(Pkg::Paths.repo_name).to eq('')
     end
 
     it 'should return non_final_repo_name for non-final version' do

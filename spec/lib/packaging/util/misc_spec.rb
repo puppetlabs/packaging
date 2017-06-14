@@ -6,7 +6,7 @@ describe 'Pkg::Util::Misc' do
     let(:orig_string) { "#!/bin/bash\necho '__REPO_NAME__'" }
     let(:updated_string) { "#!/bin/bash\necho 'abcdefg'" }
     let(:good_replacements) do
-      { __REPO_NAME__: Pkg::Config.repo_name }
+      { __REPO_NAME__: Pkg::Paths.repo_name }
     end
     let(:warn_replacements) do
       { __REPO_NAME__: nil }

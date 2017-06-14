@@ -59,7 +59,7 @@ new_pkgs = [
     tmpdir = Dir.mktmpdir
 
     before :each do
-      allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
+      allow(Pkg::Paths).to receive(:repo_name).and_return('puppet5')
       expect(FileUtils).to receive(:cp).at_least(:once)
     end
 

@@ -143,6 +143,14 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
       end
     end
 
+    # Note here we still use `Pkg::Config.gpg_key` to sign these repos. The
+    # issue here is that we have one freight repo, which contains multiple
+    # repos. There's no good way (that I can tell) of giving it a different
+    # key to sign with. This is not only defined here, but also in the freight
+    # config file we use (`/etc/freight.conf.d/community.conf`). We could add
+    # multiple freight config files, which actually wouldn't be the worst idea,
+    # but in the meantime, this is how we decided to move forward with solving
+    # this.
     def sign_repos(target = "repos", message = "Signed apt repository")
       reprepro = Pkg::Util::Tool.check_tool('reprepro')
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')

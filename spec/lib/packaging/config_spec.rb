@@ -76,7 +76,7 @@ describe "Pkg::Config" do
                   :metrics_url,
                   :msi_name,
                   :name,
-                  :non_final_repo_name,
+                  :nonfinal_repo_name,
                   :notify,
                   :project,
                   :origversion,

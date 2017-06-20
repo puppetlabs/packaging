@@ -17,7 +17,7 @@ module Pkg::Util::Git
     # Git utility to create a new git tag
     def tag(version)
       fail_unless_repo
-      stdout, = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} tag -s -u #{Pkg::Config.gpg_key} -m '#{version}' #{version}")
+      stdout, = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} tag -s -u #{Pkg::Util::Gpg.key} -m '#{version}' #{version}")
       stdout
     end
 

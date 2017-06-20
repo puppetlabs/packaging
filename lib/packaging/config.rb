@@ -79,18 +79,18 @@ module Pkg
           artifacts, _ = Pkg::Util::Net.remote_ssh_cmd(self.builds_server, cmd, true)
           artifacts = artifacts.split("\n")
           data = {}
-          Pkg::Util::Platform.platform_tags.each do |tag|
-            _, _, arch = Pkg::Util::Platform.parse_platform_tag(tag)
-            package_format = Pkg::Util::Platform.get_attribute(tag, :package_format)
+          Pkg::Platforms.platform_tags.each do |tag|
+            _, _, arch = Pkg::Platforms.parse_platform_tag(tag)
+            package_format = Pkg::Platforms.get_attribute(tag, :package_format)
             case package_format
             when 'deb'
-              artifact = artifacts.find { |e| e.include? Pkg::Util::Platform.artifacts_path(tag) and (e.include?("all") || e.include?("#{arch}.deb")) }
-              repo_config = "./repo_configs/deb/pl-#{self.project}-#{self.ref}-#{Pkg::Util::Platform.get_attribute(tag, :codename)}.list" if artifact
+              artifact = artifacts.find { |e| e.include? Pkg::Paths.artifacts_path(tag) and (e.include?("all") || e.include?("#{arch}.deb")) }
+              repo_config = "./repo_configs/deb/pl-#{self.project}-#{self.ref}-#{Pkg::Platforms.get_attribute(tag, :codename)}.list" if artifact
             when 'rpm'
-              artifact = artifacts.find { |e| e.include? Pkg::Util::Platform.artifacts_path(tag) and e.include?(arch) }
+              artifact = artifacts.find { |e| e.include? Pkg::Paths.artifacts_path(tag) and e.include?(arch) }
               repo_config = "./repo_configs/rpm/pl-#{self.project}-#{self.ref}-#{tag}.repo" if artifact
             when 'swix', 'svr4', 'ips', 'dmg', 'msi'
-              artifact = artifacts.find { |e| e.include? Pkg::Util::Platform.artifacts_path(tag) and e.include?(arch) }
+              artifact = artifacts.find { |e| e.include? Pkg::Paths.artifacts_path(tag) and e.include?(arch) }
             else
               fail "Not sure what to do with packages with a package format of '#{package_format}' - maybe update PLATFORM_INFO?"
             end

@@ -52,10 +52,10 @@ module Pkg::Paths
     if Pkg::Util::Version.final?
       Pkg::Config.repo_name || ""
     else
-      if Pkg::Config.non_final_repo_name
-        Pkg::Config.non_final_repo_name
+      if Pkg::Config.nonfinal_repo_name
+        Pkg::Config.nonfinal_repo_name
       else
-        fail "You are attempting to ship a non-final build without specifying a non-final repo destination. Either make sure you are shipping a final version or define `non_final_repo_name` in your build_defaults."
+        fail "You are attempting to ship a non-final build without specifying a non-final repo destination. Either make sure you are shipping a final version or define `nonfinal_repo_name` in your build_defaults."
       end
     end
   end

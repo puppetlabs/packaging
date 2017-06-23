@@ -93,7 +93,11 @@ if Pkg::Config.build_pe
       #   by newer ones. To handle this, we make everything we ship to the archive
       #   directories immutable, after rsyncing out.
       #
-      base_path = "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/repos"
+      if Pkg::Config.pe_feature_branch
+        base_path = "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/feature/repos"
+      else
+        base_path = "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/repos"
+      end
 
       puts "Shipping all built artifacts to to archive directories on #{Pkg::Config.apt_host}"
 
@@ -130,6 +134,12 @@ if Pkg::Config.build_pe
           files = Dir["pkg/pe/deb/#{dist}/*{_#{arch},all}.deb"].map { |f| "#{archive_path}/#{File.basename(f)}" }
 
           files += Dir["pkg/pe/deb/#{dist}/*"].select { |f| f !~ /^.*\.deb$/ }.map { |f| "#{base_path}/#{dist}-source/#{File.basename(f)}" }
+
+          # If this is not a feature branch, we need to link the shipped packages into the feature repos
+          unless Pkg::Config.pe_feature_branch
+            puts "Linking DEBs to feature repo"
+            Pkg::Util::RakeUtils.invoke_task("pe:remote:link_shipped_debs_to_feature_repo")
+          end
 
           unless files.empty?
             Pkg::Util::Net.remote_set_immutable(Pkg::Config.apt_host, files)
@@ -193,8 +203,8 @@ if Pkg::Config.build_pe
 
       end
 
-      # Throw another tire on the fire
-      desc "Remotely link shipped packages into feature repo on #{Pkg::Config.yum_host}"
+      # Throw more tires on the fire
+      desc "Remotely link shipped rpm packages into feature repo on #{Pkg::Config.yum_host}"
       task :link_shipped_rpms_to_feature_repo => "pl:fetch" do
         next if Pkg::Config.pe_feature_branch
         repo_base_path = Pkg::Config.yum_target_path
@@ -202,6 +212,20 @@ if Pkg::Config.build_pe
         pkgs = FileList['pkg/pe/rpm/**/*.rpm'].select { |path| path.gsub!('pkg/pe/rpm/', '') }
         command  = %(for pkg in #{pkgs.join(' ')}; do)
         command += %(  sudo ln -f "#{repo_base_path}/$( dirname ${pkg} )/$( basename ${pkg} )" "#{feature_repo_path}/$( dirname ${pkg} )/" ; )
+        command += %(done; )
+        command += %(sync)
+
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, command)
+      end
+      
+      desc "Remotely link shipped deb packages into feature repo on #{Pkg::Config.apt_host}"
+      task :link_shipped_debs_to_feature_repo => "pl:fetch" do
+        next if Pkg::Config.pe_feature_branch
+        feature_base_path = "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/feature/repos"
+        base_path = "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/repos"
+        pkgs = FileList["pkg/pe/deb/**/*.deb"].select { |path| path.gsub!('pkg/pe/deb/', '') }
+        command  = %(for pkg in #{pkgs.join(' ')}; do)
+        command += %(  sudo ln -f "#{base_path}/$( dirname ${pkg} )/$( basename ${pkg} )" "#{feature_base_path}/$( dirname ${pkg} )/" ; )
         command += %(done; )
         command += %(sync)
 

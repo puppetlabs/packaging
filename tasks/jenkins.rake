@@ -268,6 +268,7 @@ namespace :pl do
         remote:deploy_apt_repo_to_s3
         remote:deploy_yum_repo_to_s3
         remote:deploy_downloads_to_s3
+        remote:update_rsync_from_s3
       )
 
       if Pkg::Util.boolean_value(Pkg::Config.answer_override) && !Pkg::Config.foss_only

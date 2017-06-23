@@ -265,6 +265,21 @@ namespace :pl do
         end
       end
     end
+
+    desc "Update rsync servers from AWS S3"
+    task :update_rsync_from_s3 => 'pl:fetch' do
+      puts "Really update rsync download servers from AWS S3? [y,n]"
+      if Pkg::Util.ask_yes_or_no
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          ['downloadserver-rsync-prod-1.ops.puppetlabs.net', 'downloadserver-rsync-prod-2.ops.puppetlabs.net'].each do |destination_server|
+            ['apt', 'yum'].each do |repo|
+              command = "sudo aws s3 sync --region us-west-2 s3://#{repo}.puppetlabs.com /opt/repository/#{repo}/"
+              Pkg::Util::Net.remote_ssh_cmd(destination_server, command)
+            end
+          end
+        end
+      end
+    end
   end
 
   desc "Ship built gem to rubygems.org, internal Gem mirror, and public file server"

@@ -29,51 +29,53 @@ if Pkg::Config.build_pe
       Pkg::Util::File.empty_dir?("pkg/pe/deb") and fail "The 'pkg/pe/deb' directory has no packages!"
       target_path = ENV['APT_REPO']
 
-      #   If APT_REPO isn't specified as an environment variable, we use a temporary one
-      #   created for this specific deb ship. This enables us to escape the conflicts
-      #   introduced with simultaneous deb ships.
-      #
+      unless Pkg::Config.feature_branch
+        #   If APT_REPO isn't specified as an environment variable, we use a temporary one
+        #   created for this specific deb ship. This enables us to escape the conflicts
+        #   introduced with simultaneous deb ships.
+        #
 
-      #   We are going to iterate over every set of packages, adding them to
-      #   the repository set by set. This enables us to handle different
-      #   repositories per distribution. "pkg/pe/deb/" contains directories
-      #   named for every distribution, e.g. "lucid," "squeeze," etc.
-      #
-      Dir["pkg/pe/deb/*"].each do |dist|
-        dist = File.basename(dist)
-        unless target_path
-          puts "Creating temporary incoming dir on #{Pkg::Config.apt_host}"
-          target_path = %x(ssh -t #{Pkg::Config.apt_host} 'mktemp -d -t incoming-XXXXXX').chomp
-        end
-
-        #   For aptly, we ship just the debs into an incoming dir. On the remote end,
-        #   aptly will pull these debs in and add them to the repositories based on the
-        #   dist, e.g. lucid, architecture notwithstanding.
+        #   We are going to iterate over every set of packages, adding them to
+        #   the repository set by set. This enables us to handle different
+        #   repositories per distribution. "pkg/pe/deb/" contains directories
+        #   named for every distribution, e.g. "lucid," "squeeze," etc.
         #
-        #   The layout that the aptly library will expect is:
-        #
-        #     incoming_dir/{$dists}/*.deb
-        #
-        #   ex:
-        #     incoming_dir|
-        #                 |_lucid/*.deb
-        #                 |_squeeze/*.deb
-        #                 |_precise/*.deb
-        #                 |_wheezy/*.deb
-        #
-        puts "Shipping PE debs to apt repo 'incoming' dir on #{Pkg::Config.apt_host}"
-        Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          Dir["pkg/pe/deb/#{dist}/*.deb"].each do |deb|
-            Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "mkdir -p '#{target_path}/#{dist}'")
-            Pkg::Util::Net.rsync_to(deb, Pkg::Config.apt_host, "#{target_path}/#{dist}/#{File.basename(deb)}")
+        Dir["pkg/pe/deb/*"].each do |dist|
+          dist = File.basename(dist)
+          unless target_path
+            puts "Creating temporary incoming dir on #{Pkg::Config.apt_host}"
+            target_path = %x(ssh -t #{Pkg::Config.apt_host} 'mktemp -d -t incoming-XXXXXX').chomp
           end
-        end
 
-        if Pkg::Config.team == 'release'
-          Rake::Task["pe:remote:apt"].reenable
-          Rake::Task["pe:remote:apt"].invoke(target_path, dist)
-        end
+          #   For aptly, we ship just the debs into an incoming dir. On the remote end,
+          #   aptly will pull these debs in and add them to the repositories based on the
+          #   dist, e.g. lucid, architecture notwithstanding.
+          #
+          #   The layout that the aptly library will expect is:
+          #
+          #     incoming_dir/{$dists}/*.deb
+          #
+          #   ex:
+          #     incoming_dir|
+          #                 |_lucid/*.deb
+          #                 |_squeeze/*.deb
+          #                 |_precise/*.deb
+          #                 |_wheezy/*.deb
+          #
+          puts "Shipping PE debs to apt repo 'incoming' dir on #{Pkg::Config.apt_host}"
+          Pkg::Util::Execution.retry_on_fail(:times => 3) do
+            Dir["pkg/pe/deb/#{dist}/*.deb"].each do |deb|
+              Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "mkdir -p '#{target_path}/#{dist}'")
+              Pkg::Util::Net.rsync_to(deb, Pkg::Config.apt_host, "#{target_path}/#{dist}/#{File.basename(deb)}")
+            end
+          end
 
+          if Pkg::Config.team == 'release'
+            Rake::Task["pe:remote:apt"].reenable
+            Rake::Task["pe:remote:apt"].invoke(target_path, dist)
+          end
+
+        end
       end
 
       #   We also ship our PE artifacts to directories for archival purposes and to

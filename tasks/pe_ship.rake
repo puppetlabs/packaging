@@ -141,11 +141,11 @@ if Pkg::Config.build_pe
           unless Pkg::Config.pe_feature_branch
             puts "Linking DEBs to feature repo"
             Pkg::Util::RakeUtils.invoke_task("pe:remote:link_shipped_debs_to_feature_repo")
+            unless files.empty?
+              Pkg::Util::Net.remote_set_immutable(Pkg::Config.apt_host, files)
+            end
           end
 
-          unless files.empty?
-            Pkg::Util::Net.remote_set_immutable(Pkg::Config.apt_host, files)
-          end
         end
       end
     end

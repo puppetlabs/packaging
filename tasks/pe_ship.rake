@@ -29,7 +29,7 @@ if Pkg::Config.build_pe
       Pkg::Util::File.empty_dir?("pkg/pe/deb") and fail "The 'pkg/pe/deb' directory has no packages!"
       target_path = ENV['APT_REPO']
 
-      unless Pkg::Config.feature_branch
+      unless Pkg::Config.pe_feature_branch
         #   If APT_REPO isn't specified as an environment variable, we use a temporary one
         #   created for this specific deb ship. This enables us to escape the conflicts
         #   introduced with simultaneous deb ships.

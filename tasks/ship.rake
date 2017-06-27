@@ -215,6 +215,18 @@ namespace :pl do
       end
     end
 
+    desc "Copy signed deb repos from #{Pkg::Config.apt_signing_server} to AWS S3"
+    task :deploy_apt_repo_to_s3 => 'pl:fetch' do
+      puts "Really run S3 sync to deploy Debian repos from #{Pkg::Config.apt_signing_server} to AWS S3? [y,n]"
+      if Pkg::Util.ask_yes_or_no
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          destination_server = Pkg::Config.apt_signing_server
+          command = 'sudo /usr/local/bin/s3_repo_sync.sh apt.puppetlabs.com'
+          Pkg::Util::Net.remote_ssh_cmd(destination_server, command)
+        end
+      end
+    end
+
     desc "Copy rpm repos from #{Pkg::Config.yum_staging_server} to #{Pkg::Config.yum_host}"
     task :deploy_yum_repo => 'pl:fetch' do
       puts "Really run remote rsync to deploy yum repos from #{Pkg::Config.yum_staging_server} to #{Pkg::Config.yum_host}? [y,n]"
@@ -226,6 +238,45 @@ namespace :pl do
             Pkg::Config.yum_host,
             ENV['DRYRUN']
           )
+        end
+      end
+    end
+
+    desc "Copy signed RPM repos from #{Pkg::Config.yum_staging_server} to AWS S3"
+    task :deploy_yum_repo_to_s3 => 'pl:fetch' do
+      puts "Really run S3 sync to deploy RPM repos from #{Pkg::Config.yum_staging_server} to AWS S3? [y,n]"
+      if Pkg::Util.ask_yes_or_no
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          destination_server = Pkg::Config.apt_signing_server
+          command = 'sudo /usr/local/bin/s3_repo_sync.sh yum.puppetlabs.com'
+          Pkg::Util::Net.remote_ssh_cmd(destination_server, command)
+        end
+      end
+    end
+
+    desc "Sync downloads.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3"
+    task :deploy_downloads_to_s3 => 'pl:fetch' do
+      puts "Really run S3 sync to sync downloads.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3? [y,n]"
+      if Pkg::Util.ask_yes_or_no
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          destination_server = Pkg::Config.apt_signing_server
+          command = 'sudo /usr/local/bin/s3_repo_sync.sh downloads.puppetlabs.com'
+          Pkg::Util::Net.remote_ssh_cmd(destination_server, command)
+        end
+      end
+    end
+
+    desc "Update rsync servers from AWS S3"
+    task :update_rsync_from_s3 => 'pl:fetch' do
+      puts "Really update rsync download servers from AWS S3? [y,n]"
+      if Pkg::Util.ask_yes_or_no
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          ['downloadserver-rsync-prod-1.ops.puppetlabs.net', 'downloadserver-rsync-prod-2.ops.puppetlabs.net'].each do |destination_server|
+            ['apt', 'yum'].each do |repo|
+              command = "sudo aws s3 sync --region us-west-2 s3://#{repo}.puppetlabs.com /opt/repository/#{repo}/"
+              Pkg::Util::Net.remote_ssh_cmd(destination_server, command)
+            end
+          end
         end
       end
     end

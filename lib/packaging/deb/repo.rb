@@ -93,7 +93,7 @@ module Pkg::Deb::Repo
 Origin: Puppet Labs
 Label: Puppet Labs
 Codename: $dist
-Architectures: i386 amd64 arm64 armel armhf powerpc ppc64el sparc mips mipsel
+Architectures: i386 amd64 arm64 armel armhf powerpc ppc64el sparc mips mipsel ppc64el
 Components: #{Pkg::Paths.repo_name}
 Description: Apt repository for acceptance testing" >> conf/distributions ; )
 
@@ -164,7 +164,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
               f.puts "Origin: Puppet Labs
 Label: Puppet Labs
 Codename: #{dist}
-Architectures: i386 amd64 arm64 armel armhf powerpc ppc64el sparc mips mipsel
+Architectures: i386 amd64 arm64 armel armhf powerpc ppc64el sparc mips mipsel ppc64el
 Components: #{Pkg::Paths.repo_name}
 Description: #{message} for #{dist}
 SignWith: #{Pkg::Config.gpg_key}"

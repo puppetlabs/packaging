@@ -219,7 +219,7 @@ if Pkg::Config.build_pe
 
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, command)
       end
-      
+
       desc "Remotely link shipped deb packages into feature repo on #{Pkg::Config.apt_host}"
       task :link_shipped_debs_to_feature_repo => "pl:fetch" do
         next if Pkg::Config.pe_feature_branch

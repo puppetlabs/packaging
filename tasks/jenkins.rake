@@ -279,7 +279,7 @@ namespace :pl do
       uber_tasks.delete("remote:deploy_apt_repo") if Pkg::Config.apt_host == Pkg::Config.apt_signing_server
       uber_tasks.delete("remote:deploy_yum_repo") if Pkg::Config.yum_host == Pkg::Config.yum_staging_server
       uber_tasks.delete("remote:deploy_dmg_repo") if Pkg::Config.dmg_host == Pkg::Config.dmg_staging_server
-      uber_tasks.delete("remote:deploy_swix_rep") if Pkg::Config.swix_host == Pkg::Config.swix_staging_server
+      uber_tasks.delete("remote:deploy_swix_repo") if Pkg::Config.swix_host == Pkg::Config.swix_staging_server
       uber_tasks.delete("remote:deploy_tar_repo") if Pkg::Config.tar_host == Pkg::Config.tar_staging_server
 
       # Delete the ship_gem task if we aren't building gems

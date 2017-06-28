@@ -140,6 +140,7 @@ module Pkg::Params
                   :rpm_targets,
                   :rpmrelease,
                   :rpmversion,
+                  :s3_ship,
                   :short_ref,
                   :sign_tar,
                   :signing_server,
@@ -239,6 +240,7 @@ module Pkg::Params
               { :var => :random_mockroot,         :envvar => :RANDOM_MOCKROOT, :type => :bool },
               { :var => :rc_mocks,                :envvar => :MOCK },
               { :var => :release,                 :envvar => :RELEASE },
+              { :var => :s3_ship,                 :envvar => :S3_SHIP,         :type => :bool },
               { :var => :sign_tar,                :envvar => :SIGN_TAR,        :type => :bool },
               { :var => :signing_server,          :envvar => :SIGNING_SERVER },
               { :var => :staging_server,          :envvar => :STAGING_SERVER },
@@ -283,6 +285,7 @@ module Pkg::Params
               { :var => :msi_signing_cert,        :val => '$MSI_SIGNING_CERT' },
               { :var => :msi_signing_cert_pw,     :val => '$MSI_SIGNING_CERT_PW' },
               { :var => :pe_feature_branch,       :val => false },
+              { :var => :s3_ship,                 :val => false },
               { :var => :apt_releases,            :val => Pkg::Platforms.codenames("deb") }]
 
   # These are variables which, over time, we decided to rename or replace. For

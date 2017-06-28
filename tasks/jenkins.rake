@@ -282,6 +282,20 @@ namespace :pl do
       uber_tasks.delete("remote:deploy_swix_repo") if Pkg::Config.swix_host == Pkg::Config.swix_staging_server
       uber_tasks.delete("remote:deploy_tar_repo") if Pkg::Config.tar_host == Pkg::Config.tar_staging_server
 
+      if Pkg::Config.s3_ship
+        uber_tasks.delete("remote:deploy_apt_repo")
+        uber_tasks.delete("remote:deploy_yum_repo")
+        uber_tasks.delete("remote:deploy_dmg_repo")
+        uber_tasks.delete("remote:deploy_swix_repo")
+        uber_tasks.delete("remote:deploy_msi_repo")
+        uber_tasks.delete("remote:deploy_tar_repo")
+      else
+        uber_tasks.delete("remote:deploy_apt_repo_to_s3")
+        uber_tasks.delete("remote:deploy_yum_repo_to_s3")
+        uber_tasks.delete("remote:deploy_downloads_repo_to_s3")
+        uber_tasks.delete("remote:update_rsync_from_s3")
+      end
+
       # Delete the ship_gem task if we aren't building gems
       uber_tasks.delete("ship_gem") unless Pkg::Config.build_gem
 

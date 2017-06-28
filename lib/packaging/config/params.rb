@@ -3,7 +3,8 @@ require "packaging/platforms"
 # These are all of the parameters known to our packaging system.
 # They are ingested by the config class as class instance variables
 module Pkg::Params
-  BUILD_PARAMS = [:answer_override,
+  BUILD_PARAMS = [:allow_dirty_tree,
+                  :answer_override,
                   :apt_host,
                   :apt_releases,
                   :apt_repo_command,
@@ -178,6 +179,7 @@ module Pkg::Params
   #           Note: :type is assumed :string if not present
   #
   ENV_VARS = [
+              { :var => :allow_dirty_tree,        :envvar => :ALLOW_DIRTY_TREE, :type => :bool },
               { :var => :answer_override,         :envvar => :ANSWER_OVERRIDE },
               { :var => :apt_host,                :envvar => :APT_HOST },
               { :var => :apt_releases,            :envvar => :APT_RELEASES,    :type => :array },
@@ -269,7 +271,8 @@ module Pkg::Params
   #
   # usage is the same as above
   #
-  DEFAULTS = [{ :var => :builder_data_file,       :val => 'builder_data.yaml' },
+  DEFAULTS = [{ :var => :allow_dirty_tree,        :val => false },
+              { :var => :builder_data_file,       :val => 'builder_data.yaml' },
               { :var => :team,                    :val => 'dev' },
               { :var => :random_mockroot,         :val => true },
               { :var => :keychain_loaded,         :val => false },

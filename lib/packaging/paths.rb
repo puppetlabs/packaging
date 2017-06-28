@@ -55,7 +55,7 @@ module Pkg::Paths
       if Pkg::Config.nonfinal_repo_name
         Pkg::Config.nonfinal_repo_name
       else
-        fail "You are attempting to ship a non-final build without specifying a non-final repo destination. Either make sure you are shipping a final version or define `nonfinal_repo_name` in your build_defaults."
+        fail "You are attempting to ship a non-final build without specifying a non-final repo destination. Either make sure you are shipping a final version or define `nonfinal_repo_name` in your build_defaults.\nIf this is a test build and you want to allow tagged versions with dirty trees to be final builds, set ALLOW_DIRTY_TREE=true."
       end
     end
   end

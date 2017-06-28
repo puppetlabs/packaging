@@ -98,12 +98,12 @@ module Pkg::Util::Version
         false
       when /SNAPSHOT/
         false
+      when /g[a-f0-9]{7}/
+        false
+      when /^(\d+\.)+\d+-\d+/
+        false
       when /-dirty/
-        false
-      when /g[a-f0-9]{7}$/
-        false
-      when /^(\d+\.)+\d+-\d+$/
-        false
+        Pkg::Config.allow_dirty_tree
       else
         true
       end

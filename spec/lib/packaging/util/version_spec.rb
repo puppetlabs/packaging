@@ -89,5 +89,17 @@ describe 'Pkg::Util::Version' do
       allow(Pkg::Config).to receive(:version) { '4.99.0-56-dirty' }
       expect(Pkg::Util::Version.final?).to be false
     end
+
+    it 'classifies dirty versions as final when allow_dirty_tree is set' do
+      allow(Pkg::Config).to receive(:allow_dirty_tree).and_return true
+      allow(Pkg::Config).to receive(:version) { '1.0.0-dirty' }
+      expect(Pkg::Util::Version.final?).to be true
+    end
+
+    it 'classifies dirty nonfinal versions as not final even when allow_dirty_tree is set' do
+      allow(Pkg::Config).to receive(:allow_dirty_tree).and_return true
+      allow(Pkg::Config).to receive(:version) { '1.0.0-22-dirty' }
+      expect(Pkg::Util::Version.final?).to be false
+    end
   end
 end

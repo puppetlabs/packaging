@@ -28,6 +28,16 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
       '9' => { codename: 'stretch', architectures: ['i386', 'amd64'], repo: true, package_format: 'deb' }
     },
 
+    'fedora' => {
+      '24' => { architectures: ['i386', 'x86_64'], repo: true, package_format: 'rpm', signature_format: 'v4' },
+      '25' => { architectures: ['i386', 'x86_64'], repo: true, package_format: 'rpm', signature_format: 'v4' }
+    },
+
+    'sles' => {
+      '11' => { architectures: ['i386', 'x86_64', 's390x'], repo: true, package_format: 'rpm', signature_format: 'v3' },
+      '12' => { architectures: ['x86_64', 's390x'], repo: true, package_format: 'rpm', signature_format: 'v4' }
+    },
+
     'el' => {
       '5' => { architectures: ['i386', 'x86_64'], repo: true, package_format: 'rpm', signature_format: 'v3' },
       '6' => { architectures: ['i386', 'x86_64', 's390x'], repo: true, package_format: 'rpm', signature_format: 'v4' },
@@ -38,11 +48,6 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
       '4' => { architectures: ['i386'], repo: false, package_format: 'swix' }
     },
 
-    'fedora' => {
-      'f24' => { architectures: ['i386', 'x86_64'], repo: true, package_format: 'rpm', signature_format: 'v4' },
-      'f25' => { architectures: ['i386', 'x86_64'], repo: true, package_format: 'rpm', signature_format: 'v4' }
-    },
-
     'huaweios' => {
       '6' => { codename: 'huaweios', architectures: ['powerpc'], repo: true, package_format: 'deb' }
     },
@@ -51,11 +56,6 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
       '10.10' => { architectures: ['x86_64'], repo: false, package_format: 'dmg' },
       '10.11' => { architectures: ['x86_64'], repo: false, package_format: 'dmg' },
       '10.12' => { architectures: ['x86_64'], repo: false, package_format: 'dmg' }
-    },
-
-    'sles' => {
-      '11' => { architectures: ['i386', 'x86_64', 's390x'], repo: true, package_format: 'rpm', signature_format: 'v3' },
-      '12' => { architectures: ['x86_64', 's390x'], repo: true, package_format: 'rpm', signature_format: 'v4' }
     },
 
     'solaris' => {

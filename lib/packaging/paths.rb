@@ -14,18 +14,16 @@ module Pkg::Paths
     platform = Pkg::Platforms.supported_platforms.find { |p| path.include?(p) }
     if platform == 'windows'
       version = '2012'
-      arch = Pkg::Platforms::arches_for_platform_version(platform, version).find { |a| path.include?(a) }
+      arch = Pkg::Platforms.arches_for_platform_version(platform, version).find { |a| path.include?(a) }
       if arch.nil?
-        arch = 'x64'
+        arch = Pkg::Platforms.arches_for_platform_version(platform, version)[0]
       end
     elsif !platform.nil?
       version = Pkg::Platforms.versions_for_platform(platform).find { |v|  path =~ /#{platform}(\/|-)?#{v}/ }
       unless version.nil?
-        arch = Pkg::Platforms::arches_for_platform_version(platform, version).find { |a| path.include?(a) }
-        if arch.nil? && path.include?('ppc')
-          arch = 'power'
-        elsif arch.nil?
-          arch = 'x86_64'
+        arch = Pkg::Platforms.arches_for_platform_version(platform, version).find { |a| path.include?(a) }
+        if arch.nil?
+          arch = Pkg::Platforms.arches_for_platform_version(platform, version)[0]
         end
       end
     end
@@ -37,7 +35,7 @@ module Pkg::Paths
       fail "I can't find a platform and version from #{codename}, teach me?" if platform.nil? || version.nil?
       arch = Pkg::Platforms.arches_for_platform_version(platform, version).find { |a| path.include?(a) }
       if arch.nil?
-        arch = 'amd64'
+        arch = Pkg::Platforms.arches_for_codename(codename)[0]
       end
     end
 

@@ -275,13 +275,6 @@ namespace :pl do
         fail "Using ANSWER_OVERRIDE without FOSS_ONLY=true is dangerous!"
       end
 
-      puts '**************'
-      puts 'WARNING: Shipping software currently requires manual CDN Updates'
-      puts 'Don\'t continue unless you or someone else around knows how to do this'
-      puts '**************'
-      puts 'Continue?'
-      exit unless Pkg::Util.ask_yes_or_no
-
       # Some projects such as pl-build-tools do not stage to a separate server - so we do to deploy
       uber_tasks.delete("remote:deploy_apt_repo") if Pkg::Config.apt_host == Pkg::Config.apt_signing_server
       uber_tasks.delete("remote:deploy_yum_repo") if Pkg::Config.yum_host == Pkg::Config.yum_staging_server

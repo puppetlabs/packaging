@@ -273,7 +273,7 @@ namespace :pl do
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
           ['downloadserver-rsync-prod-1.ops.puppetlabs.net', 'downloadserver-rsync-prod-2.ops.puppetlabs.net'].each do |destination_server|
             ['apt', 'yum'].each do |repo|
-              command = "sudo aws s3 sync --region us-west-2 s3://#{repo}.puppetlabs.com /opt/repository/#{repo}/"
+              command = "sudo aws s3 sync --exclude '*.html' --region us-west-2 --delete s3://#{repo}.puppetlabs.com /opt/repository/#{repo}/"
               Pkg::Util::Net.remote_ssh_cmd(destination_server, command)
             end
           end

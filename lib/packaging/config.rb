@@ -369,6 +369,13 @@ module Pkg
         end
         "#{Pkg::Config.yum_repo_path}/#{Pkg::Config.pe_version}/repos/"
       end
+
+      def apt_target_path(feature_branch = false)
+        if feature_branch || Pkg::Config.pe_feature_branch
+          return "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/feature/repos/"
+        end
+        "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/repos/"
+      end
     end
   end
 end

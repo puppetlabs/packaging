@@ -95,11 +95,7 @@ if Pkg::Config.build_pe
       #   by newer ones. To handle this, we make everything we ship to the archive
       #   directories immutable, after rsyncing out.
       #
-      if Pkg::Config.pe_feature_branch
-        base_path = "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/feature/repos"
-      else
-        base_path = "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/repos"
-      end
+      base_path = apt_target_path
 
       puts "Shipping all built artifacts to to archive directories on #{Pkg::Config.apt_host}"
 
@@ -223,15 +219,15 @@ if Pkg::Config.build_pe
       desc "Remotely link shipped deb packages into feature repo on #{Pkg::Config.apt_host}"
       task :link_shipped_debs_to_feature_repo => "pl:fetch" do
         next if Pkg::Config.pe_feature_branch
-        feature_base_path = "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/feature/repos"
-        base_path = "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/repos"
+        base_path = Pkg::Config.apt_target_path
+        feature_base_path = Pkg::Config.apt_target_path(true)
         pkgs = FileList["pkg/pe/deb/**/*.deb"].select { |path| path.gsub!('pkg/pe/deb/', '') }
         command  = %(for pkg in #{pkgs.join(' ')}; do)
         command += %(  sudo ln -f "#{base_path}/$( dirname ${pkg} )/$( basename ${pkg} )" "#{feature_base_path}/$( dirname ${pkg} )/" ; )
         command += %(done; )
         command += %(sync)
 
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, command)
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, command)
       end
     end
   end

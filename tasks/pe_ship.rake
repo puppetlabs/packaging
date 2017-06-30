@@ -95,7 +95,7 @@ if Pkg::Config.build_pe
       #   by newer ones. To handle this, we make everything we ship to the archive
       #   directories immutable, after rsyncing out.
       #
-      base_path = apt_target_path
+      base_path = Pkg::Config.apt_target_path
 
       puts "Shipping all built artifacts to to archive directories on #{Pkg::Config.apt_host}"
 

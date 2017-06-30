@@ -223,7 +223,7 @@ if Pkg::Config.build_pe
         feature_base_path = Pkg::Config.apt_target_path(true)
         pkgs = FileList["pkg/pe/deb/**/*.deb"].select { |path| path.gsub!('pkg/pe/deb/', '') }
         command  = %(for pkg in #{pkgs.join(' ')}; do)
-        command += %(  sudo ln -f "#{base_path}/$( dirname ${pkg} )/$( basename ${pkg} )" "#{feature_base_path}/$( dirname ${pkg} )/" ; )
+        command += %(  sudo ln -f "#{base_path}/$( dirname ${pkg} )-amd64/$( basename ${pkg} )" "#{feature_base_path}/$( dirname ${pkg} )-amd64/" ; )
         command += %(done; )
         command += %(sync)
 

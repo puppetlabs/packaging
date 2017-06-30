@@ -114,10 +114,19 @@ namespace :pl do
       sign_rpm(modern_rpms.join(' '))
     end
     # Now we hardlink them back in
-    Dir["#{rpm_dir}/*/*/*/x86_64/*.noarch.rpm"].each do |rpm|
+    Dir["#{rpm_dir}/**/*.noarch.rpm"].each do |rpm|
+      platform_tag = Pkg::Paths.tag_from_artifact_path(rpm)
+      platform, version, architecture = Pkg::Platforms.parse_platform_tag(platform_tag)
+      supported_arches = Pkg::Platforms.arches_for_platform_version(platform, version)
       cd File.dirname(rpm) do
-        FileUtils.mkdir_p(File.join("..", "i386"))
-        FileUtils.ln(File.basename(rpm), File.join("..", "i386"), :force => true, :verbose => true)
+        noarch_rpm = File.basename(rpm)
+        supported_arches.each do |arch|
+          arch_dir = File.join('..', arch)
+          FileUtils.mkdir_p(arch_dir)
+          unless File.exist?(File.join(arch_dir, noarch_rpm))
+            FileUtils.ln(noarch_rpm, arch_dir, :force => true, :verbose => true)
+          end
+        end
       end
     end
   end

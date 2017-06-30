@@ -140,6 +140,7 @@ module Pkg::Params
                   :rpm_targets,
                   :rpmrelease,
                   :rpmversion,
+                  :rsync_servers,
                   :s3_ship,
                   :short_ref,
                   :sign_tar,

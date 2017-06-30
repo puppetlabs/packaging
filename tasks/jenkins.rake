@@ -268,7 +268,7 @@ namespace :pl do
         remote:deploy_apt_repo_to_s3
         remote:deploy_yum_repo_to_s3
         remote:deploy_downloads_to_s3
-        remote:update_rsync_from_s3
+        remote:deploy_to_rsync_server
       )
 
       if Pkg::Util.boolean_value(Pkg::Config.answer_override) && !Pkg::Config.foss_only
@@ -293,7 +293,7 @@ namespace :pl do
         uber_tasks.delete("remote:deploy_apt_repo_to_s3")
         uber_tasks.delete("remote:deploy_yum_repo_to_s3")
         uber_tasks.delete("remote:deploy_downloads_repo_to_s3")
-        uber_tasks.delete("remote:update_rsync_from_s3")
+        uber_tasks.delete("remote:deploy_to_rsync_server")
       end
 
       # Delete the ship_gem task if we aren't building gems

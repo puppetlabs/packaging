@@ -132,17 +132,12 @@ if Pkg::Config.build_pe
           files = Dir["pkg/pe/deb/#{dist}/*{_#{arch},all}.deb"].map { |f| "#{archive_path}/#{File.basename(f)}" }
 
           files += Dir["pkg/pe/deb/#{dist}/*"].select { |f| f !~ /^.*\.deb$/ }.map { |f| "#{base_path}/#{dist}-source/#{File.basename(f)}" }
-
-          # If this is not a feature branch, we need to link the shipped packages into the feature repos
-          unless Pkg::Config.pe_feature_branch
-            puts "Linking DEBs to feature repo"
-            Pkg::Util::RakeUtils.invoke_task("pe:remote:link_shipped_debs_to_feature_repo")
-            unless files.empty?
-              Pkg::Util::Net.remote_set_immutable(Pkg::Config.apt_host, files)
-            end
-          end
-
         end
+      end
+      # If this is not a feature branch, we need to link the shipped packages into the feature repos
+      unless Pkg::Config.pe_feature_branch
+        puts "Linking DEBs to feature repo"
+        Pkg::Util::RakeUtils.invoke_task("pe:remote:link_shipped_debs_to_feature_repo")
       end
     end
 

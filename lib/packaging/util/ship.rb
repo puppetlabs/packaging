@@ -70,4 +70,23 @@ module Pkg::Util::Ship
       end
     end
   end
+
+  def create_latest_symlink(package_name, dir, platform_ext, excludes = [], arch = nil)
+    cmd = "if [ -d '#{dir}' ] ; then "
+    cmd << "pushd #{dir} ; "
+    cmd << "ln -sf `\ls -1 *.#{platform_ext} | grep -v latest | grep -v rc | grep #{package_name} "
+    if arch
+      cmd << "| grep #{arch} "
+      package_name << "-#{arch}"
+    end
+    excludes.each do |excl|
+      cmd << "| grep -v #{excl} "
+    end
+    cmd << "| sort --version-sort | tail -1` #{package_name}-latest.#{platform_ext} ; "
+    cmd << "popd ; "
+    cmd << "fi"
+
+    _, err = Pkg::Util::Net.remote_ssh_command(Pkg::Config.staging_server, cmd, true)
+    $stderr.puts err
+  end
 end

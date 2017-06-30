@@ -269,6 +269,10 @@ namespace :pl do
   desc "ship apple dmg to #{Pkg::Config.dmg_staging_server}"
   task ship_dmg: 'pl:fetch' do
     Pkg::Util::Ship.ship_pkgs(['pkg/**/*.dmg'], Pkg::Config.dmg_staging_server, Pkg::Config.dmg_path, addtl_path_to_sub: '/mac')
+    Pkg::Util::Ship.create_latest_symlink('puppet', '/opt/downloads/mac', 'dmg', ['agent', 'hiera'])
+    Pkg::Util::Ship.create_latest_symlink('hiera', '/opt/downloads/mac', 'dmg', ['puppet'])
+    Pkg::Util::Ship.create_latest_symlink('facter', '/opt/downloads/mac', 'dmg')
+    Pkg::Util::Ship.create_latest_symlink('puppet-agent', '/opt/downloads/mac', 'dmg')
   end
 
   desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
@@ -296,6 +300,10 @@ namespace :pl do
   desc "Ship MSI packages to #{Pkg::Config.msi_staging_server}"
   task ship_msi: 'pl:fetch' do
     Pkg::Util::Ship.ship_pkgs(['pkg/**/*.msi'], Pkg::Config.msi_staging_server, Pkg::Config.msi_path, addtl_path_to_sub: '/windows', excludes: ["#{Pkg::Config.project}-x(86|64).msi"])
+    Pkg::Util::Ship.create_latest_symlink('puppet', '/opt/downloads/windows', 'msi', ['agent', 'x64'])
+    Pkg::Util::Ship.create_latest_symlink('puppet', '/opt/downloads/windows', 'msi', ['agent'], 'x64')
+    Pkg::Util::Ship.create_latest_symlink('puppet-agent', '/opt/downloads/windows', 'msi', [], 'x64')
+    Pkg::Util::Ship.create_latest_symlink('puppet-agent', '/opt/downloads/windows', 'msi', [], 'x86')
   end
 
   desc 'UBER ship: ship all the things in pkg'

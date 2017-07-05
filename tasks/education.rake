@@ -22,12 +22,10 @@ namespace :pl do
 
       # Determine VM we are trying to ship and set our link_target accordingly
       case vm
-      when /student/
-        link_target = ["puppet-student.ova", "puppet-vbox.zip", "puppet-vmware.zip"]
-      when /master/
-        link_target = ["puppet-master.ova"]
       when /training/
-        link_target = ["puppet-training.ova"]
+        link_target = ["puppet-training.ova", "puppet-student.ova", "puppet-training.box", "puppet-student.box"]
+      when /master/
+        link_target = ["puppet-master.ova", "puppet-master.box"]
       else
         fail "We do not know the type of VM you are trying to ship. Cannot update symlinks"
       end

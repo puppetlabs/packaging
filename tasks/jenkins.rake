@@ -265,25 +265,36 @@ namespace :pl do
         remote:deploy_swix_repo
         remote:deploy_msi_repo
         remote:deploy_tar_repo
+        remote:deploy_apt_repo_to_s3
+        remote:deploy_yum_repo_to_s3
+        remote:deploy_downloads_to_s3
+        remote:update_rsync_from_s3
       )
 
       if Pkg::Util.boolean_value(Pkg::Config.answer_override) && !Pkg::Config.foss_only
         fail "Using ANSWER_OVERRIDE without FOSS_ONLY=true is dangerous!"
       end
 
-      puts '**************'
-      puts 'WARNING: Shipping software currently requires manual CDN Updates'
-      puts 'Don\'t continue unless you or someone else around knows how to do this'
-      puts '**************'
-      puts 'Continue?'
-      exit unless Pkg::Util.ask_yes_or_no
-
       # Some projects such as pl-build-tools do not stage to a separate server - so we do to deploy
       uber_tasks.delete("remote:deploy_apt_repo") if Pkg::Config.apt_host == Pkg::Config.apt_signing_server
       uber_tasks.delete("remote:deploy_yum_repo") if Pkg::Config.yum_host == Pkg::Config.yum_staging_server
       uber_tasks.delete("remote:deploy_dmg_repo") if Pkg::Config.dmg_host == Pkg::Config.dmg_staging_server
-      uber_tasks.delete("remote:deploy_swix_rep") if Pkg::Config.swix_host == Pkg::Config.swix_staging_server
+      uber_tasks.delete("remote:deploy_swix_repo") if Pkg::Config.swix_host == Pkg::Config.swix_staging_server
       uber_tasks.delete("remote:deploy_tar_repo") if Pkg::Config.tar_host == Pkg::Config.tar_staging_server
+
+      if Pkg::Config.s3_ship
+        uber_tasks.delete("remote:deploy_apt_repo")
+        uber_tasks.delete("remote:deploy_yum_repo")
+        uber_tasks.delete("remote:deploy_dmg_repo")
+        uber_tasks.delete("remote:deploy_swix_repo")
+        uber_tasks.delete("remote:deploy_msi_repo")
+        uber_tasks.delete("remote:deploy_tar_repo")
+      else
+        uber_tasks.delete("remote:deploy_apt_repo_to_s3")
+        uber_tasks.delete("remote:deploy_yum_repo_to_s3")
+        uber_tasks.delete("remote:deploy_downloads_repo_to_s3")
+        uber_tasks.delete("remote:update_rsync_from_s3")
+      end
 
       # Delete the ship_gem task if we aren't building gems
       uber_tasks.delete("ship_gem") unless Pkg::Config.build_gem

@@ -29,51 +29,53 @@ if Pkg::Config.build_pe
       Pkg::Util::File.empty_dir?("pkg/pe/deb") and fail "The 'pkg/pe/deb' directory has no packages!"
       target_path = ENV['APT_REPO']
 
-      #   If APT_REPO isn't specified as an environment variable, we use a temporary one
-      #   created for this specific deb ship. This enables us to escape the conflicts
-      #   introduced with simultaneous deb ships.
-      #
+      unless Pkg::Config.pe_feature_branch
+        #   If APT_REPO isn't specified as an environment variable, we use a temporary one
+        #   created for this specific deb ship. This enables us to escape the conflicts
+        #   introduced with simultaneous deb ships.
+        #
 
-      #   We are going to iterate over every set of packages, adding them to
-      #   the repository set by set. This enables us to handle different
-      #   repositories per distribution. "pkg/pe/deb/" contains directories
-      #   named for every distribution, e.g. "lucid," "squeeze," etc.
-      #
-      Dir["pkg/pe/deb/*"].each do |dist|
-        dist = File.basename(dist)
-        unless target_path
-          puts "Creating temporary incoming dir on #{Pkg::Config.apt_host}"
-          target_path = %x(ssh -t #{Pkg::Config.apt_host} 'mktemp -d -t incoming-XXXXXX').chomp
-        end
-
-        #   For aptly, we ship just the debs into an incoming dir. On the remote end,
-        #   aptly will pull these debs in and add them to the repositories based on the
-        #   dist, e.g. lucid, architecture notwithstanding.
+        #   We are going to iterate over every set of packages, adding them to
+        #   the repository set by set. This enables us to handle different
+        #   repositories per distribution. "pkg/pe/deb/" contains directories
+        #   named for every distribution, e.g. "lucid," "squeeze," etc.
         #
-        #   The layout that the aptly library will expect is:
-        #
-        #     incoming_dir/{$dists}/*.deb
-        #
-        #   ex:
-        #     incoming_dir|
-        #                 |_lucid/*.deb
-        #                 |_squeeze/*.deb
-        #                 |_precise/*.deb
-        #                 |_wheezy/*.deb
-        #
-        puts "Shipping PE debs to apt repo 'incoming' dir on #{Pkg::Config.apt_host}"
-        Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          Dir["pkg/pe/deb/#{dist}/*.deb"].each do |deb|
-            Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "mkdir -p '#{target_path}/#{dist}'")
-            Pkg::Util::Net.rsync_to(deb, Pkg::Config.apt_host, "#{target_path}/#{dist}/#{File.basename(deb)}")
+        Dir["pkg/pe/deb/*"].each do |dist|
+          dist = File.basename(dist)
+          unless target_path
+            puts "Creating temporary incoming dir on #{Pkg::Config.apt_host}"
+            target_path = %x(ssh -t #{Pkg::Config.apt_host} 'mktemp -d -t incoming-XXXXXX').chomp
           end
-        end
 
-        if Pkg::Config.team == 'release'
-          Rake::Task["pe:remote:apt"].reenable
-          Rake::Task["pe:remote:apt"].invoke(target_path, dist)
-        end
+          #   For aptly, we ship just the debs into an incoming dir. On the remote end,
+          #   aptly will pull these debs in and add them to the repositories based on the
+          #   dist, e.g. lucid, architecture notwithstanding.
+          #
+          #   The layout that the aptly library will expect is:
+          #
+          #     incoming_dir/{$dists}/*.deb
+          #
+          #   ex:
+          #     incoming_dir|
+          #                 |_lucid/*.deb
+          #                 |_squeeze/*.deb
+          #                 |_precise/*.deb
+          #                 |_wheezy/*.deb
+          #
+          puts "Shipping PE debs to apt repo 'incoming' dir on #{Pkg::Config.apt_host}"
+          Pkg::Util::Execution.retry_on_fail(:times => 3) do
+            Dir["pkg/pe/deb/#{dist}/*.deb"].each do |deb|
+              Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, "mkdir -p '#{target_path}/#{dist}'")
+              Pkg::Util::Net.rsync_to(deb, Pkg::Config.apt_host, "#{target_path}/#{dist}/#{File.basename(deb)}")
+            end
+          end
 
+          if Pkg::Config.team == 'release'
+            Rake::Task["pe:remote:apt"].reenable
+            Rake::Task["pe:remote:apt"].invoke(target_path, dist)
+          end
+
+        end
       end
 
       #   We also ship our PE artifacts to directories for archival purposes and to
@@ -93,7 +95,7 @@ if Pkg::Config.build_pe
       #   by newer ones. To handle this, we make everything we ship to the archive
       #   directories immutable, after rsyncing out.
       #
-      base_path = "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/repos"
+      base_path = Pkg::Config.apt_target_path
 
       puts "Shipping all built artifacts to to archive directories on #{Pkg::Config.apt_host}"
 
@@ -130,11 +132,12 @@ if Pkg::Config.build_pe
           files = Dir["pkg/pe/deb/#{dist}/*{_#{arch},all}.deb"].map { |f| "#{archive_path}/#{File.basename(f)}" }
 
           files += Dir["pkg/pe/deb/#{dist}/*"].select { |f| f !~ /^.*\.deb$/ }.map { |f| "#{base_path}/#{dist}-source/#{File.basename(f)}" }
-
-          unless files.empty?
-            Pkg::Util::Net.remote_set_immutable(Pkg::Config.apt_host, files)
-          end
         end
+      end
+      # If this is not a feature branch, we need to link the shipped packages into the feature repos
+      unless Pkg::Config.pe_feature_branch
+        puts "Linking DEBs to feature repo"
+        Pkg::Util::RakeUtils.invoke_task("pe:remote:link_shipped_debs_to_feature_repo")
       end
     end
 
@@ -193,8 +196,8 @@ if Pkg::Config.build_pe
 
       end
 
-      # Throw another tire on the fire
-      desc "Remotely link shipped packages into feature repo on #{Pkg::Config.yum_host}"
+      # Throw more tires on the fire
+      desc "Remotely link shipped rpm packages into feature repo on #{Pkg::Config.yum_host}"
       task :link_shipped_rpms_to_feature_repo => "pl:fetch" do
         next if Pkg::Config.pe_feature_branch
         repo_base_path = Pkg::Config.yum_target_path
@@ -206,6 +209,20 @@ if Pkg::Config.build_pe
         command += %(sync)
 
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, command)
+      end
+
+      desc "Remotely link shipped deb packages into feature repo on #{Pkg::Config.apt_host}"
+      task :link_shipped_debs_to_feature_repo => "pl:fetch" do
+        next if Pkg::Config.pe_feature_branch
+        base_path = Pkg::Config.apt_target_path
+        feature_base_path = Pkg::Config.apt_target_path(true)
+        pkgs = FileList["pkg/pe/deb/**/*.deb"].select { |path| path.gsub!('pkg/pe/deb/', '') }
+        command  = %(for pkg in #{pkgs.join(' ')}; do)
+        command += %(  sudo ln -f "#{base_path}/$( dirname ${pkg} )-amd64/$( basename ${pkg} )" "#{feature_base_path}/$( dirname ${pkg} )-amd64/" ; )
+        command += %(done; )
+        command += %(sync)
+
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_host, command)
       end
     end
   end

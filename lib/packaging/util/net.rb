@@ -280,16 +280,18 @@ module Pkg::Util::Net
       Pkg::Util::Net.remote_ssh_cmd(host, "sudo chattr +i #{files.join(" ")}")
     end
 
-    def remote_create_latest_symlink(package_name, dir, platform_ext, excludes = [], arch = nil)
+    def remote_create_latest_symlink(package_name, dir, platform_ext, options = {})
       cmd = "if [ -d '#{dir}' ] ; then "
       cmd << "pushd #{dir} ; "
       cmd << "ln -sf `\ls -1 *.#{platform_ext} | grep -v latest | grep -v rc | grep #{package_name} "
-      if arch
-        cmd << "| grep #{arch} "
-        package_name << "-#{arch}"
+      if options[:arch]
+        cmd << "| grep #{options[:arch]} "
+        package_name << "-#{options[:arch]}"
       end
-      excludes.each do |excl|
-        cmd << "| grep -v #{excl} "
+      if options[:excludes]
+        options[:excludes].each do |excl|
+          cmd << "| grep -v #{excl} "
+        end
       end
       cmd << "| sort --version-sort | tail -1` #{package_name}-latest.#{platform_ext} ; "
       cmd << "popd ; "

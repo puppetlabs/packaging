@@ -367,6 +367,12 @@ namespace :pl do
         end
       end
     end
+    Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/mac', 'dmg', excludes: ['agent', 'hiera'])
+    Pkg::Util::Net.remote_create_latest_symlink('hiera', '/opt/downloads/mac', 'dmg', excludes: ['puppet'])
+    Pkg::Util::Net.remote_create_latest_symlink('facter', '/opt/downloads/mac', 'dmg')
+    Pkg::Platforms.PLATFORM_INFO['osx'].keys.each do |version|
+      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', "/opt/downloads/mac/#{version}/#{Pkg::Config.yum_repo_name}/x86_64", 'dmg')
+    end
   end
 
   desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
@@ -427,6 +433,10 @@ namespace :pl do
         end
       end
     end
+    Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/windows', 'msi', excludes: ['agent', 'x64'])
+    Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/windows', 'msi', excludes: ['agent'], arch: 'x64')
+    Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', '/opt/downloads/windows', 'msi', arch: 'x64')
+    Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', '/opt/downloads/windows', 'msi', arch: 'x86')
   end
 
   desc "UBER ship: ship all the things in pkg"

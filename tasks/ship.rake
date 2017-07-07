@@ -259,7 +259,7 @@ namespace :pl do
       puts "Really run S3 sync to sync downloads.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3? [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          destination_server = Pkg::Config.apt_signing_server
+          destination_server = Pkg::Config.staging_server
           command = 'sudo /usr/local/bin/s3_repo_sync.sh downloads.puppetlabs.com'
           Pkg::Util::Net.remote_ssh_cmd(destination_server, command)
         end

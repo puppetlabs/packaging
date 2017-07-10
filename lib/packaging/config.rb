@@ -94,6 +94,9 @@ module Pkg
             else
               fail "Not sure what to do with packages with a package format of '#{package_format}' - maybe update PLATFORM_INFO?"
             end
+            # Remove the f-prefix from the fedora platform tag keys so that
+            # beaker can rely on consistent keys once we rip out the f for good
+            tag = tag.sub(/fedora-f/, 'fedora-')
             data[tag] = { :artifact => artifact.sub('artifacts/', ''),
                           :repo_config => repo_config,
                         } if artifact

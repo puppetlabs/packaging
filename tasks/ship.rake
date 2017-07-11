@@ -385,7 +385,7 @@ namespace :pl do
   desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
   task ship_tar: 'pl:fetch' do
     if Pkg::Config.build_tar
-      Pkg::Util::Ship.ship_pkgs(['pkg/*.tar.gz*'], Pkg::Config.tar_staging_server, Pkg::Config.tarball_path, excludes: ['signing_bundle', 'packaging-bundle'])
+      Pkg::Util::Ship.ship_pkgs(['pkg/*.tar.gz*'], Pkg::Config.tar_staging_server, Pkg::Config.tarball_path, excludes: ['signing_bundle', 'packaging-bundle'], platform_independent: true)
     end
   end
 

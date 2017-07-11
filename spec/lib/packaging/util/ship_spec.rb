@@ -96,5 +96,20 @@ new_pkgs = [
       expect(Pkg::Util::Net).to receive(:remote_set_immutable).with(test_staging_server, anything).exactly(local_pkgs.count).times
       Pkg::Util::Ship.ship_pkgs(['pkg/**/*.rpm'], test_staging_server, test_remote_path)
     end
+
+    it 'ships packages containing the string `pkg` to the right place' do
+      allow(Pkg::Util::Ship).to receive(:collect_packages).and_return(['pkg/el/5/puppet5/x86_64/my-super-sweet-pkg-1.0.0-1.el5.x86_64.rpm' ])
+      allow(Pkg::Util::Ship).to receive(:reorganize_packages).and_return(['pkg/puppet5/el/5/x86_64/my-super-sweet-pkg-1.0.0-1.el5.x86_64.rpm'])
+      allow(Pkg::Util).to receive(:ask_yes_or_no).and_return(true)
+      allow(Dir).to receive(:mktmpdir).and_return('/tmp/test')
+      # All of these expects must be called in the same block in order for the
+      # tests to work without actually shipping anything
+      expect(Pkg::Util::Net).to receive(:remote_ssh_cmd).with(test_staging_server, /#{test_remote_path}/)
+      expect(Pkg::Util::Net).to receive(:rsync_to).with(anything, test_staging_server, /#{test_remote_path}/, anything)
+      expect(Pkg::Util::Net).to receive(:remote_set_ownership).with(test_staging_server, 'root', 'release', ['/opt/repository/yum/puppet5/el/5/x86_64/my-super-sweet-pkg-1.0.0-1.el5.x86_64.rpm'])
+      expect(Pkg::Util::Net).to receive(:remote_set_permissions).with(test_staging_server, '0664', anything)
+      expect(Pkg::Util::Net).to receive(:remote_set_immutable).with(test_staging_server, anything)
+      Pkg::Util::Ship.ship_pkgs(['pkg/**/*.rpm'], test_staging_server, test_remote_path, excludes: ['puppet-agent'])
+    end
   end
 end

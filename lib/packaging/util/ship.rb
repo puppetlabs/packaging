@@ -88,9 +88,9 @@ module Pkg::Util::Ship
 
       staged_pkgs.each do |pkg|
         Pkg::Util::Execution.retry_on_fail(times: 3) do
-          gsub_string = 'pkg'
-          gsub_string += "#{options[:addtl_path_to_sub]}" unless options[:addtl_path_to_sub].nil?
-          remote_pkg = pkg.gsub(gsub_string, remote_path)
+          sub_string = 'pkg'
+          sub_string += "#{options[:addtl_path_to_sub]}" unless options[:addtl_path_to_sub].nil?
+          remote_pkg = pkg.sub(sub_string, remote_path)
           remote_basepath = File.dirname(remote_pkg)
           Pkg::Util::Net.remote_ssh_cmd(staging_server, "mkdir -p #{remote_basepath}")
           Pkg::Util::Net.rsync_to(

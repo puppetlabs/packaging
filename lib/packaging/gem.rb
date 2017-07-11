@@ -89,7 +89,8 @@ module Pkg::Gem
     # Use rsync to deploy a file and any associated detached signatures,
     # checksums, or other glob-able artifacts to an external download server.
     def rsync_to_downloads(file)
-      Pkg::Util::Net.rsync_to("#{file}*", Pkg::Config.gem_host, Pkg::Config.gem_path, dryrun: ENV['DRYRUN'])
+      Pkg::Util.deprecate('Pkg::Gem.rsync_to_downloads', 'Pkg::Util::Ship.ship_pkgs')
+      Pkg::Util::Ship.ship_pkgs(["#{file}*"], Pkg::Config.gem_host, Pkg::Config.gem_path, platform_independent: true)
     end
 
     # Ship a Ruby gem file to rubygems.org. Requires the existence

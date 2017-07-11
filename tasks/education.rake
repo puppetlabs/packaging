@@ -24,11 +24,18 @@ namespace :pl do
       case vm
       when /training/
         link_target = ["puppet-training.ova", "puppet-student.ova", "puppet-training.box", "puppet-student.box"]
+        # We want the -*- in this regex so we don't pick up the links
+        archive_cmd = "mv #{target_directory}/puppet-*-training* #{target_directory}/archive"
       when /master/
         link_target = ["puppet-master.ova", "puppet-master.box"]
+        # We want the -*- in this regex so we don't pick up the links
+        archive_cmd = "mv #{target_directory}/puppet-*-master* #{target_directory}/archive"
       else
         fail "We do not know the type of VM you are trying to ship. Cannot update symlinks"
       end
+
+      # If the archive directory exists, move old VMs to it
+      Pkg::Util::Net.remote_ssh_cmd(target_host, "if [ -d #{target_directory}/archive ]; then #{archive_cmd}; fi")
 
       # Ship VM and md5 to host
       Pkg::Util::Net.rsync_to(vm, target_host, target_directory)

@@ -300,8 +300,9 @@ namespace :pl do
           next unless Pkg::Util.ask_yes_or_no
           Rake::Task['pl:ship_gem_to_rubygems'].execute(file: gem_file)
           Rake::Task['pl:ship_gem_to_internal_mirror'].execute(file: gem_file)
-          Rake::Task['pl:ship_gem_to_downloads'].execute(file: gem_file)
         end
+
+        Rake::Task['pl:ship_gem_to_downloads'].invoke
       else
         $stderr.puts 'Not shipping development gem using odd_even strategy for the sake of your users.'
       end
@@ -343,17 +344,13 @@ namespace :pl do
   end
 
   desc "Ship built gems to public Downloads server (#{Pkg::Config.gem_host})"
-  task :ship_gem_to_downloads, [:file] => 'pl:fetch' do |_t, args|
+  task :ship_gem_to_downloads => 'pl:fetch' do
     unless Pkg::Config.gem_host
       warn 'Value `Pkg::Config.gem_host` not defined; skipping shipping to public Download server'
     end
 
-    puts "Do you want to ship #{args[:file]} to public file server (#{Pkg::Config.gem_host})?"
-    if Pkg::Util.ask_yes_or_no
-      puts "Shipping gem #{args[:file]} to public file server (#{Pkg::Config.gem_host})"
-      Pkg::Util::Execution.retry_on_fail(times: 3) do
-        Pkg::Gem.rsync_to_downloads(args[:file])
-      end
+    Pkg::Util::Execution.retry_on_fail(times: 3) do
+      Pkg::Util::Ship.ship_pkgs(['pkg/*.gem*'], Pkg::Config.gem_host, Pkg::Config.gem_path, platform_independent: true)
     end
   end
 
@@ -388,7 +385,7 @@ namespace :pl do
   desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
   task ship_tar: 'pl:fetch' do
     if Pkg::Config.build_tar
-      Pkg::Util::Ship.ship_pkgs(['pkg/*.tar.gz*'], Pkg::Config.tar_staging_server, Pkg::Config.tarball_path, excludes: ['signing_bundle', 'packaging-bundle'])
+      Pkg::Util::Ship.ship_pkgs(['pkg/*.tar.gz*'], Pkg::Config.tar_staging_server, Pkg::Config.tarball_path, excludes: ['signing_bundle', 'packaging-bundle'], platform_independent: true)
     end
   end
 

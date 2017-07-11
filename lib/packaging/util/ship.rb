@@ -21,11 +21,18 @@ module Pkg::Util::Ship
   #
   # This assumes the working directory is a temporary directory that will
   # later be cleaned up
-  def reorganize_packages(pkgs, tmp)
+  #
+  # If this is platform_independent the packages will not get reorganized,
+  # just copied under the tmp directory for more consistent workflows
+  def reorganize_packages(pkgs, tmp, platform_independent = false)
     new_pkgs = []
     pkgs.each do |pkg|
-      platform_tag = Pkg::Paths.tag_from_artifact_path(pkg)
-      path = Pkg::Paths.artifacts_path(platform_tag, nil, 'pkg')
+      if platform_independent
+        path = 'pkg'
+      else
+        platform_tag = Pkg::Paths.tag_from_artifact_path(pkg)
+        path = Pkg::Paths.artifacts_path(platform_tag, nil, 'pkg')
+      end
       FileUtils.mkdir_p File.join(tmp, path)
       FileUtils.cp pkg, File.join(tmp, path)
       new_pkgs << File.join(path, File.basename(pkg))
@@ -33,15 +40,45 @@ module Pkg::Util::Ship
     new_pkgs
   end
 
+  # Take local packages and restructure them to the desired final path before
+  # shipping to the staging server
+  # @param [Array] pkg_exts the file globs for the files you want to ship
+  #   For example, something like ['pkg/**/*.rpm', 'pkg/**/*.deb'] to ship
+  #   the rpms and debs
+  # @param [String] staging_server The hostname to ship the packages to
+  # @param [String] remote_path The base path to ship the packages to on the
+  #   staging_server, for example '/opt/downloads/windows' or
+  #   '/opt/repository/yum'
+  # @param [Hash] opts Additional options that can be used when shipping
+  #   packages
+  # @option opts [Array] :excludes File globs to exclude packages from shipping
+  # @option opts [Boolean] :chattr Whether or not to make the files immutable
+  #   after shipping. Defaults to true.
+  # @option opts [String] :addtl_path_to_sub An additional part of the path
+  #   to substitute out when determining the path the ship to. By default just
+  #   the 'pkg' will get subbed out from the local path, but in some cases you
+  #   need more than that (if there's overlap between the local path and the
+  #   staging path, which happens with windows and a few other platforms
+  # @option opts [Boolean] :platform_independent Whether or not the path the
+  #   packages ship to has platform-dependent information in it. Defaults to
+  #   false (most paths will be platform dependent), but set to true for gems
+  #   and tarballs since those just land directly under /opt/downloads/<project>
+  #
   # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
-  def ship_pkgs(pkg_exts, staging_server, remote_path, options = { excludes: [], chattr: true, addtl_path_to_sub: nil })
+  def ship_pkgs(pkg_exts, staging_server, remote_path, opts = {})
+    options = {
+      excludes: [],
+      chattr: true,
+      addtl_path_to_sub: nil,
+      platform_independent: false }.merge(opts)
+
     # First find the packages to be shipped. We must find them before moving
     # to our temporary staging directory
     local_packages = collect_packages(pkg_exts, options[:excludes])
     return if local_packages.empty?
 
     tmpdir = Dir.mktmpdir
-    staged_pkgs = reorganize_packages(local_packages, tmpdir)
+    staged_pkgs = reorganize_packages(local_packages, tmpdir, options[:platform_independent])
 
     puts staged_pkgs.sort
     puts "Do you want to ship the above files to (#{staging_server})?"
@@ -51,9 +88,9 @@ module Pkg::Util::Ship
 
       staged_pkgs.each do |pkg|
         Pkg::Util::Execution.retry_on_fail(times: 3) do
-          gsub_string = 'pkg'
-          gsub_string += "#{options[:addtl_path_to_sub]}" unless options[:addtl_path_to_sub].nil?
-          remote_pkg = pkg.gsub(gsub_string, remote_path)
+          sub_string = 'pkg'
+          sub_string += "#{options[:addtl_path_to_sub]}" unless options[:addtl_path_to_sub].nil?
+          remote_pkg = pkg.sub(sub_string, remote_path)
           remote_basepath = File.dirname(remote_pkg)
           Pkg::Util::Net.remote_ssh_cmd(staging_server, "mkdir -p #{remote_basepath}")
           Pkg::Util::Net.rsync_to(

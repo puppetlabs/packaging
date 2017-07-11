@@ -263,15 +263,16 @@ namespace :pl do
       end
     end
 
-    desc "Update rsync servers from AWS S3"
-    task :update_rsync_from_s3 => 'pl:fetch' do
-      puts "Really update rsync download servers from AWS S3? [y,n]"
+    desc "Sync yum and apt from #{Pkg::Config.staging_server} to rsync servers"
+    task :deploy_to_rsync_server => 'pl:fetch' do
+      # This task must run after the S3 sync has run, or else /opt/repo-s3-stage won't be up-to-date
+      puts "Really run rsync to sync apt and yum from #{Pkg::Config.staging_server} to rsync servers? Only say yes if the S3 sync task has run. [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          ['downloadserver-rsync-prod-1.ops.puppetlabs.net', 'downloadserver-rsync-prod-2.ops.puppetlabs.net'].each do |destination_server|
+          Pkg::Config.rsync_servers.each do |rsync_server|
             ['apt', 'yum'].each do |repo|
-              command = "sudo aws s3 sync --exclude '*.html' --region us-west-2 --delete s3://#{repo}.puppetlabs.com /opt/repository/#{repo}/"
-              Pkg::Util::Net.remote_ssh_cmd(destination_server, command)
+              command = "sudo su - rsync --command 'rsync --verbose -a /opt/repo-s3-stage/repositories/#{repo}.puppetlabs.com/ rsync@#{rsync_server}:/opt/repository/#{repo}'"
+              Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
             end
           end
         end

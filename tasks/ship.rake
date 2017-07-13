@@ -368,7 +368,7 @@ namespace :pl do
     Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/mac', 'dmg', excludes: ['agent', 'hiera'])
     Pkg::Util::Net.remote_create_latest_symlink('hiera', '/opt/downloads/mac', 'dmg', excludes: ['puppet'])
     Pkg::Util::Net.remote_create_latest_symlink('facter', '/opt/downloads/mac', 'dmg')
-    Pkg::Platforms.PLATFORM_INFO['osx'].keys.each do |version|
+    Pkg::Platforms::PLATFORM_INFO['osx'].keys.each do |version|
       Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', "/opt/downloads/mac/#{version}/#{Pkg::Config.yum_repo_name}/x86_64", 'dmg')
     end
   end

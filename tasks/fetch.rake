@@ -36,13 +36,11 @@ namespace :pl do
     begin
       temp_build_data_dir = Pkg::Util::File.mktemp
       %x(git clone --depth 1 #{data_repo} #{temp_build_data_dir})
-      case $?.success
-      when 0
+      if $?.success?
         Dir.chdir(temp_build_data_dir) do
           [team_data_branch, project_data_branch].each do |branch|
             %x(git checkout #{branch})
-            case $?.success
-            when 0
+            if $?.success?
               Pkg::Util::RakeUtils.invoke_task("pl:load_extras", temp_build_data_dir)
             else
               warn "Unable to load build_defaults from branch '#{branch}' in '#{data_repo}'. Skipping."

@@ -280,6 +280,39 @@ module Pkg::Util::Net
       Pkg::Util::Net.remote_ssh_cmd(host, "sudo chattr +i #{files.join(" ")}")
     end
 
+    # Create a symlink indicating the latest version of a package
+    #
+    # @param package_name [String] The name of the package you want to symlink
+    #   to, e.g. 'puppet-agent', 'facter', etc.
+    # @param dir [String] The directory you want to find the latest package and
+    #   create the symlink in.
+    # @param platform_ext [String] The type of files you want to consider, e.g.
+    #   'dmg', 'msi', etc.
+    # @param options [Hash] Additional optional params:
+    #   @option :arch [String] Architecture you want to narrow your search by.
+    #   @option :excludes [Array] Strings you want to exclude from your search,
+    #     e.g. 'agent' if only searching for 'puppet'.
+    def remote_create_latest_symlink(package_name, dir, platform_ext, options = {})
+      cmd = "if [ -d '#{dir}' ] ; then "
+      cmd << "pushd #{dir} ; "
+      cmd << "ln -sf `\ls -1 *.#{platform_ext} | grep -v latest | grep -v rc | grep #{package_name} "
+      if options[:arch]
+        cmd << "| grep #{options[:arch]} "
+        package_name << "-#{options[:arch]}"
+      end
+      if options[:excludes]
+        options[:excludes].each do |excl|
+          cmd << "| grep -v #{excl} "
+        end
+      end
+      cmd << "| sort --version-sort | tail -1` #{package_name}-latest.#{platform_ext} ; "
+      cmd << "popd ; "
+      cmd << "fi"
+
+      _, err = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, cmd, true)
+      $stderr.puts err
+    end
+
     def escape_html(uri)
       require 'cgi'
       CGI.escapeHTML(uri)

@@ -213,9 +213,8 @@ namespace :pl do
       puts "Really run S3 sync to deploy Debian repos from #{Pkg::Config.apt_signing_server} to AWS S3? [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          destination_server = Pkg::Config.apt_signing_server
           command = 'sudo /usr/local/bin/s3_repo_sync.sh apt.puppetlabs.com'
-          Pkg::Util::Net.remote_ssh_cmd(destination_server, command)
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_signing_server, command)
         end
       end
     end
@@ -240,9 +239,8 @@ namespace :pl do
       puts "Really run S3 sync to deploy RPM repos from #{Pkg::Config.yum_staging_server} to AWS S3? [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          destination_server = Pkg::Config.apt_signing_server
           command = 'sudo /usr/local/bin/s3_repo_sync.sh yum.puppetlabs.com'
-          Pkg::Util::Net.remote_ssh_cmd(destination_server, command)
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_staging_server, command)
         end
       end
     end
@@ -252,22 +250,22 @@ namespace :pl do
       puts "Really run S3 sync to sync downloads.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3? [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          destination_server = Pkg::Config.apt_signing_server
           command = 'sudo /usr/local/bin/s3_repo_sync.sh downloads.puppetlabs.com'
-          Pkg::Util::Net.remote_ssh_cmd(destination_server, command)
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
         end
       end
     end
 
-    desc "Update rsync servers from AWS S3"
-    task :update_rsync_from_s3 => 'pl:fetch' do
-      puts "Really update rsync download servers from AWS S3? [y,n]"
+    desc "Sync yum and apt from #{Pkg::Config.staging_server} to rsync servers"
+    task :deploy_to_rsync_server => 'pl:fetch' do
+      # This task must run after the S3 sync has run, or else /opt/repo-s3-stage won't be up-to-date
+      puts "Really run rsync to sync apt and yum from #{Pkg::Config.staging_server} to rsync servers? Only say yes if the S3 sync task has run. [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          ['downloadserver-rsync-prod-1.ops.puppetlabs.net', 'downloadserver-rsync-prod-2.ops.puppetlabs.net'].each do |destination_server|
+          Pkg::Config.rsync_servers.each do |rsync_server|
             ['apt', 'yum'].each do |repo|
-              command = "sudo aws s3 sync --exclude '*.html' --region us-west-2 --delete s3://#{repo}.puppetlabs.com /opt/repository/#{repo}/"
-              Pkg::Util::Net.remote_ssh_cmd(destination_server, command)
+              command = "sudo su - rsync --command 'rsync --verbose -a --exclude '*.html' --delete /opt/repo-s3-stage/repositories/#{repo}.puppetlabs.com/ rsync@#{rsync_server}:/opt/repository/#{repo}'"
+              Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
             end
           end
         end
@@ -361,6 +359,12 @@ namespace :pl do
         Pkg::Util::Ship.ship_pkgs(['pkg/**/*.pkg.gz'], Pkg::Config.svr4_host, Pkg::Config.svr4_path)
       end
     end
+    Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/mac', 'dmg', excludes: ['agent', 'hiera'])
+    Pkg::Util::Net.remote_create_latest_symlink('hiera', '/opt/downloads/mac', 'dmg', excludes: ['puppet'])
+    Pkg::Util::Net.remote_create_latest_symlink('facter', '/opt/downloads/mac', 'dmg')
+    Pkg::Platforms::PLATFORM_INFO['osx'].keys.each do |version|
+      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', "/opt/downloads/mac/#{version}/#{Pkg::Config.yum_repo_name}/x86_64", 'dmg')
+    end
   end
 
   desc "Ship p5p packages to #{Pkg::Config.p5p_host}"
@@ -402,6 +406,10 @@ namespace :pl do
   desc "Ship MSI packages to #{Pkg::Config.msi_staging_server}"
   task ship_msi: 'pl:fetch' do
     Pkg::Util::Ship.ship_pkgs(['pkg/**/*.msi'], Pkg::Config.msi_staging_server, Pkg::Config.msi_path, addtl_path_to_sub: '/windows', excludes: ["#{Pkg::Config.project}-x(86|64).msi"])
+    Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/windows', 'msi', excludes: ['agent', 'x64'])
+    Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/windows', 'msi', excludes: ['agent'], arch: 'x64')
+    Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', '/opt/downloads/windows', 'msi', arch: 'x64')
+    Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', '/opt/downloads/windows', 'msi', arch: 'x86')
   end
 
   desc 'UBER ship: ship all the things in pkg'
@@ -538,9 +546,17 @@ namespace :pl do
       if File.exist?(ezbake_manifest)
         cp(ezbake_manifest, File.join(local_dir, "#{Pkg::Config.ref}.ezbake.manifest"))
       end
-      ezbake_yaml = File.join('ext', 'ezbake.manifest.yaml')
-      if File.exist?(ezbake_yaml)
-        cp(ezbake_yaml(File.join(local_dir, "#{Pkg::Config.ref}.ezbake.manifest.yaml")))
+      ezbake_yaml = File.join("ext", "ezbake.manifest.yaml")
+      if File.exists?(ezbake_yaml)
+        cp(ezbake_yaml, File.join(local_dir, "#{Pkg::Config.ref}.ezbake.manifest.yaml"))
+      end
+
+      # We are starting to collect additional metadata which contains
+      # information such as git ref and dependencies that are needed at build
+      # time. If this file exists we will make it available for downstream.
+      build_data_json = File.join("ext", "build_metadata.json")
+      if File.exists?(build_data_json)
+        cp(build_data_json, File.join(local_dir, "#{Pkg::Config.ref}.build_metadata.json"))
       end
 
       # Sadly, the packaging repo cannot yet act on its own, without living

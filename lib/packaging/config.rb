@@ -85,16 +85,19 @@ module Pkg
             case package_format
             when 'deb'
               artifact = artifacts.find { |e| e.include? Pkg::Paths.artifacts_path(tag) and (e.include?("all") || e.include?("#{arch}.deb")) }
-              repo_config = "./repo_configs/deb/pl-#{self.project}-#{self.ref}-#{Pkg::Platforms.get_attribute(tag, :codename)}.list" if artifact
+              repo_config = "../repo_configs/deb/pl-#{self.project}-#{self.ref}-#{Pkg::Platforms.get_attribute(tag, :codename)}.list" if artifact
             when 'rpm'
               artifact = artifacts.find { |e| e.include? Pkg::Paths.artifacts_path(tag) and e.include?(arch) }
-              repo_config = "./repo_configs/rpm/pl-#{self.project}-#{self.ref}-#{tag}.repo" if artifact
+              repo_config = "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-#{tag}.repo" if artifact
             when 'swix', 'svr4', 'ips', 'dmg', 'msi'
               artifact = artifacts.find { |e| e.include? Pkg::Paths.artifacts_path(tag) and e.include?(arch) }
             else
               fail "Not sure what to do with packages with a package format of '#{package_format}' - maybe update PLATFORM_INFO?"
             end
-            data[tag] = { :artifact => artifact,
+            # Remove the f-prefix from the fedora platform tag keys so that
+            # beaker can rely on consistent keys once we rip out the f for good
+            tag = tag.sub(/fedora-f/, 'fedora-')
+            data[tag] = { :artifact => artifact.sub('artifacts/', ''),
                           :repo_config => repo_config,
                         } if artifact
           end

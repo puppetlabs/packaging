@@ -309,7 +309,7 @@ module Pkg::Util::Net
       cmd << "popd ; "
       cmd << "fi"
 
-      _, err = Pkg::Util::Net.remote_ssh_command(Pkg::Config.staging_server, cmd, true)
+      _, err = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, cmd, true)
       $stderr.puts err
     end
 

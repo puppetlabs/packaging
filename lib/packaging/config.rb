@@ -85,7 +85,7 @@ module Pkg
             case package_format
             when 'deb'
               artifact = artifacts.find { |e| e.include? Pkg::Paths.artifacts_path(tag) and (e.include?("all") || e.include?("#{arch}.deb")) }
-              repo_config = "../repo_configs/deb/pl-#{self.project}-#{self.ref}-#{Pkg::Util::Platform.get_attribute(tag, :codename)}.list" if artifact
+              repo_config = "../repo_configs/deb/pl-#{self.project}-#{self.ref}-#{Pkg::Platforms.get_attribute(tag, :codename)}.list" if artifact
             when 'rpm'
               artifact = artifacts.find { |e| e.include? Pkg::Paths.artifacts_path(tag) and e.include?(arch) }
               repo_config = "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-#{tag}.repo" if artifact

@@ -292,7 +292,7 @@ namespace :pl do
       else
         uber_tasks.delete("remote:deploy_apt_repo_to_s3")
         uber_tasks.delete("remote:deploy_yum_repo_to_s3")
-        uber_tasks.delete("remote:deploy_downloads_repo_to_s3")
+        uber_tasks.delete("remote:deploy_downloads_to_s3")
         uber_tasks.delete("remote:deploy_to_rsync_server")
       end
 

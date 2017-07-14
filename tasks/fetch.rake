@@ -35,7 +35,7 @@ namespace :pl do
 
     begin
       temp_build_data_dir = Pkg::Util::File.mktemp
-      %x(git clone --depth 1 #{data_repo} #{temp_build_data_dir})
+      %x(git clone #{data_repo} #{temp_build_data_dir})
       if $?.success?
         Dir.chdir(temp_build_data_dir) do
           [team_data_branch, project_data_branch].each do |branch|

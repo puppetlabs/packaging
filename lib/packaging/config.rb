@@ -79,18 +79,16 @@ module Pkg
           artifacts, _ = Pkg::Util::Net.remote_ssh_cmd(self.builds_server, cmd, true)
           artifacts = artifacts.split("\n")
           data = {}
-          Pkg::Platforms.platform_tags.each do |tag|
-            _, _, arch = Pkg::Platforms.parse_platform_tag(tag)
+          artifacts.each do |artifact|
+            tag = Pkg::Paths.tag_from_artifact_path(artifact)
             package_format = Pkg::Platforms.get_attribute(tag, :package_format)
             case package_format
             when 'deb'
-              artifact = artifacts.find { |e| e.include? Pkg::Paths.artifacts_path(tag) and (e.include?("all") || e.include?("#{arch}.deb")) }
-              repo_config = "../repo_configs/deb/pl-#{self.project}-#{self.ref}-#{Pkg::Platforms.get_attribute(tag, :codename)}.list" if artifact
+              repo_config = "../repo_configs/deb/pl-#{self.project}-#{self.ref}-#{Pkg::Platforms.get_attribute(tag, :codename)}.list"
             when 'rpm'
-              artifact = artifacts.find { |e| e.include? Pkg::Paths.artifacts_path(tag) and e.include?(arch) }
-              repo_config = "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-#{tag}.repo" if artifact
+              repo_config = "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-#{tag}.repo"
             when 'swix', 'svr4', 'ips', 'dmg', 'msi'
-              artifact = artifacts.find { |e| e.include? Pkg::Paths.artifacts_path(tag) and e.include?(arch) }
+              # No repo_configs for these platforms, so do nothing.
             else
               fail "Not sure what to do with packages with a package format of '#{package_format}' - maybe update PLATFORM_INFO?"
             end
@@ -99,7 +97,7 @@ module Pkg
             tag = tag.sub(/fedora-f/, 'fedora-')
             data[tag] = { :artifact => artifact.sub('artifacts/', ''),
                           :repo_config => repo_config,
-                        } if artifact
+                        }
           end
           return data
         else

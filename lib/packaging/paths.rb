@@ -29,7 +29,7 @@ module Pkg::Paths
     end
     # if we didn't find a platform or a version, probably a codename
     if platform.nil? || version.nil?
-      codename = Pkg::Platforms.codenames('deb').find { |c| path =~ /\/#{c}\// }
+      codename = Pkg::Platforms.codenames('deb').find { |c| path =~ /\/#{c}/ }
       fail "I can't find a codename or platform in #{path}, teach me?" if codename.nil?
       platform, version = Pkg::Platforms.codename_to_platform_version(codename)
       fail "I can't find a platform and version from #{codename}, teach me?" if platform.nil? || version.nil?

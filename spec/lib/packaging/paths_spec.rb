@@ -18,7 +18,9 @@ describe 'Pkg::Paths' do
       'artifacts/mac/10.11/PC1/x86_64/puppet-agent-1.9.0-1.osx10.11.dmg' => 'osx-10.11-x86_64',
       'artifacts/eos/4/PC1/i386/puppet-agent-1.9.0-1.eos4.i386.swix' => 'eos-4-i386',
       'pkg/deb/cumulus/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1cumulus_amd64.deb' => 'cumulus-2.2-amd64',
-      'pkg/windows/puppet-agent-1.9.0-x86.msi' => 'windows-2012-x86'
+      'pkg/windows/puppet-agent-1.9.0-x86.msi' => 'windows-2012-x86',
+      'artifacts/ubuntu-16.04-i386/puppetserver_5.0.1-0.1SNAPSHOT.2017.07.27T2346puppetlabs1.debian.tar.gz' => 'ubuntu-16.04-i386',
+      'http://saturn.puppetlabs.net/deb_repos/1234abcd/repos/apt/xenial' => 'ubuntu-16.04-i386'
     }
     path_tranformations.each do |pre, post|
       it "should correctly parse path #{pre} to tag #{post}" do

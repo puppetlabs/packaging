@@ -46,10 +46,12 @@ module Pkg::Deb::Repo
       repo_urls.each do |url|
         # We want to skip the base_url, which wget returns as one of the results
         next if "#{url}/" == repo_base
-        dist = url.split('/').last
+        platform_tag = Pkg::Paths.tag_from_artifact_path(url)
+        platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
+        codename = Pkg::Platforms.codename_for_platform_version(platform, version)
         repoconfig = ["# Packages for #{Pkg::Config.project} built from ref #{Pkg::Config.ref}",
-                      "deb #{url} #{dist} #{Pkg::Paths.repo_name}"]
-        config = File.join("pkg", target, "deb", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}.list")
+                      "deb #{url} #{codename} #{Pkg::Paths.repo_name.empty? ? 'main' : Pkg::Paths.repo_name}"]
+        config = File.join("pkg", target, "deb", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{codename}.list")
         File.open(config, 'w') { |f| f.puts repoconfig }
       end
       puts "Wrote apt repo configs for #{Pkg::Config.project} at #{Pkg::Config.ref} to pkg/#{target}/deb."
@@ -67,53 +69,72 @@ module Pkg::Deb::Repo
       end
     end
 
-    def repo_creation_command(prefix, artifact_directory)
-      # First, we test that artifacts exist and set up the repos directory
-      cmd = 'echo " Checking for deb build artifacts. Will exit if not found.." ; '
-      cmd << "[ -d #{artifact_directory}/artifacts/#{prefix}deb ] || exit 1 ; "
-      # Descend into the deb directory and obtain the list of distributions
-      # we'll be building repos for
-      cmd << "pushd #{artifact_directory}/artifacts/#{prefix}deb && dists=$(ls) && popd; "
-      # We do one more check here to make sure we actually have distributions
-      # to build for. If deb is empty we want to just exit.
-      #
-      cmd << '[ -n "$dists" ] || exit 1 ; '
-      cmd << "pushd #{artifact_directory} ; "
+    def directories_that_contain_deb_packages(artifact_directory)
+      cmd = "[ -d #{artifact_directory} ] || exit 1 ; "
+      cmd << "pushd #{artifact_directory} > /dev/null ; "
+      cmd << 'find ./ -name "*.deb" | xargs -I {} dirname {} ; '
+      begin
+        stdout, stderr = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, cmd, true)
+        return stdout.split
+      rescue => e
+        fail "Could not retrieve deb directories"
+      end
+    end
 
+    def populate_repo_directory(artifact_parent_directory)
+      cmd = "[ -d #{artifact_parent_directory}/artifacts ] || exit 1 ; "
+      cmd << "pushd #{artifact_parent_directory} ; "
+      cmd << "rsync -avxl --ignore-existing artifacts/ repos/ ; "
+      begin
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, cmd)
+      rescue => e
+        fail "Could not populate repo directory"
+      end
+    end
+
+    def repo_creation_command(repo_directory, artifact_paths)
+      cmd = "[ -d #{repo_directory} ] || exit 1 ; "
+      cmd << "pushd #{repo_directory} ; "
       cmd << 'echo "Checking for running repo creation. Will wait if detected." ; '
       cmd << "while [ -f .lock ] ; do sleep 1 ; echo -n '.' ; done ; "
       cmd << 'echo "Setting lock" ; '
       cmd << "touch .lock ; "
-      cmd << "rsync -avxl artifacts/ repos/ ; pushd repos ; "
 
       # Make the conf directory and write out our configuration file
       cmd << "rm -rf apt && mkdir -p apt ; pushd apt ; "
-      cmd << %Q(for dist in $dists ; do mkdir -p $dist/conf ; pushd $dist ;
-      echo "
+      artifact_paths.each do |path|
+        platform_tag = Pkg::Paths.tag_from_artifact_path(path)
+        platform, version, _ = Pkg::Platforms. parse_platform_tag(platform_tag)
+        codename = Pkg::Platforms.codename_for_platform_version(platform, version)
+        default_arches = ['i386', 'amd64', 'arm64', 'armel', 'armhf', 'powerpc', 'ppc64el', 'sparc', 'mips', 'mipsel']
+        arches = Pkg::Platforms.arches_for_codename(codename)
+
+        cmd << "mkdir -p #{codename}/conf ; "
+        cmd << "pushd #{codename} ; "
+        cmd << %Q( [ -e 'conf/distributions' ] || echo "
 Origin: Puppet Labs
 Label: Puppet Labs
-Codename: $dist
-Architectures: i386 amd64 arm64 armel armhf powerpc ppc64el sparc mips mipsel
-Components: #{Pkg::Paths.repo_name}
+Codename: #{codename}
+Architectures: #{(default_arches + arches).uniq.join(' ')}
+Components: #{Pkg::Paths.repo_name.empty? ? 'main' : Pkg::Paths.repo_name}
 Description: Apt repository for acceptance testing" >> conf/distributions ; )
 
-      # Create the repositories using reprepro. Since these are for acceptance
-      # testing only, we'll just add the debs and ignore source files for now.
-      #
-      cmd << "reprepro=$(which reprepro) ; "
-      cmd << %Q($reprepro includedeb $dist ../../#{prefix}deb/$dist#{"/" unless Pkg::Paths.repo_name.empty?}#{Pkg::Paths.repo_name}/*.deb ; popd ; done ; )
-      cmd << "popd ; popd "
-
-      return cmd
+        cmd << "reprepro=$(which reprepro) ; "
+        cmd << "$reprepro includedeb #{codename} ../../#{path}/*.deb ; "
+        cmd << 'popd ; '
+      end
+      cmd << 'popd ; popd '
     end
 
     # This method is doing too much for its name
-    def create_repos
-      prefix = Pkg::Config.build_pe ? "pe/" : ""
-
+    def create_repos(directory = 'repos')
       artifact_directory = File.join(Pkg::Config.jenkins_repo_path, Pkg::Config.project, Pkg::Config.ref)
 
-      command = repo_creation_command(prefix, artifact_directory)
+      artifact_paths = directories_that_contain_deb_packages(File.join(artifact_directory, 'artifacts'))
+
+      populate_repo_directory(artifact_directory)
+
+      command = repo_creation_command(File.join(artifact_directory, 'repos'), artifact_paths)
 
       begin
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, command)
@@ -125,7 +146,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
         Pkg::Deb::Repo.ship_repo_configs
       ensure
         # Always remove the lock file, even if we've failed
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/.lock")
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/repos/.lock")
       end
     end
 
@@ -156,15 +177,19 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
 
       dists = Pkg::Util::File.directories("#{target}/apt")
+      supported_codenames = Pkg::Platforms.codenames('deb')
 
       if dists
         dists.each do |dist|
+          next unless supported_codenames.include?(dist)
+          default_arches = ['i386', 'amd64', 'arm64', 'armel', 'armhf', 'powerpc', 'ppc64el', 'sparc', 'mips', 'mipsel']
+          arches = Pkg::Platforms.arches_for_codename(dist)
           Dir.chdir("#{target}/apt/#{dist}") do
             File.open("conf/distributions", "w") do |f|
               f.puts "Origin: Puppet Labs
 Label: Puppet Labs
 Codename: #{dist}
-Architectures: i386 amd64 arm64 armel armhf powerpc ppc64el sparc mips mipsel
+Architectures: #{(default_arches + arches).uniq.join(' ')}
 Components: #{Pkg::Paths.repo_name}
 Description: #{message} for #{dist}
 SignWith: #{Pkg::Config.gpg_key}"

@@ -6,7 +6,7 @@ describe "Pkg::Deb::Repo" do
   let(:project)       { "deb_repos" }
   let(:ref)           { "1234abcd" }
   let(:base_url)      { "http://#{builds_server}/#{project}/#{ref}" }
-  let(:cows)          { ["squeeze", "wheezy", "lucid", "woody", ""] }
+  let(:cows)          { ["xenial", "jessie", "trusty", "stretch", ""] }
   let(:wget_results)  { cows.map {|cow| "#{base_url}/repos/apt/#{cow}" }.join("\n") }
   let(:wget_garbage)  { "\n and an index\nhttp://somethingelse.com/robots" }
   let(:repo_configs)  { cows.reject {|cow| cow.empty?}.map {|dist| "pkg/repo_configs/deb/pl-#{project}-#{ref}-#{dist}.list" } }
@@ -72,7 +72,7 @@ describe "Pkg::Deb::Repo" do
 
   describe "#repo_creation_command" do
     let(:prefix) { "thing" }
-    let(:artifact_directory) { "/a/b/c/d" }
+    let(:artifact_directory) { ["/a/b/c/xenial"] }
 
     it "returns a command to make repos" do
       command = Pkg::Deb::Repo.repo_creation_command(prefix, artifact_directory)
@@ -85,14 +85,17 @@ describe "Pkg::Deb::Repo" do
   describe "#create_repos" do
     let(:command) { "/usr/bin/make some repos" }
     let(:artifact_directory) { "/tmp/dir/thing" }
+    let(:pkg_directories) { ['place/to/deb/xenial', 'other/deb/trusty'] }
 
     it "generates repo configs remotely and then ships them" do
       File.stub(:join) {artifact_directory}
+      Pkg::Deb::Repo.should_receive(:directories_that_contain_deb_packages).and_return(pkg_directories)
+      Pkg::Deb::Repo.should_receive(:populate_repo_directory)
       Pkg::Deb::Repo.should_receive(:repo_creation_command).and_return(command)
       Pkg::Util::Net.should_receive(:remote_ssh_cmd).with(Pkg::Config.distribution_server, command)
       Pkg::Deb::Repo.should_receive(:generate_repo_configs)
       Pkg::Deb::Repo.should_receive(:ship_repo_configs)
-      Pkg::Util::Net.should_receive(:remote_ssh_cmd).with(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/.lock" )
+      Pkg::Util::Net.should_receive(:remote_ssh_cmd).with(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/repos/.lock" )
       Pkg::Deb::Repo.create_repos
     end
   end
@@ -130,7 +133,7 @@ describe "Pkg::Deb::Repo" do
       reprepro = "/bin/reprepro"
       Pkg::Util::File.should_receive(:directories).with("repos/apt").and_return(dists)
       Pkg::Util::Tool.should_receive(:check_tool).with("reprepro").and_return(reprepro)
-      Pkg::Util::Execution.should_receive(:capture3).exactly(4).times.with("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
+      Pkg::Util::Execution.should_receive(:capture3).at_least(1).times.with("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
 
       dists.each do |dist|
         distfiles[dist] = double

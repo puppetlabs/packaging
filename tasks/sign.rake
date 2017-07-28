@@ -79,40 +79,37 @@ namespace :pl do
   task :sign_rpms, :root_dir do |t, args|
     rpm_dir = args.root_dir || "pkg"
 
-    # Find i386 noarch rpms that have been created as hard links and remove them
-    rm_r Dir["#{rpm_dir}/*/*/*/i386/*.noarch.rpm"]
-    # We'll sign the remaining noarch
     all_rpms = Dir["#{rpm_dir}/**/*.rpm"]
-    old_rpms = Dir["#{rpm_dir}/el/4/**/*.rpm"] +
-      Dir["#{rpm_dir}/el/5/**/*.rpm"] +
-      Dir["#{rpm_dir}/sles/10/**/*.rpm"] +
-      Dir["#{rpm_dir}/sles/11/**/*.rpm"]
-    modern_rpms = Dir["#{rpm_dir}/el/6/**/*.rpm"] +
-      Dir["#{rpm_dir}/el/7/**/*.rpm"] +
-      Dir["#{rpm_dir}/fedora/**/*.rpm"] +
-      Dir["#{rpm_dir}/nxos/**/*.rpm"] +
-      Dir["#{rpm_dir}/cisco-wrlinux/**/*.rpm"] +
-      Dir["#{rpm_dir}/sles/12/**/*.rpm"] +
-      Dir["#{rpm_dir}/eos/**/**/*.rpm"]
 
-    # We don't sign AIX rpms, but we don't want to fail because they
-    # will be in the list
-    aix_rpms = Dir["#{rpm_dir}/aix/**/*.rpm"]
+    v3_rpms = []
+    v4_rpms = []
+    all_rpms.each do |rpm|
+      platform_tag = Pkg::Paths.tag_from_artifact_path(rpm)
 
-    unsigned_rpms = all_rpms - old_rpms - modern_rpms - aix_rpms
-    unless unsigned_rpms.empty?
-      fail "#{unsigned_rpms} are not signed. Please update the automation in the signing task"
+      # We don't sign AIX rpms
+      next if platform_tag.include?('aix')
+
+      sig_type = Pkg::Platforms.signature_format_for_tag(platform_tag)
+      case sig_type
+      when 'v3'
+        v3 << rpm
+      when 'v4'
+        v4 << rpm
+      else
+        fail "Cannot find signature type for package '#{rpm}'"
+      end
     end
 
-    unless old_rpms.empty?
+    unless v3_rpms.empty?
       puts "Signing old rpms..."
-      sign_legacy_rpm(old_rpms.join(' '))
+      sign_legacy_rpm(v3_rpms.join(' '))
     end
 
-    unless modern_rpms.empty?
+    unless v4_rpms.empty?
       puts "Signing modern rpms..."
-      sign_rpm(modern_rpms.join(' '))
+      sign_rpm(v4_rpms.join(' '))
     end
+
     # Now we hardlink them back in
     Dir["#{rpm_dir}/**/*.noarch.rpm"].each do |rpm|
       platform_tag = Pkg::Paths.tag_from_artifact_path(rpm)
@@ -166,9 +163,11 @@ namespace :pl do
   desc "Sign generated debian changes files. Defaults to PL Key, pass GPG_KEY to override"
   task :sign_deb_changes do
     begin
-      Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-      sign_deb_changes("pkg/deb/*/*.changes") unless Dir["pkg/deb/*/*.changes"].empty?
-      sign_deb_changes("pkg/deb/*.changes") unless Dir["pkg/deb/*.changes"].empty?
+      change_files = Dir["pkg/**/*.changes"]
+      unless change_files.empty?
+        Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
+        sign_deb_changes("pkg/**/*.changes")
+      end
     ensure
       Pkg::Util::Gpg.kill_keychain
     end

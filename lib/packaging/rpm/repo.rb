@@ -162,7 +162,8 @@ module Pkg::Rpm::Repo
         # ignore this one because its an extra
         next if url == "#{repo_base}srpm/"
 
-        dist, version, _subdir, arch = url.split('/')[-4..-1]
+        platform_tag = Pkg::Paths.tag_from_artifact_path(url)
+        platform, version, arch = Pkg::Platforms.parse_platform_tag(platform_tag)
 
         # Create an array of lines that will become our yum config
         #
@@ -179,7 +180,7 @@ module Pkg::Rpm::Repo
 
         # Write the new config to a file under our repo configs dir
         #
-        config_file = File.join("pkg", target, "rpm", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}-#{version}-#{arch}.repo")
+        config_file = File.join("pkg", target, "rpm", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{platform}-#{version}-#{arch}.repo")
         File.open(config_file, 'w') { |f| f.puts config }
       end
       puts "Wrote yum configuration files for #{Pkg::Config.project} at #{Pkg::Config.ref} to pkg/#{target}/rpm"
@@ -206,7 +207,7 @@ module Pkg::Rpm::Repo
       cmd << "while [ -f .lock ] ; do sleep 1 ; echo -n '.' ; done ; "
       cmd << 'echo "Setting lock" ; '
       cmd << "touch .lock ; "
-      cmd << "rsync -avxl artifacts/ repos/ ; pushd repos ; "
+      cmd << "rsync -avxl --ignore-existing artifacts/ repos/ ; pushd repos ; "
       cmd << "createrepo=$(which createrepo) ; "
       cmd << 'for repodir in $(find ./ -name "*.rpm" | xargs -I {} dirname {}) ; do '
       cmd << "[ -d ${repodir} ] || continue; "

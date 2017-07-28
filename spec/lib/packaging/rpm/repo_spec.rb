@@ -57,6 +57,8 @@ describe "Pkg::Rpm::Repo" do
       FileUtils.should_receive(:mkdir_p).with("pkg/repo_configs/rpm")
       config = []
       repo_configs.each_with_index do |repo_config, i|
+        Pkg::Paths.should_receive(:tag_from_artifact_path).and_return(mocks[i])
+        Pkg::Platforms.should_receive(:parse_platform_tag).and_return(mocks[i].split('-'))
         config[i] = double(File)
         File.should_receive(:open).with(repo_config, 'w').and_yield(config[i])
         config[i].should_receive(:puts)

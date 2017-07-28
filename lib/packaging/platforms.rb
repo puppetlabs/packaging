@@ -112,7 +112,7 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
   # @return [Array] An Array of Strings, containing all of the codenames
   #   defined for a given Platform
   def codenames(platform)
-    releases = send("by_#{platform}".to_s).flat_map do |p|
+    releases = by_package_format(platform).flat_map do |p|
       PLATFORM_INFO[p].values.collect { |r| r[:codename] }
     end
     releases.sort
@@ -191,25 +191,12 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
 
   def package_format_for_tag(platform_tag)
     platform, version = parse_platform_tag(platform_tag)
-    Pkg::Platforms::PLATFORM_INFO[platform][version][:package_format]
+    PLATFORM_INFO[platform][version][:package_format]
   end
 
-  # @method by_deb
-  # @return [Array] An Array of Strings, containing all platforms
-  #   that use .deb packages
-  # Helper meta-method to return all platforms that use .deb packages
-  # @scope class
-
-  # @method by_rpm
-  # @return [Array] An Array of Strings, containing all platforms
-  #   that use .rpm packages
-  # Helper meta-method to return all platforms that use .rpm packages
-  # @scope class
-  formats.each do |format|
-    type = "by_#{format}".to_sym
-    define_method(type) do
-      by_package_format format
-    end
+  def signature_format_for_tag(platform_tag)
+    platform, version = parse_platform_tag(platform_tag)
+    PLATFORM_INFO[platform][version][:signature_format]
   end
 
   private :by_package_format

@@ -110,17 +110,9 @@ if Pkg::Config.build_pe
             Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*_#{arch}.deb", Pkg::Config.apt_host, "#{archive_path}/")
           end
 
-          # Ship all-arch debs to same dist-location, but to all known
-          # architectures for this distribution.
-          #
-          # I am not proud of this. MM - 1/3/2014.
-
           unless Dir["pkg/pe/deb/#{dist}/*_all.deb"].empty?
-            if dist =~ /cumulus/
-              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*_all.deb", Pkg::Config.apt_host, "#{base_path}/#{dist}-powerpc/")
-            else
-              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*_all.deb", Pkg::Config.apt_host, "#{base_path}/#{dist}-i386/")
-              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*_all.deb", Pkg::Config.apt_host, "#{base_path}/#{dist}-amd64/")
+            Pkg::Platforms.arches_for_codename(dist).each do |arch|
+              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*_all.deb", Pkg::Config.apt_host, "#{base_path}/#{dist}-#{arch}/")
             end
           end
 

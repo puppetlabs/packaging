@@ -29,6 +29,17 @@ def debuild(args)
   end
 end
 
+def link_noarch_debs(codename, dest_dir, arch)
+  supported_arches = Pkg::Platforms.arches_for_codename(codename)
+  supported_arches.each do |link_arch|
+    next if link_arch == arch
+    link_dir = "#{Pkg::Platforms.codename_to_platform_version(codename).join('-')}-#{link_arch}"
+    cd "#{File.dirname(dest_dir)}" do
+      FileUtils.ln_s(File.basename(dest_dir), link_dir, :verbose => true) unless Dir.exist?(link_dir)
+    end
+  end
+end
+
 task :prep_deb_tars, :work_dir do |t, args|
   work_dir = args.work_dir
   FileUtils.cp "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz", work_dir, { :preserve => true }
@@ -99,6 +110,7 @@ task :build_deb, :deb_command, :cow do |t, args|
       rm_rf "#{work_dir}/#{Pkg::Config.project}-#{Pkg::Config.debversion}"
       rm_rf work_dir
     end
+    link_noarch_debs(codename, dest_dir, arch) unless FileList["#{dest_dir}/*_all.deb"].empty?
   end
   puts "Finished building in: #{bench}"
 end

@@ -89,8 +89,8 @@ describe "Pkg::Deb::Repo" do
 
     it "generates repo configs remotely and then ships them" do
       File.stub(:join) {artifact_directory}
-      Pkg::Deb::Repo.should_receive(:directories_that_contain_deb_packages).and_return(pkg_directories)
-      Pkg::Deb::Repo.should_receive(:populate_repo_directory)
+      Pkg::Repo.should_receive(:directories_that_contain_packages).and_return(pkg_directories)
+      Pkg::Repo.should_receive(:populate_repo_directory)
       Pkg::Deb::Repo.should_receive(:repo_creation_command).and_return(command)
       Pkg::Util::Net.should_receive(:remote_ssh_cmd).with(Pkg::Config.distribution_server, command)
       Pkg::Deb::Repo.should_receive(:generate_repo_configs)

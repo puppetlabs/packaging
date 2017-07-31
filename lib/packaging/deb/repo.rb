@@ -68,28 +68,6 @@ module Pkg::Deb::Repo
         fail "Couldn't retrieve deb apt repo configs.\n#{e}"
       end
     end
-
-    def directories_that_contain_deb_packages(artifact_directory)
-      cmd = "[ -d #{artifact_directory} ] || exit 1 ; "
-      cmd << "pushd #{artifact_directory} > /dev/null ; "
-      cmd << 'find ./ -name "*.deb" | xargs -I {} dirname {} ; '
-      begin
-        stdout, stderr = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, cmd, true)
-        return stdout.split
-      rescue => e
-        fail "Could not retrieve deb directories"
-      end
-    end
-
-    def populate_repo_directory(artifact_parent_directory)
-      cmd = "[ -d #{artifact_parent_directory}/artifacts ] || exit 1 ; "
-      cmd << "pushd #{artifact_parent_directory} ; "
-      cmd << "rsync -avxl --ignore-existing artifacts/ repos/ ; "
-      begin
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, cmd)
-      rescue => e
-        fail "Could not populate repo directory"
-      end
     end
 
     def repo_creation_command(repo_directory, artifact_paths)
@@ -129,11 +107,8 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
     # This method is doing too much for its name
     def create_repos(directory = 'repos')
       artifact_directory = File.join(Pkg::Config.jenkins_repo_path, Pkg::Config.project, Pkg::Config.ref)
-
-      artifact_paths = directories_that_contain_deb_packages(File.join(artifact_directory, 'artifacts'))
-
-      populate_repo_directory(artifact_directory)
-
+      artifact_paths = Pkg::Repo.directories_that_contain_packages(File.join(artifact_directory, 'artifacts'), 'deb')
+      Pkg::Repo.populate_repo_directory(artifact_directory)
       command = repo_creation_command(File.join(artifact_directory, 'repos'), artifact_paths)
 
       begin

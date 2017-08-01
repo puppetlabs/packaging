@@ -37,6 +37,8 @@ module Pkg::Deb::Repo
       # We want to exclude index and robots files and only include the http: prefixed elements
       repo_urls = stdout.split.uniq.reject { |x| x =~ /\?|index|robots/ }.select { |x| x =~ /http:/ }.map { |x| x.chomp('/') }
 
+      # This is a required field for reprepro, so must never be an empty string
+      local_repo = Pkg::Paths.repo_name.empty? ? 'main' : Pkg::Paths.repo_name
 
       # Create apt sources.list files that can be added to hosts for installing
       # these packages. We use the list of distributions to create a config
@@ -50,7 +52,7 @@ module Pkg::Deb::Repo
         platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
         codename = Pkg::Platforms.codename_for_platform_version(platform, version)
         repoconfig = ["# Packages for #{Pkg::Config.project} built from ref #{Pkg::Config.ref}",
-                      "deb #{url} #{codename} #{Pkg::Paths.repo_name.empty? ? 'main' : Pkg::Paths.repo_name}"]
+                      "deb #{url} #{codename} #{local_repo}"]
         config = File.join("pkg", target, "deb", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{codename}.list")
         File.open(config, 'w') { |f| f.puts repoconfig }
       end
@@ -61,30 +63,32 @@ module Pkg::Deb::Repo
       wget = Pkg::Util::Tool.check_tool("wget")
       FileUtils.mkdir_p("pkg/#{target}")
       config_url = "#{base_url}/#{target}/deb/"
-      begin
-        stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
-        stdout
-      rescue => e
-        fail "Couldn't retrieve deb apt repo configs.\n#{e}"
-      end
-    end
+      stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
+      stdout
+    rescue => e
+      fail "Couldn't retrieve deb apt repo configs.\n#{e}"
     end
 
     def repo_creation_command(repo_directory, artifact_paths)
       cmd = "[ -d #{repo_directory} ] || exit 1 ; "
-      cmd << "pushd #{repo_directory} ; "
+      cmd << "pushd #{repo_directory} > /dev/null ; "
       cmd << 'echo "Checking for running repo creation. Will wait if detected." ; '
-      cmd << "while [ -f .lock ] ; do sleep 1 ; echo -n '.' ; done ; "
+      cmd << 'while [ -f .lock ] ; do sleep 1 ; echo -n "." ; done ; '
       cmd << 'echo "Setting lock" ; '
-      cmd << "touch .lock ; "
+      cmd << 'touch .lock ; '
 
       # Make the conf directory and write out our configuration file
-      cmd << "rm -rf apt && mkdir -p apt ; pushd apt ; "
+      cmd << 'rm -rf apt && mkdir -p apt ; pushd apt > /dev/null ; '
+
+      default_arches = ['i386', 'amd64', 'arm64', 'armel', 'armhf', 'powerpc', 'ppc64el', 'sparc', 'mips', 'mipsel']
+
+      # This is a required field for reprepro, so must never be an empty string
+      repo_component = Pkg::Paths.repo_name.empty? ? 'main' : Pkg::Paths.repo_name
+
       artifact_paths.each do |path|
         platform_tag = Pkg::Paths.tag_from_artifact_path(path)
         platform, version, _ = Pkg::Platforms. parse_platform_tag(platform_tag)
         codename = Pkg::Platforms.codename_for_platform_version(platform, version)
-        default_arches = ['i386', 'amd64', 'arm64', 'armel', 'armhf', 'powerpc', 'ppc64el', 'sparc', 'mips', 'mipsel']
         arches = Pkg::Platforms.arches_for_codename(codename)
 
         cmd << "mkdir -p #{codename}/conf ; "
@@ -94,14 +98,15 @@ Origin: Puppet Labs
 Label: Puppet Labs
 Codename: #{codename}
 Architectures: #{(default_arches + arches).uniq.join(' ')}
-Components: #{Pkg::Paths.repo_name.empty? ? 'main' : Pkg::Paths.repo_name}
+Components: #{repo_component}
 Description: Apt repository for acceptance testing" >> conf/distributions ; )
 
-        cmd << "reprepro=$(which reprepro) ; "
+        cmd << 'reprepro=$(which reprepro) ; '
         cmd << "$reprepro includedeb #{codename} ../../#{path}/*.deb ; "
-        cmd << 'popd ; '
+        cmd << 'popd > /dev/null ; '
       end
-      cmd << 'popd ; popd '
+      cmd << 'popd > /dev/null ; popd > /dev/null '
+      cmd
     end
 
     # This method is doing too much for its name
@@ -153,11 +158,11 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
 
       dists = Pkg::Util::File.directories("#{target}/apt")
       supported_codenames = Pkg::Platforms.codenames('deb')
+      default_arches = ['i386', 'amd64', 'arm64', 'armel', 'armhf', 'powerpc', 'ppc64el', 'sparc', 'mips', 'mipsel']
 
       if dists
         dists.each do |dist|
           next unless supported_codenames.include?(dist)
-          default_arches = ['i386', 'amd64', 'arm64', 'armel', 'armhf', 'powerpc', 'ppc64el', 'sparc', 'mips', 'mipsel']
           arches = Pkg::Platforms.arches_for_codename(dist)
           Dir.chdir("#{target}/apt/#{dist}") do
             File.open("conf/distributions", "w") do |f|

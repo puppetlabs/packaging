@@ -4,6 +4,13 @@ require 'fileutils'
 module Pkg::Deb::Repo
 
   class << self
+
+    # This is the default set of arches we are using for our reprepro repos. We
+    # take this list and combine it with the list of supported arches for each
+    # given platform to ensure a complete set of architectures. We use this
+    # when we initially create the repos and when we sign the repos.
+    REPREPRO_ARCHES = ['i386', 'amd64', 'arm64', 'armel', 'armhf', 'powerpc', 'ppc64el', 'sparc', 'mips', 'mipsel']
+
     def base_url
       "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
     end
@@ -80,8 +87,6 @@ module Pkg::Deb::Repo
       # Make the conf directory and write out our configuration file
       cmd << 'rm -rf apt && mkdir -p apt ; pushd apt > /dev/null ; '
 
-      default_arches = ['i386', 'amd64', 'arm64', 'armel', 'armhf', 'powerpc', 'ppc64el', 'sparc', 'mips', 'mipsel']
-
       # This is a required field for reprepro, so must never be an empty string
       repo_component = Pkg::Paths.repo_name.empty? ? 'main' : Pkg::Paths.repo_name
 
@@ -97,7 +102,7 @@ module Pkg::Deb::Repo
 Origin: Puppet Labs
 Label: Puppet Labs
 Codename: #{codename}
-Architectures: #{(default_arches + arches).uniq.join(' ')}
+Architectures: #{(REPREPRO_ARCHES + arches).uniq.join(' ')}
 Components: #{repo_component}
 Description: Apt repository for acceptance testing" >> conf/distributions ; )
 
@@ -158,7 +163,6 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
 
       dists = Pkg::Util::File.directories("#{target}/apt")
       supported_codenames = Pkg::Platforms.codenames('deb')
-      default_arches = ['i386', 'amd64', 'arm64', 'armel', 'armhf', 'powerpc', 'ppc64el', 'sparc', 'mips', 'mipsel']
 
       if dists
         dists.each do |dist|
@@ -169,7 +173,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
               f.puts "Origin: Puppet Labs
 Label: Puppet Labs
 Codename: #{dist}
-Architectures: #{(default_arches + arches).uniq.join(' ')}
+Architectures: #{(REPREPRO_ARCHES + arches).uniq.join(' ')}
 Components: #{Pkg::Paths.repo_name}
 Description: #{message} for #{dist}
 SignWith: #{Pkg::Config.gpg_key}"

@@ -23,18 +23,18 @@ module Pkg::Rpm::Repo
     end
 
     def repo_creation_command(repo_directory, artifact_paths)
-      cmd = "[ -d #{repo_directory} ] || exit 1 ; "
-      cmd << "pushd #{repo_directory} > /dev/null ; "
-      cmd << 'echo "Checking for running repo creation. Will wait if detected." ; '
-      cmd << 'while [ -f .lock ] ; do sleep 1 ; echo -n "." ; done ; '
-      cmd << 'echo "Setting lock" ; '
-      cmd << 'touch .lock ; '
-      cmd << 'createrepo=$(which createrepo) ; '
+      cmd = "[ -d #{repo_directory} ] || exit 1 && "
+      cmd << "pushd #{repo_directory} > /dev/null && "
+      cmd << 'echo "Checking for running repo creation. Will wait if detected." && '
+      cmd << 'while [ -f .lock ] ; do sleep 1 ; echo -n "." ; done && '
+      cmd << 'echo "Setting lock" && '
+      cmd << 'touch .lock && '
+      cmd << 'createrepo=$(which createrepo) && '
 
       artifact_paths.each do |path|
-        cmd << "[ -d #{path} ] || continue; "
-        cmd << "pushd #{path} ; "
-        cmd << '$createrepo --checksum=sha --checkts --update --delta-workers=0 --database . ; '
+        cmd << "[ -d #{path} ] || continue && "
+        cmd << "pushd #{path} && "
+        cmd << '$createrepo --checksum=sha --checkts --update --delta-workers=0 --database . && '
         cmd << 'popd ; '
       end
       cmd

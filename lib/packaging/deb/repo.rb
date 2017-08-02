@@ -77,15 +77,15 @@ module Pkg::Deb::Repo
     end
 
     def repo_creation_command(repo_directory, artifact_paths)
-      cmd = "[ -d #{repo_directory} ] || exit 1 ; "
-      cmd << "pushd #{repo_directory} > /dev/null ; "
-      cmd << 'echo "Checking for running repo creation. Will wait if detected." ; '
-      cmd << 'while [ -f .lock ] ; do sleep 1 ; echo -n "." ; done ; '
-      cmd << 'echo "Setting lock" ; '
-      cmd << 'touch .lock ; '
+      cmd = "[ -d #{repo_directory} ] || exit 1 && "
+      cmd << "pushd #{repo_directory} > /dev/null && "
+      cmd << 'echo "Checking for running repo creation. Will wait if detected." && '
+      cmd << 'while [ -f .lock ] ; do sleep 1 ; echo -n "." ; done && '
+      cmd << 'echo "Setting lock" && '
+      cmd << 'touch .lock && '
 
       # Make the conf directory and write out our configuration file
-      cmd << 'rm -rf apt && mkdir -p apt ; pushd apt > /dev/null ; '
+      cmd << 'rm -rf apt && mkdir -p apt ; pushd apt > /dev/null && '
 
       # This is a required field for reprepro, so must never be an empty string
       repo_component = Pkg::Paths.repo_name.empty? ? 'main' : Pkg::Paths.repo_name
@@ -96,18 +96,18 @@ module Pkg::Deb::Repo
         codename = Pkg::Platforms.codename_for_platform_version(platform, version)
         arches = Pkg::Platforms.arches_for_codename(codename)
 
-        cmd << "mkdir -p #{codename}/conf ; "
-        cmd << "pushd #{codename} ; "
+        cmd << "mkdir -p #{codename}/conf && "
+        cmd << "pushd #{codename} && "
         cmd << %Q( [ -e 'conf/distributions' ] || echo "
 Origin: Puppet Labs
 Label: Puppet Labs
 Codename: #{codename}
 Architectures: #{(REPREPRO_ARCHES + arches).uniq.join(' ')}
 Components: #{repo_component}
-Description: Apt repository for acceptance testing" >> conf/distributions ; )
+Description: Apt repository for acceptance testing" >> conf/distributions && )
 
-        cmd << 'reprepro=$(which reprepro) ; '
-        cmd << "$reprepro includedeb #{codename} ../../#{path}/*.deb ; "
+        cmd << 'reprepro=$(which reprepro) && '
+        cmd << "$reprepro includedeb #{codename} ../../#{path}/*.deb && "
         cmd << 'popd > /dev/null ; '
       end
       cmd << 'popd > /dev/null ; popd > /dev/null '

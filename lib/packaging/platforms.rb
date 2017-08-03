@@ -199,5 +199,23 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
     PLATFORM_INFO[platform][version][:signature_format]
   end
 
+  # @method by_deb
+  # @return [Array] An Array of Strings, containing all platforms
+  #   that use .deb packages
+  # Helper meta-method to return all platforms that use .deb packages
+  # @scope class
+  def by_deb
+    by_package_format('deb')
+  end
+
+  # @method by_rpm
+  # @return [Array] An Array of Strings, containing all platforms
+  #   that use .rpm packages
+  # Helper meta-method to return all platforms that use .rpm packages
+  # @scope class
+  def by_rpm
+    by_package_format('rpm')
+  end
+
   private :by_package_format
 end

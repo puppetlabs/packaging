@@ -92,9 +92,9 @@ namespace :pl do
       sig_type = Pkg::Platforms.signature_format_for_tag(platform_tag)
       case sig_type
       when 'v3'
-        v3 << rpm
+        v3_rpms << rpm
       when 'v4'
-        v4 << rpm
+        v4_rpms << rpm
       else
         fail "Cannot find signature type for package '#{rpm}'"
       end

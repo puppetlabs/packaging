@@ -22,11 +22,22 @@ module Pkg::Rpm::Repo
       end
     end
 
-    def repo_creation_command(createrepo)
-      cmd = 'for repodir in $(find ./ -name "*.rpm" | xargs -I {} dirname {}) ; do '
-      cmd << "[ -d ${repodir} ] || continue; "
-      cmd << "pushd ${repodir} && #{createrepo} --checksum=sha --checkts --update --delta-workers=0 --database . ; popd ; "
-      cmd << "done "
+    def repo_creation_command(repo_directory, artifact_paths)
+      cmd = "[ -d #{repo_directory} ] || exit 1 && "
+      cmd << "pushd #{repo_directory} > /dev/null && "
+      cmd << 'echo "Checking for running repo creation. Will wait if detected." && '
+      cmd << 'while [ -f .lock ] ; do sleep 1 ; echo -n "." ; done && '
+      cmd << 'echo "Setting lock" && '
+      cmd << 'touch .lock && '
+      cmd << 'createrepo=$(which createrepo) && '
+
+      artifact_paths.each do |path|
+        cmd << "[ -d #{path} ] || continue && "
+        cmd << "pushd #{path} && "
+        cmd << '$createrepo --checksum=sha --checkts --update --delta-workers=0 --database . && '
+        cmd << 'popd ; '
+      end
+      cmd
     end
 
     # @deprecated this command will die a painful death when we are
@@ -78,14 +89,6 @@ module Pkg::Rpm::Repo
       end
 
       options.join("\s")
-    end
-
-    def create_repos(directory = "repos")
-      Dir.chdir(directory) do
-        createrepo = Pkg::Util::Tool.check_tool('createrepo')
-        stdout, _, _ = Pkg::Util::Execution.capture3("bash -c '#{repo_creation_command(createrepo)}'")
-        stdout
-      end
     end
 
     def sign_repos(directory)
@@ -162,7 +165,8 @@ module Pkg::Rpm::Repo
         # ignore this one because its an extra
         next if url == "#{repo_base}srpm/"
 
-        dist, version, _subdir, arch = url.split('/')[-4..-1]
+        platform_tag = Pkg::Paths.tag_from_artifact_path(url)
+        platform, version, arch = Pkg::Platforms.parse_platform_tag(platform_tag)
 
         # Create an array of lines that will become our yum config
         #
@@ -179,50 +183,35 @@ module Pkg::Rpm::Repo
 
         # Write the new config to a file under our repo configs dir
         #
-        config_file = File.join("pkg", target, "rpm", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}-#{version}-#{arch}.repo")
+        config_file = File.join("pkg", target, "rpm", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{platform}-#{version}-#{arch}.repo")
         File.open(config_file, 'w') { |f| f.puts config }
       end
       puts "Wrote yum configuration files for #{Pkg::Config.project} at #{Pkg::Config.ref} to pkg/#{target}/rpm"
     end
 
-    def create_repos_from_artifacts
-      # Formulate our command string, which will just find directories with rpms
-      # and create and update repositories.
-      #
+    def create_repos(directory = 'repos')
       artifact_directory = File.join(Pkg::Config.jenkins_repo_path, Pkg::Config.project, Pkg::Config.ref)
+      artifact_paths = Pkg::Repo.directories_that_contain_packages(File.join(artifact_directory, 'artifacts'), 'rpm')
+      Pkg::Repo.populate_repo_directory(artifact_directory)
+      command = Pkg::Rpm::Repo.repo_creation_command(File.join(artifact_directory, 'repos'), artifact_paths)
 
-      ##
-      # Test that the artifacts directory exists on the distribution server.
-      # This will give us some more helpful output.
-      #
-      cmd = 'echo "Checking for build artifacts. Will exit if not found." ; '
-      cmd << "[ -d #{artifact_directory}/artifacts ] || exit 1 ; "
+      begin
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, command)
+        # Now that we've created our package repositories, we can generate repo
+        # configurations for use with downstream jobs, acceptance clients, etc.
+        Pkg::Rpm::Repo.generate_repo_configs
 
-      ##
-      # Enter the directory containing the build artifacts and create repos.
-      #
-      cmd << "pushd #{artifact_directory} ; "
-      cmd << 'echo "Checking for running repo creation. Will wait if detected." ; '
-      cmd << "while [ -f .lock ] ; do sleep 1 ; echo -n '.' ; done ; "
-      cmd << 'echo "Setting lock" ; '
-      cmd << "touch .lock ; "
-      cmd << "rsync -avxl artifacts/ repos/ ; pushd repos ; "
-      cmd << "createrepo=$(which createrepo) ; "
-      cmd << 'for repodir in $(find ./ -name "*.rpm" | xargs -I {} dirname {}) ; do '
-      cmd << "[ -d ${repodir} ] || continue; "
-      cmd << "pushd ${repodir} && ${createrepo} --checksum=sha --checkts --update --delta-workers=0 --database . ; popd ; "
-      cmd << "done ; popd "
+        # Now that we've created the repo configs, we can ship them
+        Pkg::Rpm::Repo.ship_repo_configs
+      ensure
+        # Always remove the lock file, even if we've failed
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/repos/.lock")
+      end
+    end
 
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, cmd)
-      # Now that we've created our repositories, we can create the configs for
-      # them
-      Pkg::Rpm::Repo.generate_repo_configs
-
-      # And once they're created, we can ship them
-      Pkg::Rpm::Repo.ship_repo_configs
-    ensure
-      # Always remove the lock file, even if we've failed
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/.lock")
+    def create_repos_from_artifacts
+      Pkg::Util.deprecate('Pkg::Rpm::Repo.create_repos_from_artifacts', 'Pkg::Rpm::Repo.create_repos')
+      create_repos
     end
 
     # @deprecated this command is exactly as awful as you think it is.

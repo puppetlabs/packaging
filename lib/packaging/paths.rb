@@ -11,7 +11,7 @@ module Pkg::Paths
   # Given a path to an artifact, divine the appropriate platform tag associated
   # with the artifact and path
   def tag_from_artifact_path(path)
-    platform = Pkg::Platforms.supported_platforms.find { |p| path =~ /(\/|\.)#{p}/ }
+    platform = Pkg::Platforms.supported_platforms.find { |p| path =~ /(\/|\.)#{p}[^\.]/ }
     if platform == 'windows'
       version = '2012'
       arch = Pkg::Platforms.arches_for_platform_version(platform, version).find { |a| path.include?(a) }
@@ -29,7 +29,7 @@ module Pkg::Paths
     end
     # if we didn't find a platform or a version, probably a codename
     if platform.nil? || version.nil?
-      codename = Pkg::Platforms.codenames('deb').find { |c| path =~ /\/#{c}\// }
+      codename = Pkg::Platforms.codenames('deb').find { |c| path =~ /\/#{c}/ }
       fail "I can't find a codename or platform in #{path}, teach me?" if codename.nil?
       platform, version = Pkg::Platforms.codename_to_platform_version(codename)
       fail "I can't find a platform and version from #{codename}, teach me?" if platform.nil? || version.nil?

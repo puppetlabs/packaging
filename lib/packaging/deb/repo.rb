@@ -4,6 +4,19 @@ require 'fileutils'
 module Pkg::Deb::Repo
 
   class << self
+
+    # This is the default set of arches we are using for our reprepro repos. We
+    # take this list and combine it with the list of supported arches for each
+    # given platform to ensure a complete set of architectures. We use this
+    # when we initially create the repos and when we sign the repos.
+    DEBIAN_PACKAGING_ARCHES = ['i386', 'amd64', 'arm64', 'armel', 'armhf', 'powerpc', 'ppc64el', 'sparc', 'mips', 'mipsel']
+
+    # We cannot have the repo name be an empty string. This value is only used
+    # when initially creating and again when signing reprepro repos. Generally
+    # we can safely default to having this as an empty string, just not for
+    # reprepro. We also need to know this when we create the repo_config files.
+    DEBIAN_REPO_NAME = Pkg::Paths.repo_name.empty? ? 'main' : Pkg::Paths.repo_name
+
     def base_url
       "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
     end
@@ -37,7 +50,6 @@ module Pkg::Deb::Repo
       # We want to exclude index and robots files and only include the http: prefixed elements
       repo_urls = stdout.split.uniq.reject { |x| x =~ /\?|index|robots/ }.select { |x| x =~ /http:/ }.map { |x| x.chomp('/') }
 
-
       # Create apt sources.list files that can be added to hosts for installing
       # these packages. We use the list of distributions to create a config
       # file for every distribution.
@@ -46,10 +58,12 @@ module Pkg::Deb::Repo
       repo_urls.each do |url|
         # We want to skip the base_url, which wget returns as one of the results
         next if "#{url}/" == repo_base
-        dist = url.split('/').last
+        platform_tag = Pkg::Paths.tag_from_artifact_path(url)
+        platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
+        codename = Pkg::Platforms.codename_for_platform_version(platform, version)
         repoconfig = ["# Packages for #{Pkg::Config.project} built from ref #{Pkg::Config.ref}",
-                      "deb #{url} #{dist} #{Pkg::Paths.repo_name}"]
-        config = File.join("pkg", target, "deb", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{dist}.list")
+                      "deb #{url} #{codename} #{DEBIAN_REPO_NAME}"]
+        config = File.join("pkg", target, "deb", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{codename}.list")
         File.open(config, 'w') { |f| f.puts repoconfig }
       end
       puts "Wrote apt repo configs for #{Pkg::Config.project} at #{Pkg::Config.ref} to pkg/#{target}/deb."
@@ -59,61 +73,53 @@ module Pkg::Deb::Repo
       wget = Pkg::Util::Tool.check_tool("wget")
       FileUtils.mkdir_p("pkg/#{target}")
       config_url = "#{base_url}/#{target}/deb/"
-      begin
-        stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
-        stdout
-      rescue => e
-        fail "Couldn't retrieve deb apt repo configs.\n#{e}"
-      end
+      stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
+      stdout
+    rescue => e
+      fail "Couldn't retrieve deb apt repo configs.\n#{e}"
     end
 
-    def repo_creation_command(prefix, artifact_directory)
-      # First, we test that artifacts exist and set up the repos directory
-      cmd = 'echo " Checking for deb build artifacts. Will exit if not found.." ; '
-      cmd << "[ -d #{artifact_directory}/artifacts/#{prefix}deb ] || exit 1 ; "
-      # Descend into the deb directory and obtain the list of distributions
-      # we'll be building repos for
-      cmd << "pushd #{artifact_directory}/artifacts/#{prefix}deb && dists=$(ls) && popd; "
-      # We do one more check here to make sure we actually have distributions
-      # to build for. If deb is empty we want to just exit.
-      #
-      cmd << '[ -n "$dists" ] || exit 1 ; '
-      cmd << "pushd #{artifact_directory} ; "
-
-      cmd << 'echo "Checking for running repo creation. Will wait if detected." ; '
-      cmd << "while [ -f .lock ] ; do sleep 1 ; echo -n '.' ; done ; "
-      cmd << 'echo "Setting lock" ; '
-      cmd << "touch .lock ; "
-      cmd << "rsync -avxl artifacts/ repos/ ; pushd repos ; "
+    def repo_creation_command(repo_directory, artifact_paths)
+      cmd = "[ -d #{repo_directory} ] || exit 1 && "
+      cmd << "pushd #{repo_directory} > /dev/null && "
+      cmd << 'echo "Checking for running repo creation. Will wait if detected." && '
+      cmd << 'while [ -f .lock ] ; do sleep 1 ; echo -n "." ; done && '
+      cmd << 'echo "Setting lock" && '
+      cmd << 'touch .lock && '
 
       # Make the conf directory and write out our configuration file
-      cmd << "rm -rf apt && mkdir -p apt ; pushd apt ; "
-      cmd << %Q(for dist in $dists ; do mkdir -p $dist/conf ; pushd $dist ;
-      echo "
+      cmd << 'rm -rf apt && mkdir -p apt ; pushd apt > /dev/null && '
+
+      artifact_paths.each do |path|
+        platform_tag = Pkg::Paths.tag_from_artifact_path(path)
+        platform, version, _ = Pkg::Platforms. parse_platform_tag(platform_tag)
+        codename = Pkg::Platforms.codename_for_platform_version(platform, version)
+        arches = Pkg::Platforms.arches_for_codename(codename)
+
+        cmd << "mkdir -p #{codename}/conf && "
+        cmd << "pushd #{codename} && "
+        cmd << %Q( [ -e 'conf/distributions' ] || echo "
 Origin: Puppet Labs
 Label: Puppet Labs
-Codename: $dist
-Architectures: i386 amd64 arm64 armel armhf powerpc ppc64el sparc mips mipsel
-Components: #{Pkg::Paths.repo_name}
-Description: Apt repository for acceptance testing" >> conf/distributions ; )
+Codename: #{codename}
+Architectures: #{(DEBIAN_PACKAGING_ARCHES + arches).uniq.join(' ')}
+Components: #{DEBIAN_REPO_NAME}
+Description: Apt repository for acceptance testing" >> conf/distributions && )
 
-      # Create the repositories using reprepro. Since these are for acceptance
-      # testing only, we'll just add the debs and ignore source files for now.
-      #
-      cmd << "reprepro=$(which reprepro) ; "
-      cmd << %Q($reprepro includedeb $dist ../../#{prefix}deb/$dist#{"/" unless Pkg::Paths.repo_name.empty?}#{Pkg::Paths.repo_name}/*.deb ; popd ; done ; )
-      cmd << "popd ; popd "
-
-      return cmd
+        cmd << 'reprepro=$(which reprepro) && '
+        cmd << "$reprepro includedeb #{codename} ../../#{path}/*.deb && "
+        cmd << 'popd > /dev/null ; '
+      end
+      cmd << 'popd > /dev/null ; popd > /dev/null '
+      cmd
     end
 
     # This method is doing too much for its name
-    def create_repos
-      prefix = Pkg::Config.build_pe ? "pe/" : ""
-
+    def create_repos(directory = 'repos')
       artifact_directory = File.join(Pkg::Config.jenkins_repo_path, Pkg::Config.project, Pkg::Config.ref)
-
-      command = repo_creation_command(prefix, artifact_directory)
+      artifact_paths = Pkg::Repo.directories_that_contain_packages(File.join(artifact_directory, 'artifacts'), 'deb')
+      Pkg::Repo.populate_repo_directory(artifact_directory)
+      command = repo_creation_command(File.join(artifact_directory, 'repos'), artifact_paths)
 
       begin
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, command)
@@ -125,7 +131,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
         Pkg::Deb::Repo.ship_repo_configs
       ensure
         # Always remove the lock file, even if we've failed
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/.lock")
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/repos/.lock")
       end
     end
 
@@ -156,16 +162,19 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
 
       dists = Pkg::Util::File.directories("#{target}/apt")
+      supported_codenames = Pkg::Platforms.codenames('deb')
 
       if dists
         dists.each do |dist|
+          next unless supported_codenames.include?(dist)
+          arches = Pkg::Platforms.arches_for_codename(dist)
           Dir.chdir("#{target}/apt/#{dist}") do
             File.open("conf/distributions", "w") do |f|
               f.puts "Origin: Puppet Labs
 Label: Puppet Labs
 Codename: #{dist}
-Architectures: i386 amd64 arm64 armel armhf powerpc ppc64el sparc mips mipsel
-Components: #{Pkg::Paths.repo_name}
+Architectures: #{(DEBIAN_PACKAGING_ARCHES + arches).uniq.join(' ')}
+Components: #{DEBIAN_REPO_NAME}
 Description: #{message} for #{dist}
 SignWith: #{Pkg::Config.gpg_key}"
             end

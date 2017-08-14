@@ -31,7 +31,7 @@ module Pkg::Util::Ship
         path = 'pkg'
       else
         platform_tag = Pkg::Paths.tag_from_artifact_path(pkg)
-        path = Pkg::Paths.artifacts_path(platform_tag, nil, 'pkg')
+        path = Pkg::Paths.artifacts_path(platform_tag, 'pkg')
       end
       FileUtils.mkdir_p File.join(tmp, path)
       FileUtils.cp pkg, File.join(tmp, path)

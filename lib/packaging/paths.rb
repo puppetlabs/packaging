@@ -59,7 +59,7 @@ module Pkg::Paths
     end
   end
 
-  def artifacts_path(platform_tag, package_url = nil, path_prefix = 'artifacts')
+  def artifacts_path(platform_tag, path_prefix = 'artifacts')
     platform, version, architecture = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
 

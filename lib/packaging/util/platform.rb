@@ -25,7 +25,7 @@ module Pkg::Util::Platform
 
   def artifacts_path(platform_tag, package_url = nil)
     Pkg::Util.deprecate('Pkg::Util::Platform.artifacts_path', 'Pkg::Paths.artifacts_path')
-    Pkg::Paths.artifacts_path(platform_tag, package_url = nil)
+    Pkg::Paths.artifacts_path(platform_tag)
   end
 
   def repo_path(platform_tag)

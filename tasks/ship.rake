@@ -14,33 +14,6 @@ namespace :pl do
         __GPG_KEY__: Pkg::Util::Gpg.key
       }
 
-      # We want to run this for both final/nonfinal paths.
-      { Pkg::Config.repo_name => Pkg::Config.repo_link_target, Pkg::Config.nonfinal_repo_name => Pkg::Config.nonfinal_repo_link_target }.each do |name, target|
-        if name && target
-          yum_linking_command = <<-CMD
-          if [ -d #{Pkg::Config.yum_repo_path}/#{name} ]; then
-            # If it's a link but pointing to the wrong place, remove the link
-            # This is likely to happen around the transition times, like puppet5 -> puppet6
-            if [ -L #{Pkg::Config.yum_repo_path}/#{target} ] && [ ! #{Pkg::Config.yum_repo_path}/#{name} -ef #{Pkg::Config.yum_repo_path}/#{target} ]; then
-              rm #{Pkg::Config.yum_repo_path}/#{target}
-            # This is the link you're looking for, nothing to see here
-            elif [ -L #{Pkg::Config.yum_repo_path}/#{target} ]; then
-              exit 0
-            # Don't want to delete it if it isn't a link, that could be destructive
-            # So, fail!
-            elif [ -e #{Pkg::Config.yum_repo_path}/#{target} ]; then
-              echo "#{Pkg::Config.yum_repo_path}/#{target} exists but isn't a link, I don't know what to do with this" >&2
-              exit 1
-            fi
-            ln -s #{name} #{Pkg::Config.yum_repo_path}/#{target}
-          fi
-          CMD
-
-          _, err = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, yum_linking_command, true)
-          $stderr.puts err
-        end
-      end
-
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       if Pkg::Util.ask_yes_or_no
         if Pkg::Config.yum_repo_command
@@ -63,37 +36,6 @@ namespace :pl do
         __APT_PLATFORMS__: Pkg::Config.apt_releases.join(' '),
         __GPG_KEY__: Pkg::Util::Gpg.key
       }
-
-      # We want to run this for both final/nonfinal paths.
-      { Pkg::Config.repo_name => Pkg::Config.repo_link_target, Pkg::Config.nonfinal_repo_name => Pkg::Config.nonfinal_repo_link_target }.each do |name, target|
-        if name && target
-          apt_linking_command = <<-CMD
-          # need to add this link for all the dists
-          for i in `ls #{Pkg::Config.apt_repo_staging_path}`; do
-            # but only if we're actually shipping this dist in the current repo
-            if [ -d #{Pkg::Config.apt_repo_staging_path}/${i}/#{name} ]; then
-              # If it's a link but pointing to the wrong place, remove the link
-              # This is likely to happen around the transition times, like puppet5 -> puppet6
-              if [ -L #{Pkg::Config.apt_repo_staging_path}/${i}/#{target} ] && [ ! #{Pkg::Config.apt_repo_staging_path}/${i}/#{name} -ef #{Pkg::Config.apt_repo_staging_path}/${i}/#{target} ]; then
-                rm #{Pkg::Config.apt_repo_staging_path}/${i}/#{target}
-              # This is the link you're looking for, nothing to see here
-              elif [ -L #{Pkg::Config.apt_repo_staging_path}/${i}/#{target} ]; then
-                exit 0
-              # Don't want to delete it if it isn't a link, that could be destructive
-              # So, fail!
-              elif [ -e #{Pkg::Config.apt_repo_staging_path}/${i}/#{target} ]; then
-                echo "#{Pkg::Config.apt_repo_staging_path}/${i}/#{target} exists but isn't a link, I don't know what to do with this" >&2
-                exit 1
-              fi
-                ln -s #{name} #{Pkg::Config.apt_repo_staging_path}/${i}/#{target}
-            fi
-          done
-          CMD
-
-          _, err = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_signing_server, apt_linking_command, true)
-          $stderr.puts err
-        end
-      end
 
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
       if Pkg::Util.ask_yes_or_no
@@ -276,11 +218,30 @@ namespace :pl do
   desc "Ship mocked rpms to #{Pkg::Config.yum_staging_server}"
   task ship_rpms: 'pl:fetch' do
     Pkg::Util::Ship.ship_pkgs(['pkg/**/*.rpm', 'pkg/**/*.srpm'], Pkg::Config.yum_staging_server, Pkg::Config.yum_repo_path)
+
+    # I really don't care which one we grab, it just has to be some supported
+    # version and architecture from the `el` hash. So here we're just grabbing
+    # the first one, parsing out some info, and breaking out of the loop. Not
+    # elegant, I know, but effective.
+    Pkg::Platforms::PLATFORM_INFO['el'].each do |key, value|
+      generic_platform_tag = "el-#{key}-#{value[:architectures][0]}"
+      Pkg::Util::Ship.create_rolling_repo_link(generic_platform_tag, Pkg::Config.yum_staging_server, Pkg::Config.yum_repo_path)
+      break
+    end
   end
 
   desc "Ship cow-built debs to #{Pkg::Config.apt_signing_server}"
   task ship_debs: 'pl:fetch' do
     Pkg::Util::Ship.ship_pkgs(['pkg/**/*.debian.tar.gz', 'pkg/**/*.orig.tar.gz', 'pkg/**/*.dsc', 'pkg/**/*.deb', 'pkg/**/*.changes'], Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path, chattr: false)
+
+    # We need to iterate through all the supported platforms here because of
+    # how deb repos are set up. Each codename will have its own link from the
+    # current versioned repo (i.e., puppet5) to the rolling repo. The one thing
+    # we don't care about is architecture, so we just grab the first supported
+    # architecture for the codename we're working with at the moment.
+    Pkg::Platforms.codenames('deb').each do |codename|
+      Pkg::Util::Ship.create_rolling_repo_link(Pkg::Platforms.codename_to_tags(codename)[0], Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path)
+    end
   end
 
   desc 'Ship built gem to rubygems.org, internal Gem mirror, and public file server'
@@ -387,6 +348,16 @@ namespace :pl do
 
     Pkg::Util::Ship.ship_pkgs(['pkg/**/*.dmg'], Pkg::Config.dmg_staging_server, path)
 
+    # I really don't care which one we grab, it just has to be some supported
+    # version and architecture from the `osx` hash. So here we're just grabbing
+    # the first one, parsing out some info, and breaking out of the loop. Not
+    # elegant, I know, but effective.
+    Pkg::Platforms::PLATFORM_INFO['osx'].each do |key, value|
+      generic_platform_tag = "osx-#{key}-#{value[:architectures][0]}"
+      Pkg::Util::Ship.create_rolling_repo_link(generic_platform_tag, Pkg::Config.dmg_staging_server, path)
+      break
+    end
+
     Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/mac', 'dmg', excludes: ['agent', 'hiera'])
     Pkg::Util::Net.remote_create_latest_symlink('hiera', '/opt/downloads/mac', 'dmg', excludes: ['puppet'])
     Pkg::Util::Net.remote_create_latest_symlink('facter', '/opt/downloads/mac', 'dmg')
@@ -411,6 +382,16 @@ namespace :pl do
     end
 
     Pkg::Util::Ship.ship_pkgs(['pkg/**/*.swix*'], Pkg::Config.swix_staging_server, path)
+
+    # I really don't care which one we grab, it just has to be some supported
+    # version and architecture from the `eos` hash. So here we're just grabbing
+    # the first one, parsing out some info, and breaking out of the loop. Not
+    # elegant, I know, but effective.
+    Pkg::Platforms::PLATFORM_INFO['eos'].each do |key, value|
+      generic_platform_tag = "eos-#{key}-#{value[:architectures][0]}"
+      Pkg::Util::Ship.create_rolling_repo_link(generic_platform_tag, Pkg::Config.swix_staging_server, path)
+      break
+    end
   end
 
   desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
@@ -446,6 +427,16 @@ namespace :pl do
     end
 
     Pkg::Util::Ship.ship_pkgs(['pkg/**/*.msi'], Pkg::Config.msi_staging_server, path, excludes: ["#{Pkg::Config.project}-x(86|64).msi"])
+
+    # I really don't care which one we grab, it just has to be some supported
+    # version and architecture from the `windows` hash. So here we're just grabbing
+    # the first one, parsing out some info, and breaking out of the loop. Not
+    # elegant, I know, but effective.
+    Pkg::Platforms::PLATFORM_INFO['windows'].each do |key, value|
+      generic_platform_tag = "windows-#{key}-#{value[:architectures][0]}"
+      Pkg::Util::Ship.create_rolling_repo_link(generic_platform_tag, Pkg::Config.msi_staging_server, path)
+      break
+    end
 
     Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/windows', 'msi', excludes: ['agent', 'x64'])
     Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/windows', 'msi', excludes: ['agent'], arch: 'x64')

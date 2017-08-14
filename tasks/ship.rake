@@ -358,11 +358,13 @@ namespace :pl do
       break
     end
 
-    Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/mac', 'dmg', excludes: ['agent', 'hiera'])
-    Pkg::Util::Net.remote_create_latest_symlink('hiera', '/opt/downloads/mac', 'dmg', excludes: ['puppet'])
-    Pkg::Util::Net.remote_create_latest_symlink('facter', '/opt/downloads/mac', 'dmg')
-    Pkg::Platforms::PLATFORM_INFO['osx'].keys.each do |version|
-      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', "/opt/downloads/mac/#{version}/#{Pkg::Config.yum_repo_name}/x86_64", 'dmg')
+    Pkg::Platforms.platform_tags_for_package_format('dmg').each do |platform_tag|
+      # TODO remove the PC1 links when we no longer need to maintain them
+      _, version, arch = Pkg::Platforms.parse_platform_tag(platform_tag)
+      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', "/opt/downloads/mac/#{version}/PC1/#{arch}", 'dmg')
+
+      # Create the latest symlink for the current supported repo
+      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifacts_path(platform_tag, path), 'dmg')
     end
   end
 
@@ -438,8 +440,9 @@ namespace :pl do
       break
     end
 
-    Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/windows', 'msi', excludes: ['agent', 'x64'])
-    Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/windows', 'msi', excludes: ['agent'], arch: 'x64')
+    # We provide symlinks to the latest package in a given directory. This
+    # allows users to upgrade more easily to the latest version that we release
+    # TODO remove the links to PC1 when we no longer ship to that repo
     Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', '/opt/downloads/windows', 'msi', arch: 'x64')
     Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', '/opt/downloads/windows', 'msi', arch: 'x86')
   end

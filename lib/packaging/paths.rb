@@ -45,7 +45,8 @@ module Pkg::Paths
   # Assign repo name
   # If we are shipping development/beta/non-final packages, they should be
   # shipped to the development/beta/non-final repo, if there is one defined.
-  # Otherwise, we probably shouldn't be shipping them...
+  # Otherwise, default to the final repo name. We use this for more than just
+  # shipping to the final repos, so we need this to not fail.
   def repo_name
     if Pkg::Util::Version.final?
       Pkg::Config.repo_name || ""
@@ -53,7 +54,7 @@ module Pkg::Paths
       if Pkg::Config.nonfinal_repo_name
         Pkg::Config.nonfinal_repo_name
       else
-        fail "You are attempting to ship a non-final build without specifying a non-final repo destination. Either make sure you are shipping a final version or define `nonfinal_repo_name` in your build_defaults.\nIf this is a test build and you want to allow tagged versions with dirty trees to be final builds, set ALLOW_DIRTY_TREE=true."
+        Pkg::Config.repo_name || ""
       end
     end
   end

@@ -79,7 +79,7 @@ describe 'Pkg::Paths' do
     end
 
     it 'should be correct for trusty' do
-      expect(Pkg::Paths.artifacts_path('ubuntu-14.04-amd64')).to eq('artifacts/deb/trusty/puppet5')
+      expect(Pkg::Paths.artifacts_path('ubuntu-14.04-amd64')).to eq('artifacts/trusty/puppet5')
     end
 
     it 'should be correct for solaris 11' do

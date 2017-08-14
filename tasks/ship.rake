@@ -280,7 +280,7 @@ namespace :pl do
 
   desc "Ship cow-built debs to #{Pkg::Config.apt_signing_server}"
   task ship_debs: 'pl:fetch' do
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.debian.tar.gz', 'pkg/**/*.orig.tar.gz', 'pkg/**/*.dsc', 'pkg/**/*.deb', 'pkg/**/*.changes'], Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path, addtl_path_to_sub: '/deb', chattr: false)
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.debian.tar.gz', 'pkg/**/*.orig.tar.gz', 'pkg/**/*.dsc', 'pkg/**/*.deb', 'pkg/**/*.changes'], Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path, chattr: false)
   end
 
   desc 'Ship built gem to rubygems.org, internal Gem mirror, and public file server'

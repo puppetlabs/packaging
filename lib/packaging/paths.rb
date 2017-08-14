@@ -69,7 +69,7 @@ module Pkg::Paths
     when 'swix'
       File.join(path_prefix, platform, repo_name, version, architecture)
     when 'deb'
-      File.join(path_prefix, 'deb', Pkg::Platforms.get_attribute(platform_tag, :codename), repo_name)
+      File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), repo_name)
     when 'svr4', 'ips'
       File.join(path_prefix, 'solaris', repo_name, version)
     when 'dmg'

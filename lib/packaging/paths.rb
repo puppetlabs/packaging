@@ -59,23 +59,55 @@ module Pkg::Paths
     end
   end
 
-  def artifacts_path(platform_tag, path_prefix = 'artifacts')
+  def link_name
+    if Pkg::Util::Version.final?
+      Pkg::Config.repo_link_target || nil
+    else
+      Pkg::Config.nonfinal_repo_link_target || nil
+    end
+  end
+
+  def artifacts_base_path_and_link_path(platform_tag, path_prefix = 'artifacts')
     platform, version, architecture = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
 
     case package_format
     when 'rpm'
-      File.join(path_prefix, repo_name, platform, version, architecture)
+      [File.join(path_prefix, repo_name), link_name.nil? ? nil : File.join(path_prefix, link_name)]
     when 'swix'
-      File.join(path_prefix, platform, repo_name, version, architecture)
+      [File.join(path_prefix, platform, repo_name), link_name.nil? ? nil : File.join(path_prefix, platform, link_name)]
     when 'deb'
-      File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), repo_name)
+      [File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), repo_name),
+       link_name.nil? ? nil : File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), link_name)]
     when 'svr4', 'ips'
-      File.join(path_prefix, 'solaris', repo_name, version)
+      [File.join(path_prefix, 'solaris', repo_name), link_name.nil? ? nil : File.join(path_prefix, 'solaris', link_name)]
     when 'dmg'
-      File.join(path_prefix, 'mac', repo_name, version, architecture)
+      [File.join(path_prefix, 'mac', repo_name), link_name.nil? ? nil : File.join(path_prefix, 'mac', link_name)]
     when 'msi'
-      File.join(path_prefix, 'windows', repo_name)
+      [File.join(path_prefix, 'windows', repo_name), link_name.nil? ? nil : File.join(path_prefix, 'windows', link_name)]
+    else
+      raise "Not sure where to find packages with a package format of '#{package_format}'"
+    end
+  end
+
+  def artifacts_path(platform_tag, path_prefix = 'artifacts')
+    base_path, _ = artifacts_base_path_and_link_path(platform_tag, path_prefix)
+    platform, version, architecture = Pkg::Platforms.parse_platform_tag(platform_tag)
+    package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
+
+    case package_format
+    when 'rpm'
+      File.join(base_path, platform, version, architecture)
+    when 'swix'
+      File.join(base_path, version, architecture)
+    when 'deb'
+      base_path
+    when 'svr4', 'ips'
+      File.join(base_path, version)
+    when 'dmg'
+      File.join(base_path, version, architecture)
+    when 'msi'
+      base_path
     else
       raise "Not sure where to find packages with a package format of '#{package_format}'"
     end

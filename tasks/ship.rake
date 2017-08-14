@@ -372,7 +372,20 @@ namespace :pl do
 
   desc "ship apple dmg to #{Pkg::Config.dmg_staging_server}"
   task ship_dmg: 'pl:fetch' do
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.dmg'], Pkg::Config.dmg_staging_server, Pkg::Config.dmg_path, addtl_path_to_sub: '/mac')
+    # TODO: realistically, this shouldn't be here. This block needs to be
+    # removed, but only when we can successfully modify all instances of
+    # this to be set to '/opt/downloads'. In the meantime, we need to write
+    # this terrible workaround to ensure backward compatibility.
+    #
+    # I'm so sorry
+    # ~MAS 2017-08-14
+    if Pkg::Config.dmg_path == "/opt/downloads/mac"
+      path = "/opt/downloads"
+    else
+      path = Pkg::Config.dmg_path
+    end
+
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.dmg'], Pkg::Config.dmg_staging_server, path)
 
     Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/mac', 'dmg', excludes: ['agent', 'hiera'])
     Pkg::Util::Net.remote_create_latest_symlink('hiera', '/opt/downloads/mac', 'dmg', excludes: ['puppet'])
@@ -384,7 +397,20 @@ namespace :pl do
 
   desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
   task ship_swix: 'pl:fetch' do
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.swix*'], Pkg::Config.swix_staging_server, Pkg::Config.swix_path, addtl_path_to_sub: '/eos')
+    # TODO: realistically, this shouldn't be here. This block needs to be
+    # removed, but only when we can successfully modify all instances of
+    # this to be set to '/opt/downloads'. In the meantime, we need to write
+    # this terrible workaround to ensure backward compatibility.
+    #
+    # I'm so sorry
+    # ~MAS 2017-08-14
+    if Pkg::Config.swix_path == "/opt/downloads/eos"
+      path = "/opt/downloads"
+    else
+      path = Pkg::Config.swix_path
+    end
+
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.swix*'], Pkg::Config.swix_staging_server, path)
   end
 
   desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
@@ -406,7 +432,21 @@ namespace :pl do
 
   desc "Ship MSI packages to #{Pkg::Config.msi_staging_server}"
   task ship_msi: 'pl:fetch' do
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.msi'], Pkg::Config.msi_staging_server, Pkg::Config.msi_path, addtl_path_to_sub: '/windows', excludes: ["#{Pkg::Config.project}-x(86|64).msi"])
+    # TODO: realistically, this shouldn't be here. This block needs to be
+    # removed, but only when we can successfully modify all instances of
+    # this to be set to '/opt/downloads'. In the meantime, we need to write
+    # this terrible workaround to ensure backward compatibility.
+    #
+    # I'm so sorry
+    # ~MAS 2017-08-14
+    if Pkg::Config.msi_path == "/opt/downloads/windows"
+      path = "/opt/downloads"
+    else
+      path = Pkg::Config.msi_path
+    end
+
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.msi'], Pkg::Config.msi_staging_server, path, excludes: ["#{Pkg::Config.project}-x(86|64).msi"])
+
     Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/windows', 'msi', excludes: ['agent', 'x64'])
     Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/windows', 'msi', excludes: ['agent'], arch: 'x64')
     Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', '/opt/downloads/windows', 'msi', arch: 'x64')

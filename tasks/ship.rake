@@ -437,6 +437,10 @@ namespace :pl do
     Pkg::Platforms::PLATFORM_INFO['windows'].each do |key, value|
       generic_platform_tag = "windows-#{key}-#{value[:architectures][0]}"
       Pkg::Util::Ship.create_rolling_repo_link(generic_platform_tag, Pkg::Config.msi_staging_server, path)
+
+      # Create the symlinks for the latest supported repo
+      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifacts_path(generic_platform_tag, path), 'msi', arch: 'x64')
+      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifacts_path(generic_platform_tag, path), 'msi', arch: 'x86')
       break
     end
 

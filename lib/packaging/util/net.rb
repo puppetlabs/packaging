@@ -293,21 +293,31 @@ module Pkg::Util::Net
     #   @option :excludes [Array] Strings you want to exclude from your search,
     #     e.g. 'agent' if only searching for 'puppet'.
     def remote_create_latest_symlink(package_name, dir, platform_ext, options = {})
-      cmd = "if [ -d '#{dir}' ] ; then "
-      cmd << "pushd #{dir} ; "
-      cmd << "ln -sf `\ls -1 *.#{platform_ext} | grep -v latest | grep -v rc | grep #{package_name} "
+      ls_cmd = "ls -1 *.#{platform_ext} | grep -v latest | grep -v rc | grep #{package_name} "
       if options[:arch]
-        cmd << "| grep #{options[:arch]} "
+        ls_cmd << "| grep #{options[:arch]}"
         package_name << "-#{options[:arch]}"
       end
       if options[:excludes]
         options[:excludes].each do |excl|
-          cmd << "| grep -v #{excl} "
+          ls_cmd << "| grep -v #{excl} "
         end
       end
-      cmd << "| sort --version-sort | tail -1` #{package_name}-latest.#{platform_ext} ; "
-      cmd << "popd ; "
-      cmd << "fi"
+      ls_cmd << '| sort --version-sort | tail -1'
+      cmd = <<-CMD
+        if [ ! -d '#{dir}' ] ; then
+          echo "directory '#{dir}' does not exist, not creating latest package link"
+          exit 0
+        fi
+        pushd '#{dir}'
+        link_target=$(#{ls_cmd})
+        if [ -z "$link_target" ] ; then
+          echo "Unable to find a link target for '#{package_name}' in '#{dir}'; skipping link creation"
+          exit 0
+        fi
+        echo "creating link to '$link_target'"
+        ln -sf "$link_target" #{package_name}-latest.#{platform_ext}
+      CMD
 
       _, err = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, cmd, true)
       $stderr.puts err

@@ -199,6 +199,21 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
     PLATFORM_INFO[platform][version][:signature_format]
   end
 
+  # Return an array of platform tags associated with a given package format
+  def platform_tags_for_package_format(format)
+    platform_tags = []
+    PLATFORM_INFO.each do |platform, platform_versions|
+      platform_versions.each do |version, info|
+        info[:architectures].each do |architecture|
+          if info[:package_format] == format
+            platform_tags << "#{platform}-#{version}-#{architecture}"
+          end
+        end
+      end
+    end
+    platform_tags
+  end
+
   # @method by_deb
   # @return [Array] An Array of Strings, containing all platforms
   #   that use .deb packages

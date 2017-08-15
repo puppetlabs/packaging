@@ -280,7 +280,7 @@ namespace :pl do
 
   desc "Ship cow-built debs to #{Pkg::Config.apt_signing_server}"
   task ship_debs: 'pl:fetch' do
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.debian.tar.gz', 'pkg/**/*.orig.tar.gz', 'pkg/**/*.dsc', 'pkg/**/*.deb', 'pkg/**/*.changes'], Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path, addtl_path_to_sub: '/deb', chattr: false)
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.debian.tar.gz', 'pkg/**/*.orig.tar.gz', 'pkg/**/*.dsc', 'pkg/**/*.deb', 'pkg/**/*.changes'], Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path, chattr: false)
   end
 
   desc 'Ship built gem to rubygems.org, internal Gem mirror, and public file server'
@@ -359,12 +359,6 @@ namespace :pl do
         Pkg::Util::Ship.ship_pkgs(['pkg/**/*.pkg.gz'], Pkg::Config.svr4_host, Pkg::Config.svr4_path)
       end
     end
-    Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/mac', 'dmg', excludes: ['agent', 'hiera'])
-    Pkg::Util::Net.remote_create_latest_symlink('hiera', '/opt/downloads/mac', 'dmg', excludes: ['puppet'])
-    Pkg::Util::Net.remote_create_latest_symlink('facter', '/opt/downloads/mac', 'dmg')
-    Pkg::Platforms::PLATFORM_INFO['osx'].keys.each do |version|
-      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', "/opt/downloads/mac/#{version}/#{Pkg::Config.yum_repo_name}/x86_64", 'dmg')
-    end
   end
 
   desc "Ship p5p packages to #{Pkg::Config.p5p_host}"
@@ -379,6 +373,13 @@ namespace :pl do
   desc "ship apple dmg to #{Pkg::Config.dmg_staging_server}"
   task ship_dmg: 'pl:fetch' do
     Pkg::Util::Ship.ship_pkgs(['pkg/**/*.dmg'], Pkg::Config.dmg_staging_server, Pkg::Config.dmg_path, addtl_path_to_sub: '/mac')
+
+    Pkg::Util::Net.remote_create_latest_symlink('puppet', '/opt/downloads/mac', 'dmg', excludes: ['agent', 'hiera'])
+    Pkg::Util::Net.remote_create_latest_symlink('hiera', '/opt/downloads/mac', 'dmg', excludes: ['puppet'])
+    Pkg::Util::Net.remote_create_latest_symlink('facter', '/opt/downloads/mac', 'dmg')
+    Pkg::Platforms::PLATFORM_INFO['osx'].keys.each do |version|
+      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', "/opt/downloads/mac/#{version}/#{Pkg::Config.yum_repo_name}/x86_64", 'dmg')
+    end
   end
 
   desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"

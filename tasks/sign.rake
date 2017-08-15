@@ -56,7 +56,7 @@ namespace :pl do
 
   desc "Sign the Arista EOS swix packages, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_swix do
-    packages = Dir["pkg/eos/**/*.swix"]
+    packages = Dir["pkg/**/*.swix"]
     unless packages.empty?
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
       packages.each do |swix_package|
@@ -67,9 +67,9 @@ namespace :pl do
 
   desc "Detach sign any solaris svr4 packages"
   task :sign_svr4 do
-    unless Dir["pkg/solaris/10/**/*.pkg.gz"].empty?
+    unless Dir["pkg/**/*.pkg.gz"].empty?
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-      Dir["pkg/solaris/10/**/*.pkg.gz"].each do |pkg|
+      Dir["pkg/**/*.pkg.gz"].each do |pkg|
         Pkg::Util::Gpg.sign_file pkg
       end
     end
@@ -130,7 +130,7 @@ namespace :pl do
 
   desc "Sign ips package, uses PL certificates by default, update privatekey_pem, certificate_pem, and ips_inter_cert in build_defaults.yaml to override."
   task :sign_ips do
-    Pkg::IPS.sign unless Dir['pkg/solaris/11/**/*.p5p'].empty?
+    Pkg::IPS.sign unless Dir['pkg/**/*.p5p'].empty?
   end
 
   if Pkg::Config.build_gem
@@ -175,12 +175,12 @@ namespace :pl do
 
   desc "Sign OSX packages"
   task :sign_osx => "pl:fetch" do
-    Pkg::OSX.sign unless Dir['pkg/apple/**/*.dmg'].empty?
+    Pkg::OSX.sign unless Dir['pkg/**/*.dmg'].empty?
   end
 
   desc "Sign MSI packages"
   task :sign_msi => "pl:fetch" do
-    Pkg::MSI.sign unless Dir['pkg/windows/**/*.msi'].empty?
+    Pkg::MSI.sign unless Dir['pkg/**/*.msi'].empty?
   end
 
   ##

@@ -61,9 +61,11 @@ describe 'Pkg::Paths' do
       expect(Pkg::Paths.repo_name).to eq('puppet5-nightly')
     end
 
-    it 'should fail if nonfinal_repo_name is not set for non-final version' do
+    it 'should return repo_name if nonfinal_repo_name is not set for non-final version' do
+      allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
+      allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nil)
       allow(Pkg::Util::Version).to receive(:final?).and_return(false)
-      expect { Pkg::Paths.repo_name }.to raise_error
+      expect(Pkg::Paths.repo_name).to eq('puppet5')
     end
   end
 
@@ -77,7 +79,7 @@ describe 'Pkg::Paths' do
     end
 
     it 'should be correct for trusty' do
-      expect(Pkg::Paths.artifacts_path('ubuntu-14.04-amd64')).to eq('artifacts/deb/trusty/puppet5')
+      expect(Pkg::Paths.artifacts_path('ubuntu-14.04-amd64')).to eq('artifacts/trusty/puppet5')
     end
 
     it 'should be correct for solaris 11' do

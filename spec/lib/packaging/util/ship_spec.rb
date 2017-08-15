@@ -45,8 +45,8 @@ local_pkgs = [
   'pkg/windows/puppet5/puppet-agent-1.4.1.2904.g8023dd1-x86.msi',
 ]
 new_pkgs = [
-  'pkg/deb/cumulus/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1cumulus_amd64.deb',
-  'pkg/deb/wheezy/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1wheezy_i386.deb',
+  'pkg/cumulus/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1cumulus_amd64.deb',
+  'pkg/wheezy/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1wheezy_i386.deb',
   'pkg/puppet5/el/5/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.el5.x86_64.rpm',
   'pkg/puppet5/sles/11/i386/puppet-agent-1.4.1.2904.g8023dd1-1.sles11.i386.rpm',
   'pkg/mac/puppet5/10.10/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.osx10.10.dmg',

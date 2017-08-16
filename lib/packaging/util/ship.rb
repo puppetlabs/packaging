@@ -54,11 +54,6 @@ module Pkg::Util::Ship
   # @option opts [Array] :excludes File globs to exclude packages from shipping
   # @option opts [Boolean] :chattr Whether or not to make the files immutable
   #   after shipping. Defaults to true.
-  # @option opts [String] :addtl_path_to_sub An additional part of the path
-  #   to substitute out when determining the path the ship to. By default just
-  #   the 'pkg' will get subbed out from the local path, but in some cases you
-  #   need more than that (if there's overlap between the local path and the
-  #   staging path, which happens with windows and a few other platforms
   # @option opts [Boolean] :platform_independent Whether or not the path the
   #   packages ship to has platform-dependent information in it. Defaults to
   #   false (most paths will be platform dependent), but set to true for gems
@@ -69,7 +64,6 @@ module Pkg::Util::Ship
     options = {
       excludes: [],
       chattr: true,
-      addtl_path_to_sub: nil,
       platform_independent: false }.merge(opts)
 
     # First find the packages to be shipped. We must find them before moving
@@ -89,7 +83,6 @@ module Pkg::Util::Ship
       staged_pkgs.each do |pkg|
         Pkg::Util::Execution.retry_on_fail(times: 3) do
           sub_string = 'pkg'
-          sub_string += "#{options[:addtl_path_to_sub]}" unless options[:addtl_path_to_sub].nil?
           remote_pkg = pkg.sub(sub_string, remote_path)
           remote_basepath = File.dirname(remote_pkg)
           Pkg::Util::Net.remote_ssh_cmd(staging_server, "mkdir -p #{remote_basepath}")

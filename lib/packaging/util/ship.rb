@@ -100,4 +100,42 @@ module Pkg::Util::Ship
       end
     end
   end
+
+  def rolling_repo_link_command(platform_tag, repo_path)
+    base_path, link_path = Pkg::Paths.artifacts_base_path_and_link_path(platform_tag, repo_path)
+
+    if link_path.nil?
+      puts "No link target set, not creating rolling repo link for #{base_path}"
+      return nil
+    end
+
+    cmd = <<-CMD
+      if [ ! -d #{base_path} ] ; then
+        echo "Link target '#{base_path}' does not exist; skipping"
+        exit 0
+      fi
+      # If it's a link but pointing to the wrong place, remove the link
+      # This is likely to happen around the transition times, like puppet5 -> puppet6
+      if [ -L #{link_path} ] && [ ! #{base_path} -ef #{link_path} ] ; then
+        rm #{link_path}
+      # This is the link you're looking for, nothing to see here
+      elif [ -L #{link_path} ] ; then
+        exit 0
+      # Don't want to delete it if it isn't a link, that could be destructive
+      # So, fail!
+      elif [ -e #{link_path} ] ; then
+        echo "#{link_path} exists but isn't a link, I don't know what to do with this" >&2
+        exit 1
+      fi
+      ln -s #{base_path} #{link_path}
+    CMD
+  end
+
+  def create_rolling_repo_link(platform_tag, staging_server, repo_path)
+    command = rolling_repo_link_command(platform_tag, repo_path)
+
+    Pkg::Util::Net.remote_ssh_cmd(staging_server, command) unless command.nil?
+  rescue => e
+    fail "Failed to create rolling repo link for '#{platform_tag}'.\n#{e}"
+  end
 end

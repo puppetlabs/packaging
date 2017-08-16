@@ -199,6 +199,10 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
     PLATFORM_INFO[platform][version][:signature_format]
   end
 
+  def signature_format_for_platform_version(platform, version)
+    PLATFORM_INFO[platform][version][:signature_format]
+  end
+
   # Return an array of platform tags associated with a given package format
   def platform_tags_for_package_format(format)
     platform_tags = []

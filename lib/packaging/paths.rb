@@ -8,24 +8,25 @@ module Pkg::Paths
 
   module_function
 
+  def arch_from_artifact_path(platform, version, path)
+    # We only support sources for deb and rpm based systems
+    if path.match(/(\.debian\.tar\.gz|\.orig\.tar\.gz|\.dsc|\.changes)$/)
+      return 'source'
+    elsif path.match(/\.src\.rpm$/)
+      return 'SRPMS'
+    end
+
+    Pkg::Platforms.arches_for_platform_version(platform, version).find { |a| path.include?(a) } || Pkg::Platforms.arches_for_platform_version(platform, version)[0]
+  end
+
   # Given a path to an artifact, divine the appropriate platform tag associated
   # with the artifact and path
   def tag_from_artifact_path(path)
     platform = Pkg::Platforms.supported_platforms.find { |p| path =~ /(\/|\.)#{p}[^\.]/ }
     if platform == 'windows'
       version = '2012'
-      arch = Pkg::Platforms.arches_for_platform_version(platform, version).find { |a| path.include?(a) }
-      if arch.nil?
-        arch = Pkg::Platforms.arches_for_platform_version(platform, version)[0]
-      end
     elsif !platform.nil?
       version = Pkg::Platforms.versions_for_platform(platform).find { |v| path =~ /#{platform}(\/|-)?#{v}/ }
-      unless version.nil?
-        arch = Pkg::Platforms.arches_for_platform_version(platform, version).find { |a| path.include?(a) }
-        if arch.nil?
-          arch = Pkg::Platforms.arches_for_platform_version(platform, version)[0]
-        end
-      end
     end
     # if we didn't find a platform or a version, probably a codename
     if platform.nil? || version.nil?
@@ -33,11 +34,9 @@ module Pkg::Paths
       fail "I can't find a codename or platform in #{path}, teach me?" if codename.nil?
       platform, version = Pkg::Platforms.codename_to_platform_version(codename)
       fail "I can't find a platform and version from #{codename}, teach me?" if platform.nil? || version.nil?
-      arch = Pkg::Platforms.arches_for_platform_version(platform, version).find { |a| path.include?(a) }
-      if arch.nil?
-        arch = Pkg::Platforms.arches_for_codename(codename)[0]
-      end
     end
+
+    arch = arch_from_artifact_path(platform, version, path)
 
     return "#{platform}-#{version}-#{arch}"
   end

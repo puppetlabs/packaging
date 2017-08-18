@@ -318,14 +318,14 @@ namespace :pl do
       Pkg::Util::RakeUtils.invoke_task("pl:jenkins:deploy_signed_repos_to_s3", target_bucket)
     end
 
-    task :update_release_versions, [:target_bucket] do |t, args|
-      target_bucket = args.target_bucket or fail ":target_bucket is a required argument to #{t}"
+    task :update_release_versions do
+      target_bucket = ENV['TARGET_BUCKET'] or fail "TARGET_BUCKET must be specified to run the 'update_release_versions' task"
+      version = ENV['VERSION'] || Pkg::Util::Version.get_dot_version
 
       tempdir = Pkg::Util::File.mktemp
       latest_filepath = File.join(tempdir, "pkg", "#{Pkg::Config.project}")
       FileUtils.mkdir_p(latest_filepath)
 
-      version = Pkg::Util::Version.get_dot_version
       latest_filename = File.join(latest_filepath, "LATEST")
       File.open(latest_filename, 'w') { |file| file.write(version) }
       Pkg::Util::Net.s3sync_to(latest_filepath, target_bucket, Pkg::Config.project, ["--acl-public", "--follow-symlinks"])

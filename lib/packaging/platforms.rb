@@ -176,11 +176,6 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
   # rubocop:disable Style/GuardClause
   def parse_platform_tag(platform_tag)
     platform, version, arch = platform_tag.match(/^(.*)-(.*)-(.*)$/).captures
-    if PLATFORM_INFO.key?(platform) && PLATFORM_INFO[platform].key?(version) && PLATFORM_INFO[platform][version][:architectures].include?(arch)
-      [platform, version, arch]
-    else
-      raise "#{platform_tag} isn't a valid platform tag. Perhaps it hasn't been defined yet?"
-    end
   end
 
   def get_attribute(platform_tag, attribute_name)

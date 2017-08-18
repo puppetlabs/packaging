@@ -91,12 +91,6 @@ describe 'Pkg::Platforms' do
     end
   end
 
-  describe '#parse_platform_tag' do
-    it 'fails with a reasonable error on invalid platform' do
-      expect { Pkg::Platforms.parse_platform_tag('abcd-15-ia64') }.to raise_error(/valid platform tag/)
-    end
-  end
-
   describe '#get_attribute' do
     it 'returns info about a given platform' do
       expect(Pkg::Platforms.get_attribute('el-6-x86_64', :signature_format)).to eq('v4')

@@ -85,11 +85,12 @@ namespace :pl do
     v4_rpms = []
     all_rpms.each do |rpm|
       platform_tag = Pkg::Paths.tag_from_artifact_path(rpm)
+      platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
 
       # We don't sign AIX rpms
       next if platform_tag.include?('aix')
 
-      sig_type = Pkg::Platforms.signature_format_for_tag(platform_tag)
+      sig_type = Pkg::Platforms.signature_format_for_platform_version(platform, version)
       case sig_type
       when 'v3'
         v3_rpms << rpm
@@ -113,7 +114,7 @@ namespace :pl do
     # Now we hardlink them back in
     Dir["#{rpm_dir}/**/*.noarch.rpm"].each do |rpm|
       platform_tag = Pkg::Paths.tag_from_artifact_path(rpm)
-      platform, version, architecture = Pkg::Platforms.parse_platform_tag(platform_tag)
+      platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
       supported_arches = Pkg::Platforms.arches_for_platform_version(platform, version)
       cd File.dirname(rpm) do
         noarch_rpm = File.basename(rpm)

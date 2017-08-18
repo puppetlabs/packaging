@@ -1,6 +1,22 @@
 require 'spec_helper'
 
 describe 'Pkg::Paths' do
+  describe '#arch_from_artifact_path' do
+    arch_transformations = {
+      ['pkg/el-7-x86_64/puppet-agent-4.99.0-1.el7.x86_64.rpm', 'el', '7'] => 'x86_64',
+      ['artifacts/ubuntu-16.04-i386/puppetserver_5.0.1-0.1SNAPSHOT.2017.07.27T2346puppetlabs1.debian.tar.gz', 'ubuntu', '16.04'] => 'source',
+      ['http://saturn.puppetlabs.net/deb_repos/1234abcd/repos/apt/xenial', 'ubuntu', '16.04'] => 'i386',
+      ['pkg/ubuntu-16.04-amd64/puppet-agent_4.99.0-1xenial_amd64.deb', 'ubuntu', '16.04'] => 'amd64',
+      ['artifacts/deb/jessie/PC1/puppetserver_5.0.1.master.orig.tar.gz', 'debian', '8'] => 'source',
+      ['artifacts/el/6/PC1/SRPMS/puppetserver-5.0.1.master-0.1SNAPSHOT.2017.08.18T0951.el6.src.rpm', 'el', '6'] => 'SRPMS'
+    }
+    arch_transformations.each do |path_array, arch|
+      it "should correctly return #{arch} for #{path_array[0]}" do
+        expect(Pkg::Paths.arch_from_artifact_path(path_array[1], path_array[2], path_array[0])).to eq(arch)
+      end
+    end
+  end
+
   describe '#tag_from_artifact_path' do
     path_tranformations = {
       'pkg/el-7-x86_64/puppet-agent-4.99.0-1.el7.x86_64.rpm' => 'el-7-x86_64',
@@ -19,10 +35,12 @@ describe 'Pkg::Paths' do
       'artifacts/eos/4/PC1/i386/puppet-agent-1.9.0-1.eos4.i386.swix' => 'eos-4-i386',
       'pkg/deb/cumulus/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1cumulus_amd64.deb' => 'cumulus-2.2-amd64',
       'pkg/windows/puppet-agent-1.9.0-x86.msi' => 'windows-2012-x86',
-      'artifacts/ubuntu-16.04-i386/puppetserver_5.0.1-0.1SNAPSHOT.2017.07.27T2346puppetlabs1.debian.tar.gz' => 'ubuntu-16.04-i386',
+      'artifacts/ubuntu-16.04-i386/puppetserver_5.0.1-0.1SNAPSHOT.2017.07.27T2346puppetlabs1.debian.tar.gz' => 'ubuntu-16.04-source',
       'http://saturn.puppetlabs.net/deb_repos/1234abcd/repos/apt/xenial' => 'ubuntu-16.04-i386',
       'http://builds.puppetlabs.lan/puppet-agent/0ce4e6a0448366e01537323bbab77f834d7035c7/repos/el/6/PC1/x86_64/' => 'el-6-x86_64',
-      'http://builds.puppetlabs.lan/puppet-agent/0ce4e6a0448366e01537323bbab77f834d7035c7/repos/el/6/PC1/x86_64/' => 'el-6-x86_64'
+      'http://builds.puppetlabs.lan/puppet-agent/0ce4e6a0448366e01537323bbab77f834d7035c7/repos/el/6/PC1/x86_64/' => 'el-6-x86_64',
+      'pkg/pe/rpm/el-6-i386/pe-puppetserver-2017.3.0.3-1.el6.src.rpm' => 'el-6-SRPMS',
+      'pkg/pe/deb/xenial/pe-puppetserver_2017.3.0.3-1puppet1.orig.tar.gz' => 'ubuntu-16.04-source'
     }
     path_tranformations.each do |pre, post|
       it "should correctly parse path #{pre} to tag #{post}" do

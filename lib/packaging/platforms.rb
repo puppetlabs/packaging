@@ -54,7 +54,7 @@ module Pkg
 
       'sles' => {
         '11' => { :architectures => ['i386', 'x86_64', 's390x'], :repo => true, :package_format => 'rpm', :signature_format => 'v3', },
-        '12' => { :architectures => ['x86_64', 's390x'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
+        '12' => { :architectures => ['x86_64', 's390x', 'ppc64le'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
       },
 
       'solaris' => {

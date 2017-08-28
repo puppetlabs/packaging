@@ -80,7 +80,8 @@ module Pkg
           artifacts = artifacts.split("\n")
           data = {}
           Pkg::Util::Platform.platform_tags.each do |tag|
-            _, _, arch = Pkg::Util::Platform.parse_platform_tag(tag)
+            platform, _, arch = Pkg::Util::Platform.parse_platform_tag(tag)
+            arch = 'ppc' if platform == 'aix'
             package_format = Pkg::Util::Platform.get_attribute(tag, :package_format)
             case package_format
             when 'deb'

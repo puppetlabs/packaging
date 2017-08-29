@@ -70,7 +70,7 @@ task :build_deb, :deb_command, :cow do |t, args|
     work_dir  = Pkg::Util::File.mktemp
     subdir    = 'pe/' if Pkg::Config.build_pe
     codename = /base-(.*)-(.*)\.cow/.match(cow)[1] unless cow.nil?
-    dest_dir  = File.join(Pkg::Config.project_root, "pkg", "#{subdir}deb", codename, subrepo.to_s)
+    dest_dir  = File.join(Pkg::Config.project_root, "pkg", "#{subdir}deb", codename.to_s, subrepo.to_s)
     Pkg::Util::Tool.check_tool(deb_build)
     mkdir_p dest_dir
     deb_args  = { :work_dir => work_dir, :cow => cow }

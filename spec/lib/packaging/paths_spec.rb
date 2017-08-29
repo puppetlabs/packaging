@@ -3,6 +3,7 @@ require 'spec_helper'
 describe 'Pkg::Paths' do
   describe '#arch_from_artifact_path' do
     arch_transformations = {
+      ['artifacts/aix/6.1/PC1/ppc/puppet-agent-5.1.0.79.g782e03c-1.aix6.1.ppc.rpm', 'aix', '6.1'] => 'power',
       ['pkg/el-7-x86_64/puppet-agent-4.99.0-1.el7.x86_64.rpm', 'el', '7'] => 'x86_64',
       ['artifacts/ubuntu-16.04-i386/puppetserver_5.0.1-0.1SNAPSHOT.2017.07.27T2346puppetlabs1.debian.tar.gz', 'ubuntu', '16.04'] => 'source',
       ['http://saturn.puppetlabs.net/deb_repos/1234abcd/repos/apt/xenial', 'ubuntu', '16.04'] => 'i386',
@@ -19,6 +20,7 @@ describe 'Pkg::Paths' do
 
   describe '#tag_from_artifact_path' do
     path_tranformations = {
+      'artifacts/aix/6.1/PC1/ppc/puppet-agent-5.1.0.79.g782e03c-1.aix6.1.ppc.rpm' => 'aix-6.1-power',
       'pkg/el-7-x86_64/puppet-agent-4.99.0-1.el7.x86_64.rpm' => 'el-7-x86_64',
       'pkg/ubuntu-16.04-amd64/puppet-agent_4.99.0-1xenial_amd64.deb' => 'ubuntu-16.04-amd64',
       'pkg/windows-x64/puppet-agent-4.99.0-x64.msi' => 'windows-2012-x64',

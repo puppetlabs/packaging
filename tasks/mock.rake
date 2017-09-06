@@ -66,7 +66,7 @@ def mock_artifact(mock_config, cmd_args, mockfile)
     # configdir anymore either way, so we always clean it up if we're using
     # randomized mockroots.
     #
-    FileUtils.rm_r configdir if randomize
+    rm_r configdir if randomize
   end
 end
 
@@ -228,10 +228,10 @@ def build_rpm_with_mock(mocks)
         rpm.strip!
         arches = Pkg::Platforms.arches_for_platform_version(family, version)
 
-        FileUtils.mkdir_p "pkg/#{family}-#{version}-{srpms,#{arches.join(',')}})"
+        %x(mkdir -p pkg/#{family}-#{version}-{srpms,#{arches.join(',')}})
         case File.basename(rpm)
         when /debuginfo/
-          FileUtils.rm_rf(rpm)
+          rm_rf(rpm)
         when /src\.rpm/
           FileUtils.cp_r(rpm, "pkg/#{family}-#{version}-srpms", { :preserve => true })
         when /noarch/
@@ -314,7 +314,7 @@ def randomize_mock_config_dir(mock_config, mockfile)
   # Setup a mock config dir, copying in our mock config and logging.ini etc
   configdir = setup_mock_config_dir(config)
   # Clean up the directory with the temporary mock config
-  FileUtils.rm_r File.dirname(config)
+  rm_r File.dirname(config)
   return basedir, configdir
 end
 

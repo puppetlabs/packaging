@@ -39,6 +39,8 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
     },
 
     'fedora' => {
+      'f24' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
+      'f25' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
       '24' => { architectures: ['i386', 'x86_64'], repo: true, package_format: 'rpm', signature_format: 'v4' },
       '25' => { architectures: ['i386', 'x86_64'], repo: true, package_format: 'rpm', signature_format: 'v4' }
     },

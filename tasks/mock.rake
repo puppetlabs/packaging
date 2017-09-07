@@ -66,7 +66,7 @@ def mock_artifact(mock_config, cmd_args, mockfile)
     # configdir anymore either way, so we always clean it up if we're using
     # randomized mockroots.
     #
-    FileUtils.rm_r configdir if randomize
+    rm_r configdir if randomize
   end
 end
 
@@ -134,25 +134,6 @@ def mock_el_ver(mock_config)
   version
 end
 
-# Determine the architecture of the target distribution based on the mock config name,
-# e.g. pupent-3.0-el5-i386 = "i386"
-# and "pl-fedora-17-x86_64" = "x86_64"
-#
-def mock_el_arch(mock_config)
-  if Pkg::Config.build_pe
-    # This uses a regex capture instead of splitting to allow the now defunct PE version component to be optional
-    arch = mock_config.match(/^pupent-(\d\.\d-)?([a-z]+)([0-9]+)-(.*)$/)[4]
-  else
-    components = mock_config.split('-')
-    if (components[0] == 'el' || components[0] == 'fedora') || (components[0] == 'pl' && components[1].match(/^\d+$/))
-      arch = components[2]
-    else
-      arch = components[3]
-    end
-  end
-  arch
-end
-
 # Return the RPM family and version for a Vanagon or Packaging repo built project.
 def rpm_family_and_version
   if Pkg::Config.vanagon_project
@@ -207,8 +188,11 @@ def build_rpm_with_mock(mocks)
   mocks.split(' ').each do |mock_config|
     family  = mock_el_family(mock_config)
     version = mock_el_ver(mock_config)
-    mock_arch = mock_el_arch(mock_config)
-    subdir  = Pkg::Paths.repo_name
+    subdir  = if Pkg::Config.yum_repo_name
+                Pkg::Config.yum_repo_name
+              else
+                Pkg::Util::Version.is_final? ? 'products' : 'devel'
+              end
     bench = Benchmark.realtime do
       # Set up the rpmbuild dir in a temp space, with our tarball and spec
       workdir = prep_rpm_build_dir
@@ -226,22 +210,52 @@ def build_rpm_with_mock(mocks)
 
       rpms.each do |rpm|
         rpm.strip!
-        arches = Pkg::Platforms.arches_for_platform_version(family, version)
 
-        FileUtils.mkdir_p "pkg/#{family}-#{version}-{srpms,#{arches.join(',')}})"
-        case File.basename(rpm)
-        when /debuginfo/
-          FileUtils.rm_rf(rpm)
-        when /src\.rpm/
-          FileUtils.cp_r(rpm, "pkg/#{family}-#{version}-srpms", { :preserve => true })
-        when /noarch/
-          FileUtils.cp_r(rpm, "pkg/#{family}-#{version}-#{arches[0]}", { :preserve => true })
-          arches.each do |arch|
-            next if arch == arches[0]
-            FileUtils.ln("pkg/#{family}-#{version}-#{arches[0]}/#{File.basename(rpm)}", "pkg/#{family}-#{version}-#{arch}/", :force => false, :verbose => true)
+        if Pkg::Config.build_pe
+          %x(mkdir -p pkg/pe/rpm/#{family}-#{version}-{srpms,i386,x86_64})
+          case File.basename(rpm)
+            when /debuginfo/
+              rm_rf(rpm)
+            when /src\.rpm/
+              FileUtils.cp_r(rpm, "pkg/pe/rpm/#{family}-#{version}-srpms", { :preserve => true })
+            when /i.?86/
+              FileUtils.cp_r(rpm, "pkg/pe/rpm/#{family}-#{version}-i386", { :preserve => true })
+            when /x86_64/
+              FileUtils.cp_r(rpm, "pkg/pe/rpm/#{family}-#{version}-x86_64", { :preserve => true })
+            when /noarch/
+              FileUtils.cp_r(rpm, "pkg/pe/rpm/#{family}-#{version}-i386", { :preserve => true })
+              FileUtils.ln("pkg/pe/rpm/#{family}-#{version}-i386/#{File.basename(rpm)}", "pkg/pe/rpm/#{family}-#{version}-x86_64/", :force => true, :verbose => true)
+          end
+        elsif subdir == 'PC1' || !Pkg::Config.yum_repo_name
+          %x(mkdir -p pkg/#{family}/#{version}/#{subdir}/{SRPMS,i386,x86_64})
+          case File.basename(rpm)
+            when /debuginfo/
+              rm_rf(rpm)
+            when /src\.rpm/
+              FileUtils.cp_r(rpm, "pkg/#{family}/#{version}/#{subdir}/SRPMS", { :preserve => true })
+            when /i.?86/
+              FileUtils.cp_r(rpm, "pkg/#{family}/#{version}/#{subdir}/i386", { :preserve => true })
+            when /x86_64/
+              FileUtils.cp_r(rpm, "pkg/#{family}/#{version}/#{subdir}/x86_64", { :preserve => true })
+            when /noarch/
+              FileUtils.cp_r(rpm, "pkg/#{family}/#{version}/#{subdir}/i386", { :preserve => true })
+              FileUtils.ln("pkg/#{family}/#{version}/#{subdir}/i386/#{File.basename(rpm)}", "pkg/#{family}/#{version}/#{subdir}/x86_64/", :force => true, :verbose => true)
           end
         else
-          FileUtils.cp_r(rpm, "pkg/#{family}-#{version}-#{mock_arch}", { :preserve => true })
+          %x(mkdir -p pkg/#{subdir}/#{family}/#{version}/{SRPMS,i386,x86_64})
+          case File.basename(rpm)
+            when /debuginfo/
+              rm_rf(rpm)
+            when /src\.rpm/
+              FileUtils.cp_r(rpm, "pkg/#{subdir}/#{family}/#{version}/SRPMS", { :preserve => true })
+            when /i.?86/
+              FileUtils.cp_r(rpm, "pkg/#{subdir}/#{family}/#{version}/i386", { :preserve => true })
+            when /x86_64/
+              FileUtils.cp_r(rpm, "pkg/#{subdir}/#{family}/#{version}/x86_64", { :preserve => true })
+            when /noarch/
+              FileUtils.cp_r(rpm, "pkg/#{subdir}/#{family}/#{version}/i386", { :preserve => true })
+              FileUtils.ln("pkg/#{subdir}/#{family}/#{version}/i386/#{File.basename(rpm)}", "pkg/#{subdir}/#{family}/#{version}/x86_64/", :force => true, :verbose => true)
+          end
         end
       end
       # To avoid filling up the system with our random mockroots, we should
@@ -314,7 +328,7 @@ def randomize_mock_config_dir(mock_config, mockfile)
   # Setup a mock config dir, copying in our mock config and logging.ini etc
   configdir = setup_mock_config_dir(config)
   # Clean up the directory with the temporary mock config
-  FileUtils.rm_r File.dirname(config)
+  rm_r File.dirname(config)
   return basedir, configdir
 end
 

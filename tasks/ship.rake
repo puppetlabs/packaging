@@ -28,9 +28,16 @@ namespace :pl do
 
     desc "Update remote apt repository on '#{Pkg::Config.apt_signing_server}'"
     task update_apt_repo: 'pl:fetch' do
+      if Pkg::Util::Version.final?
+        path = Pkg::Config.apt_repo_path
+        cmd = Pkg::Config.apt_repo_command
+      else
+        path = Pkg::Config.nonfinal_apt_repo_path || Pkg::Config.apt_repo_path
+        cmd = Pkg::Config.nonfinal_apt_repo_command || Pkg::Config.apt_repo_command
+      end
       apt_whitelist = {
         __REPO_NAME__: Pkg::Paths.repo_name,
-        __REPO_PATH__: Pkg::Config.apt_repo_path,
+        __REPO_PATH__: path,
         __REPO_URL__: Pkg::Config.apt_repo_url,
         __REPO_HOST__: Pkg::Config.apt_host,
         __APT_PLATFORMS__: Pkg::Config.apt_releases.join(' '),
@@ -39,11 +46,11 @@ namespace :pl do
 
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
       if Pkg::Util.ask_yes_or_no
-        if Pkg::Config.apt_repo_command
+        if cmd
           Pkg::Util::Net.remote_ssh_cmd(
             Pkg::Config.apt_signing_server,
             Pkg::Util::Misc.search_and_replace(
-              Pkg::Config.apt_repo_command,
+              cmd,
               apt_whitelist
             )
           )
@@ -238,11 +245,11 @@ namespace :pl do
   desc "Ship cow-built debs to #{Pkg::Config.apt_signing_server}"
   task ship_debs: 'pl:fetch' do
     if Pkg::Util::Version.final?
-      path = Pkg::Config.apt_repo_path
+      staging_path = Pkg::Config.apt_repo_staging_path
     else
-      path = Pkg::Config.nonfinal_apt_repo_path || Pkg::Config.apt_repo_path
+      staging_path = Pkg::Config.nonfinal_apt_repo_staging_path || Pkg::Config.apt_repo_staging_path
     end
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.debian.tar.gz', 'pkg/**/*.orig.tar.gz', 'pkg/**/*.dsc', 'pkg/**/*.deb', 'pkg/**/*.changes'], Pkg::Config.apt_signing_server, path, chattr: false)
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.debian.tar.gz', 'pkg/**/*.orig.tar.gz', 'pkg/**/*.dsc', 'pkg/**/*.deb', 'pkg/**/*.changes'], Pkg::Config.apt_signing_server, staging_path, chattr: false)
 
     # We need to iterate through all the supported platforms here because of
     # how deb repos are set up. Each codename will have its own link from the
@@ -250,7 +257,7 @@ namespace :pl do
     # we don't care about is architecture, so we just grab the first supported
     # architecture for the codename we're working with at the moment.
     Pkg::Platforms.codenames('deb').each do |codename|
-      Pkg::Util::Ship.create_rolling_repo_link(Pkg::Platforms.codename_to_tags(codename)[0], Pkg::Config.apt_signing_server, path)
+      Pkg::Util::Ship.create_rolling_repo_link(Pkg::Platforms.codename_to_tags(codename)[0], Pkg::Config.apt_signing_server, staging_path)
     end
   end
 

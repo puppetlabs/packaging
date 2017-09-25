@@ -28,9 +28,16 @@ namespace :pl do
 
     desc "Update remote apt repository on '#{Pkg::Config.apt_signing_server}'"
     task update_apt_repo: 'pl:fetch' do
+      if Pkg::Util::Version.final?
+        path = Pkg::Config.apt_repo_path
+        cmd = Pkg::Config.apt_repo_command
+      else
+        path = Pkg::Config.nonfinal_apt_repo_path || Pkg::Config.apt_repo_path
+        cmd = Pkg::Config.nonfinal_apt_repo_command || Pkg::Config.apt_repo_command
+      end
       apt_whitelist = {
         __REPO_NAME__: Pkg::Paths.repo_name,
-        __REPO_PATH__: Pkg::Config.apt_repo_path,
+        __REPO_PATH__: path,
         __REPO_URL__: Pkg::Config.apt_repo_url,
         __REPO_HOST__: Pkg::Config.apt_host,
         __APT_PLATFORMS__: Pkg::Config.apt_releases.join(' '),
@@ -39,11 +46,11 @@ namespace :pl do
 
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
       if Pkg::Util.ask_yes_or_no
-        if Pkg::Config.apt_repo_command
+        if cmd
           Pkg::Util::Net.remote_ssh_cmd(
             Pkg::Config.apt_signing_server,
             Pkg::Util::Misc.search_and_replace(
-              Pkg::Config.apt_repo_command,
+              cmd,
               apt_whitelist
             )
           )
@@ -217,7 +224,12 @@ namespace :pl do
 
   desc "Ship mocked rpms to #{Pkg::Config.yum_staging_server}"
   task ship_rpms: 'pl:fetch' do
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.rpm', 'pkg/**/*.srpm'], Pkg::Config.yum_staging_server, Pkg::Config.yum_repo_path)
+    if Pkg::Util::Version.final?
+      path = Pkg::Config.yum_repo_path
+    else
+      path = Pkg::Config.nonfinal_yum_repo_path || Pkg::Config.yum_repo_path
+    end
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.rpm', 'pkg/**/*.srpm'], Pkg::Config.yum_staging_server, path)
 
     # I really don't care which one we grab, it just has to be some supported
     # version and architecture from the `el` hash. So here we're just grabbing
@@ -225,14 +237,19 @@ namespace :pl do
     # elegant, I know, but effective.
     Pkg::Platforms::PLATFORM_INFO['el'].each do |key, value|
       generic_platform_tag = "el-#{key}-#{value[:architectures][0]}"
-      Pkg::Util::Ship.create_rolling_repo_link(generic_platform_tag, Pkg::Config.yum_staging_server, Pkg::Config.yum_repo_path)
+      Pkg::Util::Ship.create_rolling_repo_link(generic_platform_tag, Pkg::Config.yum_staging_server, path)
       break
     end
   end
 
   desc "Ship cow-built debs to #{Pkg::Config.apt_signing_server}"
   task ship_debs: 'pl:fetch' do
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.debian.tar.gz', 'pkg/**/*.orig.tar.gz', 'pkg/**/*.dsc', 'pkg/**/*.deb', 'pkg/**/*.changes'], Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path, chattr: false)
+    if Pkg::Util::Version.final?
+      staging_path = Pkg::Config.apt_repo_staging_path
+    else
+      staging_path = Pkg::Config.nonfinal_apt_repo_staging_path || Pkg::Config.apt_repo_staging_path
+    end
+    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.debian.tar.gz', 'pkg/**/*.orig.tar.gz', 'pkg/**/*.dsc', 'pkg/**/*.deb', 'pkg/**/*.changes'], Pkg::Config.apt_signing_server, staging_path, chattr: false)
 
     # We need to iterate through all the supported platforms here because of
     # how deb repos are set up. Each codename will have its own link from the
@@ -240,7 +257,7 @@ namespace :pl do
     # we don't care about is architecture, so we just grab the first supported
     # architecture for the codename we're working with at the moment.
     Pkg::Platforms.codenames('deb').each do |codename|
-      Pkg::Util::Ship.create_rolling_repo_link(Pkg::Platforms.codename_to_tags(codename)[0], Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_staging_path)
+      Pkg::Util::Ship.create_rolling_repo_link(Pkg::Platforms.codename_to_tags(codename)[0], Pkg::Config.apt_signing_server, staging_path)
     end
   end
 
@@ -317,7 +334,12 @@ namespace :pl do
   task :ship_svr4 do
     Pkg::Util::Execution.retry_on_fail(:times => 3) do
       if File.directory?("pkg/solaris/10")
-        Pkg::Util::Ship.ship_pkgs(['pkg/**/*.pkg.gz'], Pkg::Config.svr4_host, Pkg::Config.svr4_path)
+        if Pkg::Util::Version.final?
+          path = Pkg::Config.svr4_path
+        else
+          path = Pkg::Config.nonfinal_svr4_path || Pkg::Config.svr4_path
+        end
+        Pkg::Util::Ship.ship_pkgs(['pkg/**/*.pkg.gz'], Pkg::Config.svr4_host, path)
       end
     end
   end
@@ -326,7 +348,12 @@ namespace :pl do
   task :ship_p5p do
     Pkg::Util::Execution.retry_on_fail(:times => 3) do
       if File.directory?("pkg/solaris/11")
-        Pkg::Util::Ship.ship_pkgs(['pkg/**/*.p5p'], Pkg::Config.p5p_host, Pkg::Config.p5p_path)
+        if Pkg::Util::Version.final?
+          path = Pkg::Config.p5p_path
+        else
+          path = Pkg::Config.nonfinal_p5p_path || Pkg::Config.p5p_path
+        end
+        Pkg::Util::Ship.ship_pkgs(['pkg/**/*.p5p'], Pkg::Config.p5p_host, path)
       end
     end
   end
@@ -345,6 +372,7 @@ namespace :pl do
     else
       path = Pkg::Config.dmg_path
     end
+    path = Pkg::Config.nonfinal_dmg_path if Pkg::Config.nonfinal_dmg_path && !Pkg::Util::Version.final?
 
     Pkg::Util::Ship.ship_pkgs(['pkg/**/*.dmg'], Pkg::Config.dmg_staging_server, path)
 
@@ -382,6 +410,7 @@ namespace :pl do
     else
       path = Pkg::Config.swix_path
     end
+    path = Pkg::Config.nonfinal_swix_path if Pkg::Config.nonfinal_swix_path && !Pkg::Util::Version.final?
 
     Pkg::Util::Ship.ship_pkgs(['pkg/**/*.swix*'], Pkg::Config.swix_staging_server, path)
 
@@ -427,6 +456,7 @@ namespace :pl do
     else
       path = Pkg::Config.msi_path
     end
+    path = Pkg::Config.nonfinal_msi_path if Pkg::Config.nonfinal_msi_path && !Pkg::Util::Version.final?
 
     Pkg::Util::Ship.ship_pkgs(['pkg/**/*.msi'], Pkg::Config.msi_staging_server, path, excludes: ["#{Pkg::Config.project}-x(86|64).msi"])
 

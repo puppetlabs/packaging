@@ -18,6 +18,7 @@ module Pkg
   require 'packaging/gem'
   require 'packaging/msi'
   require 'packaging/repo'
+  require 'packaging/artifactory'
 
   # Load configuration defaults
   Pkg::Config.load_defaults

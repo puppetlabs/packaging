@@ -176,7 +176,7 @@ module Pkg::Rpm::Repo
         config << ["enabled=1"]
         if signed
           config << ["gpgcheck=1"]
-          config << ["gpgkey=http://#{Pkg::Config.builds_server}/#{Pkg::Util::Gpg.key}"]
+          config << ["gpgkey=http://#{Pkg::Config.builds_server}/#{Pkg::Config.gpg_key}"]
         else
           config << ["gpgcheck=0"]
         end

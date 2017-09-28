@@ -15,7 +15,16 @@ module Pkg::Deb::Repo
     # when initially creating and again when signing reprepro repos. Generally
     # we can safely default to having this as an empty string, just not for
     # reprepro. We also need to know this when we create the repo_config files.
-    DEBIAN_REPO_NAME = Pkg::Paths.repo_name.empty? ? 'main' : Pkg::Paths.repo_name
+    #
+    # Reprepro is really only used for a handful of things. We do not use it
+    # when we ship to the public repos. We use it for internal repos, like
+    # those that are promoted into enterprise-dist. We want to enable the old
+    # repo names, i.e., PC1, if set.
+    if Pkg::Config.apt_repo_name
+      DEBIAN_REPO_NAME = Pkg::Config.apt_repo_name
+    else
+      DEBIAN_REPO_NAME = Pkg::Paths.repo_name.empty? ? 'main' : Pkg::Paths.repo_name
+    end
 
     def base_url
       "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"

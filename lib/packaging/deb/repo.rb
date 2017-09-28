@@ -11,19 +11,12 @@ module Pkg::Deb::Repo
     # when we initially create the repos and when we sign the repos.
     DEBIAN_PACKAGING_ARCHES = ['i386', 'amd64', 'arm64', 'armel', 'armhf', 'powerpc', 'ppc64el', 'sparc', 'mips', 'mipsel']
 
-    # We cannot have the repo name be an empty string. This value is only used
-    # when initially creating and again when signing reprepro repos. Generally
-    # we can safely default to having this as an empty string, just not for
-    # reprepro. We also need to know this when we create the repo_config files.
-    #
-    # Reprepro is really only used for a handful of things. We do not use it
-    # when we ship to the public repos. We use it for internal repos, like
-    # those that are promoted into enterprise-dist. We want to enable the old
-    # repo names, i.e., PC1, if set.
-    if Pkg::Config.apt_repo_name
-      DEBIAN_REPO_NAME = Pkg::Config.apt_repo_name
-    else
-      DEBIAN_REPO_NAME = Pkg::Paths.repo_name.empty? ? 'main' : Pkg::Paths.repo_name
+    def reprepro_repo_name
+      if Pkg::Config.apt_repo_name
+        Pkg::Config.apt_repo_name
+      else
+        Pkg::Paths.repo_name.empty? ? 'main' : Pkg::Paths.repo_name
+      end
     end
 
     def base_url
@@ -59,6 +52,7 @@ module Pkg::Deb::Repo
       # We want to exclude index and robots files and only include the http: prefixed elements
       repo_urls = stdout.split.uniq.reject { |x| x =~ /\?|index|robots/ }.select { |x| x =~ /http:/ }.map { |x| x.chomp('/') }
 
+
       # Create apt sources.list files that can be added to hosts for installing
       # these packages. We use the list of distributions to create a config
       # file for every distribution.
@@ -71,7 +65,7 @@ module Pkg::Deb::Repo
         platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
         codename = Pkg::Platforms.codename_for_platform_version(platform, version)
         repoconfig = ["# Packages for #{Pkg::Config.project} built from ref #{Pkg::Config.ref}",
-                      "deb #{url} #{codename} #{DEBIAN_REPO_NAME}"]
+                      "deb #{url} #{codename} #{reprepro_repo_name}"]
         config = File.join("pkg", target, "deb", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{codename}.list")
         File.open(config, 'w') { |f| f.puts repoconfig }
       end
@@ -112,7 +106,7 @@ Origin: Puppet Labs
 Label: Puppet Labs
 Codename: #{codename}
 Architectures: #{(DEBIAN_PACKAGING_ARCHES + arches).uniq.join(' ')}
-Components: #{DEBIAN_REPO_NAME}
+Components: #{reprepro_repo_name}
 Description: Apt repository for acceptance testing" >> conf/distributions && )
 
         cmd << 'reprepro=$(which reprepro) && '
@@ -183,7 +177,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions && )
 Label: Puppet Labs
 Codename: #{dist}
 Architectures: #{(DEBIAN_PACKAGING_ARCHES + arches).uniq.join(' ')}
-Components: #{DEBIAN_REPO_NAME}
+Components: #{reprepro_repo_name}
 Description: #{message} for #{dist}
 SignWith: #{Pkg::Config.gpg_key}"
             end

@@ -21,7 +21,8 @@ namespace :pl do
       remote_repo   = Pkg::Util::Net.remote_bootstrap(signing_server, 'HEAD', nil, signing_bundle)
       build_params  = Pkg::Util::Net.remote_buildparams(signing_server, Pkg::Config)
       Pkg::Util::Net.rsync_to('repos', signing_server, remote_repo)
-      Pkg::Util::Net.remote_ssh_cmd(signing_server, "cd #{remote_repo} ; rake pl:jenkins:sign_repos GPG_KEY=#{Pkg::Config.gpg_key} GPG_NONFINAL_KEY=#{Pkg::Config.gpg_nonfinal_key} PARAMS_FILE=#{build_params}")
+      nonfinal_key = "GPG_NONFINAL_KEY=#{Pkg::Config.gpg_nonfinal_key}" if Pkg::Config.gpg_nonfinal_key && !Pkg::Config.gpg_nonfinal_key.empty?
+      Pkg::Util::Net.remote_ssh_cmd(signing_server, "cd #{remote_repo} ; rake pl:jenkins:sign_repos GPG_KEY=#{Pkg::Config.gpg_key} #{nonfinal_key} PARAMS_FILE=#{build_params}")
       Pkg::Util::Net.rsync_from("#{remote_repo}/repos/", signing_server, target)
       Pkg::Util::Net.remote_ssh_cmd(signing_server, "rm -rf #{remote_repo}")
       Pkg::Util::Net.remote_ssh_cmd(signing_server, "rm #{build_params}")

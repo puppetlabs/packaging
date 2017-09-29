@@ -11,7 +11,7 @@ namespace :pl do
         __REPO_NAME__: Pkg::Paths.repo_name,
         __REPO_PATH__: Pkg::Config.yum_repo_path,
         __REPO_HOST__: Pkg::Config.yum_staging_server,
-        __GPG_KEY__: Pkg::Config.gpg_key
+        __GPG_KEY__: Pkg::Util::Gpg.key
       }
 
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
@@ -41,7 +41,7 @@ namespace :pl do
         __REPO_URL__: Pkg::Config.apt_repo_url,
         __REPO_HOST__: Pkg::Config.apt_host,
         __APT_PLATFORMS__: Pkg::Config.apt_releases.join(' '),
-        __GPG_KEY__: Pkg::Config.gpg_key
+        __GPG_KEY__: Pkg::Util::Gpg.key
       }
 
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
@@ -529,14 +529,14 @@ namespace :pl do
     end
 
     # Check for GPG on linux-y systems
-    gpg_errs << Pkg::Util::Net.check_host_gpg(Pkg::Config.apt_signing_server, Pkg::Config.gpg_key)
-    gpg_errs << Pkg::Util::Net.check_host_gpg(Pkg::Config.distribution_server, Pkg::Config.gpg_key)
+    gpg_errs << Pkg::Util::Net.check_host_gpg(Pkg::Config.apt_signing_server, Pkg::Util::Gpg.key)
+    gpg_errs << Pkg::Util::Net.check_host_gpg(Pkg::Config.distribution_server, Pkg::Util::Gpg.key)
     gpg_errs.flatten!
     # ignore gpg errors for hosts we couldn't ssh into
     gpg_errs -= ssh_errs
     unless gpg_errs.empty?
       gpg_errs.each do |host|
-        errs << "Secret key #{Pkg::Config.gpg_key} not found on #{host}"
+        errs << "Secret key #{Pkg::Util::Gpg.key} not found on #{host}"
       end
     end
 

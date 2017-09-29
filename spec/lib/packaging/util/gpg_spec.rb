@@ -11,6 +11,13 @@ describe "Pkg::Util::Gpg" do
     Pkg::Config.gpg_key = gpg_key
   end
 
+  describe '#key' do
+    it "fails if Pkg::Config.gpg_key isn't set" do
+      allow(Pkg::Config).to receive(:gpg_key).and_return(nil)
+      expect { Pkg::Util::Gpg.key }.to raise_error(RuntimeError)
+    end
+  end
+
   describe '#kill_keychain' do
     it "doesn't reload the keychain if already loaded" do
       Pkg::Util::Gpg.instance_variable_set("@keychain_loaded", TRUE)

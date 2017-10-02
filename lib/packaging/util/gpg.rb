@@ -7,7 +7,7 @@ module Pkg::Util::Gpg
     # files that are generated with this repo use the default gpg key to
     # reflect that.
     def key
-      fail "You need to set `gpg_key` in your build defaults." unless Pkg::Config.gpg_key
+      fail "You need to set `gpg_key` in your build defaults." unless Pkg::Config.gpg_key && !Pkg::Config.gpg_key.empty?
       Pkg::Config.gpg_key
     end
 

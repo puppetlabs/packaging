@@ -16,6 +16,10 @@ describe "Pkg::Util::Gpg" do
       allow(Pkg::Config).to receive(:gpg_key).and_return(nil)
       expect { Pkg::Util::Gpg.key }.to raise_error(RuntimeError)
     end
+    it "fails if Pkg::Config.gpg_key is an empty string" do
+      allow(Pkg::Config).to receive(:gpg_key).and_return('')
+      expect { Pkg::Util::Gpg.key }.to raise_error(RuntimeError)
+    end
   end
 
   describe '#kill_keychain' do

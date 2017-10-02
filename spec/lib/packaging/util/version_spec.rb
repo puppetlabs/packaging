@@ -102,4 +102,22 @@ describe 'Pkg::Util::Version' do
       expect(Pkg::Util::Version.final?).to be false
     end
   end
+
+  context "#dash_version" do
+    versions = {
+      '5.3.0' => '5.3.0',
+      '5.3.0-18-gfbddc8f' => '5.3.0-18',
+      '5.3.0-18-gfbddc8f-dirty' => '5.3.0-18-dirty',
+      '0.7.0-rc1' => '0.7.0-rc1',
+      '0.7.0-rc1-63-g51ccc51' => '0.7.0-rc1-63',
+      '0.7.0-rc1-63-g51ccc51-dirty'=> '0.7.0-rc1-63-dirty',
+    }
+    versions.each do |describe, reformatted|
+      it "correctly returns #{reformatted} when #{describe} is the git describe version" do
+        allow(Pkg::Util::Git).to receive(:ref_type).and_return 'sha'
+        allow(Pkg::Util::Git).to receive(:describe).and_return describe
+        expect(Pkg::Util::Version.dash_version).to eq reformatted
+      end
+    end
+  end
 end

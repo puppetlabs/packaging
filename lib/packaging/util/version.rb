@@ -30,8 +30,24 @@ module Pkg::Util::Version
     end
 
     # This is used to set Pkg::Config.version
+    # describe can return a number of potential formats
+    # 5.3.0
+    # 5.3.0-18-gfbddc8f
+    # 5.3.0-18-gfbddc8f-dirty
+    # 0.7.0-rc1
+    # 0.7.0-rc1-63-g51ccc51
+    # 0.7.0-rc1-63-g51ccc51-dirty
+    #
+    # we want all of it except the `gfbddc8f` part.
     def dash_version
-      Pkg::Util::Git.describe
+      describe = Pkg::Util::Git.describe
+      info = describe.split('-')
+
+      if Pkg::Util::Git.ref_type == "tag"
+        describe
+      else
+        info.reject { |d| d.match(/^g.{7}/) }.join('-')
+      end
     end
 
     # This version is used for gems and platform types that do not support

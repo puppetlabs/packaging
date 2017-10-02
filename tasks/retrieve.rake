@@ -20,7 +20,7 @@ namespace :pl do
       package_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
       if wget = Pkg::Util::Tool.find_tool("wget")
         # Grab the <ref>.yaml file
-        sh "#{wget} --quiet -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} #{package_url}/#{remote_target}/#{Pkg::Config.ref}.yaml"
+        sh "#{wget} --quiet --recursive --no-parent --no-host-directories --level=0 --cut-dirs 3 --directory-prefix=#{local_target} #{package_url}/#{remote_target}/#{Pkg::Config.ref}.yaml"
         yaml_path = File.join(local_target, "#{Pkg::Config.ref}.yaml")
         if Pkg::Config.foss_only && !Pkg::Config.foss_platforms
           warn "FOSS_ONLY specified, but I don't know anything about FOSS_PLATFORMS. Fetch everything?"
@@ -44,7 +44,7 @@ namespace :pl do
         if Pkg::Config.foss_only && Pkg::Config.foss_platforms && remote_target == 'artifacts' && File.readable?(yaml_path)
           platform_data = Pkg::Util::Serialization.load_yaml(yaml_path)[:platform_data]
           platform_data.each do |platform, paths|
-            sh "#{wget} --quiet -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' #{package_url}/#{remote_target}/#{paths[:artifact]}" if Pkg::Config.foss_platforms.include?(platform)
+            sh "#{wget} --quiet --recursive --no-parent --no-host-directories --level=0 --cut-dirs 3 --directory-prefix=#{local_target} --reject 'index*' #{package_url}/#{remote_target}/#{paths[:artifact]}" if Pkg::Config.foss_platforms.include?(platform)
           end
         else
           # For the next person who needs to look these flags up:
@@ -55,7 +55,7 @@ namespace :pl do
           # -nH = Discard http://#{Pkg::Config.builds_server} when saving to disk
           # --reject = Reject all hits that match the supplied regex
           # -P = where to save to disk (defaults to ./)
-          sh "#{wget} --quiet -r -np -nH -l 0 --cut-dirs 3 -P #{local_target} --reject 'index*' #{package_url}/#{remote_target}/"
+          sh "#{wget} --quiet --recursive --no-parent --no-host-directories --level=0 --cut-dirs 3 --directory-prefix=#{local_target} --reject 'index*' #{package_url}/#{remote_target}/"
         end
       else
         warn "Could not find `wget` tool. Falling back to rsyncing from #{Pkg::Config.distribution_server}"

@@ -84,6 +84,13 @@ module Pkg
             platform, _, arch = Pkg::Util::Platform.parse_platform_tag(tag)
             arch = 'ppc' if platform == 'aix'
             package_format = Pkg::Platforms.get_attribute(tag, :package_format)
+
+            # Skip this if it's an unversioned MSI. We create these to help
+            # beaker install the msi without having to know any version
+            # information, but we should report the versioned artifact in
+            # platform_data
+            next if platform == 'windows' && artifact == "#{self.project}-#{arch}.#{package_format}"
+
             case package_format
             when 'deb'
               repo_config = "../repo_configs/deb/pl-#{self.project}-#{self.ref}-#{Pkg::Platforms.get_attribute(tag, :codename)}.list"

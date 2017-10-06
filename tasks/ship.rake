@@ -598,6 +598,17 @@ namespace :pl do
   # server path. That way we can separate out built artifacts from
   # signed/actually shipped artifacts e.g. $path/shipped/ or $path/artifacts.
   namespace :jenkins do
+    desc 'ship pkg directory contents to artifactory'
+    task :ship_to_artifactory, :local_dir do |_t, args|
+      Pkg::Util::RakeUtils.invoke_task('pl:fetch')
+      local_dir = args.local_dir || 'pkg'
+      Dir.glob("#{local_dir}/**/*").reject { |e| File.directory? e }.each do |artifact|
+        platform_tag = Pkg::Paths.tag_from_artifact_path(artifact, false) || 'generic'
+        artifactory = Pkg::Artifactory.new(Pkg::Config.project, Pkg::Config.ref, platform_tag)
+        artifactory.deploy_package(artifact)
+      end
+    end
+
     desc 'Ship pkg directory contents to distribution server'
     task :ship, :target, :local_dir do |_t, args|
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')

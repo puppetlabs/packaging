@@ -5,7 +5,6 @@ module Pkg
     # Each element in this hash
     PLATFORM_INFO = {
       'aix' => {
-        '5.3' => { :architectures => ['power'], :repo => false, :package_format => 'rpm', },
         '6.1' => { :architectures => ['power'], :repo => false, :package_format => 'rpm', },
         '7.1' => { :architectures => ['power'], :repo => false, :package_format => 'rpm', },
       },
@@ -36,16 +35,10 @@ module Pkg
       },
 
       'fedora' => {
-        'f24' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
         'f25' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
         'f26' => { :architectures => ['x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
-        '24' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
         '25' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
         '26' => { :architectures => ['x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
-      },
-
-      'huaweios' => {
-        '6' => { :codename => 'huaweios', :architectures => ['powerpc'], :repo => true, :package_format => 'deb', },
       },
 
       'osx' => {
@@ -67,7 +60,6 @@ module Pkg
       'ubuntu' => {
         '14.04' => { :codename => 'trusty', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
         '16.04' => { :codename => 'xenial', :architectures => ['i386', 'amd64', 'ppc64el'], :repo => true, :package_format => 'deb', },
-        '16.10' => { :codename => 'yakkety', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
       },
 
       'windows' => {

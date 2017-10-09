@@ -29,7 +29,6 @@ describe 'Pkg::Paths' do
       'pkg/pe/rpm/el-6-i386/pe-puppetserver-2017.3.0.3-1.el6.noarch.rpm' => 'el-6-i386',
       'pkg/pe/deb/xenial/pe-puppetserver_2017.3.0.3-1puppet1_all.deb' => 'ubuntu-16.04-i386',
       'pkg/pe/deb/xenial/super-trusty-package_1.0.0-1puppet1_all.deb' => 'ubuntu-16.04-i386',
-      'artifacts/fedora/24/puppet/x86_64/puppet-release-1.0.0-1.fc24.noarch.rpm' => 'fedora-24-x86_64',
       'artifacts/deb/wheezy/PC1/puppetdb_4.3.1-1puppetlabs1_all.deb' => 'debian-7-i386',
       'pkg/el/7/PC1/x86_64/puppetdb-4.3.1-1.el7.noarch.rpm' => 'el-7-x86_64',
       'pkg/apple/10.11/PC1/x86_64/puppet-agent-1.9.0-1.osx10.11.dmg' => 'osx-10.11-x86_64',

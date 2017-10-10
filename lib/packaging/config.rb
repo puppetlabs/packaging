@@ -81,7 +81,7 @@ module Pkg
           data = {}
           artifacts.each do |artifact|
             tag = Pkg::Paths.tag_from_artifact_path(artifact)
-            platform, _, arch = Pkg::Util::Platform.parse_platform_tag(tag)
+            platform, version, arch = Pkg::Util::Platform.parse_platform_tag(tag)
             arch = 'ppc' if platform == 'aix'
             package_format = Pkg::Platforms.get_attribute(tag, :package_format)
 
@@ -90,6 +90,14 @@ module Pkg
             # information, but we should report the versioned artifact in
             # platform_data
             next if platform == 'windows' && artifact == "#{self.project}-#{arch}.#{package_format}"
+            # Sometimes we have source or debug packages. We don't want to save
+            # these paths in favor of the artifact paths.
+            if platform == 'solaris'
+              next if version == '10' && File.extname(artifact) != '.gz'
+              next if version == '11' && File.extname(artifact) != '.p5p'
+            else
+              next if File.extname(artifact) != ".#{package_format}"
+            end
 
             case package_format
             when 'deb'

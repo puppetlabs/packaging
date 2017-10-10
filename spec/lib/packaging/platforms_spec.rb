@@ -3,7 +3,7 @@ require 'spec_helper'
 describe 'Pkg::Platforms' do
   describe '#by_package_format' do
     it 'should return an array of platforms that use a given format' do
-      deb_platforms = ['cumulus', 'debian', 'huaweios', 'ubuntu']
+      deb_platforms = ['cumulus', 'debian', 'ubuntu']
       rpm_platforms = ['aix', 'cisco-wrlinux', 'el', 'fedora', 'sles']
       expect(Pkg::Platforms.by_package_format('deb')).to match_array(deb_platforms)
       expect(Pkg::Platforms.by_package_format('rpm')).to match_array(rpm_platforms)
@@ -19,7 +19,7 @@ describe 'Pkg::Platforms' do
 
   describe '#supported_platforms' do
     it 'should return all supported platforms' do
-      platforms = ['aix', 'cisco-wrlinux', 'cumulus', 'debian', 'el', 'eos', 'fedora', 'huaweios', 'osx', 'sles', 'solaris', 'ubuntu', 'windows']
+      platforms = ['aix', 'cisco-wrlinux', 'cumulus', 'debian', 'el', 'eos', 'fedora', 'osx', 'sles', 'solaris', 'ubuntu', 'windows']
       expect(Pkg::Platforms.supported_platforms).to match_array(platforms)
     end
   end
@@ -32,7 +32,7 @@ describe 'Pkg::Platforms' do
 
   describe '#codenames' do
     it 'should return all codenames for a given platform' do
-      codenames = ['cumulus', 'wheezy', 'jessie', 'stretch', 'huaweios', 'trusty', 'xenial', 'yakkety']
+      codenames = ['cumulus', 'wheezy', 'jessie', 'stretch', 'trusty', 'xenial']
       expect(Pkg::Platforms.codenames('deb')).to match_array(codenames)
     end
   end

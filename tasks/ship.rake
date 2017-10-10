@@ -604,7 +604,7 @@ namespace :pl do
       local_dir = args.local_dir || 'pkg'
       Dir.glob("#{local_dir}/**/*").reject { |e| File.directory? e }.each do |artifact|
         platform_tag = Pkg::Paths.tag_from_artifact_path(artifact, false) || 'generic'
-        artifactory = Pkg::Artifactory.new(Pkg::Config.project, Pkg::Config.ref, platform_tag)
+        artifactory = Pkg::ManageArtifactory.new(Pkg::Config.project, Pkg::Config.ref, platform_tag)
         artifactory.deploy_package(artifact)
       end
     end

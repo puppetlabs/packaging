@@ -73,7 +73,7 @@ describe 'artifactory.rb' do
   }
 
   platform_tags.each do |platform_tag, platform_tag_data|
-    artifact = Pkg::Artifactory.new(project, project_version, platform_tag, {:repo_base => default_repo_name, :artifactory_url => artifactory_url})
+    artifact = Pkg::ManageArtifactory.new(project, project_version, platform_tag, {:repo_base => default_repo_name, :artifactory_url => artifactory_url})
 
     describe '#package_name' do
       it 'parses the retrieved yaml file and returns the correct package name' do
@@ -101,74 +101,6 @@ describe 'artifactory.rb' do
           expect(artifact.rpm_repo_contents).to eq('')
         end
       end
-    end
-
-    describe '#deploy_package' do
-      it 'sends the correct command to curl' do
-        if platform_tag_data[:codename]
-          curl_extras = ";deb.distribution=#{platform_tag_data[:codename]};deb.component=#{platform_tag_data[:repo_subdirectories]};deb.architecture=#{platform_tag_data[:arch]}"
-        else
-          curl_extras = ''
-        end
-        curl_opts = [
-          artifact.authorization,
-          "--upload-file #{platform_tag_data[:package_name]}"
-        ]
-        curl_uri = "#{artifactory_url}/#{platform_tag_data[:toplevel_repo]}/#{platform_tag_data[:repo_subdirectories]}/#{File.basename(platform_tag_data[:package_name])}#{curl_extras}"
-        allow(Pkg::Util::Net).to receive(:curl_form_data).with(curl_uri, curl_opts).and_return true
-        expect(artifact.deploy_package(platform_tag_data[:package_name])).to be true
-      end
-    end
-
-    describe '#retrieve_package' do
-      it 'sets the package name if none is passed in' do
-        curl_opts = [
-          artifact.authorization,
-          "--output #{File.basename(platform_tag_data[:package_name])}"
-        ]
-        curl_uri = "#{artifactory_url}/#{platform_tag_data[:toplevel_repo]}/#{platform_tag_data[:repo_subdirectories]}/#{File.basename(platform_tag_data[:package_name])}"
-
-        allow(artifact).to receive(:yaml_platform_data).and_return(platform_data)
-        allow(Pkg::Util::Net).to receive(:curl_form_data).with(curl_uri, curl_opts).and_return true
-        expect(artifact.retrieve_package).to be true
-      end
-
-      it 'sets the package name if none is passed in, and honors the user specified path' do
-        output_path = "path/that/is/random"
-        curl_opts = [
-          artifact.authorization,
-          "--output #{File.join(output_path, File.basename(platform_tag_data[:package_name]))}"
-        ]
-        curl_uri = "#{artifactory_url}/#{platform_tag_data[:toplevel_repo]}/#{platform_tag_data[:repo_subdirectories]}/#{File.basename(platform_tag_data[:package_name])}"
-
-        allow(artifact).to receive(:yaml_platform_data).and_return(platform_data)
-        allow(Pkg::Util::Net).to receive(:curl_form_data).with(curl_uri, curl_opts).and_return true
-        expect(artifact.retrieve_package(nil, output_path)).to be true
-      end
-
-      it 'sends the correct command to curl' do
-        curl_opts = [
-          artifact.authorization,
-          "--output #{platform_tag_data[:package_name]}"
-        ]
-        curl_uri = "#{artifactory_url}/#{platform_tag_data[:toplevel_repo]}/#{platform_tag_data[:repo_subdirectories]}/#{File.basename(platform_tag_data[:package_name])}"
-        allow(Pkg::Util::Net).to receive(:curl_form_data).with(curl_uri, curl_opts).and_return true
-        expect(artifact.retrieve_package(platform_tag_data[:package_name])).to be true
-      end
-    end
-  end
-
-  describe '#deploy_package' do
-    it 'sends any nonstandard artifact types to the generic repo' do
-      artifact = Pkg::Artifactory.new(project, project_version, 'generic', {:repo_base => default_repo_name, :artifactory_url => artifactory_url})
-      generic_package = 'some_package.nonstandard'
-      curl_opts = [
-        artifact.authorization,
-        "--upload-file #{generic_package}"
-      ]
-      curl_uri = "#{artifactory_url}/generic/#{default_repo_name}/#{project}/#{project_version}/#{File.basename(generic_package)}"
-      allow(Pkg::Util::Net).to receive(:curl_form_data).with(curl_uri, curl_opts).and_return true
-      expect(artifact.deploy_package(generic_package)).to be true
     end
   end
 end

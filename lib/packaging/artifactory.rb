@@ -4,7 +4,8 @@ module Pkg
   # This class provides automation to access the artifactory repos maintained
   # by the Release Engineering team at Puppet. It has the ability to both push
   # artifacts to the repos, and to retrieve them back from the repos.
-  class Artifactory
+  class ManageArtifactory
+    require 'artifactory'
 
     # @param project [String] The name of the project this package is for
     # @param project_version [String] The version of the project we want the
@@ -39,6 +40,9 @@ module Pkg
       end
 
       @repo_name, @repo_subdirectories = location_for
+
+      Artifactory.endpoint = @artifactory_url
+      check_authorization
     end
 
     # @return [Array] An array containing two items, first being the main repo
@@ -53,7 +57,7 @@ module Pkg
         toplevel_repo = 'rpm'
         repo_subdirectories = File.join(repo_subdirectories, "#{@platform}-#{@platform_version}-#{@architecture}")
       when 'deb'
-        toplevel_repo = 'debian__local/pool'
+        toplevel_repo = 'debian__local'
       when 'swix', 'dmg', 'svr4', 'ips'
         repo_subdirectories = File.join(repo_subdirectories, "#{@platform}-#{@platform_version}-#{@architecture}")
       when 'msi'
@@ -61,6 +65,15 @@ module Pkg
       end
 
       [toplevel_repo, repo_subdirectories]
+    end
+
+    def alternate_subdirectory_path
+      subdirectories = @repo_subdirectories
+      if @package_format == 'deb'
+        subdirectories = File.join('pool', @repo_subdirectories)
+      end
+
+      subdirectories
     end
 
     def retrieve_yaml_data_file(tmpdir)
@@ -86,7 +99,7 @@ module Pkg
     #   debian artifactory repos for the specified project and version
     def deb_list_contents
       if @package_format == 'deb'
-        "deb #{@artifactory_url}/#{@repo_name.chomp('/pool')} #{@codename} #{@repo_subdirectories}"
+        "deb #{@artifactory_url}/#{@repo_name} #{@codename} #{@repo_subdirectories}"
       else
         ''
       end
@@ -111,54 +124,76 @@ module Pkg
       end
     end
 
-    # @return [String] The curl authorization require to access the artifactory
-    #   repos
-    #
-    # TODO this needs to be smoothed over and actually though about
-    def authorization
-      # "--user #{user_name}:#{api_token}"
-      ''
+    # Verify the correct environment variables are set in order to process
+    # authorization to access the artifactory repos
+    def check_authorization
+      unless (ENV['ARTIFACTORY_USERNAME'] && ENV['ARTIFACTORY_PASSWORD']) || ENV['ARTIFACTORY_API_KEY']
+        raise <<-DOC
+  Unable to determine credentials for Artifactory. Please set one of the
+  following environment variables:
+
+  For basic authentication, please set:
+  ARTIFACTORY_USERNAME
+  ARTIFACTORY_PASSWORD
+
+  If you would like to use the API key, ensure ARTIFACTORY_USERNAME and
+  ARTIFACTORY_PASSWORD are not set, as these take precedence. Instead, please
+  set:
+  ARTIFACTORY_API_KEY
+
+  You can also set the path to a pem file with your custom certificates with:
+  ARTIFACTORY_SSL_PEM_FILE
+        DOC
+      end
     end
 
     # @return [String] Any required extra bits that we need for the curl
     #   command used to deploy packages to artifactory
-    def deploy_curl_extras
+    #
+    #   These are a few examples from chef/artifactory-client. These could
+    #   potentially be very powerful, but we should decide how to use them.
+    #     status: 'DEV',
+    #     rating: 5,
+    #     branch: 'master'
+    def deploy_properties
       if @package_format == 'deb'
-        return ";deb.distribution=#{@codename};deb.component=#{@repo_subdirectories};deb.architecture=#{@architecture}"
+        return {
+          'deb.distribution' => @codename,
+          'deb.component' => @repo_subdirectories,
+          'deb.architecture' => @architecture,
+        }
       end
-      ''
+      {}
     end
 
     # @param package [String] The full relative path to the package to be
     #   shipped, relative from the current working directory
     def deploy_package(package)
-      curl_opts = [
-        authorization,
-        "--upload-file #{package}"
-      ]
-      curl_uri = "#{@artifactory_url}/#{@repo_name}/#{@repo_subdirectories}/#{File.basename(package)}#{deploy_curl_extras}"
-      Pkg::Util::Net.curl_form_data(curl_uri, curl_opts)
+      artifact = Artifactory::Resource::Artifact.new(local_path: package)
+      artifact.upload(@repo_name, File.join(alternate_subdirectory_path, File.basename(package)), deploy_properties)
+    rescue
+      raise "Attempt to upload #{package} to #{@artifactory_url} in the #{@repo_name} repo failed"
     end
 
     # @param package [String] optional, the name of the package to be
     #   retrieved. If the user does not know this information, we can derive it
-    #   from the yaml data. The user can set this either as just the package
-    #   name, or optionally include the path to where they want the package to
-    #   land.
-    # @param retrieval_path [String] Optional, an optional path set to where
-    #   the user wants the retrieved package to end up.
-    def retrieve_package(package = nil, retrieval_path = nil)
+    #   from the yaml data. This ignores everything but the package name. Any
+    #   customization for where the user wants to fetch the package is via the
+    #   download_path parameter.
+    # @param download_path [String] Optional, an optional path set to where
+    #   the user wants the retrieved package to end up. If no path is specified
+    #   this defaults to the pkg directory.
+    def retrieve_package(package = nil, download_path = nil)
       package ||= package_name
-      package = File.join(retrieval_path, package) unless retrieval_path.nil?
+      download_path ||= File.join('pkg', @repo_subdirectories)
 
-      curl_opts = [
-        authorization,
-        "--output #{package}"
-      ]
-      curl_uri = "#{@artifactory_url}/#{@repo_name}/#{@repo_subdirectories}/#{File.basename(package)}"
-      Pkg::Util::Net.curl_form_data(curl_uri, curl_opts)
+      artifact = Artifactory::Resource::Artifact.new(download_uri: "#{@artifactory_url}/#{@repo_name}/#{alternate_subdirectory_path}/#{File.basename(package)}")
+      artifact.download(download_path)
+    rescue
+      raise "Attempt to download #{File.basename(package)} from #{@artifactory_url}/#{@repo_name}/#{alternate_subdirectory_path} failed."
     end
 
-    private :location_for, :deploy_curl_extras, :retrieve_yaml_data_file, :yaml_platform_data
+    private :location_for, :deploy_properties, :retrieve_yaml_data_file,
+      :yaml_platform_data, :check_authorization, :alternate_subdirectory_path
   end
 end

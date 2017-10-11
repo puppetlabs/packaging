@@ -208,12 +208,12 @@ describe "Pkg::Config" do
     ]
     artifacts = \
       "./artifacts/eos/4/PC1/i386/puppet-agent-5.3.2-1.eos4.i386.swix\n" \
-      "./artifacts/apple/10.12/PC1/x86_64/puppet-agent-5.3.2-1.osx10.12.dmg\n" \
+      "./artifacts/apple/10.12/PC1/x86_64/puppet-agent-5.0.0.658.gc79ef9a-1.osx10.12.dmg\n" \
       "./artifacts/cisco-wrlinux/7/PC1/x86_64/puppet-agent-5.3.2-1.cisco_wrlinux7.x86_64.rpm\n" \
       "./artifacts/aix/6.1/PC1/ppc/puppet-agent-5.3.2-1.aix6.1.ppc.rpm\n" \
       "./artifacts/deb/xenial/PC1/puppet-agent_5.3.2-1xenial_i386.deb\n" \
       "./artifacts/deb/cumulus/PC1/puppet-agent_5.3.2-1cumulus_amd64.deb\n" \
-      "./artifacts/el/6/PC1/s390x/puppet-agent-5.3.2-1.el6.s390x.rpm\n" \
+      "./artifacts/el/6/PC1/s390x/puppet-agent-5.0.0.658.gc79ef9a-1.el6.s390x.rpm\n" \
       "./artifacts/el/7/PC1/ppc64le/puppet-agent-5.3.2-1.el7.ppc64le.rpm\n" \
       "./artifacts/sles/12/PC1/x86_64/puppet-agent-5.3.2-1.sles12.x86_64.rpm"
     fedora_artifacts = \
@@ -226,6 +226,11 @@ describe "Pkg::Config" do
     solaris_artifacts = \
       "./artifacts/solaris/11/PC1/puppet-agent@5.3.2,5.11-1.sparc.p5p\n" \
       "./artifacts/solaris/10/PC1/puppet-agent-5.3.2-1.i386.pkg.gz"
+    stretch_artifacts = \
+      "./artifacts/deb/stretch/PC1/puppet-agent-dbgsym_5.3.2-1stretch_i386.deb\n" \
+      "./artifacts/deb/stretch/PC1/puppet-agent_5.3.2-1stretch_i386.deb\n" \
+      "./artifacts/deb/stretch/PC1/puppet-agent_5.0.0.658.gc79ef9a-1stretch_amd64.deb\n" \
+      "./artifacts/deb/stretch/PC1/puppet-agent-dbgsym_5.0.0.658.gc79ef9a-1stretch_amd64.deb"
 
     project = 'puppet-agent'
     ref = '5.3.2'
@@ -274,6 +279,11 @@ describe "Pkg::Config" do
     it "should not collect unversioned msis" do
       allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(windows_artifacts, nil)
       expect(Pkg::Config.platform_data).to include({'windows-2012-x64' => {:artifact => './windows/puppet-agent-5.3.2-x64.msi', :repo_config => nil}})
+    end
+
+    it "should not collect debug packages" do
+      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(stretch_artifacts, nil)
+      expect(Pkg::Config.platform_data).to include('debian-9-amd64' => {:artifact => './deb/stretch/PC1/puppet-agent_5.0.0.658.gc79ef9a-1stretch_amd64.deb', :repo_config => '../repo_configs/deb/pl-puppet-agent-5.3.2-stretch.list'})
     end
   end
 

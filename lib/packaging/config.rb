@@ -98,6 +98,7 @@ module Pkg
             else
               next if File.extname(artifact) != ".#{package_format}"
             end
+            next if /#{self.project}-[a-z]+/.match(File.basename(artifact))
 
             case package_format
             when 'deb'

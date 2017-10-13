@@ -194,6 +194,106 @@ describe "Pkg::Config" do
     end
   end
 
+  describe "#platform_data" do
+    platform_tags = [
+      'eos-4-i386',
+      'osx-10.12-x86_64',
+      'cisco-wrlinux-7-x86_64',
+      'aix-6.1-power',
+      'ubuntu-16.04-i386',
+      'cumulus-2.2-amd64',
+      'el-6-s390x',
+      'el-7-ppc64le',
+      'sles-12-x86_64',
+    ]
+
+    artifacts = \
+      "./artifacts/eos/4/PC1/i386/puppet-agent-5.3.2-1.eos4.i386.swix\n" \
+      "./artifacts/apple/10.12/PC1/x86_64/puppet-agent-5.3.2.658.gc79ef9a-1.osx10.12.dmg\n" \
+      "./artifacts/cisco-wrlinux/7/PC1/x86_64/puppet-agent-5.3.2-1.cisco_wrlinux7.x86_64.rpm\n" \
+      "./artifacts/aix/6.1/PC1/ppc/puppet-agent-5.3.2-1.aix6.1.ppc.rpm\n" \
+      "./artifacts/deb/xenial/PC1/puppet-agent_5.3.2-1xenial_i386.deb\n" \
+      "./artifacts/deb/cumulus/PC1/puppet-agent_5.3.2-1cumulus_amd64.deb\n" \
+      "./artifacts/el/6/PC1/s390x/puppet-agent-5.3.2.658.gc79ef9a-1.el6.s390x.rpm\n" \
+      "./artifacts/el/7/PC1/ppc64le/puppet-agent-5.3.2-1.el7.ppc64le.rpm\n" \
+      "./artifacts/sles/12/PC1/x86_64/puppet-agent-5.3.2-1.sles12.x86_64.rpm"
+
+    fedora_artifacts = \
+      "./artifacts/fedora/f25/PC1/x86_64/puppet-agent-5.3.2-1.fedoraf25.x86_64.rpm"
+
+    windows_artifacts = \
+      "./artifacts/windows/puppet-agent-x64.msi\n" \
+      "./artifacts/windows/puppet-agent-5.3.2-x86.wixpdb\n" \
+      "./artifacts/windows/puppet-agent-5.3.2-x86.msi\n" \
+      "./artifacts/windows/puppet-agent-5.3.2-x64.msi"
+
+    solaris_artifacts = \
+      "./artifacts/solaris/11/PC1/puppet-agent@5.3.2,5.11-1.sparc.p5p\n" \
+      "./artifacts/solaris/10/PC1/puppet-agent-5.3.2-1.i386.pkg.gz"
+
+    stretch_artifacts = \
+      "./artifacts/deb/stretch/PC1/puppet-agent-dbgsym_5.3.2-1stretch_i386.deb\n" \
+      "./artifacts/deb/stretch/PC1/puppet-agent_5.3.2-1stretch_i386.deb\n" \
+      "./artifacts/deb/stretch/PC1/puppet-agent_5.3.2.658.gc79ef9a-1stretch_amd64.deb\n" \
+      "./artifacts/deb/stretch/PC1/puppet-agent-dbgsym_5.3.2.658.gc79ef9a-1stretch_amd64.deb"
+
+    project = 'puppet-agent'
+    ref = '5.3.2'
+
+    before :each do
+      allow(Pkg::Config).to receive(:project).and_return(project)
+      allow(Pkg::Config).to receive(:ref).and_return(ref)
+      allow(Pkg::Util::Net).to receive(:check_host_ssh).and_return([])
+    end
+
+    it "should return a hash mapping platform tags to paths" do
+      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(artifacts, nil)
+      expect(Pkg::Config.platform_data.keys).to eql(platform_tags)
+    end
+
+    it "should return nil if project isn't set" do
+      allow(Pkg::Config).to receive(:project).and_return(nil)
+      expect(Pkg::Config.platform_data).to be_nil
+    end
+
+    it "should return nil if ref isn't set" do
+      allow(Pkg::Config).to receive(:ref).and_return(nil)
+      expect(Pkg::Config.platform_data).to be_nil
+    end
+
+    it "should return nil if can't connect to build server" do
+      allow(Pkg::Util::Net).to receive(:check_host_ssh).and_return(['something'])
+      expect(Pkg::Config.platform_data).to be_nil
+    end
+
+    it "should not use 'f' in fedora platform tags" do
+      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(fedora_artifacts, nil)
+      data = Pkg::Config.platform_data
+      expect(data).to include('fedora-25-x86_64')
+      expect(data).not_to include('fedora-f25-x86_64')
+    end
+
+    it "should collect packages whose extname differ from package_format" do
+      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(solaris_artifacts, nil)
+      data = Pkg::Config.platform_data
+      expect(data).to include('solaris-10-i386' => {:artifact => './solaris/10/PC1/puppet-agent-5.3.2-1.i386.pkg.gz', :repo_config => nil})
+      expect(data).to include('solaris-11-sparc' => {:artifact => './solaris/11/PC1/puppet-agent@5.3.2,5.11-1.sparc.p5p', :repo_config => nil})
+    end
+
+    it "should collect versioned msis" do
+      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(windows_artifacts, nil)
+      data = Pkg::Config.platform_data
+      expect(data['windows-2012-x86']).to include(:artifact => './windows/puppet-agent-5.3.2-x86.msi')
+      expect(data['windows-2012-x64']).to include(:artifact => './windows/puppet-agent-5.3.2-x64.msi')
+    end
+
+    it "should not collect debug packages" do
+      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(stretch_artifacts, nil)
+      data = Pkg::Config.platform_data
+      expect(data['debian-9-amd64']).to include(:artifact => './deb/stretch/PC1/puppet-agent_5.3.2.658.gc79ef9a-1stretch_amd64.deb')
+    end
+  end
+
   describe "#config_to_yaml" do
     it "should write a valid yaml file" do
       file = double('file')

@@ -121,11 +121,11 @@ describe 'Pkg::Platforms' do
       'windows-2012-x86' => ['windows', '2012', 'x86'],
       'el-7-x86_64' => ['el', '7', 'x86_64'],
       'cisco-wrlinux-7-x86_64' => ['cisco-wrlinux', '7', 'x86_64'],
-      'cisco-wrlinux-7' => ['cisco-wrlinux', '7', nil],
-      'el-6' => ['el', '6', nil],
+      'cisco-wrlinux-7' => ['cisco-wrlinux', '7', ''],
+      'el-6' => ['el', '6', ''],
       'xenial-amd64' => ['ubuntu', '16.04', 'amd64'],
-      'xenial' => ['ubuntu', '16.04', nil],
-      'windows-2012' => ['windows', '2012', nil]
+      'xenial' => ['ubuntu', '16.04', ''],
+      'windows-2012' => ['windows', '2012', ''],
     }
 
     fail_cases = [
@@ -133,6 +133,8 @@ describe 'Pkg::Platforms' do
       'el-x86_64',
       'nothing',
       'windows-x86',
+      'el-7-notarch',
+      'debian-7-x86_64',
     ]
 
     test_cases.each do |platform_tag, results|

@@ -275,14 +275,12 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
 
 
     # For platform names with a dash in them, because everything is special
-    supported_arches = get_attribute_for_platform_version(platform, version, :architectures)
-    architecture = (platform_elements & supported_arches).first
+    supported_arches = arches_for_platform_version(platform, version)
+    architecture = platform_tag.sub(/^(#{platform}-#{version}|#{codename})-?/, '')
 
+    fail unless supported_arches.include?(architecture) || architecture.empty?
     return [platform, version, architecture]
   rescue
-    if platform && version && architecture.nil?
-      return [platform, version, nil]
-    end
     raise "Could not verify that '#{platform_tag}' is a valid tag"
   end
 

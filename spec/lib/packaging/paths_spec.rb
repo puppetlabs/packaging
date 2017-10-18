@@ -41,21 +41,24 @@ describe 'Pkg::Paths' do
       'http://builds.puppetlabs.lan/puppet-agent/0ce4e6a0448366e01537323bbab77f834d7035c7/repos/el/6/PC1/x86_64/' => 'el-6-x86_64',
       'http://builds.puppetlabs.lan/puppet-agent/0ce4e6a0448366e01537323bbab77f834d7035c7/repos/el/6/PC1/x86_64/' => 'el-6-x86_64',
       'pkg/pe/rpm/el-6-i386/pe-puppetserver-2017.3.0.3-1.el6.src.rpm' => 'el-6-SRPMS',
-      'pkg/pe/deb/xenial/pe-puppetserver_2017.3.0.3-1puppet1.orig.tar.gz' => 'ubuntu-16.04-source'
+      'pkg/pe/deb/xenial/pe-puppetserver_2017.3.0.3-1puppet1.orig.tar.gz' => 'ubuntu-16.04-source',
+      'pkg/puppet-agent-5.1.0.79.g782e03c.gem' => nil,
+      'pkg/puppet-agent-5.1.0.7.g782e03c.tar.gz' => nil,
     }
     path_tranformations.each do |pre, post|
-      it "should correctly parse path #{pre} to tag #{post}" do
+      it "should correctly return '#{post}' when given #{pre}" do
         expect(Pkg::Paths.tag_from_artifact_path(pre)).to eq(post)
       end
     end
 
     failure_cases = [
       'pkg/pe/deb/preice',
-      'pkg/el-4-x86_64'
+      'pkg/el-4-x86_64',
+      'a/package/that/sucks.rpm',
     ]
     failure_cases.each do |fail_path|
-      it 'should fail gracefully if it cannot figure out the correct platform tag' do
-        expect { Pkg::Paths.tag_from_artifact_path(fail_path) }.to raise_error(RuntimeError, /#{fail_path.gsub('/', '\/')}/)
+      it "should fail gracefully if given '#{fail_path}'" do
+        expect { Pkg::Paths.tag_from_artifact_path(fail_path) }.to raise_error
       end
     end
   end

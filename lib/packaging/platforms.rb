@@ -70,6 +70,87 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
     }
   }.freeze
 
+  # @return [Array] An array of Strings, containing all of the supported
+  #   platforms as defined in PLATFORM_INFO
+  def supported_platforms
+    PLATFORM_INFO.keys
+  end
+
+  # @return [Array] An Array of Strings, containing all the supported
+  #   versions for the given platform
+  def versions_for_platform(platform)
+    PLATFORM_INFO[platform].keys
+  rescue
+    raise "No information found for '#{platform}'"
+  end
+
+  # @param platform_tag [String] May be either the two or three unit string
+  #   that corresponds to a platform in the form of platform-version or
+  #   platform-version-arch.
+  # @return [Array] An array of three elements: the platform name, the platform
+  #   version, and the architecture. If the architecture was not included in
+  #   the original platform tag, then nil is returned in place of the
+  #   architecture
+  def parse_platform_tag(platform_tag)
+    platform_elements = platform_tag.split('-')
+
+    # Look for platform. This is probably the only place where we have to look
+    # for a combination of elements rather than a single element
+    platform = (platform_elements & supported_platforms).first
+    codename = (platform_elements & codenames).first
+
+    # This is probably a bad assumption, but I'm assuming if we find a codename,
+    # that's more reliable as it's less likely to give us a false match
+    if codename
+      platform, version = codename_to_platform_version(codename)
+    end
+
+    # There's a possibility that the platform name has a dash in it, in which
+    # case, our assumption that it's an element of the above array is false,
+    # since it would be a combination of elements in that array
+    platform ||= supported_platforms.find { |p| platform_tag =~ /#{p}-/ }
+
+    version ||= (platform_elements & versions_for_platform(platform)).first
+
+
+    # For platform names with a dash in them, because everything is special
+    supported_arches = get_attribute_for_platform_version(platform, version, :architectures)
+    architecture = (platform_elements & supported_arches).first
+
+    return [platform, version, architecture]
+  rescue
+    if platform && version && architecture.nil?
+      return [platform, version, nil]
+    end
+    raise "Could not verify that '#{platform_tag}' is a valid tag"
+  end
+
+  # @param platform_tag [String] May be either the two or three unit string
+  #   that corresponds to a platform in the form of platform-version or
+  #   platform-version-arch
+  # @return [Hash] The hash of data associated with the given platform version
+  def platform_lookup(platform_tag)
+    platform, version, _ = parse_platform_tag(platform_tag)
+    PLATFORM_INFO[platform][version]
+  end
+
+  # @param platform_tag [String] May be either the two or three unit string
+  #   that corresponds to a platform in the form of platform-version or
+  #   platform-version-arch
+  # @param attribute_name [String, Symbol] The name of the requested attribute
+  # @return [String, Array] the contents of the requested attribute
+  def get_attribute(platform_tag, attribute_name)
+    info = platform_lookup(platform_tag)
+    raise "#{platform_tag} doesn't have information about #{attribute_name} available" unless info.key?(attribute_name)
+    info[attribute_name]
+  end
+
+  def get_attribute_for_platform_version(platform, version, attribute_name)
+    info = PLATFORM_INFO[platform][version]
+    raise "#{platform_tag} doesn't have information about #{attribute_name} available" unless info.key?(attribute_name)
+    info[attribute_name]
+  end
+
   # @private List platforms that use a given package format
   # @param format [String] The name of the packaging format to filter on
   # @return [Array] An Array of Strings, containing all platforms that
@@ -92,17 +173,7 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
     fmts.to_set.sort
   end
 
-  # @return [Array] An array of Strings, containing all of the supported
-  #   platforms as defined in PLATFORM_INFO
-  def supported_platforms
-    PLATFORM_INFO.keys
-  end
 
-  # @return [Array] An Array of Strings, containing all the supported
-  #   versions for the given platform
-  def versions_for_platform(platform)
-    PLATFORM_INFO[platform].keys
-  end
 
   # @param platform [String] Optional, the platform to list all codenames for.
   #   Defaults to 'deb'
@@ -119,21 +190,22 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
   def codename_to_platform_version(codename)
     PLATFORM_INFO.each do |platform, platform_versions|
       platform_versions.each do |version, info|
-        return [platform, version] if codename == info[:codename]
+        return [platform, version] if info[:codename] && codename == info[:codename]
       end
     end
+    raise "Unable to find a platform and version for '#{codename}'"
   end
 
   # Given a debian platform and version, return the codename that corresponds to
   # the set
   def codename_for_platform_version(platform, version)
-    PLATFORM_INFO[platform][version][:codename]
+    get_attribute_for_platform_version(platform, version, :codename)
   end
 
   # Given a debian codename, return the arches that we build for that codename
   def arches_for_codename(codename)
     platform, version = codename_to_platform_version(codename)
-    PLATFORM_INFO[platform][version][:architectures]
+    arches_for_platform_version(platform, version)
   end
 
   # Given a codename, return an array of associated tags
@@ -149,7 +221,7 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
   # Given a platform and version, return the arches that we build for that
   # platform
   def arches_for_platform_version(platform, version)
-    PLATFORM_INFO[platform][version][:architectures]
+    get_attribute_for_platform_version(platform, version, :architectures)
   end
 
   # Returns an array of all currently valid platform tags
@@ -165,35 +237,19 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
     tags
   end
 
-  def platform_lookup(platform_tag)
-    platform, version, = parse_platform_tag(platform_tag)
-    PLATFORM_INFO[platform][version]
-  end
-
-  # rubocop:disable Style/GuardClause
-  def parse_platform_tag(platform_tag)
-    platform, version, arch = platform_tag.match(/^(.*)-(.*)-(.*)$/).captures
-  end
-
-  def get_attribute(platform_tag, attribute_name)
-    info = platform_lookup(platform_tag)
-    raise "#{platform_tag} doesn't have information about #{attribute_name} available" unless info.key?(attribute_name)
-    info[attribute_name]
-  end
-
   def package_format_for_tag(platform_tag)
-    platform, version = parse_platform_tag(platform_tag)
-    PLATFORM_INFO[platform][version][:package_format]
+    get_attribute(platform_tag, :package_format)
   end
 
   def signature_format_for_tag(platform_tag)
-    platform, version = parse_platform_tag(platform_tag)
-    PLATFORM_INFO[platform][version][:signature_format]
+    get_attribute(platform_tag, :signature_format)
   end
 
   def signature_format_for_platform_version(platform, version)
-    PLATFORM_INFO[platform][version][:signature_format]
+    get_attribute_for_platform_version(platform, version, :signature_format)
   end
+
+
 
   # Return an array of platform tags associated with a given package format
   def platform_tags_for_package_format(format)

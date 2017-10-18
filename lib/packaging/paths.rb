@@ -9,14 +9,16 @@ module Pkg::Paths
   module_function
 
   def arch_from_artifact_path(platform, version, path)
-    # We only support sources for deb and rpm based systems
-    if path.match(/(\.debian\.tar\.gz|\.orig\.tar\.gz|\.dsc|\.changes)$/)
-      return 'source'
-    elsif path.match(/\.src\.rpm$/)
-      return 'SRPMS'
-    end
+    arches = Pkg::Platforms.arches_for_platform_version(platform, version)
 
-    Pkg::Platforms.arches_for_platform_version(platform, version).find { |a| path.include?(a) } || Pkg::Platforms.arches_for_platform_version(platform, version)[0]
+    # First check if it's a source package
+    source_formats = Pkg::Platforms.get_attribute_for_platform_version(platform, version, :source_package_formats)
+    if source_formats.find { |fmt| path =~ /#{fmt}$/ }
+      return Pkg::Platforms.get_attribute_for_platform_version(platform, version, :source_architecture)
+    end
+    arches.find { |a| path.include?(a) } || arches[0]
+  rescue
+    arches.find { |a| path.include?(a) } || arches[0]
   end
 
   # Given a path to an artifact, divine the appropriate platform tag associated

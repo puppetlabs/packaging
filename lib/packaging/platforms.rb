@@ -344,7 +344,7 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
       end
     end
 
-   (fmts + source_fmts).flatten.compact.uniq.to_set.sort
+    (fmts + source_fmts).flatten.compact.uniq.to_set.sort
   end
 
   # @param platform [String] Optional, the platform to list all codenames for.

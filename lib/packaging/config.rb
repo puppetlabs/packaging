@@ -81,7 +81,7 @@ module Pkg
           data = {}
           artifacts.each do |artifact|
             tag = Pkg::Paths.tag_from_artifact_path(artifact)
-            platform, version, arch = Pkg::Util::Platform.parse_platform_tag(tag)
+            platform, version, arch = Pkg::Platforms.parse_platform_tag(tag)
             arch = 'ppc' if platform == 'aix'
             package_format = Pkg::Platforms.get_attribute(tag, :package_format)
 

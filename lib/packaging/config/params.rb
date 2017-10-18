@@ -323,7 +323,7 @@ module Pkg::Params
               { :var => :msi_signing_cert_pw,     :val => '$MSI_SIGNING_CERT_PW' },
               { :var => :pe_feature_branch,       :val => false },
               { :var => :s3_ship,                 :val => false },
-              { :var => :apt_releases,            :val => Pkg::Platforms.codenames("deb") }]
+              { :var => :apt_releases,            :val => Pkg::Platforms.codenames }]
 
   # These are variables which, over time, we decided to rename or replace. For
   # backwards compatibility, we assign the value of the old/deprecated

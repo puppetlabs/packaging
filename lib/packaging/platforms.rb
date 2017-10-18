@@ -104,10 +104,11 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
     PLATFORM_INFO[platform].keys
   end
 
-  # @param platform [String] The platform to list all codenames for
+  # @param platform [String] Optional, the platform to list all codenames for.
+  #   Defaults to 'deb'
   # @return [Array] An Array of Strings, containing all of the codenames
   #   defined for a given Platform
-  def codenames(platform)
+  def codenames(platform = 'deb')
     releases = by_package_format(platform).flat_map do |p|
       PLATFORM_INFO[p].values.collect { |r| r[:codename] }
     end

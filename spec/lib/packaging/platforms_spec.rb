@@ -28,18 +28,26 @@ describe 'Pkg::Platforms' do
     it 'should return all supported versions for a given platform' do
       expect(Pkg::Platforms.versions_for_platform('el')).to match_array(['5', '6', '7'])
     end
+
+    it 'should raise an error if given a nonexistent platform' do
+      expect{Pkg::Platforms.versions_for_platform('notaplatform') }.to raise_error
+    end
   end
 
   describe '#codenames' do
     it 'should return all codenames for a given platform' do
       codenames = ['cumulus', 'wheezy', 'jessie', 'stretch', 'trusty', 'xenial']
-      expect(Pkg::Platforms.codenames('deb')).to match_array(codenames)
+      expect(Pkg::Platforms.codenames).to match_array(codenames)
     end
   end
 
   describe '#codename_to_platform_version' do
     it 'should return the platform and version corresponding to a given codename' do
       expect(Pkg::Platforms.codename_to_platform_version('xenial')).to eq(['ubuntu', '16.04'])
+    end
+
+    it 'should fail if given nil as a codename' do
+      expect{Pkg::Platforms.codename_to_platform_version(nil)}.to raise_error
     end
   end
 
@@ -104,6 +112,41 @@ describe 'Pkg::Platforms' do
   describe '#package_format_for_tag' do
     it 'should return the package format for a given platform tag' do
       expect(Pkg::Platforms.package_format_for_tag('windows-2012-x86')).to eq('msi')
+    end
+  end
+
+  describe '#parse_platform_tag' do
+    test_cases = {
+      'debian-9-amd64' => ['debian', '9', 'amd64'],
+      'windows-2012-x86' => ['windows', '2012', 'x86'],
+      'el-7-x86_64' => ['el', '7', 'x86_64'],
+      'cisco-wrlinux-7-x86_64' => ['cisco-wrlinux', '7', 'x86_64'],
+      'cisco-wrlinux-7' => ['cisco-wrlinux', '7', ''],
+      'el-6' => ['el', '6', ''],
+      'xenial-amd64' => ['ubuntu', '16.04', 'amd64'],
+      'xenial' => ['ubuntu', '16.04', ''],
+      'windows-2012' => ['windows', '2012', ''],
+    }
+
+    fail_cases = [
+      'debian-4-amd64',
+      'el-x86_64',
+      'nothing',
+      'windows-x86',
+      'el-7-notarch',
+      'debian-7-x86_64',
+    ]
+
+    test_cases.each do |platform_tag, results|
+      it "returns an array for #{platform_tag}" do
+        expect(Pkg::Platforms.parse_platform_tag(platform_tag)).to match_array(results)
+      end
+    end
+
+    fail_cases.each do |platform_tag|
+      it "fails out for #{platform_tag}" do
+        expect { Pkg::Platforms.parse_platform_tag(platform_tag)}.to raise_error
+      end
     end
   end
 end

@@ -165,7 +165,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions && )
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
 
       dists = Pkg::Util::File.directories("#{target}/apt")
-      supported_codenames = Pkg::Platforms.codenames('deb')
+      supported_codenames = Pkg::Platforms.codenames
 
       if dists
         dists.each do |dist|

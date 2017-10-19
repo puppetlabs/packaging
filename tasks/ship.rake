@@ -256,7 +256,7 @@ namespace :pl do
     # current versioned repo (i.e., puppet5) to the rolling repo. The one thing
     # we don't care about is architecture, so we just grab the first supported
     # architecture for the codename we're working with at the moment.
-    Pkg::Platforms.codenames('deb').each do |codename|
+    Pkg::Platforms.codenames.each do |codename|
       Pkg::Util::Ship.create_rolling_repo_link(Pkg::Platforms.codename_to_tags(codename)[0], Pkg::Config.apt_signing_server, staging_path)
     end
   end

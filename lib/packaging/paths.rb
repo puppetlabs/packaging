@@ -9,36 +9,48 @@ module Pkg::Paths
   module_function
 
   def arch_from_artifact_path(platform, version, path)
-    # We only support sources for deb and rpm based systems
-    if path.match(/(\.debian\.tar\.gz|\.orig\.tar\.gz|\.dsc|\.changes)$/)
-      return 'source'
-    elsif path.match(/\.src\.rpm$/)
-      return 'SRPMS'
-    end
+    arches = Pkg::Platforms.arches_for_platform_version(platform, version)
 
-    Pkg::Platforms.arches_for_platform_version(platform, version).find { |a| path.include?(a) } || Pkg::Platforms.arches_for_platform_version(platform, version)[0]
+    # First check if it's a source package
+    source_formats = Pkg::Platforms.get_attribute_for_platform_version(platform, version, :source_package_formats)
+    if source_formats.find { |fmt| path =~ /#{fmt}$/ }
+      return Pkg::Platforms.get_attribute_for_platform_version(platform, version, :source_architecture)
+    end
+    arches.find { |a| path.include?(a) } || arches[0]
+  rescue
+    arches.find { |a| path.include?(a) } || arches[0]
   end
 
   # Given a path to an artifact, divine the appropriate platform tag associated
   # with the artifact and path
   def tag_from_artifact_path(path)
     platform = Pkg::Platforms.supported_platforms.find { |p| path =~ /(\/|\.)#{p}[^\.]/ }
-    if platform == 'windows'
-      version = '2012'
-    elsif !platform.nil?
-      version = Pkg::Platforms.versions_for_platform(platform).find { |v| path =~ /#{platform}(\/|-)?#{v}/ }
-    end
-    # if we didn't find a platform or a version, probably a codename
-    if platform.nil? || version.nil?
-      codename = Pkg::Platforms.codenames('deb').find { |c| path =~ /\/#{c}/ }
-      fail "I can't find a codename or platform in #{path}, teach me?" if codename.nil?
+    codename = Pkg::Platforms.codenames.find { |c| path =~ /\/#{c}/ }
+
+    if codename
       platform, version = Pkg::Platforms.codename_to_platform_version(codename)
-      fail "I can't find a platform and version from #{codename}, teach me?" if platform.nil? || version.nil?
     end
+
+    version = '2012' if platform == 'windows'
+
+    version ||= Pkg::Platforms.versions_for_platform(platform).find { |v| path =~ /#{platform}(\/|-)?#{v}/ }
 
     arch = arch_from_artifact_path(platform, version, path)
 
     return "#{platform}-#{version}-#{arch}"
+  rescue
+    fmt = Pkg::Platforms.all_supported_package_formats.find { |ext| path =~ /#{ext}$/ }
+
+    # We need to make sure this is actually a file, and not simply a path
+    file_ext = File.extname(path)
+
+    # Fail if we do not have a file extension or if that file extension is one
+    # that is platform specific
+    raise "Cannot determine tag from #{path}" if fmt || file_ext.empty?
+
+    # Return nil otherwise, assuming that is a file type that is not tied to a
+    # specific platform
+    return nil
   end
 
   # Assign repo name

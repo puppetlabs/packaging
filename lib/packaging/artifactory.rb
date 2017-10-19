@@ -7,6 +7,8 @@ module Pkg
   class ManageArtifactory
     require 'artifactory'
 
+    DEFAULT_REPO_NAME = 'generic'
+
     # @param project [String] The name of the project this package is for
     # @param project_version [String] The version of the project we want the
     #   package for. This can be one of three things:
@@ -23,7 +25,7 @@ module Pkg
     #   This currently defaults to 'development'
     #
     # rubocop:disable Metrics/AbcSize
-    def initialize(project, project_version, platform_tag = 'generic', opts = {})
+    def initialize(project, project_version, platform_tag = DEFAULT_REPO_NAME, opts = {})
       @artifactory_url = opts[:artifactory_url] || 'https://artifactory.delivery.puppetlabs.net/artifactory'
       @repo_base = opts[:repo_base] || 'development'
 
@@ -31,7 +33,7 @@ module Pkg
       @project_version = project_version
       @platform_tag = platform_tag
 
-      unless platform_tag == 'generic'
+      unless platform_tag == DEFAULT_REPO_NAME
         @platform, @platform_version, @architecture = Pkg::Platforms.parse_platform_tag(@platform_tag)
         @package_format = Pkg::Platforms.package_format_for_tag(@platform_tag)
         if @package_format == 'deb'
@@ -49,7 +51,7 @@ module Pkg
     #   name for the platform_tag, the second being the subdirectories of the
     #   repo leading to the artifact we want to install
     def location_for(format = @package_format)
-      toplevel_repo = 'generic'
+      toplevel_repo = DEFAULT_REPO_NAME
       repo_subdirectories = File.join(@repo_base, @project, @project_version)
 
       case format

@@ -48,11 +48,11 @@ module Pkg
     # @return [Array] An array containing two items, first being the main repo
     #   name for the platform_tag, the second being the subdirectories of the
     #   repo leading to the artifact we want to install
-    def location_for
+    def location_for(format = @package_format)
       toplevel_repo = 'generic'
       repo_subdirectories = File.join(@repo_base, @project, @project_version)
 
-      case @package_format
+      case format
       when 'rpm'
         toplevel_repo = 'rpm'
         repo_subdirectories = File.join(repo_subdirectories, "#{@platform}-#{@platform_version}-#{@architecture}")
@@ -77,7 +77,9 @@ module Pkg
     end
 
     def retrieve_yaml_data_file(tmpdir)
-      retrieve_package("#{@package_version}.yaml", tmpdir)
+      toplevel_repo, repo_subdirectories = location_for('yaml')
+      artifactory_repo_path = "#{@artifactory_url}/#{toplevel_repo}/#{repo_subdirectories}"
+      retrieve_package("#{@project_version}.yaml", tmpdir, artifactory_repo_path)
     end
 
     # @return [Hash] The data loaded from the retrieved yaml file for the
@@ -85,7 +87,7 @@ module Pkg
     def yaml_platform_data
       tmpdir = Dir.mktmpdir
       retrieve_yaml_data_file(tmpdir)
-      yaml_hash = YAML.load_file(File.join(tmpdir, "#{@package_version}.yaml"))
+      yaml_hash = YAML.load_file(File.join(tmpdir, "#{@project_version}.yaml"))
       yaml_hash[:platform_data]
     end
 
@@ -183,14 +185,15 @@ module Pkg
     # @param download_path [String] Optional, an optional path set to where
     #   the user wants the retrieved package to end up. If no path is specified
     #   this defaults to the pkg directory.
-    def retrieve_package(package = nil, download_path = nil)
+    def retrieve_package(package = nil, download_path = nil, artifactory_repo_path = nil)
       package ||= package_name
-      download_path ||= File.join('pkg', @repo_subdirectories)
+      download_path ||= @repo_subdirectories.sub(@repo_base, 'pkg')
+      artifactory_repo_path ||= "#{@artifactory_url}/#{@repo_name}/#{alternate_subdirectory_path}"
 
-      artifact = Artifactory::Resource::Artifact.new(download_uri: "#{@artifactory_url}/#{@repo_name}/#{alternate_subdirectory_path}/#{File.basename(package)}")
+      artifact = Artifactory::Resource::Artifact.new(download_uri: File.join(artifactory_repo_path, File.basename(package)))
       artifact.download(download_path)
     rescue
-      raise "Attempt to download #{File.basename(package)} from #{@artifactory_url}/#{@repo_name}/#{alternate_subdirectory_path} failed."
+      raise "Attempt to download package '#{package}' from #{@artifactory_url}/#{@repo_name}/#{alternate_subdirectory_path} failed."
     end
 
     private :location_for, :deploy_properties, :retrieve_yaml_data_file,

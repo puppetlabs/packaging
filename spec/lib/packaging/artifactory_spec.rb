@@ -73,6 +73,9 @@ describe 'artifactory.rb' do
   }
 
   platform_tags.each do |platform_tag, platform_tag_data|
+    original_artifactory_api_key = ENV['ARTIFACTORY_API_KEY']
+    ENV['ARTIFACTORY_API_KEY'] = 'anapikeythatdefinitelyworks'
+
     artifact = Pkg::ManageArtifactory.new(project, project_version, platform_tag, {:repo_base => default_repo_name, :artifactory_url => artifactory_url})
 
     describe '#package_name' do
@@ -102,5 +105,7 @@ describe 'artifactory.rb' do
         end
       end
     end
+
+    ENV['ARTIFACTORY_API_KEY'] = original_artifactory_api_key
   end
 end

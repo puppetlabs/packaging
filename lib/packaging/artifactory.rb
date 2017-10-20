@@ -71,6 +71,15 @@ module Pkg
       [toplevel_repo, repo_subdirectories]
     end
 
+    # @return [String] A string to the subdirectory. This is only truly needed
+    #   debian repos. When we deploy to artifactory, these repos need to be
+    #   nested under the 'pool' directory, so we do this for the user by
+    #   default. We can't just hardcode this, because there are some instances
+    #   where we want to refer to that subdirectory path without the 'pool'
+    #   prepended to it. There are also instances where we do want the 'pool'
+    #   prefix. This method is meant to give us the best of both worlds with the
+    #   least amount of fuss. You just have to pay attention to where you do and
+    #   do not need the 'pool' prefix.
     def alternate_subdirectory_path
       if @package_format == 'deb'
         subdirectories = File.join('pool', @repo_subdirectories)
@@ -78,6 +87,7 @@ module Pkg
       subdirectories || @repo_subdirectories
     end
 
+    # Fetch the yaml file in order to parse the contents
     def retrieve_yaml_data_file(tmpdir)
       toplevel_repo, repo_subdirectories = location_for('yaml')
       artifactory_repo_path = File.join(toplevel_repo, repo_subdirectories)

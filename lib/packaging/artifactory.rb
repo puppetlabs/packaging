@@ -96,19 +96,17 @@ module Pkg
     #   project_version, and platform_tag
     def package_name
       platform_data = yaml_platform_data
-      package_name = File.basename(platform_data[@platform_tag][:artifact])
+      return File.basename(platform_data[@platform_tag][:artifact])
 
-      if package_name.nil?
-        fail_message = <<-DOC
+    rescue
+      fail_message = <<-DOC
   Package name could not be found from loaded yaml data. Either this package
   does not exist, or '#{@platform_tag}' is not present in this dataset.
 
   The following are available platform tags for '#{@project}' '#{@project_version}':
-    #{platform_data.keys}
-        DOC
-        raise fail_message
-      end
-      package_name
+    #{platform_data.keys.sort}
+      DOC
+      raise fail_message
     end
 
     # @return [String] The contents of the debian list file to enable the

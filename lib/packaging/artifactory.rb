@@ -61,6 +61,7 @@ module Pkg
         repo_subdirectories = File.join(repo_subdirectories, "#{@platform}-#{@platform_version}-#{@architecture}")
       when 'deb'
         toplevel_repo = 'debian__local'
+        repo_subdirectories = File.join(repo_subdirectories, "#{@platform}-#{@platform_version}")
       when 'swix', 'dmg', 'svr4', 'ips'
         repo_subdirectories = File.join(repo_subdirectories, "#{@platform}-#{@platform_version}-#{@architecture}")
       when 'msi'

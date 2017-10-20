@@ -45,7 +45,7 @@ describe 'artifactory.rb' do
     },
     'ubuntu-16.04-amd64' => {
       :toplevel_repo => 'debian__local',
-      :repo_subdirectories => "#{default_repo_name}/#{project}/#{project_version}",
+      :repo_subdirectories => "#{default_repo_name}/#{project}/#{project_version}/ubuntu-16.04",
       :codename => 'xenial',
       :arch => 'amd64',
       :package_name => 'path/to/a/xenial/package/puppet-agent_5.3.1.34.gf65f9ef-1xenial_amd64.deb',

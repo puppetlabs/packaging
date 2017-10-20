@@ -19,14 +19,14 @@ module Pkg
     #   platform we want deal with packages for (i.e., el-7-x86_64 or
     #   ubuntu-16.04-amd64), or 'generic' for those packages or archives
     #   that are platform independent (i.e., tar, gem, etc)
-    # @option :artifactory_url [String] the uri for the artifactory server.
+    # @option :artifactory_uri [String] the uri for the artifactory server.
     #   This currently defaults to 'https://artifactory.delivery.puppetlabs.net/artifactory'
     # @option :repo_base [String] The base of all repos, set for consistency.
     #   This currently defaults to 'development'
     #
     # rubocop:disable Metrics/AbcSize
     def initialize(project, project_version, platform_tag = DEFAULT_REPO_NAME, opts = {})
-      @artifactory_url = opts[:artifactory_url] || 'https://artifactory.delivery.puppetlabs.net/artifactory'
+      @artifactory_uri = opts[:artifactory_uri] || 'https://artifactory.delivery.puppetlabs.net/artifactory'
       @repo_base = opts[:repo_base] || 'development'
 
       @project = project
@@ -42,8 +42,9 @@ module Pkg
       end
 
       @repo_name, @repo_subdirectories = location_for
+      @full_artifactory_path = File.join(@repo_name, alternate_subdirectory_path)
 
-      Artifactory.endpoint = @artifactory_url
+      Artifactory.endpoint = @artifactory_uri
       check_authorization
     end
 
@@ -70,17 +71,15 @@ module Pkg
     end
 
     def alternate_subdirectory_path
-      subdirectories = @repo_subdirectories
       if @package_format == 'deb'
         subdirectories = File.join('pool', @repo_subdirectories)
       end
-
-      subdirectories
+      subdirectories || @repo_subdirectories
     end
 
     def retrieve_yaml_data_file(tmpdir)
       toplevel_repo, repo_subdirectories = location_for('yaml')
-      artifactory_repo_path = "#{@artifactory_url}/#{toplevel_repo}/#{repo_subdirectories}"
+      artifactory_repo_path = File.join(toplevel_repo, repo_subdirectories)
       retrieve_package("#{@project_version}.yaml", tmpdir, artifactory_repo_path)
     end
 
@@ -96,14 +95,27 @@ module Pkg
     # @return [String] The name of the package for the given project,
     #   project_version, and platform_tag
     def package_name
-      File.basename(yaml_platform_data[@platform_tag][:artifact])
+      platform_data = yaml_platform_data
+      package_name = File.basename(platform_data[@platform_tag][:artifact])
+
+      if package_name.nil?
+        fail_message = <<-DOC
+  Package name could not be found from loaded yaml data. Either this package
+  does not exist, or '#{@platform_tag}' is not present in this dataset.
+
+  The following are available platform tags for '#{@project}' '#{@project_version}':
+    #{platform_data.keys}
+        DOC
+        raise fail_message
+      end
+      package_name
     end
 
     # @return [String] The contents of the debian list file to enable the
     #   debian artifactory repos for the specified project and version
     def deb_list_contents
       if @package_format == 'deb'
-        "deb #{@artifactory_url}/#{@repo_name} #{@codename} #{@repo_subdirectories}"
+        "deb #{@artifactory_uri}/#{@repo_name} #{@codename} #{@repo_subdirectories}"
       else
         ''
       end
@@ -116,11 +128,11 @@ module Pkg
         <<-DOC
   [Artifactory #{@project} #{@project_version} for #{@platform_tag}]
   name=Artifactory Repository for #{@project} #{@project_version} for #{@platform_tag}
-  baseurl=#{@artifactory_url}/#{@repo_name}/#{@repo_subdirectories}
+  baseurl=#{@artifactory_uri}/#{@repo_name}/#{@repo_subdirectories}
   enabled=1
   gpgcheck=0
   #Optional - if you have GPG signing keys installed, use the below flags to verify the repository metadata signature:
-  #gpgkey=#{@artifactory_url}/#{@repo_name}/#{@repo_subdirectories}/repomd.xml.key
+  #gpgkey=#{@artifactory_uri}/#{@repo_name}/#{@repo_subdirectories}/repomd.xml.key
   #repo_gpgcheck=1
         DOC
       else
@@ -173,10 +185,11 @@ module Pkg
     # @param package [String] The full relative path to the package to be
     #   shipped, relative from the current working directory
     def deploy_package(package)
+      check_authorization
       artifact = Artifactory::Resource::Artifact.new(local_path: package)
       artifact.upload(@repo_name, File.join(alternate_subdirectory_path, File.basename(package)), deploy_properties)
     rescue
-      raise "Attempt to upload #{package} to #{@artifactory_url} in the #{@repo_name} repo failed"
+      raise "Attempt to upload '#{package}' to #{File.join(@artifactory_uri, @full_artifactory_path)} failed"
     end
 
     # @param package [String] optional, the name of the package to be
@@ -190,15 +203,15 @@ module Pkg
     def retrieve_package(package = nil, download_path = nil, artifactory_repo_path = nil)
       package ||= package_name
       download_path ||= @repo_subdirectories.sub(@repo_base, 'pkg')
-      artifactory_repo_path ||= "#{@artifactory_url}/#{@repo_name}/#{alternate_subdirectory_path}"
+      artifactory_repo_path ||= @full_artifactory_path
 
-      artifact = Artifactory::Resource::Artifact.new(download_uri: File.join(artifactory_repo_path, File.basename(package)))
+      check_authorization
+      artifact = Artifactory::Resource::Artifact.new(download_uri: File.join(@artifactory_uri, artifactory_repo_path, File.basename(package)))
       artifact.download(download_path)
     rescue
-      raise "Attempt to download package '#{package}' from #{@artifactory_url}/#{@repo_name}/#{alternate_subdirectory_path} failed."
+      raise "Attempt to download '#{File.basename(package)}' from #{File.join(@artifactory_uri, artifactory_repo_path)} failed."
     end
 
-    private :location_for, :deploy_properties, :retrieve_yaml_data_file,
-      :yaml_platform_data, :check_authorization, :alternate_subdirectory_path
+    private :deploy_properties, :yaml_platform_data, :check_authorization
   end
 end

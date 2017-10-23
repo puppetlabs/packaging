@@ -138,4 +138,28 @@ module Pkg::Util::Ship
   rescue => e
     fail "Failed to create rolling repo link for '#{platform_tag}'.\n#{e}"
   end
+
+  def test_ship(vm, ship_task)
+    command = 'getent group release || groupadd release'
+    Pkg::Util::Net.remote_ssh_cmd(vm, command)
+    ENV['APT_HOST'] = vm
+    ENV['DMG_HOST'] = vm
+    ENV['GEM_HOST'] = vm
+    ENV['IPS_HOST'] = vm
+    ENV['MSI_HOST'] = vm
+    ENV['P5P_HOST'] = vm
+    ENV['SVR4_HOST'] = vm
+    ENV['SWIX_HOST'] = vm
+    ENV['TAR_HOST'] = vm
+    ENV['YUM_HOST'] = vm
+    ENV['APT_SIGNING_SERVER'] = vm
+    ENV['APT_STAGING_SERVER'] = vm
+    ENV['DMG_STAGING_SERVER'] = vm
+    ENV['MSI_STAGING_SERVER'] = vm
+    ENV['SWIX_STAGING_SERVER'] = vm
+    ENV['TAR_STAGING_SERVER'] = vm
+    ENV['YUM_STAGING_SERVER'] = vm
+    ENV['STAGING_SERVER'] = vm
+    Rake::Task[ship_task].invoke
+  end
 end

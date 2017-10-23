@@ -352,6 +352,13 @@ namespace :pl do
       puts "Do you want to mark this release as successfully shipped?"
       Rake::Task["pl:jenkins:ship"].invoke("shipped") if Pkg::Util.ask_yes_or_no
     end
+
+    desc "Test shipping by replacing hosts with a VM"
+    task :test_ship, [:vm, :ship_task] do |t, args|
+      vm = args.vm or fail "`vm` is a required argument for #{t}"
+      ship_task = args.ship_task or fail "`ship_task` is a required argument for #{t}"
+      Pkg::Util::Ship.test_ship(vm, ship_task)
+    end
   end
 end
 
@@ -456,4 +463,3 @@ namespace :pl do
     end
   end
 end
-

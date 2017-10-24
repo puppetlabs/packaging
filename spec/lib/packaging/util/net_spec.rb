@@ -203,26 +203,26 @@ describe "Pkg::Util::Net" do
 
     it "should return false on failure" do
       Pkg::Util::Tool.should_receive(:check_tool).with("curl").and_return(curl)
-      Pkg::Util::Execution.should_receive(:capture3).with("#{curl} -i #{target_uri}").and_return(['stdout', 'stderr', 1])
+      Pkg::Util::Execution.should_receive(:capture3).with("#{curl} -i '#{target_uri}'").and_return(['stdout', 'stderr', 1])
       Pkg::Util::Net.curl_form_data(target_uri).should eq(['stdout', 1])
     end
 
 
     it "should curl with just the uri" do
       Pkg::Util::Tool.should_receive(:check_tool).with("curl").and_return(curl)
-      Pkg::Util::Execution.should_receive(:capture3).with("#{curl} -i #{target_uri}")
+      Pkg::Util::Execution.should_receive(:capture3).with("#{curl} -i '#{target_uri}'")
       Pkg::Util::Net.curl_form_data(target_uri)
     end
 
     it "should curl with the form data and uri" do
       Pkg::Util::Tool.should_receive(:check_tool).with("curl").and_return(curl)
-      Pkg::Util::Execution.should_receive(:capture3).with("#{curl} -i #{form_data[0]} #{target_uri}")
+      Pkg::Util::Execution.should_receive(:capture3).with("#{curl} -i #{form_data[0]} '#{target_uri}'")
       Pkg::Util::Net.curl_form_data(target_uri, form_data)
     end
 
     it "should curl with form data, uri, and be quiet" do
       Pkg::Util::Tool.should_receive(:check_tool).with("curl").and_return(curl)
-      Pkg::Util::Execution.should_receive(:capture3).with("#{curl} -i #{form_data[0]} #{target_uri}").and_return(['stdout', 'stderr', 0])
+      Pkg::Util::Execution.should_receive(:capture3).with("#{curl} -i #{form_data[0]} '#{target_uri}'").and_return(['stdout', 'stderr', 0])
       Pkg::Util::Net.curl_form_data(target_uri, form_data, options).should eq(['', 0])
     end
 

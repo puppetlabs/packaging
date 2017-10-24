@@ -1,5 +1,7 @@
 source "https://rubygems.org"
 
+gem 'artifactory'
+
 group :development, :test do
   gem "rake", "~> 0.9.6"
   gem "rspec", "~> 2.14.1"

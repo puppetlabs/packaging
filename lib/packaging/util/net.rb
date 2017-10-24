@@ -230,7 +230,7 @@ module Pkg::Util::Net
       end
 
       # Add the uri
-      post_string << "#{uri}"
+      post_string << "'#{uri}'"
 
       # If this is quiet, we're going to silence all output
       begin

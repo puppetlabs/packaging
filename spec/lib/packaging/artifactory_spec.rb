@@ -72,52 +72,62 @@ describe 'artifactory.rb' do
     },
   }
 
-  platform_tags.each do |platform_tag, platform_tag_data|
+  artifact = Pkg::ManageArtifactory.new(project, project_version, {:repo_base => default_repo_name, :artifactory_uri => artifactory_uri})
+
+  around(:each) do |example|
     original_artifactory_api_key = ENV['ARTIFACTORY_API_KEY']
     ENV['ARTIFACTORY_API_KEY'] = 'anapikeythatdefinitelyworks'
+    example.run
+    ENV['ARTIFACTORY_API_KEY'] = original_artifactory_api_key
+  end
 
-    artifact = Pkg::ManageArtifactory.new(project, project_version, platform_tag, {:repo_base => default_repo_name, :artifactory_uri => artifactory_uri})
-
+  platform_tags.each do |platform_tag, platform_tag_data|
     describe '#location_for' do
-      it 'returns the expected repo name and paths by default' do
-        expect(artifact.location_for).to match_array([platform_tag_data[:toplevel_repo], platform_tag_data[:repo_subdirectories]])
+      if platform_tag_data[:codename]
+        it 'returns the expected repo name and paths by default, prepending `pool` for debian-ish platforms' do
+          expect(artifact.location_for(platform_tag)).to match_array([
+            platform_tag_data[:toplevel_repo],
+            platform_tag_data[:repo_subdirectories],
+            File.join('pool', platform_tag_data[:repo_subdirectories])
+          ])
+        end
+      else
+        it 'returns the expected repo name and paths by default' do
+          expect(artifact.location_for(platform_tag)).to match_array([
+            platform_tag_data[:toplevel_repo],
+            platform_tag_data[:repo_subdirectories],
+            platform_tag_data[:repo_subdirectories]
+          ])
+        end
       end
 
       it 'returns the correct paths for the passed in format' do
-        expect(artifact.location_for('yaml')).to match_array(['generic', File.join(default_repo_name, project, project_version)])
-      end
-    end
-
-    describe '#alternate_subdirectory_path' do
-      it 'prepends pool to the subdirectories for debian-ish platforms' do
-        if platform_tag_data[:codename]
-          expect(artifact.alternate_subdirectory_path).to eq File.join('pool', platform_tag_data[:repo_subdirectories])
-        else
-          expect(artifact.alternate_subdirectory_path).to eq platform_tag_data[:repo_subdirectories]
-        end
+        expect(artifact.location_for('generic')).to match_array([
+          'generic',
+          File.join(default_repo_name, project, project_version),
+          File.join(default_repo_name, project, project_version)
+        ])
       end
     end
 
     describe '#package_name' do
       it 'parses the retrieved yaml file and returns the correct package name' do
-        allow(artifact).to receive(:yaml_platform_data).and_return(platform_data)
-        expect(artifact.package_name).to eq(File.basename(platform_tag_data[:package_name]))
+        expect(artifact.package_name(platform_data, platform_tag)).to eq(File.basename(platform_tag_data[:package_name]))
       end
 
       it 'fails if it cannot find a valid platform name' do
         new_platform_data = platform_data
         new_platform_data.delete_if { |k| k.match(platform_tag) }
-        allow(artifact).to receive(:yaml_platform_data).and_return(new_platform_data)
-        expect{artifact.package_name}.to raise_error
+        expect{artifact.package_name(new_platform_data, platform_tag)}.to raise_error
       end
     end
 
     describe '#deb_list_contents' do
       it "returns the correct contents for the debian list file for #{platform_tag}" do
         if platform_tag_data[:codename]
-          expect(artifact.deb_list_contents).to eq("deb #{artifactory_uri}/#{platform_tag_data[:toplevel_repo].chomp('/pool')} #{platform_tag_data[:codename]} #{platform_tag_data[:repo_subdirectories]}")
+          expect(artifact.deb_list_contents(platform_tag)).to eq("deb #{artifactory_uri}/#{platform_tag_data[:toplevel_repo].chomp('/pool')} #{platform_tag_data[:codename]} #{platform_tag_data[:repo_subdirectories]}")
         else
-          expect(artifact.deb_list_contents).to eq('')
+          expect{artifact.deb_list_contents(platform_tag)}.to raise_error
         end
       end
     end
@@ -125,22 +135,19 @@ describe 'artifactory.rb' do
     describe '#rpm_repo_contents' do
       it "returns the correct contents for the rpm repo file for #{platform_tag}" do
         if platform_tag_data[:package_format] == 'rpm'
-          expect(artifact.rpm_repo_contents).to include("baseurl=#{artifactory_uri}\/#{platform_tag_data[:toplevel_repo]}\/#{platform_tag_data[:repo_subdirectories]}")
+          expect(artifact.rpm_repo_contents(platform_tag)).to include("baseurl=#{artifactory_uri}\/#{platform_tag_data[:toplevel_repo]}\/#{platform_tag_data[:repo_subdirectories]}")
         else
-          expect(artifact.rpm_repo_contents).to eq('')
+          expect{artifact.rpm_repo_contents(platform_tag)}.to raise_error
         end
       end
     end
-
-    ENV['ARTIFACTORY_API_KEY'] = original_artifactory_api_key
   end
 
   describe '#check_authorization' do
-    platform_tag = 'el-7-x86_64'
     it 'fails gracefully if authorization is not set' do
       original_artifactory_api_key = ENV['ARTIFACTORY_API_KEY']
       ENV['ARTIFACTORY_API_KEY'] = nil
-      expect { Pkg::ManageArtifactory.new(project, project_version, platform_tag) }.to raise_error
+      expect { artifact.deploy_package('path/to/el/7/x86_64/package.rpm') }.to raise_error
       ENV['ARTIFACTORY_API_KEY'] = original_artifactory_api_key
     end
   end

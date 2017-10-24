@@ -601,10 +601,10 @@ namespace :pl do
     desc 'ship pkg directory contents to artifactory'
     task :ship_to_artifactory, :local_dir do |_t, args|
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')
+      artifactory = Pkg::ManageArtifactory.new(Pkg::Config.project, Pkg::Config.ref)
+
       local_dir = args.local_dir || 'pkg'
       Dir.glob("#{local_dir}/**/*").reject { |e| File.directory? e }.each do |artifact|
-        platform_tag = Pkg::Paths.tag_from_artifact_path(artifact, false) || 'generic'
-        artifactory = Pkg::ManageArtifactory.new(Pkg::Config.project, Pkg::Config.ref, platform_tag)
         artifactory.deploy_package(artifact)
       end
     end

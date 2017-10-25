@@ -9,31 +9,33 @@ describe 'artifactory.rb' do
   default_repo_name = 'testing'
   artifactory_uri = 'https://artifactory.url'
 
-  platform_data = {
-    'el-6-x86_64' => {
+  let(:platform_data) {
+    {
+      'el-6-x86_64' => {
         :artifact => "./el/6/PC1/x86_64/puppet-agent-5.3.1.34.gf65f9ef-1.el6.x86_64.rpm",
         :repo_config => "../repo_configs/rpm/pl-puppet-agent-f65f9efbb727c3d2d72d6799c0fc345a726f27b5-el-6-x86_64.repo",
-    },
-    'ubuntu-16.04-amd64' => {
+      },
+      'ubuntu-16.04-amd64' => {
         :artifact => "./deb/xenial/PC1/puppet-agent_5.3.1.34.gf65f9ef-1xenial_amd64.deb",
         :repo_config => "../repo_configs/deb/pl-puppet-agent-f65f9efbb727c3d2d72d6799c0fc345a726f27b5-xenial.list",
-    },
-    'windows-2012-x86' => {
+      },
+      'windows-2012-x86' => {
         :artifact => "./windows/puppet-agent-5.3.1.34-x86.msi",
         :repo_config => '',
-    },
-    'eos-4-i386' => {
+      },
+      'eos-4-i386' => {
         :artifact => "./eos/4/PC1/i386/puppet-agent-5.3.1.34.gf65f9ef-1.eos4.i386.swix",
         :repo_config => '',
-    },
-    'osx-10.12-x86_64' => {
+      },
+      'osx-10.12-x86_64' => {
         :artifact => "./apple/10.12/PC1/x86_64/puppet-agent-5.3.1.34.gf65f9ef-1.osx10.12.dmg",
         :repo_config => '',
-    },
-    'solaris-10-sparc' => {
+      },
+      'solaris-10-sparc' => {
         :artifact => "./solaris/10/PC1/puppet-agent-5.3.1.34.gf65f9ef-1.sparc.pkg.gz",
         :repo_config => '',
-    },
+      },
+    }
   }
 
   platform_tags = {
@@ -72,7 +74,7 @@ describe 'artifactory.rb' do
     },
   }
 
-  artifact = Pkg::ManageArtifactory.new(project, project_version, {:repo_base => default_repo_name, :artifactory_uri => artifactory_uri})
+  let(:artifact) { Pkg::ManageArtifactory.new(project, project_version, {:repo_base => default_repo_name, :artifactory_uri => artifactory_uri})}
 
   around(:each) do |example|
     original_artifactory_api_key = ENV['ARTIFACTORY_API_KEY']

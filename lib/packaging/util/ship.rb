@@ -142,24 +142,29 @@ module Pkg::Util::Ship
   def test_ship(vm, ship_task)
     command = 'getent group release || groupadd release'
     Pkg::Util::Net.remote_ssh_cmd(vm, command)
-    ENV['APT_HOST'] = vm
-    ENV['DMG_HOST'] = vm
-    ENV['GEM_HOST'] = vm
-    ENV['IPS_HOST'] = vm
-    ENV['MSI_HOST'] = vm
-    ENV['P5P_HOST'] = vm
-    ENV['SVR4_HOST'] = vm
-    ENV['SWIX_HOST'] = vm
-    ENV['TAR_HOST'] = vm
-    ENV['YUM_HOST'] = vm
-    ENV['APT_SIGNING_SERVER'] = vm
-    ENV['APT_STAGING_SERVER'] = vm
-    ENV['DMG_STAGING_SERVER'] = vm
-    ENV['MSI_STAGING_SERVER'] = vm
-    ENV['SWIX_STAGING_SERVER'] = vm
-    ENV['TAR_STAGING_SERVER'] = vm
-    ENV['YUM_STAGING_SERVER'] = vm
-    ENV['STAGING_SERVER'] = vm
+    hosts_to_override = %w(
+      APT_HOST
+      DMG_HOST
+      GEM_HOST
+      IPS_HOST
+      MSI_HOST
+      P5P_HOST
+      SVR4_HOST
+      SWIX_HOST
+      TAR_HOST
+      YUM_HOST
+      APT_SIGNING_SERVER
+      APT_STAGING_SERVER
+      DMG_STAGING_SERVER
+      MSI_STAGING_SERVER
+      SWIX_STAGING_SERVER
+      TAR_STAGING_SERVER
+      YUM_STAGING_SERVER
+      STAGING_SERVER
+    )
+    hosts_to_override.each do |host|
+      ENV[host] = vm
+    end
     Rake::Task[ship_task].invoke
   end
 end

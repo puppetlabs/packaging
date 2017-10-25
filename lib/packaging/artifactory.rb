@@ -5,7 +5,6 @@ module Pkg
   # by the Release Engineering team at Puppet. It has the ability to both push
   # artifacts to the repos, and to retrieve them back from the repos.
   class ManageArtifactory
-    require 'artifactory'
 
     DEFAULT_REPO_TYPE = 'generic'
     DEFAULT_REPO_BASE = 'development'
@@ -21,6 +20,8 @@ module Pkg
     # @option :repo_base [String] The base of all repos, set for consistency.
     #   This currently defaults to 'development'
     def initialize(project, project_version, opts = {})
+      require 'artifactory'
+
       @artifactory_uri = opts[:artifactory_uri] || 'https://artifactory.delivery.puppetlabs.net/artifactory'
       @repo_base = opts[:repo_base] || DEFAULT_REPO_BASE
 

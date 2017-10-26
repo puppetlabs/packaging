@@ -138,4 +138,33 @@ module Pkg::Util::Ship
   rescue => e
     fail "Failed to create rolling repo link for '#{platform_tag}'.\n#{e}"
   end
+
+  def test_ship(vm, ship_task)
+    command = 'getent group release || groupadd release'
+    Pkg::Util::Net.remote_ssh_cmd(vm, command)
+    hosts_to_override = %w(
+      APT_HOST
+      DMG_HOST
+      GEM_HOST
+      IPS_HOST
+      MSI_HOST
+      P5P_HOST
+      SVR4_HOST
+      SWIX_HOST
+      TAR_HOST
+      YUM_HOST
+      APT_SIGNING_SERVER
+      APT_STAGING_SERVER
+      DMG_STAGING_SERVER
+      MSI_STAGING_SERVER
+      SWIX_STAGING_SERVER
+      TAR_STAGING_SERVER
+      YUM_STAGING_SERVER
+      STAGING_SERVER
+    )
+    hosts_to_override.each do |host|
+      ENV[host] = vm
+    end
+    Rake::Task[ship_task].invoke
+  end
 end

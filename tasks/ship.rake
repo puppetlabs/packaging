@@ -7,9 +7,14 @@ namespace :pl do
 
     desc "Update remote yum repository on '#{Pkg::Config.yum_staging_server}'"
     task update_yum_repo: 'pl:fetch' do
+      if Pkg::Util::Version.final?
+        path = Pkg::Config.yum_repo_path
+      else
+        path = Pkg::Config.nonfinal_yum_repo_path || Pkg::Config.yum_repo_path
+      end
       yum_whitelist = {
         __REPO_NAME__: Pkg::Paths.repo_name,
-        __REPO_PATH__: Pkg::Config.yum_repo_path,
+        __REPO_PATH__: path,
         __REPO_HOST__: Pkg::Config.yum_staging_server,
         __GPG_KEY__: Pkg::Util::Gpg.key
       }

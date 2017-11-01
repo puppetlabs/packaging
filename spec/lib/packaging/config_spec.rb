@@ -313,6 +313,13 @@ describe "Pkg::Config" do
   end
 
   describe "#load_default_configs" do
+    before(:each) do
+      @project_root = double('project_root')
+      Pkg::Config.project_root = @project_root
+      @test_project_data = File.join(Pkg::Config.project_root, 'ext', 'project_data.yaml')
+      @test_build_defaults = File.join(Pkg::Config.project_root, 'ext', 'build_defaults.yaml')
+    end
+
     around do |example|
       orig = Pkg::Config.project_root
       example.run
@@ -321,12 +328,31 @@ describe "Pkg::Config" do
 
     context "given ext/build_defaults.yaml and ext/project_data.yaml are readable" do
       it "should try to load build_defaults.yaml and project_data.yaml" do
-        Pkg::Config.project_root = File.join(FIXTURES, 'config')
-        test_project_data = File.join(FIXTURES, 'config', 'ext', 'project_data.yaml')
-        test_build_defaults = File.join(FIXTURES, 'config', 'ext', 'build_defaults.yaml')
-        expect(Pkg::Config).to receive(:config_from_yaml).with(test_project_data)
-        expect(Pkg::Config).to receive(:config_from_yaml).with(test_build_defaults)
+        allow(File).to receive(:readable?).with(@test_project_data).and_return(true)
+        allow(File).to receive(:readable?).with(@test_build_defaults).and_return(true)
+        expect(Pkg::Config).to receive(:config_from_yaml).with(@test_project_data)
+        expect(Pkg::Config).to receive(:config_from_yaml).with(@test_build_defaults)
         Pkg::Config.load_default_configs
+      end
+    end
+
+    context "given ext/build_defaults.yaml is readable but ext/project_data.yaml is not" do
+      it "should try to load build_defaults.yaml but not project_data.yaml" do
+        allow(File).to receive(:readable?).with(@test_project_data).and_return(false)
+        allow(File).to receive(:readable?).with(@test_build_defaults).and_return(true)
+        expect(Pkg::Config).to_not receive(:config_from_yaml).with(@test_project_data)
+        expect(Pkg::Config).to receive(:config_from_yaml).with(@test_build_defaults)
+        Pkg::Config.load_default_configs
+      end
+    end
+
+    context "given ext/build_defaults.yaml is not readable but ext/project_data.yaml is" do
+      it "should try to load build_defaults.yaml then unset project_root" do
+        allow(File).to receive(:readable?).with(@test_project_data).and_return(true)
+        allow(File).to receive(:readable?).with(@test_build_defaults).and_return(false)
+        expect(Pkg::Config).to_not receive(:config_from_yaml).with(@test_build_defaults)
+        Pkg::Config.load_default_configs
+        expect(Pkg::Config.project_root).to be_nil
       end
     end
 
@@ -340,7 +366,7 @@ describe "Pkg::Config" do
       it "should set the project root to nil" do
         Pkg::Config.project_root = 'foo'
         Pkg::Config.load_default_configs
-        expect(Pkg::Config.project_root).to be(nil)
+        expect(Pkg::Config.project_root).to be_nil
       end
     end
   end

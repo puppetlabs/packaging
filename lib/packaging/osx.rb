@@ -3,8 +3,13 @@ module Pkg::OSX
     def sign(target_dir = 'pkg')
       use_identity = "-i #{Pkg::Config.osx_signing_ssh_key}" unless Pkg::Config.osx_signing_ssh_key.nil?
 
-      ssh_host_string = "#{use_identity} #{ENV['USER']}@#{Pkg::Config.osx_signing_server}"
-      rsync_host_string = "-e 'ssh #{use_identity}' #{ENV['USER']}@#{Pkg::Config.osx_signing_server}"
+      if Pkg::Config.osx_signing_server =~ /@/
+        host_string = "#{Pkg::Config.osx_signing_server}"
+      else
+        host_string = "#{ENV['USER']}@#{Pkg::Config.osx_signing_server}"
+      end
+      ssh_host_string = "#{use_identity} #{host_string}"
+      rsync_host_string = "-e 'ssh #{use_identity}' #{host_string}"
 
       work_dir  = "/tmp/#{Pkg::Util.rand_string}"
       mount     = File.join(work_dir, "mount")

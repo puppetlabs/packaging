@@ -177,7 +177,7 @@ module Pkg
       #properties_hash = Pkg::Config.config_to_hash
       properties_hash = {}
       if data[:package_format] == 'deb'
-        properties_hash.merge({
+        properties_hash.merge!({
           'deb.distribution' => data[:codename],
           'deb.component' => data[:repo_subdirectories],
           'deb.architecture' => data[:architecture],
@@ -273,6 +273,6 @@ module Pkg
       raise "Attempt to download '#{File.basename(package)}' from #{File.join(@artifactory_uri, data[:full_artifactory_path])} failed."
     end
 
-    private :deploy_properties, :check_authorization
+    private :check_authorization
   end
 end

@@ -143,6 +143,21 @@ describe 'artifactory.rb' do
         end
       end
     end
+
+    describe '#deploy_properties' do
+      it "returns the correct contents for the deploy properties for #{platform_tag}" do
+        if platform_tag_data[:codename]
+          expect(artifact.deploy_properties(platform_tag)).to include({
+            'deb.distribution' => platform_tag_data[:codename],
+            'deb.component' => platform_tag_data[:repo_subdirectories]
+          })
+        else
+          expect(artifact.deploy_properties(platform_tag)).not_to include({
+            'deb.component' => platform_tag_data[:repo_subdirectories]
+          })
+        end
+      end
+    end
   end
 
   describe '#check_authorization' do

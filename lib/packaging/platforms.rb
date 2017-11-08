@@ -101,7 +101,7 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
         repo: true,
       },
       '7' => {
-        architectures: ['x86_64', 's390x', 'ppc64le'],
+        architectures: ['x86_64', 's390x', 'ppc64le', 'aarch64'],
         source_architecture: 'SRPMS',
         package_format: 'rpm',
         source_package_formats: ['src.rpm'],

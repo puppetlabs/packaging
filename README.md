@@ -11,6 +11,15 @@ flux, and it should not be considered to have a formal API. However, every
 effort is being made to ensure existing tasks/behavior are not broken as we
 continue to iterate and improve upon it.
 
+## Getting Started
+
+As a developer, you can get started working on this by typing:
+
+```
+bundle install
+bundle exec rspec
+```
+
 ## Using the Packaging Repo
 
 Several Puppet projects are using the packaging repo. They are:
@@ -1021,4 +1030,3 @@ files:
     destination, pass OUTPUT_DIR as a environment variable to the task. By
     default, the name of the file will be either the git tag, if HEAD of the
     project repository is a tag, or the git sha of HEAD.
-

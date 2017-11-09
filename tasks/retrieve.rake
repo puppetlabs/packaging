@@ -17,6 +17,7 @@ namespace :pl do
       local_target = args.local_target || "pkg"
       Pkg::Util::RakeUtils.invoke_task("pl:fetch")
       mkdir_p local_target
+      package_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
       if wget = Pkg::Util::Tool.find_tool("wget")
         if Pkg::Config.foss_only && !Pkg::Config.foss_platforms
           warn "FOSS_ONLY specified, but I don't know anything about FOSS_PLATFORMS. Fetch everything?"
@@ -32,7 +33,6 @@ namespace :pl do
           end
         end
         if Pkg::Config.foss_only && Pkg::Config.foss_platforms && remote_target == 'artifacts'
-          package_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
           # Grab the <ref>.yaml file
           sh "#{wget} --quiet --recursive --no-parent --no-host-directories --level=0 --cut-dirs 3 --directory-prefix=#{local_target} #{package_url}/#{remote_target}/#{Pkg::Config.ref}.yaml"
           yaml_path = File.join(local_target, "#{Pkg::Config.ref}.yaml")
@@ -44,25 +44,17 @@ namespace :pl do
             sh "#{wget} --quiet --recursive --no-parent --no-host-directories --level=0 --cut-dirs 3 --directory-prefix=#{local_target} --reject 'index*' #{package_url}/#{remote_target}/#{paths[:artifact]}" if Pkg::Config.foss_platforms.include?(platform)
           end
         else
-          # For the next person who needs to look these flags up:
-          # -r = recursive
-          # -l 0 = infinitely recurse, no limit
-          # --cut-dirs 3 = will cut off #{Pkg::Config.project}, #{Pkg::Config.ref}, and the first directory in #{remote_target} from the url when saving to disk
-          # -np = Only descend when recursing, never ascend
-          # -nH = Discard http://#{Pkg::Config.builds_server} when saving to disk
-          # --reject = Reject all hits that match the supplied regex
-          # -P = where to save to disk (defaults to ./)
           sh "#{wget} --quiet --recursive --no-parent --no-host-directories --level=0 --cut-dirs 3 --directory-prefix=#{local_target} --reject 'index*' #{package_url}/#{remote_target}/"
         end
       else
-        warn "Could not find `wget` tool. Falling back to rsyncing from #{Pkg::Config.distribution_server}"
+        warn "Could not find `wget` tool. Falling back to rsyncing from #{Pkg::Config.distribution_server} and attempting to retrieve everything."
         begin
           Pkg::Util::Net.rsync_from("#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{remote_target}/", Pkg::Config.distribution_server, "#{local_target}/")
         rescue => e
           fail "Couldn't download packages from distribution server.\n#{e}"
         end
       end
-      puts "Packages staged in pkg"
+      puts "Packages staged in #{local_target}"
     end
   end
 end

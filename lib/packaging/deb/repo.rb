@@ -83,7 +83,7 @@ module Pkg::Deb::Repo
     end
 
     def repo_creation_command(repo_directory, artifact_paths)
-      cmd = "[ -d #{repo_directory} ] || exit 1 && "
+      cmd = "[ -d #{repo_directory} ] || exit 1 ; "
       cmd << "pushd #{repo_directory} > /dev/null && "
       cmd << 'echo "Checking for running repo creation. Will wait if detected." && '
       cmd << 'while [ -f .lock ] ; do sleep 1 ; echo -n "." ; done && '
@@ -100,14 +100,14 @@ module Pkg::Deb::Repo
         arches = Pkg::Platforms.arches_for_codename(codename)
 
         cmd << "mkdir -p #{codename}/conf && "
-        cmd << "pushd #{codename} && "
+        cmd << "pushd #{codename} ; "
         cmd << %Q( [ -e 'conf/distributions' ] || echo "
 Origin: Puppet Labs
 Label: Puppet Labs
 Codename: #{codename}
 Architectures: #{(DEBIAN_PACKAGING_ARCHES + arches).uniq.join(' ')}
 Components: #{reprepro_repo_name}
-Description: Apt repository for acceptance testing" >> conf/distributions && )
+Description: Apt repository for acceptance testing" >> conf/distributions ; )
 
         cmd << 'reprepro=$(which reprepro) && '
         cmd << "$reprepro includedeb #{codename} ../../#{path}/*.deb && "

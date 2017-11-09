@@ -17,11 +17,7 @@ namespace :pl do
       local_target = args.local_target || "pkg"
       Pkg::Util::RakeUtils.invoke_task("pl:fetch")
       mkdir_p local_target
-      package_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
       if wget = Pkg::Util::Tool.find_tool("wget")
-        # Grab the <ref>.yaml file
-        sh "#{wget} --quiet --recursive --no-parent --no-host-directories --level=0 --cut-dirs 3 --directory-prefix=#{local_target} #{package_url}/#{remote_target}/#{Pkg::Config.ref}.yaml"
-        yaml_path = File.join(local_target, "#{Pkg::Config.ref}.yaml")
         if Pkg::Config.foss_only && !Pkg::Config.foss_platforms
           warn "FOSS_ONLY specified, but I don't know anything about FOSS_PLATFORMS. Fetch everything?"
           unless Pkg::Util.ask_yes_or_no(true)
@@ -34,14 +30,15 @@ namespace :pl do
             warn "Retrieve cancelled"
             exit
           end
-        elsif Pkg::Config.foss_only && !File.readable?(yaml_path)
-          warn "Couldn't read #{Pkg::Config.ref}.yaml, which is necessary for FOSS_ONLY. Fetch everything?"
-          unless Pkg::Util.ask_yes_or_no(true)
-            warn "Retrieve cancelled"
-            exit
-          end
         end
-        if Pkg::Config.foss_only && Pkg::Config.foss_platforms && remote_target == 'artifacts' && File.readable?(yaml_path)
+        if Pkg::Config.foss_only && Pkg::Config.foss_platforms && remote_target == 'artifacts'
+          package_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
+          # Grab the <ref>.yaml file
+          sh "#{wget} --quiet --recursive --no-parent --no-host-directories --level=0 --cut-dirs 3 --directory-prefix=#{local_target} #{package_url}/#{remote_target}/#{Pkg::Config.ref}.yaml"
+          yaml_path = File.join(local_target, "#{Pkg::Config.ref}.yaml")
+          unless File.readable?(yaml_path)
+            fail "Couldn't read #{Pkg::Config.ref}.yaml, which is necessary for FOSS_ONLY. Retrieve cancelled"
+          end
           platform_data = Pkg::Util::Serialization.load_yaml(yaml_path)[:platform_data]
           platform_data.each do |platform, paths|
             sh "#{wget} --quiet --recursive --no-parent --no-host-directories --level=0 --cut-dirs 3 --directory-prefix=#{local_target} --reject 'index*' #{package_url}/#{remote_target}/#{paths[:artifact]}" if Pkg::Config.foss_platforms.include?(platform)

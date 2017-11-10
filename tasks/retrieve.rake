@@ -25,14 +25,14 @@ namespace :pl do
             warn "Retrieve cancelled"
             exit
           end
-        elsif Pkg::Config.foss_only && remote_target != 'artifacts'
-          warn "I only know how to fetch from remote_target 'artifacts' with FOSS_ONLY. Fetch everything?"
+        elsif Pkg::Config.foss_only && !(remote_target == 'artifacts' || remote_target == 'repos')
+          warn "I only know how to fetch from remote_target 'artifacts' or 'repos' with FOSS_ONLY. Fetch everything?"
           unless Pkg::Util.ask_yes_or_no(true)
             warn "Retrieve cancelled"
             exit
           end
         end
-        if Pkg::Config.foss_only && Pkg::Config.foss_platforms && remote_target == 'artifacts'
+        if Pkg::Config.foss_only
           # Grab the <ref>.yaml file
           sh "#{wget} --quiet --recursive --no-parent --no-host-directories --level=0 --cut-dirs 3 --directory-prefix=#{local_target} #{package_url}/#{remote_target}/#{Pkg::Config.ref}.yaml"
           yaml_path = File.join(local_target, "#{Pkg::Config.ref}.yaml")

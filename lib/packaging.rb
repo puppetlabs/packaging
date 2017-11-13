@@ -19,6 +19,7 @@ module Pkg
   require 'packaging/msi'
   require 'packaging/repo'
   require 'packaging/artifactory'
+  require 'packaging/retrieve'
 
   # Load configuration defaults
   Pkg::Config.load_defaults

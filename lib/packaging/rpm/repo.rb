@@ -189,7 +189,15 @@ module Pkg::Rpm::Repo
       puts "Wrote yum configuration files for #{Pkg::Config.project} at #{Pkg::Config.ref} to pkg/#{target}/rpm"
     end
 
-    def create_repos(directory = 'repos')
+    def create_local_repos(directory = "repos")
+      Dir.chdir(directory) do
+        createrepo = Pkg::Util::Tool.check_tool('createrepo')
+        stdout, _, _ = Pkg::Util::Execution.capture3("bash -c '#{repo_creation_command(createrepo)}'")
+        stdout
+      end
+    end
+
+    def create_remote_repos(directory = 'repos')
       artifact_directory = File.join(Pkg::Config.jenkins_repo_path, Pkg::Config.project, Pkg::Config.ref)
       artifact_paths = Pkg::Repo.directories_that_contain_packages(File.join(artifact_directory, 'artifacts'), 'rpm')
       Pkg::Repo.populate_repo_directory(artifact_directory)
@@ -209,9 +217,14 @@ module Pkg::Rpm::Repo
       end
     end
 
-    def create_repos_from_artifacts
-      Pkg::Util.deprecate('Pkg::Rpm::Repo.create_repos_from_artifacts', 'Pkg::Rpm::Repo.create_repos')
-      create_repos
+    def create_repos_from_artifacts(directory = "repos")
+      Pkg::Util.deprecate('Pkg::Rpm::Repo.create_repos_from_artifacts', 'Pkg::Rpm::Repo.create_remote_repos')
+      create_remote_repos(directory)
+    end
+
+    def create_repos(directory = "repos")
+      Pkg::Util.deprecate('Pkg::Rpm::Repo.create_repos', 'Pkg::Rpm::Repo.create_local_repos')
+      create_local_repos(directory)
     end
 
     # @deprecated this command is exactly as awful as you think it is.

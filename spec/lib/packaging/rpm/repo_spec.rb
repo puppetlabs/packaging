@@ -81,7 +81,26 @@ describe "Pkg::Rpm::Repo" do
     end
   end
 
-  describe "#create_repos" do
+  describe "#create_local_repos" do
+    let(:command) { "/usr/bin/make some repos" }
+    let(:target_directory) { "/tmp/dir/thing" }
+
+    it "fails without createrepo" do
+      Dir.should_receive(:chdir).with(target_directory).and_yield
+      Pkg::Util::Tool.should_receive(:find_tool).with('createrepo', :required => true).and_raise(RuntimeError)
+      expect { Pkg::Rpm::Repo.create_local_repos(target_directory) }.to raise_error(RuntimeError)
+    end
+
+    it "makes a repo in the target directory" do
+      Dir.should_receive(:chdir).with(target_directory).and_yield
+      Pkg::Util::Tool.should_receive(:find_tool).with('createrepo', :required => true).and_return(command)
+      Pkg::Rpm::Repo.should_receive(:repo_creation_command).with(command).and_return("run this thing")
+      Pkg::Util::Execution.should_receive(:capture3).with("bash -c 'run this thing'")
+      Pkg::Rpm::Repo.create_local_repos(target_directory)
+    end
+  end
+
+  describe "#create_remote_repos" do
     let(:command) { "/usr/bin/make some repos" }
     let(:artifact_directory) { "/tmp/dir/thing" }
     let(:pkg_directories) { ['el-6-i386', 'el/7/x86_64'] }
@@ -95,7 +114,7 @@ describe "Pkg::Rpm::Repo" do
       Pkg::Rpm::Repo.should_receive(:generate_repo_configs)
       Pkg::Rpm::Repo.should_receive(:ship_repo_configs)
       Pkg::Util::Net.should_receive(:remote_ssh_cmd).with(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/repos/.lock" )
-      Pkg::Rpm::Repo.create_repos
+      Pkg::Rpm::Repo.create_remote_repos
     end
   end
 

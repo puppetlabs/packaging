@@ -13,7 +13,7 @@ namespace :pl do
   namespace :jenkins do
     desc "Create yum repositories of built RPM packages for this SHA on the distribution server"
     task :rpm_repos => "pl:fetch" do
-      Pkg::Rpm::Repo.create_repos_from_artifacts
+      Pkg::Rpm::Repo.create_remote_repos
     end
 
     desc "Create yum repository configs for package repos for this sha/tag on the distribution server"

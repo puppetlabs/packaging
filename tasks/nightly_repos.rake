@@ -31,7 +31,7 @@ namespace :pl do
 
     task :sign_repos => "pl:fetch" do
       Pkg::Util::RakeUtils.invoke_task("pl:sign_rpms", "repos")
-      Pkg::Rpm::Repo.create_repos('repos')
+      Pkg::Rpm::Repo.create_local_repos('repos')
       Pkg::Rpm::Repo.sign_repos('repos')
       Pkg::Deb::Repo.sign_repos('repos', 'Apt repository for signed builds')
       Pkg::OSX.sign('repos') unless Dir['repos/apple/**/*.dmg'].empty?

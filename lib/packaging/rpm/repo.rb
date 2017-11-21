@@ -22,7 +22,7 @@ module Pkg::Rpm::Repo
       end
     end
 
-    def repo_creation_command(repo_directory, artifact_paths)
+    def repo_creation_command(repo_directory, artifact_paths = nil)
       cmd = "[ -d #{repo_directory} ] || exit 1 ; "
       cmd << "pushd #{repo_directory} > /dev/null && "
       cmd << 'echo "Checking for running repo creation. Will wait if detected." && '
@@ -30,6 +30,12 @@ module Pkg::Rpm::Repo
       cmd << 'echo "Setting lock" && '
       cmd << 'touch .lock && '
       cmd << 'createrepo=$(which createrepo) ; '
+
+      # Added for compatibility.
+      # The nightly repo ships operate differently and do not want to be calculating
+      # the correct paths based on which packages are available on the distribution
+      # host, we just want to be `createrepo`ing for what we've staged locally
+      artifact_paths ||= Dir.glob('**/*.rpm').map { |package| File.dirname(package) }
 
       artifact_paths.each do |path|
         cmd << "[ -d #{path} ] || continue ; "
@@ -190,11 +196,8 @@ module Pkg::Rpm::Repo
     end
 
     def create_local_repos(directory = "repos")
-      Dir.chdir(directory) do
-        createrepo = Pkg::Util::Tool.check_tool('createrepo')
-        stdout, _, _ = Pkg::Util::Execution.capture3("bash -c '#{repo_creation_command(createrepo)}'")
-        stdout
-      end
+      stdout, _, _ = Pkg::Util::Execution.capture3("bash -c '#{repo_creation_command(directory)}'")
+      stdout
     end
 
     def create_remote_repos(directory = 'repos')

@@ -23,13 +23,13 @@ module Pkg::Rpm::Repo
     end
 
     def repo_creation_command(repo_directory, artifact_paths = nil)
+      createrepo = Pkg::Util::Tool.check_tool('createrepo')
       cmd = "[ -d #{repo_directory} ] || exit 1 ; "
       cmd << "pushd #{repo_directory} > /dev/null && "
       cmd << 'echo "Checking for running repo creation. Will wait if detected." && '
       cmd << 'while [ -f .lock ] ; do sleep 1 ; echo -n "." ; done && '
       cmd << 'echo "Setting lock" && '
       cmd << 'touch .lock && '
-      cmd << 'createrepo=$(which createrepo) ; '
 
       # Added for compatibility.
       # The nightly repo ships operate differently and do not want to be calculating
@@ -40,7 +40,7 @@ module Pkg::Rpm::Repo
       artifact_paths.each do |path|
         cmd << "[ -d #{path} ] || continue ; "
         cmd << "pushd #{path} && "
-        cmd << '$createrepo --checksum=sha --checkts --update --delta-workers=0 --database . && '
+        cmd << "#{createrepo} --checksum=sha --checkts --update --delta-workers=0 --database . && "
         cmd << 'popd ; '
       end
       cmd

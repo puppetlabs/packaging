@@ -22,19 +22,25 @@ module Pkg::Rpm::Repo
       end
     end
 
-    def repo_creation_command(repo_directory, artifact_paths)
+    def repo_creation_command(repo_directory, artifact_paths = nil)
+      createrepo = Pkg::Util::Tool.check_tool('createrepo')
       cmd = "[ -d #{repo_directory} ] || exit 1 ; "
       cmd << "pushd #{repo_directory} > /dev/null && "
       cmd << 'echo "Checking for running repo creation. Will wait if detected." && '
       cmd << 'while [ -f .lock ] ; do sleep 1 ; echo -n "." ; done && '
       cmd << 'echo "Setting lock" && '
       cmd << 'touch .lock && '
-      cmd << 'createrepo=$(which createrepo) ; '
+
+      # Added for compatibility.
+      # The nightly repo ships operate differently and do not want to be calculating
+      # the correct paths based on which packages are available on the distribution
+      # host, we just want to be `createrepo`ing for what we've staged locally
+      artifact_paths ||= Dir.glob('**/*.rpm').map { |package| File.dirname(package) }
 
       artifact_paths.each do |path|
         cmd << "[ -d #{path} ] || continue ; "
         cmd << "pushd #{path} && "
-        cmd << '$createrepo --checksum=sha --checkts --update --delta-workers=0 --database . && '
+        cmd << "#{createrepo} --checksum=sha --checkts --update --delta-workers=0 --database . && "
         cmd << 'popd ; '
       end
       cmd
@@ -190,18 +196,15 @@ module Pkg::Rpm::Repo
     end
 
     def create_local_repos(directory = "repos")
-      Dir.chdir(directory) do
-        createrepo = Pkg::Util::Tool.check_tool('createrepo')
-        stdout, _, _ = Pkg::Util::Execution.capture3("bash -c '#{repo_creation_command(createrepo)}'")
-        stdout
-      end
+      stdout, _, _ = Pkg::Util::Execution.capture3("bash -c '#{repo_creation_command(directory)}'")
+      stdout
     end
 
     def create_remote_repos(directory = 'repos')
       artifact_directory = File.join(Pkg::Config.jenkins_repo_path, Pkg::Config.project, Pkg::Config.ref)
       artifact_paths = Pkg::Repo.directories_that_contain_packages(File.join(artifact_directory, 'artifacts'), 'rpm')
       Pkg::Repo.populate_repo_directory(artifact_directory)
-      command = Pkg::Rpm::Repo.repo_creation_command(File.join(artifact_directory, 'repos'), artifact_paths)
+      command = Pkg::Rpm::Repo.repo_creation_command(File.join(artifact_directory, directory), artifact_paths)
 
       begin
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, command)

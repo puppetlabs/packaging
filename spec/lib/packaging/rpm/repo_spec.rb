@@ -86,15 +86,12 @@ describe "Pkg::Rpm::Repo" do
     let(:target_directory) { "/tmp/dir/thing" }
 
     it "fails without createrepo" do
-      Dir.should_receive(:chdir).with(target_directory).and_yield
       Pkg::Util::Tool.should_receive(:find_tool).with('createrepo', :required => true).and_raise(RuntimeError)
       expect { Pkg::Rpm::Repo.create_local_repos(target_directory) }.to raise_error(RuntimeError)
     end
 
     it "makes a repo in the target directory" do
-      Dir.should_receive(:chdir).with(target_directory).and_yield
-      Pkg::Util::Tool.should_receive(:find_tool).with('createrepo', :required => true).and_return(command)
-      Pkg::Rpm::Repo.should_receive(:repo_creation_command).with(command).and_return("run this thing")
+      Pkg::Rpm::Repo.should_receive(:repo_creation_command).with(target_directory).and_return("run this thing")
       Pkg::Util::Execution.should_receive(:capture3).with("bash -c 'run this thing'")
       Pkg::Rpm::Repo.create_local_repos(target_directory)
     end

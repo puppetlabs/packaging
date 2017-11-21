@@ -204,7 +204,7 @@ module Pkg::Rpm::Repo
       artifact_directory = File.join(Pkg::Config.jenkins_repo_path, Pkg::Config.project, Pkg::Config.ref)
       artifact_paths = Pkg::Repo.directories_that_contain_packages(File.join(artifact_directory, 'artifacts'), 'rpm')
       Pkg::Repo.populate_repo_directory(artifact_directory)
-      command = Pkg::Rpm::Repo.repo_creation_command(File.join(artifact_directory, 'repos'), artifact_paths)
+      command = Pkg::Rpm::Repo.repo_creation_command(File.join(artifact_directory, directory), artifact_paths)
 
       begin
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, command)

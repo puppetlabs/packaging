@@ -252,6 +252,7 @@ namespace :pl do
     task :uber_ship_lite => "pl:fetch" do
       tasks = %w(
         jenkins:retrieve
+        jenkins:sign_all
         ship_rpms
         ship_debs
         ship_dmg

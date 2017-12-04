@@ -189,7 +189,7 @@ namespace :pl do
   # server, ships our packages out to it, signs them, and brings them back.
   #
   namespace :jenkins do
-    desc "Sign all locally staged packages on #{Pkg::Config.distribution_server}"
+    desc "Sign all locally staged packages on #{Pkg::Config.signing_server}"
     task :sign_all => "pl:fetch" do
       Dir["pkg/*"].empty? and fail "There were files found in pkg/. Maybe you wanted to build/retrieve something first?"
 
@@ -213,13 +213,13 @@ namespace :pl do
       sign_tasks    << "pl:sign_svr4" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_ips" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_msi" if Pkg::Config.build_msi || Pkg::Config.vanagon_project
-      remote_repo   = Pkg::Util::Net.remote_bootstrap(Pkg::Config.distribution_server, 'HEAD', nil, signing_bundle)
-      build_params  = Pkg::Util::Net.remote_buildparams(Pkg::Config.distribution_server, Pkg::Config)
-      Pkg::Util::Net.rsync_to('pkg', Pkg::Config.distribution_server, remote_repo)
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "cd #{remote_repo} ; rake #{sign_tasks.join(' ')} PARAMS_FILE=#{build_params}")
-      Pkg::Util::Net.rsync_from("#{remote_repo}/pkg/", Pkg::Config.distribution_server, "pkg/")
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "rm -rf #{remote_repo}")
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "rm #{build_params}")
+      remote_repo   = Pkg::Util::Net.remote_bootstrap(Pkg::Config.signing_server, 'HEAD', nil, signing_bundle)
+      build_params  = Pkg::Util::Net.remote_buildparams(Pkg::Config.signing_server, Pkg::Config)
+      Pkg::Util::Net.rsync_to('pkg', Pkg::Config.signing_server, remote_repo)
+      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.signing_server, "cd #{remote_repo} ; rake #{sign_tasks.join(' ')} PARAMS_FILE=#{build_params}")
+      Pkg::Util::Net.rsync_from("#{remote_repo}/pkg/", Pkg::Config.signing_server, "pkg/")
+      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.signing_server, "rm -rf #{remote_repo}")
+      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.signing_server, "rm #{build_params}")
       puts "Signed packages staged in 'pkg/ directory"
     end
   end

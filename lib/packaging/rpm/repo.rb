@@ -42,7 +42,7 @@ module Pkg::Rpm::Repo
         cmd << "pushd #{path} && "
         cmd << "#{createrepo} --checksum=sha --checkts --update --delta-workers=0 --database . && "
         cmd << 'popd ; '
-        cmd << 'fi'
+        cmd << 'fi ;'
       end
       cmd
     end

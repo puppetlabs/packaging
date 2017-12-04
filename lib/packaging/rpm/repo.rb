@@ -38,10 +38,11 @@ module Pkg::Rpm::Repo
       artifact_paths ||= Dir.glob('**/*.rpm').map { |package| File.dirname(package) }
 
       artifact_paths.each do |path|
-        cmd << "[ -d #{path} ] || continue ; "
+        cmd << "if [ -d #{path}  ]; then "
         cmd << "pushd #{path} && "
         cmd << "#{createrepo} --checksum=sha --checkts --update --delta-workers=0 --database . && "
         cmd << 'popd ; '
+        cmd << 'fi'
       end
       cmd
     end

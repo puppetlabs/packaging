@@ -210,6 +210,17 @@ namespace :pl do
       end
     end
 
+    desc "Sync nightlies.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3"
+    task :deploy_nightlies_to_s3 => 'pl:fetch' do
+      puts "Really run S3 sync to sync nightlies.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3? [y,n]"
+      if Pkg::Util.ask_yes_or_no
+        Pkg::Util::Execution.retry_on_fail(:times => 3) do
+          command = 'sudo /usr/local/bin/s3_repo_sync.sh nightlies.puppetlabs.com'
+          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
+        end
+      end
+    end
+
     desc "Sync yum and apt from #{Pkg::Config.staging_server} to rsync servers"
     task :deploy_to_rsync_server => 'pl:fetch' do
       # This task must run after the S3 sync has run, or else /opt/repo-s3-stage won't be up-to-date

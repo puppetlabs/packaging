@@ -35,7 +35,16 @@ module Pkg::Rpm::Repo
       # The nightly repo ships operate differently and do not want to be calculating
       # the correct paths based on which packages are available on the distribution
       # host, we just want to be `createrepo`ing for what we've staged locally
-      artifact_paths ||= Dir.glob('**/*.rpm').map { |package| File.dirname(package) }
+      #
+      # We should only assume repo_directory exists locally if we didn't pass
+      # artifact paths
+      if artifact_paths.nil?
+        # Since the command already has a `pushd #{repo_directory}` let's make sure
+        # we're calculating artifact paths relative to that.
+        Dir.chdir repo_directory do
+          artifact_paths = Dir.glob('**/*.rpm').map { |package| File.dirname(package) }
+        end
+      end
 
       artifact_paths.each do |path|
         cmd << "if [ -d #{path}  ]; then "

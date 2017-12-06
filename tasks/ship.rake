@@ -214,7 +214,7 @@ namespace :pl do
     task :deploy_nightlies_to_s3 => 'pl:fetch' do
       puts "Deploying nightly builds from #{Pkg::Config.staging_server} to AWS S3..."
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        command = 'sudo /usr/local/bin/s3_repo_sync.sh nightlies.puppetlabs.com'
+        command = 'sudo /usr/local/bin/s3_repo_sync.sh nightlies.puppet.com'
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
       end
     end

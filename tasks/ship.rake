@@ -212,12 +212,10 @@ namespace :pl do
 
     desc "Sync nightlies.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3"
     task :deploy_nightlies_to_s3 => 'pl:fetch' do
-      puts "Really run S3 sync to sync nightlies.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3? [y,n]"
-      if Pkg::Util.ask_yes_or_no
-        Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          command = 'sudo /usr/local/bin/s3_repo_sync.sh nightlies.puppetlabs.com'
-          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
-        end
+      puts "Deploying nightly builds from #{Pkg::Config.staging_server} to AWS S3..."
+      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+        command = 'sudo /usr/local/bin/s3_repo_sync.sh nightlies.puppet.com'
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
       end
     end
 

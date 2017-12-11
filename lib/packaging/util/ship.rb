@@ -93,7 +93,8 @@ module Pkg::Util::Ship
             extra_flags: extra_flags
           )
 
-          Pkg::Util::Net.remote_set_ownership(staging_server, 'root', 'release', [remote_pkg])
+          Pkg::Util::Net.remote_set_ownership(staging_server, 'root', 'release', [remote_basepath, remote_pkg])
+          Pkg::Util::Net.remote_set_permissions(staging_server, '775', [remote_basepath])
           Pkg::Util::Net.remote_set_permissions(staging_server, '0664', [remote_pkg])
           Pkg::Util::Net.remote_set_immutable(staging_server, [remote_pkg]) if options[:chattr]
         end

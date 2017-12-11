@@ -92,6 +92,7 @@ new_pkgs = [
       expect(Pkg::Util::Net).to receive(:remote_ssh_cmd).with(test_staging_server, /#{test_remote_path}/).exactly(local_pkgs.count).times
       expect(Pkg::Util::Net).to receive(:rsync_to).with(anything, test_staging_server, /#{test_remote_path}/, anything).exactly(local_pkgs.count).times
       expect(Pkg::Util::Net).to receive(:remote_set_ownership).with(test_staging_server, 'root', 'release', anything).exactly(local_pkgs.count).times
+      expect(Pkg::Util::Net).to receive(:remote_set_permissions).with(test_staging_server, '775', anything).exactly(local_pkgs.count).times
       expect(Pkg::Util::Net).to receive(:remote_set_permissions).with(test_staging_server, '0664', anything).exactly(local_pkgs.count).times
       expect(Pkg::Util::Net).to receive(:remote_set_immutable).with(test_staging_server, anything).exactly(local_pkgs.count).times
       Pkg::Util::Ship.ship_pkgs(['pkg/**/*.rpm'], test_staging_server, test_remote_path)
@@ -106,7 +107,8 @@ new_pkgs = [
       # tests to work without actually shipping anything
       expect(Pkg::Util::Net).to receive(:remote_ssh_cmd).with(test_staging_server, /#{test_remote_path}/)
       expect(Pkg::Util::Net).to receive(:rsync_to).with(anything, test_staging_server, /#{test_remote_path}/, anything)
-      expect(Pkg::Util::Net).to receive(:remote_set_ownership).with(test_staging_server, 'root', 'release', ['/opt/repository/yum/puppet5/el/5/x86_64/my-super-sweet-pkg-1.0.0-1.el5.x86_64.rpm'])
+      expect(Pkg::Util::Net).to receive(:remote_set_ownership).with(test_staging_server, 'root', 'release', ['/opt/repository/yum/puppet5/el/5/x86_64', '/opt/repository/yum/puppet5/el/5/x86_64/my-super-sweet-pkg-1.0.0-1.el5.x86_64.rpm'])
+      expect(Pkg::Util::Net).to receive(:remote_set_permissions).with(test_staging_server, '775', anything)
       expect(Pkg::Util::Net).to receive(:remote_set_permissions).with(test_staging_server, '0664', anything)
       expect(Pkg::Util::Net).to receive(:remote_set_immutable).with(test_staging_server, anything)
       Pkg::Util::Ship.ship_pkgs(['pkg/**/*.rpm'], test_staging_server, test_remote_path, excludes: ['puppet-agent'])

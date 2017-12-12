@@ -48,5 +48,6 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.6.0...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.6.1...HEAD
+[0.6.1]: https://github.com/puppetlabs/packaging/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/puppetlabs/packaging/compare/0.5.0...0.6.0

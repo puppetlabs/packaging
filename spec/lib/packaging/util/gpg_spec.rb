@@ -1,11 +1,10 @@
 require 'spec_helper'
 
 describe "Pkg::Util::Gpg" do
-  let(:gpg)               { "/local/bin/gpg" }
-  let(:keychain)          { "/usr/local/bin/keychain" }
-  let(:gpg_key)           { "abcd1234" }
-  let(:gpg_nonfinal_key)  { "xyz9876" }
-  let(:target_file)       { "/tmp/file" }
+  let(:gpg)      { "/local/bin/gpg" }
+  let(:keychain) { "/usr/local/bin/keychain" }
+  let(:gpg_key)  { "abcd1234" }
+  let(:target_file) { "/tmp/file" }
 
   before(:each) do
     reset_env(['RPM_GPG_AGENT'])
@@ -13,22 +12,13 @@ describe "Pkg::Util::Gpg" do
   end
 
   describe '#key' do
-    it 'uses the final key if building a final version' do
-      allow(Pkg::Config).to receive(:version).and_return('1.0.0')
-      allow(Pkg::Config).to receive(:gpg_nonfinal_key).and_return(gpg_nonfinal_key)
-      expect(Pkg::Util::Gpg.key).to eq(gpg_key)
+    it "fails if Pkg::Config.gpg_key isn't set" do
+      allow(Pkg::Config).to receive(:gpg_key).and_return(nil)
+      expect { Pkg::Util::Gpg.key }.to raise_error(RuntimeError)
     end
-
-    it 'uses the final key if the nonfinal key is not defined for a nonfinal version' do
-      allow(Pkg::Config).to receive(:version).and_return('1.0.0-658-gabc1234')
-      allow(Pkg::Config).to receive(:gpg_nonfinal_key).and_return(nil)
-      expect(Pkg::Util::Gpg.key).to eq(gpg_key)
-    end
-
-    it 'uses the nonfinal key if building a nonfinal version' do
-      allow(Pkg::Config).to receive(:version).and_return('1.0.0-658-gabc1234')
-      allow(Pkg::Config).to receive(:gpg_nonfinal_key).and_return(gpg_nonfinal_key)
-      expect(Pkg::Util::Gpg.key).to eq(gpg_nonfinal_key)
+    it "fails if Pkg::Config.gpg_key is an empty string" do
+      allow(Pkg::Config).to receive(:gpg_key).and_return('')
+      expect { Pkg::Util::Gpg.key }.to raise_error(RuntimeError)
     end
   end
 

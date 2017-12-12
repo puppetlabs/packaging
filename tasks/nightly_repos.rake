@@ -324,7 +324,7 @@ namespace :pl do
       version = ENV['VERSION'] || Pkg::Util::Version.get_dot_version
 
       tempdir = Pkg::Util::File.mktemp
-      latest_filepath = File.join(tempdir, "pkg", "#{Pkg::Config.project}")
+      latest_filepath = File.join(tempdir, "pkg")
       FileUtils.mkdir_p(latest_filepath)
 
       latest_filename = File.join(latest_filepath, "LATEST")

@@ -272,6 +272,16 @@ namespace :pl do
       Rake::Task['pl:remote:deploy_nightlies_to_s3'].invoke
     end
 
+    task :ship_final => "pl:fetch" do
+      Rake::Task['pl:jenkins:uber_ship_lite'].invoke
+      Rake::Task['pl:remote:update_apt_repo'].invoke
+      Rake::Task['pl:remote:update_yum_repo'].invoke
+      Rake::Task['pl:remote:deploy_apt_repo_to_s3'].invoke
+      Rake::Task['pl:remote:deploy_yum_repo_to_s3'].invoke
+      Rake::Task['pl:remote:deploy_downloads_to_s3'].invoke
+      Rake::Take['pl:remote:deploy_to_rsync_server'].invoke
+    end
+
     desc "Retrieve packages built by jenkins, sign, and ship all!"
     task :uber_ship => "pl:fetch" do
       uber_tasks = %w(

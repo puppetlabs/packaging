@@ -65,6 +65,12 @@ namespace :pl do
       end
     end
 
+    desc "Update apt and yum repos"
+    task :update_foss_repos => "pl:fetch" do
+      Rake::Task['pl:remote:update_apt_repo'].invoke
+      Rake::Task['pl:remote:update_yum_repo'].invoke
+    end
+
     desc "Update remote ips repository on #{Pkg::Config.ips_host}"
     task :update_ips_repo  => 'pl:fetch' do
       if Dir['pkg/ips/pkgs/**/*'].empty? && Dir['pkg/solaris/11/**/*'].empty?
@@ -208,6 +214,13 @@ namespace :pl do
           Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
         end
       end
+    end
+
+    desc "Sync apt, yum, and downloads.pl.com to AWS S3"
+    task :deploy_final_builds_to_s3 => "pl:fetch" do
+      Rake::Task['pl:remote:deploy_apt_repo_to_s3'].invoke
+      Rake::Task['pl:remote:deploy_yum_repo_to_s3'].invoke
+      Rake::Task['pl:remote:deploy_downloads_to_s3'].invoke
     end
 
     desc "Sync nightlies.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3"

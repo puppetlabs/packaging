@@ -113,6 +113,9 @@ module Pkg
             # Remove the f-prefix from the fedora platform tag keys so that
             # beaker can rely on consistent keys once we rip out the f for good
             tag = tag.sub(/fedora-f/, 'fedora-')
+            # Add `r2` to windows versions so that beaker can find artifacts
+            # based on the same platform tag used in puppet-agent configs
+            tag = tag.sub(/windows-2012/, 'windows-2012r2')
             data[tag] = { :artifact => artifact.sub('artifacts/', ''),
                           :repo_config => repo_config,
                         }

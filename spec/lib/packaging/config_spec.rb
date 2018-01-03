@@ -283,8 +283,8 @@ describe "Pkg::Config" do
     it "should collect versioned msis" do
       allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(windows_artifacts, nil)
       data = Pkg::Config.platform_data
-      expect(data['windows-2012-x86']).to include(:artifact => './windows/puppet-agent-5.3.2-x86.msi')
-      expect(data['windows-2012-x64']).to include(:artifact => './windows/puppet-agent-5.3.2-x64.msi')
+      expect(data['windows-2012r2-x86']).to include(:artifact => './windows/puppet-agent-5.3.2-x86.msi')
+      expect(data['windows-2012r2-x64']).to include(:artifact => './windows/puppet-agent-5.3.2-x64.msi')
     end
 
     it "should not collect debug packages" do

@@ -89,7 +89,10 @@ module Pkg
               repo_config = "../repo_configs/deb/pl-#{self.project}-#{self.ref}-#{Pkg::Util::Platform.get_attribute(tag, :codename)}.list" if artifact
             when 'rpm'
               artifact = artifacts.find { |e| e.include? Pkg::Util::Platform.artifacts_path(tag) and e.include?(arch) }
-              repo_config = "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-#{tag}.repo" if artifact
+              if artifact
+                repo_config = "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-#{tag}.repo"
+                repo_config = repo_config.sub('power', 'ppc') if tag.include? 'aix'
+              end
             when 'swix', 'svr4', 'ips', 'dmg', 'msi'
               artifact = artifacts.find { |e| e.include? Pkg::Util::Platform.artifacts_path(tag) and e.include?(arch) }
             else

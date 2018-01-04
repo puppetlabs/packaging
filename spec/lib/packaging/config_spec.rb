@@ -199,7 +199,6 @@ describe "Pkg::Config" do
       'eos-4-i386',
       'osx-10.12-x86_64',
       'cisco-wrlinux-7-x86_64',
-      'aix-6.1-power',
       'ubuntu-16.04-i386',
       'cumulus-2.2-amd64',
       'el-6-s390x',
@@ -211,12 +210,14 @@ describe "Pkg::Config" do
       "./artifacts/eos/4/PC1/i386/puppet-agent-5.3.2-1.eos4.i386.swix\n" \
       "./artifacts/apple/10.12/PC1/x86_64/puppet-agent-5.3.2.658.gc79ef9a-1.osx10.12.dmg\n" \
       "./artifacts/cisco-wrlinux/7/PC1/x86_64/puppet-agent-5.3.2-1.cisco_wrlinux7.x86_64.rpm\n" \
-      "./artifacts/aix/6.1/PC1/ppc/puppet-agent-5.3.2-1.aix6.1.ppc.rpm\n" \
       "./artifacts/deb/xenial/PC1/puppet-agent_5.3.2-1xenial_i386.deb\n" \
       "./artifacts/deb/cumulus/PC1/puppet-agent_5.3.2-1cumulus_amd64.deb\n" \
       "./artifacts/el/6/PC1/s390x/puppet-agent-5.3.2.658.gc79ef9a-1.el6.s390x.rpm\n" \
       "./artifacts/el/7/PC1/ppc64le/puppet-agent-5.3.2-1.el7.ppc64le.rpm\n" \
       "./artifacts/sles/12/PC1/x86_64/puppet-agent-5.3.2-1.sles12.x86_64.rpm"
+
+    aix_artifacts = \
+      "./artifacts/aix/6.1/PC1/ppc/puppet-agent-5.3.2-1.aix6.1.ppc.rpm"
 
     fedora_artifacts = \
       "./artifacts/fedora/f25/PC1/x86_64/puppet-agent-5.3.2-1.fedoraf25.x86_64.rpm"
@@ -291,6 +292,12 @@ describe "Pkg::Config" do
       allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(stretch_artifacts, nil)
       data = Pkg::Config.platform_data
       expect(data['debian-9-amd64']).to include(:artifact => './deb/stretch/PC1/puppet-agent_5.3.2.658.gc79ef9a-1stretch_amd64.deb')
+    end
+
+    it "should use 'ppc' instead of 'power' in aix paths" do
+      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(aix_artifacts, nil)
+      data = Pkg::Config.platform_data
+      expect(data['aix-6.1-power']).to eql({:artifact => './aix/6.1/PC1/ppc/puppet-agent-5.3.2-1.aix6.1.ppc.rpm', :repo_config => "../repo_configs/rpm/pl-#{project}-#{ref}-aix-6.1-ppc.repo"})
     end
   end
 

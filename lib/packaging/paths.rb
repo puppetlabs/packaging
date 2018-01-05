@@ -176,21 +176,27 @@ module Pkg::Paths
     end
   end
 
-  def repo_path(platform_tag)
+  def repo_path(platform_tag, legacy = false)
+    repo_target = repo_name
+    repo_target = Pkg::Config.repo_name if legacy
     platform, version, arch = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
 
     case package_format
     when 'rpm', 'swix'
-      File.join('repos', repo_name, platform, version, arch)
+      if legacy
+        File.join('repos', platform, version, repo_target, arch)
+      else
+        File.join('repos', repo_target, platform, version, arch)
+      end
     when 'deb'
-      File.join('repos', 'apt', Pkg::Platforms.get_attribute(platform_tag, :codename), 'pool', repo_name)
+      File.join('repos', 'apt', Pkg::Platforms.get_attribute(platform_tag, :codename), 'pool', repo_target)
     when 'svr4', 'ips'
-      File.join('repos', 'solaris', repo_name, version)
+      File.join('repos', 'solaris', repo_target, version)
     when 'dmg'
-      File.join('repos', 'mac', repo_name, version, arch)
+      File.join('repos', 'mac', repo_target, version, arch)
     when 'msi'
-      File.join('repos', 'windows', repo_name)
+      File.join('repos', 'windows', repo_target)
     else
       raise "Not sure what to do with a package format of '#{package_format}'"
     end

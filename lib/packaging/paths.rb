@@ -176,7 +176,7 @@ module Pkg::Paths
     end
   end
 
-  def repo_path(platform_tag, legacy = false)
+  def repo_path(platform_tag, legacy: false)
     repo_target = repo_name
     repo_target = Pkg::Config.repo_name if legacy
     platform, version, arch = Pkg::Platforms.parse_platform_tag(platform_tag)

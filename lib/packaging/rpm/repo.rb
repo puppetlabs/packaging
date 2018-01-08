@@ -23,7 +23,7 @@ module Pkg::Rpm::Repo
     end
 
     def repo_creation_command(createrepo)
-      cmd = 'for repodir in $(find ./ -name "*.rpm" | xargs -I {} dirname {}) ; do '
+      cmd = 'for repodir in $(find ./ -name "*.rpm" ! -name "*aix*" | xargs -I {} dirname {}) ; do '
       cmd << "[ -d ${repodir} ] || continue; "
       cmd << "pushd ${repodir} && #{createrepo} --checksum=sha --checkts --update --delta-workers=0 --database . ; popd ; "
       cmd << "done "
@@ -208,7 +208,7 @@ module Pkg::Rpm::Repo
       cmd << "touch .lock ; "
       cmd << "rsync -avxl artifacts/ repos/ ; pushd repos ; "
       cmd << "createrepo=$(which createrepo) ; "
-      cmd << 'for repodir in $(find ./ -name "*.rpm" | xargs -I {} dirname {}) ; do '
+      cmd << 'for repodir in $(find ./ -name "*.rpm" ! -name "*aix*" | xargs -I {} dirname {}) ; do '
       cmd << "[ -d ${repodir} ] || continue; "
       cmd << "pushd ${repodir} && ${createrepo} --checksum=sha --checkts --update --delta-workers=0 --database . ; popd ; "
       cmd << "done ; popd "

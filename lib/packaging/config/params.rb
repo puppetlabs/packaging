@@ -273,7 +273,7 @@ module Pkg::Params
               { :var => :foss_only,               :val => false },
               { :var => :build_date,              :val => Pkg::Util::Date.timestamp('-') },
               { :var => :release,                 :val => '1' },
-              { :var => :internal_gem_host,       :val => 'http://rubygems.delivery.puppetlabs.net/' },
+              { :var => :internal_gem_host,       :val => 'https://artifactory.delivery.puppetlabs.net/artifactory/api/gems/rubygems/' },
               { :var => :build_tar,               :val => true },
               { :var => :dev_build,               :val => false },
               { :var => :osx_signing_cert,        :val => '$OSX_SIGNING_CERT' },

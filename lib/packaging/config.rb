@@ -104,8 +104,7 @@ module Pkg
             when 'deb'
               repo_config = "../repo_configs/deb/pl-#{self.project}-#{self.ref}-#{Pkg::Platforms.get_attribute(tag, :codename)}.list"
             when 'rpm'
-              repo_config = "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-#{tag}.repo"
-              repo_config = repo_config.sub('power', 'ppc') if tag.include? 'aix'
+              repo_config = "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-#{tag}.repo" unless tag.include? 'aix'
             when 'swix', 'svr4', 'ips', 'dmg', 'msi'
               # No repo_configs for these platforms, so do nothing.
             else

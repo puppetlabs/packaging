@@ -176,15 +176,15 @@ module Pkg::Paths
     end
   end
 
-  def repo_path(platform_tag, legacy: false)
+  def repo_path(platform_tag, options = { :legacy => false })
     repo_target = repo_name
-    repo_target = Pkg::Config.repo_name if legacy
+    repo_target = Pkg::Config.repo_name if options[:legacy]
     platform, version, arch = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
 
     case package_format
     when 'rpm', 'swix'
-      if legacy
+      if options[:legacy]
         File.join('repos', platform, version, repo_target, arch)
       else
         File.join('repos', repo_target, platform, version, arch)

@@ -297,7 +297,13 @@ describe "Pkg::Config" do
     it "should use 'ppc' instead of 'power' in aix paths" do
       allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(aix_artifacts, nil)
       data = Pkg::Config.platform_data
-      expect(data['aix-6.1-power']).to eql({:artifact => './aix/6.1/PC1/ppc/puppet-agent-5.3.2-1.aix6.1.ppc.rpm', :repo_config => "../repo_configs/rpm/pl-#{project}-#{ref}-aix-6.1-ppc.repo"})
+      expect(data['aix-6.1-power']).to include(:artifact => './aix/6.1/PC1/ppc/puppet-agent-5.3.2-1.aix6.1.ppc.rpm')
+    end
+
+    it "should not record an aix repo config" do
+      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(aix_artifacts, nil)
+      data = Pkg::Config.platform_data
+      expect(data['aix-6.1-power'][:repo_config]).to be_nil
     end
   end
 

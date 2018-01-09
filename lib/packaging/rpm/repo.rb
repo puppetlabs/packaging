@@ -47,6 +47,7 @@ module Pkg::Rpm::Repo
       end
 
       artifact_paths.each do |path|
+        next if path.include? 'aix'
         cmd << "if [ -d #{path}  ]; then "
         cmd << "pushd #{path} && "
         cmd << '$createrepo --checksum=sha --checkts --update --delta-workers=0 --database . && '

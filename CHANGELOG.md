@@ -4,6 +4,11 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.6.2] - 2018-01-09
+### Changed
+ - Don't generate repo configs for AIX since AIX doesn't support yum.
+ - Update default `internal_gem_host` to artifactory instead of stickler.
+
 ## [0.6.1] - 2017-12-12
 ### Added
  - Added platform support for:
@@ -48,6 +53,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.6.1...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.6.2...HEAD
+[0.6.2]: https://github.com/puppetlabs/packaging/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/puppetlabs/packaging/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/puppetlabs/packaging/compare/0.5.0...0.6.0

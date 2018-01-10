@@ -4,6 +4,35 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.6.2] - 2018-01-09
+### Changed
+ - Don't generate repo configs for AIX since AIX doesn't support yum.
+ - Update default `internal_gem_host` to artifactory instead of stickler.
+
+## [0.6.1] - 2017-12-12
+### Added
+ - Added platform support for:
+   * el7 aarch64
+   * Fedora 26
+   * SLES 12 power8
+ - Improved 'Getting Started' docs in the README.
+ - Added automation to help with shipping packages to s3.
+
+### Fixed
+ - Don't fail if `ext/project_data.yaml` doesn't exist since that is a
+   supplemental file to `ext/build_defaults.yaml`.
+ - Don't prepend a user if the `osx_signing_server` string already contains a
+   user.
+ - When calculating the deb destination dir, use `codename.to_s` instead of
+   `codename` in case `codename` is `nil`.
+
+### Removed
+ - Removed support for the following end-of-life platforms:
+   * AIX 5.3
+   * Fedora 24
+   * Huaweios 6
+   * Ubuntu 16.10 - Yakkety
+
 ## [0.6.0]
 ### Added
  - Platform data is now added to the manifest yaml file.
@@ -24,5 +53,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.6.0...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.6.2...HEAD
+[0.6.2]: https://github.com/puppetlabs/packaging/compare/0.6.1...0.6.2
+[0.6.1]: https://github.com/puppetlabs/packaging/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/puppetlabs/packaging/compare/0.5.0...0.6.0

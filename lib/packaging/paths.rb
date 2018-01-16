@@ -178,7 +178,12 @@ module Pkg::Paths
 
   def repo_path(platform_tag, options = { :legacy => false })
     repo_target = repo_name
-    repo_target = Pkg::Config.repo_name if options[:legacy]
+    # in legacy packaging methods, there was no consistent way to determine the
+    # repo name. There were separate variables for apt_repo_name and
+    # yum_repo_name. At times, either or both of these were unset, and they had
+    # different defaults. So, for legacy automation we need to just use a splat
+    # and globbing to find our packages.
+    repo_target = '**' if options[:legacy]
     platform, version, arch = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
 
@@ -192,11 +197,23 @@ module Pkg::Paths
     when 'deb'
       File.join('repos', 'apt', Pkg::Platforms.get_attribute(platform_tag, :codename), 'pool', repo_target)
     when 'svr4', 'ips'
-      File.join('repos', 'solaris', repo_target, version)
+      if options[:legacy]
+        File.join('repos', 'solaris', version, repo_target)
+      else
+        File.join('repos', 'solaris', repo_target, version)
+      end
     when 'dmg'
-      File.join('repos', 'mac', repo_target, version, arch)
+      if options[:legacy]
+        File.join('repos', 'apple', version, repo_target, arch)
+      else
+        File.join('repos', 'mac', repo_target, version, arch)
+      end
     when 'msi'
-      File.join('repos', 'windows', repo_target)
+      if options[:legacy]
+        File.join('repos', 'windows')
+      else
+        File.join('repos', 'windows', repo_target)
+      end
     else
       raise "Not sure what to do with a package format of '#{package_format}'"
     end

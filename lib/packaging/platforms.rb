@@ -168,6 +168,11 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
         architectures: ['x86_64'],
         package_format: 'dmg',
         repo: false,
+      },
+      '10.13' => {
+        architectures: ['x86_64'],
+        package_format: 'dmg',
+        repo: false,
       }
     },
 

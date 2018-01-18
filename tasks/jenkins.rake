@@ -275,7 +275,7 @@ namespace :pl do
       Rake::Task['pl:jenkins:uber_ship_lite'].invoke
       Rake::Task['pl:remote:update_foss_repos'].invoke
       Rake::Task['pl:remote:deploy_final_builds_to_s3'].invoke
-      Rake::Take['pl:remote:deploy_to_rsync_server'].invoke
+      Rake::Task['pl:remote:deploy_to_rsync_server'].invoke
     end
 
     desc "Retrieve packages built by jenkins, sign, and ship all!"

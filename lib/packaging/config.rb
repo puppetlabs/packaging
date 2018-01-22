@@ -182,7 +182,7 @@ module Pkg
         # three subdirectories below $project_root, e.g.,
         # $project_root/ext/packaging/lib/packaging.rb.
         #
-        ENV['PROJECT_ROOT'] || File.expand_path(File.join(LIBDIR, "..", "..", ".."))
+        ENV['PROJECT_ROOT'] || Dir.pwd
       end
 
       def default_packaging_root

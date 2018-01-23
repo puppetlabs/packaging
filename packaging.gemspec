@@ -11,8 +11,9 @@ Gem::Specification.new do |gem|
   gem.homepage = 'http://github.com/puppetlabs/packaging'
 
   gem.add_development_dependency('rspec', ['~> 2.14.1'])
-  gem.add_development_dependency('rake', ['~> 0.9.6'])
   gem.add_development_dependency('rubocop', ['~> 0.24.1'])
+  gem.add_runtime_dependency('rake')
+  gem.add_runtime_dependency('artifactory')
   gem.require_path = 'lib'
 
   # Ensure the gem is built out of versioned files

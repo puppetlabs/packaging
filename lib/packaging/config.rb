@@ -172,25 +172,15 @@ module Pkg
       end
 
       def default_project_root
-        # It is really quite unsafe to assume github.com/puppetlabs/packaging has been
-        # cloned into $project_root/ext/packaging even if it has _always_ been the
-        # default location. We really don't have much choice as of this moment but to
-        # assume this directory, or assume the user has passed in the correct one via
-        # ENV['PROJECT_ROOT']. It is critical we have the correct $project_root, because
-        # we get all of the package versioning from the `git-describe` of $project. If we
-        # assume $project/ext/packaging, it means packaging/lib/packaging.rb is
-        # three subdirectories below $project_root, e.g.,
-        # $project_root/ext/packaging/lib/packaging.rb.
+        # Assume that either PROJECT_ROOT has been set, or we're running from the
+        # project root
         #
-        ENV['PROJECT_ROOT'] || File.expand_path(File.join(LIBDIR, "..", "..", ".."))
+        ENV['PROJECT_ROOT'] || Dir.pwd
       end
 
       def default_packaging_root
-        # It is really quite unsafe to assume github.com/puppetlabs/packaging has been
-        # cloned into $project_root/ext/packaging even if it has _always_ been the
-        # default location. Here we use the PACKAGING_ROOT constant defined in
-        # packaging.rake if it is available, or use the parent directory of the
-        # current file as the packaging_root.
+        # Assume that PACKAGING_ROOT has been set, or set the PACKAGING_ROOT to
+        # one directory above the LIBDIR
         #
         defined?(PACKAGING_ROOT) ? File.expand_path(PACKAGING_ROOT) : File.expand_path(File.join(LIBDIR, ".."))
       end

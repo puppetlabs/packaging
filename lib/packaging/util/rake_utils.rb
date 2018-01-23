@@ -61,7 +61,7 @@ module Pkg::Util::RakeUtils
       end
     end
 
-    def load_packaging_tasks(packaging_root = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..')))
+    def load_packaging_tasks(packaging_root = Pkg::Config.packaging_root)
       packaging_task_dir = File.join(packaging_root, 'tasks')
       tasks = [
         '00_utils.rake',

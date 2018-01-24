@@ -176,6 +176,17 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
       }
     },
 
+    'redhat-fips' => {
+      '7' => {
+        architectures: ['x86_64'],
+        source_architecture: 'SRPMS',
+        package_format: 'rpm',
+        source_package_formats: ['src.rpm'],
+        signature_format: 'v3',
+        repo: true,
+      }
+    },
+
     'sles' => {
       '11' => {
         architectures: ['i386', 'x86_64', 's390x'],

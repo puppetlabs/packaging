@@ -4,6 +4,8 @@ sudo: false
 notifications:
   email: false
 rvm:
+  - 1.9.3
+  - 2.0.0
   - 2.1.1
   - 2.3.3
   - 2.4.1
@@ -14,6 +16,10 @@ env:
 
 matrix:
   exclude:
+    - rvm: 1.9.3 
+      env: "CHECK='rubocop -D'"
+    - rvm: 2.0.0
+      env: "CHECK='rubocop -D'"
     - rvm: 2.1.1
       env: "CHECK='rubocop -D'"
     - rvm: 2.3.3

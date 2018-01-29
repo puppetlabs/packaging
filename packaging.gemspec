@@ -5,6 +5,7 @@ Gem::Specification.new do |gem|
 
   gem.summary = "Puppet Labs' packaging automation"
   gem.description = "Packaging automation written in Rake and Ruby. Easily build native packages for most platforms with a few data files and git."
+  gem.license = "Apache-2.0"
 
   gem.authors  = ['Puppet Labs']
   gem.email    = 'info@puppetlabs.com'

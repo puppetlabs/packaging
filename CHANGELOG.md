@@ -4,6 +4,25 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.99.0] - 2018-01-29
+### Changed
+ - Packaging no longer needs to be cloned into ext/packaging of whatever project
+   you're building, it now can be run as a gem! Rather than loading the rake tasks
+   manually, you can now do
+   ```ruby
+   require 'packaging'
+   Pkg::Util::RakeUtils.load_packaging_tasks
+   ```
+ - Between the `master` and `1.0.x` branches of packaging, there was a major
+   code refactoring to enable a change to the paths we are shipping to.
+   Unfortunately, with the vastness of these changes and the amount of time over
+   which they occurred, we do not have accurate accounting for all of the changes.
+   We attempted to keep backwards compatibility where possible, though we probably
+   missed something. If you want to look more into the change set, it's available
+   [here](https://github.com/puppetlabs/packaging/compare/0.6.2...0.99.0). If you
+   find anything we unintentionally broke, please open a ticket
+   [here](https://tickets.puppetlabs.com/browse/CPR).
+
 ## [0.6.2] - 2018-01-09
 ### Changed
  - Don't generate repo configs for AIX since AIX doesn't support yum.
@@ -53,7 +72,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.6.2...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.0...HEAD
+[0.99.0]: https://github.com/puppetlabs/packaging/compare/0.6.2...0.99.0
 [0.6.2]: https://github.com/puppetlabs/packaging/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/puppetlabs/packaging/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/puppetlabs/packaging/compare/0.5.0...0.6.0

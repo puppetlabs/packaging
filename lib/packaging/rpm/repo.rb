@@ -14,7 +14,7 @@ module Pkg::Rpm::Repo
         return
       end
 
-      invoke_task("pl:fetch")
+      Pkg::Util::RakeUtils.invoke_task("pl:fetch")
       repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}/rpm"
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
       Pkg::Util::Execution.retry_on_fail(:times => 3) do

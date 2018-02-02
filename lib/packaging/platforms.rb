@@ -407,7 +407,16 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
   # Given a platform and version, return the arches that we build for that
   # platform
   def arches_for_platform_version(platform, version)
-    get_attribute_for_platform_version(platform, version, :architectures)
+    platform_architectures = get_attribute_for_platform_version(platform, version, :architectures)
+    # get_attribute_for_platform_version will raise an exception if the attribute
+    # isn't found. We don't want this to be a fatal error, we just want to append
+    # the source architecture if it's found
+    begin
+      source_architecture = Array(get_attribute_for_platform_version(platform, version, :source_architecture))
+    rescue
+      source_architecture = []
+    end
+    return (platform_architectures + source_architecture).flatten
   end
 
   # Returns an array of all currently valid platform tags

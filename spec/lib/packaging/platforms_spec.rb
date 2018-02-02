@@ -61,6 +61,10 @@ describe 'Pkg::Platforms' do
     it 'should return an array of arches corresponding to a given codename' do
       expect(Pkg::Platforms.arches_for_codename('trusty')).to match_array(['i386', 'amd64'])
     end
+
+    it 'should be able to include source archietectures' do
+      expect(Pkg::Platforms.arches_for_codename('trusty', true)).to match_array(['i386', 'amd64', 'source'])
+    end
   end
 
   describe '#codename_to_tags' do
@@ -72,6 +76,10 @@ describe 'Pkg::Platforms' do
   describe '#arches_for_platform_version' do
     it 'should return an array of arches for a given platform and version' do
       expect(Pkg::Platforms.arches_for_platform_version('sles', '11')).to match_array(['i386', 'x86_64', 's390x'])
+    end
+
+    it 'should be able to include source architectures' do
+      expect(Pkg::Platforms.arches_for_platform_version('sles', '11', true)).to match_array(['i386', 'x86_64', 's390x', 'SRPMS'])
     end
   end
 
@@ -127,6 +135,8 @@ describe 'Pkg::Platforms' do
       'xenial' => ['ubuntu', '16.04', ''],
       'windows-2012' => ['windows', '2012', ''],
       'redhat-fips-7-x86_64' => ['redhat-fips', '7', 'x86_64'],
+      'el-7-SRPMS' => ['el', '7', 'SRPMS'],
+      'ubuntu-14.04-source' => ['ubuntu', '14.04', 'source'],
     }
 
     fail_cases = [
@@ -136,6 +146,8 @@ describe 'Pkg::Platforms' do
       'windows-x86',
       'el-7-notarch',
       'debian-7-x86_64',
+      'el-7-source',
+      'debian-7-SRPMS',
     ]
 
     test_cases.each do |platform_tag, results|

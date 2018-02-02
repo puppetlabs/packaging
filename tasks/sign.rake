@@ -216,7 +216,7 @@ namespace :pl do
       remote_repo   = Pkg::Util::Net.remote_bootstrap(Pkg::Config.signing_server, 'HEAD', nil, signing_bundle)
       build_params  = Pkg::Util::Net.remote_buildparams(Pkg::Config.signing_server, Pkg::Config)
       Pkg::Util::Net.rsync_to('pkg', Pkg::Config.signing_server, remote_repo)
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.signing_server, "cd #{remote_repo} ; rake #{sign_tasks.join(' ')} PARAMS_FILE=#{build_params}")
+      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.signing_server, "cd #{remote_repo} ; source /usr/local/rvm/scripts/rvm; rvm use ruby-2.3.1; bundle install; bundle exec rake #{sign_tasks.join(' ')} PARAMS_FILE=#{build_params}")
       Pkg::Util::Net.rsync_from("#{remote_repo}/pkg/", Pkg::Config.signing_server, "pkg/")
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.signing_server, "rm -rf #{remote_repo}")
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.signing_server, "rm #{build_params}")

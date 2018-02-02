@@ -291,7 +291,7 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
 
 
     # For platform names with a dash in them, because everything is special
-    supported_arches = arches_for_platform_version(platform, version)
+    supported_arches = arches_for_platform_version(platform, version, true)
     architecture = platform_tag.sub(/^(#{platform}-#{version}|#{codename})-?/, '')
 
     fail unless supported_arches.include?(architecture) || architecture.empty?
@@ -389,9 +389,9 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
   end
 
   # Given a debian codename, return the arches that we build for that codename
-  def arches_for_codename(codename)
+  def arches_for_codename(codename, include_source = false)
     platform, version = codename_to_platform_version(codename)
-    arches_for_platform_version(platform, version)
+    arches_for_platform_version(platform, version, include_source)
   end
 
   # Given a codename, return an array of associated tags
@@ -406,15 +406,17 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
 
   # Given a platform and version, return the arches that we build for that
   # platform
-  def arches_for_platform_version(platform, version)
+  def arches_for_platform_version(platform, version, include_source = false)
     platform_architectures = get_attribute_for_platform_version(platform, version, :architectures)
     # get_attribute_for_platform_version will raise an exception if the attribute
     # isn't found. We don't want this to be a fatal error, we just want to append
     # the source architecture if it's found
-    begin
-      source_architecture = Array(get_attribute_for_platform_version(platform, version, :source_architecture))
-    rescue
-      source_architecture = []
+    source_architecture = []
+    if include_source
+      begin
+        source_architecture = Array(get_attribute_for_platform_version(platform, version, :source_architecture))
+      rescue
+      end
     end
     return (platform_architectures + source_architecture).flatten
   end

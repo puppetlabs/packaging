@@ -59,19 +59,27 @@ describe 'Pkg::Platforms' do
 
   describe '#arches_for_codename' do
     it 'should return an array of arches corresponding to a given codename' do
-      expect(Pkg::Platforms.arches_for_codename('trusty')).to match_array(['i386', 'amd64', 'source'])
+      expect(Pkg::Platforms.arches_for_codename('trusty')).to match_array(['i386', 'amd64'])
+    end
+
+    it 'should be able to include source archietectures' do
+      expect(Pkg::Platforms.arches_for_codename('trusty', true)).to match_array(['i386', 'amd64', 'source'])
     end
   end
 
   describe '#codename_to_tags' do
     it 'should return an array of platform tags corresponding to a given codename' do
-      expect(Pkg::Platforms.codename_to_tags('trusty')).to match_array(['ubuntu-14.04-i386', 'ubuntu-14.04-amd64', 'ubuntu-14.04-source'])
+      expect(Pkg::Platforms.codename_to_tags('trusty')).to match_array(['ubuntu-14.04-i386', 'ubuntu-14.04-amd64'])
     end
   end
 
   describe '#arches_for_platform_version' do
     it 'should return an array of arches for a given platform and version' do
-      expect(Pkg::Platforms.arches_for_platform_version('sles', '11')).to match_array(['i386', 'x86_64', 's390x', 'SRPMS'])
+      expect(Pkg::Platforms.arches_for_platform_version('sles', '11')).to match_array(['i386', 'x86_64', 's390x'])
+    end
+
+    it 'should be able to include source architectures' do
+      expect(Pkg::Platforms.arches_for_platform_version('sles', '11', true)).to match_array(['i386', 'x86_64', 's390x', 'SRPMS'])
     end
   end
 

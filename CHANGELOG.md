@@ -4,6 +4,16 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.99.1] - 2018-02-06
+### Fixed
+ - Some tidying and maintenance in the gemspec file.
+ - Platform tag parsing wasn't recognizing tags for sources (el-6-SRPMS or 
+   ubuntu-16.04-source for example).
+ - Updated to use `Pkg::Util::RakeUtils.invoke_task` instead of the deprecated
+   `invoke_task`.
+ - Use `bundle exec` when calling rake tasks from an SSH session so we can take
+   advantage of packaging being shipped as a gem.
+
 ## [0.99.0] - 2018-01-29
 ### Changed
  - Packaging no longer needs to be cloned into ext/packaging of whatever project
@@ -72,7 +82,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.0...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.1...HEAD
+[0.99.0]: https://github.com/puppetlabs/packaging/compare/0.99.0...0.99.1
 [0.99.0]: https://github.com/puppetlabs/packaging/compare/0.6.2...0.99.0
 [0.6.2]: https://github.com/puppetlabs/packaging/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/puppetlabs/packaging/compare/0.6.0...0.6.1

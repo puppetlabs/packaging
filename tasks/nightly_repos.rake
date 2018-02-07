@@ -21,7 +21,7 @@ namespace :pl do
       remote_repo   = Pkg::Util::Net.remote_bootstrap(signing_server, 'HEAD', nil, signing_bundle)
       build_params  = Pkg::Util::Net.remote_buildparams(signing_server, Pkg::Config)
       Pkg::Util::Net.rsync_to('repos', signing_server, remote_repo)
-      Pkg::Util::Net.remote_ssh_cmd(signing_server, "cd #{remote_repo} ; source /usr/local/rvm/scripts/rvm; rvm use ruby-2.3.1; bundle install; bundle exec rake pl:jenkins:sign_repos GPG_KEY=#{Pkg::Util::Gpg.key} PARAMS_FILE=#{build_params}")
+      Pkg::Util::Net.remote_ssh_cmd(signing_server, "cd #{remote_repo} ; source /usr/local/rvm/scripts/rvm; rvm use ruby-2.3.1; bundle install --path .bundle/gems; bundle exec rake pl:jenkins:sign_repos GPG_KEY=#{Pkg::Util::Gpg.key} PARAMS_FILE=#{build_params}")
       Pkg::Util::Net.rsync_from("#{remote_repo}/repos/", signing_server, target)
       Pkg::Util::Net.remote_ssh_cmd(signing_server, "rm -rf #{remote_repo}")
       Pkg::Util::Net.remote_ssh_cmd(signing_server, "rm #{build_params}")

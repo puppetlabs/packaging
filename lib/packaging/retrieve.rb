@@ -8,9 +8,37 @@ module Pkg::Retrieve
   # --directory-prefix = where to save to disk (defaults to ./)
   # --reject = Reject all hits that match the supplied regex
 
-  def default_wget(local_target, url)
+  def default_wget_command(local_target, url, additional_options = {})
+    default_options = {
+      'quiet' => true,
+      'recursive' => true,
+      'no-parent' => true,
+      'no-host-directories' => true,
+      'level' => 0,
+      'cut-dirs' => 3,
+      'directory-prefix' => local_target,
+      'reject' => "'index*'",
+    }
+    options = default_options.merge(additional_options)
     wget = Pkg::Util::Tool.check_tool('wget')
-    wget_command = "#{wget} --quiet --recursive --no-parent --no-host-directories --level=0 --cut-dirs 3 --directory-prefix=#{local_target} --reject 'index*' #{url}"
+    wget_command = wget
+    options.each do |option, value|
+      next unless value
+      if value.is_a?(TrueClass)
+        wget_command << " --#{option}"
+      else
+        wget_command << " --#{option}=#{value}"
+      end
+    end
+    wget_command << " #{url}"
+    return wget_command
+  end
+
+  # NOTE: When supplying additional options, if you want your value to be
+  # quoted (e.g. --reject='index*'), you must include the quotes as part of
+  # your string (e.g. {'reject' => "'index*'"}).
+  def default_wget(local_target, url, additional_options = {})
+    wget_command = default_wget_command(local_target, url, additional_options)
     puts "Executing #{wget_command} . . ."
     %x(#{wget_command})
   end

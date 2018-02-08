@@ -28,6 +28,44 @@ describe 'Pkg::Retrieve' do
     allow(Pkg::Util::Serialization).to receive(:load_yaml).and_return(platform_data)
   end
 
+  describe '#default_wget_command' do
+    let(:options) { [
+      "--quiet",
+      "--recursive",
+      "--no-parent",
+      "--no-host-directories",
+      "--level=0",
+      "--cut-dirs=3",
+      "--directory-prefix=#{local_target}",
+      "--reject='index*",
+    ] }
+    before :each do
+      allow(Pkg::Util::Tool).to receive(:check_tool).with('wget').and_return('wget')
+    end
+    context 'when no options passed' do
+      it 'should include default options' do
+        options.each do |option|
+          expect(Pkg::Retrieve.default_wget_command(local_target, build_url)).to include(option)
+        end
+      end
+    end
+    context 'when options are passed' do
+      it 'should add to existing options' do
+        options.push('--convert-links')
+        options.each do |option|
+          expect(Pkg::Retrieve.default_wget_command(local_target, build_url, {'convert-links' => true})).to include(option)
+        end
+      end
+      it 'should replace default values' do
+        options.push('--level=1').delete('--level=0')
+        expect(Pkg::Retrieve.default_wget_command(local_target, build_url, {'level' => 1})).to_not include('--level=0')
+        options.each do |option|
+          expect(Pkg::Retrieve.default_wget_command(local_target, build_url, {'level' => 1})).to include(option)
+        end
+      end
+    end
+  end
+
   describe '#foss_only_retrieve' do
     it 'should fail without foss_platforms' do
       allow(Pkg::Config).to receive(:foss_platforms).and_return(nil)

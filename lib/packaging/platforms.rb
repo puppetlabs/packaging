@@ -135,6 +135,14 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
         signature_format: 'v4',
         repo: true,
       },
+      'f27' => {
+        architectures: ['x86_64'],
+        source_architecture: 'SRPMS',
+        package_format: 'rpm',
+        source_package_formats: ['src.rpm'],
+        signature_format: 'v4',
+        repo: true,
+      },
       '25' => {
         architectures: ['i386', 'x86_64'],
         source_architecture: 'SRPMS',
@@ -144,6 +152,14 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
         repo: true,
       },
       '26' => {
+        architectures: ['x86_64'],
+        source_architecture: 'SRPMS',
+        package_format: 'rpm',
+        source_package_formats: ['src.rpm'],
+        signature_format: 'v4',
+        repo: true,
+      },
+      '27' => {
         architectures: ['x86_64'],
         source_architecture: 'SRPMS',
         package_format: 'rpm',

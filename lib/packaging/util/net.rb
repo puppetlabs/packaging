@@ -351,7 +351,18 @@ module Pkg::Util::Net
       tarball_name = File.basename(tarball).gsub('.tar.gz', '')
       Pkg::Util::Net.rsync_to(tarball, host, '/tmp')
       appendix = Pkg::Util.rand_string
-      Pkg::Util::Net.remote_ssh_cmd(host, "#{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ; git clone --recursive /tmp/#{tarball_name} /tmp/#{Pkg::Config.project}-#{appendix} ; cd /tmp/#{Pkg::Config.project}-#{appendix} ; source /usr/local/rvm/scripts/rvm; rvm use ruby-2.3.1; bundle install --path .bundle/gems; bundle exec rake package:bootstrap")
+      command = <<-DOC
+#{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ;
+git clone --recursive /tmp/#{tarball_name} /tmp/#{Pkg::Config.project}-#{appendix} ;
+cd /tmp/#{Pkg::Config.project}-#{appendix} ;
+bundle_prefix= ;
+if [[ -r Gemfile ]]; then
+  source /usr/local/rvm/scripts/rvm; rvm use ruby-2.3.1; bundle install --path .bundle/gems ;
+  bundle_prefix='bundle exec' ;
+fi ;
+$bundle_prefix rake package:bootstrap
+DOC
+      Pkg::Util::Net.remote_ssh_cmd(host, command)
       "/tmp/#{Pkg::Config.project}-#{appendix}"
     end
 

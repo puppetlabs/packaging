@@ -371,17 +371,27 @@ module Pkg
       end
 
       def yum_target_path(feature_branch = false)
+        target_path = "#{Pkg::Config.yum_repo_path}/#{Pkg::Config.pe_version}"
+        # Target path is different for feature (PEZ) or release branches
         if feature_branch || Pkg::Config.pe_feature_branch
-          return "#{Pkg::Config.yum_repo_path}/#{Pkg::Config.pe_version}/feature/repos/"
+          return "#{target_path}/feature/repos/"
+        elsif Pkg::Config.pe_release_branch
+          return "#{target_path}/release/repos/"
+        else
+          return "#{target_path}/repos/"
         end
-        "#{Pkg::Config.yum_repo_path}/#{Pkg::Config.pe_version}/repos/"
       end
 
       def apt_target_path(feature_branch = false)
+        target_path = "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}"
+        # Target path is different for feature (PEZ) or release branches
         if feature_branch || Pkg::Config.pe_feature_branch
-          return "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/feature/repos/"
+          return "#{target_path}/feature/repos/"
+        elsif Pkg::Config.pe_release_branch
+          return "#{target_path}/release/repos/"
+        else
+          return "#{target_path}/repos/"
         end
-        "#{Pkg::Config.apt_repo_path}/#{Pkg::Config.pe_version}/repos/"
       end
     end
   end

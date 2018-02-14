@@ -3,6 +3,14 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.2] - 2018-02-14
+### Fixed
+ - `FOSS_ONLY` mode was failing to fetch source tarballs.
+ - Fix a few issues relating to using `bundle exec` when calling rake tasks
+   via SSH.
+
+### Added
+ - The `PLATFORM_INFO` hash has added support for Fedora 27.
 
 ## [0.99.1] - 2018-02-06
 ### Fixed
@@ -82,8 +90,9 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.1...HEAD
-[0.99.0]: https://github.com/puppetlabs/packaging/compare/0.99.0...0.99.1
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.2...HEAD
+[0.99.2]: https://github.com/puppetlabs/packaging/compare/0.99.1...0.99.2
+[0.99.1]: https://github.com/puppetlabs/packaging/compare/0.99.0...0.99.1
 [0.99.0]: https://github.com/puppetlabs/packaging/compare/0.6.2...0.99.0
 [0.6.2]: https://github.com/puppetlabs/packaging/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/puppetlabs/packaging/compare/0.6.0...0.6.1

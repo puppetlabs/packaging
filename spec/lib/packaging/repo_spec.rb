@@ -95,6 +95,20 @@ describe "#Pkg::Repo" do
     end
   end
 
+  describe "#argument_required?" do
+    let(:repo_command) { "some command with __REPO_PATH__ but not repo name or anything" }
+    let(:required_arg) { 'repo_path' }
+    let(:optional_arg) { 'repo_name' }
+
+    it 'should return true if command requires arg' do
+      expect(Pkg::Repo.argument_required?(required_arg, repo_command)).to be_true
+    end
+
+    it 'should return false if command does not need arg' do
+      expect(Pkg::Repo.argument_required?(optional_arg, repo_command)).to be_false
+    end
+  end
+
   describe "#update_yum_repo" do
     let(:yum_repo_command) { "some command with __REPO_NAME__ and __REPO_PATH__ and stuff" }
     let(:repo_name) { 'puppet5' }

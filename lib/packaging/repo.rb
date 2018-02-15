@@ -52,6 +52,10 @@ module Pkg::Repo
       fail "Could not populate repos directory in #{Pkg::Config.distribution_server}:#{artifact_parent_directory}"
     end
 
+    def argument_required?(argument_name, repo_command)
+      repo_command.include?("__#{argument_name.upcase}__")
+    end
+
     def update_yum_repo(repo_name, repo_path, repo_host, command)
       fail "At least one of your arguments is nil, update your build_defaults?" unless repo_name && repo_path && repo_host && command
       yum_whitelist = {

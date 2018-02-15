@@ -267,7 +267,7 @@ namespace :pl do
 
     task :ship_nightlies => "pl:fetch" do
       Rake::Task['pl:jenkins:uber_ship_lite'].invoke
-      Rake::Task['pl:remote:update_foss_repos'].invoke
+      Rake::Task['pl:remote:update_nightly_repos'].invoke
       Rake::Task['pl:remote:deploy_nightlies_to_s3'].invoke
     end
 

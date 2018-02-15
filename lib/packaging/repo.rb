@@ -51,5 +51,29 @@ module Pkg::Repo
     rescue => e
       fail "Could not populate repos directory in #{Pkg::Config.distribution_server}:#{artifact_parent_directory}"
     end
+
+    def update_yum_repo(repo_name, repo_path, repo_host, command)
+      fail "At least one of your arguments is nil, update your build_defaults?" unless repo_name && repo_path && repo_host && command
+      yum_whitelist = {
+        __REPO_NAME__: repo_name,
+        __REPO_PATH__: repo_path,
+        __REPO_HOST__: repo_host,
+        __GPG_KEY__: Pkg::Util::Gpg.key
+      }
+      Pkg::Util::Net.remote_ssh_cmd(repo_host, Pkg::Util::Misc.search_and_replace(command, yum_whitelist))
+    end
+
+    def update_apt_repo(repo_name, repo_path, repo_host, repo_url, command)
+      fail "At least one of your arguments is nil, update your build_defaults?" unless repo_name && repo_path && repo_host && repo_url && command
+      apt_whitelist = {
+        __REPO_NAME__: repo_name,
+        __REPO_PATH__: repo_path,
+        __REPO_HOST__: repo_host,
+        __REPO_URL__: repo_url,
+        __APT_PLATFORMS__: Pkg::Config.apt_releases.join(' '),
+        __GPG_KEY__: Pkg::Util::Gpg.key
+      }
+      Pkg::Util::Net.remote_ssh_cmd(repo_host, Pkg::Util::Misc.search_and_replace(command, apt_whitelist))
+    end
   end
 end

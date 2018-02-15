@@ -57,7 +57,9 @@ module Pkg::Repo
     end
 
     def update_yum_repo(repo_name, repo_path, repo_host, command)
-      fail "At least one of your arguments is nil, update your build_defaults?" unless repo_name && repo_path && repo_host && command
+      method(__method__).parameters.each do |_, param|
+        fail "Missing required argument #{param}, update your build_defaults?" if argument_required?(param.to_s, command) && binding.local_variable_get(param).to_s.empty?
+      end
       yum_whitelist = {
         __REPO_NAME__: repo_name,
         __REPO_PATH__: repo_path,
@@ -68,7 +70,9 @@ module Pkg::Repo
     end
 
     def update_apt_repo(repo_name, repo_path, repo_host, repo_url, command)
-      fail "At least one of your arguments is nil, update your build_defaults?" unless repo_name && repo_path && repo_host && repo_url && command
+      method(__method__).parameters.each do |_, param|
+        fail "Missing required argument #{param}, update your build_defaults?" if argument_required?(param.to_s, command) && binding.local_variable_get(param).to_s.empty?
+      end
       apt_whitelist = {
         __REPO_NAME__: repo_name,
         __REPO_PATH__: repo_path,

@@ -119,8 +119,8 @@ describe "#Pkg::Repo" do
       allow(Pkg::Util::Gpg).to receive(:key)
     end
 
-    it 'should fail if any params are nil' do
-      expect{ Pkg::Repo.update_yum_repo(repo_name, nil, repo_host, yum_repo_command) }.to raise_error(RuntimeError, /one of your arguments is nil/)
+    it 'should fail if required params are nil' do
+      expect{ Pkg::Repo.update_yum_repo(repo_name, nil, repo_host, yum_repo_command) }.to raise_error(RuntimeError, /Missing required argument/)
     end
 
     it 'should execute remote_ssh_cmd' do
@@ -142,8 +142,9 @@ describe "#Pkg::Repo" do
       allow(Pkg::Config).to receive(:apt_releases).and_return(apt_releases)
     end
 
-    it 'should fail if any params are nil' do
-      expect{ Pkg::Repo.update_apt_repo(nil, repo_path, repo_host, nil, apt_repo_command) }.to raise_error(RuntimeError, /one of your arguments is nil/)
+    it 'should execute command if optional params are nil' do
+      expect(Pkg::Util::Net).to receive(:remote_ssh_cmd).with(repo_host, "some command with #{apt_releases.join(' ')} and #{repo_url} and stuff")
+      Pkg::Repo.update_apt_repo(repo_name, nil, repo_host, repo_url, apt_repo_command)
     end
 
     it 'should execute remote_ssh_cmd' do

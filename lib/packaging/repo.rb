@@ -52,28 +52,25 @@ module Pkg::Repo
       fail "Could not populate repos directory in #{Pkg::Config.distribution_server}:#{artifact_parent_directory}"
     end
 
-    def update_yum_repo(repo_name, repo_path, repo_host, command)
-      fail "At least one of your arguments is nil, update your build_defaults?" unless repo_name && repo_path && repo_host && command
-      yum_whitelist = {
-        __REPO_NAME__: repo_name,
-        __REPO_PATH__: repo_path,
-        __REPO_HOST__: repo_host,
-        __GPG_KEY__: Pkg::Util::Gpg.key
-      }
-      Pkg::Util::Net.remote_ssh_cmd(repo_host, Pkg::Util::Misc.search_and_replace(command, yum_whitelist))
+    def argument_required?(argument_name, repo_command)
+      repo_command.include?("__#{argument_name.upcase}__")
     end
 
-    def update_apt_repo(repo_name, repo_path, repo_host, repo_url, command)
-      fail "At least one of your arguments is nil, update your build_defaults?" unless repo_name && repo_path && repo_host && repo_url && command
-      apt_whitelist = {
-        __REPO_NAME__: repo_name,
-        __REPO_PATH__: repo_path,
-        __REPO_HOST__: repo_host,
-        __REPO_URL__: repo_url,
+    def update_repo(remote_host, command, options = {})
+      fail_message = "Missing required argument '%s', update your build_defaults?"
+      [:repo_name, :repo_path, :repo_host, :repo_url].each do |option|
+        fail fail_message % option.to_s if argument_required?(option.to_s, command) && !options[option]
+      end
+
+      whitelist = {
+        __REPO_NAME__: options[:repo_name],
+        __REPO_PATH__: options[:repo_path],
+        __REPO_HOST__: options[:repo_host],
+        __REPO_URL__: options[:repo_url],
         __APT_PLATFORMS__: Pkg::Config.apt_releases.join(' '),
         __GPG_KEY__: Pkg::Util::Gpg.key
       }
-      Pkg::Util::Net.remote_ssh_cmd(repo_host, Pkg::Util::Misc.search_and_replace(command, apt_whitelist))
+      Pkg::Util::Net.remote_ssh_cmd(remote_host, Pkg::Util::Misc.search_and_replace(command, whitelist))
     end
   end
 end

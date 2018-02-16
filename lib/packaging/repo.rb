@@ -58,10 +58,9 @@ module Pkg::Repo
 
     def update_repo(remote_host, command, options = {})
       fail_message = "Missing required argument '%s', update your build_defaults?"
-      fail fail_message % 'repo_name' if argument_required?('repo_name', command) && !options[:repo_name]
-      fail fail_message % 'repo_path' if argument_required?('repo_path', command) && !options[:repo_path]
-      fail fail_message % 'repo_host' if argument_required?('repo_host', command) && !options[:repo_host]
-      fail fail_message % 'repo_url' if argument_required?('repo_url', command) && !options[:repo_url]
+      [:repo_name, :repo_path, :repo_host, :repo_url].each do |option|
+        fail fail_message % option.to_s if argument_required?(option.to_s, command) && !options[option]
+      end
 
       whitelist = {
         __REPO_NAME__: options[:repo_name],

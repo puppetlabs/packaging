@@ -10,16 +10,16 @@ namespace :pl do
       command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository/Rakefile mk_repo'
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       if Pkg::Util.ask_yes_or_no
-        Pkg::Repo.update_yum_repo(Pkg::Config.repo_name, Pkg::Config.yum_repo_path, Pkg::Config.yum_staging_server, command)
+        Pkg::Repo.update_repo(Pkg::Config.yum_staging_server, command, { :repo_name => Pkg::Config.repo_name, :repo_path => Pkg::Config.yum_repo_path, :repo_host => Pkg::Config.yum_staging_server })
       end
     end
 
     desc "Update nightlies yum repository on '#{Pkg::Config.yum_staging_server}'"
     task update_nightlies_yum_repo: 'pl:fetch' do
-      command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository/Rakefile mk_repo'
+      command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository-nightlies/Rakefile mk_repo'
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       if Pkg::Util.ask_yes_or_no
-        Pkg::Repo.update_yum_repo(Pkg::Config.nonfinal_repo_name, Pkg::Config.nonfinal_yum_repo_path, Pkg::Config.yum_staging_server, command)
+        Pkg::Repo.update_repo(Pkg::Config.yum_staging_server, command, { :repo_name => Pkg::Config.nonfinal_repo_name, :repo_path => Pkg::Config.nonfinal_yum_repo_path, :repo_host => Pkg::Config.yum_staging_server })
       end
     end
 
@@ -29,7 +29,7 @@ namespace :pl do
     task update_apt_repo: 'pl:fetch' do
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
       if Pkg::Util.ask_yes_or_no
-        Pkg::Repo.update_apt_repo(Pkg::Config.repo_name, Pkg::Config.apt_repo_path, Pkg::Config.apt_host, Pkg::Config.apt_repo_url, Pkg::Config.apt_repo_command)
+        Pkg::Repo.update_repo(Pkg::Config.apt_staging_server, Pkg::Config.apt_repo_command, { :repo_name => Pkg::Config.repo_name, :repo_path => Pkg::Config.apt_repo_path, :repo_host => Pkg::Config.apt_repo_host, :repo_url => Pkg::Config.apt_repo_url })
       end
     end
 
@@ -37,7 +37,7 @@ namespace :pl do
     task update_nightlies_apt_repo: 'pl:fetch' do
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
       if Pkg::Util.ask_yes_or_no
-        Pkg::Repo.update_apt_repo(Pkg::Config.nonfinal_repo_name, Pkg::Config.nonfinal_apt_repo_path, Pkg::Config.apt_host, Pkg::Config.apt_repo_url, Pkg::Config.nonfinal_apt_repo_command)
+        Pkg::Repo.update_repo(Pkg::Config.apt_staging_server, Pkg::Config.nonfinal_apt_repo_command, { :repo_name => Pkg::Config.nonfinal_repo_name, :repo_path => Pkg::Config.nonfinal_apt_repo_path, :repo_host => Pkg::Config.apt_repo_host, :repo_url => Pkg::Config.apt_repo_url })
       end
     end
 

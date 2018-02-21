@@ -79,11 +79,28 @@ namespace :pl do
   task :sign_rpms, :root_dir do |t, args|
     rpm_dir = args.root_dir || "pkg"
 
+    # Create a hash mapping full paths to basenames.
+    # This will allow us to keep track of the different paths that may be
+    # associated with a single basename, e.g. noarch packages.
+    hash = {}
     all_rpms = Dir["#{rpm_dir}/**/*.rpm"]
+    all_rpms.each do |fullpath|
+      hash[fullpath] = File.basename(fullpath)
+    end
+    # Delete a package, both from the signing server and from the hash, if
+    # there are other packages with the same basename so that we only sign the
+    # package once.
+    all_rpms.each do |rpm|
+      if hash.values.count(File.basename(rpm)) > 1
+        FileUtils.rm_rf(rpm)
+        hash.delete(rpm)
+      end
+    end
+    unique_rpms = hash.keys
 
     v3_rpms = []
     v4_rpms = []
-    all_rpms.each do |rpm|
+    unique_rpms.each do |rpm|
       platform_tag = Pkg::Paths.tag_from_artifact_path(rpm)
       platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
 

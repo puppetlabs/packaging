@@ -79,11 +79,27 @@ namespace :pl do
   task :sign_rpms, :root_dir do |t, args|
     rpm_dir = args.root_dir || "pkg"
 
-    all_rpms = Dir["#{rpm_dir}/**/*.rpm"]
+    # Create a hash mapping full paths to basenames.
+    # This will allow us to keep track of the different paths that may be
+    # associated with a single basename, e.g. noarch packages.
+    all_rpms = {}
+    rpms_to_sign = Dir["#{rpm_dir}/**/*.rpm"]
+    rpms_to_sign.each do |rpm_path|
+      all_rpms[rpm_path] = File.basename(rpm_path)
+    end
+    # Delete a package, both from the signing server and from the rpm array, if
+    # there are other packages with the same basename so that we only sign the
+    # package once.
+    all_rpms.each do |rpm_path, rpm_filename|
+      if rpms_to_sign.map { |rpm| File.basename(rpm) }.count(rpm_filename) > 1
+        FileUtils.rm(rpm_path)
+        rpms_to_sign.delete(rpm_path)
+      end
+    end
 
     v3_rpms = []
     v4_rpms = []
-    all_rpms.each do |rpm|
+    rpms_to_sign.each do |rpm|
       platform_tag = Pkg::Paths.tag_from_artifact_path(rpm)
       platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
 
@@ -111,20 +127,15 @@ namespace :pl do
       sign_rpm(v4_rpms.join(' '))
     end
 
-    # Now we hardlink them back in
-    Dir["#{rpm_dir}/**/*.noarch.rpm"].each do |rpm|
-      platform_tag = Pkg::Paths.tag_from_artifact_path(rpm)
-      platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
-      supported_arches = Pkg::Platforms.arches_for_platform_version(platform, version)
-      cd File.dirname(rpm) do
-        noarch_rpm = File.basename(rpm)
-        supported_arches.each do |arch|
-          arch_dir = File.join('..', arch)
-          FileUtils.mkdir_p(arch_dir)
-          unless File.exist?(File.join(arch_dir, noarch_rpm))
-            FileUtils.ln(noarch_rpm, arch_dir, :force => true, :verbose => true)
-          end
-        end
+    # Using the map of paths to basenames, we re-hardlink the rpms we deleted.
+    all_rpms.each do |link_path, rpm_filename|
+      next if File.exist? link_path
+      FileUtils.mkdir_p(File.dirname(link_path))
+      # Find paths where the signed rpm has the same basename, but different
+      # full path, as the one we need to link.
+      paths_to_link_to = rpms_to_sign.select { |rpm| File.basename(rpm) == rpm_filename && rpm != link_path }
+      paths_to_link_to.each do |path|
+        FileUtils.ln(path, link_path, :force => true, :verbose => true)
       end
     end
   end

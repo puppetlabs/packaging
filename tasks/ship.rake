@@ -5,7 +5,7 @@ namespace :pl do
     # to various target yum and apt repositories based on their specific type
     # e.g., final vs devel vs PE vs FOSS packages
 
-    desc "Update remote yum repository on '#{Pkg::Config.yum_staging_server}'"
+    desc "Update '#{Pkg::Config.repo_name}' yum repository on '#{Pkg::Config.yum_staging_server}'"
     task update_yum_repo: 'pl:fetch' do
       command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository/Rakefile mk_repo'
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
@@ -14,12 +14,30 @@ namespace :pl do
       end
     end
 
-    desc "Update nightlies yum repository on '#{Pkg::Config.yum_staging_server}'"
+    desc "Update all final yum repositories on '#{Pkg::Config.yum_staging_server}'"
+    task update_all_final_yum_repos: 'pl:fetch' do
+      command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository/Rakefile mk_repo'
+      $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
+      if Pkg::Util.ask_yes_or_no
+        Pkg::Repo.update_repo(Pkg::Config.yum_staging_server, command, { :repo_name => '', :repo_path => Pkg::Config.yum_repo_path, :repo_host => Pkg::Config.yum_staging_server })
+      end
+    end
+
+    desc "Update '#{Pkg::Config.nonfinal_repo_name}' nightly yum repository on '#{Pkg::Config.yum_staging_server}'"
     task update_nightlies_yum_repo: 'pl:fetch' do
       command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository-nightlies/Rakefile mk_repo'
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Repo.update_repo(Pkg::Config.yum_staging_server, command, { :repo_name => Pkg::Config.nonfinal_repo_name, :repo_path => Pkg::Config.nonfinal_yum_repo_path, :repo_host => Pkg::Config.yum_staging_server })
+      end
+    end
+
+    desc "Update all nightly yum repositories on '#{Pkg::Config.yum_staging_server}'"
+    task update_all_nightlies_yum_repos: 'pl:fetch' do
+      command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository-nightlies/Rakefile mk_repo'
+      $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
+      if Pkg::Util.ask_yes_or_no
+        Pkg::Repo.update_repo(Pkg::Config.yum_staging_server, command, { :repo_name => '', :repo_path => Pkg::Config.nonfinal_yum_repo_path, :repo_host => Pkg::Config.yum_staging_server })
       end
     end
 

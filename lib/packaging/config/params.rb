@@ -304,7 +304,7 @@ module Pkg::Params
               { :var => :random_mockroot,         :val => true },
               { :var => :keychain_loaded,         :val => false },
               { :var => :foss_only,               :val => false },
-              { :var => :build_data_repo,         :val => 'https://github.com/puppetlabs/build-data.git' },
+              { :var => :build_data_repo,         :val => 'git@github.com:puppetlabs/build-data.git' },
               { :var => :build_date,              :val => Pkg::Util::Date.timestamp('-') },
               { :var => :release,                 :val => '1' },
               { :var => :internal_gem_host,       :val => 'https://artifactory.delivery.puppetlabs.net/artifactory/api/gems/rubygems/' },

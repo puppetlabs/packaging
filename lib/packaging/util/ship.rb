@@ -102,6 +102,42 @@ module Pkg::Util::Ship
     end
   end
 
+  def ship_rpms(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/**/*.rpm", "#{local_staging_directory}/**/*.srpm"], Pkg::Config.yum_staging_server, remote_path, opts)
+  end
+
+  def ship_debs(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/**/*.debian.tar.gz", "#{local_staging_directory}/**/*.orig.tar.gz" "#{local_staging_directory}/**/*.dsc", "#{local_staging_directory}/**/*.deb", "#{local_staging_directory}/**/*.changes"], Pkg::Config.apt_signing_server, remote_path, opts)
+  end
+
+  def ship_svr4(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/**/*.pkg.gz"], Pkg::Config.svr4_host, remote_path, opts)
+  end
+
+  def ship_p5p(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/**/*.p5p"], Pkg::Config.p5p_host, remote_path, opts)
+  end
+
+  def ship_dmg(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/**/*.dmg"], Pkg::Config.dmg_staging_server, remote_path, opts)
+  end
+
+  def ship_swix(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/**/*.swix"], Pkg::Config.swix_staging_server, remote_path, opts)
+  end
+
+  def ship_msi(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/**/*.msi"], Pkg::Config.msi_staging_server, remote_path, opts)
+  end
+
+  def ship_gem(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/*.gem*"], Pkg::Config.gem_host, remote_path, opts)
+  end
+
+  def ship_tar(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/*.tar.gz*"], Pkg::Config.tar_staging_server, remote_path, opts)
+  end
+
   def rolling_repo_link_command(platform_tag, repo_path)
     base_path, link_path = Pkg::Paths.artifacts_base_path_and_link_path(platform_tag, repo_path)
 

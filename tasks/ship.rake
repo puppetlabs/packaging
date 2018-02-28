@@ -256,7 +256,7 @@ namespace :pl do
     else
       path = Pkg::Config.nonfinal_yum_repo_path || Pkg::Config.yum_repo_path
     end
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.rpm', 'pkg/**/*.srpm'], Pkg::Config.yum_staging_server, path)
+    Pkg::Util::Ship.ship_rpms('pkg', path)
 
     # I really don't care which one we grab, it just has to be some supported
     # version and architecture from the `el` hash. So here we're just grabbing
@@ -276,7 +276,7 @@ namespace :pl do
     else
       staging_path = Pkg::Config.nonfinal_apt_repo_staging_path || Pkg::Config.apt_repo_staging_path
     end
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.debian.tar.gz', 'pkg/**/*.orig.tar.gz', 'pkg/**/*.dsc', 'pkg/**/*.deb', 'pkg/**/*.changes'], Pkg::Config.apt_signing_server, staging_path, chattr: false)
+    Pkg::Util::Ship.ship_debs('pkg', staging_path, chattr: false)
 
     # We need to iterate through all the supported platforms here because of
     # how deb repos are set up. Each codename will have its own link from the
@@ -353,7 +353,7 @@ namespace :pl do
     end
 
     Pkg::Util::Execution.retry_on_fail(times: 3) do
-      Pkg::Util::Ship.ship_pkgs(['pkg/*.gem*'], Pkg::Config.gem_host, Pkg::Config.gem_path, platform_independent: true)
+      Pkg::Util::Ship.ship_gem('pkg', Pkg::Config.gem_path, platform_independent: true)
     end
   end
 
@@ -366,7 +366,7 @@ namespace :pl do
         else
           path = Pkg::Config.nonfinal_svr4_path || Pkg::Config.svr4_path
         end
-        Pkg::Util::Ship.ship_pkgs(['pkg/**/*.pkg.gz'], Pkg::Config.svr4_host, path)
+        Pkg::Util::Ship.ship_svr4('pkg', path)
       end
     end
   end
@@ -380,7 +380,7 @@ namespace :pl do
         else
           path = Pkg::Config.nonfinal_p5p_path || Pkg::Config.p5p_path
         end
-        Pkg::Util::Ship.ship_pkgs(['pkg/**/*.p5p'], Pkg::Config.p5p_host, path)
+        Pkg::Util::Ship.ship_p5p('pkg', path)
       end
     end
   end
@@ -401,7 +401,7 @@ namespace :pl do
     end
     path = Pkg::Config.nonfinal_dmg_path if Pkg::Config.nonfinal_dmg_path && !Pkg::Util::Version.final?
 
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.dmg'], Pkg::Config.dmg_staging_server, path)
+    Pkg::Util::Ship.ship_dmg('pkg', path)
 
     # I really don't care which one we grab, it just has to be some supported
     # version and architecture from the `osx` hash. So here we're just grabbing
@@ -439,7 +439,7 @@ namespace :pl do
     end
     path = Pkg::Config.nonfinal_swix_path if Pkg::Config.nonfinal_swix_path && !Pkg::Util::Version.final?
 
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.swix*'], Pkg::Config.swix_staging_server, path)
+    Pkg::Util::Ship.ship_swix('pkg', path)
 
     # I really don't care which one we grab, it just has to be some supported
     # version and architecture from the `eos` hash. So here we're just grabbing
@@ -455,7 +455,7 @@ namespace :pl do
   desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
   task ship_tar: 'pl:fetch' do
     if Pkg::Config.build_tar
-      Pkg::Util::Ship.ship_pkgs(['pkg/*.tar.gz*'], Pkg::Config.tar_staging_server, Pkg::Config.tarball_path, excludes: ['signing_bundle', 'packaging-bundle'], platform_independent: true)
+      Pkg::Util::Ship.ship_tar('pkg', Pkg::Config.tarball_path, excludes: ['signing_bundle', 'packaging-bundle'], platform_independent: true)
     end
   end
 
@@ -485,7 +485,7 @@ namespace :pl do
     end
     path = Pkg::Config.nonfinal_msi_path if Pkg::Config.nonfinal_msi_path && !Pkg::Util::Version.final?
 
-    Pkg::Util::Ship.ship_pkgs(['pkg/**/*.msi'], Pkg::Config.msi_staging_server, path, excludes: ["#{Pkg::Config.project}-x(86|64).msi"])
+    Pkg::Util::Ship.ship_msi('pkg', path, excludes: ["#{Pkg::Config.project}-x(86|64).msi"])
 
     # I really don't care which one we grab, it just has to be some supported
     # version and architecture from the `windows` hash. So here we're just grabbing

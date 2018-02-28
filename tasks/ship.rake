@@ -257,16 +257,6 @@ namespace :pl do
       path = Pkg::Config.nonfinal_yum_repo_path || Pkg::Config.yum_repo_path
     end
     Pkg::Util::Ship.ship_rpms('pkg', path)
-
-    # I really don't care which one we grab, it just has to be some supported
-    # version and architecture from the `el` hash. So here we're just grabbing
-    # the first one, parsing out some info, and breaking out of the loop. Not
-    # elegant, I know, but effective.
-    Pkg::Platforms::PLATFORM_INFO['el'].each do |key, value|
-      generic_platform_tag = "el-#{key}-#{value[:architectures][0]}"
-      Pkg::Util::Ship.create_rolling_repo_link(generic_platform_tag, Pkg::Config.yum_staging_server, path)
-      break
-    end
   end
 
   desc "Ship cow-built debs to #{Pkg::Config.apt_signing_server}"
@@ -277,15 +267,6 @@ namespace :pl do
       staging_path = Pkg::Config.nonfinal_apt_repo_staging_path || Pkg::Config.apt_repo_staging_path
     end
     Pkg::Util::Ship.ship_debs('pkg', staging_path, chattr: false)
-
-    # We need to iterate through all the supported platforms here because of
-    # how deb repos are set up. Each codename will have its own link from the
-    # current versioned repo (i.e., puppet5) to the rolling repo. The one thing
-    # we don't care about is architecture, so we just grab the first supported
-    # architecture for the codename we're working with at the moment.
-    Pkg::Platforms.codenames.each do |codename|
-      Pkg::Util::Ship.create_rolling_repo_link(Pkg::Platforms.codename_to_tags(codename)[0], Pkg::Config.apt_signing_server, staging_path)
-    end
   end
 
   desc 'Ship built gem to rubygems.org, internal Gem mirror, and public file server'
@@ -402,25 +383,6 @@ namespace :pl do
     path = Pkg::Config.nonfinal_dmg_path if Pkg::Config.nonfinal_dmg_path && !Pkg::Util::Version.final?
 
     Pkg::Util::Ship.ship_dmg('pkg', path)
-
-    # I really don't care which one we grab, it just has to be some supported
-    # version and architecture from the `osx` hash. So here we're just grabbing
-    # the first one, parsing out some info, and breaking out of the loop. Not
-    # elegant, I know, but effective.
-    Pkg::Platforms::PLATFORM_INFO['osx'].each do |key, value|
-      generic_platform_tag = "osx-#{key}-#{value[:architectures][0]}"
-      Pkg::Util::Ship.create_rolling_repo_link(generic_platform_tag, Pkg::Config.dmg_staging_server, path)
-      break
-    end
-
-    Pkg::Platforms.platform_tags_for_package_format('dmg').each do |platform_tag|
-      # TODO remove the PC1 links when we no longer need to maintain them
-      _, version, arch = Pkg::Platforms.parse_platform_tag(platform_tag)
-      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', "/opt/downloads/mac/#{version}/PC1/#{arch}", 'dmg')
-
-      # Create the latest symlink for the current supported repo
-      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifacts_path(platform_tag, path), 'dmg')
-    end
   end
 
   desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
@@ -440,16 +402,6 @@ namespace :pl do
     path = Pkg::Config.nonfinal_swix_path if Pkg::Config.nonfinal_swix_path && !Pkg::Util::Version.final?
 
     Pkg::Util::Ship.ship_swix('pkg', path)
-
-    # I really don't care which one we grab, it just has to be some supported
-    # version and architecture from the `eos` hash. So here we're just grabbing
-    # the first one, parsing out some info, and breaking out of the loop. Not
-    # elegant, I know, but effective.
-    Pkg::Platforms::PLATFORM_INFO['eos'].each do |key, value|
-      generic_platform_tag = "eos-#{key}-#{value[:architectures][0]}"
-      Pkg::Util::Ship.create_rolling_repo_link(generic_platform_tag, Pkg::Config.swix_staging_server, path)
-      break
-    end
   end
 
   desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
@@ -486,26 +438,6 @@ namespace :pl do
     path = Pkg::Config.nonfinal_msi_path if Pkg::Config.nonfinal_msi_path && !Pkg::Util::Version.final?
 
     Pkg::Util::Ship.ship_msi('pkg', path, excludes: ["#{Pkg::Config.project}-x(86|64).msi"])
-
-    # I really don't care which one we grab, it just has to be some supported
-    # version and architecture from the `windows` hash. So here we're just grabbing
-    # the first one, parsing out some info, and breaking out of the loop. Not
-    # elegant, I know, but effective.
-    Pkg::Platforms::PLATFORM_INFO['windows'].each do |key, value|
-      generic_platform_tag = "windows-#{key}-#{value[:architectures][0]}"
-      Pkg::Util::Ship.create_rolling_repo_link(generic_platform_tag, Pkg::Config.msi_staging_server, path)
-
-      # Create the symlinks for the latest supported repo
-      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifacts_path(generic_platform_tag, path), 'msi', arch: 'x64')
-      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifacts_path(generic_platform_tag, path), 'msi', arch: 'x86')
-      break
-    end
-
-    # We provide symlinks to the latest package in a given directory. This
-    # allows users to upgrade more easily to the latest version that we release
-    # TODO remove the links to PC1 when we no longer ship to that repo
-    Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', '/opt/downloads/windows', 'msi', arch: 'x64')
-    Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', '/opt/downloads/windows', 'msi', arch: 'x86')
   end
 
   desc 'UBER ship: ship all the things in pkg'

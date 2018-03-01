@@ -162,4 +162,16 @@ describe 'Pkg::Platforms' do
       end
     end
   end
+
+  describe '#generic_platform_tag' do
+    it 'fails for unsupported platforms' do
+      expect { Pkg::Platforms.generic_platform_tag('butts') }.to raise_error
+    end
+
+    it 'returns a supported platform tag containing the supplied platform' do
+      Pkg::Platforms.supported_platforms.each do |platform|
+        expect(Pkg::Platforms.platform_tags).to include(Pkg::Platforms.generic_platform_tag(platform))
+      end
+    end
+  end
 end

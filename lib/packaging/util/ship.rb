@@ -105,15 +105,7 @@ module Pkg::Util::Ship
   def ship_rpms(local_staging_directory, remote_path, opts = {})
     ship_pkgs(["#{local_staging_directory}/**/*.rpm", "#{local_staging_directory}/**/*.srpm"], Pkg::Config.yum_staging_server, remote_path, opts)
 
-    # I really don't care which one we grab, it just has to be some supported
-    # version and architecture from the `el` hash. So here we're just grabbing
-    # the first one, parsing out some info, and breaking out of the loop. Not
-    # elegant, I know, but effective. [written by Melissa, copied by Molly]
-    Pkg::Platforms::PLATFORM_INFO['el'].each do |key, value|
-      generic_platform_tag = "el-#{key}-#{value[:architectures[0]]}"
-      create_rolling_repo_link(generic_platform_tag, Pkg::Config.yum_staging_server, remote_path)
-      break
-    end
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('el'), Pkg::Config.yum_staging_server, remote_path)
   end
 
   def ship_debs(local_staging_directory, remote_path, opts = {})
@@ -141,15 +133,7 @@ module Pkg::Util::Ship
   def ship_dmg(local_staging_directory, remote_path, opts = {})
     ship_pkgs(["#{local_staging_directory}/**/*.dmg"], Pkg::Config.dmg_staging_server, remote_path, opts)
 
-    # I really don't care which one we grab, it just has to be some supported
-    # version and architecture from the `osx` hash. So here we're just grabbing
-    # the first one, parsing out some info, and breaking out of the loop. Not
-    # elegant, I know, but effective. [written by Melissa, copied by Molly]
-    Pkg::Platforms::PLATFORM_INFO['osx'].each do |key, value|
-      generic_platform_tag = "osx-#{key}-#{value[:architectures][0]}"
-      create_rolling_repo_link(generic_platform_tag, Pkg::Config.dmg_staging_server, remote_path)
-      break
-    end
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('osx'), Pkg::Config.dmg_staging_server, remote_path)
 
     Pkgs::Platforms.platform_tags_for_package_format('dmg').each do |platform_tag|
       # TODO remove the PC1 links when we no longer need to maintain them
@@ -164,32 +148,16 @@ module Pkg::Util::Ship
   def ship_swix(local_staging_directory, remote_path, opts = {})
     ship_pkgs(["#{local_staging_directory}/**/*.swix"], Pkg::Config.swix_staging_server, remote_path, opts)
 
-    # I really don't care which one we grab, it just has to be some supported
-    # version and architecture from the `eos` hash. So here we're just grabbing
-    # the first one, parsing out some info, and breaking out of the loop. Not
-    # elegant, I know, but effective. [written by Melissa, copied by Molly]
-    Pkg::Platforms::PLATFORM_INFO['eos'].each do |key, value|
-      generic_platform_tag = "eos-#{key}-#{value[:architectures][0]}"
-      create_rolling_repo_link(generic_platform_tag, Pkg::Config.swix_staging_server, remote_path)
-      break
-    end
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('eos'), Pkg::Config.swix_staging_server, remote_path)
   end
 
   def ship_msi(local_staging_directory, remote_path, opts = {})
     ship_pkgs(["#{local_staging_directory}/**/*.msi"], Pkg::Config.msi_staging_server, remote_path, opts)
 
-    # I really don't care which one we grab, it just has to be some supported
-    # version and architecture from the `windows` hash. So here we're just grabbing
-    # the first one, parsing out some info, and breaking out of the loop. Not
-    # elegant, I know, but effective. [written by Melissa, copied by Molly]
-    Pkg::Platforms::PLATFORM_INFO['windows'].each do |key, value|
-      generic_platform_tag = "windows-#{key}-#{value[:architectures][0]}"
-      create_rolling_repo_link(generic_platform_tag, Pkg::Config.msi_staging_server, remote_path)
-      # Create the symlinks for the latest supported repo
-      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifacts_path(generic_platform_tag, remote_path), 'msi', arch: 'x64')
-      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifacts_path(generic_platform_tag, remote_path), 'msi', arch: 'x86')
-      break
-    end
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('windows'), Pkg::Config.msi_staging_server, remote_path)
+    # Create the symlinks for the latest supported repo
+    Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifacts_path(Pkg::Platforms.generic_platform_tag('windows'), remote_path), 'msi', arch: 'x64')
+    Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifacts_path(Pkg::Platforms.generic_platform_tag('windows'), remote_path), 'msi', arch: 'x86')
 
     # We provide symlinks to the latest package in a given directory. This
     # allows users to upgrade more easily to the latest version that we release

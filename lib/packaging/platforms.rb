@@ -485,6 +485,14 @@ module Pkg::Platforms # rubocop:disable Metrics/ModuleLength
     platform_tags
   end
 
+  # Return a supported platform tag for the given platform, not caring about
+  # version or architecture
+  def generic_platform_tag(platform)
+    version = versions_for_platform(platform).first
+    arch = arches_for_platform_version(platform, version).first
+    return "#{platform}-#{version}-#{arch}"
+  end
+
   # @method by_deb
   # @return [Array] An Array of Strings, containing all platforms
   #   that use .deb packages

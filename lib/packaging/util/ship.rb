@@ -102,6 +102,79 @@ module Pkg::Util::Ship
     end
   end
 
+  def ship_rpms(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/**/*.rpm", "#{local_staging_directory}/**/*.srpm"], Pkg::Config.yum_staging_server, remote_path, opts)
+
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('el'), Pkg::Config.yum_staging_server, remote_path)
+  end
+
+  def ship_debs(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/**/*.debian.tar.gz", "#{local_staging_directory}/**/*.orig.tar.gz" "#{local_staging_directory}/**/*.dsc", "#{local_staging_directory}/**/*.deb", "#{local_staging_directory}/**/*.changes"], Pkg::Config.apt_signing_server, remote_path, opts)
+
+    # We need to iterate through all the supported platforms here because of
+    # how deb repos are set up. Each codename will have its own link from the
+    # current versioned repo (e.g. puppet5) to the rolling repo. The one thing
+    # we don't care about is architecture, so we just grab the first supported
+    # architecture for the code name we're working with at the moment. [written
+    # by Melissa, copied by Molly]
+    Pkg::Platforms.codenames.each do |codename|
+      create_rolling_repo_link(Pkg::Platforms.codename_to_tags(codename)[0], Pkg::Config.apt_signing_server, remote_path)
+    end
+  end
+
+  def ship_svr4(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/**/*.pkg.gz"], Pkg::Config.svr4_host, remote_path, opts)
+  end
+
+  def ship_p5p(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/**/*.p5p"], Pkg::Config.p5p_host, remote_path, opts)
+  end
+
+  def ship_dmg(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/**/*.dmg"], Pkg::Config.dmg_staging_server, remote_path, opts)
+
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('osx'), Pkg::Config.dmg_staging_server, remote_path)
+
+    Pkgs::Platforms.platform_tags_for_package_format('dmg').each do |platform_tag|
+      # TODO remove the PC1 links when we no longer need to maintain them
+      # [written by Melissa, copied by Molly]
+      _, version, arch = Pkg::Platforms.parse_platform_tag(platform_tag)
+      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', "/opt/downloads/mac/#{version}/PC1/#{arch}", 'dmg')
+      # Create the latest symlink for the current supported repo
+      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifact_path(platform_tag, remote_path), 'dmg')
+    end
+  end
+
+  def ship_swix(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/**/*.swix"], Pkg::Config.swix_staging_server, remote_path, opts)
+
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('eos'), Pkg::Config.swix_staging_server, remote_path)
+  end
+
+  def ship_msi(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/**/*.msi"], Pkg::Config.msi_staging_server, remote_path, opts)
+
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('windows'), Pkg::Config.msi_staging_server, remote_path)
+    # Create the symlinks for the latest supported repo
+    Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifacts_path(Pkg::Platforms.generic_platform_tag('windows'), remote_path), 'msi', arch: 'x64')
+    Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifacts_path(Pkg::Platforms.generic_platform_tag('windows'), remote_path), 'msi', arch: 'x86')
+
+    # We provide symlinks to the latest package in a given directory. This
+    # allows users to upgrade more easily to the latest version that we release
+    # TODO remove the links to PC1 when we no longer ship to that repo [written
+    # by Melissa, copied by Molly]
+    Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', '/opt/downloads/windows', 'msi', arch: 'x64')
+    Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', '/opt/downloads/windows', 'msi', arch: 'x86')
+  end
+
+  def ship_gem(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/*.gem*"], Pkg::Config.gem_host, remote_path, opts)
+  end
+
+  def ship_tar(local_staging_directory, remote_path, opts = {})
+    ship_pkgs(["#{local_staging_directory}/*.tar.gz*"], Pkg::Config.tar_staging_server, remote_path, opts)
+  end
+
   def rolling_repo_link_command(platform_tag, repo_path)
     base_path, link_path = Pkg::Paths.artifacts_base_path_and_link_path(platform_tag, repo_path)
 

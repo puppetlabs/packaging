@@ -251,22 +251,22 @@ namespace :pl do
 
   desc "Ship mocked rpms to #{Pkg::Config.yum_staging_server}"
   task ship_rpms: 'pl:fetch' do
-    if Pkg::Util::Version.final?
-      path = Pkg::Config.yum_repo_path
-    else
-      path = Pkg::Config.nonfinal_yum_repo_path || Pkg::Config.yum_repo_path
-    end
-    Pkg::Util::Ship.ship_rpms('pkg', path)
+    Pkg::Util::Ship.ship_rpms('pkg', Pkg::Config.yum_repo_path)
+  end
+
+  desc "Ship nightly rpms to #{Pkg::Config.yum_staging_server}"
+  task ship_nightly_rpms: 'pl:fetch' do
+    Pkg::Util::Ship.ship_rpms('pkg', Pkg::Config.nonfinal_yum_repo_path)
   end
 
   desc "Ship cow-built debs to #{Pkg::Config.apt_signing_server}"
   task ship_debs: 'pl:fetch' do
-    if Pkg::Util::Version.final?
-      staging_path = Pkg::Config.apt_repo_staging_path
-    else
-      staging_path = Pkg::Config.nonfinal_apt_repo_staging_path || Pkg::Config.apt_repo_staging_path
-    end
-    Pkg::Util::Ship.ship_debs('pkg', staging_path, chattr: false)
+    Pkg::Util::Ship.ship_debs('pkg', Pkg::Config.apt_repo_staging_path, chattr: false)
+  end
+
+  desc "Ship nightly debs to #{Pkg::Config.apt_signing_server}"
+  task ship_nightly_debs: 'pl:fetch' do
+    Pkg::Util::Ship.ship_debs('pkg', Pkg::Config.nonfinal_apt_repo_staging_path, chattr: false)
   end
 
   desc 'Ship built gem to rubygems.org, internal Gem mirror, and public file server'
@@ -342,12 +342,7 @@ namespace :pl do
   task :ship_svr4 do
     Pkg::Util::Execution.retry_on_fail(:times => 3) do
       if File.directory?("pkg/solaris/10")
-        if Pkg::Util::Version.final?
-          path = Pkg::Config.svr4_path
-        else
-          path = Pkg::Config.nonfinal_svr4_path || Pkg::Config.svr4_path
-        end
-        Pkg::Util::Ship.ship_svr4('pkg', path)
+        Pkg::Util::Ship.ship_svr4('pkg', Pkg::Config.svr4_path)
       end
     end
   end
@@ -356,12 +351,7 @@ namespace :pl do
   task :ship_p5p do
     Pkg::Util::Execution.retry_on_fail(:times => 3) do
       if File.directory?("pkg/solaris/11")
-        if Pkg::Util::Version.final?
-          path = Pkg::Config.p5p_path
-        else
-          path = Pkg::Config.nonfinal_p5p_path || Pkg::Config.p5p_path
-        end
-        Pkg::Util::Ship.ship_p5p('pkg', path)
+        Pkg::Util::Ship.ship_p5p('pkg', Pkg::Config.p5p_path)
       end
     end
   end
@@ -380,9 +370,12 @@ namespace :pl do
     else
       path = Pkg::Config.dmg_path
     end
-    path = Pkg::Config.nonfinal_dmg_path if Pkg::Config.nonfinal_dmg_path && !Pkg::Util::Version.final?
-
     Pkg::Util::Ship.ship_dmg('pkg', path)
+  end
+
+  desc "ship nightly apple dmgs to #{Pkg::Config.dmg_staging_server}"
+  task ship_nightly_dmg: 'pl:fetch' do
+    Pkg::Util::Ship.ship_dmg('pkg', Pkg::Config.nonfinal_dmg_path)
   end
 
   desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
@@ -399,9 +392,12 @@ namespace :pl do
     else
       path = Pkg::Config.swix_path
     end
-    path = Pkg::Config.nonfinal_swix_path if Pkg::Config.nonfinal_swix_path && !Pkg::Util::Version.final?
-
     Pkg::Util::Ship.ship_swix('pkg', path)
+  end
+
+  desc "ship nightly Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
+  task ship_nightly_swix: 'pl:fetch' do
+    Pkg::Util::Ship.ship_swix('pkg', Pkg::Config.nonfinal_swix_path)
   end
 
   desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
@@ -435,9 +431,12 @@ namespace :pl do
     else
       path = Pkg::Config.msi_path
     end
-    path = Pkg::Config.nonfinal_msi_path if Pkg::Config.nonfinal_msi_path && !Pkg::Util::Version.final?
-
     Pkg::Util::Ship.ship_msi('pkg', path, excludes: ["#{Pkg::Config.project}-x(86|64).msi"])
+  end
+
+  desc "Ship nightly MSI packages to #{Pkg::Config.msi_staging_server}"
+  task ship_nightly_msi: 'pl:fetch' do
+    Pkg::Util::Ship.ship_msi('pkg', Pkg::Config.nonfinal_msi_path, excludes: ["#{Pkg::Config.project}-x(86|64).msi"])
   end
 
   desc 'UBER ship: ship all the things in pkg'

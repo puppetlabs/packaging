@@ -135,13 +135,13 @@ module Pkg::Util::Ship
 
     create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('osx'), Pkg::Config.dmg_staging_server, remote_path)
 
-    Pkgs::Platforms.platform_tags_for_package_format('dmg').each do |platform_tag|
+    Pkg::Platforms.platform_tags_for_package_format('dmg').each do |platform_tag|
       # TODO remove the PC1 links when we no longer need to maintain them
       # [written by Melissa, copied by Molly]
       _, version, arch = Pkg::Platforms.parse_platform_tag(platform_tag)
       Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', "/opt/downloads/mac/#{version}/PC1/#{arch}", 'dmg')
       # Create the latest symlink for the current supported repo
-      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifact_path(platform_tag, remote_path), 'dmg')
+      Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifacts_path(platform_tag, remote_path), 'dmg')
     end
   end
 

@@ -265,8 +265,24 @@ namespace :pl do
       end
     end
 
+    task :stage_nightlies => "pl:fetch" do
+      tasks = %w(
+        jenkins:retrieve
+        jenkins:sign_all
+        ship_nightly_rpms
+        ship_nightly_debs
+        ship_nightly_dmg
+        ship_nightly_swix
+        ship_nightly_msi
+      )
+      tasks.map { |t| "pl:#{t}" }.each do |t|
+        puts "Running #{t} . . ."
+        Rake::Task[t].invoke
+      end
+    end
+
     task :ship_nightlies => "pl:fetch" do
-      Rake::Task['pl:jenkins:uber_ship_lite'].invoke
+      Rake::Task['pl:jenkins:stage_nightlies'].invoke
       Rake::Task['pl:remote:update_nightly_repos'].invoke
       Rake::Task['pl:remote:deploy_nightlies_to_s3'].invoke
     end

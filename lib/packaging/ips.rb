@@ -31,8 +31,8 @@ module Pkg::IPS
         #
         # We sign the entire repo
         sign_cmd = "sudo -E /usr/bin/pkgsign -c /root/signing/signing_cert_2018.pem \
-                    -i /root/signing/Thawte_Code_Signing_Certificate_interim_SHA1.pem \
-                    -i /root/signing/Thawte_Primary_Root_CA_interim_SHA1.pem \
+                    -i /root/signing/Thawte_SHA256_Code_Signing_CA.pem \
+                    -i /root/signing/Thawte_Primary_Root_CA.pem \
                     -k /root/signing/signing_key_2018.pem \
                     -s 'file://#{work_dir}/repo' '*'"
         puts "About to sign #{p5p} with #{sign_cmd} in #{work_dir}"

@@ -171,7 +171,8 @@ namespace :pl do
       signing_bundle = ENV['SIGNING_BUNDLE']
       rpm_sign_task = Pkg::Config.build_pe ? "pe:sign_rpms" : "pl:sign_rpms"
       deb_sign_task = Pkg::Config.build_pe ? "pe:sign_deb_changes" : "pl:sign_deb_changes"
-      sign_tasks    = [rpm_sign_task, deb_sign_task]
+      sign_tasks    = [rpm_sign_task]
+      sign_tasks    << deb_sign_task unless Dir['pkg/**/*.changes'].empty?
       sign_tasks    << "pl:sign_tar" if Pkg::Config.build_tar
       sign_tasks    << "pl:sign_gem" if Pkg::Config.build_gem
       sign_tasks    << "pl:sign_osx" if Pkg::Config.build_dmg || Pkg::Config.vanagon_project

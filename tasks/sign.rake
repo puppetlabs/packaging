@@ -14,21 +14,20 @@ namespace :pl do
   desc "Sign the Arista EOS swix packages, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_swix do
     packages = Dir["pkg/**/*.swix"]
-    unless packages.empty?
-      Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-      packages.each do |swix_package|
-        Pkg::Util::Gpg.sign_file swix_package
-      end
+    fail "No swix packages found. Did you retrieve?" if packages.empty?
+    Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
+    packages.each do |swix_package|
+      Pkg::Util::Gpg.sign_file swix_package
     end
   end
 
   desc "Detach sign any solaris svr4 packages"
   task :sign_svr4 do
-    unless Dir["pkg/**/*.pkg.gz"].empty?
-      Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-      Dir["pkg/**/*.pkg.gz"].each do |pkg|
-        Pkg::Util::Gpg.sign_file pkg
-      end
+    packages = Dir["pkg/**/*.pkg.gz"]
+    fail "No svr4 packages found. Did you retrieve?" if packages.empty?
+    Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
+    packages.each do |pkg|
+      Pkg::Util::Gpg.sign_file pkg
     end
   end
 
@@ -41,6 +40,7 @@ namespace :pl do
     # associated with a single basename, e.g. noarch packages.
     all_rpms = {}
     rpms_to_sign = Dir["#{rpm_dir}/**/*.rpm"]
+    fail "No rpms found. Did you retrieve?" if rpms_to_sign.empty?
     rpms_to_sign.each do |rpm_path|
       all_rpms[rpm_path] = File.basename(rpm_path)
     end
@@ -99,16 +99,17 @@ namespace :pl do
 
   desc "Sign ips package, uses PL certificates by default, update privatekey_pem, certificate_pem, and ips_inter_cert in build_defaults.yaml to override."
   task :sign_ips do
-    Pkg::IPS.sign unless Dir['pkg/**/*.p5p'].empty?
+    fail "No p5p packages found. Did you retrieve?" if Dir['pkg/**/*.p5p'].empty?
+    Pkg::IPS.sign
   end
 
-  if Pkg::Config.build_gem
-    desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
-    task :sign_gem do
-      FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |gem|
-        puts "signing gem #{gem}"
-        Pkg::Util::Gpg.sign_file(gem)
-      end
+  desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
+  task :sign_gem do
+    gems = FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"]
+    fail "No gems found. Did you retrieve?" if gems.empty?
+    gems.each do |gem|
+      puts "signing gem #{gem}"
+      Pkg::Util::Gpg.sign_file(gem)
     end
   end
 
@@ -133,10 +134,9 @@ namespace :pl do
   task :sign_deb_changes do
     begin
       change_files = Dir["pkg/**/*.changes"]
-      unless change_files.empty?
-        Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-        Pkg::Sign.sign_deb_changes("pkg/**/*.changes")
-      end
+      fail "No deb changes found. Did you retrieve?" if change_files.empty?
+      Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
+      Pkg::Sign.sign_deb_changes("pkg/**/*.changes")
     ensure
       Pkg::Util::Gpg.kill_keychain
     end
@@ -144,12 +144,14 @@ namespace :pl do
 
   desc "Sign OSX packages"
   task :sign_osx => "pl:fetch" do
-    Pkg::OSX.sign unless Dir['pkg/**/*.dmg'].empty?
+    fail "No dmgs found. Did you retrieve?" if Dir['pkg/**/*.dmg'].empty?
+    Pkg::OSX.sign
   end
 
   desc "Sign MSI packages"
   task :sign_msi => "pl:fetch" do
-    Pkg::MSI.sign unless Dir['pkg/**/*.msi'].empty?
+    fail "No msis found. Did you retrieve?" if Dir['pkg/**/*.msi'].empty?
+    Pkg::MSI.sign
   end
 
   ##
@@ -159,7 +161,7 @@ namespace :pl do
   namespace :jenkins do
     desc "Sign all locally staged packages on #{Pkg::Config.signing_server}"
     task :sign_all => "pl:fetch" do
-      Dir["pkg/*"].empty? and fail "There were files found in pkg/. Maybe you wanted to build/retrieve something first?"
+      fail "There were no files found in pkg/. Maybe you wanted to build/retrieve something first?" if Dir['pkg/*'].empty?
 
       # Because rpms and debs are laid out differently in PE under pkg/ they
       # have a different sign task to address this. Rather than create a whole
@@ -178,8 +180,8 @@ namespace :pl do
       sign_tasks    << "pl:sign_gem" if Pkg::Config.build_gem
       sign_tasks    << "pl:sign_osx" if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_swix" if Pkg::Config.vanagon_project
-      sign_tasks    << "pl:sign_svr4" if Pkg::Config.vanagon_project
-      sign_tasks    << "pl:sign_ips" if Pkg::Config.vanagon_project
+      sign_tasks    << "pl:sign_svr4" if Pkg::Config.vanagon_project && !Pkg::Config.foss_only
+      sign_tasks    << "pl:sign_ips" if Pkg::Config.vanagon_project && !Pkg::Config.foss_only
       sign_tasks    << "pl:sign_msi" if Pkg::Config.build_msi || Pkg::Config.vanagon_project
       remote_repo   = Pkg::Util::Net.remote_bootstrap(Pkg::Config.signing_server, 'HEAD', nil, signing_bundle)
       build_params  = Pkg::Util::Net.remote_buildparams(Pkg::Config.signing_server, Pkg::Config)

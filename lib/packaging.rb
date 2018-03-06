@@ -20,6 +20,7 @@ module Pkg
   require 'packaging/repo'
   require 'packaging/artifactory'
   require 'packaging/retrieve'
+  require 'packaging/sign'
 
   # Load configuration defaults
   Pkg::Config.load_defaults

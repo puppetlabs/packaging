@@ -2,9 +2,11 @@ namespace :pl do
   desc "Sign the tarball, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_tar do
     unless Pkg::Config.vanagon_project
-      File.exist?("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz") or fail "No tarball exists. Try rake package:tar?"
+      tarballs_to_sign = Pkg::Util::Ship.collect_packages(['pkg/*.tar.gz'], ['signing_bundle', 'packaging-bundle'])
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-      Pkg::Util::Gpg.sign_file "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
+      tarballs_to_sign.each do |file|
+        Pkg::Util::Gpg.sign_file file
+      end
     end
   end
 

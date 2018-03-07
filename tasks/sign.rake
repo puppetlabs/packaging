@@ -96,7 +96,7 @@ namespace :pl do
 
   desc "Sign ips package, uses PL certificates by default, update privatekey_pem, certificate_pem, and ips_inter_cert in build_defaults.yaml to override."
   task :sign_ips do
-    Pkg::IPS.sign unless Dir['pkg/**/*.p5p'].empty?
+    Pkg::Sign.sign_ips unless Dir['pkg/**/*.p5p'].empty?
   end
 
   if Pkg::Config.build_gem
@@ -141,12 +141,12 @@ namespace :pl do
 
   desc "Sign OSX packages"
   task :sign_osx => "pl:fetch" do
-    Pkg::OSX.sign unless Dir['pkg/**/*.dmg'].empty?
+    Pkg::Sign.sign_osx unless Dir['pkg/**/*.dmg'].empty?
   end
 
   desc "Sign MSI packages"
   task :sign_msi => "pl:fetch" do
-    Pkg::MSI.sign unless Dir['pkg/**/*.msi'].empty?
+    Pkg::Sign.sign_msi unless Dir['pkg/**/*.msi'].empty?
   end
 
   ##

@@ -100,7 +100,7 @@ namespace :pl do
   desc "Sign ips package, uses PL certificates by default, update privatekey_pem, certificate_pem, and ips_inter_cert in build_defaults.yaml to override."
   task :sign_ips do
     fail "No p5p packages found. Did you retrieve?" if Dir['pkg/**/*.p5p'].empty?
-    Pkg::IPS.sign
+    Pkg::Sign.sign_ips
   end
 
   desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
@@ -145,13 +145,13 @@ namespace :pl do
   desc "Sign OSX packages"
   task :sign_osx => "pl:fetch" do
     fail "No dmgs found. Did you retrieve?" if Dir['pkg/**/*.dmg'].empty?
-    Pkg::OSX.sign
+    Pkg::Sign.sign_osx
   end
 
   desc "Sign MSI packages"
   task :sign_msi => "pl:fetch" do
     fail "No msis found. Did you retrieve?" if Dir['pkg/**/*.msi'].empty?
-    Pkg::MSI.sign
+    Pkg::Sign.sign_msi
   end
 
   ##

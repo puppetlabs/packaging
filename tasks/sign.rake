@@ -105,7 +105,7 @@ namespace :pl do
 
   desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_gem do
-    gems = FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"]
+    gems = FileList["pkg/*.gem"]
     fail "No gems found. Did you retrieve?" if gems.empty?
     gems.each do |gem|
       puts "signing gem #{gem}"

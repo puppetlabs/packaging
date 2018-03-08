@@ -101,13 +101,12 @@ namespace :pl do
     Pkg::Sign::Ips.sign unless Dir['pkg/**/*.p5p'].empty?
   end
 
-  if Pkg::Config.build_gem
-    desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
-    task :sign_gem do
-      FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |gem|
-        puts "signing gem #{gem}"
-        Pkg::Util::Gpg.sign_file(gem)
-      end
+  desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
+  task :sign_gem do
+    gems = FileList["pkg/*.gem"]
+    gems.each do |gem|
+      puts "signing gem #{gem}"
+      Pkg::Util::Gpg.sign_file(gem)
     end
   end
 

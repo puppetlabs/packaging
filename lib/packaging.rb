@@ -12,14 +12,12 @@ module Pkg
   require 'packaging/tar'
   require 'packaging/deb'
   require 'packaging/rpm'
-  require 'packaging/osx'
-  require 'packaging/ips'
   require 'packaging/nuget'
   require 'packaging/gem'
-  require 'packaging/msi'
   require 'packaging/repo'
   require 'packaging/artifactory'
   require 'packaging/retrieve'
+  require 'packaging/sign'
 
   # Load configuration defaults
   Pkg::Config.load_defaults

@@ -59,13 +59,13 @@ module Pkg::Retrieve
     end
   end
 
-  def retrieve_all(build_url, rsync_path, remote_target, local_target)
+  def retrieve_all(build_url, rsync_path, local_target)
     if Pkg::Util::Tool.find_tool("wget")
-      default_wget(local_target, "#{build_url}/#{remote_target}/")
+      default_wget(local_target, build_url)
     else
       warn "Could not find `wget` tool. Falling back to rsyncing from #{Pkg::Config.distribution_server}."
       begin
-        Pkg::Util::Net.rsync_from("#{rsync_path}/#{remote_target}/", Pkg::Config.distribution_server, "#{local_target}/")
+        Pkg::Util::Net.rsync_from(rsync_path, Pkg::Config.distribution_server, "#{local_target}/")
       rescue => e
         fail "Couldn't rsync packages from distribution server.\n#{e}"
       end

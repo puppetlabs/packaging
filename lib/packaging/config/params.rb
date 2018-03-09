@@ -134,6 +134,7 @@ module Pkg::Params
                   :packaging_url,
                   :pbuild_conf,
                   :pe_feature_branch,
+                  :pe_release_branch,
                   :pe_name,
                   :pe_platforms,
                   :pe_version,
@@ -320,6 +321,7 @@ module Pkg::Params
               { :var => :msi_signing_cert,        :val => '$MSI_SIGNING_CERT' },
               { :var => :msi_signing_cert_pw,     :val => '$MSI_SIGNING_CERT_PW' },
               { :var => :pe_feature_branch,       :val => false },
+              { :var => :pe_release_branch,       :val => false },
               { :var => :s3_ship,                 :val => false },
               { :var => :apt_releases,            :val => Pkg::Platforms.codenames }]
 

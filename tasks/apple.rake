@@ -86,6 +86,7 @@ end
 def build_dmg
   # Local Variables
   dmg_format_code   = 'UDZO'
+  dmg_filesystem    = 'HFS+'
   zlib_level        = '9'
   dmg_format_option = "-imagekey zlib-level=#{zlib_level}"
   dmg_format        = "#{dmg_format_code} #{dmg_format_option}"
@@ -108,6 +109,7 @@ def build_dmg
     -uid 99 \
     -gid 99 \
     -ov \
+    -fs #{dmg_filesystem} \
     -format #{dmg_format} \
     #{dmg_file}")
 

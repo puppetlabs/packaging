@@ -24,7 +24,7 @@ namespace :pl do
       else
         Pkg::Retrieve.retrieve_all(build_url, build_path, local_target)
       end
-      fail "Uh oh, looks like we didn't find anything to retrieve from #{build_url}!" if Dir["#{local_target}/*"].empty?
+      fail "Uh oh, looks like we didn't find anything in #{local_target} when attempting to retrieve from #{build_url}!" if Dir["#{local_target}/*"].empty?
       puts "Packages staged in #{local_target}"
     end
   end

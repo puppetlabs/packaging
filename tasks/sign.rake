@@ -2,9 +2,11 @@ namespace :pl do
   desc "Sign the tarball, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_tar do
     unless Pkg::Config.vanagon_project
-      File.exist?("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz") or fail "No tarball exists. Try rake package:tar?"
+      tarballs_to_sign = Pkg::Util::Ship.collect_packages(['pkg/*.tar.gz'], ['signing_bundle', 'packaging-bundle'])
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-      Pkg::Util::Gpg.sign_file "pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"
+      tarballs_to_sign.each do |file|
+        Pkg::Util::Gpg.sign_file file
+      end
     end
   end
 
@@ -99,13 +101,12 @@ namespace :pl do
     Pkg::Sign::Ips.sign unless Dir['pkg/**/*.p5p'].empty?
   end
 
-  if Pkg::Config.build_gem
-    desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
-    task :sign_gem do
-      FileList["pkg/#{Pkg::Config.gem_name}-#{Pkg::Config.gemversion}*.gem"].each do |gem|
-        puts "signing gem #{gem}"
-        Pkg::Util::Gpg.sign_file(gem)
-      end
+  desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
+  task :sign_gem do
+    gems = FileList["pkg/*.gem"]
+    gems.each do |gem|
+      puts "signing gem #{gem}"
+      Pkg::Util::Gpg.sign_file(gem)
     end
   end
 
@@ -170,7 +171,8 @@ namespace :pl do
       signing_bundle = ENV['SIGNING_BUNDLE']
       rpm_sign_task = Pkg::Config.build_pe ? "pe:sign_rpms" : "pl:sign_rpms"
       deb_sign_task = Pkg::Config.build_pe ? "pe:sign_deb_changes" : "pl:sign_deb_changes"
-      sign_tasks    = [rpm_sign_task, deb_sign_task]
+      sign_tasks    = [rpm_sign_task]
+      sign_tasks    << deb_sign_task unless Dir['pkg/**/*.changes'].empty?
       sign_tasks    << "pl:sign_tar" if Pkg::Config.build_tar
       sign_tasks    << "pl:sign_gem" if Pkg::Config.build_gem
       sign_tasks    << "pl:sign_osx" if Pkg::Config.build_dmg || Pkg::Config.vanagon_project

@@ -41,6 +41,14 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
    find anything we unintentionally broke, please open a ticket
    [here](https://tickets.puppetlabs.com/browse/CPR).
 
+## [0.6.3] - 2018-02-14
+### Fixed
+ - Use `Pkg::Util::RakeUtils.invoke_task` instead of the deprecated `invoke_task`.
+
+### Added
+ - Added support for macOS 10.13 (High Sierra) and Fedora 27 to the
+   `PLATFORM_INFO` hash.
+
 ## [0.6.2] - 2018-01-09
 ### Changed
  - Don't generate repo configs for AIX since AIX doesn't support yum.

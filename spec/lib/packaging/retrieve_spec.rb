@@ -17,8 +17,8 @@ describe 'Pkg::Retrieve' do
     'ubuntu-16.04-amd64' => {:artifact => './deb/xenial/PC1/puppet-agent_5.3.2.155.gb25e649-1xenial_amd64.deb'},
     'windows-2012-x64' => {:artifact => './windows/puppet-agent-x64.msi'},
   }}
-  build_url = "builds.delivery.puppetlabs.net/#{project}/#{ref}"
-  build_path = "/opt/jenkins-builds/#{project}/#{ref}"
+  build_url = "builds.delivery.puppetlabs.net/#{project}/#{ref}/#{remote_target}"
+  build_path = "/opt/jenkins-builds/#{project}/#{ref}/#{remote_target}"
 
   before :each do
     allow(Pkg::Config).to receive(:project).and_return(project)
@@ -86,13 +86,13 @@ describe 'Pkg::Retrieve' do
   describe '#retrieve_all' do
     it 'should try to use wget first' do
       expect(Pkg::Retrieve).to receive(:default_wget)
-      Pkg::Retrieve.retrieve_all(build_url, build_path, remote_target, local_target)
+      Pkg::Retrieve.retrieve_all(build_url, build_path, local_target)
     end
 
     it 'should use rsync if wget is not found' do
       allow(Pkg::Util::Tool).to receive(:find_tool).with('wget').and_return(nil)
       expect(Pkg::Util::Net).to receive(:rsync_from)
-      Pkg::Retrieve.retrieve_all(build_url, build_path, remote_target, local_target)
+      Pkg::Retrieve.retrieve_all(build_url, build_path, local_target)
     end
   end
 end

@@ -17,12 +17,12 @@ namespace :pl do
       remote_target = args.remote_target || "artifacts"
       local_target = args.local_target || "pkg"
       mkdir_p local_target
-      build_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{remote_target}"
-      build_path = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{remote_target}"
+      build_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
+      build_path = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
       if Pkg::Config.foss_only
         Pkg::Retrieve.foss_only_retrieve(build_url, local_target)
       else
-        Pkg::Retrieve.retrieve_all(build_url, build_path, local_target)
+        Pkg::Retrieve.retrieve_all(build_url, build_path, remote_target, local_target)
       end
       fail "Uh oh, looks like we didn't find anything to retrieve from #{build_url}!" if Dir["#{local_target}/*"].empty?
       puts "Packages staged in #{local_target}"
@@ -37,9 +37,9 @@ if Pkg::Config.build_pe
       task :retrieve, [:remote_target, :local_target] => 'pl:fetch' do |t, args|
         remote_target = args.remote_target || "artifacts"
         local_target = args.local_target || "pkg"
-        build_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{remote_target}"
-        build_path = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{remote_target}"
-        Pkg::Retrieve.retrieve_all(build_url, build_path, local_target)
+        build_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
+        build_path = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
+        Pkg::Retrieve.retrieve_all(build_url, build_path, remote_target, local_target)
       end
     end
   end

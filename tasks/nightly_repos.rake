@@ -42,9 +42,9 @@ DOC
       Pkg::Rpm::Repo.create_local_repos('repos')
       Pkg::Rpm::Repo.sign_repos('repos')
       Pkg::Deb::Repo.sign_repos('repos', 'Apt repository for signed builds')
-      Pkg::Sign.sign_osx('repos') unless Dir['repos/apple/**/*.dmg'].empty?
-      Pkg::Sign.sign_ips('repos') unless Dir['repos/solaris/11/**/*.p5p'].empty?
-      Pkg::Sign.sign_msi('repos') unless Dir['repos/windows/**/*.msi'].empty?
+      Pkg::Sign::Dmg.sign('repos') unless Dir['repos/apple/**/*.dmg'].empty?
+      Pkg::Sign::Ips.sign('repos') unless Dir['repos/solaris/11/**/*.p5p'].empty?
+      Pkg::Sign::Msi.sign('repos') unless Dir['repos/windows/**/*.msi'].empty?
     end
 
     task :ship_signed_repos, [:target_prefix] => "pl:fetch" do |t, args|

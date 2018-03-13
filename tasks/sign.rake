@@ -75,12 +75,12 @@ namespace :pl do
 
     unless v3_rpms.empty?
       puts "Signing old rpms..."
-      Pkg::Sign.sign_legacy_rpm(v3_rpms.join(' '))
+      Pkg::Sign::Rpm.legacy_sign(v3_rpms.join(' '))
     end
 
     unless v4_rpms.empty?
       puts "Signing modern rpms..."
-      Pkg::Sign.sign_rpm(v4_rpms.join(' '))
+      Pkg::Sign::Rpm.sign(v4_rpms.join(' '))
     end
 
     # Using the map of paths to basenames, we re-hardlink the rpms we deleted.
@@ -98,7 +98,7 @@ namespace :pl do
 
   desc "Sign ips package, uses PL certificates by default, update privatekey_pem, certificate_pem, and ips_inter_cert in build_defaults.yaml to override."
   task :sign_ips do
-    Pkg::Sign.sign_ips unless Dir['pkg/**/*.p5p'].empty?
+    Pkg::Sign::Ips.sign unless Dir['pkg/**/*.p5p'].empty?
   end
 
   desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
@@ -116,7 +116,7 @@ namespace :pl do
     rpms = Dir["pkg/**/*.rpm"]
     print 'Checking rpm signatures'
     rpms.each do |rpm|
-      if Pkg::Sign.rpm_has_sig rpm
+      if Pkg::Sign::Rpm.has_sig? rpm
         print '.'
       else
         puts "#{rpm} is unsigned."
@@ -133,7 +133,7 @@ namespace :pl do
       change_files = Dir["pkg/**/*.changes"]
       unless change_files.empty?
         Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-        Pkg::Sign.sign_deb_changes("pkg/**/*.changes")
+        Pkg::Sign::Deb.sign_changes("pkg/**/*.changes")
       end
     ensure
       Pkg::Util::Gpg.kill_keychain
@@ -142,12 +142,12 @@ namespace :pl do
 
   desc "Sign OSX packages"
   task :sign_osx => "pl:fetch" do
-    Pkg::Sign.sign_osx unless Dir['pkg/**/*.dmg'].empty?
+    Pkg::Sign::Dmg.sign unless Dir['pkg/**/*.dmg'].empty?
   end
 
   desc "Sign MSI packages"
   task :sign_msi => "pl:fetch" do
-    Pkg::Sign.sign_msi unless Dir['pkg/**/*.msi'].empty?
+    Pkg::Sign::Msi.sign unless Dir['pkg/**/*.msi'].empty?
   end
 
   ##

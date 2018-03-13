@@ -48,24 +48,24 @@ module Pkg::Retrieve
     unless Pkg::Config.foss_platforms
       fail "FOSS_ONLY specified, but I don't know anything about FOSS_PLATFORMS. Retrieve cancelled."
     end
-    default_wget(local_target, "#{build_url}", { 'level' => 1 })
+    default_wget(local_target, "#{build_url}/artifacts/", { 'level' => 1 })
     yaml_path = File.join(local_target, "#{Pkg::Config.ref}.yaml")
     unless File.readable?(yaml_path)
       fail "Couldn't read #{Pkg::Config.ref}.yaml, which is necessary for FOSS_ONLY. Retrieve cancelled."
     end
     platform_data = Pkg::Util::Serialization.load_yaml(yaml_path)[:platform_data]
     platform_data.each do |platform, paths|
-      default_wget(local_target, "#{build_url}/#{paths[:artifact]}") if Pkg::Config.foss_platforms.include?(platform)
+      default_wget(local_target, "#{build_url}/artifacts/#{paths[:artifact]}") if Pkg::Config.foss_platforms.include?(platform)
     end
   end
 
-  def retrieve_all(build_url, rsync_path, local_target)
+  def retrieve_all(build_url, rsync_path, remote_target, local_target)
     if Pkg::Util::Tool.find_tool("wget")
-      default_wget(local_target, build_url)
+      default_wget(local_target, "#{build_url}/#{remote_target}/")
     else
       warn "Could not find `wget` tool. Falling back to rsyncing from #{Pkg::Config.distribution_server}."
       begin
-        Pkg::Util::Net.rsync_from(rsync_path, Pkg::Config.distribution_server, "#{local_target}/")
+        Pkg::Util::Net.rsync_from("#{rsync_path}/#{remote_target}/", Pkg::Config.distribution_server, "#{local_target}/")
       rescue => e
         fail "Couldn't rsync packages from distribution server.\n#{e}"
       end

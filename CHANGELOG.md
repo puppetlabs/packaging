@@ -3,6 +3,30 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.3] - 2018-03-15
+### Added
+ - Initial support added for Puppet Enterprise release branches.
+
+### Fixed
+ - (CPR-521) When building dmgs, explicitly set the filesystem type to 'HFS+'.
+ - Some maintenance and cleanup of repository update logic.
+ - No longer sign noarch packages multiple times.
+ - Only link noarch packages to supported and tested architecture directories.
+ - Only update the repository we're shipping to during yum repository updates.
+ - Some maintenance and cleanup of package shipping logic.
+ - Some maintenance and cleanup of package signing logic.
+ - Some maintenance and cleanup of package retrieval logic.
+ - Update `sign_tar` to sign all retrieved tarballs, not only tarballs for final
+   tagged versions.
+ - Update `sign_gem` to sign all retrieved gems, not only gems for final tagged
+   versions of the expected project name. This is helpful if a single project
+   creates multiple gems.
+ - Fail explicitly if the package signing commands fail.
+
+### Changed
+ - Updated to new Solaris 11 signing certs.
+
 ## [0.99.2] - 2018-02-14
 ### Fixed
  - `FOSS_ONLY` mode was failing to fetch source tarballs.
@@ -98,7 +122,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.2...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.3...HEAD
+[0.99.3]: https://github.com/puppetlabs/packaging/compare/0.99.2...0.99.3
 [0.99.2]: https://github.com/puppetlabs/packaging/compare/0.99.1...0.99.2
 [0.99.1]: https://github.com/puppetlabs/packaging/compare/0.99.0...0.99.1
 [0.99.0]: https://github.com/puppetlabs/packaging/compare/0.6.2...0.99.0

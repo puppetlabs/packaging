@@ -22,6 +22,7 @@ module Pkg
         '7' => { :codename => 'wheezy', :architectures  => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
         '8' => { :codename => 'jessie', :architectures  => ['i386', 'amd64', 'powerpc'], :repo => true, :package_format => 'deb', },
         '9' => { :codename => 'stretch', :architectures  => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
+        '10' => { :codename => 'buster', :architectures  => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
       },
 
       'el' => {
@@ -38,9 +39,11 @@ module Pkg
         'f25' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
         'f26' => { :architectures => ['x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
         'f27' => { :architectures => ['x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
+        'f28' => { :architectures => ['x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
         '25' => { :architectures => ['i386', 'x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
         '26' => { :architectures => ['x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
         '27' => { :architectures => ['x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
+        '28' => { :architectures => ['x86_64'], :repo => true, :package_format => 'rpm', :signature_format => 'v4', },
       },
 
       'osx' => {
@@ -63,6 +66,7 @@ module Pkg
       'ubuntu' => {
         '14.04' => { :codename => 'trusty', :architectures => ['i386', 'amd64'], :repo => true, :package_format => 'deb', },
         '16.04' => { :codename => 'xenial', :architectures => ['i386', 'amd64', 'ppc64el'], :repo => true, :package_format => 'deb', },
+        '18.04' => { :codename => 'bionic', :architectures => ['amd64', 'ppc64el'], :repo => true, :package_format => 'deb', },
       },
 
       'windows' => {

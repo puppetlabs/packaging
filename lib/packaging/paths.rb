@@ -79,6 +79,20 @@ module Pkg::Paths
     repo_name !~ /^puppet/
   end
 
+  # Method to determine the yum repo name. Maintains compatibility with legacy
+  # projects, where `Pkg::Config.yum_repo_name` is set instead of
+  # `Pkg::Config.repo_name`. Defaults to 'products' if nothing is set.
+  def yum_repo_name
+    return Pkg::Config.repo_name || Pkg::Config.yum_repo_name || 'products'
+  end
+
+  # Method to determine the apt repo name. Maintains compatibility with legacy
+  # projects, where `Pkg::Config.apt_repo_name` is set instead of
+  # `Pkg::Config.repo_name`. Defaults to 'main' if nothing is set.
+  def apt_repo_name
+    return Pkg::Config.repo_name || Pkg::Config.apt_repo_name || 'main'
+  end
+
   def link_name
     if Pkg::Util::Version.final?
       Pkg::Config.repo_link_target || nil
@@ -101,10 +115,10 @@ module Pkg::Paths
 
     case package_format
     when 'rpm'
-      if is_legacy_repo?(repo_name)
-        [File.join(path_prefix, platform, version, repo_name), nil]
+      if is_legacy_repo?(yum_repo_name)
+        [File.join(path_prefix, platform, version, yum_repo_name), nil]
       else
-        [File.join(path_prefix, repo_name), link_name.nil? ? nil : File.join(path_prefix, link_name)]
+        [File.join(path_prefix, yum_repo_name), link_name.nil? ? nil : File.join(path_prefix, link_name)]
       end
     when 'swix'
       if is_legacy_repo?(repo_name)
@@ -113,7 +127,7 @@ module Pkg::Paths
         [File.join(path_prefix, platform, repo_name), link_name.nil? ? nil : File.join(path_prefix, platform, link_name)]
       end
     when 'deb'
-      [File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), repo_name),
+      [File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), apt_repo_name),
        link_name.nil? ? nil : File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), link_name)]
     when 'svr4', 'ips'
       if is_legacy_repo?(repo_name)
@@ -153,7 +167,7 @@ module Pkg::Paths
 
     case package_format
     when 'rpm'
-      if is_legacy_repo?(repo_name)
+      if is_legacy_repo?(yum_repo_name)
         File.join(base_path, architecture)
       else
         File.join(base_path, platform, version, architecture)

@@ -10,7 +10,7 @@ namespace :pl do
       command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository/Rakefile mk_repo'
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       if Pkg::Util.ask_yes_or_no
-        Pkg::Repo.update_repo(Pkg::Config.yum_staging_server, command, { :repo_name => Pkg::Config.repo_name, :repo_path => Pkg::Config.yum_repo_path, :repo_host => Pkg::Config.yum_staging_server })
+        Pkg::Repo.update_repo(Pkg::Config.yum_staging_server, command, { :repo_name => Pkg::Paths.yum_repo_name, :repo_path => Pkg::Config.yum_repo_path, :repo_host => Pkg::Config.yum_staging_server })
       end
     end
 
@@ -47,7 +47,7 @@ namespace :pl do
     task update_apt_repo: 'pl:fetch' do
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
       if Pkg::Util.ask_yes_or_no
-        Pkg::Repo.update_repo(Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_command, { :repo_name => Pkg::Config.repo_name, :repo_path => Pkg::Config.apt_repo_path, :repo_host => Pkg::Config.apt_host, :repo_url => Pkg::Config.apt_repo_url })
+        Pkg::Repo.update_repo(Pkg::Config.apt_signing_server, Pkg::Config.apt_repo_command, { :repo_name => Pkg::Paths.apt_repo_name, :repo_path => Pkg::Config.apt_repo_path, :repo_host => Pkg::Config.apt_host, :repo_url => Pkg::Config.apt_repo_url })
       end
     end
 

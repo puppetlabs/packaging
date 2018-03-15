@@ -150,4 +150,30 @@ describe 'Pkg::Paths' do
       end
     end
   end
+
+  describe '#is_legacy_repo?' do
+    it 'returns true for empty strings' do
+      expect(Pkg::Paths.is_legacy_repo?('')).to be_true
+    end
+
+    it 'returns true for PC1' do
+      expect(Pkg::Paths.is_legacy_repo?('PC1')).to be_true
+    end
+
+    it 'returns true for foopuppetbar' do
+      expect(Pkg::Paths.is_legacy_repo?('foopuppetbar')).to be_true
+    end
+
+    it 'returns false for puppet5' do
+      expect(Pkg::Paths.is_legacy_repo?('puppet5')).to be_false
+    end
+
+    it 'returns false for puppet8-nightly' do
+      expect(Pkg::Paths.is_legacy_repo?('puppet8-nightly')).to be_false
+    end
+
+    it 'returns false for puppet' do
+      expect(Pkg::Paths.is_legacy_repo?('puppet')).to be_false
+    end
+  end
 end

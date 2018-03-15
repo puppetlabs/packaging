@@ -70,6 +70,15 @@ module Pkg::Paths
     end
   end
 
+  # Method to determine if files should be shipped to legacy or current path
+  # structures. Any repo name matching /^puppet/ is a current repo, everything
+  # else is should be shipped to legacy paths.
+  #
+  # @param repo_name The repo name to check
+  def is_legacy_repo?(repo_name)
+    repo_name !~ /^puppet/
+  end
+
   def link_name
     if Pkg::Util::Version.final?
       Pkg::Config.repo_link_target || nil
@@ -92,13 +101,13 @@ module Pkg::Paths
 
     case package_format
     when 'rpm'
-      if repo_name == 'PC1'
+      if is_legacy_repo?(repo_name)
         [File.join(path_prefix, platform, version, repo_name), nil]
       else
         [File.join(path_prefix, repo_name), link_name.nil? ? nil : File.join(path_prefix, link_name)]
       end
     when 'swix'
-      if repo_name == 'PC1'
+      if is_legacy_repo?(repo_name)
         [File.join(path_prefix, platform, version, repo_name), nil]
       else
         [File.join(path_prefix, platform, repo_name), link_name.nil? ? nil : File.join(path_prefix, platform, link_name)]
@@ -107,19 +116,19 @@ module Pkg::Paths
       [File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), repo_name),
        link_name.nil? ? nil : File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), link_name)]
     when 'svr4', 'ips'
-      if repo_name == 'PC1'
+      if is_legacy_repo?(repo_name)
         [File.join(path_prefix, 'solaris', repo_name, version), nil]
       else
         [File.join(path_prefix, 'solaris', repo_name), link_name.nil? ? nil : File.join(path_prefix, 'solaris', link_name)]
       end
     when 'dmg'
-      if repo_name == 'PC1'
+      if is_legacy_repo?(repo_name)
         [File.join(path_prefix, 'mac', version, repo_name), nil]
       else
         [File.join(path_prefix, 'mac', repo_name), link_name.nil? ? nil : File.join(path_prefix, 'mac', link_name)]
       end
     when 'msi'
-      if repo_name == 'PC1'
+      if is_legacy_repo?(repo_name)
         [File.join(path_prefix, 'windows'), nil]
       else
         [File.join(path_prefix, 'windows', repo_name), link_name.nil? ? nil : File.join(path_prefix, 'windows', link_name)]
@@ -144,13 +153,13 @@ module Pkg::Paths
 
     case package_format
     when 'rpm'
-      if repo_name == 'PC1'
+      if is_legacy_repo?(repo_name)
         File.join(base_path, architecture)
       else
         File.join(base_path, platform, version, architecture)
       end
     when 'swix'
-      if repo_name == 'PC1'
+      if is_legacy_repo?(repo_name)
         File.join(base_path, architecture)
       else
         File.join(base_path, version, architecture)
@@ -158,13 +167,13 @@ module Pkg::Paths
     when 'deb'
       base_path
     when 'svr4', 'ips'
-      if repo_name == 'PC1'
+      if is_legacy_repo?(repo_name)
         base_path
       else
         File.join(base_path, version)
       end
     when 'dmg'
-      if repo_name == 'PC1'
+      if is_legacy_repo?(repo_name)
         File.join(base_path, architecture)
       else
         File.join(base_path, version, architecture)

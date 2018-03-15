@@ -65,6 +65,16 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
    find anything we unintentionally broke, please open a ticket
    [here](https://tickets.puppetlabs.com/browse/CPR).
 
+## [0.6.4] - 2018-03-14
+### Added
+ - Initial support added for Puppet Enterprise release branches.
+
+### Fixed
+ - (CPR-521) When building dmgs, explicitly set the filesystem type to 'HFS+'.
+
+### Changed
+ - Updated to new Solaris 11 signing certs.
+
 ## [0.6.3] - 2018-02-14
 ### Fixed
  - Use `Pkg::Util::RakeUtils.invoke_task` instead of the deprecated `invoke_task`.
@@ -127,6 +137,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 [0.99.2]: https://github.com/puppetlabs/packaging/compare/0.99.1...0.99.2
 [0.99.1]: https://github.com/puppetlabs/packaging/compare/0.99.0...0.99.1
 [0.99.0]: https://github.com/puppetlabs/packaging/compare/0.6.2...0.99.0
+[0.6.4]: https://github.com/puppetlabs/packaging/compare/0.6.3...0.6.4
+[0.6.3]: https://github.com/puppetlabs/packaging/compare/0.6.2...0.6.3
 [0.6.2]: https://github.com/puppetlabs/packaging/compare/0.6.1...0.6.2
 [0.6.1]: https://github.com/puppetlabs/packaging/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/puppetlabs/packaging/compare/0.5.0...0.6.0

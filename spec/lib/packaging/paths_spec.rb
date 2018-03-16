@@ -93,7 +93,7 @@ describe 'Pkg::Paths' do
 
   describe '#artifacts_path' do
     before :each do
-      allow(Pkg::Paths).to receive(:repo_name).and_return('puppet5')
+      allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
     end
 
     it 'should be correct for el7' do
@@ -125,7 +125,7 @@ describe 'Pkg::Paths' do
 
   describe '#repo_path' do
     before :each do
-      allow(Pkg::Paths).to receive(:repo_name).and_return('puppet5')
+      allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
     end
 
     it 'should be correct' do
@@ -148,6 +148,72 @@ describe 'Pkg::Paths' do
       Pkg::Platforms.platform_tags.each do |tag|
         expect { Pkg::Paths.repo_config_path(tag) }.not_to raise_error
       end
+    end
+  end
+
+  describe '#apt_repo_name' do
+    it 'should return `Pkg::Config.repo_name` if set' do
+      allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
+      allow(Pkg::Config).to receive(:apt_repo_name).and_return('PC1')
+      expect(Pkg::Paths.apt_repo_name).to eq('puppet5')
+    end
+
+    it 'should return `Pkg::Config.apt_repo_name` if `Pkg::Config.repo_name` is not set' do
+      allow(Pkg::Config).to receive(:repo_name).and_return(nil)
+      allow(Pkg::Config).to receive(:apt_repo_name).and_return('PC1')
+      expect(Pkg::Paths.apt_repo_name).to eq('PC1')
+    end
+
+    it 'should return \'main\' if nothing is set' do
+      allow(Pkg::Config).to receive(:repo_name).and_return(nil)
+      allow(Pkg::Config).to receive(:apt_repo_name).and_return(nil)
+      expect(Pkg::Paths.apt_repo_name).to eq('main')
+    end
+  end
+
+  describe '#yum_repo_name' do
+    it 'should return `Pkg::Config.repo_name` if set' do
+      allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
+      allow(Pkg::Config).to receive(:yum_repo_name).and_return('PC1')
+      expect(Pkg::Paths.yum_repo_name).to eq('puppet5')
+    end
+
+    it 'should return `Pkg::Config.yum_repo_name` if `Pkg::Config.repo_name` is not set' do
+      allow(Pkg::Config).to receive(:repo_name).and_return(nil)
+      allow(Pkg::Config).to receive(:yum_repo_name).and_return('PC1')
+      expect(Pkg::Paths.yum_repo_name).to eq('PC1')
+    end
+
+    it 'should return \'products\' if nothing is set' do
+      allow(Pkg::Config).to receive(:repo_name).and_return(nil)
+      allow(Pkg::Config).to receive(:yum_repo_name).and_return(nil)
+      expect(Pkg::Paths.yum_repo_name).to eq('products')
+    end
+  end
+
+  describe '#is_legacy_repo?' do
+    it 'returns true for empty strings' do
+      expect(Pkg::Paths.is_legacy_repo?('')).to be_true
+    end
+
+    it 'returns true for PC1' do
+      expect(Pkg::Paths.is_legacy_repo?('PC1')).to be_true
+    end
+
+    it 'returns true for foopuppetbar' do
+      expect(Pkg::Paths.is_legacy_repo?('foopuppetbar')).to be_true
+    end
+
+    it 'returns false for puppet5' do
+      expect(Pkg::Paths.is_legacy_repo?('puppet5')).to be_false
+    end
+
+    it 'returns false for puppet8-nightly' do
+      expect(Pkg::Paths.is_legacy_repo?('puppet8-nightly')).to be_false
+    end
+
+    it 'returns false for puppet' do
+      expect(Pkg::Paths.is_legacy_repo?('puppet')).to be_false
     end
   end
 end

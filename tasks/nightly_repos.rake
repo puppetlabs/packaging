@@ -205,7 +205,7 @@ DOC
 
       if args.foss_only && Pkg::Config.foss_platforms && !Pkg::Config.foss_platforms.empty?
         Pkg::Config.foss_platforms.each do |platform|
-          include_paths << Pkg::Paths.repo_path(platform, legacy: true)
+          include_paths << Pkg::Paths.repo_path(platform, legacy: true, nonfinal: true)
           if Pkg::Paths.repo_config_path(platform)
             include_paths << Pkg::Paths.repo_config_path(platform)
           end

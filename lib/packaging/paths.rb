@@ -58,15 +58,11 @@ module Pkg::Paths
   # shipped to the development/beta/non-final repo, if there is one defined.
   # Otherwise, default to the final repo name. We use this for more than just
   # shipping to the final repos, so we need this to not fail.
-  def repo_name
-    if Pkg::Util::Version.final?
-      Pkg::Config.repo_name || ""
+  def repo_name(nonfinal = false)
+    if nonfinal && Pkg::Config.nonfinal_repo_name
+      Pkg::Config.nonfinal_repo_name
     else
-      if Pkg::Config.nonfinal_repo_name
-        Pkg::Config.nonfinal_repo_name
-      else
-        Pkg::Config.repo_name || ""
-      end
+      Pkg::Config.repo_name || ""
     end
   end
 
@@ -82,14 +78,22 @@ module Pkg::Paths
   # Method to determine the yum repo name. Maintains compatibility with legacy
   # projects, where `Pkg::Config.yum_repo_name` is set instead of
   # `Pkg::Config.repo_name`. Defaults to 'products' if nothing is set.
-  def yum_repo_name
+  def yum_repo_name(nonfinal = false)
+    if nonfinal
+      return Pkg::Config.nonfinal_repo_name || Pkg::Config.repo_name || Pkg::Config.yum_repo_name || 'products'
+    end
+
     return Pkg::Config.repo_name || Pkg::Config.yum_repo_name || 'products'
   end
 
   # Method to determine the apt repo name. Maintains compatibility with legacy
   # projects, where `Pkg::Config.apt_repo_name` is set instead of
   # `Pkg::Config.repo_name`. Defaults to 'main' if nothing is set.
-  def apt_repo_name
+  def apt_repo_name(nonfinal = false)
+    if nonfinal
+      return Pkg::Config.nonfinal_repo_name || Pkg::Config.repo_name || Pkg::Config.apt_repo_name || 'main'
+    end
+
     return Pkg::Config.repo_name || Pkg::Config.apt_repo_name || 'main'
   end
 
@@ -109,43 +113,43 @@ module Pkg::Paths
   # (2016.4) is EOL'd. Hopefully also we do not choose to further change these
   # path structures, as it is no bueno.
   # --MAS 2017-08-16
-  def artifacts_base_path_and_link_path(platform_tag, path_prefix = 'artifacts')
+  def artifacts_base_path_and_link_path(platform_tag, path_prefix = 'artifacts', nonfinal = false)
     platform, version, architecture = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
 
     case package_format
     when 'rpm'
-      if is_legacy_repo?(yum_repo_name)
-        [File.join(path_prefix, platform, version, yum_repo_name), nil]
+      if is_legacy_repo?(yum_repo_name(nonfinal))
+        [File.join(path_prefix, platform, version, yum_repo_name(nonfinal)), nil]
       else
-        [File.join(path_prefix, yum_repo_name), link_name.nil? ? nil : File.join(path_prefix, link_name)]
+        [File.join(path_prefix, yum_repo_name(nonfinal)), link_name.nil? ? nil : File.join(path_prefix, link_name)]
       end
     when 'swix'
-      if is_legacy_repo?(repo_name)
-        [File.join(path_prefix, platform, version, repo_name), nil]
+      if is_legacy_repo?(repo_name(nonfinal))
+        [File.join(path_prefix, platform, version, repo_name(nonfinal)), nil]
       else
-        [File.join(path_prefix, platform, repo_name), link_name.nil? ? nil : File.join(path_prefix, platform, link_name)]
+        [File.join(path_prefix, platform, repo_name(nonfinal)), link_name.nil? ? nil : File.join(path_prefix, platform, link_name)]
       end
     when 'deb'
-      [File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), apt_repo_name),
+      [File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), apt_repo_name(nonfinal)),
        link_name.nil? ? nil : File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), link_name)]
     when 'svr4', 'ips'
-      if is_legacy_repo?(repo_name)
-        [File.join(path_prefix, 'solaris', repo_name, version), nil]
+      if is_legacy_repo?(repo_name(nonfinal))
+        [File.join(path_prefix, 'solaris', repo_name(nonfinal), version), nil]
       else
-        [File.join(path_prefix, 'solaris', repo_name), link_name.nil? ? nil : File.join(path_prefix, 'solaris', link_name)]
+        [File.join(path_prefix, 'solaris', repo_name(nonfinal)), link_name.nil? ? nil : File.join(path_prefix, 'solaris', link_name)]
       end
     when 'dmg'
-      if is_legacy_repo?(repo_name)
-        [File.join(path_prefix, 'mac', version, repo_name), nil]
+      if is_legacy_repo?(repo_name(nonfinal))
+        [File.join(path_prefix, 'mac', version, repo_name(nonfinal)), nil]
       else
-        [File.join(path_prefix, 'mac', repo_name), link_name.nil? ? nil : File.join(path_prefix, 'mac', link_name)]
+        [File.join(path_prefix, 'mac', repo_name(nonfinal)), link_name.nil? ? nil : File.join(path_prefix, 'mac', link_name)]
       end
     when 'msi'
-      if is_legacy_repo?(repo_name)
+      if is_legacy_repo?(repo_name(nonfinal))
         [File.join(path_prefix, 'windows'), nil]
       else
-        [File.join(path_prefix, 'windows', repo_name), link_name.nil? ? nil : File.join(path_prefix, 'windows', link_name)]
+        [File.join(path_prefix, 'windows', repo_name(nonfinal)), link_name.nil? ? nil : File.join(path_prefix, 'windows', link_name)]
       end
     else
       raise "Not sure where to find packages with a package format of '#{package_format}'"
@@ -160,20 +164,20 @@ module Pkg::Paths
   # (2016.4) is EOL'd. Hopefully also we do not choose to further change these
   # path structures, as it is no bueno.
   # --MAS 2017-08-16
-  def artifacts_path(platform_tag, path_prefix = 'artifacts')
-    base_path, _ = artifacts_base_path_and_link_path(platform_tag, path_prefix)
+  def artifacts_path(platform_tag, path_prefix = 'artifacts', nonfinal = false)
+    base_path, _ = artifacts_base_path_and_link_path(platform_tag, path_prefix, nonfinal)
     platform, version, architecture = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
 
     case package_format
     when 'rpm'
-      if is_legacy_repo?(yum_repo_name)
+      if is_legacy_repo?(yum_repo_name(nonfinal))
         File.join(base_path, architecture)
       else
         File.join(base_path, platform, version, architecture)
       end
     when 'swix'
-      if is_legacy_repo?(repo_name)
+      if is_legacy_repo?(repo_name(nonfinal))
         File.join(base_path, architecture)
       else
         File.join(base_path, version, architecture)
@@ -181,13 +185,13 @@ module Pkg::Paths
     when 'deb'
       base_path
     when 'svr4', 'ips'
-      if is_legacy_repo?(repo_name)
+      if is_legacy_repo?(repo_name(nonfinal))
         base_path
       else
         File.join(base_path, version)
       end
     when 'dmg'
-      if is_legacy_repo?(repo_name)
+      if is_legacy_repo?(repo_name(nonfinal))
         File.join(base_path, architecture)
       else
         File.join(base_path, version, architecture)
@@ -199,8 +203,8 @@ module Pkg::Paths
     end
   end
 
-  def repo_path(platform_tag, options = { :legacy => false })
-    repo_target = repo_name
+  def repo_path(platform_tag, options = { :legacy => false, :nonfinal => false })
+    repo_target = repo_name(options[:nonfinal])
     # in legacy packaging methods, there was no consistent way to determine the
     # repo name. There were separate variables for apt_repo_name and
     # yum_repo_name. At times, either or both of these were unset, and they had

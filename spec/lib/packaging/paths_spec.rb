@@ -67,27 +67,23 @@ describe 'Pkg::Paths' do
 
     it 'should return repo_name for final version' do
       allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
-      allow(Pkg::Util::Version).to receive(:final?).and_return(true)
       expect(Pkg::Paths.repo_name).to eq('puppet5')
     end
 
     it 'should be empty string if repo_name is not set for final version' do
       allow(Pkg::Config).to receive(:repo_name).and_return(nil)
-      allow(Pkg::Util::Version).to receive(:final?).and_return(true)
       expect(Pkg::Paths.repo_name).to eq('')
     end
 
     it 'should return nonfinal_repo_name for non-final version' do
       allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return('puppet5-nightly')
-      allow(Pkg::Util::Version).to receive(:final?).and_return(false)
-      expect(Pkg::Paths.repo_name).to eq('puppet5-nightly')
+      expect(Pkg::Paths.repo_name(true)).to eq('puppet5-nightly')
     end
 
     it 'should return repo_name if nonfinal_repo_name is not set for non-final version' do
       allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
       allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nil)
-      allow(Pkg::Util::Version).to receive(:final?).and_return(false)
-      expect(Pkg::Paths.repo_name).to eq('puppet5')
+      expect(Pkg::Paths.repo_name(true)).to eq('puppet5')
     end
   end
 

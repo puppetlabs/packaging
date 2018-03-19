@@ -24,14 +24,14 @@ module Pkg::Util::Ship
   #
   # If this is platform_independent the packages will not get reorganized,
   # just copied under the tmp directory for more consistent workflows
-  def reorganize_packages(pkgs, tmp, platform_independent = false)
+  def reorganize_packages(pkgs, tmp, platform_independent = false, nonfinal = false)
     new_pkgs = []
     pkgs.each do |pkg|
       if platform_independent
         path = 'pkg'
       else
         platform_tag = Pkg::Paths.tag_from_artifact_path(pkg)
-        path = Pkg::Paths.artifacts_path(platform_tag, 'pkg')
+        path = Pkg::Paths.artifacts_path(platform_tag, 'pkg', nonfinal)
       end
       FileUtils.mkdir_p File.join(tmp, path)
       FileUtils.cp pkg, File.join(tmp, path)
@@ -64,7 +64,8 @@ module Pkg::Util::Ship
     options = {
       excludes: [],
       chattr: true,
-      platform_independent: false }.merge(opts)
+      platform_independent: false,
+      nonfinal: false }.merge(opts)
 
     # First find the packages to be shipped. We must find them before moving
     # to our temporary staging directory
@@ -72,7 +73,7 @@ module Pkg::Util::Ship
     return if local_packages.empty?
 
     tmpdir = Dir.mktmpdir
-    staged_pkgs = reorganize_packages(local_packages, tmpdir, options[:platform_independent])
+    staged_pkgs = reorganize_packages(local_packages, tmpdir, options[:platform_independent], options[:nonfinal])
 
     puts staged_pkgs.sort
     puts "Do you want to ship the above files to (#{staging_server})?"

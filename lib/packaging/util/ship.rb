@@ -106,7 +106,7 @@ module Pkg::Util::Ship
   def ship_rpms(local_staging_directory, remote_path, opts = {})
     ship_pkgs(["#{local_staging_directory}/**/*.rpm", "#{local_staging_directory}/**/*.srpm"], Pkg::Config.yum_staging_server, remote_path, opts)
 
-    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('el'), Pkg::Config.yum_staging_server, remote_path)
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('el'), Pkg::Config.yum_staging_server, remote_path, opts[:nonfinal])
   end
 
   def ship_debs(local_staging_directory, remote_path, opts = {})
@@ -119,7 +119,7 @@ module Pkg::Util::Ship
     # architecture for the code name we're working with at the moment. [written
     # by Melissa, copied by Molly]
     Pkg::Platforms.codenames.each do |codename|
-      create_rolling_repo_link(Pkg::Platforms.codename_to_tags(codename)[0], Pkg::Config.apt_signing_server, remote_path)
+      create_rolling_repo_link(Pkg::Platforms.codename_to_tags(codename)[0], Pkg::Config.apt_signing_server, remote_path, opts[:nonfinal])
     end
   end
 
@@ -134,7 +134,7 @@ module Pkg::Util::Ship
   def ship_dmg(local_staging_directory, remote_path, opts = {})
     ship_pkgs(["#{local_staging_directory}/**/*.dmg"], Pkg::Config.dmg_staging_server, remote_path, opts)
 
-    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('osx'), Pkg::Config.dmg_staging_server, remote_path)
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('osx'), Pkg::Config.dmg_staging_server, remote_path, opts[:nonfinal])
 
     Pkg::Platforms.platform_tags_for_package_format('dmg').each do |platform_tag|
       # TODO remove the PC1 links when we no longer need to maintain them
@@ -149,13 +149,13 @@ module Pkg::Util::Ship
   def ship_swix(local_staging_directory, remote_path, opts = {})
     ship_pkgs(["#{local_staging_directory}/**/*.swix"], Pkg::Config.swix_staging_server, remote_path, opts)
 
-    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('eos'), Pkg::Config.swix_staging_server, remote_path)
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('eos'), Pkg::Config.swix_staging_server, remote_path, opts[:nonfinal])
   end
 
   def ship_msi(local_staging_directory, remote_path, opts = {})
     ship_pkgs(["#{local_staging_directory}/**/*.msi"], Pkg::Config.msi_staging_server, remote_path, opts)
 
-    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('windows'), Pkg::Config.msi_staging_server, remote_path)
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('windows'), Pkg::Config.msi_staging_server, remote_path, opts[:nonfinal])
     # Create the symlinks for the latest supported repo
     Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifacts_path(Pkg::Platforms.generic_platform_tag('windows'), remote_path), 'msi', arch: 'x64')
     Pkg::Util::Net.remote_create_latest_symlink('puppet-agent', Pkg::Paths.artifacts_path(Pkg::Platforms.generic_platform_tag('windows'), remote_path), 'msi', arch: 'x86')
@@ -176,8 +176,8 @@ module Pkg::Util::Ship
     ship_pkgs(["#{local_staging_directory}/*.tar.gz*"], Pkg::Config.tar_staging_server, remote_path, opts)
   end
 
-  def rolling_repo_link_command(platform_tag, repo_path)
-    base_path, link_path = Pkg::Paths.artifacts_base_path_and_link_path(platform_tag, repo_path)
+  def rolling_repo_link_command(platform_tag, repo_path, nonfinal = false)
+    base_path, link_path = Pkg::Paths.artifacts_base_path_and_link_path(platform_tag, repo_path, nonfinal)
 
     if link_path.nil?
       puts "No link target set, not creating rolling repo link for #{base_path}"
@@ -206,8 +206,8 @@ module Pkg::Util::Ship
     CMD
   end
 
-  def create_rolling_repo_link(platform_tag, staging_server, repo_path)
-    command = rolling_repo_link_command(platform_tag, repo_path)
+  def create_rolling_repo_link(platform_tag, staging_server, repo_path, nonfinal = false)
+    command = rolling_repo_link_command(platform_tag, repo_path, nonfinal)
 
     Pkg::Util::Net.remote_ssh_cmd(staging_server, command) unless command.nil?
   rescue => e

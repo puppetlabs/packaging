@@ -256,7 +256,7 @@ namespace :pl do
 
   desc "Ship nightly rpms to #{Pkg::Config.yum_staging_server}"
   task ship_nightly_rpms: 'pl:fetch' do
-    Pkg::Util::Ship.ship_rpms('pkg', Pkg::Config.nonfinal_yum_repo_path)
+    Pkg::Util::Ship.ship_rpms('pkg', Pkg::Config.nonfinal_yum_repo_path, nonfinal: true)
   end
 
   desc "Ship cow-built debs to #{Pkg::Config.apt_signing_server}"
@@ -266,7 +266,7 @@ namespace :pl do
 
   desc "Ship nightly debs to #{Pkg::Config.apt_signing_server}"
   task ship_nightly_debs: 'pl:fetch' do
-    Pkg::Util::Ship.ship_debs('pkg', Pkg::Config.nonfinal_apt_repo_staging_path, chattr: false)
+    Pkg::Util::Ship.ship_debs('pkg', Pkg::Config.nonfinal_apt_repo_staging_path, chattr: false, nonfinal: true)
   end
 
   desc 'Ship built gem to rubygems.org, internal Gem mirror, and public file server'
@@ -375,7 +375,7 @@ namespace :pl do
 
   desc "ship nightly apple dmgs to #{Pkg::Config.dmg_staging_server}"
   task ship_nightly_dmg: 'pl:fetch' do
-    Pkg::Util::Ship.ship_dmg('pkg', Pkg::Config.nonfinal_dmg_path)
+    Pkg::Util::Ship.ship_dmg('pkg', Pkg::Config.nonfinal_dmg_path, nonfinal: true)
   end
 
   desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
@@ -397,7 +397,7 @@ namespace :pl do
 
   desc "ship nightly Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
   task ship_nightly_swix: 'pl:fetch' do
-    Pkg::Util::Ship.ship_swix('pkg', Pkg::Config.nonfinal_swix_path)
+    Pkg::Util::Ship.ship_swix('pkg', Pkg::Config.nonfinal_swix_path, nonfinal: true)
   end
 
   desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
@@ -436,7 +436,7 @@ namespace :pl do
 
   desc "Ship nightly MSI packages to #{Pkg::Config.msi_staging_server}"
   task ship_nightly_msi: 'pl:fetch' do
-    Pkg::Util::Ship.ship_msi('pkg', Pkg::Config.nonfinal_msi_path, excludes: ["#{Pkg::Config.project}-x(86|64).msi"])
+    Pkg::Util::Ship.ship_msi('pkg', Pkg::Config.nonfinal_msi_path, excludes: ["#{Pkg::Config.project}-x(86|64).msi"], nonfinal: true)
   end
 
   desc 'UBER ship: ship all the things in pkg'

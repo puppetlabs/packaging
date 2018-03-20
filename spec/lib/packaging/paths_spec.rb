@@ -80,10 +80,10 @@ describe 'Pkg::Paths' do
       expect(Pkg::Paths.repo_name(true)).to eq('puppet5-nightly')
     end
 
-    it 'should return repo_name if nonfinal_repo_name is not set for non-final version' do
+    it 'should fail if nonfinal_repo_name is not set for non-final version' do
       allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
       allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nil)
-      expect(Pkg::Paths.repo_name(true)).to eq('puppet5')
+      expect { Pkg::Paths.repo_name(true) }.to raise_error
     end
   end
 
@@ -165,6 +165,17 @@ describe 'Pkg::Paths' do
       allow(Pkg::Config).to receive(:apt_repo_name).and_return(nil)
       expect(Pkg::Paths.apt_repo_name).to eq('main')
     end
+    it 'should return nonfinal_repo_name for nonfinal version' do
+      allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
+      allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return('puppet5-nightly')
+      expect(Pkg::Paths.apt_repo_name(true)).to eq('puppet5-nightly')
+    end
+
+    it 'should fail if nonfinal_repo_name is not set for non-final version' do
+      allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
+      allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nil)
+      expect { Pkg::Paths.apt_repo_name(true) }.to raise_error
+    end
   end
 
   describe '#yum_repo_name' do
@@ -184,6 +195,18 @@ describe 'Pkg::Paths' do
       allow(Pkg::Config).to receive(:repo_name).and_return(nil)
       allow(Pkg::Config).to receive(:yum_repo_name).and_return(nil)
       expect(Pkg::Paths.yum_repo_name).to eq('products')
+    end
+
+    it 'should return nonfinal_repo_name for nonfinal version' do
+      allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
+      allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return('puppet5-nightly')
+      expect(Pkg::Paths.yum_repo_name(true)).to eq('puppet5-nightly')
+    end
+
+    it 'should fail if nonfinal_repo_name is not set for non-final version' do
+      allow(Pkg::Config).to receive(:repo_name).and_return('puppet5')
+      allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nil)
+      expect { Pkg::Paths.yum_repo_name(true) }.to raise_error
     end
   end
 

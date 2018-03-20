@@ -61,6 +61,8 @@ module Pkg::Paths
   def repo_name(nonfinal = false)
     if nonfinal && Pkg::Config.nonfinal_repo_name
       Pkg::Config.nonfinal_repo_name
+    elsif nonfinal
+      fail "Nonfinal is set to true but Pkg::Config.nonfinal_repo_name is unset!"
     else
       Pkg::Config.repo_name || ""
     end
@@ -79,8 +81,10 @@ module Pkg::Paths
   # projects, where `Pkg::Config.yum_repo_name` is set instead of
   # `Pkg::Config.repo_name`. Defaults to 'products' if nothing is set.
   def yum_repo_name(nonfinal = false)
-    if nonfinal
-      return Pkg::Config.nonfinal_repo_name || Pkg::Config.repo_name || Pkg::Config.yum_repo_name || 'products'
+    if nonfinal && Pkg::Config.nonfinal_repo_name
+      return Pkg::Config.nonfinal_repo_name
+    elsif nonfinal
+      fail "Nonfinal is set to true but Pkg::Config.nonfinal_repo_name is unset!"
     end
 
     return Pkg::Config.repo_name || Pkg::Config.yum_repo_name || 'products'
@@ -90,8 +94,10 @@ module Pkg::Paths
   # projects, where `Pkg::Config.apt_repo_name` is set instead of
   # `Pkg::Config.repo_name`. Defaults to 'main' if nothing is set.
   def apt_repo_name(nonfinal = false)
-    if nonfinal
-      return Pkg::Config.nonfinal_repo_name || Pkg::Config.repo_name || Pkg::Config.apt_repo_name || 'main'
+    if nonfinal && Pkg::Config.nonfinal_repo_name
+      return Pkg::Config.nonfinal_repo_name
+    elsif nonfinal
+      fail "Nonfinal is set to true but Pkg::Config.nonfinal_repo_name is unset!"
     end
 
     return Pkg::Config.repo_name || Pkg::Config.apt_repo_name || 'main'

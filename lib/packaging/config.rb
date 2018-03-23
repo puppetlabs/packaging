@@ -82,7 +82,6 @@ module Pkg
           artifacts.each do |artifact|
             tag = Pkg::Paths.tag_from_artifact_path(artifact)
             platform, version, arch = Pkg::Platforms.parse_platform_tag(tag)
-            arch = 'ppc' if platform == 'aix'
             package_format = Pkg::Platforms.get_attribute(tag, :package_format)
 
             # Skip this if it's an unversioned MSI. We create these to help

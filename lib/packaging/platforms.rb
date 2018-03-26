@@ -345,6 +345,9 @@ module Pkg
       architecture = platform_tag.sub(/^(#{platform}-#{version}|#{codename})-?/, '')
 
       fail unless supported_arches.include?(architecture) || architecture.empty?
+
+      # AIX uses 'ppc' as its architecture in paths and file names
+      architecture = 'ppc' if platform == 'aix'
       return [platform, version, architecture]
     rescue
       raise "Could not verify that '#{platform_tag}' is a valid tag"

@@ -337,7 +337,7 @@ DOC
 
       latest_filename = File.join(latest_filepath, "LATEST")
       File.open(latest_filename, 'w') { |file| file.write(version) }
-      Pkg::Util::Net.s3sync_to(latest_filepath, target_bucket, Pkg::Config.project, ["--acl-public", "--follow-symlinks"])
+      Pkg::Util::Net.s3sync_to(latest_filename, target_bucket, Pkg::Config.project, ["--acl-public", "--follow-symlinks"])
       FileUtils.rm_rf latest_filepath
     end
   end

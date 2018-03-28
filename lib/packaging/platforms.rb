@@ -213,7 +213,7 @@ module Pkg
         },
       },
 
-      'redhat-fips' => {
+      'redhatfips' => {
         '7' => {
           architectures: ['x86_64'],
           source_architecture: 'SRPMS',

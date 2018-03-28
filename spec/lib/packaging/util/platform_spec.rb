@@ -37,6 +37,10 @@ describe "Pkg::Util::Platform" do
       expect(Pkg::Util::Platform.artifacts_path('el-7-x86_64')).to eq('artifacts/el/7')
     end
 
+    it 'should be correct for redhatfips 7' do
+      expect(Pkg::Util::Platform.artifacts_path('redhatfips-7-x86_64')).to eq('artifacts/redhatfips/7')
+    end
+
     it 'should be correct for trusty' do
       expect(Pkg::Util::Platform.artifacts_path('ubuntu-14.04-amd64')).to eq('artifacts/deb/trusty')
     end

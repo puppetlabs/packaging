@@ -4,7 +4,7 @@ describe 'Pkg::Platforms' do
   describe '#by_package_format' do
     it 'should return an array of platforms that use a given format' do
       deb_platforms = ['cumulus', 'debian', 'ubuntu']
-      rpm_platforms = ['aix', 'cisco-wrlinux', 'el', 'fedora', 'redhat-fips', 'sles']
+      rpm_platforms = ['aix', 'cisco-wrlinux', 'el', 'fedora', 'redhatfips', 'sles']
       expect(Pkg::Platforms.by_package_format('deb')).to match_array(deb_platforms)
       expect(Pkg::Platforms.by_package_format('rpm')).to match_array(rpm_platforms)
     end
@@ -19,7 +19,7 @@ describe 'Pkg::Platforms' do
 
   describe '#supported_platforms' do
     it 'should return all supported platforms' do
-      platforms = ['aix', 'cisco-wrlinux', 'cumulus', 'debian', 'el', 'eos', 'fedora', 'osx', 'redhat-fips', 'sles', 'solaris', 'ubuntu', 'windows']
+      platforms = ['aix', 'cisco-wrlinux', 'cumulus', 'debian', 'el', 'eos', 'fedora', 'osx', 'redhatfips', 'sles', 'solaris', 'ubuntu', 'windows']
       expect(Pkg::Platforms.supported_platforms).to match_array(platforms)
     end
   end
@@ -134,7 +134,7 @@ describe 'Pkg::Platforms' do
       'xenial-amd64' => ['ubuntu', '16.04', 'amd64'],
       'xenial' => ['ubuntu', '16.04', ''],
       'windows-2012' => ['windows', '2012', ''],
-      'redhat-fips-7-x86_64' => ['redhat-fips', '7', 'x86_64'],
+      'redhatfips-7-x86_64' => ['redhatfips', '7', 'x86_64'],
       'el-7-SRPMS' => ['el', '7', 'SRPMS'],
       'ubuntu-14.04-source' => ['ubuntu', '14.04', 'source'],
     }

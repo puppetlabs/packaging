@@ -10,9 +10,12 @@ namespace :pl do
     end
   end
 
+  # If no directory to sign is specified assume "pkg"
+  $DEFAULT_DIRECTORY = "pkg"
+
   desc "Sign the Arista EOS swix packages, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_swix, :root_dir do |_t, args|
-    swix_dir = args.root_dir || "pkg"
+    swix_dir = args.root_dir || $DEFAULT_DIRECTORY
     packages = Dir["#{swix_dir}/**/*.swix"]
     unless packages.empty?
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
@@ -24,7 +27,7 @@ namespace :pl do
 
   desc "Detach sign any solaris svr4 packages"
   task :sign_svr4, :root_dir do |_t, args|
-    svr4_dir = args.root_dir || "pkg"
+    svr4_dir = args.root_dir || $DEFAULT_DIRECTORY
     unless Dir["#{svr4_dir}/**/*.pkg.gz"].empty?
       Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
       Dir["#{svr4_dir}/**/*.pkg.gz"].each do |pkg|
@@ -35,7 +38,7 @@ namespace :pl do
 
   desc "Sign mocked rpms, Defaults to PL Key, pass GPG_KEY to override"
   task :sign_rpms, :root_dir do |t, args|
-    rpm_dir = args.root_dir || "pkg"
+    rpm_dir = args.root_dir || $DEFAULT_DIRECTORY
 
     # Create a hash mapping full paths to basenames.
     # This will allow us to keep track of the different paths that may be
@@ -100,13 +103,13 @@ namespace :pl do
 
   desc "Sign ips package, uses PL certificates by default, update privatekey_pem, certificate_pem, and ips_inter_cert in build_defaults.yaml to override."
   task :sign_ips, :root_dir do |_t, args|
-    ips_dir = args.root_dir || "pkg"
+    ips_dir = args.root_dir || $DEFAULT_DIRECTORY
     Pkg::Sign::Ips.sign(ips_dir) unless Dir["#{ips_dir}/**/*.p5p"].empty?
   end
 
   desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
   task :sign_gem, :root_dir do |_t, args|
-    gems_dir = args.root_dir || "pkg"
+    gems_dir = args.root_dir || $DEFAULT_DIRECTORY
     gems = FileList["#{gems_dir}/*.gem"]
     gems.each do |gem|
       puts "signing gem #{gem}"
@@ -116,7 +119,7 @@ namespace :pl do
 
   desc "Check if all rpms are signed"
   task :check_rpm_sigs, :root_dir do |_t, args|
-    rpm_dir = args.root_dir || "pkg"
+    rpm_dir = args.root_dir || $DEFAULT_DIRECTORY
     signed = TRUE
     rpms = Dir["#{rpm_dir}/**/*.rpm"]
     print 'Checking rpm signatures'
@@ -135,7 +138,7 @@ namespace :pl do
   desc "Sign generated debian changes files. Defaults to PL Key, pass GPG_KEY to override"
   task :sign_deb_changes, :root_dir do |_t, args|
     begin
-      deb_dir = args.root_dir || "pkg"
+      deb_dir = args.root_dir || $DEFAULT_DIRECTORY
       change_files = Dir["#{deb_dir}/**/*.changes"]
       unless change_files.empty?
         Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
@@ -148,13 +151,13 @@ namespace :pl do
 
   desc "Sign OSX packages"
   task :sign_osx, [:root_dir] => "pl:fetch" do |_t, args|
-    dmg_dir = args.root_dir || "pkg"
+    dmg_dir = args.root_dir || $DEFAULT_DIRECTORY
     Pkg::Sign::Dmg.sign(dmg_dir) unless Dir["#{dmg_dir}/**/*.dmg"].empty?
   end
 
   desc "Sign MSI packages"
   task :sign_msi, [:root_dir] => "pl:fetch" do |_t, args|
-    msi_dir = args.root_dir || "pkg"
+    msi_dir = args.root_dir || $DEFAULT_DIRECTORY
     Pkg::Sign::Msi.sign(msi_dir) unless Dir["#{msi_dir}/**/*.msi"].empty?
   end
 
@@ -166,7 +169,7 @@ namespace :pl do
     desc "Sign all locally staged packages on #{Pkg::Config.signing_server}"
     task :sign_all, :root_dir do |_t, args|
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')
-      root_dir = args.root_dir || "pkg"
+      root_dir = args.root_dir || $DEFAULT_DIRECTORY
       Dir["#{root_dir}/*"].empty? and fail "There were no files found in #{root_dir}. Maybe you wanted to build/retrieve something first?"
 
       # Because rpms and debs are laid out differently in PE under pkg/ they
@@ -203,10 +206,10 @@ fi ;
 $bundle_prefix rake #{sign_tasks.map { |task| task + "[#{root_dir}]" }.join(" ")} PARAMS_FILE=#{build_params}
 DOC
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.signing_server, rake_command)
-      Pkg::Util::Net.rsync_from("#{remote_repo}/#{root_dir}/", Pkg::Config.signing_server, "pkg/")
+      Pkg::Util::Net.rsync_from("#{remote_repo}/#{root_dir}/", Pkg::Config.signing_server, "#{$DEFAULT_DIRECTORY}/")
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.signing_server, "rm -rf #{remote_repo}")
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.signing_server, "rm #{build_params}")
-      puts "Signed packages staged in 'pkg/ directory"
+      puts "Signed packages staged in #{$DEFAULT_DIRECTORY}/ directory"
     end
   end
 end

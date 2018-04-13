@@ -4,6 +4,32 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.99.4] - 2018-04-17
+### Added
+- Added platform support for:
+   * Debian 10 'Buster'
+   * Ubuntu 18.04 'Bionic'
+   * Fedora 28
+- Added `is_legacy_repo?` helper to determine if files should be shipped to
+legacy or current path structures.
+- Added `yum_repo_name` and `apt_repo_name` helper methods which allows us
+to maintain compatibility with projects that don't set`Pkg::Config.repo_name`
+but rather set `Pkg::Config.yum_repo_name` and `Pkg::Config.apt_repo_name`.
+- Fail if nonfinal_repo_name is unset for nonfinal repos.
+- Added option for user to specify which directory of packages they want to sign.
+
+### Changed
+- Use `tar` labeled nodes to build tarballs
+- Use `ppc` in AIX artifact paths by updating the `parse_platform_tag` function.
+- Renamed redhat-fips platform to redhatfips.
+
+### Fixed
+- Fix nightlies path so we can pass a `nonfinal` variable through when we're working on
+a nightly ship so we don't need to rely on the magic checking of whether or not
+this is a final version.
+- Copy pasta error where we were syncing the latest directory instead of the file.
+- Skip tarball signing if signature already exists.
+
 ## [0.99.3] - 2018-03-15
 ### Added
  - Initial support added for Puppet Enterprise release branches.
@@ -73,8 +99,11 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
    * Fedora 28
 
 ### Changed
-- Use `tar` labeled nodes to build tarballs
+- Use `tar` labeled nodes to build tarballs.
 - Renamed redhat-fips platform to redhatfips.
+
+### Fixed
+- Skip tarball signing if signature already exists.
 
 ## [0.6.4] - 2018-03-14
 ### Added
@@ -143,7 +172,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.3...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.4...HEAD
+[0.99.4]: https://github.com/puppetlabs/packaging/compare/0.99.3...0.99.4
 [0.99.3]: https://github.com/puppetlabs/packaging/compare/0.99.2...0.99.3
 [0.99.2]: https://github.com/puppetlabs/packaging/compare/0.99.1...0.99.2
 [0.99.1]: https://github.com/puppetlabs/packaging/compare/0.99.0...0.99.1

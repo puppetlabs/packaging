@@ -12,8 +12,11 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
    * Fedora 28
 
 ### Changed
-- Use `tar` labeled nodes to build tarballs
+- Use `tar` labeled nodes to build tarballs.
 - Renamed redhat-fips platform to redhatfips.
+
+### Fixed
+- Skip tarball signing if signature already exists.
 
 ## [0.6.4] - 2018-03-14
 ### Added

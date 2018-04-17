@@ -65,6 +65,17 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
    find anything we unintentionally broke, please open a ticket
    [here](https://tickets.puppetlabs.com/browse/CPR).
 
+## [0.6.5] - 2018-04-17
+### Added
+- Added platform support for:
+   * Debian 10 'Buster'
+   * Ubuntu 18.04 'Bionic'
+   * Fedora 28
+
+### Changed
+- Use `tar` labeled nodes to build tarballs
+- Renamed redhat-fips platform to redhatfips.
+
 ## [0.6.4] - 2018-03-14
 ### Added
  - Initial support added for Puppet Enterprise release branches.
@@ -137,6 +148,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 [0.99.2]: https://github.com/puppetlabs/packaging/compare/0.99.1...0.99.2
 [0.99.1]: https://github.com/puppetlabs/packaging/compare/0.99.0...0.99.1
 [0.99.0]: https://github.com/puppetlabs/packaging/compare/0.6.2...0.99.0
+[0.6.5]: https://github.com/puppetlabs/packaging/compare/0.6.4...0.6.5
 [0.6.4]: https://github.com/puppetlabs/packaging/compare/0.6.3...0.6.4
 [0.6.3]: https://github.com/puppetlabs/packaging/compare/0.6.2...0.6.3
 [0.6.2]: https://github.com/puppetlabs/packaging/compare/0.6.1...0.6.2

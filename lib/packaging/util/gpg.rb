@@ -51,6 +51,10 @@ module Pkg::Util::Gpg
       gpg ||= Pkg::Util::Tool.find_tool('gpg')
 
       if gpg
+        if File.exist? "#{file}.asc"
+          warn "Signature on #{file} exists, skipping..."
+          return true
+        end
         use_tty = "--no-tty --use-agent" if ENV['RPM_GPG_AGENT']
         stdout, _, _ = Pkg::Util::Execution.capture3("#{gpg} #{use_tty} --armor --detach-sign -u #{key} #{file}")
         stdout

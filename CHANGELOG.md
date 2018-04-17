@@ -4,7 +4,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
-## [0.6.5] - 2018-04-16
+## [0.6.5] - 2018-04-17
 ### Added
 - Added platform support for:
    * Debian 10 'Buster'

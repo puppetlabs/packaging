@@ -256,6 +256,7 @@ namespace :pl do
         ship_rpms
         ship_debs
         ship_dmg
+        ship_tar
         ship_swix
         ship_msi
       )

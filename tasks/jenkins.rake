@@ -249,6 +249,23 @@ namespace :pl do
       end
     end
 
+		task :uber_ship_lite => "pl:fetch" do
+      tasks = %w(
+        jenkins:retrieve
+        jenkins:sign_all
+        ship_rpms
+        ship_debs
+        ship_dmg
+        ship_tar
+        ship_swix
+        ship_msi
+      )
+      tasks.map { |t| "pl:#{t}" }.each do |t|
+        puts "Running #{t} . . ."
+        Rake::Task[t].invoke
+      end
+    end
+
     desc "Retrieve packages built by jenkins, sign, and ship all!"
     task :uber_ship => "pl:fetch" do
       uber_tasks = %w(

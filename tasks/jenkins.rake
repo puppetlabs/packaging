@@ -257,6 +257,7 @@ namespace :pl do
         ship_debs
         ship_dmg
         ship_swix
+        ship_tar
         ship_msi
       )
       tasks.map { |t| "pl:#{t}" }.each do |t|

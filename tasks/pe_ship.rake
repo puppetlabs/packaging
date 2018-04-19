@@ -14,9 +14,9 @@ if Pkg::Config.build_pe
       end
       if Pkg::Config.team == 'release'
 
-        # If this is not a feature branch, we need to link the shipped packages into the feature repos,
-        # then update their metadata as well.
-        unless Pkg::Config.pe_feature_branch
+        # If this is not a feature branch or release branch, we need to link the
+        # shipped packages into the feature repos and update their metadata.
+        unless Pkg::Config.pe_feature_branch || Pkg::Config.pe_release_branch
           puts "Linking RPMs to feature repo"
           Pkg::Util::RakeUtils.invoke_task("pe:remote:link_shipped_rpms_to_feature_repo")
           Pkg::Util::RakeUtils.invoke_task("pe:remote:update_yum_repo")
@@ -126,8 +126,9 @@ if Pkg::Config.build_pe
           files += Dir["pkg/pe/deb/#{dist}/*"].select { |f| f !~ /^.*\.deb$/ }.map { |f| "#{base_path}/#{dist}-source/#{File.basename(f)}" }
         end
       end
-      # If this is not a feature branch, we need to link the shipped packages into the feature repos
-      unless Pkg::Config.pe_feature_branch
+      # If this is not a feature branch or release branch, we need to link the
+      # shipped packages into the feature repos
+      unless Pkg::Config.pe_feature_branch || Pkg::Config.pe_release_branch
         puts "Linking DEBs to feature repo"
         Pkg::Util::RakeUtils.invoke_task("pe:remote:link_shipped_debs_to_feature_repo")
       end

@@ -162,7 +162,7 @@ namespace :pl do
   end
 
   ##
-  # This crazy piece of work establishes a remote repo on the distribution
+  # This crazy piece of work establishes a remote repo on the signing
   # server, ships our packages out to it, signs them, and brings them back.
   #
   namespace :jenkins do

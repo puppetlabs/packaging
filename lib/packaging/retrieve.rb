@@ -55,7 +55,8 @@ module Pkg::Retrieve
     end
     platform_data = Pkg::Util::Serialization.load_yaml(yaml_path)[:platform_data]
     platform_data.each do |platform, paths|
-      default_wget(local_target, "#{build_url}/#{paths[:artifact]}") if Pkg::Config.foss_platforms.include?(platform)
+      path_to_retrieve = File.dirname(paths[:artifact])
+      default_wget(local_target, "#{build_url}/#{path_to_retrieve}/") if Pkg::Config.foss_platforms.include?(platform)
     end
   end
 

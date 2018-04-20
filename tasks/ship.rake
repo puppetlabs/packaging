@@ -309,22 +309,6 @@ namespace :pl do
     unless Pkg::Config.internal_gem_host
       warn 'Value `Pkg::Config.internal_gem_host` not defined; skipping internal ship'
     end
-
-    puts "Do you want to ship #{args[:file]} to the internal stickler server(#{Pkg::Config.internal_stickler_host})?"
-    if Pkg::Util.ask_yes_or_no
-      puts "Shipping gem #{args[:file]} to internal Gem server (#{Pkg::Config.internal_stickler_host})"
-      Pkg::Util::Execution.retry_on_fail(times: 3) do
-        Pkg::Gem.ship_to_stickler(args[:file])
-      end
-    end
-
-    puts "Do you want to ship #{args[:file]} to the internal nexus server(#{Pkg::Config.internal_nexus_host})?"
-    if Pkg::Util.ask_yes_or_no
-      puts "Shipping gem #{args[:file]} to internal Gem server (#{Pkg::Config.internal_nexus_host})"
-      Pkg::Util::Execution.retry_on_fail(times: 3) do
-        Pkg::Gem.ship_to_nexus(args[:file])
-      end
-    end
   end
 
   desc "Ship built gems to public Downloads server (#{Pkg::Config.gem_host})"
@@ -511,22 +495,6 @@ namespace :pl do
     end
 
     if Pkg::Config.build_gem
-      # Do we have stickler and nexus?
-      if Pkg::Util::Misc.check_gem('stickler')
-        `stickler list --server #{Pkg::Config.internal_stickler_host} > /dev/null 2>&1`
-        unless $CHILD_STATUS.zero?
-          errs << "Listing gems at the stickler server #{Pkg::Config.internal_stickler_host} failed!"
-        end
-      else
-        errs << 'gem stickler not found'
-      end
-
-      errs << 'gem nexus not found' unless Pkg::Util::Misc.check_gem('nexus')
-      `gem list --source #{Pkg::Config.internal_nexus_host} > /dev/null 2>&1`
-      unless $CHILD_STATUS.zero?
-        errs << "Listing gems at the nexus server #{Pkg::Config.internal_nexus_host} failed!"
-      end
-
       # Do we have rubygems access set up
       if Pkg::Util::File.file_exists?("#{ENV['HOME']}/.gem/credentials")
         # Do we have permissions to publish this gem on rubygems

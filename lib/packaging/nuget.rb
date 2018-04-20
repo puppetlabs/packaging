@@ -2,7 +2,7 @@ module Pkg::Nuget
   class << self
     def ship(packages)
       #
-      # Support shipping of Nuget style packages to a nexus based nuget feed
+      # Support shipping of Nuget style packages to an Artifactory based nuget feed
       # Using curl to submit the packages rather than windows based choco/mono.
       # This approach gives more flexibility and fits in with the current Puppet
       # release automation practices using linux/mac systems.

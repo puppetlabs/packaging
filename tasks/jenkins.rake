@@ -264,6 +264,8 @@ namespace :pl do
         puts "Running #{t} . . ."
         Rake::Task[t].invoke
       end
+      # mark the build as successfully shipped
+      Rake::Task["pl:jenkins:ship"].invoke("shipped")
     end
 
     desc "Retrieve packages built by jenkins, sign, and ship all!"

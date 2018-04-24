@@ -527,6 +527,9 @@ namespace :pl do
     desc 'ship pkg directory contents to artifactory'
     task :ship_to_artifactory, :local_dir do |_t, args|
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')
+      unless Pkg::Config.project
+        fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT' environment variable."
+      end
       artifactory = Pkg::ManageArtifactory.new(Pkg::Config.project, Pkg::Config.ref)
 
       local_dir = args.local_dir || 'pkg'
@@ -538,6 +541,9 @@ namespace :pl do
     desc 'Ship pkg directory contents to distribution server'
     task :ship, :target, :local_dir do |_t, args|
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')
+      unless Pkg::Config.project
+        fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT' environment variable."
+      end
       target = args.target || 'artifacts'
       local_dir = args.local_dir || 'pkg'
       project_basedir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}"

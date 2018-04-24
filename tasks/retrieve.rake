@@ -14,6 +14,9 @@ namespace :pl do
   namespace :jenkins do
     desc "Retrieve packages from the distribution server\. Check out commit to retrieve"
     task :retrieve, [:remote_target, :local_target] => 'pl:fetch' do |t, args|
+      unless Pkg::Config.project
+        fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT' environment variable."
+      end
       remote_target = args.remote_target || "artifacts"
       local_target = args.local_target || "pkg"
       mkdir_p local_target
@@ -35,6 +38,9 @@ if Pkg::Config.build_pe
     namespace :jenkins do
       desc "Retrieve packages from the distribution server\. Check out commit to retrieve"
       task :retrieve, [:remote_target, :local_target] => 'pl:fetch' do |t, args|
+        unless Pkg::Config.project
+          fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT' environment variable."
+        end
         remote_target = args.remote_target || "artifacts"
         local_target = args.local_target || "pkg"
         build_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{remote_target}"

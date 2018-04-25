@@ -266,6 +266,7 @@ module Pkg::Params
               { :var => :pe_feature_branch,       :envvar => :PE_FEATURE_BRANCH },
               { :var => :pe_version,              :envvar => :PE_VER },
               { :var => :privatekey_pem,          :envvar => :PRIVATE_PEM },
+              { :var => :project,                 :envvar => :PROJECT },
               { :var => :project_root,            :envvar => :PROJECT_ROOT },
               { :var => :random_mockroot,         :envvar => :RANDOM_MOCKROOT, :type => :bool },
               { :var => :rc_mocks,                :envvar => :MOCK },

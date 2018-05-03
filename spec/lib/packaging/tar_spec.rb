@@ -20,34 +20,25 @@ describe "tar.rb" do
       "#{PROJECT_ROOT}/ext/debian/changelog.erb"
     ]
   end
+  before(:each) do
+    Pkg::Config.config_from_hash(
+      {
+        :templates      => templates,
+        :project        => project,
+        :version        => version,
+        :files          => files,
+        :project_root   => PROJECT_ROOT,
+        :packaging_root => "ext/packaging"
+      })
+  end
 
   describe "#expand_templates" do
     it "should be invoked when Pkg::Config.templates is set" do
-      Pkg::Config.config_from_hash(
-        {
-          :templates      => templates,
-          :project        => project,
-          :version        => version,
-          :files          => files,
-          :project_root   => PROJECT_ROOT,
-          :packaging_root => "ext/packaging"
-        })
-
       Pkg::Tar.any_instance.should_receive(:expand_templates)
       Pkg::Tar.new
     end
 
     it "packaging templates should be filtered and paths should be expanded" do
-      Pkg::Config.config_from_hash(
-        {
-          :templates      => templates,
-          :project        => project,
-          :version        => version,
-          :files          => files,
-          :project_root   => PROJECT_ROOT,
-          :packaging_root => "ext/packaging"
-        })
-
       templates.each do |temp|
         if temp.is_a?(String)
           Dir.stub(:glob).with(File.join(PROJECT_ROOT, temp)).and_return(File.join(PROJECT_ROOT, temp))
@@ -62,17 +53,11 @@ describe "tar.rb" do
   end
 
   describe "#template" do
-    it "should handle hashes and strings correctly" do
-      Pkg::Config.config_from_hash(
-        {
-          :templates      => expanded_templates,
-          :project        => project,
-          :version        => version,
-          :files          => files,
-          :project_root   => PROJECT_ROOT,
-          :packaging_root => "ext/packaging"
-        })
+    before(:each) do
+      Pkg::Config.templates = expanded_templates
+    end
 
+    it "should handle hashes and strings correctly" do
       # Set up correct stubs and expectations
       expanded_templates.each do |temp|
         if temp.is_a?(String)
@@ -92,16 +77,6 @@ describe "tar.rb" do
     end
 
     it "should raise an error if the template source can't be found" do
-     Pkg::Config.config_from_hash(
-        {
-          :templates      => expanded_templates,
-          :project        => project,
-          :version        => version,
-          :files          => files,
-          :project_root   => PROJECT_ROOT,
-          :packaging_root => "ext/packaging"
-        })
-
       # Set up correct stubs and expectations
       expanded_templates.each do |temp|
         if temp.is_a?(String)

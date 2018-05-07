@@ -30,6 +30,11 @@ module Pkg
         @excludes = []
       end
 
+      # If the user has specified things to exclude via config file, they will be
+      # honored by the tar class, but we also always exclude the packaging repo
+      # and 'pkg' directory.
+      @excludes += ['pkg', 'ext/packaging']
+
       # On the other hand, support for explicit templates started with Arrays,
       # so that's all we support.
       #

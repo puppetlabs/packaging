@@ -32,6 +32,16 @@ describe "tar.rb" do
       })
   end
 
+  describe '#initialize' do
+    it 'should always mark ext/packaging and pkg directories as excluded files' do
+      Pkg::Config.tar_excludes = ['foo']
+      expect(Pkg::Tar.new.excludes).to eql(['foo', 'pkg', 'ext/packaging'])
+
+      Pkg::Config.tar_excludes = []
+      expect(Pkg::Tar.new.excludes).to eql(['pkg', 'ext/packaging'])
+    end
+  end
+
   describe "#expand_templates" do
     it "should be invoked when Pkg::Config.templates is set" do
       Pkg::Tar.any_instance.should_receive(:expand_templates)

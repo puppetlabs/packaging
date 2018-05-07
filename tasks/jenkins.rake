@@ -259,6 +259,7 @@ namespace :pl do
         ship_swix
         ship_tar
         ship_msi
+        ship_gem
       )
       tasks.map { |t| "pl:#{t}" }.each do |t|
         puts "Running #{t} . . ."

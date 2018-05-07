@@ -40,6 +40,15 @@ describe "tar.rb" do
       Pkg::Config.tar_excludes = []
       expect(Pkg::Tar.new.excludes).to eql(['pkg', 'ext/packaging'])
     end
+
+    it 'should archive the entire project directory by default' do
+      Pkg::Config.files = nil
+      expect(Pkg::Tar.new.files).to eql(Dir.glob('*'))
+    end
+
+    it 'should archive the user-specified list of files' do
+      expect(Pkg::Tar.new.files).to eql(files)
+    end
   end
 
   describe "#expand_templates" do

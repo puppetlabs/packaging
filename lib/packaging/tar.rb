@@ -14,6 +14,10 @@ module Pkg
       @files    = Pkg::Config.files
       @target   = File.join(Pkg::Config.project_root, "pkg", "#{@project}-#{@version}.tar.gz")
 
+      # If the user did not specify any files, then archive the entire working directory
+      # instead
+      @files ||= Dir.glob('*')
+
       # We require that the excludes list be a string (which is space
       # separated, we hope)(deprecated) or an array.
       #

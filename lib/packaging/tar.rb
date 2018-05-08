@@ -14,6 +14,10 @@ module Pkg
       @files    = Pkg::Config.files
       @target   = File.join(Pkg::Config.project_root, "pkg", "#{@project}-#{@version}.tar.gz")
 
+      # If the user did not specify any files, then archive the entire working directory
+      # instead
+      @files ||= Dir.glob('*')
+
       # We require that the excludes list be a string (which is space
       # separated, we hope)(deprecated) or an array.
       #
@@ -29,6 +33,11 @@ module Pkg
       else
         @excludes = []
       end
+
+      # If the user has specified things to exclude via config file, they will be
+      # honored by the tar class, but we also always exclude the packaging repo
+      # and 'pkg' directory.
+      @excludes += ['pkg', 'ext/packaging']
 
       # On the other hand, support for explicit templates started with Arrays,
       # so that's all we support.

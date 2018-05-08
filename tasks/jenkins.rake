@@ -259,11 +259,14 @@ namespace :pl do
         ship_swix
         ship_tar
         ship_msi
+        ship_gem
       )
       tasks.map { |t| "pl:#{t}" }.each do |t|
         puts "Running #{t} . . ."
         Rake::Task[t].invoke
       end
+      # mark the build as successfully shipped
+      Rake::Task["pl:jenkins:ship"].invoke("shipped")
     end
 
     task :stage_nightlies => "pl:fetch" do

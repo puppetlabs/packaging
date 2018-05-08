@@ -4,6 +4,16 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.6.6] - 2018-05-08
+### Added
+- Backported `ubership_light` task.
+
+### Changed
+- Pkg::Tar now archives the working directory by default.
+
+### Fixed
+- Packages promoted to a release branch no longer cause PEZ to fail
+
 ## [0.6.5] - 2018-04-17
 ### Added
 - Added platform support for:
@@ -85,7 +95,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.6.5...master
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.6.6...master
+[0.6.6]: https://github.com/puppetlabs/packaging/compare/0.6.5...0.6.6
 [0.6.5]: https://github.com/puppetlabs/packaging/compare/0.6.4...0.6.5
 [0.6.4]: https://github.com/puppetlabs/packaging/compare/0.6.3...0.6.4
 [0.6.3]: https://github.com/puppetlabs/packaging/compare/0.6.2...0.6.3

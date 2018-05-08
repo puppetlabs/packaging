@@ -16,12 +16,6 @@ namespace :package do
     #
     tar.templates ||= Dir[File.join(Pkg::Config.project_root, "ext", "**", "*.erb")].select { |i| i !~ /ext\/packaging|ext\/osx/ }
 
-
-    # If the user has specified things to exclude via config file, they will be
-    # honored by the tar class, but we also always exclude the packaging repo.
-    #
-    tar.excludes << "ext/packaging"
-
     tar.pkg!
 
     puts "Wrote #{`pwd`.strip}/pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz"

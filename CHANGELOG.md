@@ -4,6 +4,23 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.99.5] - 2018-05-08
+### Added
+- Backported `ubership_light` task.
+
+### Changed
+- PROJECT_OVERRIDE can now be passed in to allow packaging to run on projects
+- which produce multiple package artifacts.
+  avoid name collisions with existing projects.
+- Pkg::Tar now archives the working directory by default.
+- Updates to remove references to old stickler server.
+
+### Fixed
+- Packages promoted to a release branch no longer cause PEZ to fail
+- When shipping packages packaging will now fetch all artifacts instead of
+  relying on the artifacts specified in <sha>.yaml so that projects with
+  multiple packages can be shipped together.
+
 ## [0.99.4] - 2018-04-17
 ### Added
 - Added platform support for:
@@ -172,7 +189,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.4...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.5...HEAD
+[0.99.5]: https://github.com/puppetlabs/packaging/compare/0.99.4...0.99.5
 [0.99.4]: https://github.com/puppetlabs/packaging/compare/0.99.3...0.99.4
 [0.99.3]: https://github.com/puppetlabs/packaging/compare/0.99.2...0.99.3
 [0.99.2]: https://github.com/puppetlabs/packaging/compare/0.99.1...0.99.2

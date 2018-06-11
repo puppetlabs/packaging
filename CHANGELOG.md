@@ -4,6 +4,12 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.99.6] - 2018-06-11
+### Changed
+- '-latest' symlinks for Windows and macOS will now be created for all projects,
+  not just puppet-agent.
+- The `uber_ship_lite` task can now ship gems.
+
 ## [0.99.5] - 2018-05-08
 ### Changed
 - PROJECT_OVERRIDE can now be passed in to allow packaging to run on projects
@@ -195,7 +201,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.5...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.6...HEAD
+[0.99.6]: https://github.com/puppetlabs/packaging/compare/0.99.5...0.99.6
 [0.99.5]: https://github.com/puppetlabs/packaging/compare/0.99.4...0.99.5
 [0.99.4]: https://github.com/puppetlabs/packaging/compare/0.99.3...0.99.4
 [0.99.3]: https://github.com/puppetlabs/packaging/compare/0.99.2...0.99.3

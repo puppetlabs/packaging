@@ -61,6 +61,10 @@ namespace :pl do
     v3_rpms = []
     v4_rpms = []
     rpms_to_sign.each do |rpm|
+      if Pkg::Sign::Rpm.has_sig? rpm
+        puts "#{rpm} is already signed, skipping . . ."
+        next
+      end
       platform_tag = Pkg::Paths.tag_from_artifact_path(rpm)
       platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
 

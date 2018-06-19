@@ -4,6 +4,10 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.99.7] - 2018-06-19
+### Changed
+- Remote bundle installs now use Ruby 2.4.1
+
 ## [0.99.6] - 2018-06-11
 ### Changed
 - '-latest' symlinks for Windows and macOS will now be created for all projects,
@@ -201,7 +205,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.6...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.7...HEAD
+[0.99.7]: https://github.com/puppetlabs/packaging/compare/0.99.6...0.99.7
 [0.99.6]: https://github.com/puppetlabs/packaging/compare/0.99.5...0.99.6
 [0.99.5]: https://github.com/puppetlabs/packaging/compare/0.99.4...0.99.5
 [0.99.4]: https://github.com/puppetlabs/packaging/compare/0.99.3...0.99.4

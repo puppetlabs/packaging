@@ -70,8 +70,7 @@ module Pkg::Sign::Rpm
       # We don't sign AIX rpms
       next if platform_tag.include?('aix')
 
-      sig_type = Pkg::Platforms.signature_format_for_platform_version(platform, version)
-      case sig_type
+      case Pkg::Platforms.signature_format_for_platform_version(platform, version)
       when 'v3'
         v3_rpms << rpm
       when 'v4'
@@ -82,12 +81,12 @@ module Pkg::Sign::Rpm
     end
 
     unless v3_rpms.empty?
-      puts "Signing old rpms..."
+      puts "Signing legacy (v3) rpms..."
       legacy_sign(v3_rpms.join(' '))
     end
 
     unless v4_rpms.empty?
-      puts "Signing modern rpms..."
+      puts "Signing modern (v4) rpms..."
       sign(v4_rpms.join(' '))
     end
 

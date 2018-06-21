@@ -39,7 +39,7 @@ namespace :pl do
   desc "Sign mocked rpms, Defaults to PL Key, pass GPG_KEY to override"
   task :sign_rpms, :root_dir do |t, args|
     rpm_directory = args.root_dir || $DEFAULT_DIRECTORY
-    Pkg::Sign::Rpm.sign_all(rpm_directory)
+    sign_all(rpm_directory)
   end
 
   desc "Sign ips package, uses PL certificates by default, update privatekey_pem, certificate_pem, and ips_inter_cert in build_defaults.yaml to override."

@@ -4,6 +4,11 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.6.7] - 2018-07-11
+### Fixed
+- Retrieving with `FOSS_ONLY=true` now fetches all (non-platform-specific)
+  top-level files.
+
 ## [0.6.6] - 2018-05-08
 ### Added
 - Backported `ubership_light` task.
@@ -95,7 +100,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.6.6...master
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.6.7...master
+[0.6.7]: https://github.com/puppetlabs/packaging/compare/0.6.6...0.6.7
 [0.6.6]: https://github.com/puppetlabs/packaging/compare/0.6.5...0.6.6
 [0.6.5]: https://github.com/puppetlabs/packaging/compare/0.6.4...0.6.5
 [0.6.4]: https://github.com/puppetlabs/packaging/compare/0.6.3...0.6.4

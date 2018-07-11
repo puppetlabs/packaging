@@ -114,6 +114,11 @@ this is a final version.
    find anything we unintentionally broke, please open a ticket
    [here](https://tickets.puppetlabs.com/browse/CPR).
 
+## [0.6.7] - 2018-07-11
+### Fixed
+- Retrieving with `FOSS_ONLY=true` now fetches all (non-platform-specific)
+  top-level files.
+
 ## [0.6.6] - 2018-05-08
 ### Added
 - Backported `uber_ship_lite` task.
@@ -214,6 +219,7 @@ this is a final version.
 [0.99.2]: https://github.com/puppetlabs/packaging/compare/0.99.1...0.99.2
 [0.99.1]: https://github.com/puppetlabs/packaging/compare/0.99.0...0.99.1
 [0.99.0]: https://github.com/puppetlabs/packaging/compare/0.6.2...0.99.0
+[0.6.7]: https://github.com/puppetlabs/packaging/compare/0.6.6...0.6.7
 [0.6.6]: https://github.com/puppetlabs/packaging/compare/0.6.5...0.6.6
 [0.6.5]: https://github.com/puppetlabs/packaging/compare/0.6.4...0.6.5
 [0.6.4]: https://github.com/puppetlabs/packaging/compare/0.6.3...0.6.4

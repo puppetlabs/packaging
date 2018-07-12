@@ -61,7 +61,7 @@ module Pkg
       'debian' => {
         '7' => {
           codename: 'wheezy',
-          architectures: ['i386', 'amd64'],
+          architectures: ['amd64', 'i386'],
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,
@@ -69,7 +69,7 @@ module Pkg
         },
         '8' => {
           codename: 'jessie',
-          architectures: ['i386', 'amd64', 'powerpc'],
+          architectures: ['amd64', 'i386', 'powerpc'],
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,
@@ -77,7 +77,7 @@ module Pkg
         },
         '9' => {
           codename: 'stretch',
-          architectures: ['i386', 'amd64'],
+          architectures: ['amd64', 'i386'],
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,
@@ -85,7 +85,7 @@ module Pkg
         },
         '10' => {
           codename: 'buster',
-          architectures: ['i386', 'amd64'],
+          architectures: ['amd64', 'i386'],
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,
@@ -95,7 +95,7 @@ module Pkg
 
       'el' => {
         '5' => {
-          architectures: ['i386', 'x86_64'],
+          architectures: ['x86_64', 'i386'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
@@ -103,7 +103,7 @@ module Pkg
           repo: true,
         },
         '6' => {
-          architectures: ['i386', 'x86_64', 's390x'],
+          architectures: ['x86_64', 'i386', 's390x'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
@@ -130,7 +130,7 @@ module Pkg
 
       'fedora' => {
         'f25' => {
-          architectures: ['i386', 'x86_64'],
+          architectures: ['x86_64', 'i386'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
@@ -162,7 +162,7 @@ module Pkg
           repo: true,
         },
         '25' => {
-          architectures: ['i386', 'x86_64'],
+          architectures: ['x86_64', 'i386'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
@@ -231,7 +231,7 @@ module Pkg
 
       'sles' => {
         '11' => {
-          architectures: ['i386', 'x86_64', 's390x'],
+          architectures: ['x86_64', 'i386', 's390x'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
@@ -264,7 +264,7 @@ module Pkg
       'ubuntu' => {
         '14.04' => {
           codename: 'trusty',
-          architectures: ['i386', 'amd64'],
+          architectures: ['amd64', 'i386'],
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,
@@ -272,7 +272,7 @@ module Pkg
         },
         '16.04' => {
           codename: 'xenial',
-          architectures: ['i386', 'amd64', 'ppc64el'],
+          architectures: ['amd64', 'i386', 'ppc64el'],
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,

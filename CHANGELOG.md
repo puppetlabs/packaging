@@ -4,6 +4,13 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.99.8] - 2018-07-12
+### Changed
+- 64-bit platform architectures are now listed first to maintain consistency
+  when determining platform tag for noarch packages.
+- Gem tasks are now always loaded, even without the `build_gem` setting, but
+  gems will only be built when `build_gem` is true.
+
 ## [0.99.7] - 2018-06-19
 ### Changed
 - Remote bundle installs now use Ruby 2.4.1
@@ -210,7 +217,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.7...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.8...HEAD
+[0.99.8]: https://github.com/puppetlabs/packaging/compare/0.99.7...0.99.8
 [0.99.7]: https://github.com/puppetlabs/packaging/compare/0.99.6...0.99.7
 [0.99.6]: https://github.com/puppetlabs/packaging/compare/0.99.5...0.99.6
 [0.99.5]: https://github.com/puppetlabs/packaging/compare/0.99.4...0.99.5

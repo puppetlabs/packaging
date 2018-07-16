@@ -528,7 +528,7 @@ namespace :pl do
     task :ship_to_artifactory, :local_dir do |_t, args|
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')
       unless Pkg::Config.project
-        fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT' environment variable."
+        fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT_OVERRIDE' environment variable."
       end
       artifactory = Pkg::ManageArtifactory.new(Pkg::Config.project, Pkg::Config.ref)
 
@@ -542,7 +542,7 @@ namespace :pl do
     task :ship, :target, :local_dir do |_t, args|
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')
       unless Pkg::Config.project
-        fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT' environment variable."
+        fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT_OVERRIDE' environment variable."
       end
       target = args.target || 'artifacts'
       local_dir = args.local_dir || 'pkg'

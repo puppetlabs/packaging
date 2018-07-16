@@ -15,7 +15,7 @@ namespace :pl do
     desc "Retrieve packages from the distribution server\. Check out commit to retrieve"
     task :retrieve, [:remote_target, :local_target] => 'pl:fetch' do |t, args|
       unless Pkg::Config.project
-        fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT' environment variable."
+        fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT_OVERRIDE' environment variable."
       end
       remote_target = args.remote_target || "artifacts"
       local_target = args.local_target || "pkg"
@@ -39,7 +39,7 @@ if Pkg::Config.build_pe
       desc "Retrieve packages from the distribution server\. Check out commit to retrieve"
       task :retrieve, [:remote_target, :local_target] => 'pl:fetch' do |t, args|
         unless Pkg::Config.project
-          fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT' environment variable."
+          fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT_OVERRIDE' environment variable."
         end
         remote_target = args.remote_target || "artifacts"
         local_target = args.local_target || "pkg"

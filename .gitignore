@@ -2,3 +2,4 @@
 .idea
 Gemfile.lock
 *.gem
+.ruby-version

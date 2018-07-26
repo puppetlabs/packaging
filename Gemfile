@@ -1,4 +1,3 @@
-source "https://rubygems.org"
 source 'https://artifactory.delivery.puppetlabs.net/artifactory/api/gems/rubygems/'
 
 gem 'artifactory'

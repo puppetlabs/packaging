@@ -1,6 +1,8 @@
 source "https://rubygems.org"
+source 'https://artifactory.delivery.puppetlabs.net/artifactory/api/gems/rubygems/'
 
 gem 'artifactory'
+gem 'releng_metadata'
 
 group :development, :test do
   gem "rake", "~> 12.2.1"

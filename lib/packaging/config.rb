@@ -54,6 +54,15 @@ module Pkg
         config_from_hash(build_data)
       end
 
+      def config_from_metadata
+        platform_metadata       = Pkg::Metadata.retrieve_metadata_section('platforms')
+        infrastructure_metadata = Pkg::Metadata.retrieve_metadata_section('infrastructure')
+        project_metadata        = Pkg::Metadata.retrieve_project_metadata(Pkg::Config.project)
+        data = platform_metadata.values + infrastructure_metadata.values + project_metadata.values
+        data = data.reduce({}, :merge)
+        config_from_hash(data)
+      end
+
       ##
       # By default return a hash of the names, values of current Pkg::Config
       # instance variables. With :format => :yaml, write a yaml file containing
@@ -186,21 +195,28 @@ module Pkg
 
       def load_default_configs
         got_config = false
+        begin
+          self.config_from_metadata
+          got_config = true
+        rescue
+          warn "Failed to retrieve metadata, falling back to build_defaults . . ."
+        end
         default_project_data = { :path => File.join(@project_root, "ext", "project_data.yaml"), :required => false }
-        default_build_defaults = { :path => File.join(@project_root, "ext", "build_defaults.yaml"), :required => true }
+        default_build_defaults = { :path => File.join(@project_root, "ext", "build_defaults.yaml"), :required => !got_config }
 
         [default_project_data, default_build_defaults].each do |config|
           if File.readable? config[:path]
             self.config_from_yaml(config[:path])
             got_config = true if config[:required]
           else
-            puts "Skipping load of expected default config #{config[:path]}, cannot read file."
+            warn "Skipping load of expected default config #{config[:path]}, cannot read file."
           end
         end
 
         if got_config
-          self.config
+          return self.config
         else
+          warn "Could not load default configs. Ensure that there is a metadata file for project #{Pkg::Config.project} in the releng-build-metadata repo or that there is an `ext/build_defaults.yaml` file in your project directory."
           # Since the default configuration files are not readable, most
           # likely not present, at this point we assume the project_root
           # isn't what we hoped it would be, and unset it.

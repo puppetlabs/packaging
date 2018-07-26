@@ -195,14 +195,8 @@ module Pkg
 
       def load_default_configs
         got_config = false
-        begin
-          self.config_from_metadata
-          got_config = true
-        rescue
-          warn "Failed to retrieve metadata, falling back to build_defaults . . ."
-        end
         default_project_data = { :path => File.join(@project_root, "ext", "project_data.yaml"), :required => false }
-        default_build_defaults = { :path => File.join(@project_root, "ext", "build_defaults.yaml"), :required => !got_config }
+        default_build_defaults = { :path => File.join(@project_root, "ext", "build_defaults.yaml"), :required => true }
 
         [default_project_data, default_build_defaults].each do |config|
           if File.readable? config[:path]
@@ -211,6 +205,13 @@ module Pkg
           else
             warn "Skipping load of expected default config #{config[:path]}, cannot read file."
           end
+        end
+
+        begin
+          self.config_from_metadata
+          got_config = true
+        rescue
+          warn "Failed to retrieve metadata, falling back to build_defaults . . ."
         end
 
         if got_config

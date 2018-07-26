@@ -210,8 +210,8 @@ module Pkg
         begin
           self.config_from_metadata
           got_config = true
-        rescue
-          warn "Failed to retrieve metadata, falling back to build_defaults . . ."
+        rescue => e
+          warn "Failed to retrieve metadata: #{e}"
         end
 
         if got_config

@@ -214,15 +214,12 @@ module Pkg
           warn "Failed to retrieve metadata: #{e}"
         end
 
-        if got_config
-          return self.config
-        else
-          warn "Could not load default configs. Ensure that there is a metadata file for project #{Pkg::Config.project} in the releng-build-metadata repo or that there is an `ext/build_defaults.yaml` file in your project directory."
-          # Since the default configuration files are not readable, most
-          # likely not present, at this point we assume the project_root
-          # isn't what we hoped it would be, and unset it.
-          @project_root = nil
-        end
+        return self.config if got_config
+        warn "Could not load default configs. Ensure that there is a metadata file for project #{Pkg::Config.project} in the releng-build-metadata repo or that there is an `ext/build_defaults.yaml` file in your project directory."
+        # Since the default configuration files are not readable, most
+        # likely not present, at this point we assume the project_root
+        # isn't what we hoped it would be, and unset it.
+        @project_root = nil
       end
 
       #   Set all aspects of how the package will be versioned. Versioning

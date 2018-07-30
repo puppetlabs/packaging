@@ -54,15 +54,6 @@ module Pkg
         config_from_hash(build_data)
       end
 
-      def config_from_metadata
-        platform_metadata       = Pkg::Metadata.retrieve_metadata_section('platforms')
-        infrastructure_metadata = Pkg::Metadata.retrieve_metadata_section('infrastructure')
-        project_metadata        = Pkg::Metadata.retrieve_project_metadata(Pkg::Config.project)
-        data = platform_metadata.values + infrastructure_metadata.values + project_metadata.values
-        data = data.reduce({}, :merge)
-        config_from_hash(data)
-      end
-
       ##
       # By default return a hash of the names, values of current Pkg::Config
       # instance variables. With :format => :yaml, write a yaml file containing
@@ -203,23 +194,18 @@ module Pkg
             self.config_from_yaml(config[:path])
             got_config = true if config[:required]
           else
-            warn "Skipping load of expected default config #{config[:path]}, cannot read file."
+            puts "Skipping load of expected default config #{config[:path]}, cannot read file."
           end
         end
 
-        begin
-          self.config_from_metadata
-          got_config = true
-        rescue => e
-          warn "Failed to retrieve metadata: #{e}"
+        if got_config
+          self.config
+        else
+          # Since the default configuration files are not readable, most
+          # likely not present, at this point we assume the project_root
+          # isn't what we hoped it would be, and unset it.
+          @project_root = nil
         end
-
-        return self.config if got_config
-        warn "Could not load default configs. Ensure that there is a metadata file for project #{Pkg::Config.project} in the releng-build-metadata repo or that there is an `ext/build_defaults.yaml` file in your project directory."
-        # Since the default configuration files are not readable, most
-        # likely not present, at this point we assume the project_root
-        # isn't what we hoped it would be, and unset it.
-        @project_root = nil
       end
 
       #   Set all aspects of how the package will be versioned. Versioning

@@ -343,23 +343,6 @@ describe "Pkg::Config" do
     end
   end
 
-  describe "#config_from_metadata" do
-    platform_metadata = { 'el' => { 'el_7_architectures' => ['x86_64', 'i386', 's390x', 'aarch64'], 'el_6_signature-format' => 'v4' } }
-    infrastructure_metadata = { 'sign' => { 'gpg_key' => 'SUP3RS3CR3TK3Y69' }, 'host' => { 'staging-server' => 'weth.delivery.puppetlabs.net', 'internal-build-host' => 'builds.delivery.puppetlabs.net' } }
-    project_metadata = { 'cool-project' => { 'repo_name' => 'cool-repo', 'vanagon_project' => 'true' } }
-    it "should set params based on metadata" do
-      Pkg::Config.project = 'cool-project'
-      orig = Pkg::Config.gpg_key
-      Pkg::Config.gpg_key = 'ABCD1234EFGH5678'
-      allow(Pkg::Metadata).to receive(:retrieve_metadata_section).with('platforms').and_return(platform_metadata)
-      allow(Pkg::Metadata).to receive(:retrieve_metadata_section).with('infrastructure').and_return(infrastructure_metadata)
-      expect(Pkg::Metadata).to receive(:retrieve_project_metadata).with('cool-project').and_return(project_metadata)
-      Pkg::Config.config_from_metadata
-      expect(Pkg::Config.gpg_key).to eq('SUP3RS3CR3TK3Y69')
-      Pkg::Config.gpg_key = orig
-    end
-  end
-
   describe "#string_to_array" do
     ary = %W(FOO BAR ARR RAY)
     context "given a string with spaces in it" do
@@ -468,52 +451,47 @@ describe "Pkg::Config" do
       Pkg::Config.project_root = orig
     end
 
-    context "without project metadata" do
-      before(:each) do
-        allow(Pkg::Config).to receive(:config_from_metadata).and_raise('ruh-roh')
+    context "given ext/build_defaults.yaml and ext/project_data.yaml are readable" do
+      it "should try to load build_defaults.yaml and project_data.yaml" do
+        allow(File).to receive(:readable?).with(@test_project_data).and_return(true)
+        allow(File).to receive(:readable?).with(@test_build_defaults).and_return(true)
+        expect(Pkg::Config).to receive(:config_from_yaml).with(@test_project_data)
+        expect(Pkg::Config).to receive(:config_from_yaml).with(@test_build_defaults)
+        Pkg::Config.load_default_configs
       end
-      context "given ext/build_defaults.yaml and ext/project_data.yaml are readable" do
-        it "should try to load build_defaults.yaml and project_data.yaml" do
-          allow(File).to receive(:readable?).with(@test_project_data).and_return(true)
-          allow(File).to receive(:readable?).with(@test_build_defaults).and_return(true)
-          expect(Pkg::Config).to receive(:config_from_yaml).with(@test_project_data)
-          expect(Pkg::Config).to receive(:config_from_yaml).with(@test_build_defaults)
-          Pkg::Config.load_default_configs
-        end
+    end
+
+    context "given ext/build_defaults.yaml is readable but ext/project_data.yaml is not" do
+      it "should try to load build_defaults.yaml but not project_data.yaml" do
+        allow(File).to receive(:readable?).with(@test_project_data).and_return(false)
+        allow(File).to receive(:readable?).with(@test_build_defaults).and_return(true)
+        expect(Pkg::Config).to_not receive(:config_from_yaml).with(@test_project_data)
+        expect(Pkg::Config).to receive(:config_from_yaml).with(@test_build_defaults)
+        Pkg::Config.load_default_configs
+      end
+    end
+
+    context "given ext/build_defaults.yaml is not readable but ext/project_data.yaml is" do
+      it "should try to load build_defaults.yaml then unset project_root" do
+        allow(File).to receive(:readable?).with(@test_project_data).and_return(true)
+        allow(File).to receive(:readable?).with(@test_build_defaults).and_return(false)
+        expect(Pkg::Config).to_not receive(:config_from_yaml).with(@test_build_defaults)
+        Pkg::Config.load_default_configs
+        expect(Pkg::Config.project_root).to be_nil
+      end
+    end
+
+    context "given ext/build_defaults.yaml and ext/project_data.yaml are not readable" do
+      it "should not try to load build_defaults.yaml and project_data.yaml" do
+        Pkg::Config.project_root = 'foo'
+        expect(Pkg::Config).to_not receive(:config_from_yaml)
+        Pkg::Config.load_default_configs
       end
 
-      context "given ext/build_defaults.yaml is readable but ext/project_data.yaml is not" do
-        it "should try to load build_defaults.yaml but not project_data.yaml" do
-          allow(File).to receive(:readable?).with(@test_project_data).and_return(false)
-          allow(File).to receive(:readable?).with(@test_build_defaults).and_return(true)
-          expect(Pkg::Config).to_not receive(:config_from_yaml).with(@test_project_data)
-          expect(Pkg::Config).to receive(:config_from_yaml).with(@test_build_defaults)
-          Pkg::Config.load_default_configs
-        end
-      end
-
-      context "given ext/build_defaults.yaml is not readable but ext/project_data.yaml is" do
-        it "should try to load build_defaults.yaml then unset project_root" do
-          allow(File).to receive(:readable?).with(@test_project_data).and_return(true)
-          allow(File).to receive(:readable?).with(@test_build_defaults).and_return(false)
-          expect(Pkg::Config).to_not receive(:config_from_yaml).with(@test_build_defaults)
-          Pkg::Config.load_default_configs
-          expect(Pkg::Config.project_root).to be_nil
-        end
-      end
-
-      context "given ext/build_defaults.yaml and ext/project_data.yaml are not readable" do
-        it "should not try to load build_defaults.yaml and project_data.yaml" do
-          Pkg::Config.project_root = 'foo'
-          expect(Pkg::Config).to_not receive(:config_from_yaml)
-          Pkg::Config.load_default_configs
-        end
-
-        it "should set the project root to nil" do
-          Pkg::Config.project_root = 'foo'
-          Pkg::Config.load_default_configs
-          expect(Pkg::Config.project_root).to be_nil
-        end
+      it "should set the project root to nil" do
+        Pkg::Config.project_root = 'foo'
+        Pkg::Config.load_default_configs
+        expect(Pkg::Config.project_root).to be_nil
       end
     end
   end

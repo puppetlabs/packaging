@@ -18,6 +18,7 @@ module Pkg
   require 'packaging/artifactory'
   require 'packaging/retrieve'
   require 'packaging/sign'
+  require 'packaging/metadata'
 
   # Load configuration defaults
   Pkg::Config.load_defaults

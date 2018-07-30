@@ -20,17 +20,3 @@ def reset_env(keys)
     ENV[key] = nil
   end
 end
-
-RSpec.configure do |config|
-  if Pkg::Util::OS.windows? && RUBY_VERSION =~ /^1\./
-    require 'win32console'
-    config.output_stream = $stdout
-    config.error_stream = $stderr
-
-    config.formatters.each do |f|
-      if not f.instance_variable_get(:@output).kind_of?(::File)
-        f.instance_variable_set(:@output, $stdout)
-      end
-    end
-  end
-end

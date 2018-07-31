@@ -4,6 +4,16 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.99.9] - 2018-07-31
+### Changed
+- Dropped support for Ruby 1.9.3.
+- Bumped rake dependency to ~> 12.3.
+- Removed unnecessary win32console dependency.
+
+### Fixed
+- Fail messages when `project` is unset now includes the correct environment
+  variable to set (`PROJECT_OVERRIDE`).
+
 ## [0.99.8] - 2018-07-12
 ### Changed
 - 64-bit platform architectures are now listed first to maintain consistency
@@ -217,7 +227,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.8...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.9...HEAD
+[0.99.9]: https://github.com/puppetlabs/packaging/compare/0.99.8...0.99.9
 [0.99.8]: https://github.com/puppetlabs/packaging/compare/0.99.7...0.99.8
 [0.99.7]: https://github.com/puppetlabs/packaging/compare/0.99.6...0.99.7
 [0.99.6]: https://github.com/puppetlabs/packaging/compare/0.99.5...0.99.6

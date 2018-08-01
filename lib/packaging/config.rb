@@ -353,10 +353,10 @@ module Pkg
 
       def deb_build_targets
         if self.vanagon_project
-          fail "ERROR: Could not find any deb targets. Try adding `deb_targets` to your build_defaults.yaml." unless self.deb_targets
+          fail "ERROR: Could not find any deb targets. Try adding `deb_targets` to your build_defaults.yaml. If you don't want to build any debs, set this to an empty string." unless self.deb_targets
           self.deb_targets.split(' ')
         else
-          fail "ERROR: Could not find any deb targets. Try adding `cows` to your build_defaults.yaml." unless self.cows
+          fail "ERROR: Could not find any deb targets. Try adding `cows` to your build_defaults.yaml. If you don't want to build any debs, set this to an empty string." unless self.cows
           self.cows.split(' ').map do |cow|
             codename, arch = self.cow_to_codename_arch(cow)
             "#{codename}-#{arch}"
@@ -366,10 +366,10 @@ module Pkg
 
       def rpm_build_targets
         if self.vanagon_project
-          fail "ERROR: Could not find any rpm targets. Try adding `rpm_targets` to your build_defaults.yaml." unless self.rpm_targets
+          fail "ERROR: Could not find any rpm targets. Try adding `rpm_targets` to your build_defaults.yaml. If you don't want to build any rpms, set this to an empty string." unless self.rpm_targets
           self.rpm_targets.split(' ')
         else
-          fail "ERROR: Could not find any rpm targets. Try adding `final_mocks` to your build_defaults.yaml." unless self.final_mocks
+          fail "ERROR: Could not find any rpm targets. Try adding `final_mocks` to your build_defaults.yaml. If you don't want to build any rpms, set this to an empty string." unless self.final_mocks
           self.final_mocks.split(' ').map do |mock|
             platform, version, arch = self.mock_to_dist_version_arch(mock)
             "#{platform}-#{version}-#{arch}"

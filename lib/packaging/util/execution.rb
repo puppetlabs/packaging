@@ -42,6 +42,33 @@ module Pkg::Util::Execution
     def capture3(command, debug = false)
       require 'open3'
       puts "Executing '#{command}'..." if debug
+      # The following is for windows systems attempting to use
+      # packaging. In that scenario, it's often that C:\Program Files
+      # is a part of the path to executables.
+      #
+      # The space in program files causes execution to fail in ruby
+      #
+      # To remedy the space in C:\Program Files, we use the windows environment var
+      # %ProgramFiles% in it's place. Unfortunately, in order to use that env var we
+      # also need to escape the system call with "s. Even more unfortunate: we can _only_
+      # escape the executable path, not the whole command string, otherwise windows will
+      # bail out of execution.
+      #
+      # So here we are: the following checks if the command starts with C:/Program Files,
+      # then replaces that string with %ProgramFiles%. Then splits the command string using
+      # spaces as a delimeter (now that there is no space in C:/Program Files) and surrounds
+      # the first section (the executable) with "s.
+      #
+      #                                                  - Sean P. McDonald 8/3/18
+      if command.start_with?("C:/Program Files")
+        command_parts = command.gsub("C:/Program Files", "%ProgramFiles%").split(' ')
+        command_parts[0] = "\"" + command_parts[0] + "\""
+        command = command_parts.join(' ')
+      elsif command.start_with?("C:/Program Files (x86)")
+        command_parts = command.gsub("C:/Program Files (x86)", "%ProgramFiles(x86)%").split(' ')
+        command_parts[0] = "\"" + command_parts[0] + "\""
+        command = command_parts.join(' ')
+      end
       stdout, stderr, ret = Open3.capture3(command)
       unless Pkg::Util::Execution.success?(ret)
         raise "#{stdout}#{stderr}"

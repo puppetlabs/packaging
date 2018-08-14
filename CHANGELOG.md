@@ -5,7 +5,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ## [Unreleased]
 ## [0.6.8] - 2018-08-14
 ### Changed
-- Remove stickler and nexus configs for gem shipping
+- Remove stickler and nexus configs for gem shipping.
 
 ## [0.6.7] - 2018-07-11
 ### Fixed

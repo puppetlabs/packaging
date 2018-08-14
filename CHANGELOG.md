@@ -3,6 +3,9 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.6.8] - 2018-08-14
+### Changed
+- Remove stickler and nexus configs for gem shipping.
 
 ## [0.99.9] - 2018-07-31
 ### Changed
@@ -227,6 +230,7 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
+<<<<<<< HEAD
 [Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.9...HEAD
 [0.99.9]: https://github.com/puppetlabs/packaging/compare/0.99.8...0.99.9
 [0.99.8]: https://github.com/puppetlabs/packaging/compare/0.99.7...0.99.8
@@ -238,6 +242,10 @@ this is a final version.
 [0.99.2]: https://github.com/puppetlabs/packaging/compare/0.99.1...0.99.2
 [0.99.1]: https://github.com/puppetlabs/packaging/compare/0.99.0...0.99.1
 [0.99.0]: https://github.com/puppetlabs/packaging/compare/0.6.2...0.99.0
+=======
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.6.8...master
+[0.6.8]: https://github.com/puppetlabs/packaging/compare/0.6.7...0.6.8
+>>>>>>> master
 [0.6.7]: https://github.com/puppetlabs/packaging/compare/0.6.6...0.6.7
 [0.6.6]: https://github.com/puppetlabs/packaging/compare/0.6.5...0.6.6
 [0.6.5]: https://github.com/puppetlabs/packaging/compare/0.6.4...0.6.5

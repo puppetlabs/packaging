@@ -108,7 +108,7 @@ this is a final version.
 ## [0.99.1] - 2018-02-06
 ### Fixed
  - Some tidying and maintenance in the gemspec file.
- - Platform tag parsing wasn't recognizing tags for sources (el-6-SRPMS or 
+ - Platform tag parsing wasn't recognizing tags for sources (el-6-SRPMS or
    ubuntu-16.04-source for example).
  - Updated to use `Pkg::Util::RakeUtils.invoke_task` instead of the deprecated
    `invoke_task`.
@@ -230,7 +230,6 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-<<<<<<< HEAD
 [Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.9...HEAD
 [0.99.9]: https://github.com/puppetlabs/packaging/compare/0.99.8...0.99.9
 [0.99.8]: https://github.com/puppetlabs/packaging/compare/0.99.7...0.99.8
@@ -242,10 +241,7 @@ this is a final version.
 [0.99.2]: https://github.com/puppetlabs/packaging/compare/0.99.1...0.99.2
 [0.99.1]: https://github.com/puppetlabs/packaging/compare/0.99.0...0.99.1
 [0.99.0]: https://github.com/puppetlabs/packaging/compare/0.6.2...0.99.0
-=======
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.6.8...master
 [0.6.8]: https://github.com/puppetlabs/packaging/compare/0.6.7...0.6.8
->>>>>>> master
 [0.6.7]: https://github.com/puppetlabs/packaging/compare/0.6.6...0.6.7
 [0.6.6]: https://github.com/puppetlabs/packaging/compare/0.6.5...0.6.6
 [0.6.5]: https://github.com/puppetlabs/packaging/compare/0.6.4...0.6.5

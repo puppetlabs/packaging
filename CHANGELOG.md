@@ -3,10 +3,6 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
-## [0.99.10] - 2018-08-14
-### Changed
-- Fix find_tool for windows
-- Improve error messages for missing build targets
 
 ## [0.99.9] - 2018-07-31
 ### Changed
@@ -109,7 +105,7 @@ this is a final version.
 ## [0.99.1] - 2018-02-06
 ### Fixed
  - Some tidying and maintenance in the gemspec file.
- - Platform tag parsing wasn't recognizing tags for sources (el-6-SRPMS or
+ - Platform tag parsing wasn't recognizing tags for sources (el-6-SRPMS or 
    ubuntu-16.04-source for example).
  - Updated to use `Pkg::Util::RakeUtils.invoke_task` instead of the deprecated
    `invoke_task`.
@@ -231,8 +227,7 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.10...HEAD
-[0.99.10]: https://github.com/puppetlabs/packaging/compare/0.99.9...0.99.10
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.9...HEAD
 [0.99.9]: https://github.com/puppetlabs/packaging/compare/0.99.8...0.99.9
 [0.99.8]: https://github.com/puppetlabs/packaging/compare/0.99.7...0.99.8
 [0.99.7]: https://github.com/puppetlabs/packaging/compare/0.99.6...0.99.7

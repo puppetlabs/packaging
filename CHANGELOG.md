@@ -5,7 +5,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ## [Unreleased]
 ## [0.99.10] - 2018-08-14
 ### Changed
-- Fix find_tool for windows.
+- Fix find_tool for Windows.
 - Improve error messages for missing build targets.
 
 ## [0.99.9] - 2018-07-31

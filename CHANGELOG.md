@@ -3,9 +3,6 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
-## [0.6.8] - 2018-08-14
-### Changed
-- Remove stickler and nexus configs for gem shipping.
 
 ## [0.99.9] - 2018-07-31
 ### Changed
@@ -133,6 +130,10 @@ this is a final version.
    [here](https://github.com/puppetlabs/packaging/compare/0.6.2...0.99.0). If you
    find anything we unintentionally broke, please open a ticket
    [here](https://tickets.puppetlabs.com/browse/CPR).
+
+## [0.6.8] - 2018-08-14
+### Changed
+- Remove stickler and nexus configs for gem shipping.
 
 ## [0.6.7] - 2018-07-11
 ### Fixed

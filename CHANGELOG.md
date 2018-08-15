@@ -105,7 +105,7 @@ this is a final version.
 ## [0.99.1] - 2018-02-06
 ### Fixed
  - Some tidying and maintenance in the gemspec file.
- - Platform tag parsing wasn't recognizing tags for sources (el-6-SRPMS or 
+ - Platform tag parsing wasn't recognizing tags for sources (el-6-SRPMS or
    ubuntu-16.04-source for example).
  - Updated to use `Pkg::Util::RakeUtils.invoke_task` instead of the deprecated
    `invoke_task`.
@@ -130,6 +130,10 @@ this is a final version.
    [here](https://github.com/puppetlabs/packaging/compare/0.6.2...0.99.0). If you
    find anything we unintentionally broke, please open a ticket
    [here](https://tickets.puppetlabs.com/browse/CPR).
+
+## [0.6.8] - 2018-08-14
+### Changed
+- Remove stickler and nexus configs for gem shipping.
 
 ## [0.6.7] - 2018-07-11
 ### Fixed
@@ -238,6 +242,7 @@ this is a final version.
 [0.99.2]: https://github.com/puppetlabs/packaging/compare/0.99.1...0.99.2
 [0.99.1]: https://github.com/puppetlabs/packaging/compare/0.99.0...0.99.1
 [0.99.0]: https://github.com/puppetlabs/packaging/compare/0.6.2...0.99.0
+[0.6.8]: https://github.com/puppetlabs/packaging/compare/0.6.7...0.6.8
 [0.6.7]: https://github.com/puppetlabs/packaging/compare/0.6.6...0.6.7
 [0.6.6]: https://github.com/puppetlabs/packaging/compare/0.6.5...0.6.6
 [0.6.5]: https://github.com/puppetlabs/packaging/compare/0.6.4...0.6.5

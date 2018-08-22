@@ -14,7 +14,8 @@ if Pkg::Config.build_pe
       { :OS => 'el', :version => 7 },
       { :OS => 'sles', :version => 10 },
       { :OS => 'sles', :version => 11 },
-      { :OS => 'sles', :version => 12 }
+      { :OS => 'sles', :version => 12 },
+      { :OS => 'sles', :version => 15 }
       ]
       ['i386', 'x86_64'].each do |arch|
         sign_dists.each do |dist|

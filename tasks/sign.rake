@@ -93,6 +93,7 @@ namespace :pl do
       Dir["#{rpm_dir}/nxos/**/*.rpm"] +
       Dir["#{rpm_dir}/cisco-wrlinux/**/*.rpm"] +
       Dir["#{rpm_dir}/sles/12/**/*.rpm"] +
+      Dir["#{rpm_dir}/sles/15/**/*.rpm"] +
       Dir["#{rpm_dir}/eos/**/**/*.rpm"]
 
     # We don't sign AIX rpms, but we don't want to fail because they

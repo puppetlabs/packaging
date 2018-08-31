@@ -3,6 +3,13 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.11] - 2018-09-04
+### Added
+- (PA-2001) Add support for SLES 15.
+
+### Changed
+- Use packaging gem in uber_build job templates.
+
 ## [0.99.10] - 2018-08-14
 ### Changed
 - Fix find_tool for Windows.
@@ -235,7 +242,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.10...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.11...HEAD
+[0.99.11]: https://github.com/puppetlabs/packaging/compare/0.99.10...0.99.11
 [0.99.10]: https://github.com/puppetlabs/packaging/compare/0.99.9...0.99.10
 [0.99.9]: https://github.com/puppetlabs/packaging/compare/0.99.8...0.99.9
 [0.99.8]: https://github.com/puppetlabs/packaging/compare/0.99.7...0.99.8

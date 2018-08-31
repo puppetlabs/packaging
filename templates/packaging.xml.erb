@@ -37,7 +37,7 @@ pl:jenkins:uber_build NOTIFY=foo@puppetlabs.com&#xd;
   Successful completion of packaging will result in the automatic creation of&#xd;
   apt/yum repositories on the distribution server with the built packages.  To&#xd;
   generate client apt/yum repository config files for accessing these packages,&#xd;
-  check out the ref of the git sha that was packaged, and run `rake&#xd;
+  check out the ref of the git sha that was packaged, and run `bundle exec rake&#xd;
   pl:jenkins:(deb|rpm)_repo_configs`. Configuration files will be generated and&#xd;
   deposited locally in pkg/repo_configs.&#xd;
 &lt;/p&gt;&#xd;
@@ -146,13 +146,13 @@ pushd project
   pushd git_repo
 
     ### Clone the packaging repo
-    rake package:bootstrap
+    bundle install --path .bundle/gems --binstubs .bundle/bin --retry 3
 
     ### Perform the build
-    rake $command PARAMS_FILE=&quot;$WORKSPACE/BUILD_PROPERTIES&quot; --trace
+    bundle exec rake $command PARAMS_FILE=&quot;$WORKSPACE/BUILD_PROPERTIES&quot; --trace
 
     ### Send the results
-    rake pl:jenkins:ship[&quot;artifacts&quot;] PARAMS_FILE=&quot;$WORKSPACE/BUILD_PROPERTIES&quot; --trace
+    bundle exec rake pl:jenkins:ship[&quot;artifacts&quot;] PARAMS_FILE=&quot;$WORKSPACE/BUILD_PROPERTIES&quot; --trace
 
   popd
 popd</command>

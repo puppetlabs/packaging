@@ -71,16 +71,16 @@ if [ $PACKAGE_BUILD_RESULT -eq 0 ] ; then
     pushd git_repo
 
       ### Clone the packaging repo
-      rake package:bootstrap --trace
+      bundle install --path .bundle/gems --binstubs .bundle/bin --retry 3
 
       ### Run repo creation
 <% if Pkg::Config.final_mocks and not Pkg::Config.final_mocks.empty? %>
-      rake PARAMS_FILE=../../BUILD_PROPERTIES pl:jenkins:rpm_repos --trace
+      bundle exec rake PARAMS_FILE=../../BUILD_PROPERTIES pl:jenkins:rpm_repos --trace
 <% else %>
       echo "No mock/rpm targets found, skipping rpm repo creation"
 <% end %>
 <% if Pkg::Config.cows and not Pkg::Config.cows.empty? %>
-      rake PARAMS_FILE=../../BUILD_PROPERTIES pl:jenkins:deb_repos --trace
+      bundle exec rake PARAMS_FILE=../../BUILD_PROPERTIES pl:jenkins:deb_repos --trace
 <% else %>
       echo "No cow/deb targets found, skipping deb repo creation"
 <% end %>

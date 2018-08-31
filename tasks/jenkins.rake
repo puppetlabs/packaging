@@ -53,13 +53,13 @@
 #     pushd git_repo
 #
 #     ### Clone the packaging repo
-#     rake package:bootstrap
+#     bundle install --path .bundle/gems --binstubs .bundle/bin --retry 3
 #
 #     ### Perform the build
-#     rake pl:build_from_params PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
+#     bundle exec rake pl:build_from_params PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
 #
 #     ### Send the results
-#     rake pl:jenkins:ship["artifacts"] PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
+#     bundle exec rake pl:jenkins:ship["artifacts"] PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
 #
 #   popd
 # popd
@@ -75,7 +75,7 @@
 # if [ -n "$DOWNSTREAM_JOB" ] ; then
 #   pushd project
 #     pushd git_repo
-#       rake pl:jenkins:post["$DOWNSTREAM_JOB"] PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
+#       bundle exec rake pl:jenkins:post["$DOWNSTREAM_JOB"] PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
 #     popd
 #   popd
 # fi

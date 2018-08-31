@@ -359,12 +359,12 @@ module Pkg::Util::Net
 #{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ;
 git clone --recursive /tmp/#{tarball_name} /tmp/#{Pkg::Config.project}-#{appendix} ;
 cd /tmp/#{Pkg::Config.project}-#{appendix} ;
-bundle_prefix= ;
 if [[ -r Gemfile ]]; then
-  source /usr/local/rvm/scripts/rvm; rvm use ruby-2.4.1; bundle install --path .bundle/gems ;
-  bundle_prefix='bundle exec' ;
+  source /usr/local/rvm/scripts/rvm; rvm use ruby-2.4.1; bundle install --path .bundle/gems --binstubs .bundle/bin ;
+else
+  echo "ERROR: Couldn't read Gemfile, can't bundle install."
+  exit 1
 fi ;
-$bundle_prefix rake package:bootstrap
 DOC
       Pkg::Util::Net.remote_ssh_cmd(host, command)
       "/tmp/#{Pkg::Config.project}-#{appendix}"

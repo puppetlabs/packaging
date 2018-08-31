@@ -23,12 +23,13 @@ namespace :pl do
       Pkg::Util::Net.rsync_to('repos', signing_server, remote_repo)
       rake_command = <<-DOC
 cd #{remote_repo} ;
-bundle_prefix= ;
 if [[ -r Gemfile ]]; then
-  source /usr/local/rvm/scripts/rvm; rvm use ruby-2.4.1; bundle install --path .bundle/gems;
-  bundle_prefix='bundle exec';
+  source /usr/local/rvm/scripts/rvm; rvm use ruby-2.4.1; bundle install --path .bundle/gems --binstubs .bundle/bin;
+else
+  echo "ERROR: Couldn't read Gemfile, can't bundle install."
+  exit 1
 fi ;
-$bundle_prefix rake pl:jenkins:sign_repos GPG_KEY=#{Pkg::Util::Gpg.key} PARAMS_FILE=#{build_params}
+bundle exec rake pl:jenkins:sign_repos GPG_KEY=#{Pkg::Util::Gpg.key} PARAMS_FILE=#{build_params}
 DOC
       Pkg::Util::Net.remote_ssh_cmd(signing_server, rake_command)
       Pkg::Util::Net.rsync_from("#{remote_repo}/repos/", signing_server, target)

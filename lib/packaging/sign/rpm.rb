@@ -39,7 +39,7 @@ module Pkg::Sign::Rpm
     # lowercase, since that's what the `rpm -Kv` output uses.
     key = Pkg::Util::Gpg.key.downcase.chars.last(8).join
     signature_check_output, _, _ = Pkg::Util::Execution.capture3("rpm --checksig --verbose #{rpm}")
-    return signature_check_output.include? key
+    return signature_check_output.include? "key ID #{key}"
   end
 
   def sign_all(rpm_directory)

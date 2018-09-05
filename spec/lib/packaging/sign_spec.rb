@@ -30,6 +30,10 @@ DOC
         allow(Pkg::Util::Execution).to receive(:capture3).and_return([unsigned_response, '', 0])
         expect(Pkg::Sign::Rpm.has_sig?(rpm)).to be false
       end
+      it 'fails if gpg_key is not set' do
+        allow(Pkg::Config).to receive(:gpg_key).and_return(nil)
+        expect { Pkg::Sign::Rpm.has_sig?(rpm) }.to raise_error(RuntimeError, /You need to set `gpg_key` in your build defaults./)
+      end
     end
 
     describe '#sign_all' do

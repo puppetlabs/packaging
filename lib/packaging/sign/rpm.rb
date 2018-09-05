@@ -34,8 +34,12 @@ module Pkg::Sign::Rpm
   end
 
   def has_sig?(rpm)
-    %x(rpm -Kv #{rpm} | grep "#{Pkg::Util::Gpg.key.downcase}" &> /dev/null)
-    $?.success?
+    # This should allow the `Pkg::Util::Gpg.key` method to fail if gpg_key is
+    # not set, before shelling out. We also only want the short key, all
+    # lowercase, since that's what the `rpm -Kv` output uses.
+    key = Pkg::Util::Gpg.key.downcase.chars.last(8).join
+    signature_check_output, _, _ = Pkg::Util::Execution.capture3("rpm --checksig --verbose #{rpm}")
+    return signature_check_output.include? key
   end
 
   def sign_all(rpm_directory)

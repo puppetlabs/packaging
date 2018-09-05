@@ -8,6 +8,30 @@ describe 'Pkg::Sign' do
       allow(Pkg::Config).to receive(:gpg_key).and_return('7F438280EF8D349F')
     end
 
+    describe '#has_sig?' do
+      let(:rpm) { 'foo.rpm' }
+      let(:signed_response) { <<-DOC
+Header V4 RSA/SHA256 Signature, key ID ef8d349f: NOKEY
+Header SHA1 digest: OK (3cb7e9861e8bc09783a1b6c8d88243a3c16daa81)
+V4 RSA/SHA256 Signature, key ID ef8d349f: NOKEY
+MD5 digest: OK (d5f06ba2a9053de532326d0659ec0d11)
+DOC
+      }
+      let(:unsigned_response) { <<-DOC
+Header SHA1 digest: OK (f9404cc95f200568c2dbb1fd24e1119e3e4a40a9)
+MD5 digest: OK (816095f3cee145091c3fa07a0915ce85)
+DOC
+      }
+      it 'returns true if rpm has been signed' do
+        allow(Pkg::Util::Execution).to receive(:capture3).and_return([signed_response, '', 0])
+        expect(Pkg::Sign::Rpm.has_sig?(rpm)).to be true
+      end
+      it 'returns false if rpm has not been signed' do
+        allow(Pkg::Util::Execution).to receive(:capture3).and_return([unsigned_response, '', 0])
+        expect(Pkg::Sign::Rpm.has_sig?(rpm)).to be false
+      end
+    end
+
     describe '#sign_all' do
       let(:rpm_directory) { 'foo' }
       let(:rpms_not_to_sign) { [
@@ -48,6 +72,7 @@ describe 'Pkg::Sign' do
 
       it 'does not sign AIX rpms' do
         allow(Dir).to receive(:[]).with("#{rpm_directory}/**/*.rpm").and_return(rpms_not_to_sign)
+        allow(Pkg::Sign::Rpm).to receive(:has_sig?)
         expect(Pkg::Sign::Rpm).to_not receive(:legacy_sign)
         expect(Pkg::Sign::Rpm).to_not receive(:sign)
         Pkg::Sign::Rpm.sign_all(rpm_directory)
@@ -66,6 +91,7 @@ describe 'Pkg::Sign' do
       it 'deletes and relinks rpms with the same basename' do
         allow(Dir).to receive(:[]).with("#{rpm_directory}/**/*.rpm").and_return(noarch_rpms)
         allow(Pkg::Sign::Rpm).to receive(:sign)
+        allow(Pkg::Sign::Rpm).to receive(:has_sig?)
         expect(FileUtils).to receive(:rm).exactly(noarch_rpms.count/2).times
         expect(FileUtils).to receive(:ln).exactly(noarch_rpms.count/2).times
         Pkg::Sign::Rpm.sign_all(rpm_directory)

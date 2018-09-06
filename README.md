@@ -446,7 +446,7 @@ packager: 'puppetlabs'
 # GPG key ID of the signer
 gpg_key: '7F438280EF8D349F'
 # Whether to require tarball signing as a prerequisite of other package building
-sign_tar: FALSE
+sign_tar: false
 # a space separated list of mock configs. These are the rpm distributions to package for. If a noarch package, only one arch of each is needed.
 final_mocks: 'pl-el-5-i386 pl-el-5-x86_64 pl-el-6-i386 pl-el-6-x86_64 pl-fedora-16-i386 pl-fedora-16-x86_64 pl-fedora-17-i386 pl-fedora-17-x86_64'
 # The host that contains the yum repository to ship to
@@ -462,10 +462,10 @@ apt_repo_path: '/opt/repository/incoming'
 # The host that stores the tarballs for downloading
 tar_host: 'downloads.puppetlabs.com'
 # Whether to present the gem and apple tasks
-build_gem: TRUE
-build_dmg: TRUE
+build_gem: true
+build_dmg: true
 # Whether to execute the rdoc rake tasks prior to composing the tarball
-build_doc: FALSE
+build_doc: false
 # Whether to kick of a dynamic msi build job along side the uber_build
 # If present, a dynamically generated jenkins job will be kicked off.
 # The automation in puppet_for_the_win is used to build the msi with the
@@ -487,9 +487,9 @@ build_msi:
     repo: 'git://github.com/puppetlabs/puppet-win32-ruby.git'
 # Whether to present the Solaris 11 IPS packaging tasks
 # This requires suitable IPS packaging artifacts in the project in ext/ips
-build_ips: FALSE
+build_ips: false
 # Whether this project is a PE project or not
-build_pe: FALSE
+build_pe: false
 # An optional task to execute pre-tarball composition. See the tasks in
 # the 'pretasks' directory
 pre_tar_task: 'package:vendor_gems'
@@ -657,7 +657,7 @@ files:
 * **package:apple**
 
     Use `PackageMaker` to create a pkg package inside a dmg. Requires 'sudo'
-    privileges. `build_dmg: TRUE` must be set in `ext/build_defaults.yaml`.
+    privileges. `build_dmg: true` must be set in `ext/build_defaults.yaml`.
     Packages are staged in ./pkg/apple. See the Mac packaging section of
     [Setting up projects for the Packaging
     Repo](https://github.com/MosesMendoza/packaging/tree/more_documentation#setting-up-projects-for-the-packaging-repo).
@@ -677,7 +677,7 @@ files:
 
 * **package:gem**
     Use the `rubygems/package_task` library to create a rubygem from the
-    repository. Requires `build_gem: TRUE` and gem-related parameters be set in
+    repository. Requires `build_gem: true` and gem-related parameters be set in
     `ext/build_defaults.yaml` and `ext/project\_data.yaml`. The gem is staged
     in `./pkg`.
 

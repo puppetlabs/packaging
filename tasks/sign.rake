@@ -120,7 +120,7 @@ namespace :pl do
   desc "Check if all rpms are signed"
   task :check_rpm_sigs, :root_dir do |_t, args|
     rpm_dir = args.root_dir || $DEFAULT_DIRECTORY
-    signed = TRUE
+    signed = true
     rpms = Dir["#{rpm_dir}/**/*.rpm"]
     print 'Checking rpm signatures'
     rpms.each do |rpm|
@@ -128,7 +128,7 @@ namespace :pl do
         print '.'
       else
         puts "#{rpm} is unsigned."
-        signed = FALSE
+        signed = false
       end
     end
     fail unless signed

@@ -25,7 +25,7 @@ module Pkg::Util::Gpg
           kill_keychain
           start_keychain
         end
-        @keychain_loaded = TRUE
+        @keychain_loaded = true
       end
     end
 

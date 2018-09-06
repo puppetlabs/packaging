@@ -71,6 +71,9 @@ if [ $PACKAGE_BUILD_RESULT -eq 0 ] ; then
     pushd git_repo
 
       ### Clone the packaging repo
+      <% if ENV['PACKAGING_LOCATION'] && !ENV['PACKAGING_LOCATION'].empty? %>
+        export PACKAGING_LOCATION=&quot;<%= ENV['PACKAGING_LOCATION'] %>&quot;
+      <% end %>
       bundle install --path .bundle/gems --binstubs .bundle/bin --retry 3
 
       ### Run repo creation

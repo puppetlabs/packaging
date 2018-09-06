@@ -146,6 +146,7 @@ pushd project
   pushd git_repo
 
     ### Clone the packaging repo
+    export PACKAGING_LOCATION=&quot;<%= ENV['PACKAGING_LOCATION'] %>&quot;
     bundle install --path .bundle/gems --binstubs .bundle/bin --retry 3
 
     ### Perform the build

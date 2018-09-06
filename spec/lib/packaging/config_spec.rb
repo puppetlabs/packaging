@@ -168,10 +168,10 @@ describe "Pkg::Config" do
       end
     end
 
-    mixed_params = { :sign_tar => TRUE, :baz => 'qux' }
+    mixed_params = { :sign_tar => true, :baz => 'qux' }
     context "given a hash with both valid and invalid params" do
       it "should set the valid param" do
-        Pkg::Config.should_receive(:instance_variable_set).with("@sign_tar", TRUE)
+        Pkg::Config.should_receive(:instance_variable_set).with("@sign_tar", true)
         Pkg::Config.config_from_hash(mixed_params)
       end
 
@@ -190,7 +190,7 @@ describe "Pkg::Config" do
   describe "#params" do
     it "should return a hash containing keys for all build parameters" do
       params = Pkg::Config.config
-      Build_Params.each { |param| params.has_key?(param).should == TRUE }
+      Build_Params.each { |param| params.has_key?(param).should == true }
     end
   end
 

@@ -22,8 +22,8 @@ module Pkg::Util
   require 'packaging/util/git_tags'
 
   def self.boolean_value(var)
-    return TRUE if var == TRUE || ( var.is_a?(String) && ( var.downcase == 'true' || var.downcase =~ /^y$|^yes$/))
-    FALSE
+    return true if var == true || ( var.is_a?(String) && ( var.downcase == 'true' || var.downcase =~ /^y$|^yes$/))
+    return false
   end
 
   def self.in_project_root(&blk)

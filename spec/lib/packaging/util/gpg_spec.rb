@@ -24,7 +24,7 @@ describe "Pkg::Util::Gpg" do
 
   describe '#kill_keychain' do
     it "doesn't reload the keychain if already loaded" do
-      Pkg::Util::Gpg.instance_variable_set("@keychain_loaded", TRUE)
+      Pkg::Util::Gpg.instance_variable_set("@keychain_loaded", true)
       Pkg::Util::Gpg.should_receive(:kill_keychain).never
       Pkg::Util::Gpg.should_receive(:start_keychain).never
       Pkg::Util::Gpg.load_keychain

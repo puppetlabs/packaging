@@ -38,7 +38,12 @@ module Pkg::Sign::Rpm
     # not set, before shelling out. We also only want the short key, all
     # lowercase, since that's what the `rpm -Kv` output uses.
     key = Pkg::Util::Gpg.key.downcase.chars.last(8).join
-    signature_check_output, _, _ = Pkg::Util::Execution.capture3("rpm --checksig --verbose #{rpm}")
+    signature_check_output = %x(rpm --checksig --verbose #{rpm})
+    # If the signing key has not been loaded on the system this is running on,
+    # the check will exit 1, even if the rpm is signed, so we can't use capture3,
+    # which bails out with non-0 exit codes. Instead, check that the output
+    # looks more-or-less how we expect it to.
+    fail "Something went wrong checking the signature of #{rpm}." unless signature_check_output.include? "Header"
     return signature_check_output.include? "key ID #{key}"
   end
 

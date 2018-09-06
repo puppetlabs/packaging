@@ -37,20 +37,24 @@ MD5 digest: OK (816095f3cee145091c3fa07a0915ce85)
 DOC
       }
       it 'returns true if rpm has been signed (el7)' do
-        allow(Pkg::Util::Execution).to receive(:capture3).and_return([el7_signed_response, '', 0])
+        allow(Pkg::Sign::Rpm).to receive(:`).and_return(el7_signed_response)
         expect(Pkg::Sign::Rpm.has_sig?(rpm)).to be true
       end
       it 'returns true if rpm has been signed (el5)' do
-        allow(Pkg::Util::Execution).to receive(:capture3).and_return([el5_signed_response, '', 0])
+        allow(Pkg::Sign::Rpm).to receive(:`).and_return(el5_signed_response)
         expect(Pkg::Sign::Rpm.has_sig?(rpm)).to be true
       end
       it 'returns true if rpm has been signed (sles12)' do
-        allow(Pkg::Util::Execution).to receive(:capture3).and_return([sles12_signed_response, '', 0])
+        allow(Pkg::Sign::Rpm).to receive(:`).and_return(sles12_signed_response)
         expect(Pkg::Sign::Rpm.has_sig?(rpm)).to be true
       end
       it 'returns false if rpm has not been signed' do
-        allow(Pkg::Util::Execution).to receive(:capture3).and_return([unsigned_response, '', 0])
+        allow(Pkg::Sign::Rpm).to receive(:`).and_return(unsigned_response)
         expect(Pkg::Sign::Rpm.has_sig?(rpm)).to be false
+      end
+      it 'fails with unexpected output' do
+        allow(Pkg::Sign::Rpm).to receive(:`).and_return('something that is definitely not a normal response')
+        expect { Pkg::Sign::Rpm.has_sig?(rpm) }.to raise_error(RuntimeError, /Something went wrong checking the signature/)
       end
       it 'fails if gpg_key is not set' do
         allow(Pkg::Config).to receive(:gpg_key).and_return(nil)

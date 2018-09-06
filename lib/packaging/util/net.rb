@@ -361,7 +361,7 @@ git clone --recursive /tmp/#{tarball_name} /tmp/#{Pkg::Config.project}-#{appendi
 cd /tmp/#{Pkg::Config.project}-#{appendix} ;
 bundle_prefix= ;
 if [[ -r Gemfile ]]; then
-  source /usr/local/rvm/scripts/rvm; rvm use ruby-2.4.1; bundle install --path .bundle/gems ;
+  source /usr/local/rvm/scripts/rvm; rvm use ruby-2.4.1; export PACKAGING_LOCATION=#{ENV['PACKAGING_LOCATION']}; bundle install --path .bundle/gems ;
   bundle_prefix='bundle exec' ;
 fi ;
 $bundle_prefix rake package:bootstrap

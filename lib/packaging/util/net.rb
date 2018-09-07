@@ -361,13 +361,19 @@ git clone --recursive /tmp/#{tarball_name} /tmp/#{Pkg::Config.project}-#{appendi
 cd /tmp/#{Pkg::Config.project}-#{appendix} ;
 bundle_prefix= ;
 if [[ -r Gemfile ]]; then
-  source /usr/local/rvm/scripts/rvm; rvm use ruby-2.4.1; bundle install --path .bundle/gems ;
+  #{remote_bundle_install_command}
   bundle_prefix='bundle exec' ;
 fi ;
 $bundle_prefix rake package:bootstrap
 DOC
       Pkg::Util::Net.remote_ssh_cmd(host, command)
       "/tmp/#{Pkg::Config.project}-#{appendix}"
+    end
+
+    def remote_bundle_install_command
+      export_packaging_location = ''
+      export_packaging_location = "export PACKAGING_LOCATION=#{ENV['PACKAGING_LOCATION']};" if ENV['PACKAGING_LOCATION'] && !ENV['PACKAGING_LOCATION'].empty?
+      command = "source /usr/local/rvm/scripts/rvm; rvm use ruby-2.4.1; #{export_packaging_location} bundle install --path .bundle/gems ;"
     end
 
     # Given a BuildInstance object and a host, send its params to the host. Return

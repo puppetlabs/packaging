@@ -25,7 +25,7 @@ namespace :pl do
 cd #{remote_repo} ;
 bundle_prefix= ;
 if [[ -r Gemfile ]]; then
-  source /usr/local/rvm/scripts/rvm; rvm use ruby-2.4.1; bundle install --path .bundle/gems;
+  #{Pkg::Util::Net.remote_bundle_install_command}
   bundle_prefix='bundle exec';
 fi ;
 $bundle_prefix rake pl:jenkins:sign_repos GPG_KEY=#{Pkg::Util::Gpg.key} PARAMS_FILE=#{build_params}

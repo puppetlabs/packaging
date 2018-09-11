@@ -3,6 +3,16 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.12] - 2018-09-11
+### Added
+- Export `PACKAGING_LOCATION` before doing remote bundle installs. Must be set to
+  a git branch and will fail if set to a local directory.
+
+### Changed
+- Use lowercase boolean constants.
+- Move rpm `sign_all` method into Pkg::Sign::Rpm module.
+- Updates to `has_sig?` for better testing and now checks for short gpg key rather than full.
+
 ## [0.99.11] - 2018-09-04
 ### Added
 - (PA-2001) Add support for SLES 15.
@@ -242,7 +252,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.11...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.12...HEAD
+[0.99.12]: https://github.com/puppetlabs/packaging/compare/0.99.11...0.99.12
 [0.99.11]: https://github.com/puppetlabs/packaging/compare/0.99.10...0.99.11
 [0.99.10]: https://github.com/puppetlabs/packaging/compare/0.99.9...0.99.10
 [0.99.9]: https://github.com/puppetlabs/packaging/compare/0.99.8...0.99.9

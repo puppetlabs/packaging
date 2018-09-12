@@ -3,6 +3,10 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.13] - 2018-09-12
+### Fixed
+- Don't run `has_sig?` for AIX packages.
+
 ## [0.99.12] - 2018-09-11
 ### Added
 - Export `PACKAGING_LOCATION` before doing remote bundle installs. Must be set to

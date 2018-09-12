@@ -69,15 +69,16 @@ module Pkg::Sign::Rpm
     v3_rpms = []
     v4_rpms = []
     rpms_to_sign.each do |rpm|
-      if has_sig? rpm
-        puts "#{rpm} is already signed, skipping . . ."
-        next
-      end
       platform_tag = Pkg::Paths.tag_from_artifact_path(rpm)
       platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
 
       # We don't sign AIX rpms
       next if platform_tag.include?('aix')
+
+      if has_sig? rpm
+        puts "#{rpm} is already signed, skipping . . ."
+        next
+      end
 
       case Pkg::Platforms.signature_format_for_platform_version(platform, version)
       when 'v3'

@@ -44,6 +44,7 @@ end
 #               in the ext/osx directory.
 def make_directory_tree
   project_tmp    = "#{Pkg::Util::File.mktemp}/#{@package_name}"
+  packaging_dir  = Gem::Specification.find_by_name('packaging').gem_dir
   @scratch       = "#{project_tmp}/#{@title}"
   @working_tree  = {
      'scripts'   => "#{@scratch}/scripts",
@@ -69,8 +70,8 @@ def make_directory_tree
     Pkg::Util::File.erb_file 'ext/osx/prototype.plist.erb', "#{@scratch}/prototype.plist", false, :binding => binding
   end
 
-  if File.exists?('ext/packaging/static_artifacts/PackageInfo.plist')
-    cp 'ext/packaging/static_artifacts/PackageInfo.plist', "#{@scratch}/PackageInfo.plist"
+  if File.exists?("#{packaging_dir}/static_artifacts/PackageInfo.plist")
+    cp "#{packaging_dir}/static_artifacts/PackageInfo.plist", "#{@scratch}/PackageInfo.plist"
   end
 
 end

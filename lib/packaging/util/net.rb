@@ -372,7 +372,7 @@ DOC
 
     def remote_bundle_install_command
       export_packaging_location = ''
-      export_packaging_location = "export PACKAGING_LOCATION=#{ENV['PACKAGING_LOCATION']};" if ENV['PACKAGING_LOCATION'] && !ENV['PACKAGING_LOCATION'].empty?
+      export_packaging_location = "export PACKAGING_LOCATION='#{ENV['PACKAGING_LOCATION']}';" if ENV['PACKAGING_LOCATION'] && !ENV['PACKAGING_LOCATION'].empty?
       command = "source /usr/local/rvm/scripts/rvm; rvm use ruby-2.4.1; #{export_packaging_location} bundle install --path .bundle/gems ;"
     end
 

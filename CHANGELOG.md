@@ -3,6 +3,13 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.14] - 2018-09-26
+### Fixed
+- Signed packages now get rsync'd back to the root directory they were
+  originally staged in.
+- Added quotes around the `PACKAGING_LOCATION` environment variable that gets
+  exported during remote bundle installs.
+
 ## [0.99.13] - 2018-09-12
 ### Fixed
 - Don't run `has_sig?` for AIX packages.
@@ -256,7 +263,9 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.12...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.14...HEAD
+[0.99.14]: https://github.com/puppetlabs/packaging/compare/0.99.13...0.99.14
+[0.99.13]: https://github.com/puppetlabs/packaging/compare/0.99.12...0.99.13
 [0.99.12]: https://github.com/puppetlabs/packaging/compare/0.99.11...0.99.12
 [0.99.11]: https://github.com/puppetlabs/packaging/compare/0.99.10...0.99.11
 [0.99.10]: https://github.com/puppetlabs/packaging/compare/0.99.9...0.99.10

@@ -294,6 +294,14 @@ module Pkg
           source_package_formats: DEBIAN_SOURCE_FORMATS,
           repo: true,
         },
+        '18.10' => {
+          codename: 'cosmic',
+          architectures: ['amd64', 'ppc64el'],
+          source_architecture: 'source',
+          package_format: 'deb',
+          source_package_formats: DEBIAN_SOURCE_FORMATS,
+          repo: true,
+        },
       },
 
       'windows' => {

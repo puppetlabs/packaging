@@ -292,6 +292,22 @@ namespace :pl do
     end
   end
 
+  desc 'Ship built gem to internal Gem mirror and public nightlies file server'
+  task ship_nightly_gem: 'pl:fetch' do
+    # We want to ship a Gem only for projects that build gems, so
+    # all of the Gem shipping tasks are wrapped in an `if`.
+    if Pkg::Config.build_gem
+      fail 'Value `Pkg::Config.gem_host` not defined, skipping nightly ship' unless Pkg::Config.gem_host
+      fail 'Value `Pkg::Config.nonfinal_gem_path` not defined, skipping nightly ship' unless Pkg::Config.nonfinal_gem_path
+      FileList['pkg/*.gem'].each do |gem_file|
+        Pkg::Gem.ship_to_internal_mirror(gem_file)
+      end
+      Pkg::Util::Execution.retry_on_fail(times: 3) do
+        Pkg::Util::Ship.ship_gem('pkg', Pkg::Config.nonfinal_gem_path, platform_independent: true)
+      end
+    end
+  end
+
   desc 'Ship built gem to rubygems.org'
   task :ship_gem_to_rubygems, [:file] => 'pl:fetch' do |_t, args|
     puts "Do you want to ship #{args[:file]} to rubygems.org?"

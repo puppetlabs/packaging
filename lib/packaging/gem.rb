@@ -35,9 +35,8 @@ module Pkg::Gem
     end
 
     def ship_to_internal_mirror(file)
-      internal_mirror_url = 'https://artifactory.delivery.puppetlabs.net/artifactory/api/gems/rubygems'
       internal_mirror_api_key_name = 'artifactory_api_key'
-      ship_to_rubygems(file, { :host => internal_mirror_url, :key => internal_mirror_api_key_name })
+      ship_to_rubygems(file, { :host => Pkg::Config.internal_gem_host, :key => internal_mirror_api_key_name })
     end
   end
 end

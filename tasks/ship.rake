@@ -283,7 +283,6 @@ namespace :pl do
           puts "Do you want to start shipping the rubygem '#{gem_file}'?"
           next unless Pkg::Util.ask_yes_or_no
           Rake::Task['pl:ship_gem_to_rubygems'].execute(file: gem_file)
-          Rake::Task['pl:ship_gem_to_internal_mirror'].execute(file: gem_file)
         end
 
         Rake::Task['pl:ship_gem_to_downloads'].invoke
@@ -301,13 +300,6 @@ namespace :pl do
       Pkg::Util::Execution.retry_on_fail(times: 3) do
         Pkg::Gem.ship_to_rubygems(args[:file])
       end
-    end
-  end
-
-  desc "Ship built gems to internal Gem server (#{Pkg::Config.internal_gem_host})"
-  task :ship_gem_to_internal_mirror, [:file] => 'pl:fetch' do |_t, args|
-    unless Pkg::Config.internal_gem_host
-      warn 'Value `Pkg::Config.internal_gem_host` not defined; skipping internal ship'
     end
   end
 

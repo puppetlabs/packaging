@@ -135,7 +135,7 @@ groups, e.g. to use mock on the builder, membership in the mock group. This is
 a major hurdle, and is resolved with the `jenkins` tasks below.
 
 ## legacy `:jenkins:` workflow tasks
-(Deprecated - see "dyamic jenkins task workflow" below)
+(Deprecated - see "dynamic jenkins task workflow" below)
 Jenkins tasks are similar to the `:remote:` tasks, but they do not require ssh
 access to the builders. They do require being on the local network - the
 jenkins instance that performs package builds is an internal server only,
@@ -502,7 +502,7 @@ author: 'Puppet'
 email: 'info@puppet.com'
 homepage: 'https://github.com/puppetlabs/hiera'
 summary: 'Light weight hierarchical data store'
-description: 'A pluggable data store for hierarcical data'
+description: 'A pluggable data store for hierarchical data'
 # file containing hard coded version information, if present
 version_file: '/lib/hiera.rb'
 # A string indicating the version strategy for the project (one of 'odd_even' or 'rc_final'), defaults to rc_final

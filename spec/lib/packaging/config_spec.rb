@@ -80,6 +80,7 @@ describe "Pkg::Config" do
                   :nonfinal_apt_repo_path,
                   :nonfinal_apt_repo_staging_path,
                   :nonfinal_dmg_path,
+                  :nonfinal_gem_path,
                   :nonfinal_ips_path,
                   :nonfinal_msi_path,
                   :nonfinal_p5p_path,

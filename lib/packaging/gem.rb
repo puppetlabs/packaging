@@ -18,9 +18,12 @@ module Pkg::Gem
     # Ship a Ruby gem file to rubygems.org. Requires the existence
     # of a ~/.gem/credentials file or else rubygems.org won't have
     # any idea who you are.
-    def ship_to_rubygems(file)
+    def ship_to_rubygems(file, options = {})
       Pkg::Util::File.file_exists?("#{ENV['HOME']}/.gem/credentials", :required => true)
-      Pkg::Util::Execution.capture3("gem push #{file}")
+      gem_push_command = "gem push #{file}"
+      gem_push_command << " --host #{options[:host]}" if options[:host]
+      gem_push_command << " --key #{options[:key]}" if options[:key]
+      Pkg::Util::Execution.capture3(gem_push_command)
     rescue => e
       puts "###########################################"
       puts "#  Publishing to rubygems failed. Make sure your .gem/credentials"
@@ -29,6 +32,11 @@ module Pkg::Gem
       puts
       puts e
       raise e
+    end
+
+    def ship_to_internal_mirror(file)
+      internal_mirror_api_key_name = 'artifactory_api_key'
+      ship_to_rubygems(file, { :host => Pkg::Config.internal_gem_host, :key => internal_mirror_api_key_name })
     end
   end
 end

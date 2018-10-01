@@ -283,12 +283,27 @@ namespace :pl do
           puts "Do you want to start shipping the rubygem '#{gem_file}'?"
           next unless Pkg::Util.ask_yes_or_no
           Rake::Task['pl:ship_gem_to_rubygems'].execute(file: gem_file)
-          Rake::Task['pl:ship_gem_to_internal_mirror'].execute(file: gem_file)
         end
 
         Rake::Task['pl:ship_gem_to_downloads'].invoke
       else
         $stderr.puts 'Not shipping development gem using odd_even strategy for the sake of your users.'
+      end
+    end
+  end
+
+  desc 'Ship built gem to internal Gem mirror and public nightlies file server'
+  task ship_nightly_gem: 'pl:fetch' do
+    # We want to ship a Gem only for projects that build gems, so
+    # all of the Gem shipping tasks are wrapped in an `if`.
+    if Pkg::Config.build_gem
+      fail 'Value `Pkg::Config.gem_host` not defined, skipping nightly ship' unless Pkg::Config.gem_host
+      fail 'Value `Pkg::Config.nonfinal_gem_path` not defined, skipping nightly ship' unless Pkg::Config.nonfinal_gem_path
+      FileList['pkg/*.gem'].each do |gem_file|
+        Pkg::Gem.ship_to_internal_mirror(gem_file)
+      end
+      Pkg::Util::Execution.retry_on_fail(times: 3) do
+        Pkg::Util::Ship.ship_gem('pkg', Pkg::Config.nonfinal_gem_path, platform_independent: true)
       end
     end
   end
@@ -301,13 +316,6 @@ namespace :pl do
       Pkg::Util::Execution.retry_on_fail(times: 3) do
         Pkg::Gem.ship_to_rubygems(args[:file])
       end
-    end
-  end
-
-  desc "Ship built gems to internal Gem server (#{Pkg::Config.internal_gem_host})"
-  task :ship_gem_to_internal_mirror, [:file] => 'pl:fetch' do |_t, args|
-    unless Pkg::Config.internal_gem_host
-      warn 'Value `Pkg::Config.internal_gem_host` not defined; skipping internal ship'
     end
   end
 

@@ -22,7 +22,12 @@ module Pkg::Sign::Dmg
       /usr/bin/hdiutil attach #{work_dir}/$dmg.dmg -mountpoint #{mount} -nobrowse -quiet ;
       /usr/bin/security -q unlock-keychain -p "#{Pkg::Config.osx_signing_keychain_pw}" "#{Pkg::Config.osx_signing_keychain}" ;
         for pkg in $(ls #{mount}/*.pkg | xargs -n 1 basename); do
-          /usr/bin/productsign --keychain "#{Pkg::Config.osx_signing_keychain}" --sign "#{Pkg::Config.osx_signing_cert}" #{mount}/$pkg #{signed}/$pkg ;
+          if /usr/sbin/pkgutil --check-signature #{mount}/$pkg ; then
+            echo "$pkg is already signed, skipping . . ." ;
+            cp #{mount}/$pkg #{signed}/$pkg ;
+          else
+            /usr/bin/productsign --keychain "#{Pkg::Config.osx_signing_keychain}" --sign "#{Pkg::Config.osx_signing_cert}" #{mount}/$pkg #{signed}/$pkg ;
+          fi
         done
       /usr/bin/hdiutil detach #{mount} -quiet ;
       /bin/rm #{work_dir}/$dmg.dmg ;

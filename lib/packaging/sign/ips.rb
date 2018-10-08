@@ -18,6 +18,16 @@ module Pkg::Sign::Ips
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "mkdir -p #{repo_dir} #{unsigned_dir} #{signed_dir}")
       Pkg::Util::Net.rsync_to(p5p, rsync_host_string, unsigned_dir)
 
+      # Check if p5p is signed already before beginning the signing process
+      begin
+        Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkg contents -m -g #{unsigned_dir}/#{File.basename(p5p)} '*' | grep '^signature '")
+        puts "#{p5p} is already signed, skipping . . .";
+        Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E mv #{unsigned_dir}/#{File.basename(p5p)} #{signed_dir}")
+        next
+      rescue RuntimeError
+        puts "Starting to sign #{p5p} . . ."
+      end
+
       # Before we can get started with signing packages we need to create a repo
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgrepo create #{repo_dir}")
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "sudo -E /usr/bin/pkgrepo set -s #{repo_dir} publisher/prefix=puppetlabs.com")

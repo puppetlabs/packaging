@@ -79,32 +79,10 @@ DOC
     # pe_repo expects and use simplified agent install without needing internet access, or having to
     # manually download each agent that they need to feed to pe_repo.
     # This task should be invoked after prepare_signed_repos, so that there are repos to pack up.
-    task :pack_all_signed_repos, [:path_to_repo, :name_of_archive, :versioning] => ["pl:fetch"] do |t, args|
-      # path_to_repo should be relative to ./pkg
+    task :pack_all_signed_repos, [:name_of_archive, :versioning] => ["pl:fetch"] do |t, args|
       name_of_archive = args.name_of_archive or fail ":name_of_archive is a required argument for #{t}"
       versioning = args.versioning or fail ":versioning is a required argument for #{t}"
-      tar = Pkg::Util::Tool.check_tool('tar')
-
-      Dir.chdir("pkg") do
-        if versioning == 'ref'
-          local_target = File.join(Pkg::Config.project, Pkg::Config.ref, "repos")
-        elsif versioning == 'version'
-          local_target = File.join(Pkg::Config.project, Pkg::Util::Version.dot_version, "repos")
-        end
-
-        Dir.chdir(local_target) do
-          if !Pkg::Util::File.exist?("#{name_of_archive}.tar.gz")
-            warn "Skipping #{name_of_archive} because it (#{name_of_archive}.tar.gz) has no files"
-          else
-            if File.exist?("#{Pkg::Config.project}-all.tar")
-              tar_cmd = "--update"
-            else
-              tar_cmd = "--create"
-            end
-            Pkg::Util::Execution.ex("#{tar} --owner=0 --group=0 #{tar_cmd} --file #{Pkg::Config.project}-all.tar #{name_of_archive}.tar.gz")
-          end
-        end
-      end
+      Pkg.Repo.create_combined_repo_archive(name_of_archive, versioning)
     end
 
     # tar does not support adding or updating files in a compressed archive, so

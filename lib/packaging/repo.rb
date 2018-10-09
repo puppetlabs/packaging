@@ -33,6 +33,34 @@ module Pkg::Repo
       end
     end
 
+    def create_combined_repo_archive(project, versioning)
+      tar = Pkg::Util::Tool.check_tool('tar')
+      platforms = Pkg::Config.platform_repos
+      platforms.each do |platform|
+        archive_name = "#{project}-#{platform['name']}"
+        Dir.chdir("pkg") do
+          if versioning == 'ref'
+            local_target = File.join(Pkg::Config.project, Pkg::Config.ref, "repos")
+          elsif versioning == 'version'
+            local_target = File.join(Pkg::Config.project, Pkg::Util::Version.dot_version, "repos")
+          end
+
+          Dir.chdir(local_target) do
+            if !Pkg::Util::File.exist?("#{archive_name}.tar.gz")
+              warn "Skipping #{archive_name} because it (#{archive_name}.tar.gz) has no files"
+            else
+              if File.exist?("#{Pkg::Config.project}-all.tar")
+                tar_cmd = "--update"
+              else
+                tar_cmd = "--create"
+              end
+              Pkg::Util::Execution.ex("#{tar} --owner=0 --group=0 #{tar_cmd} --file #{Pkg::Config.project}-all.tar #{archive_name}.tar.gz")
+            end
+          end
+        end
+      end
+    end
+
     def directories_that_contain_packages(artifact_directory, pkg_ext)
       cmd = "[ -d #{artifact_directory} ] || exit 1 ; "
       cmd << "pushd #{artifact_directory} > /dev/null && "

@@ -265,4 +265,21 @@ module Pkg::Paths
       raise "Not sure what to do with a package format of '#{package_format}'"
     end
   end
+
+  def release_package_link_path(platform_tag, nonfinal = false)
+    platform, version, arch = Pkg::Platforms.parse_platform_tag(platform_tag)
+    package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
+    case package_format
+    when 'rpm'
+      base_path = nonfinal ? Pkg::Config.nonfinal_yum_repo_path : Pkg::Config.yum_repo_path
+      return File.join(base_path, "#{repo_name(nonfinal)}-release-#{platform}-#{version}.noarch.rpm")
+    when 'deb'
+      base_path = nonfinal ? Pkg::Config.nonfinal_apt_repo_path : Pkg::Config.apt_repo_path
+      codename = Pkg::Platforms.codename_for_platform_version(platform, version)
+      return File.join(base_path, "#{repo_name(nonfinal)}-release-#{codename}.deb")
+    else
+      warn "No release packages for package format '#{package_format}', skipping . . ."
+      return nil
+    end
+  end
 end

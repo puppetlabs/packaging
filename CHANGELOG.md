@@ -3,6 +3,24 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.15] - 2018-10-15
+### Changed
+- (RE-11600) Skip signing dmgs and msis if they're already signed.
+
+### Added
+- Add optional `:key` and `:host` params to `ship_to_rubygems` method to allow
+  shipping to other rubygems hosts (e.g. Artifactory).
+- Add `ship_to_internal_mirror` method as a wrapper around the newly-updated
+  `ship_to_rubygems` method.
+- Add `nonfinal_gem_path` param to determine where to ship nightly gems.
+- (RE-11480) Add `ship_nightly_gem` task to ship gems to our internal mirror and
+  to our public nightly repos.
+- Add support for ubuntu-18.10-amd64 (cosmic).
+
+### Removed
+- Remove `ship_gem_to_internal_mirror` task. This was previously used to ship
+  gems to our internal stickler server, but has been no-op for some time now.
+
 ## [0.99.14] - 2018-09-26
 ### Fixed
 - Signed packages now get rsync'd back to the root directory they were
@@ -263,7 +281,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.14...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.15...HEAD
+[0.99.15]: https://github.com/puppetlabs/packaging/compare/0.99.14...0.99.15
 [0.99.14]: https://github.com/puppetlabs/packaging/compare/0.99.13...0.99.14
 [0.99.13]: https://github.com/puppetlabs/packaging/compare/0.99.12...0.99.13
 [0.99.12]: https://github.com/puppetlabs/packaging/compare/0.99.11...0.99.12

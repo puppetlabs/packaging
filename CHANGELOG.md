@@ -3,6 +3,10 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.16] - 2018-10-17
+### Fixed
+- Sign debian .changes files individually rather than as a glob.
+
 ## [0.99.15] - 2018-10-15
 ### Changed
 - (RE-11600) Skip signing dmgs and msis if they're already signed.
@@ -281,7 +285,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.15...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.16...HEAD
+[0.99.16]: https://github.com/puppetlabs/packaging/compare/0.99.15...0.99.16
 [0.99.15]: https://github.com/puppetlabs/packaging/compare/0.99.14...0.99.15
 [0.99.14]: https://github.com/puppetlabs/packaging/compare/0.99.13...0.99.14
 [0.99.13]: https://github.com/puppetlabs/packaging/compare/0.99.12...0.99.13

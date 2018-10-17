@@ -83,7 +83,9 @@ namespace :pl do
       change_files = Dir["#{deb_dir}/**/*.changes"]
       unless change_files.empty?
         Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-        Pkg::Sign::Deb.sign_changes("#{deb_dir}/**/*.changes")
+        change_files.each do |file|
+          Pkg::Sign::Deb.sign_changes(file)
+        end
       end
     ensure
       Pkg::Util::Gpg.kill_keychain

@@ -103,12 +103,9 @@ module Pkg::Paths
     return Pkg::Config.repo_name || Pkg::Config.apt_repo_name || 'main'
   end
 
-  def link_name
-    if Pkg::Util::Version.final?
-      Pkg::Config.repo_link_target || nil
-    else
-      Pkg::Config.nonfinal_repo_link_target || nil
-    end
+  def link_name(nonfinal = false)
+    return Pkg::Config.nonfinal_repo_link_target if nonfinal
+    return Pkg::Config.repo_link_target
   end
 
   # TODO: please please please clean this up
@@ -128,34 +125,34 @@ module Pkg::Paths
       if is_legacy_repo?(yum_repo_name(nonfinal))
         [File.join(path_prefix, platform, version, yum_repo_name(nonfinal)), nil]
       else
-        [File.join(path_prefix, yum_repo_name(nonfinal)), link_name.nil? ? nil : File.join(path_prefix, link_name)]
+        [File.join(path_prefix, yum_repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, link_name(nonfinal))]
       end
     when 'swix'
       if is_legacy_repo?(repo_name(nonfinal))
         [File.join(path_prefix, platform, version, repo_name(nonfinal)), nil]
       else
-        [File.join(path_prefix, platform, repo_name(nonfinal)), link_name.nil? ? nil : File.join(path_prefix, platform, link_name)]
+        [File.join(path_prefix, platform, repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, platform, link_name(nonfinal))]
       end
     when 'deb'
       [File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), apt_repo_name(nonfinal)),
-       link_name.nil? ? nil : File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), link_name)]
+       link_name(nonfinal).nil? ? nil : File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), link_name(nonfinal))]
     when 'svr4', 'ips'
       if is_legacy_repo?(repo_name(nonfinal))
         [File.join(path_prefix, 'solaris', repo_name(nonfinal), version), nil]
       else
-        [File.join(path_prefix, 'solaris', repo_name(nonfinal)), link_name.nil? ? nil : File.join(path_prefix, 'solaris', link_name)]
+        [File.join(path_prefix, 'solaris', repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, 'solaris', link_name(nonfinal))]
       end
     when 'dmg'
       if is_legacy_repo?(repo_name(nonfinal))
         [File.join(path_prefix, 'mac', version, repo_name(nonfinal)), nil]
       else
-        [File.join(path_prefix, 'mac', repo_name(nonfinal)), link_name.nil? ? nil : File.join(path_prefix, 'mac', link_name)]
+        [File.join(path_prefix, 'mac', repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, 'mac', link_name(nonfinal))]
       end
     when 'msi'
       if is_legacy_repo?(repo_name(nonfinal))
         [File.join(path_prefix, 'windows'), nil]
       else
-        [File.join(path_prefix, 'windows', repo_name(nonfinal)), link_name.nil? ? nil : File.join(path_prefix, 'windows', link_name)]
+        [File.join(path_prefix, 'windows', repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, 'windows', link_name(nonfinal))]
       end
     else
       raise "Not sure where to find packages with a package format of '#{package_format}'"

@@ -130,7 +130,7 @@ module Pkg::Util::Net
       raise(ArgumentError, "Cannot sync between two remote hosts") if
         options[:origin_host] && options[:target_host]
 
-      raise(ArgumentError, "Cannot sync path '#{origin}' to itself") unless
+      raise(ArgumentError, "Cannot sync path '#{origin}' because both origin_host and target_host are nil. Perhaps you need to set TEAM=release ?") unless
         options[:origin_host] || options[:target_host]
 
       cmd = %W(

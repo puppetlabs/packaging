@@ -235,4 +235,37 @@ describe 'Pkg::Paths' do
       expect(Pkg::Paths.is_legacy_repo?('puppet')).to be_false
     end
   end
+
+  describe '#release_package_link_path' do
+    repo_name = 'puppet6'
+    nonfinal_repo_name = 'puppet6-nightly'
+    yum_repo_path = '/opt/repository/yum'
+    apt_repo_path = '/opt/repository/apt'
+    nonfinal_yum_repo_path = '/opt/repository-nightlies/yum'
+    nonfinal_apt_repo_path = '/opt/repository-nightlies/apt'
+    before :each do
+      allow(Pkg::Config).to receive(:repo_name).and_return(repo_name)
+      allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nonfinal_repo_name)
+      allow(Pkg::Config).to receive(:yum_repo_path).and_return(yum_repo_path)
+      allow(Pkg::Config).to receive(:apt_repo_path).and_return(apt_repo_path)
+      allow(Pkg::Config).to receive(:nonfinal_yum_repo_path).and_return(nonfinal_yum_repo_path)
+      allow(Pkg::Config).to receive(:nonfinal_apt_repo_path).and_return(nonfinal_apt_repo_path)
+    end
+    it 'returns the appropriate link path for rpm release packages' do
+      expect(Pkg::Paths.release_package_link_path('sles-12-ppc64le')).to eq("#{yum_repo_path}/#{repo_name}-release-sles-12.noarch.rpm")
+    end
+    it 'returns the appropriate link path for deb release packages' do
+      expect(Pkg::Paths.release_package_link_path('ubuntu-16.04-amd64')).to eq("#{apt_repo_path}/#{repo_name}-release-xenial.deb")
+    end
+    it 'returns the appropriate link path for nonfinal rpm release packages' do
+      expect(Pkg::Paths.release_package_link_path('el-7-x86_64', true)).to eq("#{nonfinal_yum_repo_path}/#{nonfinal_repo_name}-release-el-7.noarch.rpm")
+    end
+    it 'returns the appropriate link path for nonfinal deb release packages' do
+      expect(Pkg::Paths.release_package_link_path('debian-9-i386', true)).to eq("#{nonfinal_apt_repo_path}/#{nonfinal_repo_name}-release-stretch.deb")
+    end
+    it 'returns nil for package formats that do not have release packages' do
+      expect(Pkg::Paths.release_package_link_path('osx-10.13-x86_64')).to eq(nil)
+      expect(Pkg::Paths.release_package_link_path('windows-2012-x86')).to eq(nil)
+    end
+  end
 end

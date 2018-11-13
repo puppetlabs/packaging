@@ -3,6 +3,20 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.17] - 2018-11-13
+### Added
+- Add `release_package_link_path` method to determine the release package
+  symlink path for a given platform.
+
+### Fixed
+- (RE-11291) Improve rsync error message with more detail on how to resolve the
+  error.
+- (RE-11714) Update `link_name` method to take an optional `nonfinal` param to
+  determine whether we want the `repo_link_target` or
+  `nonfinal_repo_link_target`. Previously, we pivoted on the build version,
+  which caused undesired symlink creation when final-tagged builds were shipped
+  to nightlies.
+
 ## [0.99.16] - 2018-10-17
 ### Fixed
 - Sign debian .changes files individually rather than as a glob.
@@ -285,7 +299,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.16...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.17...HEAD
+[0.99.17]: https://github.com/puppetlabs/packaging/compare/0.99.16...0.99.17
 [0.99.16]: https://github.com/puppetlabs/packaging/compare/0.99.15...0.99.16
 [0.99.15]: https://github.com/puppetlabs/packaging/compare/0.99.14...0.99.15
 [0.99.14]: https://github.com/puppetlabs/packaging/compare/0.99.13...0.99.14

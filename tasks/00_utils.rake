@@ -195,11 +195,6 @@ def deprecate(old_cmd, new_cmd = nil)
   Pkg::Util.deprecate(old_cmd, new_cmd)
 end
 
-def remote_bootstrap(host, treeish, tar_cmd = nil, tarball = nil)
-  Pkg::Util.deprecate('remote_bootstrap', 'Pkg::Util::Net.remote_bootstrap')
-  Pkg::Util::Net.remote_bootstrap(host, treeish, tar_cmd, tarball)
-end
-
 def remote_buildparams(host, build)
   Pkg::Util.deprecate('remote_buildparams', 'Pkg::Util::Net.remote_buildparams')
   Pkg::Util::Net.remote_buildparams(host, build)

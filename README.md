@@ -36,12 +36,12 @@ as well as several closed-source projects, including
 * console-auth
 * console
 
-Generally speaking, the packaging repo should be compatible with ruby 1.8.7,
-ruby 1.9.3 and rake 0.9.x. To pull the packaging tasks into your source repo,
-do a `rake package:bootstrap`. This will clone this repo into the ext directory
-of the project and make many packaging tasks available. The tasks are
-generally grouped into two categories, `package:` namespaced tasks and `pl:`
-namespaced tasks.
+Generally speaking, the packaging repo should be compatible with ruby >= 2.0.0
+rake ~> 12.3. To pull the packaging tasks into your source repo,
+do a `bundle install`. This will install the packaging gem and all its
+dependencies. Packaging's rake tasks will be made available by running any rake
+command, e.g. `bundle exec rake -T`. The tasks are generally grouped into two
+categories, `package:` namespaced tasks and `pl:` namespaced tasks.
 
 ## `package:` tasks
 `package:` namespaced tasks are general purpose tasks that are set up to use
@@ -51,7 +51,8 @@ the building host, and any dynamically generated dependencies may result in
 packages that are only suitable for the OS/version of the build host. However,
 for rolling one's own debs and rpms or for use in environments without many
 OSes/versions, this may work just fine. To build an rpm using the packaging
-repo, do a `rake package:rpm`. To build a deb, use `rake package:deb`.
+repo, do a `bundle exec rake package:rpm`. To build a deb, use `bundle exec rake
+package:deb`.
 
 ## `pl:` tasks
 `pl:` namespaced tasks rely on a slighly more complex toolchain for packaging
@@ -75,32 +76,32 @@ separating these data and tasks out is to refrain from presenting by
 default yet more Puppet-specific tasks that aren't generally consumable by
 everyone. To build a deb from a local repository using a `pl` task, ssh into a
 builder (e.g., one stood up using the modules detailed below) and clone the
-source repo, e.g. puppet. Then, run `rake package:bootstrap` and `rake pl:deb`
-to create a deb, and `rake pl:mock` to make an rpm (on a debian or redhat host,
-respectively).
+source repo, e.g. puppet. Then, run `bundle install` and `bundle exec rake pl:deb`
+to create a deb, and `bundle exec rake pl:mock` to make an rpm (on a debian or
+redhat host, respectively).
 
 ## `pe:` tasks
-There is also a `pe:` namespace, for the building of Puppet
-Labs' Puppet Enterprise packages that have been converted to using this repo.
-The `pe:` tasks rely heavily on PL internal infrastructure, and are not
-generally useful outside of this environment. To create packages, in the source
-repository run `rake package:bootstrap`, followed by `rake pl:fetch`. These two
-commands bootstrap the packaging environment and pull in the additional data
-needed for PE building (see `pl:fetch` notes above).  Then, to make a debian
-package, run `rake pe:deb`, and to make an rpm, run `rake pe:mock`. There are
-also `pe:deb_all` and `pe:mock_all` tasks, which build packages against all
-shipped debian/redhat targets. The `pe:deb_all` task is not generally necessary
-for developer use for building test packages; the `pe:deb` task creates a
-  package that will work against virtually all supported PE debian versions.
-  The same is generally true for PE internal rpms, but because of variances in
-  build macros for rpm, rpms should generally be built with `pe:mock_all`, and
-  then the desired version installed, or by building only for a specific
-  target.  This is accomplished by passing MOCK=<mock> to the rake call, e.g.
-  `rake pe:mock MOCK=<mock>`.  The available mocks are listed in
-  `ext/build_defaults.yaml` after `final_mocks:`.  For PE, the mocks are
-  formatted as `pupent-<peversion>-<distversion>-<arch>`, e.g.
-  `pupent-2.7-el5-i386`. To build for a specific target, set `MOCK=<mock>` to
-  the mock that matches the target.
+There is also a `pe:` namespace, for the building of Puppet Labs' Puppet
+Enterprise packages that have been converted to using this repo. The `pe:` tasks
+rely heavily on PL internal infrastructure, and are not generally useful outside
+of this environment. To create packages, in the source repository run `bundle
+install`, followed by `bundle exec rake pl:fetch`. These two commands install
+the packaging gem and pull in the additional data needed for PE building (see
+`pl:fetch` notes above). Then, to make a debian package, run `bundle exec rake
+pe:deb`, and to make an rpm, run `bundle exec rake pe:mock`. There are also
+`pe:deb_all` and `pe:mock_all` tasks, which build packages against all shipped
+debian/redhat targets. The `pe:deb_all` task is not generally necessary for
+developer use for building test packages; the `pe:deb` task creates a package
+that will work against virtually all supported PE debian versions. The same is
+generally true for PE internal rpms, but because of variances in build macros
+for rpm, rpms should generally be built with `pe:mock_all`, and then the desired
+version installed, or by building only for a specific target. This is
+accomplished by passing MOCK=<mock> to the rake call, e.g. `bundle exec rake
+pe:mock MOCK=<mock>`. The available mocks are listed in
+`ext/build_defaults.yaml` after `final_mocks:`. For PE, the mocks are formatted
+as `pupent-<peversion>-<distversion>-<arch>`, e.g. `pupent-2.7-el5-i386`. To
+build for a specific target, set `MOCK=<mock>` to the mock that matches the
+target.
 
 ## `:remote:` tasks
 There are also sub-namespaces of `:pl` and `:pe` that are
@@ -108,22 +109,24 @@ worth noting. First, the `:remote` namespace. Tasks under `:remote` perform
 builds remotely on internal builders from your local workstation. How they
 work:
 
-1) Run `pl:fetch` to obtain extra data from the build-data repo. The data
+0) Run `bundle install` to install the packaging gem and its dependencies.
+
+1) Run `bundle exec pl:fetch` to obtain extra data from the build-data repo. The data
 includes the hostnames of builders to use for packaging.
 
 2) Create a git bundle of the local workspace and tar it up.
 
 3) Create a build parameters file. The params file includes all the information
 about the build, including any values overridden with env vars, and the actual
-task to run, e.g. `rake pl:deb`.
+task to run, e.g. `bundle exec rake pl:deb`.
 
 4) scp the git bundle and build parameters file to a temporary directory on the
 builder hostname assigned to that particular package build type.
 
-5) ssh into the builder, untar the git bundle, clone it, and run `rake
-package:bootstrap`.
+5) ssh into the builder, untar the git bundle, clone it, and run `bundle
+install`.
 
-6) ssh into the builder, cd into the cloned repo, and run `rake
+6) ssh into the builder, cd into the cloned repo, and run `bundle exec rake
 pl:build_from_params PARAMS_FILE=/path/to/previously/sent/file`.
 
 7) Maintain the ssh connection until the build finishes, and rsync the packages
@@ -206,18 +209,18 @@ the task are:
 
     cd git_repo
 
-      ### Clone the packaging repo
-      rake package:bootstrap && rake pl:fetch
+      ### Install the packaging gem via Bundler
+      bundle install && bundle exec rake pl:fetch
 
       ### Perform the build
-      rake pl:load_extras pl:build_from_params PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
+      bundle exec rake pl:load_extras pl:build_from_params PARAMS_FILE=$WORKSPACE/BUILD_PROPERTIES
 
       ### Send the results
-      rake pl:jenkins:ship["artifacts"]
+      bundle exec rake pl:jenkins:ship["artifacts"]
 
       ### If a downstream job was passed, trigger it now
       if [ -n "$DOWNSTREAM_JOB" ] ; then
-        rake pl:jenkins:post["$DOWNSTREAM_JOB"]
+        bundle exec rake pl:jenkins:post["$DOWNSTREAM_JOB"]
       fi
 
 #################
@@ -258,18 +261,18 @@ analysis. Contents of this string are items which cannot be obtained from within
 the Jenkins job itself. Note that the Groovy postbuild script needed for metrics
 gathering is dynamically passed to each job.
 
-This first job clones the git bundle passed in as a parameter, then clones the
-packaging repo (rake package:bootstrap) and for every cell in its matrix
-performs a package build for a specific target (e.g. rake pl:deb
+This first job clones the git bundle passed in as a parameter, then installs the
+packaging gem (bundle install) and for every cell in its matrix performs a
+package build for a specific target (e.g. bundle exec rake pl:deb
 COW=base-lucid-i386.cow). Once all cells in the matrix complete (either succeed
-or fail), this job automatically triggers the second of the new jobs
-as a downstream job.
+or fail), this job automatically triggers the second of the new jobs as a
+downstream job.
 
 To receive an email notification from jenkins about the status of the packaging
 job, pass NOTIFY=<recipient> as an environment variable to the uber_build
 invocation, e.g.:
 
-rake pl:jenkins:uber_build NOTIFY="foo@puppet.com bar@puppet.com"
+bundle exec rake pl:jenkins:uber_build NOTIFY="foo@puppet.com bar@puppet.com"
 
 The second job is an automatic repository creation task for this git repo.
 Specifically, the job copies the git bundle from the packaging job and clones
@@ -358,10 +361,6 @@ side of this packaging repo. The rpm-side module,
 [puppetlabs-rpmbuilder](https://github.com/puppetlabs/puppetlabs-rpmbuilder),
 will set up an rpm builder.
 
-## Clean up
-To remove the packaging repo, remove the ext/packaging directory or run `rake
-package:implode`.
-
 ##Setting up projects for the Packaging Repo
 
 The packaging repo requires many project-side artifacts inside the ext
@@ -377,48 +376,9 @@ spec file, and an osx preflight and plist.
 
 The top level Rakefile or a separate task file in the project should have the following added:
 
-(this assumes RAKE\_ROOT is defined in the top-level Rakefile using something like the following)
 ```ruby
-RAKE_ROOT = File.expand_path(File.dirname(__FILE__))
-```
-
-```ruby
-build_defs_file = File.join(RAKE_ROOT, 'ext', 'build_defaults.yaml')
-if File.exist?(build_defs_file)
-  begin
-    require 'yaml'
-    @build_defaults ||= YAML.load_file(build_defs_file)
-  rescue Exception => e
-    $stderr.puts "Unable to load yaml from #{build_defs_file}:"
-    raise e
-  end
-  @packaging_url  = @build_defaults['packaging_url']
-  @packaging_repo = @build_defaults['packaging_repo']
-  raise "Could not find packaging url in #{build_defs_file}" if @packaging_url.nil?
-  raise "Could not find packaging repo in #{build_defs_file}" if @packaging_repo.nil?
-
-  namespace :package do
-    desc "Bootstrap packaging automation, e.g. clone into packaging repo"
-    task :bootstrap do
-      if File.exist?(File.join(RAKE_ROOT, "ext", @packaging_repo))
-        puts "It looks like you already have ext/#{@packaging_repo}. If you don't like it, blow it away with package:implode."
-      else
-        cd File.join(RAKE_ROOT, 'ext') do
-          %x{git clone #{@packaging_url}}
-        end
-      end
-    end
-    desc "Remove all cloned packaging automation"
-    task :implode do
-      rm_rf File.join(RAKE_ROOT, "ext", @packaging_repo)
-    end
-  end
-end
-
-begin
-  load File.join(RAKE_ROOT, 'ext', 'packaging', 'packaging.rake')
-rescue LoadError
-end
+require 'packaging'
+Pkg::Util::RakeUtils.load_packaging_tasks
 ```
 
 Also in ext should be two files, build_defaults.yaml and project_data.yaml (optional).
@@ -662,13 +622,6 @@ files:
     [Setting up projects for the Packaging
     Repo](https://github.com/MosesMendoza/packaging/tree/more_documentation#setting-up-projects-for-the-packaging-repo).
 
-* **package:bootstrap**
-
-    Clone the packaging repo into this project. This task isn't actually in the
-    packaging repo itself, but resides in the project. See [Setting up projects
-    for the Packaging
-      Repo](https://github.com/puppetlabs/packaging#setting-up-projects-for-the-packaging-repo).
-
 * **package:deb**
 
     Use `debbuild` to create a deb package and associated debian package
@@ -680,13 +633,6 @@ files:
     repository. Requires `build_gem: true` and gem-related parameters be set in
     `ext/build_defaults.yaml` and `ext/project\_data.yaml`. The gem is staged
     in `./pkg`.
-
-* **package:implode**
-
-    Remove the packaging repo entirely from the project. This task isn't
-    actually in the packaging repo itself, but resides in the project. See
-    [Setting up projects for the Packaging
-    Repo](https://github.com/puppetlabs/packaging#setting-up-projects-for-the-packaging-repo).
 
 * **package:ips**
 
@@ -717,8 +663,8 @@ files:
 * **pl:build_from_params**
 
     Invoke a build from a build parameters yaml file. The parameters file
-    should be created with `rake pl:write_build_params`. The settings in the
-    build parameters file will override all values contained in
+    should be created with `bundle exec rake pl:write_build_params`. The
+    settings in the build parameters file will override all values contained in
     `./ext/build_defaults.yaml` and `./ext/project_data.yaml`.
 
 * **pl:deb**
@@ -733,10 +679,10 @@ files:
 
 * **pl:deb_all***
 
-    The same as `rake pl:deb`, but a package is built for every cow listed in
-    `ext/build_defaults.yaml` on the line `cows:<cows>`. The packages and
-    associated source artifacts are staged in `./pkg/deb/$distribution`, where
-    $distribution is the Debian/Ubuntu codename of the cow that was used to
+    The same as `bundle exec rake pl:deb`, but a package is built for every cow
+    listed in `ext/build_defaults.yaml` on the line `cows:<cows>`. The packages
+    and associated source artifacts are staged in `./pkg/deb/$distribution`,
+    where $distribution is the Debian/Ubuntu codename of the cow that was used to
     build the package, e.g. "wheezy" or "precise."
 
 * **pl:ips**
@@ -905,11 +851,11 @@ files:
 
 * **pl:mock_all**
 
-    The same as `rake pl:mock`, but a package is built for every mock listed in
-    `ext/build_defaults.yaml` on the line `mocks:<mocks>`. Packages are staged
-    in `./pkg/<repo_name>/(el | fedora)/$version/(i386 | x86_64 |
-    SRPMS)`. The subdirectories are dependent on the mock that is used. The
-    task assumes that the mock configurations are the standard Puppet mock
+    The same as `bundle exec rake pl:mock`, but a package is built for every
+    mock listed in `ext/build_defaults.yaml` on the line `mocks:<mocks>`.
+    Packages are staged in `./pkg/<repo_name>/(el | fedora)/$version/(i386 |
+    x86_64 | SRPMS)`. The subdirectories are dependent on the mock that is used.
+    The task assumes that the mock configurations are the standard Puppet mock
     configurations that are generated by the
     [puppetlabs-rpmbuilder](https://github.com/puppetlabs/puppetlabs-rpmbuilder)
     module.

@@ -136,17 +136,13 @@ namespace :pl do
       sign_tasks    << "pl:sign_svr4" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_ips" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_msi" if Pkg::Config.build_msi || Pkg::Config.vanagon_project
-      remote_repo   = Pkg::Util::Net.remote_bootstrap(Pkg::Config.signing_server, 'HEAD', nil, signing_bundle)
+      remote_repo   = Pkg::Util::Net.remote_unpack_git_bundle(Pkg::Config.signing_server, 'HEAD', nil, signing_bundle)
       build_params  = Pkg::Util::Net.remote_buildparams(Pkg::Config.signing_server, Pkg::Config)
       Pkg::Util::Net.rsync_to(root_dir, Pkg::Config.signing_server, remote_repo)
       rake_command = <<-DOC
 cd #{remote_repo} ;
-bundle_prefix= ;
-if [[ -r Gemfile ]]; then
-  #{Pkg::Util::Net.remote_bundle_install_command}
-  bundle_prefix='bundle exec';
-fi ;
-$bundle_prefix rake #{sign_tasks.map { |task| task + "[#{root_dir}]" }.join(" ")} PARAMS_FILE=#{build_params}
+#{Pkg::Util::Net.remote_bundle_install_command}
+bundle exec rake #{sign_tasks.map { |task| task + "[#{root_dir}]" }.join(" ")} PARAMS_FILE=#{build_params}
 DOC
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.signing_server, rake_command)
       Pkg::Util::Net.rsync_from("#{remote_repo}/#{root_dir}/", Pkg::Config.signing_server, "#{root_dir}/")

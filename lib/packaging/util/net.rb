@@ -347,7 +347,7 @@ module Pkg::Util::Net
     # We take a tar argument for cases where `tar` isn't best, e.g. Solaris.  We
     # also take an optional argument of the tarball containing the git bundle to
     # use.
-    def remote_bootstrap(host, treeish, tar_cmd = nil, tarball = nil)
+    def remote_unpack_git_bundle(host, treeish, tar_cmd = nil, tarball = nil)
       unless tar = tar_cmd
         tar = 'tar'
       end
@@ -355,19 +355,13 @@ module Pkg::Util::Net
       tarball_name = File.basename(tarball).gsub('.tar.gz', '')
       Pkg::Util::Net.rsync_to(tarball, host, '/tmp')
       appendix = Pkg::Util.rand_string
+      git_bundle_directory = File.join('/tmp', "#{Pkg::Config.project}-#{appendix}")
       command = <<-DOC
 #{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ;
-git clone --recursive /tmp/#{tarball_name} /tmp/#{Pkg::Config.project}-#{appendix} ;
-cd /tmp/#{Pkg::Config.project}-#{appendix} ;
-bundle_prefix= ;
-if [[ -r Gemfile ]]; then
-  #{remote_bundle_install_command}
-  bundle_prefix='bundle exec' ;
-fi ;
-$bundle_prefix rake package:bootstrap
+git clone --recursive /tmp/#{tarball_name} #{git_bundle_directory} ;
 DOC
       Pkg::Util::Net.remote_ssh_cmd(host, command)
-      "/tmp/#{Pkg::Config.project}-#{appendix}"
+      return git_bundle_directory
     end
 
     def remote_bundle_install_command

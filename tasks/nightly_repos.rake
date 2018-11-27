@@ -18,17 +18,13 @@ namespace :pl do
       Pkg::Util::File.empty_dir?("repos") and fail "There were no repos found in repos/. Maybe something in the pipeline failed?"
       signing_bundle = ENV['SIGNING_BUNDLE']
 
-      remote_repo   = Pkg::Util::Net.remote_bootstrap(signing_server, 'HEAD', nil, signing_bundle)
+      remote_repo   = Pkg::Util::Net.remote_unpack_git_bundle(signing_server, 'HEAD', nil, signing_bundle)
       build_params  = Pkg::Util::Net.remote_buildparams(signing_server, Pkg::Config)
       Pkg::Util::Net.rsync_to('repos', signing_server, remote_repo)
       rake_command = <<-DOC
 cd #{remote_repo} ;
-bundle_prefix= ;
-if [[ -r Gemfile ]]; then
-  #{Pkg::Util::Net.remote_bundle_install_command}
-  bundle_prefix='bundle exec';
-fi ;
-$bundle_prefix rake pl:jenkins:sign_repos GPG_KEY=#{Pkg::Util::Gpg.key} PARAMS_FILE=#{build_params}
+#{Pkg::Util::Net.remote_bundle_install_command}
+bundle exec rake pl:jenkins:sign_repos GPG_KEY=#{Pkg::Util::Gpg.key} PARAMS_FILE=#{build_params}
 DOC
       Pkg::Util::Net.remote_ssh_cmd(signing_server, rake_command)
       Pkg::Util::Net.rsync_from("#{remote_repo}/repos/", signing_server, target)

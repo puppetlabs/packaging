@@ -3,6 +3,21 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.18] - 2018-11-28
+### Added
+- (PA-2232) Add support for Fedora 29.
+
+### Changed
+- (RE-11584) Replace `remote_bootstrap` with `remote_unpack_git_bundle`, which
+  does the same thing except for actually bootstrapping or bundle installing
+  packaging. Instead of bundle installing in the same method as unpacking the
+  git bundle, we now bundle install as part of the same command as remote rake
+  calls to ensure that all gems are accessible when we need them.
+
+### Removed
+- Remove deprecated `remote_bootstrap` method, since there is no longer
+  anything using the bootstrap method of installing packaging.
+
 ## [0.99.17] - 2018-11-13
 ### Added
 - Add `release_package_link_path` method to determine the release package
@@ -299,7 +314,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.17...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.18...HEAD
+[0.99.18]: https://github.com/puppetlabs/packaging/compare/0.99.17...0.99.18
 [0.99.17]: https://github.com/puppetlabs/packaging/compare/0.99.16...0.99.17
 [0.99.16]: https://github.com/puppetlabs/packaging/compare/0.99.15...0.99.16
 [0.99.15]: https://github.com/puppetlabs/packaging/compare/0.99.14...0.99.15

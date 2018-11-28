@@ -193,6 +193,14 @@ module Pkg
           signature_format: 'v4',
           repo: true,
         },
+        '29' => {
+          architectures: ['x86_64'],
+          source_architecture: 'SRPMS',
+          package_format: 'rpm',
+          source_package_formats: ['src.rpm'],
+          signature_format: 'v4',
+          repo: true,
+        },
       },
 
       'osx' => {

@@ -5,7 +5,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ## [Unreleased]
 ## [0.99.18] - 2018-11-28
 ### Added
-- (PA-2232) Add support for Fedora 29
+- (PA-2232) Add support for Fedora 29.
 
 ### Changed
 - (RE-11584) Replace `remote_bootstrap` with `remote_unpack_git_bundle`, which

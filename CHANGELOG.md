@@ -3,6 +3,10 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.19] - 2018-12-13
+### Changed
+- Pin artifactory gem to ~> 2, since artifactory 3.0.0 requires ruby >= 2.3.
+
 ## [0.99.18] - 2018-11-28
 ### Added
 - (PA-2232) Add support for Fedora 29.
@@ -314,7 +318,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.18...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.19...HEAD
+[0.99.19]: https://github.com/puppetlabs/packaging/compare/0.99.18...0.99.19
 [0.99.18]: https://github.com/puppetlabs/packaging/compare/0.99.17...0.99.18
 [0.99.17]: https://github.com/puppetlabs/packaging/compare/0.99.16...0.99.17
 [0.99.16]: https://github.com/puppetlabs/packaging/compare/0.99.15...0.99.16

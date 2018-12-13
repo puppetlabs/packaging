@@ -26,7 +26,7 @@ describe 'Pkg::Platforms' do
 
   describe '#versions_for_platform' do
     it 'should return all supported versions for a given platform' do
-      expect(Pkg::Platforms.versions_for_platform('el')).to match_array(['5', '6', '7'])
+      expect(Pkg::Platforms.versions_for_platform('el')).to match_array(['5', '6', '7', '8'])
     end
 
     it 'should raise an error if given a nonexistent platform' do

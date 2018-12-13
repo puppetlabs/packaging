@@ -19,7 +19,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency('rubocop', ['~> 0.24.1'])
   gem.add_development_dependency('pry')
   gem.add_runtime_dependency('rake', ['~> 12.3'])
-  gem.add_runtime_dependency('artifactory')
+  gem.add_runtime_dependency('artifactory', ['~> 2'])
   gem.require_path = 'lib'
 
   # Ensure the gem is built out of versioned files

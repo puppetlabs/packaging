@@ -293,7 +293,7 @@ module Pkg::Util::Net
     #   @option :excludes [Array] Strings you want to exclude from your search,
     #     e.g. 'agent' if only searching for 'puppet'.
     def remote_create_latest_symlink(package_name, dir, platform_ext, options = {})
-      ls_cmd = "ls -1 *.#{platform_ext} | grep -v latest | grep -v rc | grep #{package_name} "
+      ls_cmd = "ls -1 *.#{platform_ext} | grep -v latest | grep -v rc | grep -P #{package_name}-\d "
 
       # store this in a separate var to avoid side affects
       full_package_name = String.new(package_name)

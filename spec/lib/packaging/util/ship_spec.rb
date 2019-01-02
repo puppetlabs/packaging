@@ -95,7 +95,7 @@ new_pkgs = [
       expect(Pkg::Util::Net).to receive(:remote_set_permissions).with(test_staging_server, '775', anything).exactly(local_pkgs.count).times
       expect(Pkg::Util::Net).to receive(:remote_set_permissions).with(test_staging_server, '0664', anything).exactly(local_pkgs.count).times
       expect(Pkg::Util::Net).to receive(:remote_set_immutable).with(test_staging_server, anything).exactly(local_pkgs.count).times
-      Pkg::Util::Ship.ship_pkgs(['pkg/**/*.rpm'], test_staging_server, test_remote_path)
+      expect(Pkg::Util::Ship.ship_pkgs(['pkg/**/*.rpm'], test_staging_server, test_remote_path)).to eq(true)
     end
 
     it 'ships packages containing the string `pkg` to the right place' do
@@ -111,7 +111,11 @@ new_pkgs = [
       expect(Pkg::Util::Net).to receive(:remote_set_permissions).with(test_staging_server, '775', anything)
       expect(Pkg::Util::Net).to receive(:remote_set_permissions).with(test_staging_server, '0664', anything)
       expect(Pkg::Util::Net).to receive(:remote_set_immutable).with(test_staging_server, anything)
-      Pkg::Util::Ship.ship_pkgs(['pkg/**/*.rpm'], test_staging_server, test_remote_path, excludes: ['puppet-agent'])
+      expect(Pkg::Util::Ship.ship_pkgs(['pkg/**/*.rpm'], test_staging_server, test_remote_path, excludes: ['puppet-agent'])).to eq(true)
+    end
+
+    it 'returns false if there are no packages to ship' do
+      expect(Pkg::Util::Ship.ship_pkgs(['pkg/**/*.msi'], test_staging_server, test_remote_path)).to eq(false)
     end
   end
 end

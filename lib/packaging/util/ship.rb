@@ -70,7 +70,7 @@ module Pkg::Util::Ship
     # First find the packages to be shipped. We must find them before moving
     # to our temporary staging directory
     local_packages = collect_packages(pkg_exts, options[:excludes])
-    return if local_packages.empty?
+    return false if local_packages.empty?
 
     tmpdir = Dir.mktmpdir
     staged_pkgs = reorganize_packages(local_packages, tmpdir, options[:platform_independent], options[:nonfinal])
@@ -100,6 +100,7 @@ module Pkg::Util::Ship
           Pkg::Util::Net.remote_set_immutable(staging_server, [remote_pkg]) if options[:chattr]
         end
       end
+      return true
     end
   end
 
@@ -132,13 +133,15 @@ module Pkg::Util::Ship
   end
 
   def ship_dmg(local_staging_directory, remote_path, opts = {})
-    ship_pkgs(["#{local_staging_directory}/**/*.dmg"], Pkg::Config.dmg_staging_server, remote_path, opts)
+    packages_have_shipped = ship_pkgs(["#{local_staging_directory}/**/*.dmg"], Pkg::Config.dmg_staging_server, remote_path, opts)
 
     create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('osx'), Pkg::Config.dmg_staging_server, remote_path, opts[:nonfinal])
 
-    Pkg::Platforms.platform_tags_for_package_format('dmg').each do |platform_tag|
-      # Create the latest symlink for the current supported repo
-      Pkg::Util::Net.remote_create_latest_symlink(Pkg::Config.project, Pkg::Paths.artifacts_path(platform_tag, remote_path), 'dmg')
+    if packages_have_shipped
+      Pkg::Platforms.platform_tags_for_package_format('dmg').each do |platform_tag|
+        # Create the latest symlink for the current supported repo
+        Pkg::Util::Net.remote_create_latest_symlink(Pkg::Config.project, Pkg::Paths.artifacts_path(platform_tag, remote_path), 'dmg')
+      end
     end
   end
 
@@ -149,12 +152,14 @@ module Pkg::Util::Ship
   end
 
   def ship_msi(local_staging_directory, remote_path, opts = {})
-    ship_pkgs(["#{local_staging_directory}/**/*.msi"], Pkg::Config.msi_staging_server, remote_path, opts)
+    packages_have_shipped = ship_pkgs(["#{local_staging_directory}/**/*.msi"], Pkg::Config.msi_staging_server, remote_path, opts)
 
     create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('windows'), Pkg::Config.msi_staging_server, remote_path, opts[:nonfinal])
-    # Create the symlinks for the latest supported repo
-    Pkg::Util::Net.remote_create_latest_symlink(Pkg::Config.project, Pkg::Paths.artifacts_path(Pkg::Platforms.generic_platform_tag('windows'), remote_path), 'msi', arch: 'x64')
-    Pkg::Util::Net.remote_create_latest_symlink(Pkg::Config.project, Pkg::Paths.artifacts_path(Pkg::Platforms.generic_platform_tag('windows'), remote_path), 'msi', arch: 'x86')
+    if packages_have_shipped
+      # Create the symlinks for the latest supported repo
+      Pkg::Util::Net.remote_create_latest_symlink(Pkg::Config.project, Pkg::Paths.artifacts_path(Pkg::Platforms.generic_platform_tag('windows'), remote_path), 'msi', arch: 'x64')
+      Pkg::Util::Net.remote_create_latest_symlink(Pkg::Config.project, Pkg::Paths.artifacts_path(Pkg::Platforms.generic_platform_tag('windows'), remote_path), 'msi', arch: 'x86')
+    end
   end
 
   def ship_gem(local_staging_directory, remote_path, opts = {})

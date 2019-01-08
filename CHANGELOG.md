@@ -3,6 +3,13 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.21] - 2019-01-08
+### Changed
+- (RE-11741) Search for '<project_name>-\d' in order to prevent aggressive
+  matching when determining latest package to symlink to (e.g. prevent
+  'puppet-agent' from matching a search for 'puppet').
+- (RE-11741) Only create '-latest' symlinks if there were packages to ship.
+
 ## [0.99.20] - 2018-12-17
 ### Added
 - (PA-2326) Add support for RHEL 8
@@ -323,7 +330,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.20...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.21...HEAD
+[0.99.21]: https://github.com/puppetlabs/packaging/compare/0.99.20...0.99.21
 [0.99.20]: https://github.com/puppetlabs/packaging/compare/0.99.19...0.99.20
 [0.99.19]: https://github.com/puppetlabs/packaging/compare/0.99.18...0.99.19
 [0.99.18]: https://github.com/puppetlabs/packaging/compare/0.99.17...0.99.18

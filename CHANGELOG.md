@@ -3,6 +3,11 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.22] - 2019-01-22
+### Changed
+- (RE-11984) Add quotes and escape '\d' in the regex used to find the latest
+  version of a particular project.
+
 ## [0.99.21] - 2019-01-08
 ### Changed
 - (RE-11741) Search for '<project_name>-\d' in order to prevent aggressive
@@ -330,7 +335,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.21...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.22...HEAD
+[0.99.22]: https://github.com/puppetlabs/packaging/compare/0.99.21...0.99.22
 [0.99.21]: https://github.com/puppetlabs/packaging/compare/0.99.20...0.99.21
 [0.99.20]: https://github.com/puppetlabs/packaging/compare/0.99.19...0.99.20
 [0.99.19]: https://github.com/puppetlabs/packaging/compare/0.99.18...0.99.19

@@ -1,3 +1,4 @@
+require 'json'
 module Pkg::Gem
   class << self
     # This is preserved because I don't want to update the deprecated code path
@@ -15,10 +16,20 @@ module Pkg::Gem
       Pkg::Util::Ship.ship_pkgs(["#{file}*"], Pkg::Config.gem_host, Pkg::Config.gem_path, platform_independent: true)
     end
 
+    def shipped_to_rubygems?(gem_name, gem_version)
+      gem_data = JSON.parse(`curl https://rubygems.org/api/v1/versions/#{gem_name}.json`)
+      gem_versions = gem_data.map { |version| version['number'] }
+      return gem_versions.include? gem_version
+    end
+
     # Ship a Ruby gem file to rubygems.org. Requires the existence
     # of a ~/.gem/credentials file or else rubygems.org won't have
     # any idea who you are.
     def ship_to_rubygems(file, options = {})
+      if shipped_to_rubygems?(Pkg::Config.gem_name, Pkg::Config.gemversion)
+        puts "#{file} has already been shipped to rubygems, skipping . . ."
+        return
+      end
       Pkg::Util::File.file_exists?("#{ENV['HOME']}/.gem/credentials", :required => true)
       gem_push_command = "gem push #{file}"
       gem_push_command << " --host #{options[:host]}" if options[:host]

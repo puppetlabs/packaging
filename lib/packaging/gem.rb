@@ -20,6 +20,11 @@ module Pkg::Gem
       gem_data = JSON.parse(`curl https://rubygems.org/api/v1/versions/#{gem_name}.json`)
       gem_versions = gem_data.map { |version| version['number'] }
       return gem_versions.include? gem_version
+    rescue => e
+      puts "Uh oh, something went wrong searching for gem '#{gem_name}':"
+      puts e
+      puts "Perhaps you're shipping gem '#{gem_name}' for the first time? Congrats!"
+      return false
     end
 
     # Ship a Ruby gem file to rubygems.org. Requires the existence

@@ -3,6 +3,11 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.23] - 2019-01-28
+### Added
+- Check if a specific gem version has already been shipped to rubygems.org
+  before attempting to ship the gem.
+
 ## [0.99.22] - 2019-01-22
 ### Changed
 - (RE-11984) Add quotes and escape '\d' in the regex used to find the latest
@@ -335,7 +340,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.22...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.23...HEAD
+[0.99.23]: https://github.com/puppetlabs/packaging/compare/0.99.22...0.99.23
 [0.99.22]: https://github.com/puppetlabs/packaging/compare/0.99.21...0.99.22
 [0.99.21]: https://github.com/puppetlabs/packaging/compare/0.99.20...0.99.21
 [0.99.20]: https://github.com/puppetlabs/packaging/compare/0.99.19...0.99.20

@@ -571,12 +571,14 @@ namespace :pl do
         cp(ezbake_yaml, File.join(local_dir, "#{Pkg::Config.ref}.ezbake.manifest.yaml"))
       end
 
-      # We are starting to collect additional metadata which contains
+      # Inside build_metadata*.json files there is additional metadata containing
       # information such as git ref and dependencies that are needed at build
-      # time. If this file exists we will make it available for downstream.
-      build_data_json = File.join("ext", "build_metadata.json")
-      if File.exists?(build_data_json)
-        cp(build_data_json, File.join(local_dir, "#{Pkg::Config.ref}.build_metadata.json"))
+      # time. If these files exist, copy them downstream.
+      # Typically these files are named 'ext/build_metadata.<project>.<platform>.json'
+      build_metadata_json_files = Dir.glob('ext/build_metadata*.json')
+      build_metadata_json_files.each do |source_file|
+        target_file = File.join(local_dir, "#{Pkg::Config.ref}.#{File.basename(source_file)}")
+        cp(source_file, target_file)
       end
 
       # Sadly, the packaging repo cannot yet act on its own, without living

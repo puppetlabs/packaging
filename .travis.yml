@@ -17,7 +17,7 @@ matrix:
   exclude:
     - rvm: 2.0.0
       env: "CHECK='rubocop -D'"
-    - rvm: 2.1.1
+    - rvm: 2.1.9
       env: "CHECK='rubocop -D'"
-    - rvm: 2.3.3
+    - rvm: 2.3.8
       env: "CHECK='rubocop -D'"

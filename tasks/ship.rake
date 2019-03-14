@@ -330,26 +330,6 @@ namespace :pl do
     end
   end
 
-  # TESTING THE RAKE TASK!!
-  desc "Copy a package from one spot on artifactory to another"
-  task :promote_package do
-    #package_ref = "01a431162b5fae029c7516b27e247fe676eca9a9"
-    package_ref = "001ab40c3367466247dc0daefac042dd791f5b7e"
-    pe_version = "2018.1"
-    puts "lets run a test and see what happens"
-    artifact = Pkg::ManageArtifactory.new(Pkg::Config.project, Pkg::Config.ref)
-    #artifact.promote_package("puppet-agent", package_ref, pe_version, "el-7-x86_64")
-    artifact.promote_package("puppet-agent", "5.3.8", pe_version, "el-7-x86_64")
-    package_ref_deb = "001ab40c3367466247dc0daefac042dd791f5b7e"
-    pe_version = "2018.1"
-    #artifact.promote_package("puppet-agent", package_ref_deb, "2018.1",  "ubuntu-16.04-amd64")
-    snapshot_ref = "2.6.2.SNAPSHOT.2018.11.02T1630"
-    #artifact.promote_package("puppetserver", "5.3.4.SNAPSHOT.2018.07.10T2051", pe_version, "el-7-x86_64")
-    #artifact.promote_package("puppetserver", snapshot_ref, pe_version, "ubuntu-16.04-amd64")
-    #artifact.promote_package('puppet-agent', '1.10.13', '2018.1', 'el-7-x86_64')
-  end
-
-
   desc "Ship svr4 packages to #{Pkg::Config.svr4_host}"
   task :ship_svr4 do
     Pkg::Util::Execution.retry_on_fail(:times => 3) do

@@ -8,7 +8,6 @@ describe 'artifactory.rb' do
   project_version = 'ashawithlettersandnumbers'
   default_repo_name = 'testing'
   artifactory_uri = 'https://artifactory.url'
-  artifactory_connection = 'https://artifactory.delivery.puppetlabs.net/artifactory/rpm__local'
 
   let(:platform_data) {
     {
@@ -168,22 +167,5 @@ describe 'artifactory.rb' do
       expect { artifact.deploy_package('path/to/el/7/x86_64/package.rpm') }.to raise_error
       ENV['ARTIFACTORY_API_KEY'] = original_artifactory_api_key
     end
-  end
-
-  describe '#check_promotion' do
-  	it 'prints a bunch of shit' do
-  		# problems:
-  		# can't verify valid tag...not sure where it gets verified or how?
-  		#artifact.promote_package('el-6-x86_64', '2018.1')
-  		artifact.promote_package('puppet-agent', '1.10.13', '2018.1', 'el-7-x86_64')
-  	end
-  end
-
-  describe '#test_search_connection' do
-  	it 'tries to connect to artifactory and search for a package, given package name' do
-  		  # can't connect to artifactory because not real url
-  		  #artifact[:artifactory_uri] = "artifactory.delivery.puppetlabs.net/artifactory/rpm__local"
-  		  #artifact.test_search_connection('puppet-agent-5.5.1.356.g01a4311-1.el7.x86_64.rpm')
-  	end
   end
 end

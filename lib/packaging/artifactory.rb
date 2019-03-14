@@ -241,28 +241,37 @@ module Pkg
     #
     # @param pkg [String] the package name ex. puppet-agent
     # @param ref [String] tag or SHA of package(s) to be promoted
-    # @param pe_version [String] enterprise version promoting to (XX.YY)
     # @param platform_tag [String] the platform tag of the artifact
     #   ex. el-7-x86_64, ubuntu-18.04-amd64
-    def promote_package(pkg, ref, pe_version, platform_tag)
-      yaml_url = @artifactory_uri + "/generic__local/development/#{pkg}/#{ref}/#{ref}.yaml"
-      # grab the associated yaml file
-      yaml_content = open(yaml_url){|f| f.read}
+    # @param repositories [Array(String)] the repositories to promote
+    #   the artifact to. Will prepend 'rpm_' or 'debian_' to the repositories
+    #   depending on package type
+    def promote_package(pkg, ref, platform_tag, repositories)
+      # load package metadata
+      yaml_content = retrieve_yaml_data(pkg, ref)
       yaml_data = YAML::load(yaml_content)
+
       # get the artifact name
-      artifact_name = File.basename(yaml_data[:platform_data]["#{platform_tag}"][:artifact])
+      artifact_name = package_name(yaml_data[:platform_data], platform_tag)
       artifact_to_promote = Artifactory::Resource::Artifact.search(name: artifact_name, :artifactory_uri => @artifactory_uri)
+
       if artifact_to_promote.empty?
         puts "Error: could not find PKG=#{pkg} at REF=#{git_ref} for #{platform_tag}"
       end
-      # set the promotion path based on whether rpm or deb
+
+      # This makes an assumption that we're using some consistent repo names
+      # but need to either prepend 'rpm_' or 'debian_' based on package type
       if File.extname(artifact_name) == '.rpm'
-          promotion_path = "rpm_enterprise__local/#{pe_version}/repos/#{platform_tag}"
-      else # 'deb'
-          promotion_path = "debian_enterprise__local/#{pe_version}/repos/#{platform_tag}"
+        promotion_paths = Array(repositories).compact.map { |repo| "rpm_#{repo}/#{platform_tag}/#{artifact_name}" }
+      else
+        promotion_paths = Array(repositories).compact.map { |repo| "debian_#{repo}/#{platform_tag}/#{artifact_name}" }
       end
-      puts "promoting #{artifact_name} to #{promotion_path}"
-      artifact_to_promote[0].copy(promotion_path)
+
+      begin
+        promotion_paths.each do |path|
+          puts "promoting #{artifact_name} to #{path}"
+          artifact_to_promote[0].copy(path)
+        end
       rescue
         raise "PROMOTION FAILED: #{artifact_name} has already been promoted"
     end

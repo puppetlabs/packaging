@@ -256,7 +256,7 @@ module Pkg
       artifact_to_promote = Artifactory::Resource::Artifact.search(name: artifact_name, :artifactory_uri => @artifactory_uri)
 
       if artifact_to_promote.empty?
-        puts "Error: could not find PKG=#{pkg} at REF=#{git_ref} for #{platform_tag}"
+        raise "Error: could not find PKG=#{pkg} at REF=#{git_ref} for #{platform_tag}"
       end
 
       # This makes an assumption that we're using some consistent repo names
@@ -273,7 +273,8 @@ module Pkg
           artifact_to_promote[0].copy(path)
         end
       rescue
-        raise "PROMOTION FAILED: #{artifact_name} has already been promoted"
+        puts "Skipping promotion of #{artifact_name}; it has already been promoted"
+      end
     end
 
     # @param platform_tags [Array[String], String] optional, either a string, or

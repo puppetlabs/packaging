@@ -264,8 +264,10 @@ module Pkg
       # but need to either prepend 'rpm_' or 'debian_' based on package type
       if File.extname(artifact_name) == '.rpm'
         promotion_paths = Array(repositories).compact.map { |repo| "rpm_#{repo}/#{platform_tag}/#{artifact_name}" }
-      else
+      elsif File.extname(artifact_name) == '.deb'
         promotion_paths = Array(repositories).compact.map { |repo| "debian_#{repo}/#{platform_tag}/#{artifact_name}" }
+      else
+        raise "Error: Unknown promotion repository for #{artifact_name}! Only .rpm and .deb files are supported!"
       end
 
       begin

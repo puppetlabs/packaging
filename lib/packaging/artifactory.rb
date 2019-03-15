@@ -277,34 +277,6 @@ module Pkg
       end
     end
 
-    # @param platform_tags [Array[String], String] optional, either a string, or
-    #   an array of strings. These are the platform or platforms that we will
-    #   download packages for.
-    # @param package [String] the name of the package to be retrieved
-    # @param download_path [String] Optional, an optional path set to where
-    #   the user wants the retrieved package to end up. If no path is specified
-    #   this defaults to the pkg directory.
-    def retrieve_package(platform_tags = nil, package = nil, download_path = nil)
-
-      if platform_tags.nil? && !package.nil?
-        platform_tags = Pkg::Paths.tag_from_artifact_path(package) || DEFAULT_REPO_TYPE
-      end
-
-      Array(platform_tags).each do |platform_tag|
-        puts "fetching package for #{platform_tag}"
-        data = platform_specific_data(platform_tag)
-        download_path_for_tag = download_path || data[:repo_subdirectories].sub(@repo_base, 'pkg')
-
-        check_authorization
-        artifact = Artifactory::Resource::Artifact.new(
-          download_uri: File.join(@artifactory_uri, data[:full_artifactory_path], File.basename(package))
-        )
-        artifact.download(download_path_for_tag)
-      end
-    rescue
-      raise "Attempt to download '#{File.basename(package)}' from #{File.join(@artifactory_uri, data[:full_artifactory_path])} failed."
-    end
-
     private :check_authorization
   end
 end

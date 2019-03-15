@@ -206,8 +206,9 @@ module Pkg
       raise "Attempt to upload '#{package}' to #{File.join(@artifactory_uri, data[:full_artifactory_path])} failed"
     end
 
-    # @param pkg The package to download YAML for
-    # @param ref The git ref (sha or tag) we want the YAML for
+    # @param pkg [String] The package to download YAML for
+    #   i.e. 'puppet-agent' or 'puppetdb'
+    # @param ref [String] The git ref (sha or tag) we want the YAML for
     #
     # @return [String] The contents of the YAML file
     def retrieve_yaml_data(pkg, ref)

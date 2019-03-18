@@ -236,7 +236,7 @@ module Pkg
       raise fail_message
     end
 
-    # Promotes a build based on build SHA or tag
+    # Promotes a build based on build SHA or tag (or SNAPSHOT version, for ezbake)
     # Depending on if it's an RPM or Deb package promote accordingly
     # 'promote' by copying the package(s) to the enterprise directory on artifactory
     #

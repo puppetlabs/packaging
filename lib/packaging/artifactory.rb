@@ -1,3 +1,6 @@
+require 'uri'
+require 'open-uri'
+
 module Pkg
 
   # The Artifactory class
@@ -203,13 +206,16 @@ module Pkg
       raise "Attempt to upload '#{package}' to #{File.join(@artifactory_uri, data[:full_artifactory_path])} failed"
     end
 
-    # @param directory [String] optional, The directory where the yaml file will
-    #   be downloaded
-    # @return [String] The path to the downloaded file
-    def retrieve_yaml_data_file(directory = nil)
-      directory ||= Dir.mktmpdir
-      retrieve_package(DEFAULT_REPO_TYPE, "#{@project_version}.yaml", directory)
-      File.join(directory, "#{@project_version}.yaml")
+    # @param pkg [String] The package to download YAML for
+    #   i.e. 'puppet-agent' or 'puppetdb'
+    # @param ref [String] The git ref (sha or tag) we want the YAML for
+    #
+    # @return [String] The contents of the YAML file
+    def retrieve_yaml_data(pkg, ref)
+      yaml_url = "#{@artifactory_uri}/#{DEFAULT_REPO_TYPE}/#{DEFAULT_REPO_BASE}/#{pkg}/#{ref}/#{ref}.yaml"
+      open(yaml_url) { |f| f.read }
+    rescue
+      raise "Failed to load YAML data for #{pkg} at #{ref} from #{yaml_url}!"
     end
 
     # @param platform_data [Hash] The has of the platform data that needs to be
@@ -230,47 +236,56 @@ module Pkg
       raise fail_message
     end
 
-    # @param platform_tags [Array[String], String] optional, either a string, or
-    #   an array of strings. These are the platform or platforms that we will
-    #   download packages for.
-    # @param package [String] optional, the name of the package to be
-    #   retrieved. If the user does not know this information, we can derive it
-    #   from the yaml data. This ignores everything but the package name. Any
-    #   customization for where the user wants to fetch the package is via the
-    #   download_path parameter.
-    # @param download_path [String] Optional, an optional path set to where
-    #   the user wants the retrieved package to end up. If no path is specified
-    #   this defaults to the pkg directory.
-    def retrieve_package(platform_tags = nil, package = nil, download_path = nil)
+    # Promotes a build based on build SHA or tag (or SNAPSHOT version, for ezbake)
+    # Depending on if it's an RPM or Deb package promote accordingly
+    # 'promote' by copying the package(s) to the enterprise directory on artifactory
+    #
+    # @param pkg [String] the package name ex. puppet-agent
+    # @param ref [String] tag or SHA of package(s) to be promoted
+    # @param platform_tag [String] the platform tag of the artifact
+    #   ex. el-7-x86_64, ubuntu-18.04-amd64
+    # @param repositories [Array(String)] the repositories to promote
+    #   the artifact to. Will prepend 'rpm_' or 'debian_' to the repositories
+    #   depending on package type
+    def promote_package(pkg, ref, platform_tag, repositories)
+      # load package metadata
+      yaml_content = retrieve_yaml_data(pkg, ref)
+      yaml_data = YAML::load(yaml_content)
 
-      if platform_tags.nil? && !package.nil?
-        platform_tags = Pkg::Paths.tag_from_artifact_path(package) || DEFAULT_REPO_TYPE
-      elsif platform_tags.nil? && package.nil?
-        yaml_file = retrieve_yaml_data_file(download_path)
-        yaml_data = Pkg::Config.config_from_yaml(yaml_file)
-        platform_data = yaml_data[:platform_data]
-        platform_tags = platform_data.keys
+      # get the artifact name
+      artifact_name = package_name(yaml_data[:platform_data], platform_tag)
+      artifact_to_promote = Artifactory::Resource::Artifact.search(name: artifact_name, :artifactory_uri => @artifactory_uri)
+
+      if artifact_to_promote.empty?
+        raise "Error: could not find PKG=#{pkg} at REF=#{git_ref} for #{platform_tag}"
       end
 
-      Array(platform_tags).each do |platform_tag|
-        puts "fetching package for #{platform_tag}"
-        data = platform_specific_data(platform_tag)
-        if package.nil?
-          package_for_tag = package_name(platform_data, platform_tag)
-          puts "package name is #{package_for_tag}"
-        else
-          package_for_tag = package
+      # This makes an assumption that we're using some consistent repo names
+      # but need to either prepend 'rpm_' or 'debian_' based on package type
+      if File.extname(artifact_name) == '.rpm'
+        promotion_paths = Array(repositories).compact.map { |repo| "rpm_#{repo}/#{platform_tag}/#{artifact_name}" }
+      elsif File.extname(artifact_name) == '.deb'
+        promotion_paths = Array(repositories).compact.map { |repo| "debian_#{repo}/#{platform_tag}/#{artifact_name}" }
+      else
+        raise "Error: Unknown promotion repository for #{artifact_name}! Only .rpm and .deb files are supported!"
+      end
+
+      begin
+        promotion_paths.each do |path|
+          puts "promoting #{artifact_name} to #{path}"
+          artifact_to_promote[0].copy(path)
         end
-        download_path_for_tag = download_path || data[:repo_subdirectories].sub(@repo_base, 'pkg')
-
-        check_authorization
-        artifact = Artifactory::Resource::Artifact.new(
-          download_uri: File.join(@artifactory_uri, data[:full_artifactory_path], File.basename(package_for_tag))
-        )
-        artifact.download(download_path_for_tag)
+      rescue Artifactory::Error::HTTPError => e
+        if e.message =~ /destination and source are the same/i
+          puts "Skipping promotion of #{artifact_name}; it has already been promoted"
+        else
+          puts "#{e.level}: #{e.message}"
+          raise e
+        end
+      rescue => e
+        puts "Something went wrong promoting #{artifact_name}!"
+        raise e
       end
-    rescue
-      raise "Attempt to download '#{File.basename(package)}' from #{File.join(@artifactory_uri, data[:full_artifactory_path])} failed."
     end
 
     private :check_authorization

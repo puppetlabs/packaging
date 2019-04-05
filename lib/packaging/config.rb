@@ -81,6 +81,13 @@ module Pkg
           data = {}
           artifacts.each do |artifact|
             tag = Pkg::Paths.tag_from_artifact_path(artifact)
+
+            # Remove the f-prefix from the fedora platform tag keys so that
+            # beaker can rely on consistent keys once we rip out the f for good
+            tag = tag.sub(/fedora-f/, 'fedora-')
+
+            data[tag] ||= {}
+
             platform, version, arch = Pkg::Platforms.parse_platform_tag(tag)
             package_format = Pkg::Platforms.get_attribute(tag, :package_format)
 
@@ -109,12 +116,8 @@ module Pkg
             else
               fail "Not sure what to do with packages with a package format of '#{package_format}' - maybe update PLATFORM_INFO?"
             end
-            # Remove the f-prefix from the fedora platform tag keys so that
-            # beaker can rely on consistent keys once we rip out the f for good
-            tag = tag.sub(/fedora-f/, 'fedora-')
-            data[tag] = { :artifact => artifact.sub('artifacts/', ''),
-                          :repo_config => repo_config,
-                        }
+            data[tag][:artifact] = artifact.sub('artifacts/', '')
+            data[tag][:repo_config] = repo_config
           end
           return data
         else

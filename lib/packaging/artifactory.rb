@@ -236,6 +236,28 @@ module Pkg
       raise fail_message
     end
 
+    # @param platform_data [Hash] The has of the platform data that needs to be
+    #   parsed
+    # @param platform_tag [String] The tag that the data we want belongs to
+    # @return [String] The name of the package for the given project,
+    #   project_version, and platform_tag
+    def all_package_names(platform_data, platform_tag)
+      packages = [platform_data[platform_tag][:artifact]]
+      packages << platform_data[platform_tag][:additional_artifacts]
+      packages.flatten!
+      packages.reject! { |package| package.empty? || package.nil? }
+      packages.map { |package| File.basename(package) }
+    rescue
+      fail_message = <<-DOC
+  Package name could not be found from loaded yaml data. Either this package
+  does not exist, or '#{@platform_tag}' is not present in this dataset.
+
+  The following are available platform tags for '#{@project}' '#{@project_version}':
+    #{platform_data.keys.sort}
+      DOC
+      raise fail_message
+    end
+
     # Promotes a build based on build SHA or tag (or SNAPSHOT version, for ezbake)
     # Depending on if it's an RPM or Deb package promote accordingly
     # 'promote' by copying the package(s) to the enterprise directory on artifactory
@@ -253,38 +275,40 @@ module Pkg
       yaml_data = YAML::load(yaml_content)
 
       # get the artifact name
-      artifact_name = package_name(yaml_data[:platform_data], platform_tag)
-      artifact_to_promote = Artifactory::Resource::Artifact.search(name: artifact_name, :artifactory_uri => @artifactory_uri)
+      artifact_names = all_package_names(yaml_data[:platform_data], platform_tag)
+      artifact_names.each do |artifact_name|
+        artifact_to_promote = Artifactory::Resource::Artifact.search(name: artifact_name, :artifactory_uri => @artifactory_uri)
 
-      if artifact_to_promote.empty?
-        raise "Error: could not find PKG=#{pkg} at REF=#{git_ref} for #{platform_tag}"
-      end
-
-      # This makes an assumption that we're using some consistent repo names
-      # but need to either prepend 'rpm_' or 'debian_' based on package type
-      if File.extname(artifact_name) == '.rpm'
-        promotion_paths = Array(repositories).compact.map { |repo| "rpm_#{repo}/#{platform_tag}/#{artifact_name}" }
-      elsif File.extname(artifact_name) == '.deb'
-        promotion_paths = Array(repositories).compact.map { |repo| "debian_#{repo}/#{platform_tag}/#{artifact_name}" }
-      else
-        raise "Error: Unknown promotion repository for #{artifact_name}! Only .rpm and .deb files are supported!"
-      end
-
-      begin
-        promotion_paths.each do |path|
-          puts "promoting #{artifact_name} to #{path}"
-          artifact_to_promote[0].copy(path)
+        if artifact_to_promote.empty?
+          raise "Error: could not find PKG=#{pkg} at REF=#{git_ref} for #{platform_tag}"
         end
-      rescue Artifactory::Error::HTTPError => e
-        if e.message =~ /destination and source are the same/i
-          puts "Skipping promotion of #{artifact_name}; it has already been promoted"
+
+        # This makes an assumption that we're using some consistent repo names
+        # but need to either prepend 'rpm_' or 'debian_' based on package type
+        if File.extname(artifact_name) == '.rpm'
+          promotion_paths = Array(repositories).compact.map { |repo| "rpm_#{repo}/#{platform_tag}/#{artifact_name}" }
+        elsif File.extname(artifact_name) == '.deb'
+          promotion_paths = Array(repositories).compact.map { |repo| "debian_#{repo}/#{platform_tag}/#{artifact_name}" }
         else
-          puts "#{e.level}: #{e.message}"
+          raise "Error: Unknown promotion repository for #{artifact_name}! Only .rpm and .deb files are supported!"
+        end
+
+        begin
+          promotion_paths.each do |path|
+            puts "promoting #{artifact_name} to #{path}"
+            artifact_to_promote[0].copy(path)
+          end
+        rescue Artifactory::Error::HTTPError => e
+          if e.message =~ /destination and source are the same/i
+            puts "Skipping promotion of #{artifact_name}; it has already been promoted"
+          else
+            puts "#{e.level}: #{e.message}"
+            raise e
+          end
+        rescue => e
+          puts "Something went wrong promoting #{artifact_name}!"
           raise e
         end
-      rescue => e
-        puts "Something went wrong promoting #{artifact_name}!"
-        raise e
       end
     end
 

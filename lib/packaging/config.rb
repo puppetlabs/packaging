@@ -104,7 +104,19 @@ module Pkg
             else
               next if File.extname(artifact) != ".#{package_format}"
             end
-            next if /#{self.project}-[a-z]+/.match(File.basename(artifact))
+            if /#{self.project}-[a-z]+/.match(File.basename(artifact))
+              # Don't want to include debian debug packages
+              next if /-dbgsym/.match(File.basename(artifact))
+
+              additional_artifact = artifact.sub('artifacts/', '')
+              data[tag][:additional_artifacts] ||= []
+
+              # don't add noarch packages multiple times
+              if data[tag][:additional_artifacts].select { |artifact| File.basename(artifact) == File.basename(additional_artifact) }.empty?
+                data[tag][:additional_artifacts] << additional_artifact
+              end
+              next
+            end
 
             case package_format
             when 'deb'

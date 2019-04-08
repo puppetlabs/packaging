@@ -151,16 +151,21 @@ module Pkg
       # @param tag the platform tag
       # @param artifact the path of the additional artifact path to add
       def add_additional_artifact(platform_data, tag, artifact)
-        platform_data[tag][:additional_artifacts] ||= []
-
         # Don't add noarch packages to additional_artifacts if the same package
         # is already the artifact
         if File.basename(platform_data[tag][:artifact]) == File.basename(artifact)
           return
         end
 
+        platform_data[tag][:additional_artifacts] ||= []
+
         if platform_data[tag][:additional_artifacts].select { |a| File.basename(a) == File.basename(artifact) }.empty?
           platform_data[tag][:additional_artifacts] << artifact
+        end
+
+        # try to avoid empty entries in the yaml for more concise output
+        if platform_data[tag][:additional_artifacts].empty?
+          platform_data[tag][:additional_artifacts] = nil
         end
       end
 

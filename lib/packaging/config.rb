@@ -96,6 +96,7 @@ module Pkg
             # information, but we should report the versioned artifact in
             # platform_data
             next if platform == 'windows' && File.basename(artifact) == "#{self.project}-#{arch}.#{package_format}"
+
             # Sometimes we have source or debug packages. We don't want to save
             # these paths in favor of the artifact paths.
             if platform == 'solaris'
@@ -104,17 +105,12 @@ module Pkg
             else
               next if File.extname(artifact) != ".#{package_format}"
             end
+
+            # Don't want to include debian debug packages
+            next if /-dbgsym/.match(File.basename(artifact))
+
             if /#{self.project}-[a-z]+/.match(File.basename(artifact))
-              # Don't want to include debian debug packages
-              next if /-dbgsym/.match(File.basename(artifact))
-
-              additional_artifact = artifact.sub('artifacts/', '')
-              data[tag][:additional_artifacts] ||= []
-
-              # don't add noarch packages multiple times
-              if data[tag][:additional_artifacts].select { |artifact| File.basename(artifact) == File.basename(additional_artifact) }.empty?
-                data[tag][:additional_artifacts] << additional_artifact
-              end
+              add_additional_artifact(data, tag, artifact.sub('artifacts/', ''))
               next
             end
 
@@ -128,13 +124,38 @@ module Pkg
             else
               fail "Not sure what to do with packages with a package format of '#{package_format}' - maybe update PLATFORM_INFO?"
             end
-            data[tag][:artifact] = artifact.sub('artifacts/', '')
-            data[tag][:repo_config] = repo_config
+
+            # handle the case where there are multiple artifacts but the artifacts are not
+            # named based on project name (e.g. puppet-enterprise-vanagon).
+            # In this case, the first one will get set as the artifact, everything else
+            # will be in the additional artifacts
+            if data[tag][:artifact].nil?
+              data[tag][:artifact] = artifact.sub('artifacts/', '')
+              data[tag][:repo_config] = repo_config
+            else
+              add_additional_artifact(data, tag, artifact.sub('artifacts/', ''))
+            end
           end
           return data
         else
           warn "Skipping platform_data collection, but don't worry about it."
           return nil
+        end
+      end
+
+      # Add artifact to the `additional_artifacts` array in platform data.
+      # This will not add noarch package paths for the same noarch package
+      # multiple times.
+      #
+      # @param platform_data The platform data hash to update
+      # @param tag the platform tag
+      # @param artifact the path of the additional artifact path to add
+      def add_additional_artifact(platform_data, tag, artifact)
+        platform_data[tag][:additional_artifacts] ||= []
+
+        if platform_data[tag][:additional_artifacts].select { |a| File.basename(a) == File.basename(artifact) }.empty?
+          warn "ADDING ADDITIONAL ARTIFACT! #{File.basename(artifact)}"
+          platform_data[tag][:additional_artifacts] << artifact
         end
       end
 

@@ -239,6 +239,11 @@ describe "Pkg::Config" do
       "./artifacts/deb/stretch/PC1/puppet-agent_5.3.2.658.gc79ef9a-1stretch_amd64.deb\n" \
       "./artifacts/deb/stretch/PC1/puppet-agent-dbgsym_5.3.2.658.gc79ef9a-1stretch_amd64.deb"
 
+    artifacts_not_matching_project = \
+      "./artifacts/deb/xenial/pe-postgresql-contrib_2019.1.9.6.12-1xenial_amd64.deb\n" \
+      "./artifacts/deb/xenial/pe-postgresql-devel_2019.1.9.6.12-1xenial_amd64.deb\n" \
+      "./artifacts/deb/xenial/pe-postgresql-server_2019.1.9.6.12-1xenial_amd64.deb\n" \
+      "./artifacts/deb/xenial/pe-postgresql_2019.1.9.6.12-1xenial_amd64.deb"
     project = 'puppet-agent'
     ref = '5.3.2'
 
@@ -293,6 +298,16 @@ describe "Pkg::Config" do
       allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(stretch_artifacts, nil)
       data = Pkg::Config.platform_data
       expect(data['debian-9-amd64']).to include(:artifact => './deb/stretch/PC1/puppet-agent_5.3.2.658.gc79ef9a-1stretch_amd64.deb')
+    end
+
+    it "should collect packages that don't match the project name" do
+      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(artifacts_not_matching_project, nil)
+      data = Pkg::Config.platform_data
+      expect(data['ubuntu-16.04-amd64']).to include(:artifact => './deb/xenial/pe-postgresql-contrib_2019.1.9.6.12-1xenial_amd64.deb')
+      expect(data['ubuntu-16.04-amd64'][:additional_artifacts].size).to eq(3)
+      expect(data['ubuntu-16.04-amd64'][:additional_artifacts]).to include('./deb/xenial/pe-postgresql-devel_2019.1.9.6.12-1xenial_amd64.deb')
+      expect(data['ubuntu-16.04-amd64'][:additional_artifacts]).to include('./deb/xenial/pe-postgresql-server_2019.1.9.6.12-1xenial_amd64.deb')
+      expect(data['ubuntu-16.04-amd64'][:additional_artifacts]).to include('./deb/xenial/pe-postgresql_2019.1.9.6.12-1xenial_amd64.deb')
     end
 
     it "should use 'ppc' instead of 'power' in aix paths" do

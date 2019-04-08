@@ -153,8 +153,13 @@ module Pkg
       def add_additional_artifact(platform_data, tag, artifact)
         platform_data[tag][:additional_artifacts] ||= []
 
+        # Don't add noarch packages to additional_artifacts if the same package
+        # is already the artifact
+        if File.basename(platform_data[tag][:artifact]) == File.basename(artifact)
+          return
+        end
+
         if platform_data[tag][:additional_artifacts].select { |a| File.basename(a) == File.basename(artifact) }.empty?
-          warn "ADDING ADDITIONAL ARTIFACT! #{File.basename(artifact)}"
           platform_data[tag][:additional_artifacts] << artifact
         end
       end

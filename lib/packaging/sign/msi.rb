@@ -66,23 +66,42 @@ module Pkg::Sign::Msi
       if "/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe" verify -in "C:/#{work_dir}/$msi" ; then
         echo "$msi is already signed, skipping . . ." ;
       else
-        "/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe" sign \
-          -n "Puppet" -i "http://www.puppet.com" \
-          -h sha1 \
-          -pkcs12 "#{Pkg::Config.msi_signing_cert}" \
-          -pass "#{Pkg::Config.msi_signing_cert_pw}" \
-          -t "http://timestamp.verisign.com/scripts/timstamp.dll" \
-          -in "C:/#{work_dir}/$msi" \
-          -out "C:/#{work_dir}/signed-$msi"
-        "/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe" sign \
-          -n "Puppet" -i "http://www.puppet.com" \
-          -nest -h sha256 \
-          -pkcs12 "#{Pkg::Config.msi_signing_cert}" \
-          -pass "#{Pkg::Config.msi_signing_cert_pw}" \
-          -ts "http://sha256timestamp.ws.symantec.com/sha256/timestamp" \
-          -in "C:/#{work_dir}/signed-$msi" \
-          -out "C:/#{work_dir}/$msi"
-        rm "C:/#{work_dir}/signed-$msi" ;
+          tries=5
+          sha1Servers=(http://timestamp.verisign.com/scripts/timstamp.dll
+            http://timestamp.globalsign.com/scripts/timstamp.dll
+            http://www.startssl.com/timestamp)
+              for timeserver in "${sha1Servers[@]}"; do
+                for ((try=1; try<=$tries; try++)) do
+                  ret=$(/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe sign \
+                            -n "Puppet" -i "http://www.puppet.com" \
+                            -h sha1 \
+                            -pkcs12 "#{Pkg::Config.msi_signing_cert}" \
+                            -pass "#{Pkg::Config.msi_signing_cert_pw}" \
+                            -t "$timeserver" \
+                            -in "C:/#{work_dir}/$msi" \
+                            -out "C:/#{work_dir}/signed-$msi")
+                    if [[ $ret == *"Succeeded"* ]]; then break; fi
+                  done;
+              if [[ $ret == *"Succeeded"* ]]; then break; fi
+            done;
+            echo $ret
+            sha256Servers=(http://sha256timestamp.ws.symantec.com/sha256/timestamp
+              http://timestamp.comodoca.com?td=sha256)
+                for timeserver in "${sha256Servers[@]}"; do
+                  for ((try=1; try<=$tries; try++)) do
+                    ret=$(/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe sign \
+                      -n "Puppet" -i "http://www.puppet.com" \
+                      -nest -h sha256 \
+                      -pkcs12 "#{Pkg::Config.msi_signing_cert}" \
+                      -pass "#{Pkg::Config.msi_signing_cert_pw}" \
+                      -ts "$timeserver" \
+                      -in "C:/#{work_dir}/signed-$msi" \
+                      -out "C:/#{work_dir}/$msi")
+                      if [[ $ret == *"Succeeded"* ]]; then break; fi
+                    done;
+                if [[ $ret == *"Succeeded"* ]]; then break; fi
+              done;
+              echo $ret
       fi
     done))
     msis.each do | msi |

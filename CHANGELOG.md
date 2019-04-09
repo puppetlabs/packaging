@@ -3,6 +3,11 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.26] - 2019-04-09
+### Fixed
+- Ensure existing artifact path is not nil before comparing to additional
+  artifact paths.
+
 ## [0.99.25] - 2019-04-09
 ### Added
 - (RE-9511) Record `additional_artifacts` in `platform_data` yaml output for
@@ -355,7 +360,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.25...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.26...HEAD
+[0.99.26]: https://github.com/puppetlabs/packaging/compare/0.99.25...0.99.26
 [0.99.25]: https://github.com/puppetlabs/packaging/compare/0.99.24...0.99.25
 [0.99.24]: https://github.com/puppetlabs/packaging/compare/0.99.23...0.99.24
 [0.99.23]: https://github.com/puppetlabs/packaging/compare/0.99.22...0.99.23

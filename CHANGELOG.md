@@ -3,10 +3,17 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.25] - 2019-04-09
+### Added
+- (RE-9511) Record `additional_artifacts` in `platform_data` yaml output for
+  projects that produce multiple packages.
+- (RE-11105) Add `promote_package` method to promote (i.e. copy) packages to
+  separate enterprise repositories on Artifactory.
+
 ## [0.99.24] - 2019-03-12
 ### Added
 - (RE-12062) Copy all the build_metadata\*.json files via glob rather than a single
-static file.
+  static file.
 
 ### Changed
 - Update ruby version exclusions for rubocop.
@@ -348,7 +355,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.24...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.25...HEAD
+[0.99.25]: https://github.com/puppetlabs/packaging/compare/0.99.24...0.99.25
 [0.99.24]: https://github.com/puppetlabs/packaging/compare/0.99.23...0.99.24
 [0.99.23]: https://github.com/puppetlabs/packaging/compare/0.99.22...0.99.23
 [0.99.22]: https://github.com/puppetlabs/packaging/compare/0.99.21...0.99.22

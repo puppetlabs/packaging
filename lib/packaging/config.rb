@@ -81,6 +81,13 @@ module Pkg
           data = {}
           artifacts.each do |artifact|
             tag = Pkg::Paths.tag_from_artifact_path(artifact)
+
+            # Remove the f-prefix from the fedora platform tag keys so that
+            # beaker can rely on consistent keys once we rip out the f for good
+            tag = tag.sub(/fedora-f/, 'fedora-')
+
+            data[tag] ||= {}
+
             platform, version, arch = Pkg::Platforms.parse_platform_tag(tag)
             package_format = Pkg::Platforms.get_attribute(tag, :package_format)
 
@@ -89,6 +96,7 @@ module Pkg
             # information, but we should report the versioned artifact in
             # platform_data
             next if platform == 'windows' && File.basename(artifact) == "#{self.project}-#{arch}.#{package_format}"
+
             # Sometimes we have source or debug packages. We don't want to save
             # these paths in favor of the artifact paths.
             if platform == 'solaris'
@@ -97,7 +105,14 @@ module Pkg
             else
               next if File.extname(artifact) != ".#{package_format}"
             end
-            next if /#{self.project}-[a-z]+/.match(File.basename(artifact))
+
+            # Don't want to include debian debug packages
+            next if /-dbgsym/.match(File.basename(artifact))
+
+            if /#{self.project}-[a-z]+/.match(File.basename(artifact))
+              add_additional_artifact(data, tag, artifact.sub('artifacts/', ''))
+              next
+            end
 
             case package_format
             when 'deb'
@@ -109,17 +124,48 @@ module Pkg
             else
               fail "Not sure what to do with packages with a package format of '#{package_format}' - maybe update PLATFORM_INFO?"
             end
-            # Remove the f-prefix from the fedora platform tag keys so that
-            # beaker can rely on consistent keys once we rip out the f for good
-            tag = tag.sub(/fedora-f/, 'fedora-')
-            data[tag] = { :artifact => artifact.sub('artifacts/', ''),
-                          :repo_config => repo_config,
-                        }
+
+            # handle the case where there are multiple artifacts but the artifacts are not
+            # named based on project name (e.g. puppet-enterprise-vanagon).
+            # In this case, the first one will get set as the artifact, everything else
+            # will be in the additional artifacts
+            if data[tag][:artifact].nil?
+              data[tag][:artifact] = artifact.sub('artifacts/', '')
+              data[tag][:repo_config] = repo_config
+            else
+              add_additional_artifact(data, tag, artifact.sub('artifacts/', ''))
+            end
           end
           return data
         else
           warn "Skipping platform_data collection, but don't worry about it."
           return nil
+        end
+      end
+
+      # Add artifact to the `additional_artifacts` array in platform data.
+      # This will not add noarch package paths for the same noarch package
+      # multiple times.
+      #
+      # @param platform_data The platform data hash to update
+      # @param tag the platform tag
+      # @param artifact the path of the additional artifact path to add
+      def add_additional_artifact(platform_data, tag, artifact)
+        # Don't add noarch packages to additional_artifacts if the same package
+        # is already the artifact
+        if File.basename(platform_data[tag][:artifact]) == File.basename(artifact)
+          return
+        end
+
+        platform_data[tag][:additional_artifacts] ||= []
+
+        if platform_data[tag][:additional_artifacts].select { |a| File.basename(a) == File.basename(artifact) }.empty?
+          platform_data[tag][:additional_artifacts] << artifact
+        end
+
+        # try to avoid empty entries in the yaml for more concise output
+        if platform_data[tag][:additional_artifacts].empty?
+          platform_data[tag][:additional_artifacts] = nil
         end
       end
 

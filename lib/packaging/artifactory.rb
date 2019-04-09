@@ -218,7 +218,7 @@ module Pkg
       raise "Failed to load YAML data for #{pkg} at #{ref} from #{yaml_url}!"
     end
 
-    # @param platform_data [Hash] The has of the platform data that needs to be
+    # @param platform_data [Hash] The hash of the platform data that needs to be
     #   parsed
     # @param platform_tag [String] The tag that the data we want belongs to
     # @return [String] The name of the package for the given project,
@@ -236,10 +236,10 @@ module Pkg
       raise fail_message
     end
 
-    # @param platform_data [Hash] The has of the platform data that needs to be
+    # @param platform_data [Hash] The hash of the platform data that needs to be
     #   parsed
     # @param platform_tag [String] The tag that the data we want belongs to
-    # @return [String] The name of the package for the given project,
+    # @return [Array] An array containing all packages for the given project,
     #   project_version, and platform_tag
     def all_package_names(platform_data, platform_tag)
       packages = [platform_data[platform_tag][:artifact]]

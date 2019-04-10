@@ -80,11 +80,15 @@ module Pkg
           artifacts = artifacts.split("\n")
           data = {}
           artifacts.each do |artifact|
-            tag = Pkg::Paths.tag_from_artifact_path(artifact)
+            # We need to preserve the original tag to make sure we look for
+            # fedora repo configs in the 1.10.x branch of puppet-agent in
+            # the correct place. For 5.x and 6.x release streams the f prefix
+            # has been removed and so tag will equal original_tag
+            original_tag = Pkg::Paths.tag_from_artifact_path(artifact)
 
             # Remove the f-prefix from the fedora platform tag keys so that
             # beaker can rely on consistent keys once we rip out the f for good
-            tag = tag.sub(/fedora-f/, 'fedora-')
+            tag = original_tag.sub(/fedora-f/, 'fedora-')
 
             data[tag] ||= {}
 
@@ -118,7 +122,8 @@ module Pkg
             when 'deb'
               repo_config = "../repo_configs/deb/pl-#{self.project}-#{self.ref}-#{Pkg::Platforms.get_attribute(tag, :codename)}.list"
             when 'rpm'
-              repo_config = "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-#{tag}.repo" unless tag.include? 'aix'
+              # Using original_tag here to not break legacy fedora repo targets
+              repo_config = "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-#{original_tag}.repo" unless tag.include? 'aix'
             when 'swix', 'svr4', 'ips', 'dmg', 'msi'
               # No repo_configs for these platforms, so do nothing.
             else

@@ -3,6 +3,12 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.27] - 2019-04-10
+### Fixed
+- Presesrve the original tag to keep the `fedora-f` prefix in the repo config
+  artifact path. We have discontinued the `-f` in recent releases but this is
+  still an issue with puppet-agent 1.10.x.
+
 ## [0.99.26] - 2019-04-09
 ### Fixed
 - Ensure existing artifact path is not nil before comparing to additional
@@ -360,7 +366,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.26...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.27...HEAD
+[0.99.27]: https://github.com/puppetlabs/packaging/compare/0.99.26...0.99.27
 [0.99.26]: https://github.com/puppetlabs/packaging/compare/0.99.25...0.99.26
 [0.99.25]: https://github.com/puppetlabs/packaging/compare/0.99.24...0.99.25
 [0.99.24]: https://github.com/puppetlabs/packaging/compare/0.99.23...0.99.24

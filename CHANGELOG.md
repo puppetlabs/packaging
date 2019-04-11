@@ -3,6 +3,12 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.28] - 2019-04-11
+### Fixed
+- Due to incorrect ordering in the checks for `nil?` and `empty?` in `all_artifact_names`,
+  promotions into artifactory for anything that didn't have additional packages was (softly)
+  failing. This has been fixed.
+
 ## [0.99.27] - 2019-04-10
 ### Fixed
 - Presesrve the original tag to keep the `fedora-f` prefix in the repo config

@@ -228,7 +228,7 @@ module Pkg
     rescue
       fail_message = <<-DOC
   Package name could not be found from loaded yaml data. Either this package
-  does not exist, or '#{@platform_tag}' is not present in this dataset.
+  does not exist, or '#{platform_tag}' is not present in this dataset.
 
   The following are available platform tags for '#{@project}' '#{@project_version}':
     #{platform_data.keys.sort}
@@ -250,7 +250,7 @@ module Pkg
     rescue
       fail_message = <<-DOC
   Package name could not be found from loaded yaml data. Either this package
-  does not exist, or '#{@platform_tag}' is not present in this dataset.
+  does not exist, or '#{platform_tag}' is not present in this dataset.
 
   The following are available platform tags for '#{@project}' '#{@project_version}':
     #{platform_data.keys.sort}

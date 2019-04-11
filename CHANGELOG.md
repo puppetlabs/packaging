@@ -372,7 +372,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.27...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.28...HEAD
+[0.99.28]: https://github.com/puppetlabs/packaging/compare/0.99.27...0.99.28
 [0.99.27]: https://github.com/puppetlabs/packaging/compare/0.99.26...0.99.27
 [0.99.26]: https://github.com/puppetlabs/packaging/compare/0.99.25...0.99.26
 [0.99.25]: https://github.com/puppetlabs/packaging/compare/0.99.24...0.99.25

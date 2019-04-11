@@ -245,7 +245,7 @@ module Pkg
       packages = [platform_data[platform_tag][:artifact]]
       packages << platform_data[platform_tag][:additional_artifacts]
       packages.flatten!
-      packages.reject! { |package| package.empty? || package.nil? }
+      packages.reject! { |package| package.nil? || package.empty? }
       packages.map { |package| File.basename(package) }
     rescue
       fail_message = <<-DOC

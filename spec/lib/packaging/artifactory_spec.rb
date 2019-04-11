@@ -39,7 +39,6 @@ describe 'artifactory.rb' do
       'solaris-10-sparc' => {
         :artifact => "./solaris/10/PC1/puppet-agent-5.3.1.34.gf65f9ef-1.sparc.pkg.gz",
         :repo_config => '',
-        :additional_artifacts => ["./solaris/10/PC1/puppet-agent-extras-5.3.1.34.gf65f9ef-1.sparc.pkg.gz"],
       },
     }
   }
@@ -82,7 +81,7 @@ describe 'artifactory.rb' do
       :toplevel_repo => 'generic',
       :repo_subdirectories => "#{default_repo_name}/#{project}/#{project_version}/solaris-10-sparc",
       :package_name => 'path/to/a/solaris/10/package/puppet-agent-5.3.1.34.gf65f9ef-1.sparc.pkg.gz',
-      :all_package_names => ['puppet-agent-5.3.1.34.gf65f9ef-1.sparc.pkg.gz','puppet-agent-extras-5.3.1.34.gf65f9ef-1.sparc.pkg.gz']
+      :all_package_names => ['puppet-agent-5.3.1.34.gf65f9ef-1.sparc.pkg.gz']
     },
   }
 

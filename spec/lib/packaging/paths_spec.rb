@@ -236,6 +236,30 @@ describe 'Pkg::Paths' do
     end
   end
 
+  describe '#remote_repo_base' do
+    before :each do
+      allow(Pkg::Config).to receive(:yum_repo_path).and_return('foo')
+      allow(Pkg::Config).to receive(:apt_repo_path).and_return('bar')
+      allow(Pkg::Config).to receive(:nonfinal_yum_repo_path).and_return('foo-nightly')
+      allow(Pkg::Config).to receive(:nonfinal_apt_repo_path).and_return('bar-nightly')
+    end
+    it 'returns yum_repo_path for rpms' do
+      expect(Pkg::Paths.remote_repo_base('el-7-x86_64')).to eq('foo')
+    end
+    it 'returns apt_repo_path for debs' do
+      expect(Pkg::Paths.remote_repo_base('ubuntu-18.04-amd64')).to eq('bar')
+    end
+    it 'returns nonfinal_yum_repo_path for nonfinal rpms' do
+      expect(Pkg::Paths.remote_repo_base('fedora-29-x86_64', true)).to eq('foo-nightly')
+    end
+    it 'returns nonfinal_apt_repo_path for nonfinal debs' do
+      expect(Pkg::Paths.remote_repo_base('debian-9-amd64', true)).to eq('bar-nightly')
+    end
+    it 'fails for all other package formats' do
+      expect { Pkg::Paths.remote_repo_base('osx-10.14-x86_64') }.to raise_error(/Can't determine remote repo base path/)
+    end
+  end
+
   describe '#release_package_link_path' do
     repo_name = 'puppet6'
     nonfinal_repo_name = 'puppet6-nightly'

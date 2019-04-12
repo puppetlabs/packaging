@@ -208,6 +208,40 @@ module Pkg::Util::Ship
     fail "Failed to create rolling repo link for '#{platform_tag}'.\n#{e}"
   end
 
+  def update_release_package_symlinks(local_staging_directory, nonfinal = false)
+    local_packages = collect_packages(["#{local_staging_directory}/**/*.rpm", "#{local_staging_directory}/**/*.deb"])
+    local_packages.each do |package|
+      platform_tag = Pkg::Paths.tag_from_artifact_path(package)
+      package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
+      case package_format
+      when 'rpm'
+        remote_base = Pkg::Paths.artifacts_path(platform_tag, Pkg::Paths.remote_repo_base(platform_tag, nonfinal), nonfinal)
+      when 'deb'
+        remote_base = Pkg::Paths.apt_package_base_path(platform_tag, Pkg::Paths.repo_name(nonfinal), Pkg::Config.project, nonfinal)
+      else
+        fail "Unexpected package format #{package_format}, cannot create symlinks."
+      end
+      remote_path = File.join(remote_base, File.basename(package))
+      link_path = Pkg::Paths.release_package_link_path(platform_tag, nonfinal)
+      link_command = <<-CMD
+        if [ ! -e #{remote_path} ]; then
+          echo "Uh oh! #{remote_path} doesn't exist! Can't create symlink."
+          exit 1
+        fi
+        if [ -e #{link_path} ] && [ ! -L #{link_path} ]; then
+          echo "Uh oh! #{link_path} exists but isn't a link, I don't know what to do with this."
+          exit 1
+        fi
+        if [ -L #{link_path} ] && [ ! #{remote_path} -ef #{link_path} ]; then
+          echo "Removing old link from $(readlink #{link_path}) to #{link_path} . . ."
+          rm #{link_path}
+        fi
+        ln -sf #{remote_path} #{link_path}
+      CMD
+      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, link_command)
+    end
+  end
+
   def test_ship(vm, ship_task)
     command = 'getent group release || groupadd release'
     Pkg::Util::Net.remote_ssh_cmd(vm, command)

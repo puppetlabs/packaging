@@ -298,6 +298,24 @@ namespace :pl do
       Rake::Task['pl:remote:deploy_to_rsync_server'].invoke
     end
 
+    task :stage_release_packages => "pl:fetch" do
+      Rake::Task['pl:jenkins:uber_ship_lite'].invoke
+      # Deb packages only appear in the freight directory until repo updates.
+      # We must run that before creating symlinks so we can link from packages
+      # in the apt repository.
+      Rake::Task['pl:remote:update_apt_repo'].invoke
+      Pkg::Util::Ship.update_release_package_symlinks('pkg')
+    end
+
+    task :stage_nightly_release_packages => "pl:fetch" do
+      Rake::Task['pl:jenkins:stage_nightlies'].invoke
+      # Deb packages only appear in the freight directory until repo updates.
+      # We must run that before creating symlinks so we can link from packages
+      # in the apt repository.
+      Rake::Task['pl:remote:update_nightlies_apt_repo'].invoke
+      Pkg::Util::Ship.update_release_package_symlinks('pkg', true)
+    end
+
     desc "Retrieve packages built by jenkins, sign, and ship all!"
     task :uber_ship => "pl:fetch" do
       uber_tasks = %w(

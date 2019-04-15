@@ -278,6 +278,14 @@ module Pkg::Paths
     end
   end
 
+  # This is where deb packages end up after freight repo updates
+  def apt_package_base_path(platform_tag, repo_name, project, nonfinal = false)
+    fail "Can't determine path for non-debian platform #{platform_tag}." unless Pkg::Platforms.package_format_for_tag(platform_tag) == 'deb'
+    platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
+    codename = Pkg::Platforms.codename_for_platform_version(platform, version)
+    return File.join(remote_repo_base(platform_tag, nonfinal), 'pool', codename, repo_name, project[0], project)
+  end
+
   def release_package_link_path(platform_tag, nonfinal = false)
     platform, version, arch = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)

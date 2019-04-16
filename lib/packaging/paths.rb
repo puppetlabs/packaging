@@ -266,17 +266,35 @@ module Pkg::Paths
     end
   end
 
+  def remote_repo_base(platform_tag, nonfinal = false)
+    package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
+    case package_format
+    when 'rpm'
+      nonfinal ? Pkg::Config.nonfinal_yum_repo_path : Pkg::Config.yum_repo_path
+    when 'deb'
+      nonfinal ? Pkg::Config.nonfinal_apt_repo_path : Pkg::Config.apt_repo_path
+    else
+      raise "Can't determine remote repo base path for package format '#{package_format}'."
+    end
+  end
+
+  # This is where deb packages end up after freight repo updates
+  def apt_package_base_path(platform_tag, repo_name, project, nonfinal = false)
+    fail "Can't determine path for non-debian platform #{platform_tag}." unless Pkg::Platforms.package_format_for_tag(platform_tag) == 'deb'
+    platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
+    codename = Pkg::Platforms.codename_for_platform_version(platform, version)
+    return File.join(remote_repo_base(platform_tag, nonfinal), 'pool', codename, repo_name, project[0], project)
+  end
+
   def release_package_link_path(platform_tag, nonfinal = false)
     platform, version, arch = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
     case package_format
     when 'rpm'
-      base_path = nonfinal ? Pkg::Config.nonfinal_yum_repo_path : Pkg::Config.yum_repo_path
-      return File.join(base_path, "#{repo_name(nonfinal)}-release-#{platform}-#{version}.noarch.rpm")
+      return File.join(remote_repo_base(platform_tag, nonfinal), "#{repo_name(nonfinal)}-release-#{platform}-#{version}.noarch.rpm")
     when 'deb'
-      base_path = nonfinal ? Pkg::Config.nonfinal_apt_repo_path : Pkg::Config.apt_repo_path
       codename = Pkg::Platforms.codename_for_platform_version(platform, version)
-      return File.join(base_path, "#{repo_name(nonfinal)}-release-#{codename}.deb")
+      return File.join(remote_repo_base(platform_tag, nonfinal), "#{repo_name(nonfinal)}-release-#{codename}.deb")
     else
       warn "No release packages for package format '#{package_format}', skipping . . ."
       return nil

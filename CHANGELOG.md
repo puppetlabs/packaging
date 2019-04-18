@@ -3,6 +3,14 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.29] - 2019-04-17
+### Added
+- (RE-10207) Add `stage_release_packages` and `stage_nightly_release_packages`
+  tasks to automatically ship release packages and update symlinks to them.
+
+### Changed
+- (RE-12205) Add retries and additional time servers to MSI signing process.
+
 ## [0.99.28] - 2019-04-11
 ### Fixed
 - Due to incorrect ordering in the checks for `nil?` and `empty?` in `all_artifact_names`,
@@ -372,7 +380,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.28...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.29...HEAD
+[0.99.29]: https://github.com/puppetlabs/packaging/compare/0.99.28...0.99.29
 [0.99.28]: https://github.com/puppetlabs/packaging/compare/0.99.27...0.99.28
 [0.99.27]: https://github.com/puppetlabs/packaging/compare/0.99.26...0.99.27
 [0.99.26]: https://github.com/puppetlabs/packaging/compare/0.99.25...0.99.26

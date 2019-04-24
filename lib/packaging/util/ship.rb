@@ -140,7 +140,7 @@ module Pkg::Util::Ship
     if packages_have_shipped
       Pkg::Platforms.platform_tags_for_package_format('dmg').each do |platform_tag|
         # Create the latest symlink for the current supported repo
-        Pkg::Util::Net.remote_create_latest_symlink(Pkg::Config.project, Pkg::Paths.artifacts_path(platform_tag, remote_path), 'dmg')
+        Pkg::Util::Net.remote_create_latest_symlink(Pkg::Config.project, Pkg::Paths.artifacts_path(platform_tag, remote_path, opts[:nonfinal]), 'dmg')
       end
     end
   end
@@ -157,8 +157,8 @@ module Pkg::Util::Ship
     create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('windows'), Pkg::Config.msi_staging_server, remote_path, opts[:nonfinal])
     if packages_have_shipped
       # Create the symlinks for the latest supported repo
-      Pkg::Util::Net.remote_create_latest_symlink(Pkg::Config.project, Pkg::Paths.artifacts_path(Pkg::Platforms.generic_platform_tag('windows'), remote_path), 'msi', arch: 'x64')
-      Pkg::Util::Net.remote_create_latest_symlink(Pkg::Config.project, Pkg::Paths.artifacts_path(Pkg::Platforms.generic_platform_tag('windows'), remote_path), 'msi', arch: 'x86')
+      Pkg::Util::Net.remote_create_latest_symlink(Pkg::Config.project, Pkg::Paths.artifacts_path(Pkg::Platforms.generic_platform_tag('windows'), remote_path, opts[:nonfinal]), 'msi', arch: 'x64')
+      Pkg::Util::Net.remote_create_latest_symlink(Pkg::Config.project, Pkg::Paths.artifacts_path(Pkg::Platforms.generic_platform_tag('windows'), remote_path, opts[:nonfinal]), 'msi', arch: 'x86')
     end
   end
 

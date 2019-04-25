@@ -3,6 +3,15 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.30] - 2019-04-25
+### Added
+- Add the ability to specify the debian repository component when
+  promoting packages into artifactory.
+
+### Fixed
+- (CPR-677) We were not getting `-latest.[dmg|msi]` symlinks for nightly repositories.
+  The code has been updated to account for path differences with nightly repositories.
+
 ## [0.99.29] - 2019-04-17
 ### Added
 - (RE-10207) Add `stage_release_packages` and `stage_nightly_release_packages`
@@ -380,7 +389,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.29...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.30...HEAD
+[0.99.29]: https://github.com/puppetlabs/packaging/compare/0.99.29...0.99.30
 [0.99.29]: https://github.com/puppetlabs/packaging/compare/0.99.28...0.99.29
 [0.99.28]: https://github.com/puppetlabs/packaging/compare/0.99.27...0.99.28
 [0.99.27]: https://github.com/puppetlabs/packaging/compare/0.99.26...0.99.27

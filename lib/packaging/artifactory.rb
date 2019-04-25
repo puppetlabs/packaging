@@ -266,10 +266,12 @@ module Pkg
     # @param ref [String] tag or SHA of package(s) to be promoted
     # @param platform_tag [String] the platform tag of the artifact
     #   ex. el-7-x86_64, ubuntu-18.04-amd64
-    # @param repositories [Array(String)] the repositories to promote
+    # @param repository [String] the repository to promote
     #   the artifact to. Will prepend 'rpm_' or 'debian_' to the repositories
     #   depending on package type
-    def promote_package(pkg, ref, platform_tag, repositories)
+    # @param debian_component [String] the debian component to promote packages
+    #   into. Optional.
+    def promote_package(pkg, ref, platform_tag, repository, debian_component = nil)
       # load package metadata
       yaml_content = retrieve_yaml_data(pkg, ref)
       yaml_data = YAML::load(yaml_content)
@@ -286,17 +288,21 @@ module Pkg
         # This makes an assumption that we're using some consistent repo names
         # but need to either prepend 'rpm_' or 'debian_' based on package type
         if File.extname(artifact_name) == '.rpm'
-          promotion_paths = Array(repositories).compact.map { |repo| "rpm_#{repo}/#{platform_tag}/#{artifact_name}" }
+          promotion_path = "rpm_#{repository}/#{platform_tag}/#{artifact_name}"
         elsif File.extname(artifact_name) == '.deb'
-          promotion_paths = Array(repositories).compact.map { |repo| "debian_#{repo}/#{platform_tag}/#{artifact_name}" }
+          promotion_path = "debian_#{repository}/#{platform_tag}/#{artifact_name}"
+          properties = { 'deb.component' => debian_component } unless debian_component.nil?
         else
           raise "Error: Unknown promotion repository for #{artifact_name}! Only .rpm and .deb files are supported!"
         end
 
         begin
-          promotion_paths.each do |path|
-            puts "promoting #{artifact_name} to #{path}"
-            artifact_to_promote[0].copy(path)
+          puts "promoting #{artifact_name} to #{promotion_path}"
+          artifact_to_promote[0].copy(promotion_path)
+          unless properties.nil?
+            artifacts = Artifactory::Resource::Artifact.search(name: artifact_name, :artifactory_uri => @artifactory_uri)
+            promoted_artifact = artifacts.select { |artifact| artifact.download_uri =~ %r{#{promotion_path}} }.first
+            promoted_artifact.properties(properties)
           end
         rescue Artifactory::Error::HTTPError => e
           if e.message =~ /destination and source are the same/i

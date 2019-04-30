@@ -4,7 +4,8 @@ require 'yaml'
 
 describe "Pkg::Config" do
 
-  Build_Params = [:apt_host,
+  Build_Params = [:apt_archive_path,
+                  :apt_host,
                   :apt_releases,
                   :apt_repo_path,
                   :apt_repo_url,
@@ -34,9 +35,11 @@ describe "Pkg::Config" do
                   :default_mock,
                   :description,
                   :dmg_path,
+                  :downloads_archive_path,
                   :email,
                   :files,
                   :final_mocks,
+                  :freight_archive_path,
                   :freight_conf,
                   :gem_default_executables,
                   :gem_dependencies,
@@ -128,6 +131,7 @@ describe "Pkg::Config" do
                   :version,
                   :version_file,
                   :version_strategy,
+                  :yum_archive_path,
                   :yum_host,
                   :yum_repo_path,
                   :yum_repo_name,

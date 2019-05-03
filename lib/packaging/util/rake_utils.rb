@@ -67,6 +67,7 @@ module Pkg::Util::RakeUtils
         '00_utils.rake',
         '30_metrics.rake',
         'apple.rake',
+        'archive.rake',
         'build.rake',
         'clean.rake',
         'deb.rake',

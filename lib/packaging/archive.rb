@@ -1,14 +1,17 @@
 module Pkg::Archive
   module_function
 
+  # Array of base paths for foss artifacts on weth
   def base_paths
     [Pkg::Config.yum_repo_path, Pkg::Config.apt_repo_staging_path, Pkg::Config.apt_repo_path, '/opt/downloads'].compact.freeze
   end
 
+  # Array of paths for temporarily staging artifacts before syncing to release-archives on s3
   def archive_paths
     [Pkg::Config.yum_archive_path, Pkg::Config.apt_archive_path, Pkg::Config.freight_archive_path, Pkg::Config.downloads_archive_path].compact.freeze
   end
 
+  # Move yum directories from repo path to archive staging path
   def stage_yum_archives(directory)
     # /opt/repository/yum/#{directory}
     full_directory = File.join(Pkg::Config.yum_repo_path, directory)
@@ -33,6 +36,7 @@ module Pkg::Archive
     Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
   end
 
+  # Move apt directories from repo path (and repo staging path aka freight path) to archive staging paths
   def stage_apt_archives(directory)
     # /opt/tools/freight/apt/$codename/#{directory}
     # /opt/repository/apt/pool/$codename/#{directory}
@@ -77,6 +81,7 @@ module Pkg::Archive
     Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
   end
 
+  # Move downloads directories to archive staging path
   def stage_downloads_archives(directory)
     # /opt/downloads/#{directory}
     full_directory = File.join('/', 'opt', 'downloads', directory)
@@ -101,6 +106,7 @@ module Pkg::Archive
     Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
   end
 
+  # Delete empty directories from repo paths on weth
   def remove_empty_directories
     base_paths.each do |path|
       command = <<-CMD
@@ -120,6 +126,7 @@ module Pkg::Archive
     end
   end
 
+  # Delete broken symlinks from repo paths on weth
   def remove_dead_symlinks
     base_paths.each do |path|
       command = "find #{path} -xtype l -delete"
@@ -127,6 +134,7 @@ module Pkg::Archive
     end
   end
 
+  # Delete artifacts from archive staging paths (after they've been synced to s3)
   def delete_staged_archives
     archive_paths.each do |archive_path|
       command = "sudo rm -rf #{File.join(archive_path, '*')}"

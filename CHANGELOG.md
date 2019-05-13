@@ -396,7 +396,7 @@ this is a final version.
 
 [Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.31...HEAD
 [0.99.31]: https://github.com/puppetlabs/packaging/compare/0.99.30...0.99.31
-[0.99.29]: https://github.com/puppetlabs/packaging/compare/0.99.29...0.99.30
+[0.99.30]: https://github.com/puppetlabs/packaging/compare/0.99.29...0.99.30
 [0.99.29]: https://github.com/puppetlabs/packaging/compare/0.99.28...0.99.29
 [0.99.28]: https://github.com/puppetlabs/packaging/compare/0.99.27...0.99.28
 [0.99.27]: https://github.com/puppetlabs/packaging/compare/0.99.26...0.99.27

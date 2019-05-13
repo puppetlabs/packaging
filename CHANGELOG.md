@@ -3,6 +3,11 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.31] - 2019-05-13
+### Added
+- (RE-11598) Add `stage_archives`, `deploy_staged_archives_to_s3`, and
+  `archive_cleanup` tasks for moving EOL packages to release-archives.
+
 ## [0.99.30] - 2019-04-25
 ### Added
 - Add the ability to specify the debian repository component when
@@ -389,7 +394,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.30...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.31...HEAD
+[0.99.31]: https://github.com/puppetlabs/packaging/compare/0.99.30...0.99.31
 [0.99.29]: https://github.com/puppetlabs/packaging/compare/0.99.29...0.99.30
 [0.99.29]: https://github.com/puppetlabs/packaging/compare/0.99.28...0.99.29
 [0.99.28]: https://github.com/puppetlabs/packaging/compare/0.99.27...0.99.28

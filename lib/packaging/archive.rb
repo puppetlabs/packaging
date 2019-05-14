@@ -48,8 +48,8 @@ module Pkg::Archive
         subdirectory=${full_directory##{Pkg::Config.apt_repo_path}/}
         codename=$(echo $subdirectory | cut -d'/' -f 2)
         sudo mkdir --parents #{Pkg::Config.apt_archive_path}/$subdirectory
-        sudo chown root:release -R #{Pkg::Config.apt_archive_path}/$subdirectory
-        sudo chmod g+w -R #{Pkg::Config.apt_archive_path}/$subdirectory
+        sudo chown root:release -R #{Pkg::Config.apt_archive_path}/$(dirname $subdirectory)
+        sudo chmod g+w -R #{Pkg::Config.apt_archive_path}/$(dirname $subdirectory)
         mv $full_directory #{Pkg::Config.apt_archive_path}/$(dirname $subdirectory)
         sudo mkdir --parents #{Pkg::Config.freight_archive_path}/$codename
         sudo chown root:release -R #{Pkg::Config.freight_archive_path}/$codename

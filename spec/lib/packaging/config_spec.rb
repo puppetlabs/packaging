@@ -5,6 +5,7 @@ require 'yaml'
 describe "Pkg::Config" do
 
   Build_Params = [:apt_archive_path,
+                  :apt_archive_repo_command,
                   :apt_host,
                   :apt_releases,
                   :apt_repo_path,

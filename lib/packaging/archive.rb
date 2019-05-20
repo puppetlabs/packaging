@@ -8,7 +8,7 @@ module Pkg::Archive
 
   # Array of paths for temporarily staging artifacts before syncing to release-archives on s3
   def archive_paths
-    [Pkg::Config.yum_archive_path, Pkg::Config.apt_archive_path, Pkg::Config.freight_archive_path, Pkg::Config.downloads_archive_path].compact.freeze
+    [Pkg::Config.yum_archive_path, Pkg::Config.apt_archive_path, Pkg::Config.freight_archive_path, Pkg::Config.downloads_archive_path, '/opt/tmp-apt'].compact.freeze
   end
 
   # Move yum directories from repo path to archive staging path
@@ -36,46 +36,28 @@ module Pkg::Archive
     Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
   end
 
-  # Move apt directories from repo path (and repo staging path aka freight path) to archive staging paths
+  # Move directories from freight path (aka repo staging path) to archive staging paths
   def stage_apt_archives(directory)
-    # /opt/tools/freight/apt/$codename/#{directory}
-    # /opt/repository/apt/pool/$codename/#{directory}
-    pool_directory = File.join(Pkg::Config.apt_repo_path, 'pool')
+    find_command = "find #{Pkg::Config.apt_repo_staging_path} -type d -name #{directory}"
+    find_command = "find #{Pkg::Config.apt_repo_staging_path} -maxdepth 2 -type f" if directory == 'main'
     command = <<-CMD
-      for full_directory in $(find #{pool_directory} -type d -name #{directory}); do
-        find $full_directory -type l -delete
-        sudo chattr -i -R $full_directory
-        subdirectory=${full_directory##{Pkg::Config.apt_repo_path}/}
-        codename=$(echo $subdirectory | cut -d'/' -f 2)
-        sudo mkdir --parents #{Pkg::Config.apt_archive_path}/$subdirectory
-        sudo chown root:release -R #{Pkg::Config.apt_archive_path}/$(dirname $subdirectory)
-        sudo chmod g+w -R #{Pkg::Config.apt_archive_path}/$(dirname $subdirectory)
-        mv $full_directory #{Pkg::Config.apt_archive_path}/$(dirname $subdirectory)
+      for stuff in $(#{find_command}); do
+        find $stuff -type l -delete
+        codename=$(dirname ${stuff##{Pkg::Config.apt_repo_staging_path}/})
         sudo mkdir --parents #{Pkg::Config.freight_archive_path}/$codename
         sudo chown root:release -R #{Pkg::Config.freight_archive_path}/$codename
         sudo chmod g+w -R #{Pkg::Config.freight_archive_path}/$codename
-        if [ #{directory} = 'main' ]; then
-          freight_directory=#{Pkg::Config.apt_repo_staging_path}/$codename
-          if [ ! -d $freight_directory ]; then
-            echo "ERROR: Couldn't find freight directory $freight_directory, exiting . . ."
-            exit 1
-          fi
-          for file in $(find $freight_directory -maxdepth 1 -type f); do
-            mv $file #{Pkg::Config.freight_archive_path}/$codename
-          done
-        else
-          freight_directory=#{Pkg::Config.apt_repo_staging_path}/$codename/#{directory}
-          if [ ! -d $freight_directory ]; then
-            if [ -d #{Pkg::Config.freight_archive_path}/$codename/#{directory} ]; then
-              echo "Directory $freight_directory has already been staged, skipping . . ."
-              exit 0
-            else
-              echo "ERROR: Couldn't find freight directory $freight_directory, exiting . . ."
-              exit 1
-            fi
-          fi
-          mv $freight_directory #{Pkg::Config.freight_archive_path}/$codename/#{directory}
+        mv $stuff #{Pkg::Config.freight_archive_path}/$codename
+
+        pool_directory=#{Pkg::Config.apt_repo_path}/pool/$codename/#{directory}
+        if [ ! -d $pool_directory ]; then
+          echo "Can't find directory $pool_directory, it may have already been archived, skipping . . ."
+          continue
         fi
+        sudo mkdir --parents /opt/tmp-apt
+        sudo chown root:release -R /opt/tmp-apt
+        sudo chmod g+w -R /opt/tmp-apt
+        mv $pool_directory /opt/tmp-apt
       done
     CMD
     Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)

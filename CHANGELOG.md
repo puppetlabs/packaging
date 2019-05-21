@@ -3,6 +3,15 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.32] - 2019-05-21
+### Added
+- (CPR-698) Add `update_archive_yum_repo` and `update_archive_apt_repo` tasks
+  for updating repo metadata for release-archives.
+
+### Changed
+- (CPR-698) Stage debian packages from the freight directory, rather than from
+  the pool directory, in order to create repo metadata for release-archives.
+
 ## [0.99.31] - 2019-05-13
 ### Added
 - (RE-11598) Add `stage_archives`, `deploy_staged_archives_to_s3`, and
@@ -394,7 +403,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.31...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.32...HEAD
+[0.99.32]: https://github.com/puppetlabs/packaging/compare/0.99.31...0.99.32
 [0.99.31]: https://github.com/puppetlabs/packaging/compare/0.99.30...0.99.31
 [0.99.30]: https://github.com/puppetlabs/packaging/compare/0.99.29...0.99.30
 [0.99.29]: https://github.com/puppetlabs/packaging/compare/0.99.28...0.99.29

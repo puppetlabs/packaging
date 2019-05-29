@@ -3,6 +3,10 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.33] - 2019-05-29
+### Added
+- (PA-2678) Add support for Fedora 30.
+
 ## [0.99.32] - 2019-05-21
 ### Added
 - (CPR-698) Add `update_archive_yum_repo` and `update_archive_apt_repo` tasks
@@ -403,7 +407,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.32...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.33...HEAD
+[0.99.33]: https://github.com/puppetlabs/packaging/compare/0.99.32...0.99.33
 [0.99.32]: https://github.com/puppetlabs/packaging/compare/0.99.31...0.99.32
 [0.99.31]: https://github.com/puppetlabs/packaging/compare/0.99.30...0.99.31
 [0.99.30]: https://github.com/puppetlabs/packaging/compare/0.99.29...0.99.30

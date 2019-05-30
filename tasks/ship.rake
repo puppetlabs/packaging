@@ -240,7 +240,8 @@ namespace :pl do
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
           Pkg::Config.rsync_servers.each do |rsync_server|
             ['apt', 'yum'].each do |repo|
-              command = "sudo su - rsync --command 'rsync --verbose -a --exclude '*.html' --delete /opt/repo-s3-stage/repositories/#{repo}.puppetlabs.com/ rsync@#{rsync_server}:/opt/repository/#{repo}'"
+              # Don't --delete so that folks using archived packages can continue to do so
+              command = "sudo su - rsync --command 'rsync --verbose -a --exclude '*.html' /opt/repo-s3-stage/repositories/#{repo}.puppetlabs.com/ rsync@#{rsync_server}:/opt/repository/#{repo}'"
               Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
             end
           end

@@ -30,7 +30,30 @@ namespace :pl do
 
     desc "Sync archived packages to s3"
     task :deploy_staged_archives_to_s3 => 'pl:fetch' do
-      command = 'sudo /usr/local/bin/s3_repo_sync.sh release-archives.puppet.com'
+      Pkg::Util::RakeUtils.invoke_task('pl:remote:deploy_staged_apt_archives_to_s3')
+      Pkg::Util::RakeUtils.invoke_task('pl:remote:deploy_staged_yum_archives_to_s3')
+      Pkg::Util::RakeUtils.invoke_task('pl:remote:deploy_staged_downloads_archives_to_s3')
+    end
+
+    desc "Sync staged apt archive repos to s3"
+    task :deploy_staged_apt_archives_to_s3 => 'pl:fetch' do
+      command = 'sudo /usr/local/bin/s3_repo_sync.sh release-archives.puppet.com/apt'
+      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
+      end
+    end
+
+    desc "Sync staged yum archive repos to s3"
+    task :deploy_staged_yum_archives_to_s3 => 'pl:fetch' do
+      command = 'sudo /usr/local/bin/s3_repo_sync.sh release-archives.puppet.com/yum'
+      Pkg::Util::Execution.retry_on_fail(:times => 3) do
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
+      end
+    end
+
+    desc "Sync staged downloads archives to s3"
+    task :deploy_staged_downloads_archives_to_s3 => 'pl:fetch' do
+      command = 'sudo /usr/local/bin/s3_repo_sync.sh release-archives.puppet.com/downloads'
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
         Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
       end

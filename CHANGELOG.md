@@ -3,6 +3,15 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.34] - 2019-06-05
+### Updated
+- Update the regular expression to skip errors both when a package already exists and
+  when you don't have permissions to overwrite the existing package when deploying to
+  artifactory.
+- Add rake tasks to sync yum, apt, and downloads archives individually.
+- Don't delete packages from rsync servers so we don't need to stand up additional archive
+  hosts.
+
 ## [0.99.33] - 2019-05-29
 ### Added
 - (PA-2678) Add support for Fedora 30.
@@ -407,7 +416,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.33...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.34...HEAD
+[0.99.34]: https://github.com/puppetlabs/packaging/compare/0.99.33...0.99.34
 [0.99.33]: https://github.com/puppetlabs/packaging/compare/0.99.32...0.99.33
 [0.99.32]: https://github.com/puppetlabs/packaging/compare/0.99.31...0.99.32
 [0.99.31]: https://github.com/puppetlabs/packaging/compare/0.99.30...0.99.31

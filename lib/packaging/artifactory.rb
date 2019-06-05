@@ -305,10 +305,10 @@ module Pkg
             promoted_artifact.properties(properties)
           end
         rescue Artifactory::Error::HTTPError => e
-          if e.message =~ /destination and source are the same/i
+          if e.message =~ /(destination and source are the same|user doesn't have permissions to override)/i
             puts "Skipping promotion of #{artifact_name}; it has already been promoted"
           else
-            puts "#{e.level}: #{e.message}"
+            puts "#{e.message}"
             raise e
           end
         rescue => e

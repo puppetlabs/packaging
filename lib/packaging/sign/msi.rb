@@ -80,30 +80,32 @@ module Pkg::Sign::Msi
                             -t "$timeserver" \
                             -in "C:/#{work_dir}/$msi" \
                             -out "C:/#{work_dir}/signed-$msi")
-                    if [[ $ret == *"Succeeded"* ]]; then break; fi
-                  done;
-              if [[ $ret == *"Succeeded"* ]]; then break; fi
-            done;
-            echo $ret
-            sha256Servers=(http://sha256timestamp.ws.symantec.com/sha256/timestamp
-              http://timestamp.comodoca.com?td=sha256)
-                for timeserver in "${sha256Servers[@]}"; do
-                  for ((try=1; try<=$tries; try++)) do
-                    ret=$(/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe sign \
-                      -n "Puppet" -i "http://www.puppet.com" \
-                      -nest -h sha256 \
-                      -pkcs12 "#{Pkg::Config.msi_signing_cert}" \
-                      -pass "#{Pkg::Config.msi_signing_cert_pw}" \
-                      -ts "$timeserver" \
-                      -in "C:/#{work_dir}/signed-$msi" \
-                      -out "C:/#{work_dir}/$msi")
-                      if [[ $ret == *"Succeeded"* ]]; then break; fi
-                    done;
+                  if [[ $ret == *"Succeeded"* ]]; then break; fi
+                done;
                 if [[ $ret == *"Succeeded"* ]]; then break; fi
               done;
-              echo $ret
+          echo $ret
+          if [[ $ret != *"Succeeded"* ]]; then exit 1; fi
+          sha256Servers=(http://sha256timestamp.ws.symantec.com/sha256/timestamp
+            http://timestamp.comodoca.com?td=sha256)
+              for timeserver in "${sha256Servers[@]}"; do
+                for ((try=1; try<=$tries; try++)) do
+                  ret=$(/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe sign \
+                    -n "Puppet" -i "http://www.puppet.com" \
+                    -nest -h sha256 \
+                    -pkcs12 "#{Pkg::Config.msi_signing_cert}" \
+                    -pass "#{Pkg::Config.msi_signing_cert_pw}" \
+                    -ts "$timeserver" \
+                    -in "C:/#{work_dir}/signed-$msi" \
+                    -out "C:/#{work_dir}/$msi")
+                    if [[ $ret == *"Succeeded"* ]]; then break; fi
+                done;
+                if [[ $ret == *"Succeeded"* ]]; then break; fi
+              done;
+          echo $ret
+          if [[ $ret != *"Succeeded"* ]]; then exit 1; fi
       fi
-    done))
+    done), false, '', false)
     msis.each do | msi |
       Pkg::Util::Net.rsync_from("/cygdrive/c/#{work_dir}/#{File.basename(msi)}", rsync_host_string, File.dirname(msi))
     end

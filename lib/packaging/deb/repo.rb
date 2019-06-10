@@ -159,27 +159,28 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
       dists = Pkg::Util::File.directories("#{target}/apt")
       supported_codenames = Pkg::Platforms.codenames
 
-      if dists
-        dists.each do |dist|
-          next unless supported_codenames.include?(dist)
-          arches = Pkg::Platforms.arches_for_codename(dist)
-          Dir.chdir("#{target}/apt/#{dist}") do
-            File.open("conf/distributions", "w") do |f|
-              f.puts "Origin: Puppet Labs
+      unless dists
+        warn "No repos found to sign. Maybe you didn't build any debs, or the repo creation failed?"
+        return
+      end
+
+      dists.each do |dist|
+        next unless supported_codenames.include?(dist)
+        arches = Pkg::Platforms.arches_for_codename(dist)
+        Dir.chdir("#{target}/apt/#{dist}") do
+          File.open("conf/distributions", "w") do |f|
+            f.puts "Origin: Puppet Labs
 Label: Puppet Labs
 Codename: #{dist}
 Architectures: #{(DEBIAN_PACKAGING_ARCHES + arches).uniq.join(' ')}
 Components: #{reprepro_repo_name}
 Description: #{message} for #{dist}
 SignWith: #{Pkg::Config.gpg_key}"
-            end
-
-            stdout, _, _ = Pkg::Util::Execution.capture3("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
-            stdout
           end
+
+          stdout, _, _ = Pkg::Util::Execution.capture3("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
+          stdout
         end
-      else
-        warn "No repos found to sign. Maybe you didn't build any debs, or the repo creation failed?"
       end
     end
 

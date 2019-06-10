@@ -128,12 +128,21 @@ describe "Pkg::Deb::Repo" do
     end
 
     it "makes a repo for each dist" do
+      # stub out start_keychain to prevent actual keychain starts.
+      Pkg::Util::Gpg.stub(:start_keychain)
+
       dists = cows.reject { |cow| cow.empty? }
       distfiles = {}
-      reprepro = "/bin/reprepro"
       Pkg::Util::File.should_receive(:directories).with("repos/apt").and_return(dists)
-      Pkg::Util::Tool.should_receive(:check_tool).with("reprepro").and_return(reprepro)
-      Pkg::Util::Execution.should_receive(:capture3).at_least(1).times.with("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
+
+      # Let the keychain command happen if find_tool('keychain') finds it
+      keychain_command = "/usr/bin/keychain -k mine"
+      allow(Pkg::Util::Execution).to receive(:capture3) { keychain_command }
+
+      # Enforce reprepro
+      reprepro_command = "/bin/reprepro"
+      Pkg::Util::Tool.should_receive(:check_tool).with("reprepro").and_return(reprepro_command)
+      Pkg::Util::Execution.should_receive(:capture3).at_least(1).times.with("#{reprepro_command} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
 
       dists.each do |dist|
         distfiles[dist] = double

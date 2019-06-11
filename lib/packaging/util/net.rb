@@ -64,13 +64,18 @@ module Pkg::Util::Net
       return errs
     end
 
-    def remote_ssh_cmd(target, command, capture_output = false, extra_options = '', fail_fast = true)
+    def remote_ssh_cmd(target, command, capture_output = false, extra_options = '', fail_fast = true, trace = false)  # rubocop:disable Style/ParameterLists
+
       ssh = Pkg::Util::Tool.check_tool('ssh')
 
       # we pass some pretty complicated commands in via ssh. We need this to fail
       # if any part of the remote ssh command fails.
-      command = "set -e; #{command}" if fail_fast
-      cmd = "#{ssh} #{extra_options} -t #{target} '#{command.gsub("'", "'\\\\''")}'"
+      shell_flags = ''
+      shell_flags += 'set -e;' if fail_fast
+      shell_flags += 'set -x;' if trace
+      shell_commands = "#{shell_flags}#{command}"
+
+      cmd = "#{ssh} #{extra_options} -t #{target} '#{shell_commands.gsub("'", "'\\\\''")}'"
 
       # This is NOT a good way to support this functionality.
       # It needs to be refactored into a set of methods that

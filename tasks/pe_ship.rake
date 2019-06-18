@@ -145,11 +145,23 @@ if Pkg::Config.build_pe
         # single line. By breaking it into a series of concatenated strings, we can maintain
         # a semblance of formatting and structure (nevermind readability).
         command  = %(for dir in #{repo_base_path}/{#{rpm_family_and_version.join(",")}}-*; do)
-        command += %(  sudo createrepo --checksum=sha --checkts --update --delta-workers=0 --quiet --database --update $dir; )
+
+        # For (RE-12463), make this less quiet than it has been.
+        # We're trying to find out why its aborting. Preserve the original
+        # so it can be restored.
+        command += %(  sudo createrepo --checksum=sha --checkts --update --delta-workers=0 --database --update $dir; )
+
+        ## Original
+        # command += %(  sudo createrepo --checksum=sha --checkts --update --delta-workers=0 --quiet --database --update $dir; )
+        ##
         command += %(done; )
         command += %(sync)
 
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, command)
+        # Again for (RE-12463). Make this more verbose temporarily
+        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, command, false, '', true, true)
+
+        ## Original one below
+        # Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_host, command)
       end
 
       desc "Remotely add shipped packages to apt repo on #{Pkg::Config.apt_host}"

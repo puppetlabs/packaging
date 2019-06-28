@@ -324,7 +324,9 @@ namespace :pl do
   task :ship_gem_to_downloads => 'pl:fetch' do
     unless Pkg::Config.gem_host
       warn 'Value `Pkg::Config.gem_host` not defined; skipping shipping to public Download server'
+      exit
     end
+    fail 'Value `Pkg::Config.gem_path` not defined; skipping shipping to public Download server' unless Pkg::Config.gem_path
 
     Pkg::Util::Execution.retry_on_fail(times: 3) do
       Pkg::Util::Ship.ship_gem('pkg', Pkg::Config.gem_path, platform_independent: true)

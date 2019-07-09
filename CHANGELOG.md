@@ -3,12 +3,17 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.36] - 2019-07-09
+### Changed
+- (RE-12520) Fail shipping gems to downloads.puppet.com when `gem_path`
+  is unset. Skip shipping gems to downloads.puppet.com when `gem_host` is unset.
+
 ## [0.99.35] - 2019-06-11
 ### Fixed
 - Don't use `set -e` for windows signing. This will let retries work.
 
 ## [0.99.34] - 2019-06-05
-### Updated
+### Changed
 - Update the regular expression to skip errors both when a package already exists and
   when you don't have permissions to overwrite the existing package when deploying to
   artifactory.
@@ -420,7 +425,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.35...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.36...HEAD
+[0.99.36]: https://github.com/puppetlabs/packaging/compare/0.99.35...0.99.36
 [0.99.35]: https://github.com/puppetlabs/packaging/compare/0.99.34...0.99.35
 [0.99.34]: https://github.com/puppetlabs/packaging/compare/0.99.33...0.99.34
 [0.99.33]: https://github.com/puppetlabs/packaging/compare/0.99.32...0.99.33

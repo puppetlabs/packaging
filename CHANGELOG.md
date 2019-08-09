@@ -3,6 +3,12 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.37] - 2019-08-09
+### Added
+- (RE-12605) Add CODEOWNERS file.
+- (RE-12499) Add function `download_packages` that uses a provided manifest to download packages from artifactory to a staging directory.
+- (RE-12499) Add `ship_pe_tarballs` to upload packages to a specified artifactory repo and file path.
+
 ## [0.99.36] - 2019-07-09
 ### Changed
 - (RE-12520) Fail shipping gems to downloads.puppet.com when `gem_path`
@@ -425,7 +431,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.36...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.37...HEAD
+[0.99.37]: https://github.com/puppetlabs/packaging/compare/0.99.36...0.99.37
 [0.99.36]: https://github.com/puppetlabs/packaging/compare/0.99.35...0.99.36
 [0.99.35]: https://github.com/puppetlabs/packaging/compare/0.99.34...0.99.35
 [0.99.34]: https://github.com/puppetlabs/packaging/compare/0.99.33...0.99.34

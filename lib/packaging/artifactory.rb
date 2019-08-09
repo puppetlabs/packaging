@@ -1,5 +1,6 @@
 require 'uri'
 require 'open-uri'
+require 'digest'
 
 module Pkg
 
@@ -314,6 +315,46 @@ module Pkg
         rescue => e
           puts "Something went wrong promoting #{artifact_name}!"
           raise e
+        end
+      end
+    end
+
+    # Using the manifest provided by enterprise-dist, grab the appropropriate packages from artifactory based on md5sum
+    # @param staging_directory [String] location to download packages to
+    # @param manifest [File] JSON file containing information about what packages to download and the corresponding md5sums
+    def download_packages(staging_directory, manifest)
+      check_authorization
+      manifest.each do |dist, packages|
+        puts "Grabbing the #{dist} packages from artifactory"
+        packages.each do |name, info|
+          artifact_to_download = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"]).first
+          if artifact_to_download.nil?
+            raise "Error: what the hell, could not find package #{info["filename"]} with md5sum #{info["md5"]}"
+          else
+            puts "downloading #{artifact_to_download.download_uri}"
+            artifact_to_download.download("#{staging_directory}/#{dist}", filename: "#{info["filename"]}")
+          end
+        end
+      end
+    end
+
+    # Ship PE tarballs to specified artifactory repo and paths
+    # @param tarball_path [String] the path of the tarballs to ship
+    # @param target_repo [String] the artifactory repo to ship the tarballs to
+    # @param ship_paths [Array] the artifactory path(s) to ship the tarballs to within the target_repo
+    def ship_pe_tarballs(tarball_path, target_repo, ship_paths)
+      check_authorization
+      Dir.foreach("#{tarball_path}/") do |pe_tarball|
+        unless pe_tarball == '.' || pe_tarball == ".."
+          ship_paths.each do |path|
+            begin
+              puts "Uploading #{pe_tarball} to #{target_repo}/#{path}... "
+              artifact = Artifactory::Resource::Artifact.new(local_path: "#{tarball_path}/#{pe_tarball}")
+              artifact.upload(target_repo, "/#{path}/#{pe_tarball}")
+            rescue Errno::EPIPE
+              STDERR.puts "Error: Could not upload #{pe_tarball} to #{path}"
+            end
+          end
         end
       end
     end

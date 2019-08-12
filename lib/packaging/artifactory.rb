@@ -359,6 +359,31 @@ module Pkg
       end
     end
 
+    # Remove shipped PE tarballs from artifactory
+    # Used when compose fails, we only want the tarball shipped to artifactory if all platforms succeed
+    # Identify which packages were created and shipped based on md5sum and remove them
+    # @param tarball_path [String] the local path to the tarballs that were shipped
+    # @param pe_repo [String] the artifactory repo the tarballs were shipped to
+    def purge_copied_pe_tarballs(tarball_path, pe_repo)
+      check_authorization
+      Dir.foreach("#{tarball_path}/") do |pe_tarball|
+        unless pe_tarball == '.' || pe_tarball == ".."
+          md5 = Digest::MD5.file("#{tarball_path}/#{pe_tarball}").hexdigest
+          artifacts_to_delete = Artifactory::Resource::Artifact.checksum_search(md5: md5, repos: pe_repo)
+          unless artifacts_to_delete.nil?
+            begin
+              artifacts_to_delete.each do |artifact|
+                puts "removing...#{pe_tarball} from #{pe_repo}"
+                artifact.delete
+              end
+            rescue Artifactory::Error::HTTPError
+              STDERR.puts "Error: cannot remove #{pe_tarball}, do you have the right permissions?"
+            end
+          end
+        end
+      end
+    end
+
     private :check_authorization
   end
 end

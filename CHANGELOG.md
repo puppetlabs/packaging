@@ -3,6 +3,11 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.38] - 2019-08-13
+### Added
+- (RE-12499) Add `purge_copied_pe_tarballs` function to remove shipped PE packages from artifactory.
+- Add `test` and `release` actions for the packaging gem.
+
 ## [0.99.37] - 2019-08-09
 ### Added
 - (RE-12605) Add CODEOWNERS file.
@@ -431,7 +436,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.37...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.38...HEAD
+[0.99.38]: https://github.com/puppetlabs/packaging/compare/0.99.37...0.99.38
 [0.99.37]: https://github.com/puppetlabs/packaging/compare/0.99.36...0.99.37
 [0.99.36]: https://github.com/puppetlabs/packaging/compare/0.99.35...0.99.36
 [0.99.35]: https://github.com/puppetlabs/packaging/compare/0.99.34...0.99.35

@@ -1,0 +1,24 @@
+name: Ruby
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby: [ '2.3.x', '2.4.x' ]
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up Ruby
+      uses: actions/setup-ruby@v1
+      with:
+        version: ${{ matrix.ruby }}
+    - run: |
+        gem install bundler
+        bundle install --jobs 4 --retry 3
+        bundle exec rspec spec --color --format documentation --order random
+    - name: Rubocop
+      run: |
+        bundle exec rubocop -D

@@ -1,0 +1,17 @@
+name: Gem release
+
+on: [release]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: scarhand/actions-ruby@master
+      - name: Build gem
+        args: build *.gemspec
+      - name: Publish gem
+        env:
+          RUBYGEMS_AUTH_TOKEN: ${{ secrets.RUBYGEMS_AUTH_TOKEN }}
+        args: push *.gem
+

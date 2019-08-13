@@ -367,19 +367,17 @@ module Pkg
     def purge_copied_pe_tarballs(tarball_path, pe_repo)
       check_authorization
       Dir.foreach("#{tarball_path}/") do |pe_tarball|
-        unless pe_tarball == '.' || pe_tarball == ".."
-          md5 = Digest::MD5.file("#{tarball_path}/#{pe_tarball}").hexdigest
-          artifacts_to_delete = Artifactory::Resource::Artifact.checksum_search(md5: md5, repos: pe_repo)
-          unless artifacts_to_delete.nil?
-            begin
-              artifacts_to_delete.each do |artifact|
-                puts "removing...#{pe_tarball} from #{pe_repo}"
-                artifact.delete
-              end
-            rescue Artifactory::Error::HTTPError
-              STDERR.puts "Error: cannot remove #{pe_tarball}, do you have the right permissions?"
-            end
+        next if pe_tarball == '.' || pe_tarball == ".."
+        md5 = Digest::MD5.file("#{tarball_path}/#{pe_tarball}").hexdigest
+        artifacts_to_delete = Artifactory::Resource::Artifact.checksum_search(md5: md5, repos: pe_repo)
+        next if artifacts_to_delete.nil?
+        begin
+          artifacts_to_delete.each do |artifact|
+            puts "Removing #{pe_tarball} from #{pe_repo}... "
+            artifact.delete
           end
+        rescue Artifactory::Error::HTTPError
+          STDERR.puts "Error: cannot remove #{pe_tarball}, do you have the right permissions?"
         end
       end
     end

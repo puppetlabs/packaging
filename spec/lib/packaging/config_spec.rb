@@ -357,7 +357,7 @@ describe "Pkg::Config" do
         # apt_host: is set to "foo" in the fixture
         orig = Pkg::Config.apt_host
         Pkg::Config.apt_host = "bar"
-        Pkg::Config.config_from_yaml(File.join(FIXTURES, 'config', 'params.yaml'))
+        Pkg::Config.config_from_yaml(File.join(FIXTURES, 'config', 'ext', 'build_defaults.yaml'))
         expect(Pkg::Config.apt_host).to eq("foo")
         Pkg::Config.apt_host = orig
       end

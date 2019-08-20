@@ -1,1 +1,2 @@
-../params.yaml
+---
+:apt_host: foo

@@ -198,10 +198,13 @@ module Pkg
 
       check_authorization
       artifact = Artifactory::Resource::Artifact.new(local_path: package)
+      artifact_md5 = Digest::MD5.file(package).hexdigest
+      headers = { "X-Checksum-Md5" => artifact_md5 }
       artifact.upload(
         data[:repo_name],
         File.join(data[:alternate_subdirectories], File.basename(package)),
-        deploy_properties(platform_tag)
+        deploy_properties(platform_tag),
+        headers
       )
     rescue
       raise "Attempt to upload '#{package}' to #{File.join(@artifactory_uri, data[:full_artifactory_path])} failed"

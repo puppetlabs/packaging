@@ -30,13 +30,13 @@ module Pkg::Repo
           raise "Error: missing packages under #{repo_location}"
         end
         warn "Warn: Skipping #{archive_name} because #{repo_location} has no files"
+        return
       end
 
       Dir.chdir(File.join('pkg', local_target)) do
         puts "Info: Archiving #{repo_location} as #{archive_name}"
         target_tarball = File.join('repos', "#{archive_name}.tar.gz")
         tar_command = "#{tar} --owner=0 --group=0 --create --gzip --file #{target_tarball} #{repo_location}"
-        puts "Info: Executing tar: #{tar_command}"
         stdout, _, _ = Pkg::Util::Execution.capture3(tar_command)
         return stdout
       end
@@ -50,7 +50,7 @@ module Pkg::Repo
     def update_tarball_of_all_repos(project, platform, versioning)
       tar = Pkg::Util::Tool.check_tool('tar')
 
-      all_repos_tarball_name = "#{Pkg::Config.project}-all.tar"
+      all_repos_tarball_name = "#{project}-all.tar"
       archive_name = "#{project}-#{platform['name']}"
       local_target = construct_local_target_path(versioning)
       repo_tarball_name = "#{archive_name}.tar.gz"
@@ -68,7 +68,6 @@ module Pkg::Repo
         end
 
         tar_command = "#{tar} --owner=0 --group=0 #{tar_action} --file #{all_repos_tarball_name} #{repo_tarball_path}"
-        puts "Info: Executing all-repos-tar #{tar_command}"
         stdout, _, _ = Pkg::Util::Execution.capture3(tar_command)
         puts stdout
       end
@@ -82,7 +81,6 @@ module Pkg::Repo
       gzip = Pkg::Util::Tool.check_tool('gzip')
 
       gzip_command = "#{gzip} --fast #{all_repos_tarball_name}"
-      puts "Info: Compressing all-repos tarball with: #{gzip_command}"
       stdout, _, _ = Pkg::Util::Execution.capture3(gzip_command)
       puts stdout
     end

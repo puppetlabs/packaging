@@ -93,7 +93,7 @@ module Pkg::Repo
     def create_all_repo_archives(project, versioning)
       platforms = Pkg::Config.platform_repos
       local_target = construct_local_target_path(versioning)
-      all_repos_tarball_name = "#{Pkg::Config.project}-all.tar"
+      all_repos_tarball_name = "#{project}-all.tar"
 
       platforms.each do |platform|
         archive_name = "#{project}-#{platform['name']}"

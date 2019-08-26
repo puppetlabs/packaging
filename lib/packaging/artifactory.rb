@@ -190,6 +190,20 @@ module Pkg
       properties_hash
     end
 
+    # Basic method to check if a package exists on artifactory
+    # @param package [String] The full relative path to the package to be
+    #   checked, relative from the current working directory
+    # Return true if package already exists on artifactory
+    def package_exists_on_artifactory?(package)
+      check_authorization
+      artifact = Artifactory::Resource::Artifact.search(name: File.basename(package), :artifactory_uri => @artifactory_uri)
+      if artifact.empty?
+        return false
+      else
+        return true
+      end
+    end
+
     # @param package [String] The full relative path to the package to be
     #   shipped, relative from the current working directory
     def deploy_package(package)

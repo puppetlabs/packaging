@@ -545,7 +545,11 @@ namespace :pl do
 
       local_dir = args.local_dir || 'pkg'
       Dir.glob("#{local_dir}/**/*").reject { |e| File.directory? e }.each do |artifact|
-        artifactory.deploy_package(artifact)
+        if artifactory.package_exists_on_artifactory?(artifact)
+          warn "Attempt to upload '#{artifact}' failed. Package already exists!"
+        else
+          artifactory.deploy_package(artifact)
+        end
       end
     end
 

@@ -545,7 +545,9 @@ namespace :pl do
 
       local_dir = args.local_dir || 'pkg'
       Dir.glob("#{local_dir}/**/*").reject { |e| File.directory? e }.each do |artifact|
-        if artifactory.package_exists_on_artifactory?(artifact)
+        if File.extname(artifact) == ".yaml" || File.extname(artifact) == ".json"
+          artifactory.deploy_package(artifact)
+        elsif artifactory.package_exists_on_artifactory?(artifact)
           warn "Attempt to upload '#{artifact}' failed. Package already exists!"
         else
           artifactory.deploy_package(artifact)

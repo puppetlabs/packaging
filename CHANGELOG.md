@@ -3,6 +3,10 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.41] - 2019-09-03
+### Fixed
+- Always ship `.yaml` and `.json` files in `ship_to_artifactory` rake task.
+
 ## [0.99.40] - 2019-08-28
 ### Added
 - (RE-12711) Add `package_exists_on_artifactory?` check so we don't re-ship already shipped packages to artifactory.
@@ -450,7 +454,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.40...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.41...HEAD
+[0.99.41]: https://github.com/puppetlabs/packaging/compare/0.99.40...0.99.41
 [0.99.40]: https://github.com/puppetlabs/packaging/compare/0.99.39...0.99.40
 [0.99.39]: https://github.com/puppetlabs/packaging/compare/0.99.38...0.99.39
 [0.99.38]: https://github.com/puppetlabs/packaging/compare/0.99.37...0.99.38

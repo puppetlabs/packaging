@@ -376,6 +376,20 @@ module Pkg
       end
     end
 
+    # Update LATEST file with latest PE build
+    # @param latest_file [String] name of latest file to ship
+    # @param target_repo [String] repo on artifactory to ship latest file to
+    # @param path [String] path on target_repo to latest file
+    def update_latest_file(latest_file, target_repo, path)
+      check_authorization
+      artifact = Artifactory::Resource::Artifact.new(local_path: latest_file)
+      begin
+        artifact.upload(target_repo, "/#{path}/#{latest_file}")
+      rescue Errno::ENOENT
+        STDERR.puts "Error: Could not upload #{latest_file} file. Are you sure it was created?"
+      end
+    end
+
     # Remove shipped PE tarballs from artifactory
     # Used when compose fails, we only want the tarball shipped to artifactory if all platforms succeed
     # Identify which packages were created and shipped based on md5sum and remove them

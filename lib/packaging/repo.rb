@@ -5,12 +5,12 @@ module Pkg::Repo
     ##
     ## Construct a local_target based upon the versioning style
     ##
-    def construct_local_target_path(versioning)
+    def construct_local_target_path(project, versioning)
       case versioning
       when 'ref'
-        return File.join(Pkg::Config.project, Pkg::Config.ref)
+        return File.join(project, Pkg::Config.ref)
       when 'version'
-        return File.join(Pkg::Config.project, Pkg::Util::Version.dot_version)
+        return File.join(project, Pkg::Util::Version.dot_version)
       else
         fail "Error: Unknown versioning argument: #{versioning}"
       end
@@ -23,7 +23,7 @@ module Pkg::Repo
     def create_signed_repo_archive(repo_location, archive_name, versioning)
       tar = Pkg::Util::Tool.check_tool('tar')
 
-      local_target = construct_local_target_path(versioning)
+      local_target = construct_local_target_path(Pkg::Config.project, versioning)
 
       if Pkg::Util::File.empty_dir?(File.join('pkg', local_target, repo_location))
         if ENV['FAIL_ON_MISSING_TARGET'] == "true"
@@ -44,7 +44,7 @@ module Pkg::Repo
 
     ##
     ## Add a single repo tarball into the 'all' tarball located in
-    ## 'pkg/<local_target>/<Pkg::Config.project>-all.tar'
+    ## 'pkg/<local_target>/<project>-all.tar'
     ## Create the 'all' tarball if needed.
     ##
     def update_tarball_of_all_repos(project, platform, versioning)
@@ -52,7 +52,7 @@ module Pkg::Repo
 
       all_repos_tarball_name = "#{project}-all.tar"
       archive_name = "#{project}-#{platform['name']}"
-      local_target = construct_local_target_path(versioning)
+      local_target = construct_local_target_path(project, versioning)
       repo_tarball_name = "#{archive_name}.tar.gz"
       repo_tarball_path = File.join('repos', repo_tarball_name)
 
@@ -75,7 +75,7 @@ module Pkg::Repo
 
     ##
     ## Invoke gzip to compress the 'all' tarball located in
-    ## 'pkg/<local_target>/<Pkg::Config.project>-all.tar'
+    ## 'pkg/<local_target>/<project>-all.tar'
     ##
     def compress_tarball_of_all_repos(all_repos_tarball_name)
       gzip = Pkg::Util::Tool.check_tool('gzip')
@@ -92,7 +92,7 @@ module Pkg::Repo
     ##
     def create_all_repo_archives(project, versioning)
       platforms = Pkg::Config.platform_repos
-      local_target = construct_local_target_path(versioning)
+      local_target = construct_local_target_path(project, versioning)
       all_repos_tarball_name = "#{project}-all.tar"
 
       platforms.each do |platform|

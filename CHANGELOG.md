@@ -3,6 +3,12 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.42] - 2019-09-06
+### Added
+- (RE-12728) Add `update_latest_file` for enterprise repos on artifactory.
+- (RE-12729) Add `download_artifact` to download artifact from artifactory based on name, repo, and file path.
+- (PE-16465) Add functionality to create a tarball of all PE platform repos.
+
 ## [0.99.41] - 2019-09-03
 ### Fixed
 - Always ship `.yaml` and `.json` files in `ship_to_artifactory` rake task.
@@ -454,7 +460,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.41...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.42...HEAD
+[0.99.42]: https://github.com/puppetlabs/packaging/compare/0.99.41...0.99.42
 [0.99.41]: https://github.com/puppetlabs/packaging/compare/0.99.40...0.99.41
 [0.99.40]: https://github.com/puppetlabs/packaging/compare/0.99.39...0.99.40
 [0.99.39]: https://github.com/puppetlabs/packaging/compare/0.99.38...0.99.39

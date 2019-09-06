@@ -2,8 +2,8 @@ name: Gem release
 
 on:
   push:
-    branches:
-      - refs/tags/*
+    tags:
+      - '*'
 
 jobs:
   release:

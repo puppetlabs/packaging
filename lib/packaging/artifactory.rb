@@ -390,6 +390,20 @@ module Pkg
       end
     end
 
+    # Download an artifact based on name, repo, and path to artifact
+    # @param artifact_name [String] name of artifact to download
+    # @param repo [String] repo the artifact lives
+    # @param path [String] path to artifact in the repo
+    def download_artifact(artifact_name, repo, path)
+      check_authorization
+      artifacts = Artifactory::Resource::Artifact.search(name: artifact_name, repos: repo)
+      artifacts.each do |artifact|
+        if artifact.download_uri.include? path
+          artifact.download('.')
+        end
+      end
+    end
+
     # Remove shipped PE tarballs from artifactory
     # Used when compose fails, we only want the tarball shipped to artifactory if all platforms succeed
     # Identify which packages were created and shipped based on md5sum and remove them

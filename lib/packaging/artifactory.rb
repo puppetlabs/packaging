@@ -379,6 +379,7 @@ module Pkg
             STDERR.puts "Warning: Could not upload #{pe_tarball} to #{path}. Skipping."
             next
           end
+          pp uploaded_artifact
           uploaded_artifact.properties(ARTIFACTORY_CLEANUP_SKIP_PROPERTY => true)
         end
       end

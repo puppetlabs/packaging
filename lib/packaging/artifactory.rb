@@ -10,6 +10,11 @@ module Pkg
   # artifacts to the repos, and to retrieve them back from the repos.
   class ManageArtifactory
 
+    # The Artifactory property that the artifactCleanup user plugin
+    # {https://github.com/jfrog/artifactory-user-plugins/tree/master/cleanup/artifactCleanup}
+    # uses to tell it to not clean a particular artifact
+    ARTIFACTORY_CLEANUP_SKIP_PROPERTY = 'cleanup.skip'
+
     DEFAULT_REPO_TYPE = 'generic'
     DEFAULT_REPO_BASE = 'development'
 
@@ -361,20 +366,24 @@ module Pkg
     # @param ship_paths [Array] the artifactory path(s) to ship the tarballs to within the target_repo
     def ship_pe_tarballs(tarball_path, target_repo, ship_paths)
       check_authorization
-      Dir.foreach("#{tarball_path}/") do |pe_tarball|
-        unless pe_tarball == '.' || pe_tarball == ".."
-          ship_paths.each do |path|
-            begin
-              puts "Uploading #{pe_tarball} to #{target_repo}/#{path}... "
-              artifact = Artifactory::Resource::Artifact.new(local_path: "#{tarball_path}/#{pe_tarball}")
-              artifact.upload(target_repo, "/#{path}/#{pe_tarball}")
-            rescue Errno::EPIPE
-              STDERR.puts "Error: Could not upload #{pe_tarball} to #{path}"
-            end
+      ship_paths.each do |path|
+        unset_cleanup_skip_on_artifacts(target_repo, path)
+        Dir.foreach("#{tarball_path}/") do |pe_tarball|
+          next if pe_tarball == '.' || pe_tarball == ".."
+          begin
+            puts "Uploading #{pe_tarball} to #{target_repo}/#{path}... "
+            artifact = Artifactory::Resource::Artifact.new(local_path: "#{tarball_path}/#{pe_tarball}")
+            uploaded_artifact = artifact.upload(target_repo, "/#{path}/#{pe_tarball}")
+          rescue Errno::EPIPE
+            ## [eric.griswold] maybe this should be fatal?
+            STDERR.puts "Warning: Could not upload #{pe_tarball} to #{path}. Skipping."
+            next
           end
+          uploaded_artifact.properties(ARTIFACTORY_CLEANUP_SKIP_PROPERTY => true)
         end
       end
     end
+
 
     # Update LATEST file with latest PE build
     # @param latest_file [String] name of latest file to ship
@@ -387,6 +396,31 @@ module Pkg
         artifact.upload(target_repo, "/#{path}/#{latest_file}")
       rescue Errno::ENOENT
         STDERR.puts "Error: Could not upload #{latest_file} file. Are you sure it was created?"
+      end
+    end
+
+    # Clear the ARTIFACTORY_CLEANUP_SKIP_PROPERTY on all artifacts in
+    # a specified directory in a given Artifactory repos that match
+    # /<directory>/*.tar. Use this before uploading newer tarballs to maintain
+    # 'cleanup.skip' on the latest tarballs only.
+    #
+    # @param repo [String] Artifactory repository containing path
+    # @param directory [String] Artifactory directory in repo containing the artifacts from which to
+    #   set the 'cleanup.skip' property setting to false
+    def unset_cleanup_skip_on_artifacts(repo, directory)
+      check_authorization
+      artifacts_with_cleanup_skip = Artifactory::Resource::Artifact.property_search(
+        ARTIFACTORY_CLEANUP_SKIP_PROPERTY => true,
+        "repos" => repo
+      )
+      regexp_safe_repo = Regexp.escape(repo)
+      regexp_safe_directory = Regexp.escape(directory)
+
+      # For all artifacts that have 'cleanup.skip' set to true, find the tarballs in <directory>
+      # and set it to 'false'
+      artifacts_with_cleanup_skip.each do |artifact|
+        next unless /#{regexp_safe_repo}\/#{regexp_safe_directory}\/.*\.tar$/.match(artifact.uri)
+        artifact.properties(ARTIFACTORY_CLEANUP_SKIP_PROPERTY => false)
       end
     end
 

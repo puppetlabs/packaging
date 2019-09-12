@@ -368,10 +368,10 @@ module Pkg
       check_authorization
       ship_paths.each do |path|
         unset_cleanup_skip_on_artifacts(target_repo, path)
-        Dir.foreach("#{tarball_path}") do |pe_tarball|
+        Dir.foreach(tarball_path) do |pe_tarball|
           next if pe_tarball == '.' || pe_tarball == ".."
           begin
-            puts "Uploading #{pe_tarball} to #{target_repo}/#{path}... "
+            puts "Uploading #{pe_tarball} to #{target_repo}/#{path}/#{pe_tarball}"
             artifact = Artifactory::Resource::Artifact.new(local_path: "#{tarball_path}/#{pe_tarball}")
             uploaded_artifact = artifact.upload(target_repo, "/#{path}/#{pe_tarball}")
           rescue Errno::EPIPE

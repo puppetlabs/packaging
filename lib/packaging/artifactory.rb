@@ -361,21 +361,21 @@ module Pkg
     end
 
     # Ship PE tarballs to specified artifactory repo and paths
-    # @param tarball_path [String] the path of the tarballs to ship
+    # @param local_tarball_directory [String] the local directory containing the tarballs
     # @param target_repo [String] the artifactory repo to ship the tarballs to
     # @param ship_paths [Array] the artifactory path(s) to ship the tarballs to within the target_repo
-    def ship_pe_tarballs(tarball_paths, target_repo, ship_paths)
+    def ship_pe_tarballs(local_tarball_directory, target_repo, ship_paths)
       check_authorization
       ship_paths.each do |path|
         unset_cleanup_skip_on_artifacts(target_repo, path)
-        Dir.foreach(tarball_paths) do |pe_tarball|
+        Dir.foreach(local_tarball_directory) do |pe_tarball|
           next if pe_tarball == '.' || pe_tarball == ".."
           puts "pe_tarball = #{pe_tarball}"
           puts "path = #{path}"
           begin
             puts "Uploading #{pe_tarball} to #{target_repo}/#{path}/#{pe_tarball}"
-            artifact = Artifactory::Resource::Artifact.new(local_path: "#{tarball_path}/#{pe_tarball}")
-            uploaded_artifact = artifact.upload(target_repo, "/#{path}/#{pe_tarball}")
+            artifact = Artifactory::Resource::Artifact.new(local_path: "#{local_tarball_directory}/#{pe_tarball}")
+            uploaded_artifact = artifact.upload(target_repo, "#{path}/#{pe_tarball}")
           rescue Errno::EPIPE
             ## [eric.griswold] maybe this should be fatal?
             STDERR.puts "Warning: Could not upload #{pe_tarball} to #{path}. Skipping."

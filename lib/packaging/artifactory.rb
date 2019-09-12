@@ -373,9 +373,9 @@ module Pkg
           puts "pe_tarball = #{pe_tarball}"
           puts "path = #{path}"
           begin
-            puts "Uploading #{pe_tarball} to #{target_repo}/#{path}/#{pe_tarball}"
+            puts "Uploading #{pe_tarball} to #{target_repo}/#{path}#{pe_tarball}"
             artifact = Artifactory::Resource::Artifact.new(local_path: "#{local_tarball_directory}/#{pe_tarball}")
-            uploaded_artifact = artifact.upload(target_repo, "#{path}/#{pe_tarball}")
+            uploaded_artifact = artifact.upload(target_repo, "#{path}#{pe_tarball}")
           rescue Errno::EPIPE
             ## [eric.griswold] maybe this should be fatal?
             STDERR.puts "Warning: Could not upload #{pe_tarball} to #{path}. Skipping."

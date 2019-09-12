@@ -364,12 +364,14 @@ module Pkg
     # @param tarball_path [String] the path of the tarballs to ship
     # @param target_repo [String] the artifactory repo to ship the tarballs to
     # @param ship_paths [Array] the artifactory path(s) to ship the tarballs to within the target_repo
-    def ship_pe_tarballs(tarball_path, target_repo, ship_paths)
+    def ship_pe_tarballs(tarball_paths, target_repo, ship_paths)
       check_authorization
       ship_paths.each do |path|
         unset_cleanup_skip_on_artifacts(target_repo, path)
-        Dir.foreach(tarball_path) do |pe_tarball|
+        Dir.foreach(tarball_paths) do |pe_tarball|
           next if pe_tarball == '.' || pe_tarball == ".."
+          puts "pe_tarball = #{pe_tarball}"
+          puts "path = #{path}"
           begin
             puts "Uploading #{pe_tarball} to #{target_repo}/#{path}/#{pe_tarball}"
             artifact = Artifactory::Resource::Artifact.new(local_path: "#{tarball_path}/#{pe_tarball}")

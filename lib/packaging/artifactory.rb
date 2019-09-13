@@ -383,7 +383,7 @@ module Pkg
             next
           end
           pp uploaded_artifact
-          uploaded_artifact.properties(ARTIFACTORY_CLEANUP_SKIP_PROPERTY => true)
+          # uploaded_artifact.properties(ARTIFACTORY_CLEANUP_SKIP_PROPERTY => true)
         end
       end
     end

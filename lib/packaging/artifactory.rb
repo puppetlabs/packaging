@@ -10,6 +10,11 @@ module Pkg
   # artifacts to the repos, and to retrieve them back from the repos.
   class ManageArtifactory
 
+    # The Artifactory property that the artifactCleanup user plugin
+    # {https://github.com/jfrog/artifactory-user-plugins/tree/master/cleanup/artifactCleanup}
+    # uses to tell it to not clean a particular artifact
+    ARTIFACTORY_CLEANUP_SKIP_PROPERTY = 'cleanup.skip'
+
     DEFAULT_REPO_TYPE = 'generic'
     DEFAULT_REPO_BASE = 'development'
 
@@ -356,21 +361,37 @@ module Pkg
     end
 
     # Ship PE tarballs to specified artifactory repo and paths
-    # @param tarball_path [String] the path of the tarballs to ship
+    # @param local_tarball_directory [String] the local directory containing the tarballs
     # @param target_repo [String] the artifactory repo to ship the tarballs to
-    # @param ship_paths [Array] the artifactory path(s) to ship the tarballs to within the target_repo
-    def ship_pe_tarballs(tarball_path, target_repo, ship_paths)
+    # @param ship_paths [Array] the artifactory path(s) to ship the tarballs to within
+    #   the target_repo
+    def ship_pe_tarballs(local_tarball_directory, target_repo, ship_paths)
       check_authorization
-      Dir.foreach("#{tarball_path}/") do |pe_tarball|
-        unless pe_tarball == '.' || pe_tarball == ".."
-          ship_paths.each do |path|
-            begin
-              puts "Uploading #{pe_tarball} to #{target_repo}/#{path}... "
-              artifact = Artifactory::Resource::Artifact.new(local_path: "#{tarball_path}/#{pe_tarball}")
-              artifact.upload(target_repo, "/#{path}/#{pe_tarball}")
-            rescue Errno::EPIPE
-              STDERR.puts "Error: Could not upload #{pe_tarball} to #{path}"
+      ship_paths.each do |path|
+        unset_cleanup_skip_on_artifacts(target_repo, path)
+        Dir.foreach(local_tarball_directory) do |pe_tarball|
+          next if pe_tarball == '.' || pe_tarball == ".."
+          begin
+            puts "Uploading #{pe_tarball} to #{target_repo}/#{path}#{pe_tarball}"
+            artifact = Artifactory::Resource::Artifact.new(
+              local_path: "#{local_tarball_directory}/#{pe_tarball}")
+            uploaded_artifact = artifact.upload(target_repo, "#{path}#{pe_tarball}")
+            # The Artifactory gem property setter only works when '/api/storage' is used in
+            # the 'uri' field.
+            # Strangely, the above Artifactory::Resource::Artifact.new gives us the raw URI.
+            # Therefore we are forced to do some path surgery, inserting
+            # '/api/storage' before "/#{target_repo}" to make the property setting work.
+            storage_artifact = uploaded_artifact
+            unless storage_artifact.uri.include?("/api/storage")
+              storage_artifact.uri = storage_artifact.uri.sub(
+                "/#{target_repo}",
+                "/api/storage/#{target_repo}")
             end
+            storage_artifact.properties(ARTIFACTORY_CLEANUP_SKIP_PROPERTY => true)
+          rescue Errno::EPIPE
+            ## [eric.griswold] maybe this should be fatal?
+            STDERR.puts "Warning: Could not upload #{pe_tarball} to #{target_repo}/#{path}. Skipping."
+            next
           end
         end
       end
@@ -387,6 +408,31 @@ module Pkg
         artifact.upload(target_repo, "/#{path}/#{latest_file}")
       rescue Errno::ENOENT
         STDERR.puts "Error: Could not upload #{latest_file} file. Are you sure it was created?"
+      end
+    end
+
+    # Clear the ARTIFACTORY_CLEANUP_SKIP_PROPERTY on all artifacts in
+    # a specified directory in a given Artifactory repo that match
+    # /<directory>/*.tar. Use this before uploading newer tarballs to maintain
+    # 'cleanup.skip' on the latest tarballs only.
+    #
+    # @param repo [String] Artifactory repository that contains the specified directory
+    # @param directory [String] Artifactory directory in repo containing the artifacts from which to
+    #   set the 'cleanup.skip' property setting to false
+    def unset_cleanup_skip_on_artifacts(repo, directory)
+      artifacts_with_cleanup_skip = Artifactory::Resource::Artifact.property_search(
+        ARTIFACTORY_CLEANUP_SKIP_PROPERTY => true,
+        "repos" => repo
+      )
+
+      # For the upcoming directory check, make sure we know where our trailing slashes are.
+      directory_no_trailing_slashes = directory.sub(/(\/)+$/, '')
+
+      # For all tarball artifacts in #{directory} that have the Artifactory property
+      # 'cleanup.skip' set to true, set it to 'false'
+      artifacts_with_cleanup_skip.each do |artifact|
+        next unless artifact.uri.include?("/#{directory_no_trailing_slashes}/")
+        artifact.properties(ARTIFACTORY_CLEANUP_SKIP_PROPERTY => false)
       end
     end
 

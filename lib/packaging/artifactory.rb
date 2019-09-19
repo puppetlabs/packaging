@@ -450,6 +450,36 @@ module Pkg
       end
     end
 
+    # Download final pe tarballs to local path based on name, repo, and path on artifactory
+    # @param pe_version [String] pe final tag
+    # @param repo [String] repo the tarballs live
+    # @param remote_path [String] path to tarballs in the repo
+    # @param local_path [String] local path to download tarballs to
+    def download_final_pe_tarballs(pe_version, repo, remote_path, local_path)
+      check_authorization
+      artifacts = Artifactory::Resource::Artifact.search(name: pe_version, repos: repo)
+      artifacts.each do |artifact|
+        next unless artifact.download_uri.include? remote_path
+        next if artifact.download_uri.include? "-rc"
+        artifact.download(local_path)
+      end
+    end
+
+    # When we ship a new PE release we copy final tarballs to archives/releases
+    # @param pe_version [String] pe final tag
+    # @param repo [String] repo the tarballs live
+    # @param remote_path [String] path to tarballs in the repo
+    # @param target_path [String] path copy tarballs to, assumes same repo
+    def copy_final_pe_tarballs(pe_version, repo, remote_path, target_path)
+      check_authorization
+      final_tarballs = Artifactory::Resource::Artifact.search(name: pe_version, repos: repo)
+      final_tarballs.each do |artifact|
+        next unless artifact.download_uri.include? remote_path
+        next if artifact.download_uri.include? "-rc"
+        artifact.copy("#{repo}/#{target_path}")
+      end
+    end
+
     # Remove shipped PE tarballs from artifactory
     # Used when compose fails, we only want the tarball shipped to artifactory if all platforms succeed
     # Identify which packages were created and shipped based on md5sum and remove them

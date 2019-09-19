@@ -323,7 +323,8 @@ module Pkg
         end
 
         begin
-          puts "promoting #{artifact_name} to #{promotion_path}"
+          source_path = artifact_to_promote.download_uri.sub(@artifactory_uri, '')
+          puts "promoting #{artifact_name} from #{source_path} to #{promotion_path}"
           artifact_to_promote.copy(promotion_path)
           unless properties.nil?
             artifacts = Artifactory::Resource::Artifact.search(name: artifact_name, :artifactory_uri => @artifactory_uri)

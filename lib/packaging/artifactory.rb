@@ -302,17 +302,20 @@ module Pkg
       # get the artifact name
       artifact_names = all_package_names(yaml_data[:platform_data], platform_tag)
       artifact_names.each do |artifact_name|
-        artifact_to_promote = Artifactory::Resource::Artifact.search(name: artifact_name, :artifactory_uri => @artifactory_uri)
+        artifact_search_results = Artifactory::Resource::Artifact.search(
+          name: artifact_name, :artifactory_uri => @artifactory_uri)
 
-        if artifact_to_promote.empty?
+        if artifact_search_results.empty?
           raise "Error: could not find PKG=#{pkg} at REF=#{git_ref} for #{platform_tag}"
         end
+        artifact_to_promote = artifact_search_results[0]
 
         # This makes an assumption that we're using some consistent repo names
         # but need to either prepend 'rpm_' or 'debian_' based on package type
-        if File.extname(artifact_name) == '.rpm'
+        case File.extname(artifact_name)
+        when '.rpm'
           promotion_path = "rpm_#{repository}/#{platform_tag}/#{artifact_name}"
-        elsif File.extname(artifact_name) == '.deb'
+        when '.deb'
           promotion_path = "debian_#{repository}/#{platform_tag}/#{artifact_name}"
           properties = { 'deb.component' => debian_component } unless debian_component.nil?
         else
@@ -320,8 +323,9 @@ module Pkg
         end
 
         begin
-          puts "promoting #{artifact_name} to #{promotion_path}"
-          artifact_to_promote[0].copy(promotion_path)
+          source_path = artifact_to_promote.download_uri.sub(@artifactory_uri, '')
+          puts "promoting #{artifact_name} from #{source_path} to #{promotion_path}"
+          artifact_to_promote.copy(promotion_path)
           unless properties.nil?
             artifacts = Artifactory::Resource::Artifact.search(name: artifact_name, :artifactory_uri => @artifactory_uri)
             promoted_artifact = artifacts.select { |artifact| artifact.download_uri =~ %r{#{promotion_path}} }.first

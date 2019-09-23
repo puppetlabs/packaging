@@ -544,6 +544,29 @@ module Pkg
       end
     end
 
+    # When we cut a release branch we need to copy the pe components into <pe_version>/release/<platform>
+    # @param manifest [File] JSON file containing information about what packages to download and the corresponding md5sums
+    # @param target_path [String] path on artifactory to copy components to
+    def populate_pe_release_repos(manifest, target_path)
+      check_authorization
+      manifest.each do |dist, packages|
+        puts "Copying #{dist} packages..."
+        packages.each do |name, info|
+          artifact = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"]).first
+          if artifact.nil?
+            raise "Error: what the hell, could not find package #{info["filename"]} with md5sum #{info["md5"]}"
+          end
+          begin
+            artifact_target_path = "#{artifact.repo}/#{target_path}/#{dist}/#{info["filename"]}"
+            puts "Copying #{artifact.download_uri} to #{artifact_target_path}"
+            artifact.copy(artifact_target_path)
+          rescue Artifactory::Error::HTTPError
+            STDERR.puts "Could not copy #{artifact_target_path}. Source and destination are the same. Skipping..."
+          end
+        end
+      end
+    end
+
     # Remove shipped PE tarballs from artifactory
     # Used when compose fails, we only want the tarball shipped to artifactory if all platforms succeed
     # Identify which packages were created and shipped based on md5sum and remove them

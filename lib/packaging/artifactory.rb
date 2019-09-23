@@ -1,6 +1,68 @@
+require 'artifactory'
 require 'uri'
 require 'open-uri'
 require 'digest'
+
+#
+# [eric.griswold] This is unfortunate. The 'pattern_search' class method really does belong in
+# the Artifactory gem. However, because of some of Chef's social policies,
+# I am unwilling to contribute this code there. If that changes, I'll submit a PR. Until
+# then, it'll live here.
+#
+module Artifactory
+  class Resource::Artifact
+    #
+    # Search for an artifact in a repo using an Ant-like pattern.
+    # Unlike many Artifactory searches, this one is restricted to a single
+    # repository.
+    #
+    # @example Search in a repository named 'foo_local' for an artifact in a directory containing
+    #   the word "recent", named "artifact[0-9].txt"
+    #   Artifact.pattern_search(pattern: '*recent*/artifact[0-9].txt',
+    #                           repo: 'foo_local')
+    #
+    # @param [Hash] options
+    #   A hash of options, as follows:
+    #
+    # @option options [Artifactory::Client] :client
+    #   the client object to make the request with
+    # @option options [String] :pattern
+    #   the Ant-like pattern to use for finding artifacts within the repos. Note that the
+    #   Ant pattern '**' is barred in this case by JFrog.
+    # @option options [String] :repo
+    #   the repo to search
+    #
+    # @return [Array<Resource::Artifact>]
+    #   a list of artifacts that match the query
+    #
+    def self.pattern_search(options = {})
+      client = extract_client!(options)
+      params = Util.slice(options, :pattern, :repo)
+      pattern_search_parameter = { :pattern => "#{params[:repo]}:#{params[:pattern]}" }
+      response = client.get('/api/search/pattern', pattern_search_parameter)
+      return [] if response['files'].nil? || response['files'].empty?
+
+      # A typical response:
+      # {
+      #  "repoUri"=>"https:<artifactory endpoint>/<repo>",
+      #  "sourcePattern"=>"<repo>:<provided search pattern>",
+      #  "files"=>[<filename that matched pattern>, ...]
+      # }
+      #
+      # Inserting '/api/storage' before the repo makes the 'from_url' call work correctly.
+      #
+      repo_uri = response['repoUri']
+      unless repo_uri.include?('/api/storage/')
+        # rubocop:disable Style/PercentLiteralDelimiters
+        repo_uri.sub!(%r(/#{params[:repo]}$), "/api/storage/#{params[:repo]}")
+      end
+      response['files'].map do |file_path|
+        from_url("#{repo_uri}/#{file_path}", client: client)
+      end
+    end
+  end
+end
+
 
 module Pkg
 
@@ -29,8 +91,6 @@ module Pkg
     # @option :repo_base [String] The base of all repos, set for consistency.
     #   This currently defaults to 'development'
     def initialize(project, project_version, opts = {})
-      require 'artifactory'
-
       @artifactory_uri = opts[:artifactory_uri] || 'https://artifactory.delivery.puppetlabs.net/artifactory'
       @repo_base = opts[:repo_base] || DEFAULT_REPO_BASE
 

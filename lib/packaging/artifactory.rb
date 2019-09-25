@@ -544,10 +544,10 @@ module Pkg
       end
     end
 
-    # When we cut a release branch we need to copy the pe components into <pe_version>/release/<platform>
+    # When we cut a new PE branch, we need to copy the pe components into <pe_version>/{repos,feature,release}/<platform>
     # @param manifest [File] JSON file containing information about what packages to download and the corresponding md5sums
-    # @param target_path [String] path on artifactory to copy components to
-    def populate_pe_release_repos(manifest, target_path)
+    # @param target_path [String] path on artifactory to copy components to, e.g. <pe_version>/release
+    def populate_pe_repos(manifest, target_path)
       check_authorization
       manifest.each do |dist, packages|
         puts "Copying #{dist} packages..."

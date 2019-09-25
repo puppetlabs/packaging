@@ -567,6 +567,20 @@ module Pkg
       end
     end
 
+    # Remove all artifacts in repo based on pattern, used when we purge all artifacts in release/ after PE release
+    # @param repos [Array] repos that we want to search for artifacts in
+    # @param pattern [String] pattern for artifacts that should be deleted ex. `2019.1/release/*/*`
+    def teardown_repo(repos, pattern)
+      check_authorization
+      repos.each do |repo|
+        artifacts = Artifactory::Resource::Artifact.pattern_search(repo: repo, pattern: pattern)
+        artifacts.each do |artifact|
+          puts "Deleting #{artifact.download_uri}"
+          artifact.delete
+        end
+      end
+    end
+
     # Remove shipped PE tarballs from artifactory
     # Used when compose fails, we only want the tarball shipped to artifactory if all platforms succeed
     # Identify which packages were created and shipped based on md5sum and remove them

@@ -461,17 +461,20 @@ module Pkg
       end
     end
 
-    # Update LATEST file with latest PE build
-    # @param latest_file [String] name of latest file to ship
-    # @param target_repo [String] repo on artifactory to ship latest file to
-    # @param path [String] path on target_repo to latest file
-    def update_latest_file(latest_file, target_repo, path)
+    # Upload file to Artifactory
+    # @param local_path [String] local path to file to upload
+    # @param target_repo [String] repo on artifactory to upload to
+    # @param target_path [String] path within target_repo to upload to
+    def upload_file(local_path, target_repo, target_path)
+      fail "Error: Couldn't find file at #{local_path}." unless File.exist? local_path
       check_authorization
-      artifact = Artifactory::Resource::Artifact.new(local_path: latest_file)
+      artifact = Artifactory::Resource::Artifact.new(local_path: local_path)
+      full_upload_path = File.join(target_path, File.basename(local_path))
       begin
-        artifact.upload(target_repo, "/#{path}/#{latest_file}")
-      rescue Errno::ENOENT
-        STDERR.puts "Error: Could not upload #{latest_file} file. Are you sure it was created?"
+        puts "Uploading #{local_path} to #{target_repo}/#{full_upload_path} . . ."
+        artifact.upload(target_repo, full_upload_path)
+      rescue Artifactory::Error::HTTPError => e
+        fail "Error: Upload failed. Ensure path #{target_path} exists in the #{target_repo} repository."
       end
     end
 

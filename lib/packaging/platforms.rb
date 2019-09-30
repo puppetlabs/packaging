@@ -340,6 +340,13 @@ module Pkg
           repo: false,
         }
       },
+      'windowsfips' => {
+        '2012' => {
+          architectures: ['x64'],
+          package_format: 'msi',
+          repo: false,
+        }
+      },
     }.freeze
 
     # @return [Array] An array of Strings, containing all of the supported

@@ -4,7 +4,9 @@ describe '#Pkg::Util::Ship' do
   describe '#collect_packages' do
     msi_pkgs = [
       'pkg/windows/puppet5/puppet-agent-1.4.1.2904.g8023dd1-x86.msi',
-      'pkg/windows/puppet5/puppet-agent-x86.msi'
+      'pkg/windows/puppet5/puppet-agent-x86.msi',
+      'pkg/windowsfips/puppet5/puppet-agent-1.4.1.2904.g8023dd1-x64.msi',
+      'pkg/windowsfips/puppet5/puppet-agent-x64.msi'
     ]
     swix_pkgs = [
       'pkg/eos/puppet5/4/i386/puppet-agent-1.4.1.2904.g8023dd1-1.eos4.i386.swix',
@@ -24,7 +26,13 @@ describe '#Pkg::Util::Ship' do
         expect(Pkg::Util::Ship.collect_packages(['pkg/**/*.msi'], ['puppet-agent-x(86|64).msi'])).not_to include('pkg/windows/puppet5/puppet-agent-x86.msi')
       end
       it 'correctly includes packages that do not match a passed excluded argument' do
-        expect(Pkg::Util::Ship.collect_packages(['pkg/**/*.msi'], ['puppet-agent-x(86|64).msi'])).to include('pkg/windows/puppet5/puppet-agent-1.4.1.2904.g8023dd1-x86.msi')
+        expect(Pkg::Util::Ship.collect_packages(['pkg/**/*.msi'], ['puppet-agent-x(86|64).msi'])).to \
+          match_array(
+            [
+              'pkg/windows/puppet5/puppet-agent-1.4.1.2904.g8023dd1-x86.msi',
+              'pkg/windowsfips/puppet5/puppet-agent-1.4.1.2904.g8023dd1-x64.msi',
+            ]
+          )
       end
     end
 

@@ -26,6 +26,11 @@ describe 'artifactory.rb' do
         :repo_config => '',
         :additional_artifacts => ["./windows/puppet-agent-extras-5.3.1.34-x86.msi"],
       },
+      'windowsfips-2012-x64' => {
+        :artifact => "./windowsfips/puppet-agent-5.3.1.34-x64.msi",
+        :repo_config => '',
+        :additional_artifacts => ["./windowsfips/puppet-agent-extras-5.3.1.34-x64.msi"],
+      },
       'eos-4-i386' => {
         :artifact => "./eos/4/PC1/i386/puppet-agent-5.3.1.34.gf65f9ef-1.eos4.i386.swix",
         :repo_config => '',
@@ -64,6 +69,12 @@ describe 'artifactory.rb' do
       :repo_subdirectories => "#{default_repo_name}/#{project}/#{project_version}/windows-x86",
       :package_name => 'path/to/a/windows/package/puppet-agent-5.3.1.34-x86.msi',
       :all_package_names => ['puppet-agent-5.3.1.34-x86.msi','puppet-agent-extras-5.3.1.34-x86.msi']
+    },
+    'windowsfips-2012-x64' => {
+      :toplevel_repo => 'generic',
+      :repo_subdirectories => "#{default_repo_name}/#{project}/#{project_version}/windowsfips-x64",
+      :package_name => 'path/to/a/windowsfips/package/puppet-agent-5.3.1.34-x64.msi',
+      :all_package_names => ['puppet-agent-5.3.1.34-x64.msi','puppet-agent-extras-5.3.1.34-x64.msi']
     },
     'eos-4-i386' => {
       :toplevel_repo => 'generic',

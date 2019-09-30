@@ -19,7 +19,7 @@ describe 'Pkg::Platforms' do
 
   describe '#supported_platforms' do
     it 'should return all supported platforms' do
-      platforms = ['aix', 'cisco-wrlinux', 'cumulus', 'debian', 'el', 'eos', 'fedora', 'osx', 'redhatfips', 'sles', 'solaris', 'ubuntu', 'windows']
+      platforms = ['aix', 'cisco-wrlinux', 'cumulus', 'debian', 'el', 'eos', 'fedora', 'osx', 'redhatfips', 'sles', 'solaris', 'ubuntu', 'windows', 'windowsfips']
       expect(Pkg::Platforms.supported_platforms).to match_array(platforms)
     end
   end
@@ -127,6 +127,7 @@ describe 'Pkg::Platforms' do
     test_cases = {
       'debian-9-amd64' => ['debian', '9', 'amd64'],
       'windows-2012-x86' => ['windows', '2012', 'x86'],
+      'windowsfips-2012-x64' => ['windowsfips', '2012', 'x64'],
       'el-7-x86_64' => ['el', '7', 'x86_64'],
       'cisco-wrlinux-7-x86_64' => ['cisco-wrlinux', '7', 'x86_64'],
       'cisco-wrlinux-7' => ['cisco-wrlinux', '7', ''],

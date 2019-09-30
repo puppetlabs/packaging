@@ -25,13 +25,15 @@ module Pkg::Paths
   # with the artifact and path
   def tag_from_artifact_path(path)
     platform = Pkg::Platforms.supported_platforms.find { |p| path =~ /(\/|\.)#{p}[^\.]/ }
+    platform = 'windowsfips' if path =~ /windowsfips/
+
     codename = Pkg::Platforms.codenames.find { |c| path =~ /\/#{c}/ }
 
     if codename
       platform, version = Pkg::Platforms.codename_to_platform_version(codename)
     end
 
-    version = '2012' if platform == 'windows'
+    version = '2012' if platform =~ /^windows.*$/
 
     version ||= Pkg::Platforms.versions_for_platform(platform).find { |v| path =~ /#{platform}(\/|-)?#{v}/ }
 
@@ -152,7 +154,7 @@ module Pkg::Paths
       if is_legacy_repo?(repo_name(nonfinal))
         [File.join(path_prefix, 'windows'), nil]
       else
-        [File.join(path_prefix, 'windows', repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, 'windows', link_name(nonfinal))]
+        [File.join(path_prefix, platform, repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, platform, link_name(nonfinal))]
       end
     else
       raise "Not sure where to find packages with a package format of '#{package_format}'"
@@ -242,7 +244,7 @@ module Pkg::Paths
       if options[:legacy]
         File.join('repos', 'windows')
       else
-        File.join('repos', 'windows', repo_target)
+        File.join('repos', platform, repo_target)
       end
     else
       raise "Not sure what to do with a package format of '#{package_format}'"

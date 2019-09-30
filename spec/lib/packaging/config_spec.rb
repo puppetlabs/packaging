@@ -232,7 +232,9 @@ describe "Pkg::Config" do
       "./artifacts/windows/puppet-agent-x64.msi\n" \
       "./artifacts/windows/puppet-agent-5.3.2-x86.wixpdb\n" \
       "./artifacts/windows/puppet-agent-5.3.2-x86.msi\n" \
-      "./artifacts/windows/puppet-agent-5.3.2-x64.msi"
+      "./artifacts/windows/puppet-agent-5.3.2-x64.msi\n"\
+      "./artifacts/windowsfips/puppet-agent-x64.msi\n" \
+      "./artifacts/windowsfips/puppet-agent-5.3.2-x64.msi"
 
     solaris_artifacts = \
       "./artifacts/solaris/11/PC1/puppet-agent@5.3.2,5.11-1.sparc.p5p\n" \
@@ -297,6 +299,7 @@ describe "Pkg::Config" do
       data = Pkg::Config.platform_data
       expect(data['windows-2012-x86']).to include(:artifact => './windows/puppet-agent-5.3.2-x86.msi')
       expect(data['windows-2012-x64']).to include(:artifact => './windows/puppet-agent-5.3.2-x64.msi')
+      expect(data['windowsfips-2012-x64']).to include(:artifact => './windowsfips/puppet-agent-5.3.2-x64.msi')
     end
 
     it "should not collect debug packages" do

@@ -3,6 +3,31 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.99.43] - 2019-10-01
+### Added
+- (RE-12731) Set `cleanup.skip` property when uploading PE tarballs to
+  Artifactory (and unset everwhere else) to ensure that the latest PE tarballs
+  are never purged.
+- (RE-12734) Add `download_final_pe_tarballs` method for downloading PE tarballs
+  from Artifactory.
+- (RE-12732) Add `download_beta_pe_tarballs` method for downloading PE Beta
+  tarballs from Artifactory.
+- (RE-12734) Add `copy_final_pe_tarballs` method for copying PE tarballs to
+  the archives/releases directory on Artifactory.
+- (RE-12765) Add `pattern_search` method to Artifactory gem. This is a monkey
+  patch that should've been submitted upstream, but, due to Chef's recent
+  contract with ICE, we don't feel comfortable contributing to their codebases
+  at this time.
+- (RE-12767) Add `populate_pe_repos` method for copying all packages from one PE
+  version into the appropriate directory structure for a new PE version.
+- (RE-12771) Add `teardown_repo` method for removing all packages that match a
+  given search pattern from a given repo.
+- (PA-2839) Add support for windowsfips-7-x64.
+
+### Changed
+- Include source path in output when promoting packages in Artifactory.
+- Rename `update_latest_file` method to `upload_file` to be more generic.
+
 ## [0.99.42] - 2019-09-06
 ### Added
 - (RE-12728) Add `update_latest_file` for enterprise repos on artifactory.
@@ -460,7 +485,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.42...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.43...HEAD
+[0.99.43]: https://github.com/puppetlabs/packaging/compare/0.99.42...0.99.43
 [0.99.42]: https://github.com/puppetlabs/packaging/compare/0.99.41...0.99.42
 [0.99.41]: https://github.com/puppetlabs/packaging/compare/0.99.40...0.99.41
 [0.99.40]: https://github.com/puppetlabs/packaging/compare/0.99.39...0.99.40

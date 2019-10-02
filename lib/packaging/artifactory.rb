@@ -598,6 +598,26 @@ module Pkg
       end
     end
 
+    # Remove promoted artifacts if promotion is reverted, use information provided in manifest
+    # @param manifest [File] JSON file containing information about what packages to download and the corresponding md5sums
+    # @param remote_path [String] path on artifactory to promoted packages ex. 2019.1/repos/
+    # @param package [String] package name ex. puppet-agent
+    # @param repos [Array] the repos the promoted artifacts live
+    def remove_promoted_packages(manifest, remote_path, package, repos)
+      check_authorization
+      manifest.each do |dist, packages|
+        packages.each do |package_name, info|
+          next unless package_name == package
+          artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: repos)
+          artifacts.each do |artifact|
+            next unless artifact.download_uri.include? remote_path
+            puts "Removing reverted package #{artifact.download_uri}"
+            artifact.delete
+          end
+        end
+      end
+    end
+
     # Remove shipped PE tarballs from artifactory
     # Used when compose fails, we only want the tarball shipped to artifactory if all platforms succeed
     # Identify which packages were created and shipped based on md5sum and remove them

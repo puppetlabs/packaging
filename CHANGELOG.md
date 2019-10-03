@@ -3,6 +3,15 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.44] - 2019-10-03
+### Fixed
+- (RE-12793) Loosen the dependency on rake to allow packaging to use rake >= 13.0.0
+  at runtime.
+
+### Added
+- (RE-12727) Remove reverted packages from artifactory enterprise repositories.
+
 ## [0.99.43] - 2019-10-01
 ### Added
 - (RE-12731) Set `cleanup.skip` property when uploading PE tarballs to
@@ -485,7 +494,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.43...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.44...HEAD
+[0.99.44]: https://github.com/puppetlabs/packaging/compare/0.99.43...0.99.44
 [0.99.43]: https://github.com/puppetlabs/packaging/compare/0.99.42...0.99.43
 [0.99.42]: https://github.com/puppetlabs/packaging/compare/0.99.41...0.99.42
 [0.99.41]: https://github.com/puppetlabs/packaging/compare/0.99.40...0.99.41

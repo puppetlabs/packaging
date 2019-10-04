@@ -302,4 +302,10 @@ module Pkg::Paths
       return nil
     end
   end
+
+  def two_digit_pe_version_from_path(path)
+    matches = path.match(/\d+\.\d+/)
+    fail "Error: Could not determine PE version from path #{path}" if matches.nil?
+    return matches[0]
+  end
 end

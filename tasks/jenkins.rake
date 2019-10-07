@@ -267,6 +267,12 @@ namespace :pl do
       end
       # mark the build as successfully shipped
       Rake::Task["pl:jenkins:ship"].invoke("shipped")
+      # update the release spreadsheet
+      begin
+        Rake::Task["pl:update_release_spreadsheet"].invoke
+      rescue => e
+        puts "Uh oh! Something went wrong updating the release spreadsheet:\n#{e}\nPlease update it manually. Proceeding..."
+      end
     end
 
     task :stage_nightlies => "pl:fetch" do

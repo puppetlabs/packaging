@@ -19,6 +19,7 @@ module Pkg
   require 'packaging/retrieve'
   require 'packaging/sign'
   require 'packaging/archive'
+  require 'packaging/metrics'
 
   # Load configuration defaults
   Pkg::Config.load_defaults

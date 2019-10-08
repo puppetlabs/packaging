@@ -4,6 +4,11 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.99.45] - 2019-10-08
+### Fixed
+- (RE-12788) Set `deb.component` property when copying enterprise packages so
+  repos are properly populated.
+
 ## [0.99.44] - 2019-10-03
 ### Fixed
 - (RE-12793) Loosen the dependency on rake to allow packaging to use rake >= 13.0.0
@@ -494,7 +499,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.44...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.45...HEAD
+[0.99.45]: https://github.com/puppetlabs/packaging/compare/0.99.44...0.99.45
 [0.99.44]: https://github.com/puppetlabs/packaging/compare/0.99.43...0.99.44
 [0.99.43]: https://github.com/puppetlabs/packaging/compare/0.99.42...0.99.43
 [0.99.42]: https://github.com/puppetlabs/packaging/compare/0.99.41...0.99.42

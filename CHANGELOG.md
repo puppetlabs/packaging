@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- Allow Gemfile source to be overridden with `GEM SOURCE`
 
 ## [0.99.45] - 2019-10-08
 ### Fixed

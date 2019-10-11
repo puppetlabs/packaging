@@ -434,6 +434,11 @@ namespace :pl do
     Pkg::Util::Ship.ship_msi('pkg', Pkg::Config.nonfinal_msi_path, excludes: ["#{Pkg::Config.project}-x(86|64).msi"], nonfinal: true)
   end
 
+  desc "Add #{Pkg::Config.project} version #{Pkg::Config.ref} to release-metrics"
+  task :update_release_metrics => "pl:fetch" do
+    Pkg::Metrics.update_release_metrics
+  end
+
   desc 'UBER ship: ship all the things in pkg'
   task uber_ship: 'pl:fetch' do
     if Pkg::Util.confirm_ship(FileList['pkg/**/*'])

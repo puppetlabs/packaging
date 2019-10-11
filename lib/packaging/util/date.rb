@@ -11,5 +11,10 @@ module Pkg::Util::Date
       end
       Time.now.strftime(format)
     end
+
+    def today
+      format = "%m/%d/%Y"
+      Time.now.strftime(format)
+    end
   end
 end

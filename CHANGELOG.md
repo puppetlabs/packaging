@@ -3,6 +3,14 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- Allow Gemfile source to be overridden with `GEM SOURCE`
+- (RE-11802) Add `update_release_metrics` task for adding a release to the
+  release-metrics repo.
+
+### Changed
+- Stop testing against Ruby 2.0.0 and 2.1.9.
+- Start testing against Ruby 2.6.5.
 
 ## [0.99.45] - 2019-10-08
 ### Fixed

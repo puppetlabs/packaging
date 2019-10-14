@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.46] - 2019-10-14
 ### Added
 - Allow Gemfile source to be overridden with `GEM SOURCE`.
 - (RE-11802) Add `update_release_metrics` task for adding a release to the
@@ -507,7 +509,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.45...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.46...HEAD
+[0.99.46]: https://github.com/puppetlabs/packaging/compare/0.99.45...0.99.46
 [0.99.45]: https://github.com/puppetlabs/packaging/compare/0.99.44...0.99.45
 [0.99.44]: https://github.com/puppetlabs/packaging/compare/0.99.43...0.99.44
 [0.99.43]: https://github.com/puppetlabs/packaging/compare/0.99.42...0.99.43

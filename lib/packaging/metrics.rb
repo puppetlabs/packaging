@@ -10,6 +10,6 @@ bundle exec add-release --date #{Pkg::Util::Date.today} --project #{Pkg::Config.
 cd ..
 rm -r #{metrics_repo}
 CMD
-    Pkg::Util::Execution.capture3(command)
+    Pkg::Util::Execution.capture3(command, true)
   end
 end

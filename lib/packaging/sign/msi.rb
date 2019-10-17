@@ -87,7 +87,7 @@ for msi in #{msis.map { |d| File.basename(d) }.join(" ")}; do
     done;
     echo $ret
     if [[ $ret != *"Succeeded"* ]]; then exit 1; fi
-    sha256Servers=(http://sha256timestamp.ws.symantec.com/sha256/timestamp
+    sha256Servers=(http://timestamp.digicert.com/sha256/timestamp
       http://timestamp.comodoca.com?td=sha256)
     for timeserver in "${sha256Servers[@]}"; do
       for ((try=1; try<=$tries; try++)) do

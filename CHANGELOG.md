@@ -5,6 +5,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ## [Unreleased]
 ### Changed
 - Capture debug output when updating release-metrics.
+- (RE-12868) Update timestamp server for windows signing.
 
 ## [0.99.46] - 2019-10-14
 ### Added

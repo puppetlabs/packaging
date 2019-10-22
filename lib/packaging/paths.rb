@@ -303,9 +303,10 @@ module Pkg::Paths
     end
   end
 
-  def two_digit_pe_version_from_path(path)
-    matches = path.match(/\d+\.\d+/)
-    fail "Error: Could not determine PE version from path #{path}" if matches.nil?
+  def debian_component_from_path(path)
+    matches = path.match(/(\d+\.\d+)\/(\w+)/)
+    fail "Error: Could not determine Debian Component from path #{path}" if matches.nil?
+    return matches[1] if matches[2] == 'repos'
     return matches[0]
   end
 end

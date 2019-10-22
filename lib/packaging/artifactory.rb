@@ -584,7 +584,7 @@ module Pkg
             copied_artifact_search = Artifactory::Resource::Artifact.pattern_search(repo: 'debian_enterprise__local', pattern: "#{target_path}/*/#{info["filename"]}")
             fail "Error: what the hell, could not find just-copied package #{info["filename"]} under debian_enterprise__local/#{target_path}" if copied_artifact_search.nil?
             copied_artifact = copied_artifact_search.first
-            properties = { 'deb.component' => Pkg::Paths.two_digit_pe_version_from_path(target_path) }
+            properties = { 'deb.component' => Pkg::Paths.debian_component_from_path(target_path) }
             copied_artifact.properties(properties)
           end
         end

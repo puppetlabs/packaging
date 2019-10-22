@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.47] - 2019-10-22
 ### Changed
 - Capture debug output when updating release-metrics.
 - (RE-12868) Update timestamp server for windows signing.
@@ -512,7 +514,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.46...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.47...HEAD
+[0.99.47]: https://github.com/puppetlabs/packaging/compare/0.99.46...0.99.47
 [0.99.46]: https://github.com/puppetlabs/packaging/compare/0.99.45...0.99.46
 [0.99.45]: https://github.com/puppetlabs/packaging/compare/0.99.44...0.99.45
 [0.99.44]: https://github.com/puppetlabs/packaging/compare/0.99.43...0.99.44

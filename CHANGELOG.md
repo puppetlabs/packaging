@@ -8,6 +8,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
   `Pkg::Paths.debian_component_from_path` since the method was only being used
   for setting components and was not working correctly for packages populated
   to 'release' or 'feature' repos
+- (RE-12869) Skip shipping gems to downloads.puppet.com, but don't exit or fail,
+  when `gem_host` or `gem_path` is unset.
 
 ## [0.99.47] - 2019-10-22
 ### Changed

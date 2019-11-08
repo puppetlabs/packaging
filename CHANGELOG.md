@@ -4,6 +4,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 ### Changed
+- (RE-12874) Simplify the logic for setting 'cleanup.skip' for Artifactory
+  artifact directories
 - Replace `Pkg::Paths.two_digit_pe_version_from_path` with
   `Pkg::Paths.debian_component_from_path` since the method was only being used
   for setting components and was not working correctly for packages populated

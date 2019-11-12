@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.48] - 2019-11-12
 ### Changed
 - (RE-12874) Simplify the logic for setting 'cleanup.skip' for Artifactory
   artifact directories
@@ -523,7 +525,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.47...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.48...HEAD
+[0.99.48]: https://github.com/puppetlabs/packaging/compare/0.99.47...0.99.48
 [0.99.47]: https://github.com/puppetlabs/packaging/compare/0.99.46...0.99.47
 [0.99.46]: https://github.com/puppetlabs/packaging/compare/0.99.45...0.99.46
 [0.99.45]: https://github.com/puppetlabs/packaging/compare/0.99.44...0.99.45

@@ -432,28 +432,14 @@ module Pkg
     def ship_pe_tarballs(local_tarball_directory, target_repo, ship_paths)
       check_authorization
       ship_paths.each do |path|
-        unset_cleanup_skip_on_artifacts(target_repo, path)
         Dir.foreach(local_tarball_directory) do |pe_tarball|
           next if pe_tarball == '.' || pe_tarball == ".."
           begin
             puts "Uploading #{pe_tarball} to #{target_repo}/#{path}#{pe_tarball}"
             artifact = Artifactory::Resource::Artifact.new(
               local_path: "#{local_tarball_directory}/#{pe_tarball}")
-            uploaded_artifact = artifact.upload(target_repo, "#{path}#{pe_tarball}")
-            # The Artifactory gem property setter only works when '/api/storage' is used in
-            # the 'uri' field.
-            # Strangely, the above Artifactory::Resource::Artifact.new gives us the raw URI.
-            # Therefore we are forced to do some path surgery, inserting
-            # '/api/storage' before "/#{target_repo}" to make the property setting work.
-            storage_artifact = uploaded_artifact
-            unless storage_artifact.uri.include?("/api/storage")
-              storage_artifact.uri = storage_artifact.uri.sub(
-                "/#{target_repo}",
-                "/api/storage/#{target_repo}")
-            end
-            storage_artifact.properties(ARTIFACTORY_CLEANUP_SKIP_PROPERTY => true)
+            artifact.upload(target_repo, "#{path}#{pe_tarball}")
           rescue Errno::EPIPE
-            ## [eric.griswold] maybe this should be fatal?
             STDERR.puts "Warning: Could not upload #{pe_tarball} to #{target_repo}/#{path}. Skipping."
             next
           end
@@ -478,28 +464,42 @@ module Pkg
       end
     end
 
-    # Clear the ARTIFACTORY_CLEANUP_SKIP_PROPERTY on all artifacts in
-    # a specified directory in a given Artifactory repo that match
-    # /<directory>/*.tar. Use this before uploading newer tarballs to maintain
-    # 'cleanup.skip' on the latest tarballs only.
+    # Start by clearing the ARTIFACTORY_CLEANUP_SKIP_PROPERTY on all artifacts in a
+    # single repo/directory location. This allows all artifacts in the directory to be cleaned.
+    # Once cleared, set ARTIFACTORY_CLEANUP_SKIP_PROPERTY on those matching pe_build_version,
+    # presumably the latest. This prevents those artifacts from being deleted.
     #
     # @param repo [String] Artifactory repository that contains the specified directory
     # @param directory [String] Artifactory directory in repo containing the artifacts from which to
     #   set the 'cleanup.skip' property setting to false
-    def unset_cleanup_skip_on_artifacts(repo, directory)
-      artifacts_with_cleanup_skip = Artifactory::Resource::Artifact.property_search(
-        ARTIFACTORY_CLEANUP_SKIP_PROPERTY => true,
-        "repos" => repo
+    # @param pe_build_version [String] Set 'cleanup.skip' property on artifacts that
+    #   contain this string in their file inside the directory.
+    def prevent_artifact_cleanup(repo, directory, pe_build_version)
+      # Clean up any trailing slashes on directory, just in case
+      directory.sub!(/(\/)+$/, '')
+
+      all_artifacts_pattern = "#{directory}/*"
+      latest_artifacts_pattern = "#{directory}/*#{pe_build_version}*"
+
+      all_artifacts = Artifactory::Resource::Artifact.pattern_search(
+        repo: repo,
+        pattern: all_artifacts_pattern
+      )
+      latest_artifacts = Artifactory::Resource::Artifact.pattern_search(
+        repo: repo,
+        pattern: latest_artifacts_pattern
       )
 
-      # For the upcoming directory check, make sure we know where our trailing slashes are.
-      directory_no_trailing_slashes = directory.sub(/(\/)+$/, '')
-
-      # For all tarball artifacts in #{directory} that have the Artifactory property
-      # 'cleanup.skip' set to true, set it to 'false'
-      artifacts_with_cleanup_skip.each do |artifact|
-        next unless artifact.uri.include?("/#{directory_no_trailing_slashes}/")
+      # Clear cleanup.skip on all artifacts in directory
+      puts "Clearing #{ARTIFACTORY_CLEANUP_SKIP_PROPERTY} in #{repo}/#{all_artifacts_pattern}"
+      all_artifacts.each do |artifact|
         artifact.properties(ARTIFACTORY_CLEANUP_SKIP_PROPERTY => false)
+      end
+
+      # Set cleanup.skip on all artifacts in directory matching *pe_build_version*
+      puts "Setting #{ARTIFACTORY_CLEANUP_SKIP_PROPERTY} in #{repo}/#{latest_artifacts_pattern}"
+      latest_artifacts.each do |artifact|
+        artifact.properties(ARTIFACTORY_CLEANUP_SKIP_PROPERTY => true)
       end
     end
 

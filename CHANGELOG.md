@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- (PDK-1546) Add Fedora 31 to platforms
 
 ## [0.99.48] - 2019-11-12
 ### Changed

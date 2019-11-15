@@ -5,6 +5,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ## [Unreleased]
 ### Fixed
 - Include filename when copying PE tarballs so the parent directory is created.
+- Use correct parameter name in Artifactory promotion error message.
 
 ### Added
 - (PDK-1546) Add Fedora 31 to platforms

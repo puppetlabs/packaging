@@ -366,7 +366,7 @@ module Pkg
           name: artifact_name, :artifactory_uri => @artifactory_uri)
 
         if artifact_search_results.empty?
-          raise "Error: could not find PKG=#{pkg} at REF=#{git_ref} for #{platform_tag}"
+          raise "Error: could not find PKG=#{pkg} at REF=#{ref} for #{platform_tag}"
         end
         artifact_to_promote = artifact_search_results[0]
 

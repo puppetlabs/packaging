@@ -557,7 +557,11 @@ module Pkg
       final_tarballs.each do |artifact|
         next unless artifact.download_uri.include? remote_path
         next if artifact.download_uri.include? "-rc"
-        artifact.copy("#{repo}/#{target_path}")
+        filename = File.basename(artifact.download_uri)
+        # Artifactory does NOT like when you use `File.join`, so let's concatenate!
+        full_target_path = "#{repo}/#{target_path}/#{filename}"
+        puts "INFO: Copying #{filename} to #{full_target_path} . . ."
+        artifact.copy(full_target_path)
       end
     end
 

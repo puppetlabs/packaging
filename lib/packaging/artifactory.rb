@@ -417,8 +417,9 @@ module Pkg
           if artifact_to_download.nil?
             raise "Error: what the hell, could not find package #{info["filename"]} with md5sum #{info["md5"]}"
           else
-            puts "downloading #{artifact_to_download.download_uri}"
-            artifact_to_download.download("#{staging_directory}/#{dist}", filename: "#{info["filename"]}")
+            full_staging_path = "#{staging_directory}/#{dist}"
+            puts "downloading #{artifact_to_download.download_uri} to #{File.join(full_staging_path, info['filename'])}"
+            artifact_to_download.download(full_staging_path, filename: "#{info["filename"]}")
           end
         end
       end

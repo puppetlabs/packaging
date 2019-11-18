@@ -11,6 +11,10 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 - (PDK-1546) Add Fedora 31 to platforms
 - Include target directory in output when downloading from Artifactory.
 
+### Changed
+- (RE-13072) Use artifact basename as target filename when downloading from
+  Artifactory and manifest is missing filename metadata.
+
 ## [0.99.48] - 2019-11-12
 ### Changed
 - (RE-12874) Simplify the logic for setting 'cleanup.skip' for Artifactory

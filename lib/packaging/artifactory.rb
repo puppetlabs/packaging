@@ -415,10 +415,13 @@ module Pkg
         packages.each do |name, info|
           artifact_to_download = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"]).first
           if artifact_to_download.nil?
-            raise "Error: what the hell, could not find package #{info["filename"]} with md5sum #{info["md5"]}"
+            filename = info["filename"] || info["name"]
+            raise "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]}"
           else
-            puts "downloading #{artifact_to_download.download_uri}"
-            artifact_to_download.download("#{staging_directory}/#{dist}", filename: "#{info["filename"]}")
+            full_staging_path = "#{staging_directory}/#{dist}"
+            filename = info['filename'] || File.basename(artifact_to_download.download_uri)
+            puts "downloading #{artifact_to_download.download_uri} to #{File.join(full_staging_path, filename)}"
+            artifact_to_download.download(full_staging_path, filename: filename)
           end
         end
       end
@@ -575,18 +578,20 @@ module Pkg
         packages.each do |name, info|
           artifact = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"]).first
           if artifact.nil?
-            raise "Error: what the hell, could not find package #{info["filename"]} with md5sum #{info["md5"]}"
+            filename = info["filename"] || info["name"]
+            raise "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]}"
           end
           begin
-            artifact_target_path = "#{artifact.repo}/#{target_path}/#{dist}/#{info["filename"]}"
+            filename = info["filename"] || File.basename(artifact.download_uri)
+            artifact_target_path = "#{artifact.repo}/#{target_path}/#{dist}/#{filename}"
             puts "Copying #{artifact.download_uri} to #{artifact_target_path}"
             artifact.copy(artifact_target_path)
           rescue Artifactory::Error::HTTPError
             STDERR.puts "Could not copy #{artifact_target_path}. Source and destination are the same. Skipping..."
           end
-          if File.extname(info["filename"]) == '.deb'
-            copied_artifact_search = Artifactory::Resource::Artifact.pattern_search(repo: 'debian_enterprise__local', pattern: "#{target_path}/*/#{info["filename"]}")
-            fail "Error: what the hell, could not find just-copied package #{info["filename"]} under debian_enterprise__local/#{target_path}" if copied_artifact_search.nil?
+          if File.extname(filename) == '.deb'
+            copied_artifact_search = Artifactory::Resource::Artifact.pattern_search(repo: 'debian_enterprise__local', pattern: "#{target_path}/*/#{filename}")
+            fail "Error: what the hell, could not find just-copied package #{filename} under debian_enterprise__local/#{target_path}" if copied_artifact_search.nil?
             copied_artifact = copied_artifact_search.first
             properties = { 'deb.component' => Pkg::Paths.debian_component_from_path(target_path) }
             copied_artifact.properties(properties)

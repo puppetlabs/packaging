@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.49] - 2019-11-19
 ### Fixed
 - Include filename when copying PE tarballs so the parent directory is created.
 - Use correct parameter name in Artifactory promotion error message.
@@ -536,7 +538,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.48...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.49...HEAD
+[0.99.49]: https://github.com/puppetlabs/packaging/compare/0.99.48...0.99.49
 [0.99.48]: https://github.com/puppetlabs/packaging/compare/0.99.47...0.99.48
 [0.99.47]: https://github.com/puppetlabs/packaging/compare/0.99.46...0.99.47
 [0.99.46]: https://github.com/puppetlabs/packaging/compare/0.99.45...0.99.46

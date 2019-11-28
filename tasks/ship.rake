@@ -630,20 +630,27 @@ namespace :pl do
       # building to. Once we move the Metadata about the output location in
       # to one source of truth we can refactor this to use that to search
       #                                           -Sean P. M. 08/12/16
-      packages = Dir["#{local_dir}/windows/*"]
-      ['x86', 'x64'].each do |arch|
-        package_version = Pkg::Util::Git.describe.tr('-', '.')
-        package_filename = File.join(local_dir, 'windows', "#{Pkg::Config.project}-#{package_version}-#{arch}.msi")
-        link_filename = File.join(local_dir, 'windows', "#{Pkg::Config.project}-#{arch}.msi")
 
-        next unless !packages.include?(link_filename) && packages.include?(package_filename)
-        # Dear future code spelunkers:
-        # Using symlinks instead of hard links causes failures when we try
-        # to set these files to be immutable. Also be wary of whether the
-        # linking utility you're using expects the source path to be relative
-        # to the link target or pwd.
-        #
-        FileUtils.ln(package_filename, link_filename)
+      {
+        'windows' => ['x86', 'x64'],
+        'windowsfips' => ['x64']
+      }.each_pair do |platform, archs|
+        packages = Dir["#{local_dir}/#{platform}/*"]
+
+        archs.each do |arch|
+          package_version = Pkg::Util::Git.describe.tr('-', '.')
+          package_filename = File.join(local_dir, platform, "#{Pkg::Config.project}-#{package_version}-#{arch}.msi")
+          link_filename = File.join(local_dir, platform, "#{Pkg::Config.project}-#{arch}.msi")
+
+          next unless !packages.include?(link_filename) && packages.include?(package_filename)
+          # Dear future code spelunkers:
+          # Using symlinks instead of hard links causes failures when we try
+          # to set these files to be immutable. Also be wary of whether the
+          # linking utility you're using expects the source path to be relative
+          # to the link target or pwd.
+          #
+          FileUtils.ln(package_filename, link_filename)
+        end
       end
 
       Pkg::Util::Execution.retry_on_fail(times: 3) do

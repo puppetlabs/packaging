@@ -4,6 +4,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 - Add windowsfips versionless symlinks
+- Add rake task to build nightly gem packages
+- Add rake task to remotely link nightly shipped gems to latest versions
 
 ## [0.99.49] - 2019-11-19
 ### Fixed

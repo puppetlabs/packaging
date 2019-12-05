@@ -127,23 +127,33 @@ def create_platform_specific_gems
   end
 end
 
+def package_gem
+  unless Pkg::Config.build_gem
+    puts "The #{Pkg::Config.project} project does not build any gems! Passing through ..."
+    return
+  end
+
+  mkdir_p File.join(Pkg::Config.project_root, "pkg")
+  create_default_gem
+  if Pkg::Config.gem_platform_dependencies
+    create_platform_specific_gems
+  end
+end
+
 namespace :package do
   desc "Build a gem - All gems if platform specific"
   task :gem => ["clean"] do
-    unless Pkg::Config.build_gem
-      puts("The #{Pkg::Config.project} project does not build any gems! Passing through ...")
-      next
-    end
+    package_gem
+  end
 
-    mkdir_p File.join(Pkg::Config.project_root, "pkg")
-    create_default_gem
-    if Pkg::Config.gem_platform_dependencies
-      create_platform_specific_gems
-    end
+  task :nightly_gem => ["clean"] do
+    Pkg::Config.gemversion = Pkg::Util::Version.extended_dot_version
+    package_gem
   end
 end
 
 # An alias task to simplify our remote logic in jenkins.rake
 namespace :pl do
   task :gem => "package:gem"
+  task :nightly_gem => "package:nightly_gem"
 end

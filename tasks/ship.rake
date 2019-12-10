@@ -248,6 +248,23 @@ namespace :pl do
         end
       end
     end
+
+    desc "Remotely link nightly shipped gems to latest versions on #{Pkg::Config.gem_host}"
+    task :link_nightly_shipped_gems_to_latest do
+      Pkg::Config.gemversion = Pkg::Util::Version.extended_dot_version
+
+      remote_path = Pkg::Config.nonfinal_gem_path
+      gems = FileList['pkg/*.gem'].map! { |path| path.gsub!('pkg/', '') }
+      command = %(cd #{remote_path}; )
+
+      command += gems.map! do |gem_name|
+        %(sudo ln -sf #{gem_name} #{gem_name.gsub(Pkg::Config.gemversion, 'latest')})
+      end.join(';')
+
+      command += %(; sync)
+
+      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.gem_host, command)
+    end
   end
 
   desc "Ship mocked rpms to #{Pkg::Config.yum_staging_server}"

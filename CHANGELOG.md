@@ -4,6 +4,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 - Add windowsfips versionless symlinks
+- Add `NIGHTLY_PACKAGE` param to handle diffrent cases for building and shipping
+  nightly packages
 
 ## [0.99.49] - 2019-11-19
 ### Fixed

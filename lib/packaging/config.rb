@@ -279,7 +279,13 @@ module Pkg
           @ref         = Pkg::Util::Git.sha_or_tag
           @short_ref   = Pkg::Util::Git.sha_or_tag(7)
           @version     = Pkg::Util::Version.dash_version
-          @gemversion  = Pkg::Util::Version.dot_version
+          @gemversion  =  if Pkg::Config.nightly_package
+                            Pkg::Util::Version.dot_version(
+                              Pkg::Util::Version.extended_dash_version
+                            )
+                          else
+                            Pkg::Util::Version.dot_version
+                          end
           @debversion  = Pkg::Util::Version.debversion
           @origversion = Pkg::Util::Version.origversion
           @rpmversion  = Pkg::Util::Version.rpmversion

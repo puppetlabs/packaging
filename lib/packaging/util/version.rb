@@ -50,6 +50,10 @@ module Pkg::Util::Version
       end
     end
 
+    def extended_dash_version
+      Pkg::Util::Git.describe(['--tags', '--dirty', '--abbrev=7'])
+    end
+
     # This version is used for gems and platform types that do not support
     # dashes in the package version
     def dot_version(version = Pkg::Config.version)

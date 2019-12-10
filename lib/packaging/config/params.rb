@@ -189,6 +189,7 @@ module Pkg::Params
                   :yum_repo_name,
                   :yum_repo_path,
                   :yum_staging_server,
+                  :nightly_package,
                  ]
 
   # Environment variable overrides for Pkg::Config parameters
@@ -303,6 +304,7 @@ module Pkg::Params
               { :var => :yum_repo_path,           :envvar => :YUM_REPO },
               { :var => :yum_staging_server,      :envvar => :YUM_STAGING_SERVER },
               { :var => :internal_gem_host,       :envvar => :INTERNAL_GEM_HOST },
+              { :var => :nightly_package,         :envvar => :NIGHTLY_PACKAGE, :type => :bool },
              ]
   # Default values that are supplied if the user does not supply them
   #
@@ -332,7 +334,8 @@ module Pkg::Params
               { :var => :pe_feature_branch,       :val => false },
               { :var => :pe_release_branch,       :val => false },
               { :var => :s3_ship,                 :val => false },
-              { :var => :apt_releases,            :val => Pkg::Platforms.codenames }]
+              { :var => :apt_releases,            :val => Pkg::Platforms.codenames },
+              { :var => :nightly_package,         :val => false }]
 
   # These are variables which, over time, we decided to rename or replace. For
   # backwards compatibility, we assign the value of the old/deprecated

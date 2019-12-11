@@ -3,6 +3,9 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.50) - 2019-12-11
+### Added
 - Add windowsfips versionless symlinks
 - Add rake task to build nightly gem packages
 - Add rake task to remotely link nightly shipped gems to latest versions
@@ -541,7 +544,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.49...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.50...HEAD
+[0.99.50]: https://github.com/puppetlabs/packaging/compare/0.99.49...0.99.50
 [0.99.49]: https://github.com/puppetlabs/packaging/compare/0.99.48...0.99.49
 [0.99.48]: https://github.com/puppetlabs/packaging/compare/0.99.47...0.99.48
 [0.99.47]: https://github.com/puppetlabs/packaging/compare/0.99.46...0.99.47

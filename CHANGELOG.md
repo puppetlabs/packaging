@@ -4,7 +4,11 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
-## [0.99.50) - 2019-12-11
+## [0.99.51] - 2019-12-11
+### Fixed
+- Fixed a typo in the CHANGELOG.md file preventing proper linking
+
+## [0.99.50] - 2019-12-11
 ### Added
 - Add windowsfips versionless symlinks
 - Add rake task to build nightly gem packages
@@ -544,7 +548,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.50...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.51...HEAD
+[0.99.51]: https://github.com/puppetlabs/packaging/compare/0.99.50...0.99.51
 [0.99.50]: https://github.com/puppetlabs/packaging/compare/0.99.49...0.99.50
 [0.99.49]: https://github.com/puppetlabs/packaging/compare/0.99.48...0.99.49
 [0.99.48]: https://github.com/puppetlabs/packaging/compare/0.99.47...0.99.48

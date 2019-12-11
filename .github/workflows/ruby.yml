@@ -8,13 +8,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: [ '2.3.x', '2.4.x' ]
+        ruby: [ '2.4.x', '2.5.x' ]
     steps:
     - uses: actions/checkout@master
     - name: Set up Ruby
       uses: actions/setup-ruby@v1
       with:
-        version: ${{ matrix.ruby }}
+        ruby-version: ${{ matrix.ruby }}
     - run: |
         gem install bundler
         bundle install --jobs 4 --retry 3

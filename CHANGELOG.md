@@ -3,6 +3,9 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (RE-13101) Change warning to hard fail when release-metrics update doesn't
+  work.
 
 ## [0.99.52] - 2019-12-17
 ### Fixed

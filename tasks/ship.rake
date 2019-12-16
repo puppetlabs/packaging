@@ -250,7 +250,7 @@ namespace :pl do
     end
 
     desc "Remotely link nightly shipped gems to latest versions on #{Pkg::Config.gem_host}"
-    task :link_nightly_shipped_gems_to_latest do
+    task link_nightly_shipped_gems_to_latest: 'pl:fetch' do
       Pkg::Config.gemversion = Pkg::Util::Version.extended_dot_version
 
       remote_path = Pkg::Config.nonfinal_gem_path

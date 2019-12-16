@@ -3,6 +3,7 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+- Fixed link_nightly_shipped_gems_to_latest task
 
 ## [0.99.51] - 2019-12-11
 ### Fixed

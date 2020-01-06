@@ -271,7 +271,7 @@ namespace :pl do
       begin
         Rake::Task["pl:update_release_metrics"].invoke
       rescue => e
-        puts "Uh oh! Something went wrong updating release-metrics:\n#{e}\nPlease add this release manually. Proceeding..."
+        fail "Error updating release-metrics:\n#{e}\nYou will need to add this release manually."
       end
     end
 

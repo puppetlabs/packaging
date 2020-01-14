@@ -16,10 +16,10 @@ module Pkg::Gem
       Pkg::Util::Ship.ship_pkgs(["#{file}*"], Pkg::Config.gem_host, Pkg::Config.gem_path, platform_independent: true)
     end
 
-    def shipped_to_rubygems?(gem_name, gem_version)
+    def shipped_to_rubygems?(gem_name, gem_version, gem_platform)
       gem_data = JSON.parse(`curl https://rubygems.org/api/v1/versions/#{gem_name}.json`)
-      gem_versions = gem_data.map { |version| version['number'] }
-      return gem_versions.include? gem_version
+      gem = gem_data.select { |data| data['number'] == gem_version && data['platform'] == gem_platform }
+      return !gem.empty?
     rescue => e
       puts "Uh oh, something went wrong searching for gem '#{gem_name}':"
       puts e
@@ -31,7 +31,15 @@ module Pkg::Gem
     # of a ~/.gem/credentials file or else rubygems.org won't have
     # any idea who you are.
     def ship_to_rubygems(file, options = {})
-      if shipped_to_rubygems?(Pkg::Config.gem_name, Pkg::Config.gemversion)
+      # rubygems uses 'ruby' as the platform when it's not a platform-specific
+      # gem
+      platform = file.match(/\w+-(?:\d+(?:\.)?)+-(.*)\.gem$/)
+      unless platform.nil?
+        gem_platform = platform[1]
+      end
+      gem_platform ||= 'ruby'
+
+      if shipped_to_rubygems?(Pkg::Config.gem_name, Pkg::Config.gemversion, gem_platform)
         puts "#{file} has already been shipped to rubygems, skipping . . ."
         return
       end

@@ -3,6 +3,10 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Fixed
+- (RE-13167) When checking if gem has been published, check platform as well as
+  version.
+
 ### Changed
 - (RE-13101) Change warning to hard fail when release-metrics update doesn't
   work.

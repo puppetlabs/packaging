@@ -68,15 +68,19 @@ describe 'Pkg::Gem' do
     }
     it 'returns true if gem version has already been shipped' do
       allow(JSON).to receive(:parse).and_return(gem_data)
-      expect(Pkg::Gem.shipped_to_rubygems?('puppet', '6.0.5')).to be true
+      expect(Pkg::Gem.shipped_to_rubygems?('puppet', '6.0.5', 'ruby')).to be true
+    end
+    it 'returns false if the platform doesn\'t match' do
+      allow(JSON).to receive(:parse).and_return(gem_data)
+      expect(Pkg::Gem.shipped_to_rubygems?('puppet', '6.0.5', 'x64-mingw32')).to be false
     end
     it 'returns false if gem version has not already been shipped' do
       allow(JSON).to receive(:parse).and_return(gem_data)
-      expect(Pkg::Gem.shipped_to_rubygems?('puppet', '6.0.9')).to be false
+      expect(Pkg::Gem.shipped_to_rubygems?('puppet', '6.0.9', 'ruby')).to be false
     end
     it 'returns false if gem is not found at all on rubygems' do
-      expect { Pkg::Gem.shipped_to_rubygems?('totally-not-a-real-gem', '9.9.9') }.to_not raise_error
-      expect(Pkg::Gem.shipped_to_rubygems?('totally-not-a-real-gem', '9.9.9')).to be false
+      expect { Pkg::Gem.shipped_to_rubygems?('totally-not-a-real-gem', '9.9.9', 'ruby') }.to_not raise_error
+      expect(Pkg::Gem.shipped_to_rubygems?('totally-not-a-real-gem', '9.9.9', 'ruby')).to be false
     end
   end
 end

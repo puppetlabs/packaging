@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.53] - 2020-01-15
 ### Fixed
 - (RE-13167) When checking if gem has been published, check platform as well as
   version.
@@ -559,7 +561,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.52...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.53...HEAD
+[0.99.53]: https://github.com/puppetlabs/packaging/compare/0.99.52...0.99.53
 [0.99.52]: https://github.com/puppetlabs/packaging/compare/0.99.51...0.99.52
 [0.99.51]: https://github.com/puppetlabs/packaging/compare/0.99.50...0.99.51
 [0.99.50]: https://github.com/puppetlabs/packaging/compare/0.99.49...0.99.50

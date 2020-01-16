@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- (PA-2995) Add macOS 10.15 to platforms
 
 ## [0.99.53] - 2020-01-15
 ### Fixed

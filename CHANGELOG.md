@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Fixed
+- (RE-13191) Fixed issue with the changes to MSI package signing.
 
 ## [0.99.54] - 2020-01-22
 ### Added

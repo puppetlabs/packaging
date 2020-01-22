@@ -8,10 +8,11 @@ module Pkg::Sign::Msi
     rsync_host_string = "-e 'ssh #{use_identity}' Administrator@#{Pkg::Config.msi_signing_server}"
 
     work_dir = "Windows/Temp/#{Pkg::Util.rand_string}"
-    Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "mkdir -p C:/#{work_dir}")
     msis = Dir.glob("#{target_dir}/windows*/**/*.msi")
-    Pkg::Util::Net.rsync_to(msis.join(" "), rsync_host_string, "/cygdrive/c/#{work_dir}")
-
+    msis.each do | msi |
+      Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "mkdir -p C:/#{work_dir}/#{File.dirname(msi)}")
+      Pkg::Util::Net.rsync_to(msi, rsync_host_string, "/cygdrive/c/#{work_dir}/#{File.dirname(msi)}")
+    end
     # Please Note:
     # We are currently adding two signatures to the msi.
     #
@@ -63,7 +64,7 @@ module Pkg::Sign::Msi
     # Once we no longer support Windows 8/Windows Vista, we can remove the
     # first Sha1 signature.
     sign_command = <<-CMD
-for msi in #{msis.map { |d| File.basename(d) }.join(" ")}; do
+for msi in #{msis.map { |d| File.dirname(d) + "/" + File.basename(d) }.join(" ")}; do
   if "/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe" verify -in "C:/#{work_dir}/$msi" ; then
     echo "$msi is already signed, skipping . . ." ;
   else
@@ -111,7 +112,7 @@ CMD
 
     Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, sign_command, false, '', false)
     msis.each do | msi |
-      Pkg::Util::Net.rsync_from("/cygdrive/c/#{work_dir}/#{File.basename(msi)}", rsync_host_string, File.dirname(msi))
+      Pkg::Util::Net.rsync_from("/cygdrive/c/#{work_dir}/#{File.dirname(msi)}/#{File.basename(msi)}", rsync_host_string, File.dirname(msi))
     end
     Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "if [ -d '/cygdrive/c/#{work_dir}' ]; then rm -rf '/cygdrive/c/#{work_dir}'; fi")
   end

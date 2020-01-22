@@ -3,8 +3,13 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.54] - 2020-01-22
 ### Added
-- (PA-2995) Add macOS 10.15 to platforms
+- (PA-2995) Add macOS 10.15 to platforms.
+
+### Fixed
+- Fixed the way we rsync msi packages to signing server to prevent overwriting.
 
 ## [0.99.53] - 2020-01-15
 ### Fixed
@@ -563,7 +568,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.53...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.54...HEAD
+[0.99.54]: https://github.com/puppetlabs/packaging/compare/0.99.53...0.99.54
 [0.99.53]: https://github.com/puppetlabs/packaging/compare/0.99.52...0.99.53
 [0.99.52]: https://github.com/puppetlabs/packaging/compare/0.99.51...0.99.52
 [0.99.51]: https://github.com/puppetlabs/packaging/compare/0.99.50...0.99.51

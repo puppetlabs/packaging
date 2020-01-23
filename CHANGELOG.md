@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.55] - 2020-01-23
 ### Fixed
 - (RE-13191) Fixed issue with the changes to MSI package signing.
 
@@ -570,7 +572,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.54...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.55...HEAD
+[0.99.55]: https://github.com/puppetlabs/packaging/compare/0.99.54...0.99.55
 [0.99.54]: https://github.com/puppetlabs/packaging/compare/0.99.53...0.99.54
 [0.99.53]: https://github.com/puppetlabs/packaging/compare/0.99.52...0.99.53
 [0.99.52]: https://github.com/puppetlabs/packaging/compare/0.99.51...0.99.52

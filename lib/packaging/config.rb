@@ -143,7 +143,6 @@ module Pkg
           end
           return data
         else
-          warn "Skipping platform_data collection, but don't worry about it."
           return nil
         end
       end

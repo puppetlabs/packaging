@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (RE-13220) Removed noisy informational message when loading platform_data
 
 ## [0.99.55] - 2020-01-23
 ### Fixed

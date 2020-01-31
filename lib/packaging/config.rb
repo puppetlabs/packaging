@@ -73,79 +73,85 @@ module Pkg
       # This is to be consumed by beaker and later replaced with our metadata service.
       #
       def platform_data
-        if self.project && self.ref && Pkg::Util::Net.check_host_ssh([self.builds_server]).empty?
-          dir = "/opt/jenkins-builds/#{self.project}/#{self.ref}"
-          cmd = "if [ -s \"#{dir}/artifacts\" ]; then cd #{dir}; find ./artifacts/ -mindepth 2 -type f; fi"
-          artifacts, _ = Pkg::Util::Net.remote_ssh_cmd(self.builds_server, cmd, true)
-          artifacts = artifacts.split("\n")
-          data = {}
-          artifacts.each do |artifact|
-            # We need to preserve the original tag to make sure we look for
-            # fedora repo configs in the 1.10.x branch of puppet-agent in
-            # the correct place. For 5.x and 6.x release streams the f prefix
-            # has been removed and so tag will equal original_tag
-            original_tag = Pkg::Paths.tag_from_artifact_path(artifact)
+        # Return nil if something is not right..
+        return nil unless self.project && self.ref &&
+                          Pkg::Util::Net.check_host_ssh([self.builds_server]).empty?
 
-            # Remove the f-prefix from the fedora platform tag keys so that
-            # beaker can rely on consistent keys once we rip out the f for good
-            tag = original_tag.sub(/fedora-f/, 'fedora-')
+        dir = "/opt/jenkins-builds/#{self.project}/#{self.ref}"
+        cmd = "if [ -s \"#{dir}/artifacts\" ]; then cd #{dir};"\
+              "find ./artifacts/ -mindepth 2 -type f; fi"
+        artifacts, _ = Pkg::Util::Net.remote_ssh_cmd(self.builds_server, cmd, true)
 
-            data[tag] ||= {}
+        artifacts = artifacts.split("\n")
+        data = {}
+        artifacts.each do |artifact|
+          # We need to preserve the original tag to make sure we look for
+          # fedora repo configs in the 1.10.x branch of puppet-agent in
+          # the correct place. For 5.x and 6.x release streams the f prefix
+          # has been removed and so tag will equal original_tag
+          original_tag = Pkg::Paths.tag_from_artifact_path(artifact)
 
-            platform, version, arch = Pkg::Platforms.parse_platform_tag(tag)
-            package_format = Pkg::Platforms.get_attribute(tag, :package_format)
+          # Remove the f-prefix from the fedora platform tag keys so that
+          # beaker can rely on consistent keys once we rip out the f for good
+          tag = original_tag.sub(/fedora-f/, 'fedora-')
 
-            # Skip this if it's an unversioned MSI. We create these to help
-            # beaker install the msi without having to know any version
-            # information, but we should report the versioned artifact in
-            # platform_data
-            next if platform =~ /^windows.*$/ && File.basename(artifact) == "#{self.project}-#{arch}.#{package_format}"
+          data[tag] ||= {}
 
-            # Sometimes we have source or debug packages. We don't want to save
-            # these paths in favor of the artifact paths.
-            if platform == 'solaris'
-              next if version == '10' && File.extname(artifact) != '.gz'
-              next if version == '11' && File.extname(artifact) != '.p5p'
-            else
-              next if File.extname(artifact) != ".#{package_format}"
-            end
+          platform, version, arch = Pkg::Platforms.parse_platform_tag(tag)
+          package_format = Pkg::Platforms.get_attribute(tag, :package_format)
 
-            # Don't want to include debian debug packages
-            next if /-dbgsym/.match(File.basename(artifact))
+          # Skip this if it's an unversioned MSI. We create these to help
+          # beaker install the msi without having to know any version
+          # information, but we should report the versioned artifact in
+          # platform_data
+          next if platform =~ /^windows.*$/ &&
+                  File.basename(artifact) == "#{self.project}-#{arch}.#{package_format}"
 
-            if /#{self.project}-[a-z]+/.match(File.basename(artifact))
-              add_additional_artifact(data, tag, artifact.sub('artifacts/', ''))
-              next
-            end
-
-            case package_format
-            when 'deb'
-              repo_config = "../repo_configs/deb/pl-#{self.project}-#{self.ref}-#{Pkg::Platforms.get_attribute(tag, :codename)}.list"
-            when 'rpm'
-              # Using original_tag here to not break legacy fedora repo targets
-              repo_config = "../repo_configs/rpm/pl-#{self.project}-#{self.ref}-#{original_tag}.repo" unless tag.include? 'aix'
-            when 'swix', 'svr4', 'ips', 'dmg', 'msi'
-              # No repo_configs for these platforms, so do nothing.
-            else
-              fail "Not sure what to do with packages with a package format of '#{package_format}' - maybe update PLATFORM_INFO?"
-            end
-
-            # handle the case where there are multiple artifacts but the artifacts are not
-            # named based on project name (e.g. puppet-enterprise-vanagon).
-            # In this case, the first one will get set as the artifact, everything else
-            # will be in the additional artifacts
-            if data[tag][:artifact].nil?
-              data[tag][:artifact] = artifact.sub('artifacts/', '')
-              data[tag][:repo_config] = repo_config
-            else
-              add_additional_artifact(data, tag, artifact.sub('artifacts/', ''))
-            end
+          # Sometimes we have source or debug packages. We don't want to save
+          # these paths in favor of the artifact paths.
+          if platform == 'solaris'
+            next if version == '10' && File.extname(artifact) != '.gz'
+            next if version == '11' && File.extname(artifact) != '.p5p'
+          else
+            next if File.extname(artifact) != ".#{package_format}"
           end
-          return data
-        else
-          warn "Skipping platform_data collection, but don't worry about it."
-          return nil
+
+          # Don't want to include debian debug packages
+          next if /-dbgsym/.match(File.basename(artifact))
+
+          if /#{self.project}-[a-z]+/.match(File.basename(artifact))
+            add_additional_artifact(data, tag, artifact.sub('artifacts/', ''))
+            next
+          end
+
+          case package_format
+          when 'deb'
+            repo_config = "../repo_configs/deb/pl-#{self.project}-#{self.ref}-"\
+                          "#{Pkg::Platforms.get_attribute(tag, :codename)}.list"
+          when 'rpm'
+            # Using original_tag here to not break legacy fedora repo targets
+            unless tag.include? 'aix'
+              repo_config = "../repo_configs/rpm/pl-#{self.project}-"\
+                            "#{self.ref}-#{original_tag}.repo"
+            end
+          when 'swix', 'svr4', 'ips', 'dmg', 'msi'
+            # No repo_configs for these platforms, so do nothing.
+          else
+            fail "Error: Unknown package format: '#{package_format}'. Maybe update PLATFORM_INFO?"
+          end
+
+          # handle the case where there are multiple artifacts but the artifacts are not
+          # named based on project name (e.g. puppet-enterprise-vanagon).
+          # In this case, the first one will get set as the artifact, everything else
+          # will be in the additional artifacts
+          if data[tag][:artifact].nil?
+            data[tag][:artifact] = artifact.sub('artifacts/', '')
+            data[tag][:repo_config] = repo_config
+          else
+            add_additional_artifact(data, tag, artifact.sub('artifacts/', ''))
+          end
         end
+        return data
       end
 
       # Add artifact to the `additional_artifacts` array in platform data.

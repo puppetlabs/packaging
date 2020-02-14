@@ -3,6 +3,9 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- Add `search_with_path` artifactory method to allow you to easily access the
+  Artifactory::Resource::Artifact objects matching your search criteria.
 
 ## [0.99.56] - 2020-02-11
 ### Changed

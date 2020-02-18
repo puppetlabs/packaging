@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.57] - 2020-02-18
 ### Added
 - Add `search_with_path` artifactory method to allow you to easily access the
   Artifactory::Resource::Artifact objects matching your search criteria.
@@ -579,7 +581,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.56...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.57...HEAD
+[0.99.57]: https://github.com/puppetlabs/packaging/compare/0.99.56...0.99.57
 [0.99.56]: https://github.com/puppetlabs/packaging/compare/0.99.55...0.99.56
 [0.99.55]: https://github.com/puppetlabs/packaging/compare/0.99.54...0.99.55
 [0.99.54]: https://github.com/puppetlabs/packaging/compare/0.99.53...0.99.54

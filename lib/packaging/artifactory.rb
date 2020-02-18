@@ -506,18 +506,33 @@ module Pkg
       end
     end
 
+    # Search for artifacts matching `artifact_name` in `repo` with path matching
+    # `path`
+    # @param artifact_name [String] name of artifact to download
+    # @param repo [String] repo the artifact lives
+    # @param path [String] path to artifact in the repo
+    #
+    # @return [Array<Artifactory::Resource::Artifact>] A list of artifacts that
+    #         match the query
+    def search_with_path(artifact_id, repo, path)
+      check_authorization
+      artifacts = Artifactory::Resource::Artifact.search(name: artifact_id, repos: repo)
+      artifacts.select { |artifact| artifact.download_uri.include? path }
+    end
+
     # Download an artifact based on name, repo, and path to artifact
     # @param artifact_name [String] name of artifact to download
     # @param repo [String] repo the artifact lives
     # @param path [String] path to artifact in the repo
-    def download_artifact(artifact_name, repo, path)
-      check_authorization
-      artifacts = Artifactory::Resource::Artifact.search(name: artifact_name, repos: repo)
-      artifacts.each do |artifact|
-        if artifact.download_uri.include? path
-          artifact.download('.')
-        end
-      end
+    # @param target [String] directory to download artifact to. Defaults to '.'
+    # @param filename [String] Filename to save artifact as. Defaults to artifact_name
+    def download_artifact(artifact_name, repo, path, target: '.', filename: nil)
+      filename ||= artifact_name
+      artifacts = search_with_path(artifact_name, repo, path)
+      return nil if artifacts.empty?
+      # Only download the first of the artifacts since we're saving them to
+      # the same location anyways
+      artifacts.first.download(target, filename: filename)
     end
 
     # Download final pe tarballs to local path based on name, repo, and path on artifactory

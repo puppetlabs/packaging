@@ -32,7 +32,7 @@ describe 'Pkg::Paths' do
       'artifacts/deb/wheezy/PC1/puppetdb_4.3.1-1puppetlabs1_all.deb' => 'debian-7-amd64',
       'pkg/el/7/PC1/x86_64/puppetdb-4.3.1-1.el7.noarch.rpm' => 'el-7-x86_64',
       'pkg/apple/10.11/PC1/x86_64/puppet-agent-1.9.0-1.osx10.11.dmg' => 'osx-10.11-x86_64',
-      'artifacts/mac/10.11/PC1/x86_64/puppet-agent-1.9.0-1.osx10.11.dmg' => 'osx-10.11-x86_64',
+      'artifacts/apple/10.11/PC1/x86_64/puppet-agent-1.9.0-1.osx10.11.dmg' => 'osx-10.11-x86_64',
       'artifacts/eos/4/PC1/i386/puppet-agent-1.9.0-1.eos4.i386.swix' => 'eos-4-i386',
       'pkg/deb/cumulus/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1cumulus_amd64.deb' => 'cumulus-2.2-amd64',
       'pkg/windows/puppet-agent-1.9.0-x86.msi' => 'windows-2012-x86',
@@ -105,7 +105,8 @@ describe 'Pkg::Paths' do
     end
 
     it 'should be correct for osx' do
-      expect(Pkg::Paths.artifacts_path('osx-10.10-x86_64')).to eq('artifacts/mac/puppet5/10.10/x86_64')
+      expect(Pkg::Paths.artifacts_path('osx-10.10-x86_64'))
+        .to eq('artifacts/apple/puppet5/10.10/x86_64')
     end
 
     it 'should be correct for windows' do

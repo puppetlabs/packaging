@@ -146,9 +146,10 @@ module Pkg::Paths
       end
     when 'dmg'
       if is_legacy_repo?(repo_name(nonfinal))
-        [File.join(path_prefix, 'mac', version, repo_name(nonfinal)), nil]
+        [File.join(path_prefix, 'apple', version, repo_name(nonfinal)), nil]
       else
-        [File.join(path_prefix, 'mac', repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, 'mac', link_name(nonfinal))]
+        [File.join(path_prefix, 'apple', repo_name(nonfinal)),
+         link_name(nonfinal).nil? ? nil : File.join(path_prefix, 'apple', link_name(nonfinal))]
       end
     when 'msi'
       if is_legacy_repo?(repo_name(nonfinal))

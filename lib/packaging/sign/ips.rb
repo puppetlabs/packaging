@@ -31,10 +31,10 @@ module Pkg::Sign::Ips
       #            - Sean P. McDonald
       #
       # We sign the entire repo
-      sign_cmd = "sudo -E /usr/bin/pkgsign -c /root/signing/signing_cert_2018.pem \
+      sign_cmd = "sudo -E /usr/bin/pkgsign -c /root/signing/signing_cert_2020.pem \
                   -i /root/signing/Thawte_SHA256_Code_Signing_CA.pem \
                   -i /root/signing/Thawte_Primary_Root_CA.pem \
-                  -k /root/signing/signing_key_2018.pem \
+                  -k /root/signing/signing_key_2020.pem \
                   -s 'file://#{work_dir}/repo' '*'"
       puts "About to sign #{p5p} with #{sign_cmd} in #{work_dir}"
       Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, sign_cmd.squeeze(' '))

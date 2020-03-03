@@ -4,6 +4,10 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.99.58] - 2020-03-03
+### Changed
+- (RE-13163) Updated the signing cert and key filenames for Solaris 11 signing.
+
 ## [0.99.57] - 2020-02-18
 ### Added
 - Add `search_with_path` artifactory method to allow you to easily access the
@@ -581,7 +585,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.57...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.58...HEAD
+[0.99.58]: https://github.com/puppetlabs/packaging/compare/0.99.57...0.99.58
 [0.99.57]: https://github.com/puppetlabs/packaging/compare/0.99.56...0.99.57
 [0.99.56]: https://github.com/puppetlabs/packaging/compare/0.99.55...0.99.56
 [0.99.55]: https://github.com/puppetlabs/packaging/compare/0.99.54...0.99.55

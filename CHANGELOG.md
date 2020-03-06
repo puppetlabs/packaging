@@ -3,6 +3,9 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Addeed
+- Added the option to specify a search path to the `download_packages` artifactory
+  method.
 
 ## [0.99.58] - 2020-03-03
 ### Changed

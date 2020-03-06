@@ -408,17 +408,22 @@ module Pkg
     # Using the manifest provided by enterprise-dist, grab the appropropriate packages from artifactory based on md5sum
     # @param staging_directory [String] location to download packages to
     # @param manifest [File] JSON file containing information about what packages to download and the corresponding md5sums
-    # @param path [String] path matching for where the package should be downloaded from. Defaults to '' (no custom path for searching)
-    def download_packages(staging_directory, manifest, path = '')
+    # @param remote_path [String] Optional partial path on the remote host containing packages
+    #        Used to specify which subdirectories packages will be downloaded from.
+    def download_packages(staging_directory, manifest, remote_path = '')
       check_authorization
       manifest.each do |dist, packages|
         puts "Grabbing the #{dist} packages from artifactory"
         packages.each do |name, info|
           artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"])
-          artifact_to_download = artifacts.select { |artifact| artifact.download_uri.include? path }.first
+          artifact_to_download = artifacts.select { |artifact| artifact.download_uri.include? remote_path }.first
           if artifact_to_download.nil?
             filename = info["filename"] || name
-            raise "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]} in #{path}"
+            message = "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]}"
+            unless path.empty?
+              message += " in #{path}"
+            end
+            raise message
           else
             full_staging_path = "#{staging_directory}/#{dist}"
             filename = info['filename'] || File.basename(artifact_to_download.download_uri)

@@ -417,7 +417,7 @@ module Pkg
           artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"])
           artifact_to_download = artifacts.select { |artifact| artifact.download_uri.include? path }.first
           if artifact_to_download.nil?
-            filename = info["filename"] || info["name"]
+            filename = info["filename"] || name
             raise "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]} in #{path}"
           else
             full_staging_path = "#{staging_directory}/#{dist}"

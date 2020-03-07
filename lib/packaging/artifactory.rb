@@ -420,8 +420,8 @@ module Pkg
           if artifact_to_download.nil?
             filename = info["filename"] || name
             message = "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]}"
-            unless path.empty?
-              message += " in #{path}"
+            unless remote_path.empty?
+              message += " in #{remote_path}"
             end
             raise message
           else

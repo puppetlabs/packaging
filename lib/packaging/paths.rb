@@ -305,8 +305,17 @@ module Pkg::Paths
 
   def debian_component_from_path(path)
     matches = path.match(/(\d+\.\d+)\/(\w+)/)
+    # substitute '.' and '/' since those aren't valid characters for debian components
+    regex_for_substitution = /[\.\/]/
     fail "Error: Could not determine Debian Component from path #{path}" if matches.nil?
-    return matches[1] if matches[2] == 'repos'
-    return matches[0]
+    base_component = matches[1]
+    component_qualifier = matches[2]
+    full_component = "#{base_component}/#{component_qualifier}"
+    unless regex_for_substitution.nil?
+      base_component.gsub!(regex_for_substitution, '_')
+      full_component.gsub!(regex_for_substitution, '_')
+    end
+    return base_component if component_qualifier == 'repos'
+    return full_component
   end
 end

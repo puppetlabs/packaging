@@ -304,8 +304,8 @@ module Pkg::Paths
   end
 
   def debian_component_from_path(path)
-    matches = path.match(/(\d+\.\d+)\/(\w+)/)
     # substitute '.' and '/' since those aren't valid characters for debian components
+    matches = path.match(/([\d+\.\d+|master])\/(\w+)/)
     regex_for_substitution = /[\.\/]/
     fail "Error: Could not determine Debian Component from path #{path}" if matches.nil?
     base_component = matches[1]

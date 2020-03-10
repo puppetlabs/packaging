@@ -600,7 +600,7 @@ module Pkg
         packages.each do |name, info|
           artifact = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"]).first
           if artifact.nil?
-            filename = info["filename"] || info["name"]
+            filename = info["filename"] || name
             raise "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]}"
           end
           begin

@@ -3,9 +3,15 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
-### Addeed
+### Added
 - Added the option to specify a search path to the `download_packages` artifactory
-  method.
+  method. If packages are found in the correct repositories but not in the
+  search path, they will be copied to the search path.
+
+### Fixed
+- `debian_component_from_path` now supports the master branch.
+- `debian_component_from_path` substitutes `.` and `/` with `_` so the components
+   are valid.
 
 ## [0.99.58] - 2020-03-03
 ### Changed

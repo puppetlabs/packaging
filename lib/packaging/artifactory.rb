@@ -417,6 +417,17 @@ module Pkg
         packages.each do |name, info|
           artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"])
           artifact_to_download = artifacts.select { |artifact| artifact.download_uri.include? remote_path }.first
+          # If we found matching artifacts, but not in the correct path, copy the artifact to the correct path
+          # This should help us keep repos up to date with the packages we are expecting to be there
+          # while helping us avoid 'what the hell, could not find package' errors
+          if artifact_to_download.nil? && !artifacts.empty?
+            artifact_to_copy = artifacts.first
+            filename = info['filename'] || File.basename(artifact_to_copy.download_uri)
+            copy_artifact(artifact_to_copy, artifact_to_copy.repo, "#{remote_path}/#{dist}/#{filename}")
+            artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"])
+            artifact_to_download = artifacts.select { |artifact| artifact.download_uri.include? remote_path }.first
+          end
+
           if artifact_to_download.nil?
             filename = info["filename"] || name
             message = "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]}"
@@ -590,6 +601,33 @@ module Pkg
       end
     end
 
+    # Copy an artifact to a target repo/path
+    #
+    # @param artifact [Artifactory::Resource::Artifact] The artifact to be copied
+    # @param target_repo [String] The repository to copy the artifact to
+    # @param target_path [String] The path in the target repository to copy the artifact to
+    # @param target_debian_component [String] `deb.component` property to set on the copied artifact
+    #        defaults to `Pkg::Paths.debian_component_from_path(target_path)`
+    def copy_artifact(artifact, target_repo, target_path, target_debian_component = nil)
+      filename = File.basename(artifact.download_uri)
+      artifactory_target_path = "#{target_repo}/#{target_path}"
+      puts "Copying #{artifact.download_uri} to #{artifactory_target_path}"
+      begin
+        artifact.copy(artifactory_target_path)
+      rescue Artifactory::Error::HTTPError
+        STDERR.puts "Could not copy #{artifactory_target_path}. Source and destination are the same. Skipping..."
+      end
+
+      if File.extname(filename) == '.deb'
+        target_debian_component ||= Pkg::Paths.debian_component_from_path(target_path)
+        copied_artifact_search = search_with_path(filename, target_repo, target_path)
+        fail "Error: what the hell, could not find just-copied package #{filename} under #{target_repo}/#{target_path}" if copied_artifact_search.empty?
+        copied_artifact = copied_artifact_search.first
+        properties = { 'deb.component' => target_debian_component }
+        copied_artifact.properties(properties)
+      end
+     end
+
     # When we cut a new PE branch, we need to copy the pe components into <pe_version>/{repos,feature,release}/<platform>
     # @param manifest [File] JSON file containing information about what packages to download and the corresponding md5sums
     # @param target_path [String] path on artifactory to copy components to, e.g. <pe_version>/release
@@ -600,24 +638,11 @@ module Pkg
         packages.each do |name, info|
           artifact = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"]).first
           if artifact.nil?
-            filename = info["filename"] || info["name"]
+            filename = info["filename"] || name
             raise "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]}"
           end
-          begin
-            filename = info["filename"] || File.basename(artifact.download_uri)
-            artifact_target_path = "#{artifact.repo}/#{target_path}/#{dist}/#{filename}"
-            puts "Copying #{artifact.download_uri} to #{artifact_target_path}"
-            artifact.copy(artifact_target_path)
-          rescue Artifactory::Error::HTTPError
-            STDERR.puts "Could not copy #{artifact_target_path}. Source and destination are the same. Skipping..."
-          end
-          if File.extname(filename) == '.deb'
-            copied_artifact_search = Artifactory::Resource::Artifact.pattern_search(repo: 'debian_enterprise__local', pattern: "#{target_path}/*/#{filename}")
-            fail "Error: what the hell, could not find just-copied package #{filename} under debian_enterprise__local/#{target_path}" if copied_artifact_search.nil?
-            copied_artifact = copied_artifact_search.first
-            properties = { 'deb.component' => Pkg::Paths.debian_component_from_path(target_path) }
-            copied_artifact.properties(properties)
-          end
+          filename = info["filename"] || File.basename(artifact.download_uri)
+          copy_artifact(artifact, artifact.repo, "#{target_path}/#{dist}/#{filename}")
         end
       end
     end

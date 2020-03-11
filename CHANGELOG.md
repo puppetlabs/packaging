@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.59] - 2020-03-11
 ### Added
 - Added the option to specify a search path to the `download_packages` artifactory
   method. If packages are found in the correct repositories but not in the
@@ -594,7 +596,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.58...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.59...HEAD
+[0.99.59]: https://github.com/puppetlabs/packaging/compare/0.99.58...0.99.59
 [0.99.58]: https://github.com/puppetlabs/packaging/compare/0.99.57...0.99.58
 [0.99.57]: https://github.com/puppetlabs/packaging/compare/0.99.56...0.99.57
 [0.99.56]: https://github.com/puppetlabs/packaging/compare/0.99.55...0.99.56

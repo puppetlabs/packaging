@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Fixed
+- (RE-9687) Set `deb.architecture` correctly in artifactory for noarch packages.
 
 ## [0.99.59] - 2020-03-11
 ### Added

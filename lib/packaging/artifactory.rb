@@ -235,7 +235,7 @@ module Pkg
     #
     #   Currently we are including everything that would be included in the yaml
     #   file that is generated at package build time.
-    def deploy_properties(platform_tag)
+    def deploy_properties(platform_tag, file_name)
       data = platform_specific_data(platform_tag)
 
       # TODO This method should be returning the entire contents of the yaml
@@ -246,10 +246,15 @@ module Pkg
       #properties_hash = Pkg::Config.config_to_hash
       properties_hash = {}
       if data[:package_format] == 'deb'
+        architecture = data[:architecture]
+        # set arch correctly for noarch packages
+        if file_name =~ /_all\.deb$/
+          architecture = 'all'
+        end
         properties_hash.merge!({
           'deb.distribution' => data[:codename],
           'deb.component' => data[:repo_subdirectories],
-          'deb.architecture' => data[:architecture],
+          'deb.architecture' => architecture,
         })
       end
       properties_hash
@@ -282,7 +287,7 @@ module Pkg
       artifact.upload(
         data[:repo_name],
         File.join(data[:alternate_subdirectories], File.basename(package)),
-        deploy_properties(platform_tag),
+        deploy_properties(platform_tag, File.basename(package)),
         headers
       )
     rescue

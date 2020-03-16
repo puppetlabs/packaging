@@ -21,6 +21,11 @@ describe 'artifactory.rb' do
         :repo_config => "../repo_configs/deb/pl-puppet-agent-f65f9efbb727c3d2d72d6799c0fc345a726f27b5-xenial.list",
         :additional_artifacts => ["./deb/xenial/PC1/puppet-agent-extras_5.3.1.34.gf65f9ef-1xenial_amd64.deb"],
       },
+      'debian-10-amd64' => {
+        :artifact => "./deb/buster/PC1/puppetdb_5.3.1.34.gf65f9ef-1buster_all.deb",
+        :repo_config => "../repo_configs/deb/pl-puppetdb-f65f9efbb727c3d2d72d6799c0fc345a726f27b5-buster.list",
+        :additional_artifacts => ["./deb/buster/PC1/puppetdb-termini_5.3.1.34.gf65f9ef-1buster_all.deb"],
+      },
       'windows-2012-x86' => {
         :artifact => "./windows/puppet-agent-5.3.1.34-x86.msi",
         :repo_config => '',
@@ -64,7 +69,15 @@ describe 'artifactory.rb' do
       :package_name => 'path/to/a/xenial/package/puppet-agent_5.3.1.34.gf65f9ef-1xenial_amd64.deb',
       :all_package_names => ['puppet-agent_5.3.1.34.gf65f9ef-1xenial_amd64.deb', 'puppet-agent-extras_5.3.1.34.gf65f9ef-1xenial_amd64.deb']
     },
-    'windows-2012-x86' => {
+    'debian-10-amd64' => {
+      :toplevel_repo => 'debian__local',
+      :repo_subdirectories => "#{default_repo_name}/#{project}/#{project_version}/debian-10",
+      :codename => 'buster',
+      :arch => 'all',
+      :package_name => 'path/to/a/buster/package/puppetdb_5.3.1.34.gf65f9ef-1buster_all.deb',
+      :all_package_names => ['puppetdb_5.3.1.34.gf65f9ef-1buster_all.deb', 'puppetdb-termini_5.3.1.34.gf65f9ef-1buster_all.deb']
+    },
+'windows-2012-x86' => {
       :toplevel_repo => 'generic',
       :repo_subdirectories => "#{default_repo_name}/#{project}/#{project_version}/windows-x86",
       :package_name => 'path/to/a/windows/package/puppet-agent-5.3.1.34-x86.msi',
@@ -186,12 +199,13 @@ describe 'artifactory.rb' do
     describe '#deploy_properties' do
       it "returns the correct contents for the deploy properties for #{platform_tag}" do
         if platform_tag_data[:codename]
-          expect(artifact.deploy_properties(platform_tag)).to include({
+          expect(artifact.deploy_properties(platform_tag, File.basename(platform_tag_data[:package_name]))).to include({
             'deb.distribution' => platform_tag_data[:codename],
-            'deb.component' => platform_tag_data[:repo_subdirectories]
+            'deb.component' => platform_tag_data[:repo_subdirectories],
+            'deb.architecture' => platform_tag_data[:arch]
           })
         else
-          expect(artifact.deploy_properties(platform_tag)).not_to include({
+          expect(artifact.deploy_properties(platform_tag, File.basename(platform_tag_data[:package_name]))).not_to include({
             'deb.component' => platform_tag_data[:repo_subdirectories]
           })
         end

@@ -3,6 +3,10 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- Added parameters to ManageArtifactory#upload_file to allow for setting properties
+  and headers after the upload, matching the parameters in Resource::Artifact#upload
+
 ### Fixed
 - (RE-9687) Set `deb.architecture` correctly in artifactory for noarch packages.
 

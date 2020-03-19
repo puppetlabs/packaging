@@ -477,14 +477,19 @@ module Pkg
     # @param local_path [String] local path to file to upload
     # @param target_repo [String] repo on artifactory to upload to
     # @param target_path [String] path within target_repo to upload to
-    def upload_file(local_path, target_repo, target_path)
+    # @param properties [Hash] Optional property names and values to assign the uploaded file
+    #   For example, this would set both the 'cleanup.skip' and 'deb.component' properties:
+    #   \{ "cleanup.skip" => true, "deb.component" => 'bionic' \}
+    # @param headers [Hash] Optional upload headers, most likely checksums, for the upload request
+    #   "X-Checksum-Md5" and "X-Checksum-Sha1" are typical
+    def upload_file(local_path, target_repo, target_path, properties = {}, headers = {})
       fail "Error: Couldn't find file at #{local_path}." unless File.exist? local_path
       check_authorization
       artifact = Artifactory::Resource::Artifact.new(local_path: local_path)
       full_upload_path = File.join(target_path, File.basename(local_path))
       begin
         puts "Uploading #{local_path} to #{target_repo}/#{full_upload_path} . . ."
-        artifact.upload(target_repo, full_upload_path)
+        artifact.upload(target_repo, full_upload_path, properties, headers)
       rescue Artifactory::Error::HTTPError => e
         fail "Error: Upload failed. Ensure path #{target_path} exists in the #{target_repo} repository."
       end

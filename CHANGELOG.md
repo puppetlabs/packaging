@@ -6,6 +6,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ### Added
 - Added parameters to ManageArtifactory#upload_file to allow for setting properties
   and headers after the upload, matching the parameters in Resource::Artifact#upload
+- Added platform support for:
+   * Ubuntu 20.04 'Focal'
 
 ### Fixed
 - (RE-9687) Set `deb.architecture` correctly in artifactory for noarch packages.

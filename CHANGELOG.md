@@ -10,6 +10,10 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ### Fixed
 - (RE-9687) Set `deb.architecture` correctly in artifactory for noarch packages.
 
+### Removed
+- (RE-13177)(RE-13180)(RE-13183)(RE-13186) Removed EOL platforms and updated spec tests
+  accordingly.
+
 ## [0.99.59] - 2020-03-11
 ### Added
 - Added the option to specify a search path to the `download_packages` artifactory

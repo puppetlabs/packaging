@@ -70,6 +70,7 @@ DOC
       ] }
       let(:v3_rpms) { [
         "#{rpm_directory}/el/5/PC1/i386/puppet-agent-5.5.3-1.el5.i386.rpm",
+        "#{rpm_directory}/sles/11/PC1/x86_64/puppet-agent-5.5.3-1.sles11.x86_64.rpm",
       ] }
       let(:v4_rpms) { [
         "#{rpm_directory}/el/7/PC1/aarch64/puppet-agent-5.5.3-1.el7.aarch64.rpm",

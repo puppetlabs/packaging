@@ -26,6 +26,7 @@ describe 'Pkg::Paths' do
       'pkg/windows-x64/puppet-agent-4.99.0-x64.msi' => 'windows-2012-x64',
       'artifacts/el/6/products/x86_64/pe-r10k-2.5.4.3-1.el6.x86_64.rpm' => 'el-6-x86_64',
       'pkg/pe/rpm/el-6-i386/pe-puppetserver-2017.3.0.3-1.el6.noarch.rpm' => 'el-6-i386',
+      'pkg/deb/trusty/pe-r10k_2.5.4.3-1trusty_amd64.deb' => 'ubuntu-14.04-amd64',
       'pkg/pe/deb/xenial/pe-puppetserver_2017.3.0.3-1puppet1_all.deb' => 'ubuntu-16.04-amd64',
       'pkg/pe/deb/xenial/super-trusty-package_1.0.0-1puppet1_all.deb' => 'ubuntu-16.04-amd64',
       'artifacts/deb/stretch/PC1/puppetdb_4.3.1-1puppetlabs1_all.deb' => 'debian-9-amd64',

@@ -153,6 +153,14 @@ module Pkg
       },
 
       'sles' => {
+        '11' => {
+          architectures: ['x86_64', 'i386'],
+          source_architecture: 'SRPMS',
+          package_format: 'rpm',
+          source_package_formats: ['src.rpm'],
+          signature_format: 'v3',
+          repo: true,
+        },
         '12' => {
           architectures: ['x86_64', 'ppc64le'],
           source_architecture: 'SRPMS',
@@ -185,6 +193,14 @@ module Pkg
       },
 
       'ubuntu' => {
+        '14.04' => {
+          codename: 'trusty',
+          architectures: ['amd64', 'i386'],
+          source_architecture: 'source',
+          package_format: 'deb',
+          source_package_formats: DEBIAN_SOURCE_FORMATS,
+          repo: true,
+        },
         '16.04' => {
           codename: 'xenial',
           architectures: ['amd64', 'i386', 'ppc64el'],

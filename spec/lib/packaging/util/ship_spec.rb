@@ -36,6 +36,7 @@ describe '#Pkg::Util::Ship' do
 local_pkgs = [
   'pkg/deb/stretch/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1stretch_i386.deb',
   'pkg/el/5/puppet5/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.el5.x86_64.rpm',
+  'pkg/sles/11/puppet5/i386/puppet-agent-1.4.1.2904.g8023dd1-1.sles11.i386.rpm',
   'pkg/sles/12/puppet5/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.sles12.x86_64.rpm',
   'pkg/mac/10.15/puppet5/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.osx10.15.dmg',
   'pkg/windows/puppet5/puppet-agent-1.4.1.2904.g8023dd1-x86.msi',
@@ -43,6 +44,7 @@ local_pkgs = [
 new_pkgs = [
   'pkg/stretch/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1stretch_i386.deb',
   'pkg/puppet5/el/5/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.el5.x86_64.rpm',
+  'pkg/puppet5/sles/11/i386/puppet-agent-1.4.1.2904.g8023dd1-1.sles11.i386.rpm',
   'pkg/puppet5/sles/12/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.sles12.x86_64.rpm',
   'pkg/mac/puppet5/10.15/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.osx10.15.dmg',
   'pkg/windows/puppet5/puppet-agent-1.4.1.2904.g8023dd1-x86.msi',

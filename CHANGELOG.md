@@ -3,9 +3,11 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.60] - 2020-04-01
 ### Added
 - Added parameters to ManageArtifactory#upload_file to allow for setting properties
-  and headers after the upload, matching the parameters in Resource::Artifact#upload
+  and headers after the upload, matching the parameters in Resource::Artifact#upload.
 - Added platform support for:
    * Ubuntu 20.04 'Focal'
 
@@ -608,7 +610,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.59...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.60...HEAD
+[0.99.60]: https://github.com/puppetlabs/packaging/compare/0.99.59...0.99.60
 [0.99.59]: https://github.com/puppetlabs/packaging/compare/0.99.58...0.99.59
 [0.99.58]: https://github.com/puppetlabs/packaging/compare/0.99.57...0.99.58
 [0.99.57]: https://github.com/puppetlabs/packaging/compare/0.99.56...0.99.57

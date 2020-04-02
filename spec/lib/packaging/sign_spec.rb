@@ -74,6 +74,7 @@ DOC
       ] }
       let(:v4_rpms) { [
         "#{rpm_directory}/el/7/PC1/aarch64/puppet-agent-5.5.3-1.el7.aarch64.rpm",
+        "#{rpm_directory}/sles/12/PC1/s390x/puppet-agent-5.5.3-1.sles12.s390x.rpm",
       ] }
       let(:rpms) { rpms_not_to_sign + v3_rpms + v4_rpms }
       let(:already_signed_rpms) { [

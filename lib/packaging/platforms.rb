@@ -47,7 +47,26 @@ module Pkg
         },
       },
 
+      'cumulus' => {
+        '2.2' => {
+          codename: 'cumulus',
+          architectures: ['amd64'],
+          source_architecture: 'source',
+          package_format: 'deb',
+          source_package_formats: DEBIAN_SOURCE_FORMATS,
+          repo: true,
+        },
+      },
+
       'debian' => {
+        '7' => {
+          codename: 'wheezy',
+          architectures: ['amd64', 'i386'],
+          source_architecture: 'source',
+          package_format: 'deb',
+          source_package_formats: DEBIAN_SOURCE_FORMATS,
+          repo: true,
+        },
         '8' => {
           codename: 'jessie',
           architectures: ['amd64', 'i386', 'powerpc'],
@@ -84,7 +103,7 @@ module Pkg
           repo: true,
         },
         '6' => {
-          architectures: ['x86_64', 'i386'],
+          architectures: ['x86_64', 'i386', 's390x'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
@@ -92,7 +111,7 @@ module Pkg
           repo: true,
         },
         '7' => {
-          architectures: ['x86_64', 'ppc64le', 'aarch64'],
+          architectures: ['x86_64', 's390x', 'ppc64le', 'aarch64'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
@@ -109,7 +128,87 @@ module Pkg
         }
       },
 
+      'eos' => {
+        '4' => {
+          architectures: ['i386'],
+          package_format: 'swix',
+          repo: false,
+        },
+      },
+
       'fedora' => {
+        'f25' => {
+          architectures: ['x86_64', 'i386'],
+          source_architecture: 'SRPMS',
+          package_format: 'rpm',
+          source_package_formats: ['src.rpm'],
+          signature_format: 'v4',
+          repo: true,
+        },
+        'f26' => {
+          architectures: ['x86_64'],
+          source_architecture: 'SRPMS',
+          package_format: 'rpm',
+          source_package_formats: ['src.rpm'],
+          signature_format: 'v4',
+          repo: true,
+        },
+        'f27' => {
+          architectures: ['x86_64'],
+          source_architecture: 'SRPMS',
+          package_format: 'rpm',
+          source_package_formats: ['src.rpm'],
+          signature_format: 'v4',
+          repo: true,
+        },
+        'f28' => {
+          architectures: ['x86_64'],
+          source_architecture: 'SRPMS',
+          package_format: 'rpm',
+          source_package_formats: ['src.rpm'],
+          signature_format: 'v4',
+          repo: true,
+        },
+        '25' => {
+          architectures: ['x86_64', 'i386'],
+          source_architecture: 'SRPMS',
+          package_format: 'rpm',
+          source_package_formats: ['src.rpm'],
+          signature_format: 'v4',
+          repo: true,
+        },
+        '26' => {
+          architectures: ['x86_64'],
+          source_architecture: 'SRPMS',
+          package_format: 'rpm',
+          source_package_formats: ['src.rpm'],
+          signature_format: 'v4',
+          repo: true,
+        },
+        '27' => {
+          architectures: ['x86_64'],
+          source_architecture: 'SRPMS',
+          package_format: 'rpm',
+          source_package_formats: ['src.rpm'],
+          signature_format: 'v4',
+          repo: true,
+        },
+        '28' => {
+          architectures: ['x86_64'],
+          source_architecture: 'SRPMS',
+          package_format: 'rpm',
+          source_package_formats: ['src.rpm'],
+          signature_format: 'v4',
+          repo: true,
+        },
+        '29' => {
+          architectures: ['x86_64'],
+          source_architecture: 'SRPMS',
+          package_format: 'rpm',
+          source_package_formats: ['src.rpm'],
+          signature_format: 'v4',
+          repo: true,
+        },
         '30' => {
           architectures: ['x86_64'],
           source_architecture: 'SRPMS',
@@ -129,6 +228,26 @@ module Pkg
       },
 
       'osx' => {
+        '10.10' => {
+          architectures: ['x86_64'],
+          package_format: 'dmg',
+          repo: false,
+        },
+        '10.11' => {
+          architectures: ['x86_64'],
+          package_format: 'dmg',
+          repo: false,
+        },
+        '10.12' => {
+          architectures: ['x86_64'],
+          package_format: 'dmg',
+          repo: false,
+        },
+        '10.13' => {
+          architectures: ['x86_64'],
+          package_format: 'dmg',
+          repo: false,
+        },
         '10.14' => {
           architectures: ['x86_64'],
           package_format: 'dmg',
@@ -154,7 +273,7 @@ module Pkg
 
       'sles' => {
         '11' => {
-          architectures: ['x86_64', 'i386'],
+          architectures: ['x86_64', 'i386', 's390x'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
@@ -162,7 +281,7 @@ module Pkg
           repo: true,
         },
         '12' => {
-          architectures: ['x86_64', 'ppc64le'],
+          architectures: ['x86_64', 's390x', 'ppc64le'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],

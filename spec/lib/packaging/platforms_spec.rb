@@ -3,7 +3,7 @@ require 'spec_helper'
 describe 'Pkg::Platforms' do
   describe '#by_package_format' do
     it 'should return an array of platforms that use a given format' do
-      deb_platforms = ['debian', 'ubuntu']
+      deb_platforms = ['cumulus', 'debian', 'ubuntu']
       rpm_platforms = ['aix', 'cisco-wrlinux', 'el', 'fedora', 'redhatfips', 'sles']
       expect(Pkg::Platforms.by_package_format('deb')).to match_array(deb_platforms)
       expect(Pkg::Platforms.by_package_format('rpm')).to match_array(rpm_platforms)
@@ -12,14 +12,14 @@ describe 'Pkg::Platforms' do
 
   describe '#formats' do
     it 'should return all package formats' do
-      fmts = ['rpm', 'deb', 'dmg', 'svr4', 'ips', 'msi']
+      fmts = ['rpm', 'deb', 'swix', 'dmg', 'svr4', 'ips', 'msi']
       expect(Pkg::Platforms.formats).to match_array(fmts)
     end
   end
 
   describe '#supported_platforms' do
     it 'should return all supported platforms' do
-      platforms = ['aix', 'cisco-wrlinux', 'debian', 'el', 'fedora', 'osx', 'redhatfips', 'sles', 'solaris', 'ubuntu', 'windows', 'windowsfips']
+      platforms = ['aix', 'cisco-wrlinux', 'cumulus', 'debian', 'el', 'eos', 'fedora', 'osx', 'redhatfips', 'sles', 'solaris', 'ubuntu', 'windows', 'windowsfips']
       expect(Pkg::Platforms.supported_platforms).to match_array(platforms)
     end
   end
@@ -36,7 +36,7 @@ describe 'Pkg::Platforms' do
 
   describe '#codenames' do
     it 'should return all codenames for a given platform' do
-      codenames = ['focal', 'bionic', 'buster', 'cosmic', 'jessie', 'stretch', 'trusty', 'xenial']
+      codenames = ['focal', 'bionic', 'buster', 'cosmic', 'cumulus', 'wheezy', 'jessie', 'stretch', 'trusty', 'xenial']
       expect(Pkg::Platforms.codenames).to match_array(codenames)
     end
   end
@@ -59,27 +59,27 @@ describe 'Pkg::Platforms' do
 
   describe '#arches_for_codename' do
     it 'should return an array of arches corresponding to a given codename' do
-      expect(Pkg::Platforms.arches_for_codename('xenial')).to match_array(['amd64', 'i386', 'ppc64el'])
+      expect(Pkg::Platforms.arches_for_codename('trusty')).to match_array(['i386', 'amd64'])
     end
 
     it 'should be able to include source archietectures' do
-      expect(Pkg::Platforms.arches_for_codename('xenial', true)).to match_array(["amd64", "i386", "ppc64el", "source"])
+      expect(Pkg::Platforms.arches_for_codename('trusty', true)).to match_array(['i386', 'amd64', 'source'])
     end
   end
 
   describe '#codename_to_tags' do
     it 'should return an array of platform tags corresponding to a given codename' do
-      expect(Pkg::Platforms.codename_to_tags('xenial')).to match_array(['ubuntu-16.04-i386', 'ubuntu-16.04-amd64', "ubuntu-16.04-ppc64el"])
+      expect(Pkg::Platforms.codename_to_tags('trusty')).to match_array(['ubuntu-14.04-i386', 'ubuntu-14.04-amd64'])
     end
   end
 
   describe '#arches_for_platform_version' do
     it 'should return an array of arches for a given platform and version' do
-      expect(Pkg::Platforms.arches_for_platform_version('sles', '12')).to match_array(['x86_64', 'ppc64le'])
+      expect(Pkg::Platforms.arches_for_platform_version('sles', '11')).to match_array(['i386', 'x86_64', 's390x'])
     end
 
     it 'should be able to include source architectures' do
-      expect(Pkg::Platforms.arches_for_platform_version('sles', '12', true)).to match_array(["SRPMS", "ppc64le", "x86_64"])
+      expect(Pkg::Platforms.arches_for_platform_version('sles', '11', true)).to match_array(['i386', 'x86_64', 's390x', 'SRPMS'])
     end
   end
 
@@ -98,12 +98,12 @@ describe 'Pkg::Platforms' do
 
   describe '#platform_lookup' do
     it 'should return a hash of platform info' do
-      expect(Pkg::Platforms.platform_lookup('osx-10.15-x86_64')).to be_instance_of(Hash)
+      expect(Pkg::Platforms.platform_lookup('osx-10.10-x86_64')).to be_instance_of(Hash)
     end
 
     it 'should include at least arch and package format keys' do
-      expect(Pkg::Platforms.platform_lookup('osx-10.15-x86_64').keys).to include(:architectures)
-      expect(Pkg::Platforms.platform_lookup('osx-10.15-x86_64').keys).to include(:package_format)
+      expect(Pkg::Platforms.platform_lookup('osx-10.10-x86_64').keys).to include(:architectures)
+      expect(Pkg::Platforms.platform_lookup('osx-10.10-x86_64').keys).to include(:package_format)
     end
   end
 
@@ -113,7 +113,7 @@ describe 'Pkg::Platforms' do
     end
 
     it 'fails with a reasonable error when specified attribute is not defined' do
-      expect { Pkg::Platforms.get_attribute('osx-10.15-x86_64', :signature_format) }.to raise_error(/doesn't have information/)
+      expect { Pkg::Platforms.get_attribute('eos-4-i386', :signature_format) }.to raise_error(/doesn't have information/)
     end
   end
 
@@ -137,7 +137,7 @@ describe 'Pkg::Platforms' do
       'windows-2012' => ['windows', '2012', ''],
       'redhatfips-7-x86_64' => ['redhatfips', '7', 'x86_64'],
       'el-7-SRPMS' => ['el', '7', 'SRPMS'],
-      'ubuntu-16.04-source' => ['ubuntu', '16.04', 'source'],
+      'ubuntu-14.04-source' => ['ubuntu', '14.04', 'source'],
     }
 
     fail_cases = [

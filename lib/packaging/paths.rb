@@ -101,27 +101,81 @@ module Pkg::Paths
     return Pkg::Config.repo_link_target
   end
 
-  def artifacts_base_path_and_link_path(platform_tag, path_prefix = 'artifacts', nonfinal = false)
-    platform, version, architecture = Pkg::Platforms.parse_platform_tag(platform_tag)
-    package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
+  # Construct a platform-dependent symlink target path.
+  def construct_base_path(path_data)
+    package_format = path_data[:package_format]
+    prefix = path_data[:prefix]
+    is_nonfinal = path_data[:is_nonfinal]
+    platform_name = path_data[:platform_name]
+    platform_tag = path_data[:platform_tag]
+
+    case package_format
+    when 'deb'
+      debian_code_name = Pkg::Platforms.get_attribute(platform_tag, :codename)
+      return File.join(prefix, debian_code_name, apt_repo_name(is_nonfinal))
+    when 'dmg'
+      return File.join(prefix, 'mac', repo_name(is_nonfinal))
+    when 'msi'
+      return File.join(prefix, platform_name, repo_name(is_nonfinal))
+    when 'rpm'
+      return File.join(prefix, yum_repo_name(is_nonfinal))
+    when 'swix'
+      return File.join(prefix, platform_name, repo_name(is_nonfinal))
+    when 'svr4', 'ips'
+      return File.join(prefix, 'solaris', repo_name(is_nonfinal))
+    else
+      raise "Error: Unknown package format '#{package_format}'"
+    end
+  end
+
+  # Construct a platform-dependent link path
+  def construct_link_path(path_data)
+    package_format = path_data[:package_format]
+    prefix = path_data[:prefix]
+    platform_name = path_data[:platform_name]
+    platform_tag = path_data[:platform_tag]
+    link = path_data[:link]
+
+    return nil if link.nil?
 
     case package_format
     when 'rpm'
-      [File.join(path_prefix, yum_repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, link_name(nonfinal))]
+      return File.join(prefix, link)
     when 'swix'
-      [File.join(path_prefix, platform, repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, platform, link_name(nonfinal))]
+      return File.join(prefix, platform_name, link)
     when 'deb'
-      [File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), apt_repo_name(nonfinal)),
-       link_name(nonfinal).nil? ? nil : File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), link_name(nonfinal))]
+      debian_code_name = Pkg::Platforms.get_attribute(platform_tag, :codename)
+      return File.join(prefix, debian_code_name, link)
     when 'svr4', 'ips'
-      [File.join(path_prefix, 'solaris', repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, 'solaris', link_name(nonfinal))]
+      return File.join(prefix, 'solaris', link)
     when 'dmg'
-      [File.join(path_prefix, 'mac', repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, 'mac', link_name(nonfinal))]
+      return File.join(prefix, 'mac', link)
     when 'msi'
-      [File.join(path_prefix, platform, repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, platform, link_name(nonfinal))]
+      return File.join(prefix, platform, link)
     else
-      raise "Not sure where to find packages with a package format of '#{package_format}'"
+      raise "Error: Unknown package format '#{package_format}'"
     end
+  end
+
+  # Given platform information, create symlink target (base_path) and link path in the
+  # form of a 2-element array
+  def artifacts_base_path_and_link_path(platform_tag, prefix = 'artifacts', is_nonfinal = false)
+    platform_name, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
+    package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
+
+    path_data = {
+      is_nonfinal: is_nonfinal,
+      link: link_name(is_nonfinal),
+      package_format: package_format,
+      platform_name: platform_name,
+      platform_tag: platform_tag,
+      prefix: prefix
+    }
+
+    return [
+      construct_base_path(path_data),
+      construct_link_path(path_data)
+    ]
   end
 
   def artifacts_path(platform_tag, path_prefix = 'artifacts', nonfinal = false)

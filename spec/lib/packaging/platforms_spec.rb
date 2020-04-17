@@ -75,11 +75,11 @@ describe 'Pkg::Platforms' do
 
   describe '#arches_for_platform_version' do
     it 'should return an array of arches for a given platform and version' do
-      expect(Pkg::Platforms.arches_for_platform_version('sles', '11')).to match_array(['i386', 'x86_64', 's390x'])
+      expect(Pkg::Platforms.arches_for_platform_version('sles', '11')).to match_array(['i386', 'x86_64'])
     end
 
     it 'should be able to include source architectures' do
-      expect(Pkg::Platforms.arches_for_platform_version('sles', '11', true)).to match_array(['i386', 'x86_64', 's390x', 'SRPMS'])
+      expect(Pkg::Platforms.arches_for_platform_version('sles', '11', true)).to match_array(['i386', 'x86_64', 'SRPMS'])
     end
   end
 

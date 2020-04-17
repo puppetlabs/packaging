@@ -207,7 +207,7 @@ describe "Pkg::Config" do
       'cisco-wrlinux-7-x86_64',
       'ubuntu-16.04-i386',
       'cumulus-2.2-amd64',
-      'el-6-s390x',
+      'el-6-i386',
       'el-7-ppc64le',
       'sles-12-x86_64',
     ]
@@ -218,7 +218,7 @@ describe "Pkg::Config" do
       "./artifacts/cisco-wrlinux/7/PC1/x86_64/puppet-agent-5.3.2-1.cisco_wrlinux7.x86_64.rpm\n" \
       "./artifacts/deb/xenial/PC1/puppet-agent_5.3.2-1xenial_i386.deb\n" \
       "./artifacts/deb/cumulus/PC1/puppet-agent_5.3.2-1cumulus_amd64.deb\n" \
-      "./artifacts/el/6/PC1/s390x/puppet-agent-5.3.2.658.gc79ef9a-1.el6.s390x.rpm\n" \
+      "./artifacts/el/6/PC1/i386/puppet-agent-5.3.2.658.gc79ef9a-1.el6.i386.rpm\n" \
       "./artifacts/el/7/PC1/ppc64le/puppet-agent-5.3.2-1.el7.ppc64le.rpm\n" \
       "./artifacts/sles/12/PC1/x86_64/puppet-agent-5.3.2-1.sles12.x86_64.rpm"
 

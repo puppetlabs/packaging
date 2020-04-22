@@ -103,7 +103,7 @@ module Pkg
           repo: true,
         },
         '6' => {
-          architectures: ['x86_64', 'i386', 's390x'],
+          architectures: ['x86_64', 'i386'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
@@ -111,7 +111,7 @@ module Pkg
           repo: true,
         },
         '7' => {
-          architectures: ['x86_64', 's390x', 'ppc64le', 'aarch64'],
+          architectures: ['x86_64', 'ppc64le', 'aarch64'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
@@ -273,7 +273,7 @@ module Pkg
 
       'sles' => {
         '11' => {
-          architectures: ['x86_64', 'i386', 's390x'],
+          architectures: ['x86_64', 'i386'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
@@ -281,7 +281,7 @@ module Pkg
           repo: true,
         },
         '12' => {
-          architectures: ['x86_64', 's390x', 'ppc64le'],
+          architectures: ['x86_64', 'ppc64le'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],

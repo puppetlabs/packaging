@@ -12,7 +12,7 @@ describe 'Pkg::Retrieve' do
     'aix-6.1-power' => {:artifact => './aix/6.1/PC1/ppc/puppet-agent-5.3.2.155.gb25e649-1.aix6.1.ppc.rpm'},
     'el-7-x86_64' => {:artifact => './el/7/PC1/x86_64/puppet-agent-5.3.2.155.gb25e649-1.el7.x86_64.rpm'},
     'osx-10.11-x86_64' => {:artifact => './apple/10.11/PC1/x86_64/puppet-agent-5.3.2.155.gb25e649-1.osx10.11.dmg'},
-    'sles-11-s390x' => {:artifact => './sles/11/PC1/s390x/puppet-agent-5.3.2.155.gb25e649-1.sles11.s390x.rpm'},
+    'sles-11-i386' => {:artifact => './sles/11/PC1/i386/puppet-agent-5.3.2.155.gb25e649-1.sles11.i386.rpm'},
     'solaris-10-sparc' => {:artifact => './solaris/10/PC1/puppet-agent-5.3.2.155.gb25e649-1.sparc.pkg.gz'},
     'ubuntu-16.04-amd64' => {:artifact => './deb/xenial/PC1/puppet-agent_5.3.2.155.gb25e649-1xenial_amd64.deb'},
     'windows-2012-x64' => {:artifact => './windows/puppet-agent-x64.msi'},

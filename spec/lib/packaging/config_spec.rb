@@ -203,22 +203,20 @@ describe "Pkg::Config" do
   describe "#platform_data" do
     platform_tags = [
       'eos-4-i386',
-      'osx-10.12-x86_64',
+      'osx-10.15-x86_64',
       'cisco-wrlinux-7-x86_64',
       'ubuntu-16.04-i386',
-      'cumulus-2.2-amd64',
-      'el-6-i386',
+      'el-6-x86_64',
       'el-7-ppc64le',
       'sles-12-x86_64',
     ]
 
     artifacts = \
       "./artifacts/eos/4/PC1/i386/puppet-agent-5.3.2-1.eos4.i386.swix\n" \
-      "./artifacts/apple/10.12/PC1/x86_64/puppet-agent-5.3.2.658.gc79ef9a-1.osx10.12.dmg\n" \
+      "./artifacts/apple/10.15/PC1/x86_64/puppet-agent-5.3.2.658.gc79ef9a-1.osx10.15.dmg\n" \
       "./artifacts/cisco-wrlinux/7/PC1/x86_64/puppet-agent-5.3.2-1.cisco_wrlinux7.x86_64.rpm\n" \
       "./artifacts/deb/xenial/PC1/puppet-agent_5.3.2-1xenial_i386.deb\n" \
-      "./artifacts/deb/cumulus/PC1/puppet-agent_5.3.2-1cumulus_amd64.deb\n" \
-      "./artifacts/el/6/PC1/i386/puppet-agent-5.3.2.658.gc79ef9a-1.el6.i386.rpm\n" \
+      "./artifacts/el/6/PC1/x86_64/puppet-agent-5.3.2.658.gc79ef9a-1.el6.x86_64.rpm\n" \
       "./artifacts/el/7/PC1/ppc64le/puppet-agent-5.3.2-1.el7.ppc64le.rpm\n" \
       "./artifacts/sles/12/PC1/x86_64/puppet-agent-5.3.2-1.sles12.x86_64.rpm"
 
@@ -226,7 +224,7 @@ describe "Pkg::Config" do
       "./artifacts/aix/6.1/PC1/ppc/puppet-agent-5.3.2-1.aix6.1.ppc.rpm"
 
     fedora_artifacts = \
-      "./artifacts/fedora/f25/PC1/x86_64/puppet-agent-5.3.2-1.fedoraf25.x86_64.rpm"
+      "./artifacts/fedora/31/PC1/x86_64/puppet-agent-5.3.2-1.fc31.x86_64.rpm"
 
     windows_artifacts = \
       "./artifacts/windows/puppet-agent-x64.msi\n" \
@@ -283,8 +281,8 @@ describe "Pkg::Config" do
     it "should not use 'f' in fedora platform tags" do
       allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(fedora_artifacts, nil)
       data = Pkg::Config.platform_data
-      expect(data).to include('fedora-25-x86_64')
-      expect(data).not_to include('fedora-f25-x86_64')
+      expect(data).to include('fedora-31-x86_64')
+      expect(data).not_to include('fedora-f31-x86_64')
     end
 
     it "should collect packages whose extname differ from package_format" do

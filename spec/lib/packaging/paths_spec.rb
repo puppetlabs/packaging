@@ -25,17 +25,15 @@ describe 'Pkg::Paths' do
       'pkg/ubuntu-16.04-amd64/puppet-agent_4.99.0-1xenial_amd64.deb' => 'ubuntu-16.04-amd64',
       'pkg/windows-x64/puppet-agent-4.99.0-x64.msi' => 'windows-2012-x64',
       'artifacts/el/6/products/x86_64/pe-r10k-2.5.4.3-1.el6.x86_64.rpm' => 'el-6-x86_64',
-      'pkg/deb/trusty/pe-r10k_2.5.4.3-1trusty_amd64.deb' => 'ubuntu-14.04-amd64',
       'pkg/pe/rpm/el-6-i386/pe-puppetserver-2017.3.0.3-1.el6.noarch.rpm' => 'el-6-i386',
       'pkg/deb/trusty/pe-r10k_2.5.4.3-1trusty_amd64.deb' => 'ubuntu-14.04-amd64',
       'pkg/pe/deb/xenial/pe-puppetserver_2017.3.0.3-1puppet1_all.deb' => 'ubuntu-16.04-amd64',
       'pkg/pe/deb/xenial/super-trusty-package_1.0.0-1puppet1_all.deb' => 'ubuntu-16.04-amd64',
-      'artifacts/deb/wheezy/PC1/puppetdb_4.3.1-1puppetlabs1_all.deb' => 'debian-7-amd64',
+      'artifacts/deb/stretch/PC1/puppetdb_4.3.1-1puppetlabs1_all.deb' => 'debian-9-amd64',
       'pkg/el/7/PC1/x86_64/puppetdb-4.3.1-1.el7.noarch.rpm' => 'el-7-x86_64',
-      'pkg/apple/10.11/PC1/x86_64/puppet-agent-1.9.0-1.osx10.11.dmg' => 'osx-10.11-x86_64',
-      'artifacts/mac/10.11/PC1/x86_64/puppet-agent-1.9.0-1.osx10.11.dmg' => 'osx-10.11-x86_64',
+      'pkg/apple/10.14/PC1/x86_64/puppet-agent-1.9.0-1.osx10.14.dmg' => 'osx-10.14-x86_64',
+      'artifacts/mac/10.15/PC1/x86_64/puppet-agent-1.9.0-1.osx10.15.dmg' => 'osx-10.15-x86_64',
       'artifacts/eos/4/PC1/i386/puppet-agent-1.9.0-1.eos4.i386.swix' => 'eos-4-i386',
-      'pkg/deb/cumulus/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1cumulus_amd64.deb' => 'cumulus-2.2-amd64',
       'pkg/windows/puppet-agent-1.9.0-x86.msi' => 'windows-2012-x86',
       'artifacts/ubuntu-16.04-i386/puppetserver_5.0.1-0.1SNAPSHOT.2017.07.27T2346puppetlabs1.debian.tar.gz' => 'ubuntu-16.04-source',
       'http://saturn.puppetlabs.net/deb_repos/1234abcd/repos/apt/xenial' => 'ubuntu-16.04-amd64',
@@ -97,8 +95,8 @@ describe 'Pkg::Paths' do
       expect(Pkg::Paths.artifacts_path('el-7-x86_64')).to eq('artifacts/puppet5/el/7/x86_64')
     end
 
-    it 'should be correct for trusty' do
-      expect(Pkg::Paths.artifacts_path('ubuntu-14.04-amd64')).to eq('artifacts/trusty/puppet5')
+    it 'should be correct for bionic' do
+      expect(Pkg::Paths.artifacts_path('ubuntu-18.04-amd64')).to eq('artifacts/bionic/puppet5')
     end
 
     it 'should be correct for solaris 11' do
@@ -106,7 +104,7 @@ describe 'Pkg::Paths' do
     end
 
     it 'should be correct for osx' do
-      expect(Pkg::Paths.artifacts_path('osx-10.10-x86_64')).to eq('artifacts/mac/puppet5/10.10/x86_64')
+      expect(Pkg::Paths.artifacts_path('osx-10.15-x86_64')).to eq('artifacts/mac/puppet5/10.15/x86_64')
     end
 
     it 'should be correct for windows' do
@@ -251,7 +249,7 @@ describe 'Pkg::Paths' do
       expect(Pkg::Paths.remote_repo_base('ubuntu-18.04-amd64')).to eq('bar')
     end
     it 'returns nonfinal_yum_repo_path for nonfinal rpms' do
-      expect(Pkg::Paths.remote_repo_base('fedora-29-x86_64', true)).to eq('foo-nightly')
+      expect(Pkg::Paths.remote_repo_base('fedora-31-x86_64', true)).to eq('foo-nightly')
     end
     it 'returns nonfinal_apt_repo_path for nonfinal debs' do
       expect(Pkg::Paths.remote_repo_base('debian-9-amd64', true)).to eq('bar-nightly')
@@ -305,7 +303,7 @@ describe 'Pkg::Paths' do
       expect(Pkg::Paths.release_package_link_path('debian-9-i386', true)).to eq("#{nonfinal_apt_repo_path}/#{nonfinal_repo_name}-release-stretch.deb")
     end
     it 'returns nil for package formats that do not have release packages' do
-      expect(Pkg::Paths.release_package_link_path('osx-10.13-x86_64')).to eq(nil)
+      expect(Pkg::Paths.release_package_link_path('osx-10.15-x86_64')).to eq(nil)
       expect(Pkg::Paths.release_package_link_path('windows-2012-x86')).to eq(nil)
     end
   end

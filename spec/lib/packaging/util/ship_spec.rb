@@ -43,25 +43,21 @@ describe '#Pkg::Util::Ship' do
   end
 
 local_pkgs = [
-  'pkg/deb/cumulus/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1cumulus_amd64.deb',
-  'pkg/deb/wheezy/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1wheezy_i386.deb',
+  'pkg/deb/stretch/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1stretch_i386.deb',
   'pkg/el/5/puppet5/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.el5.x86_64.rpm',
   'pkg/sles/11/puppet5/i386/puppet-agent-1.4.1.2904.g8023dd1-1.sles11.i386.rpm',
   'pkg/sles/12/puppet5/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.sles12.x86_64.rpm',
   'pkg/mac/10.15/puppet5/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.osx10.15.dmg',
-  'pkg/mac/10.10/puppet5/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.osx10.10.dmg',
   'pkg/eos/4/puppet5/i386/puppet-agent-1.4.1.2904.g8023dd1-1.eos4.i386.swix',
   'pkg/eos/4/puppet5/i386/puppet-agent-1.4.1.2904.g8023dd1-1.eos4.i386.swix.asc',
   'pkg/windows/puppet5/puppet-agent-1.4.1.2904.g8023dd1-x86.msi',
 ]
 new_pkgs = [
-  'pkg/cumulus/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1cumulus_amd64.deb',
-  'pkg/wheezy/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1wheezy_i386.deb',
+  'pkg/stretch/puppet5/puppet-agent_1.4.1.2904.g8023dd1-1stretch_i386.deb',
   'pkg/puppet5/el/5/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.el5.x86_64.rpm',
   'pkg/puppet5/sles/11/i386/puppet-agent-1.4.1.2904.g8023dd1-1.sles11.i386.rpm',
   'pkg/puppet5/sles/12/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.sles12.x86_64.rpm',
   'pkg/mac/puppet5/10.15/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.osx10.15.dmg',
-  'pkg/mac/puppet5/10.10/x86_64/puppet-agent-1.4.1.2904.g8023dd1-1.osx10.10.dmg',
   'pkg/eos/puppet5/4/i386/puppet-agent-1.4.1.2904.g8023dd1-1.eos4.i386.swix',
   'pkg/eos/puppet5/4/i386/puppet-agent-1.4.1.2904.g8023dd1-1.eos4.i386.swix.asc',
   'pkg/windows/puppet5/puppet-agent-1.4.1.2904.g8023dd1-x86.msi',

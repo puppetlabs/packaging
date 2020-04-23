@@ -111,7 +111,6 @@ module Pkg
     def location_for(platform_tag)
       toplevel_repo = DEFAULT_REPO_TYPE
       repo_subdirectories = File.join(@repo_base, @project, @project_version)
-      alternate_subdirectories = repo_subdirectories
 
       unless platform_tag == DEFAULT_REPO_TYPE
         format = Pkg::Platforms.package_format_for_tag(platform_tag)
@@ -122,20 +121,16 @@ module Pkg
       when 'rpm'
         toplevel_repo = 'rpm'
         repo_subdirectories = File.join(repo_subdirectories, "#{platform}-#{version}-#{architecture}")
-        alternate_subdirectories = repo_subdirectories
       when 'deb'
         toplevel_repo = 'debian__local'
         repo_subdirectories = File.join(repo_subdirectories, "#{platform}-#{version}")
-        alternate_subdirectories = repo_subdirectories
       when 'swix', 'dmg', 'svr4', 'ips'
         repo_subdirectories = File.join(repo_subdirectories, "#{platform}-#{version}-#{architecture}")
-        alternate_subdirectories = repo_subdirectories
       when 'msi'
         repo_subdirectories = File.join(repo_subdirectories, "#{platform}-#{architecture}")
-        alternate_subdirectories = repo_subdirectories
       end
 
-      [toplevel_repo, repo_subdirectories, alternate_subdirectories]
+      [toplevel_repo, repo_subdirectories]
     end
 
     # @param platform_tag [String] The platform tag specific to the information
@@ -150,8 +145,8 @@ module Pkg
         end
       end
 
-      repo_name, repo_subdirectories, alternate_subdirectories = location_for(platform_tag)
-      full_artifactory_path = File.join(repo_name, alternate_subdirectories)
+      repo_name, repo_subdirectories = location_for(platform_tag)
+      full_artifactory_path = File.join(repo_name, repo_subdirectories)
 
       {
         platform: platform,
@@ -161,7 +156,6 @@ module Pkg
         package_format: package_format,
         repo_name: repo_name,
         repo_subdirectories: repo_subdirectories,
-        alternate_subdirectories: alternate_subdirectories,
         full_artifactory_path: full_artifactory_path
       }
     end
@@ -286,7 +280,7 @@ module Pkg
       headers = { "X-Checksum-Md5" => artifact_md5 }
       artifact.upload(
         data[:repo_name],
-        File.join(data[:alternate_subdirectories], File.basename(package)),
+        File.join(data[:repo_subdirectories], File.basename(package)),
         deploy_properties(platform_tag, File.basename(package)),
         headers
       )

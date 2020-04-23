@@ -125,7 +125,6 @@ describe 'artifactory.rb' do
           expect(artifact.location_for(platform_tag)).to match_array([
             platform_tag_data[:toplevel_repo],
             platform_tag_data[:repo_subdirectories],
-            platform_tag_data[:repo_subdirectories]
           ])
         end
       else
@@ -133,7 +132,6 @@ describe 'artifactory.rb' do
           expect(artifact.location_for(platform_tag)).to match_array([
             platform_tag_data[:toplevel_repo],
             platform_tag_data[:repo_subdirectories],
-            platform_tag_data[:repo_subdirectories]
           ])
         end
       end
@@ -142,7 +140,6 @@ describe 'artifactory.rb' do
         expect(artifact.location_for('generic')).to match_array([
           'generic',
           File.join(default_repo_name, project, project_version),
-          File.join(default_repo_name, project, project_version)
         ])
       end
     end

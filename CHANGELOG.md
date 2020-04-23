@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Removed
+- (RE-13273) Removed support of PC1 repos. They are obsolete
 
 ## [0.99.61] - 2020-04-01
 ### Fixed

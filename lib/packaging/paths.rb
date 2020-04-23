@@ -70,15 +70,6 @@ module Pkg::Paths
     end
   end
 
-  # Method to determine if files should be shipped to legacy or current path
-  # structures. Any repo name matching /^puppet/ is a current repo, everything
-  # else is should be shipped to legacy paths.
-  #
-  # @param repo_name The repo name to check
-  def is_legacy_repo?(repo_name)
-    repo_name !~ /^puppet/
-  end
-
   # Method to determine the yum repo name. Maintains compatibility with legacy
   # projects, where `Pkg::Config.yum_repo_name` is set instead of
   # `Pkg::Config.repo_name`. Defaults to 'products' if nothing is set.
@@ -110,65 +101,29 @@ module Pkg::Paths
     return Pkg::Config.repo_link_target
   end
 
-  # TODO: please please please clean this up
-  # This is so terrible. I really dislike it. But in order to maintain backward
-  # compatibility, we need to maintain these path differences between PC1 and
-  # everything else. Once we stop shipping things to PC1, we can remove all the
-  # PC1 specific cases. That's likely to not happen until the current LTS
-  # (2016.4) is EOL'd. Hopefully also we do not choose to further change these
-  # path structures, as it is no bueno.
-  # --MAS 2017-08-16
   def artifacts_base_path_and_link_path(platform_tag, path_prefix = 'artifacts', nonfinal = false)
     platform, version, architecture = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
 
     case package_format
     when 'rpm'
-      if is_legacy_repo?(yum_repo_name(nonfinal))
-        [File.join(path_prefix, platform, version, yum_repo_name(nonfinal)), nil]
-      else
-        [File.join(path_prefix, yum_repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, link_name(nonfinal))]
-      end
+      [File.join(path_prefix, yum_repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, link_name(nonfinal))]
     when 'swix'
-      if is_legacy_repo?(repo_name(nonfinal))
-        [File.join(path_prefix, platform, version, repo_name(nonfinal)), nil]
-      else
-        [File.join(path_prefix, platform, repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, platform, link_name(nonfinal))]
-      end
+      [File.join(path_prefix, platform, repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, platform, link_name(nonfinal))]
     when 'deb'
       [File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), apt_repo_name(nonfinal)),
        link_name(nonfinal).nil? ? nil : File.join(path_prefix, Pkg::Platforms.get_attribute(platform_tag, :codename), link_name(nonfinal))]
     when 'svr4', 'ips'
-      if is_legacy_repo?(repo_name(nonfinal))
-        [File.join(path_prefix, 'solaris', repo_name(nonfinal), version), nil]
-      else
-        [File.join(path_prefix, 'solaris', repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, 'solaris', link_name(nonfinal))]
-      end
+      [File.join(path_prefix, 'solaris', repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, 'solaris', link_name(nonfinal))]
     when 'dmg'
-      if is_legacy_repo?(repo_name(nonfinal))
-        [File.join(path_prefix, 'mac', version, repo_name(nonfinal)), nil]
-      else
-        [File.join(path_prefix, 'mac', repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, 'mac', link_name(nonfinal))]
-      end
+      [File.join(path_prefix, 'mac', repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, 'mac', link_name(nonfinal))]
     when 'msi'
-      if is_legacy_repo?(repo_name(nonfinal))
-        [File.join(path_prefix, 'windows'), nil]
-      else
-        [File.join(path_prefix, platform, repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, platform, link_name(nonfinal))]
-      end
+      [File.join(path_prefix, platform, repo_name(nonfinal)), link_name(nonfinal).nil? ? nil : File.join(path_prefix, platform, link_name(nonfinal))]
     else
       raise "Not sure where to find packages with a package format of '#{package_format}'"
     end
   end
 
-  # TODO: please please please clean this up
-  # This is so terrible. I really dislike it. But in order to maintain backward
-  # compatibility, we need to maintain these path differences between PC1 and
-  # everything else. Once we stop shipping things to PC1, we can remove all the
-  # PC1 specific cases. That's likely to not happen until the current LTS
-  # (2016.4) is EOL'd. Hopefully also we do not choose to further change these
-  # path structures, as it is no bueno.
-  # --MAS 2017-08-16
   def artifacts_path(platform_tag, path_prefix = 'artifacts', nonfinal = false)
     base_path, _ = artifacts_base_path_and_link_path(platform_tag, path_prefix, nonfinal)
     platform, version, architecture = Pkg::Platforms.parse_platform_tag(platform_tag)
@@ -176,31 +131,15 @@ module Pkg::Paths
 
     case package_format
     when 'rpm'
-      if is_legacy_repo?(yum_repo_name(nonfinal))
-        File.join(base_path, architecture)
-      else
-        File.join(base_path, platform, version, architecture)
-      end
+      File.join(base_path, platform, version, architecture)
     when 'swix'
-      if is_legacy_repo?(repo_name(nonfinal))
-        File.join(base_path, architecture)
-      else
-        File.join(base_path, version, architecture)
-      end
+      File.join(base_path, version, architecture)
     when 'deb'
       base_path
     when 'svr4', 'ips'
-      if is_legacy_repo?(repo_name(nonfinal))
-        base_path
-      else
-        File.join(base_path, version)
-      end
+      File.join(base_path, version)
     when 'dmg'
-      if is_legacy_repo?(repo_name(nonfinal))
-        File.join(base_path, architecture)
-      else
-        File.join(base_path, version, architecture)
-      end
+      File.join(base_path, version, architecture)
     when 'msi'
       base_path
     else

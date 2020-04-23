@@ -6,13 +6,17 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ### Removed
 - (RE-13273) Removed support of PC1 repos. They are obsolete
 
+### Changed
+- (RE-13386) In `Pkg::Artifactory` deb packages will no longer default to
+  shipping to the 'pool' subdirectory.
+
 ## [0.99.61] - 2020-04-01
 ### Fixed
 - Reverted removal of EOL platforms since it was causing breakage.
 
 ## [0.99.60] - 2020-04-01
 ### Added
-- Added parameters to ManageArtifactory#upload_file to allow for setting properties
+- Added parameters to `ManageArtifactory#upload_file` to allow for setting properties
   and headers after the upload, matching the parameters in Resource::Artifact#upload.
 - Added platform support for:
    * Ubuntu 20.04 'Focal'

@@ -126,7 +126,7 @@ module Pkg
       when 'deb'
         toplevel_repo = 'debian__local'
         repo_subdirectories = File.join(repo_subdirectories, "#{platform}-#{version}")
-        alternate_subdirectories = File.join('pool', repo_subdirectories)
+        alternate_subdirectories = repo_subdirectories
       when 'swix', 'dmg', 'svr4', 'ips'
         repo_subdirectories = File.join(repo_subdirectories, "#{platform}-#{version}-#{architecture}")
         alternate_subdirectories = repo_subdirectories

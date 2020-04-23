@@ -125,7 +125,7 @@ describe 'artifactory.rb' do
           expect(artifact.location_for(platform_tag)).to match_array([
             platform_tag_data[:toplevel_repo],
             platform_tag_data[:repo_subdirectories],
-            File.join('pool', platform_tag_data[:repo_subdirectories])
+            platform_tag_data[:repo_subdirectories]
           ])
         end
       else

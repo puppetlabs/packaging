@@ -3,8 +3,16 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.62] - 2020-06-16
+### Added
+- (RE-13462) Mixins to allow artifactory `search` and `checksum_search` to look
+  for an exact filename.
+
 ### Removed
-- (RE-13273) Removed support of PC1 repos. They are obsolete
+- (RE-13273) Removed support of PC1 repos. They are obsolete.
+- (RE-13177)(RE-13180)(RE-13183)(RE-13186) Removed EOL platforms and updated spec tests
+  accordingly.
 
 ### Changed
 - (RE-13386) In `Pkg::Artifactory` deb packages will no longer default to
@@ -620,7 +628,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.61...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.62...HEAD
+[0.99.62]: https://github.com/puppetlabs/packaging/compare/0.99.61...0.99.62
 [0.99.61]: https://github.com/puppetlabs/packaging/compare/0.99.60...0.99.61
 [0.99.60]: https://github.com/puppetlabs/packaging/compare/0.99.59...0.99.60
 [0.99.59]: https://github.com/puppetlabs/packaging/compare/0.99.58...0.99.59

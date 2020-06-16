@@ -2,67 +2,7 @@ require 'artifactory'
 require 'uri'
 require 'open-uri'
 require 'digest'
-
-#
-# [eric.griswold] This is unfortunate. The 'pattern_search' class method really does belong in
-# the Artifactory gem. However, because of some of Chef's social policies,
-# I am unwilling to contribute this code there. If that changes, I'll submit a PR. Until
-# then, it'll live here.
-#
-module Artifactory
-  class Resource::Artifact
-    #
-    # Search for an artifact in a repo using an Ant-like pattern.
-    # Unlike many Artifactory searches, this one is restricted to a single
-    # repository.
-    #
-    # @example Search in a repository named 'foo_local' for an artifact in a directory containing
-    #   the word "recent", named "artifact[0-9].txt"
-    #   Artifact.pattern_search(pattern: '*recent*/artifact[0-9].txt',
-    #                           repo: 'foo_local')
-    #
-    # @param [Hash] options
-    #   A hash of options, as follows:
-    #
-    # @option options [Artifactory::Client] :client
-    #   the client object to make the request with
-    # @option options [String] :pattern
-    #   the Ant-like pattern to use for finding artifacts within the repos. Note that the
-    #   Ant pattern '**' is barred in this case by JFrog.
-    # @option options [String] :repo
-    #   the repo to search
-    #
-    # @return [Array<Resource::Artifact>]
-    #   a list of artifacts that match the query
-    #
-    def self.pattern_search(options = {})
-      client = extract_client!(options)
-      params = Util.slice(options, :pattern, :repo)
-      pattern_search_parameter = { :pattern => "#{params[:repo]}:#{params[:pattern]}" }
-      response = client.get('/api/search/pattern', pattern_search_parameter)
-      return [] if response['files'].nil? || response['files'].empty?
-
-      # A typical response:
-      # {
-      #  "repoUri"=>"https:<artifactory endpoint>/<repo>",
-      #  "sourcePattern"=>"<repo>:<provided search pattern>",
-      #  "files"=>[<filename that matched pattern>, ...]
-      # }
-      #
-      # Inserting '/api/storage' before the repo makes the 'from_url' call work correctly.
-      #
-      repo_uri = response['repoUri']
-      unless repo_uri.include?('/api/storage/')
-        # rubocop:disable Style/PercentLiteralDelimiters
-        repo_uri.sub!(%r(/#{params[:repo]}$), "/api/storage/#{params[:repo]}")
-      end
-      response['files'].map do |file_path|
-        from_url("#{repo_uri}/#{file_path}", client: client)
-      end
-    end
-  end
-end
-
+require 'packaging/artifactory/extensions'
 
 module Pkg
 
@@ -414,21 +354,20 @@ module Pkg
       manifest.each do |dist, packages|
         puts "Grabbing the #{dist} packages from artifactory"
         packages.each do |name, info|
-          artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"])
+          filename = info['filename']
+          artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"], name: filename)
           artifact_to_download = artifacts.select { |artifact| artifact.download_uri.include? remote_path }.first
           # If we found matching artifacts, but not in the correct path, copy the artifact to the correct path
           # This should help us keep repos up to date with the packages we are expecting to be there
           # while helping us avoid 'what the hell, could not find package' errors
           if artifact_to_download.nil? && !artifacts.empty?
             artifact_to_copy = artifacts.first
-            filename = info['filename'] || File.basename(artifact_to_copy.download_uri)
             copy_artifact(artifact_to_copy, artifact_to_copy.repo, "#{remote_path}/#{dist}/#{filename}")
-            artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"])
+            artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"], name: filename)
             artifact_to_download = artifacts.select { |artifact| artifact.download_uri.include? remote_path }.first
           end
 
           if artifact_to_download.nil?
-            filename = info["filename"] || name
             message = "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]}"
             unless remote_path.empty?
               message += " in #{remote_path}"
@@ -436,7 +375,6 @@ module Pkg
             raise message
           else
             full_staging_path = "#{staging_directory}/#{dist}"
-            filename = info['filename'] || File.basename(artifact_to_download.download_uri)
             puts "downloading #{artifact_to_download.download_uri} to #{File.join(full_staging_path, filename)}"
             artifact_to_download.download(full_staging_path, filename: filename)
           end
@@ -640,12 +578,11 @@ module Pkg
       manifest.each do |dist, packages|
         puts "Copying #{dist} packages..."
         packages.each do |name, info|
-          artifact = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"]).first
+          filename = info["filename"]
+          artifact = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"], name: filename).first
           if artifact.nil?
-            filename = info["filename"] || name
             raise "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]}"
           end
-          filename = info["filename"] || File.basename(artifact.download_uri)
           copy_artifact(artifact, artifact.repo, "#{target_path}/#{dist}/#{filename}")
         end
       end
@@ -675,7 +612,8 @@ module Pkg
       manifest.each do |dist, packages|
         packages.each do |package_name, info|
           next unless package_name == package
-          artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: repos)
+          filename = info["filename"]
+          artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: repos, name: filename)
           artifacts.each do |artifact|
             next unless artifact.download_uri.include? remote_path
             puts "Removing reverted package #{artifact.download_uri}"
@@ -695,7 +633,7 @@ module Pkg
       Dir.foreach("#{tarball_path}/") do |pe_tarball|
         next if pe_tarball == '.' || pe_tarball == ".."
         md5 = Digest::MD5.file("#{tarball_path}/#{pe_tarball}").hexdigest
-        artifacts_to_delete = Artifactory::Resource::Artifact.checksum_search(md5: md5, repos: pe_repo)
+        artifacts_to_delete = Artifactory::Resource::Artifact.checksum_search(md5: md5, repos: pe_repo, name: pe_tarball)
         next if artifacts_to_delete.nil?
         begin
           artifacts_to_delete.each do |artifact|

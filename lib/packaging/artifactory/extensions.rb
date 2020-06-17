@@ -28,7 +28,7 @@ module ArtifactoryExtensions
     #
     def pattern_search(options = {})
       client = extract_client!(options)
-      params = Util.slice(options, :pattern, :repo)
+      params = Artifactory::Util.slice(options, :pattern, :repo)
       pattern_search_parameter = { :pattern => "#{params[:repo]}:#{params[:pattern]}" }
       response = client.get('/api/search/pattern', pattern_search_parameter)
       return [] if response['files'].nil? || response['files'].empty?

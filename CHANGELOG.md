@@ -4,6 +4,10 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.99.63] - 2020-06-17
+### Fixed
+- Artifactory::Util.slice wasn't properly scoped in the `pattern_search` method.
+
 ## [0.99.62] - 2020-06-16
 ### Added
 - (RE-13462) Mixins to allow artifactory `search` and `checksum_search` to look
@@ -628,7 +632,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.62...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.63...HEAD
+[0.99.63]: https://github.com/puppetlabs/packaging/compare/0.99.62...0.99.63
 [0.99.62]: https://github.com/puppetlabs/packaging/compare/0.99.61...0.99.62
 [0.99.61]: https://github.com/puppetlabs/packaging/compare/0.99.60...0.99.61
 [0.99.60]: https://github.com/puppetlabs/packaging/compare/0.99.59...0.99.60

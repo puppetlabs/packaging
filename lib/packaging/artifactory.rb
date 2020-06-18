@@ -531,7 +531,7 @@ module Pkg
     # @param target_path [String] path copy tarballs to, assumes same repo
     def copy_final_pe_tarballs(pe_version, repo, remote_path, target_path)
       check_authorization
-      final_tarballs = Artifactory::Resource::Artifact.search(name: pe_version, repos: repo)
+      final_tarballs = Artifactory::Resource::Artifact.search(name: pe_version, repos: repo, exact_match: false)
       final_tarballs.each do |artifact|
         next unless artifact.download_uri.include? remote_path
         next if artifact.download_uri.include? "-rc"

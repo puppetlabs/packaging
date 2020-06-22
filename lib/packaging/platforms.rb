@@ -137,6 +137,11 @@ module Pkg
       },
 
       'osx' => {
+        '10.13' => {
+          architectures: ['x86_64'],
+          package_format: 'dmg',
+          repo: false,
+        },
         '10.14' => {
           architectures: ['x86_64'],
           package_format: 'dmg',

@@ -4,6 +4,10 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.99.65] - 2020-06-22
+### Fixed
+- Add 0SX 10.13 platform back, it is not EOL for all projects.
+
 ## [0.99.64] - 2020-06-18
 ### Fixed
 - Do not use exact match when searching for final PE tarballs.

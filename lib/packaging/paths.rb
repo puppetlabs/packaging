@@ -151,7 +151,7 @@ module Pkg::Paths
     when 'dmg'
       return File.join(prefix, 'mac', link)
     when 'msi'
-      return File.join(prefix, platform, link)
+      return File.join(prefix, platform_name, link)
     else
       raise "Error: Unknown package format '#{package_format}'"
     end

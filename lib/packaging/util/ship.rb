@@ -106,22 +106,11 @@ module Pkg::Util::Ship
 
   def ship_rpms(local_staging_directory, remote_path, opts = {})
     ship_pkgs(["#{local_staging_directory}/**/*.rpm", "#{local_staging_directory}/**/*.srpm"], Pkg::Config.yum_staging_server, remote_path, opts)
-
-    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('el'), Pkg::Config.yum_staging_server, remote_path, opts[:nonfinal])
   end
 
   def ship_debs(local_staging_directory, remote_path, opts = {})
     ship_pkgs(["#{local_staging_directory}/**/*.debian.tar.gz", "#{local_staging_directory}/**/*.orig.tar.gz" "#{local_staging_directory}/**/*.dsc", "#{local_staging_directory}/**/*.deb", "#{local_staging_directory}/**/*.changes"], Pkg::Config.apt_signing_server, remote_path, opts)
 
-    # We need to iterate through all the supported platforms here because of
-    # how deb repos are set up. Each codename will have its own link from the
-    # current versioned repo (e.g. puppet5) to the rolling repo. The one thing
-    # we don't care about is architecture, so we just grab the first supported
-    # architecture for the code name we're working with at the moment. [written
-    # by Melissa, copied by Molly]
-    Pkg::Platforms.codenames.each do |codename|
-      create_rolling_repo_link(Pkg::Platforms.codename_to_tags(codename)[0], Pkg::Config.apt_signing_server, remote_path, opts[:nonfinal])
-    end
   end
 
   def ship_svr4(local_staging_directory, remote_path, opts = {})
@@ -135,8 +124,6 @@ module Pkg::Util::Ship
   def ship_dmg(local_staging_directory, remote_path, opts = {})
     packages_have_shipped = ship_pkgs(["#{local_staging_directory}/**/*.dmg"], Pkg::Config.dmg_staging_server, remote_path, opts)
 
-    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('osx'), Pkg::Config.dmg_staging_server, remote_path, opts[:nonfinal])
-
     if packages_have_shipped
       Pkg::Platforms.platform_tags_for_package_format('dmg').each do |platform_tag|
         # Create the latest symlink for the current supported repo
@@ -147,14 +134,11 @@ module Pkg::Util::Ship
 
   def ship_swix(local_staging_directory, remote_path, opts = {})
     ship_pkgs(["#{local_staging_directory}/**/*.swix"], Pkg::Config.swix_staging_server, remote_path, opts)
-
-    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('eos'), Pkg::Config.swix_staging_server, remote_path, opts[:nonfinal])
   end
 
   def ship_msi(local_staging_directory, remote_path, opts = {})
     packages_have_shipped = ship_pkgs(["#{local_staging_directory}/**/*.msi"], Pkg::Config.msi_staging_server, remote_path, opts)
 
-    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('windows'), Pkg::Config.msi_staging_server, remote_path, opts[:nonfinal])
     if packages_have_shipped
       # Create the symlinks for the latest supported repo
       Pkg::Util::Net.remote_create_latest_symlink(Pkg::Config.project, Pkg::Paths.artifacts_path(Pkg::Platforms.generic_platform_tag('windows'), remote_path, opts[:nonfinal]), 'msi', arch: 'x64')
@@ -205,7 +189,55 @@ module Pkg::Util::Ship
 
     Pkg::Util::Net.remote_ssh_cmd(staging_server, command) unless command.nil?
   rescue => e
-    fail "Failed to create rolling repo link for '#{platform_tag}'.\n#{e}"
+    fail "Failed to create rolling repo link for '#{platform_tag}'.\n#{e}\n#{e.backtrace}"
+  end
+
+  # create all of the rolling repo links in one step
+  def create_rolling_repo_links(nonfinal = false)
+    yum_path = Pkg::Paths.remote_repo_base(Pkg::Platforms.generic_platform_tag('el'), nonfinal)
+    dmg_path = Pkg::Config.dmg_path
+    swix_path = Pkg::Config.swix_path
+    msi_path = Pkg::Config.msi_path
+
+    if nonfinal
+      dmg_path = Pkg::Config.nonfinal_dmg_path
+      swix_path = Pkg::Config.nonfinal_swix_path
+      msi_path = Pkg::Config.nonfinal_msi_path
+    end
+
+    # Hacks to work around issues with paths nested under downloads, see notes
+    # in tasks/ship.rake
+    if dmg_path == "/opt/downloads/mac"
+      dmg_path = "/opt/downloads"
+    end
+
+    if swix_path == "/opt/downloads/eos"
+      swix_path = "/opt/downloads"
+    end
+
+    if msi_path == "/opt/downloads/windows"
+      msi_path = "/opt/downloads"
+    end
+
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('el'), Pkg::Config.yum_staging_server, yum_path, nonfinal)
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('osx'), Pkg::Config.dmg_staging_server, dmg_path, nonfinal)
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('eos'), Pkg::Config.swix_staging_server, swix_path, nonfinal)
+    create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('windows'), Pkg::Config.msi_staging_server, msi_path, nonfinal)
+
+    # We need to iterate through all the supported platforms here because of
+    # how deb repos are set up. Each codename will have its own link from the
+    # current versioned repo (e.g. puppet5) to the rolling repo. The one thing
+    # we don't care about is architecture, so we just grab the first supported
+    # architecture for the code name we're working with at the moment. [written
+    # by Melissa, copied by Molly]
+
+    apt_path = Pkg::Config.apt_repo_staging_path
+    if nonfinal
+      apt_path = Pkg::Config.nonfinal_apt_repo_staging_path
+    end
+    Pkg::Platforms.codenames.each do |codename|
+      create_rolling_repo_link(Pkg::Platforms.codename_to_tags(codename)[0], Pkg::Config.apt_signing_server, apt_path, nonfinal)
+    end
   end
 
   def update_release_package_symlinks(local_staging_directory, nonfinal = false)

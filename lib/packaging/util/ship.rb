@@ -194,30 +194,10 @@ module Pkg::Util::Ship
 
   # create all of the rolling repo links in one step
   def create_rolling_repo_links(nonfinal = false)
-    yum_path = Pkg::Paths.remote_repo_base(Pkg::Platforms.generic_platform_tag('el'), nonfinal)
-    dmg_path = Pkg::Config.dmg_path
-    swix_path = Pkg::Config.swix_path
-    msi_path = Pkg::Config.msi_path
-
-    if nonfinal
-      dmg_path = Pkg::Config.nonfinal_dmg_path
-      swix_path = Pkg::Config.nonfinal_swix_path
-      msi_path = Pkg::Config.nonfinal_msi_path
-    end
-
-    # Hacks to work around issues with paths nested under downloads, see notes
-    # in tasks/ship.rake
-    if dmg_path == "/opt/downloads/mac"
-      dmg_path = "/opt/downloads"
-    end
-
-    if swix_path == "/opt/downloads/eos"
-      swix_path = "/opt/downloads"
-    end
-
-    if msi_path == "/opt/downloads/windows"
-      msi_path = "/opt/downloads"
-    end
+    yum_path = Pkg::Paths.remote_repo_base(nonfinal: nonfinal, package_format: 'rpm')
+    dmg_path = Pkg::Paths.remote_repo_base(nonfinal: nonfinal, package_format: 'dmg')
+    swix_path = Pkg::Paths.remote_repo_base(nonfinal: nonfinal, package_format: 'swix')
+    msi_path = Pkg::Paths.remote_repo_base(nonfinal: nonfinal, package_format: 'msi')
 
     create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('el'), Pkg::Config.yum_staging_server, yum_path, nonfinal)
     create_rolling_repo_link(Pkg::Platforms.generic_platform_tag('osx'), Pkg::Config.dmg_staging_server, dmg_path, nonfinal)
@@ -247,7 +227,7 @@ module Pkg::Util::Ship
       package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
       case package_format
       when 'rpm'
-        remote_base = Pkg::Paths.artifacts_path(platform_tag, Pkg::Paths.remote_repo_base(platform_tag, nonfinal), nonfinal)
+        remote_base = Pkg::Paths.artifacts_path(platform_tag, Pkg::Paths.remote_repo_base(platform_tag, nonfinal: nonfinal), nonfinal)
       when 'deb'
         remote_base = Pkg::Paths.apt_package_base_path(platform_tag, Pkg::Paths.repo_name(nonfinal), Pkg::Config.project, nonfinal)
       else

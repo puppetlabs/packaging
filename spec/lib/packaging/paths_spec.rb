@@ -213,6 +213,7 @@ describe 'Pkg::Paths' do
     before :each do
       allow(Pkg::Config).to receive(:yum_repo_path).and_return('foo')
       allow(Pkg::Config).to receive(:apt_repo_path).and_return('bar')
+      allow(Pkg::Config).to receive(:dmg_path).and_return('/opt/downloads/mac')
       allow(Pkg::Config).to receive(:nonfinal_yum_repo_path).and_return('foo-nightly')
       allow(Pkg::Config).to receive(:nonfinal_apt_repo_path).and_return('bar-nightly')
     end
@@ -223,13 +224,21 @@ describe 'Pkg::Paths' do
       expect(Pkg::Paths.remote_repo_base('ubuntu-18.04-amd64')).to eq('bar')
     end
     it 'returns nonfinal_yum_repo_path for nonfinal rpms' do
-      expect(Pkg::Paths.remote_repo_base('fedora-31-x86_64', true)).to eq('foo-nightly')
+      expect(Pkg::Paths.remote_repo_base('fedora-31-x86_64', nonfinal: true)).to eq('foo-nightly')
     end
     it 'returns nonfinal_apt_repo_path for nonfinal debs' do
-      expect(Pkg::Paths.remote_repo_base('debian-9-amd64', true)).to eq('bar-nightly')
+      expect(Pkg::Paths.remote_repo_base('debian-9-amd64', nonfinal: true)).to eq('bar-nightly')
     end
+    it 'fails if neither tag nor package_format is provided' do
+      expect { Pkg::Paths.remote_repo_base }.to raise_error(/Pkg::Paths.remote_repo_base must have/)
+    end
+
+    it 'returns /opt/downloads if the path is /opt/downloads/<something>' do
+      expect(Pkg::Paths.remote_repo_base(package_format: 'dmg')).to eq('/opt/downloads')
+    end
+
     it 'fails for all other package formats' do
-      expect { Pkg::Paths.remote_repo_base('osx-10.14-x86_64') }.to raise_error(/Can't determine remote repo base path/)
+      expect { Pkg::Paths.remote_repo_base('solaris-11-i386') }.to raise_error(/Can't determine remote repo base path/)
     end
   end
 

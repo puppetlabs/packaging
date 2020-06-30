@@ -151,7 +151,7 @@ module Pkg::Paths
     when 'dmg'
       return File.join(prefix, 'mac', link)
     when 'msi'
-      return File.join(prefix, platform, link)
+      return File.join(prefix, platform_name, link)
     else
       raise "Error: Unknown package format '#{package_format}'"
     end
@@ -261,16 +261,33 @@ module Pkg::Paths
     end
   end
 
-  def remote_repo_base(platform_tag, nonfinal = false)
-    package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
-    case package_format
+  def remote_repo_base(platform_tag = nil, nonfinal: false, package_format: nil)
+    if platform_tag.nil? && package_format.nil?
+      raise "Pkg::Paths.remote_repo_base must have `platform_tag` or `package_format` specified."
+    end
+
+    package_format ||= Pkg::Platforms.package_format_for_tag(platform_tag)
+
+    repo_base = case package_format
     when 'rpm'
       nonfinal ? Pkg::Config.nonfinal_yum_repo_path : Pkg::Config.yum_repo_path
     when 'deb'
       nonfinal ? Pkg::Config.nonfinal_apt_repo_path : Pkg::Config.apt_repo_path
+    when 'dmg'
+      nonfinal ? Pkg::Config.nonfinal_dmg_path : Pkg::Config.dmg_path
+    when 'swix'
+      nonfinal ? Pkg::Config.nonfinal_swix_path : Pkg::Config.swix_path
+    when 'msi'
+      nonfinal ? Pkg::Config.nonfinal_msi_path : Pkg::Config.msi_path
     else
       raise "Can't determine remote repo base path for package format '#{package_format}'."
     end
+
+    # normalize the path for things shipping to the downloads server
+    if repo_base.match(/^\/opt\/downloads\/\w+$/)
+      repo_base = '/opt/downloads'
+    end
+    repo_base
   end
 
   # This is where deb packages end up after freight repo updates
@@ -278,7 +295,7 @@ module Pkg::Paths
     fail "Can't determine path for non-debian platform #{platform_tag}." unless Pkg::Platforms.package_format_for_tag(platform_tag) == 'deb'
     platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
     codename = Pkg::Platforms.codename_for_platform_version(platform, version)
-    return File.join(remote_repo_base(platform_tag, nonfinal), 'pool', codename, repo_name, project[0], project)
+    return File.join(remote_repo_base(platform_tag, nonfinal: nonfinal), 'pool', codename, repo_name, project[0], project)
   end
 
   def release_package_link_path(platform_tag, nonfinal = false)
@@ -286,10 +303,10 @@ module Pkg::Paths
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
     case package_format
     when 'rpm'
-      return File.join(remote_repo_base(platform_tag, nonfinal), "#{repo_name(nonfinal)}-release-#{platform}-#{version}.noarch.rpm")
+      return File.join(remote_repo_base(platform_tag, nonfinal: nonfinal), "#{repo_name(nonfinal)}-release-#{platform}-#{version}.noarch.rpm")
     when 'deb'
       codename = Pkg::Platforms.codename_for_platform_version(platform, version)
-      return File.join(remote_repo_base(platform_tag, nonfinal), "#{repo_name(nonfinal)}-release-#{codename}.deb")
+      return File.join(remote_repo_base(platform_tag, nonfinal: nonfinal), "#{repo_name(nonfinal)}-release-#{codename}.deb")
     else
       warn "No release packages for package format '#{package_format}', skipping . . ."
       return nil

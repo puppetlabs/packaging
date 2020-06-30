@@ -368,46 +368,26 @@ namespace :pl do
 
   desc "ship apple dmg to #{Pkg::Config.dmg_staging_server}"
   task ship_dmg: 'pl:fetch' do
-    # TODO: realistically, this shouldn't be here. This block needs to be
-    # removed, but only when we can successfully modify all instances of
-    # this to be set to '/opt/downloads'. In the meantime, we need to write
-    # this terrible workaround to ensure backward compatibility.
-    #
-    # I'm so sorry
-    # ~MAS 2017-08-14
-    if Pkg::Config.dmg_path == "/opt/downloads/mac"
-      path = "/opt/downloads"
-    else
-      path = Pkg::Config.dmg_path
-    end
+    path = Pkg::Paths.remote_repo_base(package_format: 'dmg')
     Pkg::Util::Ship.ship_dmg('pkg', path)
   end
 
   desc "ship nightly apple dmgs to #{Pkg::Config.dmg_staging_server}"
   task ship_nightly_dmg: 'pl:fetch' do
-    Pkg::Util::Ship.ship_dmg('pkg', Pkg::Config.nonfinal_dmg_path, nonfinal: true)
+    path = Pkg::Paths.remote_repo_base(package_format: 'dmg', nonfinal: true)
+    Pkg::Util::Ship.ship_dmg('pkg', path, nonfinal: true)
   end
 
   desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
   task ship_swix: 'pl:fetch' do
-    # TODO: realistically, this shouldn't be here. This block needs to be
-    # removed, but only when we can successfully modify all instances of
-    # this to be set to '/opt/downloads'. In the meantime, we need to write
-    # this terrible workaround to ensure backward compatibility.
-    #
-    # I'm so sorry
-    # ~MAS 2017-08-14
-    if Pkg::Config.swix_path == "/opt/downloads/eos"
-      path = "/opt/downloads"
-    else
-      path = Pkg::Config.swix_path
-    end
+    path = Pkg::Paths.remote_repo_base(package_format: 'swix')
     Pkg::Util::Ship.ship_swix('pkg', path)
   end
 
   desc "ship nightly Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
   task ship_nightly_swix: 'pl:fetch' do
-    Pkg::Util::Ship.ship_swix('pkg', Pkg::Config.nonfinal_swix_path, nonfinal: true)
+    path = Pkg::Paths.remote_repo_base(package_format: 'swix', nonfinal: true)
+    Pkg::Util::Ship.ship_swix('pkg', path, nonfinal: true)
   end
 
   desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
@@ -429,24 +409,14 @@ namespace :pl do
 
   desc "Ship MSI packages to #{Pkg::Config.msi_staging_server}"
   task ship_msi: 'pl:fetch' do
-    # TODO: realistically, this shouldn't be here. This block needs to be
-    # removed, but only when we can successfully modify all instances of
-    # this to be set to '/opt/downloads'. In the meantime, we need to write
-    # this terrible workaround to ensure backward compatibility.
-    #
-    # I'm so sorry
-    # ~MAS 2017-08-14
-    if Pkg::Config.msi_path == "/opt/downloads/windows"
-      path = "/opt/downloads"
-    else
-      path = Pkg::Config.msi_path
-    end
+    path = Pkg::Paths.remote_repo_base(package_format: 'msi')
     Pkg::Util::Ship.ship_msi('pkg', path, excludes: ["#{Pkg::Config.project}-x(86|64).msi"])
   end
 
   desc "Ship nightly MSI packages to #{Pkg::Config.msi_staging_server}"
   task ship_nightly_msi: 'pl:fetch' do
-    Pkg::Util::Ship.ship_msi('pkg', Pkg::Config.nonfinal_msi_path, excludes: ["#{Pkg::Config.project}-x(86|64).msi"], nonfinal: true)
+    path = Pkg::Paths.remote_repo_base(package_format: 'msi', nonfinal: true)
+    Pkg::Util::Ship.ship_msi('pkg', path, excludes: ["#{Pkg::Config.project}-x(86|64).msi"], nonfinal: true)
   end
 
   desc "Add #{Pkg::Config.project} version #{Pkg::Config.ref} to release-metrics"
@@ -545,6 +515,16 @@ namespace :pl do
       errs.each do |err|
         puts " * #{err}"
       end
+    end
+
+    desc 'Create the rolling repo links'
+    task create_repo_links: 'pl:fetch' do
+      Pkg::Util::Ship.create_rolling_repo_links
+    end
+
+    desc 'Create rolling repo links for nightlies'
+    task create_nightly_repo_links: 'pl:fetch' do
+      Pkg::Util::Ship.create_rolling_repo_links(true)
     end
   end
 

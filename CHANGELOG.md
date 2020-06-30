@@ -3,6 +3,12 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- (RE-13303) Moved rolling repo link creation from the ship tasks 
+  to separate rake tasks - `pl:remote:create_repo_links` and
+  `pl:remote:create_nightly_repo_links`
+- Update `Pkg::Paths::remote_repo_base` to support dmg, msi, and swix packaging
+  types.
 
 ## [0.99.65] - 2020-06-22
 ### Fixed

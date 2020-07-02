@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.66] - 2020-07-02
 ### Added
 - (RE-13303) Moved rolling repo link creation from the ship tasks 
   to separate rake tasks - `pl:remote:create_repo_links` and
@@ -646,7 +648,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.65...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.66...HEAD
+[0.99.66]: https://github.com/puppetlabs/packaging/compare/0.99.65...0.99.66
 [0.99.65]: https://github.com/puppetlabs/packaging/compare/0.99.64...0.99.65
 [0.99.64]: https://github.com/puppetlabs/packaging/compare/0.99.63...0.99.64
 [0.99.63]: https://github.com/puppetlabs/packaging/compare/0.99.62...0.99.63

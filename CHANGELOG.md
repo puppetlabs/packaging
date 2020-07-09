@@ -3,6 +3,7 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+- (PA-3212) Add support for Fedora 32.
 
 ## [0.99.66] - 2020-07-02
 ### Added

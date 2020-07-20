@@ -3,7 +3,14 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.67] - 2020-07-20
+### Added
 - (PA-3212) Add support for Fedora 32.
+
+### Fixed
+- Pinned the 'csv' gem to 3.1.5 to avoid pulling in a version of stringio that
+  depends on ruby 2.5.
 
 ## [0.99.66] - 2020-07-02
 ### Added
@@ -649,7 +656,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.66...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.67...HEAD
+[0.99.67]: https://github.com/puppetlabs/packaging/compare/0.99.66...0.99.67
 [0.99.66]: https://github.com/puppetlabs/packaging/compare/0.99.65...0.99.66
 [0.99.65]: https://github.com/puppetlabs/packaging/compare/0.99.64...0.99.65
 [0.99.64]: https://github.com/puppetlabs/packaging/compare/0.99.63...0.99.64

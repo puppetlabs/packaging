@@ -21,6 +21,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency('rake', ['>= 12.3'])
   gem.add_runtime_dependency('artifactory', ['~> 2'])
   gem.add_runtime_dependency('release-metrics')
+  gem.add_runtime_dependency('csv', ['3.1.5'])
   gem.require_path = 'lib'
 
   # Ensure the gem is built out of versioned files

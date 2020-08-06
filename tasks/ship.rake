@@ -265,6 +265,25 @@ namespace :pl do
 
       Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.gem_host, command)
     end
+
+    # PA-3356: temporary task to link puppet 7 nightly gem
+    # TODO: PA-3358 - remove when puppet 7 is officialy out
+    desc "Remotely link puppet 7 nightly shipped gems to latest versions on #{Pkg::Config.gem_host}"
+    task link_puppet_7_nightly_shipped_gems_to_latest: 'pl:fetch' do
+      Pkg::Config.gemversion = Pkg::Util::Version.extended_dot_version.gsub(/6\.\d+\.\d+/, '7.0.0')
+
+      remote_path = Pkg::Config.nonfinal_gem_path
+      gems = FileList['pkg/*.gem'].map! { |path| path.gsub!('pkg/', '') }
+      command = %(cd #{remote_path}; )
+
+      command += gems.map! do |gem_name|
+        %(sudo ln -sf #{gem_name} #{gem_name.gsub(Pkg::Config.gemversion, 'latest')})
+      end.join(';')
+
+      command += %(; sync)
+
+      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.gem_host, command)
+    end
   end
 
   desc "Ship mocked rpms to #{Pkg::Config.yum_staging_server}"

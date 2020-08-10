@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+ - (PA-3356) add puppet 7 nightly gem rake task
 
 ## [0.99.67] - 2020-07-20
 ### Added

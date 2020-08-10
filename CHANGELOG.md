@@ -3,8 +3,10 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.68] - 2020-08-11
 ### Added
- - (PA-3356) add puppet 7 nightly gem rake task
+ - (PA-3356) Add puppet 7 nightly gem rake task
 
 ### Fixed
  - (RE-13629) Do not use exact file match when downloading final PE tarballs
@@ -661,7 +663,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.67...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.68...HEAD
+[0.99.68]: https://github.com/puppetlabs/packaging/compare/0.99.67...0.99.68
 [0.99.67]: https://github.com/puppetlabs/packaging/compare/0.99.66...0.99.67
 [0.99.66]: https://github.com/puppetlabs/packaging/compare/0.99.65...0.99.66
 [0.99.65]: https://github.com/puppetlabs/packaging/compare/0.99.64...0.99.65

@@ -502,7 +502,7 @@ module Pkg
     # @param local_path [String] local path to download tarballs to
     def download_final_pe_tarballs(pe_version, repo, remote_path, local_path)
       check_authorization
-      artifacts = Artifactory::Resource::Artifact.search(name: pe_version, repos: repo)
+      artifacts = Artifactory::Resource::Artifact.search(name: pe_version, repos: repo, exact_match: false)
       artifacts.each do |artifact|
         next unless artifact.download_uri.include? remote_path
         next if artifact.download_uri.include? "-rc"

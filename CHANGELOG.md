@@ -6,6 +6,9 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ### Added
  - (PA-3356) add puppet 7 nightly gem rake task
 
+### Fixed
+ - (RE-13629) Do not use exact file match when downloading final PE tarballs
+
 ## [0.99.67] - 2020-07-20
 ### Added
 - (PA-3212) Add support for Fedora 32.

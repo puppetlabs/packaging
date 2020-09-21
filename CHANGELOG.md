@@ -3,6 +3,7 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+- (PA-3386) Add support for Redhat 8 aarch64.
 
 ## [0.99.68] - 2020-08-11
 ### Added

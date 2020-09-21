@@ -100,7 +100,7 @@ module Pkg
           repo: true,
         },
         '8' => {
-          architectures: ['x86_64'],
+          architectures: ['x86_64', 'aarch64'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],

@@ -3,6 +3,9 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.69] - 2020-09-21
+### Added
 - (PA-3386) Add support for Redhat 8 aarch64.
 
 ## [0.99.68] - 2020-08-11
@@ -664,7 +667,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.68...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.69...HEAD
+[0.99.69]: https://github.com/puppetlabs/packaging/compare/0.99.68...0.99.69
 [0.99.68]: https://github.com/puppetlabs/packaging/compare/0.99.67...0.99.68
 [0.99.67]: https://github.com/puppetlabs/packaging/compare/0.99.66...0.99.67
 [0.99.66]: https://github.com/puppetlabs/packaging/compare/0.99.65...0.99.66

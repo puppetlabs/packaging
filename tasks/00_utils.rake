@@ -119,7 +119,10 @@ end
 # purport to both return the results of the command execution (ala `%x{cmd}`)
 # while also raising an exception if a command does not succeed (ala `sh "cmd"`).
 def ex(command)
-  Pkg::Util.deprecate("ex", "Pkg::Util::Execution.ex")
+  # We haven't done anything about this deprecation and our log files
+  # have too many warnings from this.
+  # Turn off the notice for now until packaging is refactored.
+  # Pkg::Util.deprecate("ex", "Pkg::Util::Execution.ex")
   Pkg::Util::Execution.ex(command)
 end
 

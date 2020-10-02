@@ -4,6 +4,10 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.99.71] - 2020-10-02
+### Fixed
+- Fixed a bug in the regex for debian component from path determination
+
 ## [0.99.70] - 2020-10-01
 ### Added
 - Added ability to determine debian component for paths containing 'main'
@@ -671,7 +675,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.70...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.71...HEAD
+[0.99.71]: https://github.com/puppetlabs/packaging/compare/0.99.70...0.99.71
 [0.99.70]: https://github.com/puppetlabs/packaging/compare/0.99.69...0.99.70
 [0.99.69]: https://github.com/puppetlabs/packaging/compare/0.99.68...0.99.69
 [0.99.68]: https://github.com/puppetlabs/packaging/compare/0.99.67...0.99.68

@@ -77,6 +77,7 @@ module Pkg::Params
                   :gem_test_files,
                   :gemversion,
                   :gpg_key,
+                  :gpg_key_override,
                   :gpg_name,
                   :homepage,
                   :internal_gem_host,

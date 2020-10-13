@@ -244,17 +244,30 @@ describe 'Pkg::Paths' do
 
   describe '#apt_package_base_path' do
     it 'fails for non-debian platforms' do
-      expect { Pkg::Paths.apt_package_base_path('el-7-x86_64', 'puppet6', 'puppet-agent') }.to raise_error(/Can't determine path for non-debian platform/)
+      expect { Pkg::Paths.apt_package_base_path('el-7-x86_64', 'puppet6', 'puppet-agent') }
+        .to raise_error(/Can't determine path for non-debian platform/)
     end
     it 'returns the approprate apt repo path' do
       allow(Pkg::Paths).to receive(:remote_repo_base).and_return('/opt/repository/apt')
-      expect(Pkg::Paths.apt_package_base_path('ubuntu-18.04-amd64', 'puppet6', 'puppet-agent')).to eq('/opt/repository/apt/pool/bionic/puppet6/p/puppet-agent')
-      expect(Pkg::Paths.apt_package_base_path('debian-9-amd64', 'puppet6', 'razor-server')).to eq('/opt/repository/apt/pool/stretch/puppet6/r/razor-server')
+      expect(Pkg::Paths.apt_package_base_path('ubuntu-18.04-amd64', 'puppet6', 'puppet-agent'))
+        .to eq('/opt/repository/apt/pool/bionic/puppet6/p/puppet-agent')
+
+      expect(Pkg::Paths.apt_package_base_path('ubuntu-18.04-amd64', 'puppet7', 'puppet-agent'))
+        .to eq('/opt/repository/apt/pool/bionic/puppet7/p/puppet-agent')
+
+      expect(Pkg::Paths.apt_package_base_path('debian-9-amd64', 'puppet6', 'razor-server'))
+        .to eq('/opt/repository/apt/pool/stretch/puppet6/r/razor-server')
+
+      expect(Pkg::Paths.apt_package_base_path('debian-9-amd64', 'puppet7', 'puppet-agent'))
+        .to eq('/opt/repository/apt/pool/stretch/puppet7/p/puppet-agent')
     end
     it 'returns the appropriate nonfinal repo path' do
       allow(Pkg::Paths).to receive(:remote_repo_base).and_return('/opt/repository-nightlies/apt')
-      expect(Pkg::Paths.apt_package_base_path('ubuntu-18.04-amd64', 'puppet6-nightly', 'puppet-agent', true)).to eq('/opt/repository-nightlies/apt/pool/bionic/puppet6-nightly/p/puppet-agent')
-      expect(Pkg::Paths.apt_package_base_path('debian-9-amd64', 'puppet6-nightly', 'razor-server', true)).to eq('/opt/repository-nightlies/apt/pool/stretch/puppet6-nightly/r/razor-server')
+      expect(Pkg::Paths.apt_package_base_path('ubuntu-18.04-amd64', 'puppet6-nightly', 'puppet-agent', true))
+        .to eq('/opt/repository-nightlies/apt/pool/bionic/puppet6-nightly/p/puppet-agent')
+
+      expect(Pkg::Paths.apt_package_base_path('debian-9-amd64', 'puppet6-nightly', 'razor-server', true))
+        .to eq('/opt/repository-nightlies/apt/pool/stretch/puppet6-nightly/r/razor-server')
     end
   end
 

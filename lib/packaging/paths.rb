@@ -109,9 +109,19 @@ module Pkg::Paths
     platform_name = path_data[:platform_name]
     platform_tag = path_data[:platform_tag]
 
+    repo_name = Pkg::Config.repo_name
+
     case package_format
     when 'deb'
       debian_code_name = Pkg::Platforms.get_attribute(platform_tag, :codename)
+
+      # In puppet7 and beyond, we moved the repo_name to the top to allow each
+      # puppet major release to have its own apt repo.
+      if %w(puppet7 puppet7-nightly).include? repo_name
+        return File.join(prefix, apt_repo_name(is_nonfinal), debian_code_name)
+      end
+
+      # For puppet6 and prior
       return File.join(prefix, debian_code_name, apt_repo_name(is_nonfinal))
     when 'dmg'
       return File.join(prefix, 'mac', repo_name(is_nonfinal))
@@ -292,23 +302,39 @@ module Pkg::Paths
 
   # This is where deb packages end up after freight repo updates
   def apt_package_base_path(platform_tag, repo_name, project, nonfinal = false)
-    fail "Can't determine path for non-debian platform #{platform_tag}." unless Pkg::Platforms.package_format_for_tag(platform_tag) == 'deb'
+    unless Pkg::Platforms.package_format_for_tag(platform_tag) == 'deb'
+      fail "Can't determine path for non-debian platform #{platform_tag}."
+    end
+
     platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
-    codename = Pkg::Platforms.codename_for_platform_version(platform, version)
-    return File.join(remote_repo_base(platform_tag, nonfinal: nonfinal), 'pool', codename, repo_name, project[0], project)
+    code_name = Pkg::Platforms.codename_for_platform_version(platform, version)
+    remote_repo_path = remote_repo_base(platform_tag, nonfinal: nonfinal)
+
+    # In puppet7 and beyond, we moved the puppet major version to near the top to allow each
+    # puppet major release to have its own apt repo, for example:
+    # /opt/repository/apt/puppet7/pool/bionic/p/puppet-agent
+    if %w(puppet7 puppet7-nightly).include? repo_name
+      return File.join(remote_repo_path, repo_name, 'pool', code_name, project[0], project)
+    end
+
+    # For repos prior to puppet7, the puppet version was part of the repository
+    # For example: /opt/repository/apt/pool/bionic/puppet6/p/puppet-agent
+    return File.join(remote_repo_path, 'pool', code_name, repo_name, project[0], project)
   end
 
   def release_package_link_path(platform_tag, nonfinal = false)
-    platform, version, arch = Pkg::Platforms.parse_platform_tag(platform_tag)
+    platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
     case package_format
     when 'rpm'
-      return File.join(remote_repo_base(platform_tag, nonfinal: nonfinal), "#{repo_name(nonfinal)}-release-#{platform}-#{version}.noarch.rpm")
+      return File.join(remote_repo_base(platform_tag, nonfinal: nonfinal),
+                       "#{repo_name(nonfinal)}-release-#{platform}-#{version}.noarch.rpm")
     when 'deb'
       codename = Pkg::Platforms.codename_for_platform_version(platform, version)
-      return File.join(remote_repo_base(platform_tag, nonfinal: nonfinal), "#{repo_name(nonfinal)}-release-#{codename}.deb")
+      return File.join(remote_repo_base(platform_tag, nonfinal: nonfinal),
+                       "#{repo_name(nonfinal)}-release-#{codename}.deb")
     else
-      warn "No release packages for package format '#{package_format}', skipping . . ."
+      warn "No release packages for package format '#{package_format}', skipping."
       return nil
     end
   end

@@ -3,6 +3,10 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- Added the --silent flag to curl when fetching gem JSON data from rubygems.org.
+  The live download progress/throughput information is noisy and not really helpful
+  when packaging is running in a batch mode.
 
 ## [0.99.71] - 2020-10-02
 ### Fixed
@@ -33,7 +37,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [0.99.66] - 2020-07-02
 ### Added
-- (RE-13303) Moved rolling repo link creation from the ship tasks 
+- (RE-13303) Moved rolling repo link creation from the ship tasks
   to separate rake tasks - `pl:remote:create_repo_links` and
   `pl:remote:create_nightly_repo_links`
 - Update `Pkg::Paths::remote_repo_base` to support dmg, msi, and swix packaging

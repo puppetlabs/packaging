@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.73] - 2020-10-28
 ### Changed
 - (RE-13722) make a semi-revert of the APT repository path changes, labeling them as
   'FUTURE' changes in order to coordinate details of the changes better. This change
@@ -692,6 +694,7 @@ this is a final version.
 ## Versions <= 0.5.0 do not have a change log entry
 
 [Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.72...HEAD
+[0.99.73]: https://github.com/puppetlabs/packaging/compare/0.99.72...0.99.73
 [0.99.72]: https://github.com/puppetlabs/packaging/compare/0.99.71...0.99.72
 [0.99.71]: https://github.com/puppetlabs/packaging/compare/0.99.70...0.99.71
 [0.99.70]: https://github.com/puppetlabs/packaging/compare/0.99.69...0.99.70

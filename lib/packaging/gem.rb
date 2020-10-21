@@ -16,7 +16,7 @@ module Pkg::Gem
 
     def shipped_to_rubygems?(gem_name, gem_version, gem_platform)
       rubygems_url = "https://rubygems.org/api/v1/versions/#{gem_name}.json"
-      gem_data = JSON.parse(%x[curl --silent #{rubygems_url}])
+      gem_data = JSON.parse(%x(curl --silent #{rubygems_url}))
       gem = gem_data.select do |data|
         data['number'] == gem_version && data['platform'] == gem_platform
       end

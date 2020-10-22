@@ -1,9 +1,6 @@
 require 'json'
 module Pkg::Gem
   class << self
-    # This is preserved because I don't want to update the deprecated code path
-    # yet; I'm not entirely sure I've fixed everything that might attempt
-    # to call this method so this is now a wrapper for a wrapper.
     def ship(file)
       rsync_to_downloads(file)
       ship_to_rubygems(file)
@@ -13,17 +10,21 @@ module Pkg::Gem
     # checksums, or other glob-able artifacts to an external download server.
     def rsync_to_downloads(file)
       Pkg::Util.deprecate('Pkg::Gem.rsync_to_downloads', 'Pkg::Util::Ship.ship_pkgs')
-      Pkg::Util::Ship.ship_pkgs(["#{file}*"], Pkg::Config.gem_host, Pkg::Config.gem_path, platform_independent: true)
+      Pkg::Util::Ship.ship_pkgs(["#{file}*"], Pkg::Config.gem_host,
+                                Pkg::Config.gem_path, platform_independent: true)
     end
 
     def shipped_to_rubygems?(gem_name, gem_version, gem_platform)
-      gem_data = JSON.parse(`curl https://rubygems.org/api/v1/versions/#{gem_name}.json`)
-      gem = gem_data.select { |data| data['number'] == gem_version && data['platform'] == gem_platform }
+      rubygems_url = "https://rubygems.org/api/v1/versions/#{gem_name}.json"
+      gem_data = JSON.parse(%x(curl --silent #{rubygems_url}))
+      gem = gem_data.select do |data|
+        data['number'] == gem_version && data['platform'] == gem_platform
+      end
       return !gem.empty?
     rescue => e
-      puts "Uh oh, something went wrong searching for gem '#{gem_name}':"
+      puts "Something went wrong searching for gem '#{gem_name}':"
       puts e
-      puts "Perhaps you're shipping gem '#{gem_name}' for the first time? Congrats!"
+      puts "Perhaps you're shipping '#{gem_name}' for the first time?"
       return false
     end
 
@@ -40,7 +41,7 @@ module Pkg::Gem
       gem_platform ||= 'ruby'
 
       if shipped_to_rubygems?(Pkg::Config.gem_name, Pkg::Config.gemversion, gem_platform)
-        puts "#{file} has already been shipped to rubygems, skipping . . ."
+        puts "#{file} has already been shipped to rubygems, skipping."
         return
       end
       Pkg::Util::File.file_exists?("#{ENV['HOME']}/.gem/credentials", :required => true)
@@ -60,7 +61,10 @@ module Pkg::Gem
 
     def ship_to_internal_mirror(file)
       internal_mirror_api_key_name = 'artifactory_api_key'
-      ship_to_rubygems(file, { :host => Pkg::Config.internal_gem_host, :key => internal_mirror_api_key_name })
+      ship_to_rubygems(file, {
+                         host: Pkg::Config.internal_gem_host,
+                         key: internal_mirror_api_key_name
+                       })
     end
   end
 end

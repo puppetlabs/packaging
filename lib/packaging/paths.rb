@@ -319,7 +319,11 @@ module Pkg::Paths
 
     # For repos prior to puppet7, the puppet version was part of the repository
     # For example: /opt/repository/apt/pool/bionic/puppet6/p/puppet-agent
-    return File.join(remote_repo_path, 'pool', code_name, repo_name, project[0], project)
+    if %w(puppet puppet5 puppet6 puppet-nightly puppet5-nightly puppet6-nightly).include? repo_name
+      return File.join(remote_repo_path, 'pool', code_name, repo_name, project[0], project)
+    end
+
+    raise "Error: Cannot determine apt_package_base_path for repo: \"#{repo_name}\"."
   end
 
   def release_package_link_path(platform_tag, nonfinal = false)

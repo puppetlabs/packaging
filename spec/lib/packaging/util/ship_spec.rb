@@ -2,14 +2,16 @@ require 'spec_helper'
 
 describe '#Pkg::Util::Ship' do
   describe '#collect_packages' do
-    msi_packages = [
-      'pkg/windows/puppet6/puppet-agent-6.19.0-x64.msi',
-      'pkg/windows/puppet6/puppet-agent-6.19.0-x86.msi',
-      'pkg/windowsfips/puppet6/puppet-agent-6.19.0-x64.msi'
+    msi_packages = %w[
+      pkg/windows/puppet6/puppet-agent-6.19.0-x64.msi
+      pkg/windows/puppet6/puppet-agent-6.19.0-x86.msi
+      pkg/windowsfips/puppet6/puppet-agent-6.19.0-x64.msi
+      pkg/windows/puppet6/puppet-agent-x86.msi
+      pkg/windowsfips/puppet6/puppet-agent-x64.msi
     ]
-    solaris_packages = [
-      'pkg/solaris/10/puppet6/puppet-agent-6.9.0-1.sparc.pkg.gz',
-      'pkg/solaris/10/puppet6/puppet-agent-6.9.0-1.sparc.pkg.gz.asc'
+    solaris_packages = %w[
+      pkg/solaris/10/puppet6/puppet-agent-6.9.0-1.sparc.pkg.gz
+      pkg/solaris/10/puppet6/puppet-agent-6.9.0-1.sparc.pkg.gz.asc
     ]
 
     it 'returns an array of packages found on the filesystem' do
@@ -23,9 +25,9 @@ describe '#Pkg::Util::Ship' do
       end
       it 'correctly excludes any packages that match a passed excludes argument' do
         expect(Pkg::Util::Ship.collect_packages(['pkg/**/*.msi'], ['puppet-agent-x(86|64).msi']))
-          .not_to include('pkg/windows/puppet5/puppet-agent-x86.msi')
+          .not_to include('pkg/windows/puppet6/puppet-agent-x86.msi')
         expect(Pkg::Util::Ship.collect_packages(['pkg/**/*.msi'], ['puppet-agent-x(86|64).msi']))
-          .not_to include('pkg/windows/puppet5/puppet-agent-x64.msi')
+          .not_to include('pkg/windows/puppet6/puppet-agent-x64.msi')
       end
       it 'correctly includes packages that do not match a passed excluded argument' do
         expect(Pkg::Util::Ship.collect_packages(['pkg/**/*.msi'],
@@ -41,38 +43,42 @@ describe '#Pkg::Util::Ship' do
   end
 
   # Sample data for #reorganize_packages and #ship_pkgs specs
-  retrieved_packages = [
-    'pkg/deb/bionic/puppet6/puppet-agent_6.19.0-1bionic_amd64.deb',
-    'pkg/el/7/puppet6/aarch64/puppet-agent-6.19.0-1.el7.aarch64.rpm',
-    'pkg/el/7/puppet6/ppc64le/puppet-agent-6.19.0-1.el7.ppc64le.rpm',
-    'pkg/el/7/puppet6/x86_64/puppet-agent-6.19.0-1.el7.x86_64.rpm',
-    'pkg/sles/12/puppet6/ppc64le/puppet-agent-6.19.0-1.sles12.ppc64le.rpm',
-    'pkg/sles/12/puppet6/x86_64/puppet-agent-6.19.0-1.sles12.x86_64.rpm',
-    'pkg/sles/15/puppet6/x86_64/puppet-agent-6.19.0-1.sles15.x86_64.rpm',
-    'pkg/apple/10.14/puppet6/x86_64/puppet-agent-6.19.0-1.osx10.14.dmg',
-    'pkg/apple/10.15/puppet6/x86_64/puppet-agent-6.19.0-1.osx10.15.dmg',
-    'pkg/fedora/32/puppet6/x86_64/puppet-agent-6.19.0-1.fc32.x86_64.rpm',
-    'pkg/windows/puppet-agent-6.19.0-x64.msi',
-    'pkg/windows/puppet-agent-6.19.0-x86.msi',
-    'pkg/windowsfips/puppet-agent-6.19.0-x64.msi'
+  retrieved_packages = %w[
+    pkg/deb/bionic/puppet6/puppet-agent_6.19.0-1bionic_amd64.deb
+    pkg/el/7/puppet6/aarch64/puppet-agent-6.19.0-1.el7.aarch64.rpm
+    pkg/el/7/puppet6/ppc64le/puppet-agent-6.19.0-1.el7.ppc64le.rpm
+    pkg/el/7/puppet6/x86_64/puppet-agent-6.19.0-1.el7.x86_64.rpm
+    pkg/sles/12/puppet6/ppc64le/puppet-agent-6.19.0-1.sles12.ppc64le.rpm
+    pkg/sles/12/puppet6/x86_64/puppet-agent-6.19.0-1.sles12.x86_64.rpm
+    pkg/sles/15/puppet6/x86_64/puppet-agent-6.19.0-1.sles15.x86_64.rpm
+    pkg/apple/10.14/puppet6/x86_64/puppet-agent-6.19.0-1.osx10.14.dmg
+    pkg/apple/10.15/puppet6/x86_64/puppet-agent-6.19.0-1.osx10.15.dmg
+    pkg/fedora/32/puppet6/x86_64/puppet-agent-6.19.0-1.fc32.x86_64.rpm
+    pkg/windows/puppet-agent-6.19.0-x64.msi
+    pkg/windows/puppet-agent-6.19.0-x86.msi
+    pkg/windowsfips/puppet-agent-6.19.0-x64.msi
+    pkg/windows/puppet6/puppet-agent-x86.msi
+    pkg/windowsfips/puppet6/puppet-agent-x64.msi
   ]
 
   # After reorganization, the packages should look like this.
   # Beware apple->mac transforms.
-  expected_reorganized_packages = [
-    'pkg/bionic/puppet6/puppet-agent_6.19.0-1bionic_amd64.deb',
-    'pkg/puppet6/el/7/aarch64/puppet-agent-6.19.0-1.el7.aarch64.rpm',
-    'pkg/puppet6/el/7/ppc64le/puppet-agent-6.19.0-1.el7.ppc64le.rpm',
-    'pkg/puppet6/el/7/x86_64/puppet-agent-6.19.0-1.el7.x86_64.rpm',
-    'pkg/puppet6/sles/12/ppc64le/puppet-agent-6.19.0-1.sles12.ppc64le.rpm',
-    'pkg/puppet6/sles/12/x86_64/puppet-agent-6.19.0-1.sles12.x86_64.rpm',
-    'pkg/puppet6/sles/15/x86_64/puppet-agent-6.19.0-1.sles15.x86_64.rpm',
-    'pkg/mac/puppet6/10.14/x86_64/puppet-agent-6.19.0-1.osx10.14.dmg',
-    'pkg/mac/puppet6/10.15/x86_64/puppet-agent-6.19.0-1.osx10.15.dmg',
-    'pkg/puppet6/fedora/32/x86_64/puppet-agent-6.19.0-1.fc32.x86_64.rpm',
-    'pkg/windows/puppet6/puppet-agent-6.19.0-x64.msi',
-    'pkg/windows/puppet6/puppet-agent-6.19.0-x86.msi',
-    'pkg/windowsfips/puppet6/puppet-agent-6.19.0-x64.msi'
+  expected_reorganized_packages = %w[
+    pkg/bionic/puppet6/puppet-agent_6.19.0-1bionic_amd64.deb
+    pkg/puppet6/el/7/aarch64/puppet-agent-6.19.0-1.el7.aarch64.rpm
+    pkg/puppet6/el/7/ppc64le/puppet-agent-6.19.0-1.el7.ppc64le.rpm
+    pkg/puppet6/el/7/x86_64/puppet-agent-6.19.0-1.el7.x86_64.rpm
+    pkg/puppet6/sles/12/ppc64le/puppet-agent-6.19.0-1.sles12.ppc64le.rpm
+    pkg/puppet6/sles/12/x86_64/puppet-agent-6.19.0-1.sles12.x86_64.rpm
+    pkg/puppet6/sles/15/x86_64/puppet-agent-6.19.0-1.sles15.x86_64.rpm
+    pkg/mac/puppet6/10.14/x86_64/puppet-agent-6.19.0-1.osx10.14.dmg
+    pkg/mac/puppet6/10.15/x86_64/puppet-agent-6.19.0-1.osx10.15.dmg
+    pkg/puppet6/fedora/32/x86_64/puppet-agent-6.19.0-1.fc32.x86_64.rpm
+    pkg/windows/puppet6/puppet-agent-6.19.0-x64.msi
+    pkg/windows/puppet6/puppet-agent-6.19.0-x86.msi
+    pkg/windowsfips/puppet6/puppet-agent-6.19.0-x64.msi
+    pkg/windows/puppet6/puppet-agent-x86.msi
+    pkg/windowsfips/puppet6/puppet-agent-x64.msi
   ]
 
   describe '#reorganize_packages' do

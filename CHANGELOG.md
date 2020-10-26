@@ -4,6 +4,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 ### Changed
+- Allow `Pkg::Config.version` to be overridden with the `PACKAGING_PACKAGE_VERSION`
+  environment variable.
 - Added the --silent flag to curl when fetching gem JSON data from rubygems.org.
   The live download progress/throughput information is noisy and not really helpful
   when packaging is running in a batch mode.

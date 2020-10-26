@@ -298,6 +298,7 @@ module Pkg::Params
               { :var => :team,                    :envvar => :TEAM },
               { :var => :update_version_file,     :envvar => :NEW_STYLE_PACKAGE },
               { :var => :vanagon_project,         :envvar => :VANAGON_PROJECT, :type => :bool },
+              { :var => :version,                 :envvar => :PACKAGING_PACKAGE_VERSION },
               { :var => :yum_archive_path,        :envvar => :YUM_ARCHIVE_PATH },
               { :var => :yum_host,                :envvar => :YUM_HOST },
               { :var => :yum_repo_path,           :envvar => :YUM_REPO },

@@ -3,12 +3,18 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
-### Changed
+
+## [0.99.72] - 2020-10-26
+### Added
 - Allow `Pkg::Config.version` to be overridden with the `PACKAGING_PACKAGE_VERSION`
   environment variable.
-- Added the --silent flag to curl when fetching gem JSON data from rubygems.org.
+
+### Changed
+- Added the `--silent` flag to curl when fetching gem JSON data from rubygems.org.
   The live download progress/throughput information is noisy and not really helpful
   when packaging is running in a batch mode.
+- APT repository paths are changing in puppet7 to allow for new repos for each major
+  puppet version. Updated the pathing calculations for this case.
 
 ## [0.99.71] - 2020-10-02
 ### Fixed
@@ -681,7 +687,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.71...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.72...HEAD
+[0.99.72]: https://github.com/puppetlabs/packaging/compare/0.99.71...0.99.72
 [0.99.71]: https://github.com/puppetlabs/packaging/compare/0.99.70...0.99.71
 [0.99.70]: https://github.com/puppetlabs/packaging/compare/0.99.69...0.99.70
 [0.99.69]: https://github.com/puppetlabs/packaging/compare/0.99.68...0.99.69

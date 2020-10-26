@@ -6,7 +6,7 @@ module Pkg::Util::Git
     # Git utility to create a new git commit
     def commit_file(file, message = 'changes')
       fail_unless_repo
-      puts 'Commiting changes:'
+      puts 'Committing changes:'
       puts
       diff, = Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} diff HEAD #{file}")
       puts diff

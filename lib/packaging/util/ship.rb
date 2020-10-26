@@ -105,12 +105,22 @@ module Pkg::Util::Ship
   end
 
   def ship_rpms(local_staging_directory, remote_path, opts = {})
-    ship_pkgs(["#{local_staging_directory}/**/*.rpm", "#{local_staging_directory}/**/*.srpm"], Pkg::Config.yum_staging_server, remote_path, opts)
+    things_to_ship = [
+      "#{local_staging_directory}/**/*.rpm",
+      "#{local_staging_directory}/**/*.srpm"
+    ]
+    ship_pkgs(things_to_ship, Pkg::Config.yum_staging_server, remote_path, opts)
   end
 
   def ship_debs(local_staging_directory, remote_path, opts = {})
-    ship_pkgs(["#{local_staging_directory}/**/*.debian.tar.gz", "#{local_staging_directory}/**/*.orig.tar.gz" "#{local_staging_directory}/**/*.dsc", "#{local_staging_directory}/**/*.deb", "#{local_staging_directory}/**/*.changes"], Pkg::Config.apt_signing_server, remote_path, opts)
-
+    things_to_ship = [
+      "#{local_staging_directory}/**/*.debian.tar.gz",
+      "#{local_staging_directory}/**/*.orig.tar.gz",
+      "#{local_staging_directory}/**/*.dsc",
+      "#{local_staging_directory}/**/*.deb",
+      "#{local_staging_directory}/**/*.changes"
+    ]
+    ship_pkgs(things_to_ship, Pkg::Config.apt_signing_server, remote_path, opts)
   end
 
   def ship_svr4(local_staging_directory, remote_path, opts = {})
@@ -122,12 +132,17 @@ module Pkg::Util::Ship
   end
 
   def ship_dmg(local_staging_directory, remote_path, opts = {})
-    packages_have_shipped = ship_pkgs(["#{local_staging_directory}/**/*.dmg"], Pkg::Config.dmg_staging_server, remote_path, opts)
+    packages_have_shipped = ship_pkgs(["#{local_staging_directory}/**/*.dmg"],
+                                      Pkg::Config.dmg_staging_server, remote_path, opts)
 
     if packages_have_shipped
       Pkg::Platforms.platform_tags_for_package_format('dmg').each do |platform_tag|
         # Create the latest symlink for the current supported repo
-        Pkg::Util::Net.remote_create_latest_symlink(Pkg::Config.project, Pkg::Paths.artifacts_path(platform_tag, remote_path, opts[:nonfinal]), 'dmg')
+        Pkg::Util::Net.remote_create_latest_symlink(
+          Pkg::Config.project,
+          Pkg::Paths.artifacts_path(platform_tag, remote_path, opts[:nonfinal]),
+          'dmg'
+        )
       end
     end
   end

@@ -3,6 +3,10 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (RE-13722) make a semi-revert of the APT repository path changes, labeling them as
+  'FUTURE' changes in order to coordinate details of the changes better. This change
+  is expected to reappear shortly once the downstream issues are resolved.
 
 ## [0.99.72] - 2020-10-26
 ### Added

@@ -117,7 +117,7 @@ module Pkg::Paths
 
       # In puppet7 and beyond, we moved the repo_name to the top to allow each
       # puppet major release to have its own apt repo.
-      if %w(puppet7 puppet7-nightly).include? repo_name
+      if %w(FUTURE-puppet7 FUTURE-puppet7-nightly).include? repo_name
         return File.join(prefix, apt_repo_name(is_nonfinal), debian_code_name)
       end
 
@@ -313,13 +313,16 @@ module Pkg::Paths
     # In puppet7 and beyond, we moved the puppet major version to near the top to allow each
     # puppet major release to have its own apt repo, for example:
     # /opt/repository/apt/puppet7/pool/bionic/p/puppet-agent
-    if %w(puppet7 puppet7-nightly).include? repo_name
+    if %w(FUTURE-puppet7 FUTURE-puppet7-nightly).include? repo_name
       return File.join(remote_repo_path, repo_name, 'pool', code_name, project[0], project)
     end
 
     # For repos prior to puppet7, the puppet version was part of the repository
     # For example: /opt/repository/apt/pool/bionic/puppet6/p/puppet-agent
-    if %w(puppet puppet5 puppet6 puppet-nightly puppet5-nightly puppet6-nightly).include? repo_name
+    if %w(puppet7 puppet7-nightly
+          puppet6 puppet6-nightly
+          puppet5 puppet5-nightly
+          puppet).include? repo_name
       return File.join(remote_repo_path, 'pool', code_name, repo_name, project[0], project)
     end
 

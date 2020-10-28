@@ -64,8 +64,8 @@ describe 'Pkg::Paths' do
     end
 
     it 'should return repo_name for final version' do
-      allow(Pkg::Config).to receive(:repo_name).and_return('puppet7')
-      expect(Pkg::Paths.repo_name).to eq('puppet7')
+      allow(Pkg::Config).to receive(:repo_name).and_return('FUTURE-puppet7')
+      expect(Pkg::Paths.repo_name).to eq('FUTURE-puppet7')
     end
 
     it 'should be empty string if repo_name is not set for final version' do
@@ -131,16 +131,16 @@ describe 'Pkg::Paths' do
 
     context 'after puppet 7 apt changes' do
       before :each do
-        allow(Pkg::Config).to receive(:repo_name).and_return('puppet7')
+        allow(Pkg::Config).to receive(:repo_name).and_return('FUTURE-puppet7')
       end
 
       it 'should be correct for bionic' do
         expect(Pkg::Paths.artifacts_path('ubuntu-18.04-amd64'))
-          .to eq('artifacts/puppet7/bionic')
+          .to eq('artifacts/FUTURE-puppet7/bionic')
       end
       it 'should be correct for focal' do
         expect(Pkg::Paths.artifacts_path('ubuntu-20.04-amd64'))
-          .to eq('artifacts/puppet7/focal')
+          .to eq('artifacts/FUTURE-puppet7/focal')
       end
     end
   end
@@ -201,13 +201,13 @@ describe 'Pkg::Paths' do
     end
 
     it 'should return nonfinal_repo_name for nonfinal version' do
-      allow(Pkg::Config).to receive(:repo_name).and_return('puppet7')
-      allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return('puppet7-nightly')
-      expect(Pkg::Paths.apt_repo_name(true)).to eq('puppet7-nightly')
+      allow(Pkg::Config).to receive(:repo_name).and_return('FUTURE-puppet7')
+      allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return('FUTURE-puppet7-nightly')
+      expect(Pkg::Paths.apt_repo_name(true)).to eq('FUTURE-puppet7-nightly')
     end
 
     it 'should fail if nonfinal_repo_name is not set for non-final version' do
-      allow(Pkg::Config).to receive(:repo_name).and_return('puppet7')
+      allow(Pkg::Config).to receive(:repo_name).and_return('FUTURE-puppet7')
       allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nil)
       expect { Pkg::Paths.apt_repo_name(true) }.to raise_error
     end
@@ -222,8 +222,8 @@ describe 'Pkg::Paths' do
 
     it 'should return `Pkg::Config.yum_repo_name` if `Pkg::Config.repo_name` is not set' do
       allow(Pkg::Config).to receive(:repo_name).and_return(nil)
-      allow(Pkg::Config).to receive(:yum_repo_name).and_return('puppet7')
-      expect(Pkg::Paths.yum_repo_name).to eq('puppet7')
+      allow(Pkg::Config).to receive(:yum_repo_name).and_return('FUTURE-puppet7')
+      expect(Pkg::Paths.yum_repo_name).to eq('FUTURE-puppet7')
     end
 
     it 'should return \'products\' if nothing is set' do
@@ -233,13 +233,13 @@ describe 'Pkg::Paths' do
     end
 
     it 'should return nonfinal_repo_name for nonfinal version' do
-      allow(Pkg::Config).to receive(:repo_name).and_return('puppet7')
-      allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return('puppet7-nightly')
-      expect(Pkg::Paths.yum_repo_name(true)).to eq('puppet7-nightly')
+      allow(Pkg::Config).to receive(:repo_name).and_return('FUTURE-puppet7')
+      allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return('FUTURE-puppet7-nightly')
+      expect(Pkg::Paths.yum_repo_name(true)).to eq('FUTURE-puppet7-nightly')
     end
 
     it 'should fail if nonfinal_repo_name is not set for non-final version' do
-      allow(Pkg::Config).to receive(:repo_name).and_return('puppet7')
+      allow(Pkg::Config).to receive(:repo_name).and_return('FUTURE-puppet7')
       allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nil)
       expect { Pkg::Paths.yum_repo_name(true) }.to raise_error
     end
@@ -319,15 +319,15 @@ describe 'Pkg::Paths' do
     context 'for puppet 7 and after' do
       it 'returns the approprate apt repo path' do
         allow(Pkg::Paths).to receive(:remote_repo_base).and_return('/opt/repository/apt')
-        expect(Pkg::Paths.apt_package_base_path('ubuntu-18.04-amd64', 'puppet7', 'puppet-agent'))
-          .to eq('/opt/repository/apt/puppet7/pool/bionic/p/puppet-agent')
-        expect(Pkg::Paths.apt_package_base_path('ubuntu-20.04-amd64', 'puppet7', 'puppet-agent'))
-          .to eq('/opt/repository/apt/puppet7/pool/focal/p/puppet-agent')
+        expect(Pkg::Paths.apt_package_base_path('ubuntu-18.04-amd64', 'FUTURE-puppet7', 'puppet-agent'))
+          .to eq('/opt/repository/apt/FUTURE-puppet7/pool/bionic/p/puppet-agent')
+        expect(Pkg::Paths.apt_package_base_path('ubuntu-20.04-amd64', 'FUTURE-puppet7', 'puppet-agent'))
+          .to eq('/opt/repository/apt/FUTURE-puppet7/pool/focal/p/puppet-agent')
       end
       it 'returns the appropriate nonfinal repo path' do
         allow(Pkg::Paths).to receive(:remote_repo_base).and_return('/opt/repository-nightlies/apt')
-        expect(Pkg::Paths.apt_package_base_path('debian-10-amd64', 'puppet7-nightly', 'pdk', true))
-          .to eq('/opt/repository-nightlies/apt/puppet7-nightly/pool/buster/p/pdk')
+        expect(Pkg::Paths.apt_package_base_path('debian-10-amd64', 'FUTURE-puppet7-nightly', 'pdk', true))
+          .to eq('/opt/repository-nightlies/apt/FUTURE-puppet7-nightly/pool/buster/p/pdk')
       end
     end
   end
@@ -371,8 +371,8 @@ describe 'Pkg::Paths' do
     end
 
     context 'for puppet 7' do
-      repo_name = 'puppet7'
-      nonfinal_repo_name = 'puppet7-nightly'
+      repo_name = 'FUTURE-puppet7'
+      nonfinal_repo_name = 'FUTURE-puppet7-nightly'
       yum_repo_path = '/opt/repository/yum'
       apt_repo_path = '/opt/repository/apt'
       nonfinal_yum_repo_path = '/opt/repository-nightlies/yum'

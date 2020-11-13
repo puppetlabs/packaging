@@ -117,7 +117,7 @@ module Pkg::Paths
 
       # In puppet7 and beyond, we moved the repo_name to the top to allow each
       # puppet major release to have its own apt repo.
-      if %w(FUTURE-puppet7 FUTURE-puppet7-nightly).include? repo_name
+      if %w(puppet7 puppet7-nightly).include? repo_name
         return File.join(prefix, apt_repo_name(is_nonfinal), debian_code_name)
       end
 
@@ -313,7 +313,7 @@ module Pkg::Paths
     # In puppet7 and beyond, we moved the puppet major version to near the top to allow each
     # puppet major release to have its own apt repo, for example:
     # /opt/repository/apt/puppet7/pool/bionic/p/puppet-agent
-    if %w(FUTURE-puppet7 FUTURE-puppet7-nightly).include? repo_name
+    if %w(puppet7 puppet7-nightly).include? repo_name
       return File.join(remote_repo_path, repo_name, 'pool', code_name, project[0], project)
     end
 
@@ -360,5 +360,23 @@ module Pkg::Paths
     end
     return base_component if component_qualifier == 'repos'
     return full_component
+  end
+
+  # Given a repo name and a final/nonfinal (aka nightly) designation, fetch from
+  # build-data the correct shell commands to generate the target repo.
+  def apt_repo_generator(nonfinal: true)
+    if nonfinal
+      # Nightly/nonfinal repos
+      if Pkg::Config.repo_name == 'puppet7'
+        return Pkg::Config.puppet7_nonfinal_apt_repo_generate
+      end
+      return Pkg::Config.nonfinal_apt_repo_command
+    end
+
+    # stable / not-nonfinal repos
+    if Pkg::Config.repo_name == 'puppet7'
+      return Pkg::Config.puppet7_stable_apt_repo_generate
+    end
+    return Pkg::Config.apt_repo_command
   end
 end

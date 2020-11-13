@@ -132,18 +132,25 @@ module Pkg::Repo
     def update_repo(remote_host, command, options = {})
       fail_message = "Error: Missing required argument '%s', update your build_defaults?"
       [:repo_name, :repo_path, :repo_host, :repo_url].each do |option|
-        fail fail_message % option.to_s if argument_required?(option.to_s, command) && !options[option]
+        if argument_required?(option.to_s, command) && !options[option]
+          fail fail_message % option.to_s
+        end
       end
 
-      whitelist = {
+      # APT_DISTROS is a replacement synonym for (deprecated) APT_PLATFORMS. APT_DISTROS
+      # matches closer to the terminology used by freight.
+      macro_substitutions = {
+        __APT_DISTROS__: Pkg::Config.apt_releases.join(' '),
+        __APT_PLATFORMS__: Pkg::Config.apt_releases.join(' '),
+        __GPG_KEY__: Pkg::Util::Gpg.key,
+        __REPO_HOST__: options[:repo_host],
         __REPO_NAME__: options[:repo_name],
         __REPO_PATH__: options[:repo_path],
-        __REPO_HOST__: options[:repo_host],
-        __REPO_URL__: options[:repo_url],
-        __APT_PLATFORMS__: Pkg::Config.apt_releases.join(' '),
-        __GPG_KEY__: Pkg::Util::Gpg.key
+        __REPO_URL__: options[:repo_url]
       }
-      Pkg::Util::Net.remote_ssh_cmd(remote_host, Pkg::Util::Misc.search_and_replace(command, whitelist))
+      Pkg::Util::Net.remote_ssh_cmd(
+        remote_host,
+        Pkg::Util::Misc.search_and_replace(command, macro_substitutions))
     end
   end
 end

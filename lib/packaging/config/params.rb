@@ -148,6 +148,8 @@ module Pkg::Params
                   :privatekey_pem,
                   :project,
                   :project_root,
+                  :puppet7_nonfinal_apt_repo_generate,
+                  :puppet7_stable_apt_repo_generate,
                   :random_mockroot,
                   :rc_mocks,
                   :redis_hostname,

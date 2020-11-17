@@ -367,14 +367,14 @@ module Pkg::Paths
   def apt_repo_generator(nonfinal: true)
     if nonfinal
       # Nightly/nonfinal repos
-      if Pkg::Config.repo_name == 'puppet7'
+      if %w[puppet7 puppet7-nightly].include? Pkg::Config.repo_name
         return Pkg::Config.puppet7_nonfinal_apt_repo_generate
       end
       return Pkg::Config.nonfinal_apt_repo_command
     end
 
     # stable / not-nonfinal repos
-    if Pkg::Config.repo_name == 'puppet7'
+    if %w[puppet7 puppet7-nightly].include? Pkg::Config.repo_name
       return Pkg::Config.puppet7_stable_apt_repo_generate
     end
     return Pkg::Config.apt_repo_command

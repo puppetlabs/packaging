@@ -53,7 +53,7 @@ namespace :pl do
         Pkg::Paths.apt_repo_generator(nonfinal: false),
         {
           repo_name: Pkg::Paths.apt_repo_name,
-          repo_path: Pkg::Config.apt_repo_path,
+          repo_path: Pkg::Paths.apt_repo_path(nonfinal: false),
           repo_host: Pkg::Config.apt_host,
           repo_url: Pkg::Config.apt_repo_url
         })
@@ -69,7 +69,7 @@ namespace :pl do
         Pkg::Paths.apt_repo_generator(nonfinal: true),
         {
           repo_name: Pkg::Config.nonfinal_repo_name,
-          repo_path: Pkg::Config.nonfinal_apt_repo_path,
+          repo_path: Pkg::Paths.nonfinal_apt_repo_path(nonfinal: true),
           repo_host: Pkg::Config.apt_host,
           repo_url: Pkg::Config.apt_repo_url
         })
@@ -171,16 +171,16 @@ namespace :pl do
     desc "Move signed deb repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}"
     task deploy_apt_repo: 'pl:fetch' do
       puts "Really run remote rsync to deploy Debian repos from #{Pkg::Config.apt_signing_server} to #{Pkg::Config.apt_host}? [y,n]"
-      if Pkg::Util.ask_yes_or_no
-        Pkg::Util::Execution.retry_on_fail(times: 3) do
-          Pkg::Deb::Repo.deploy_repos(
-            Pkg::Config.apt_repo_path,
-            Pkg::Config.apt_repo_staging_path,
-            Pkg::Config.apt_signing_server,
-            Pkg::Config.apt_host,
-            ENV['DRYRUN']
-          )
-        end
+      next unless Pkg::Util.ask_yes_or_no
+
+      Pkg::Util::Execution.retry_on_fail(times: 3) do
+        Pkg::Deb::Repo.deploy_repos(
+          Pkg::Paths.apt_repo_path(nonfinal: true),
+          Pkg::Paths.apt_repo_staging_path(nonfinal: true),
+          Pkg::Config.apt_signing_server,
+          Pkg::Config.apt_host,
+          ENV['DRYRUN']
+        )
       end
     end
 

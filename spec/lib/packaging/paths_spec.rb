@@ -374,16 +374,17 @@ describe 'Pkg::Paths' do
       repo_name = 'puppet7'
       nonfinal_repo_name = 'puppet7-nightly'
       yum_repo_path = '/opt/repository/yum'
-      apt_repo_path = '/opt/repository/apt'
+      puppet7_apt_repo_path = '/opt/repository/apt/puppet7'
       nonfinal_yum_repo_path = '/opt/repository-nightlies/yum'
-      nonfinal_apt_repo_path = '/opt/repository-nightlies/apt'
+      puppet7_nonfinal_apt_repo_path = '/opt/repository-nightlies/apt/puppet7'
       before :each do
         allow(Pkg::Config).to receive(:repo_name).and_return(repo_name)
         allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nonfinal_repo_name)
         allow(Pkg::Config).to receive(:yum_repo_path).and_return(yum_repo_path)
-        allow(Pkg::Config).to receive(:apt_repo_path).and_return(apt_repo_path)
+        allow(Pkg::Config).to receive(:puppet7_apt_repo_path).and_return(puppet7_apt_repo_path)
         allow(Pkg::Config).to receive(:nonfinal_yum_repo_path).and_return(nonfinal_yum_repo_path)
-        allow(Pkg::Config).to receive(:nonfinal_apt_repo_path).and_return(nonfinal_apt_repo_path)
+        allow(Pkg::Config).to receive(:puppet7_nonfinal_apt_repo_path)
+                                .and_return(puppet7_nonfinal_apt_repo_path)
       end
       it 'returns the appropriate link path for rpm release packages' do
         expect(Pkg::Paths.release_package_link_path('sles-12-ppc64le'))
@@ -391,7 +392,7 @@ describe 'Pkg::Paths' do
       end
       it 'returns the appropriate link path for deb release packages' do
         expect(Pkg::Paths.release_package_link_path('ubuntu-20.04-amd64'))
-          .to eq("#{apt_repo_path}/#{repo_name}-release-focal.deb")
+          .to eq("#{puppet7_apt_repo_path}/#{repo_name}-release-focal.deb")
       end
       it 'returns the appropriate link path for nonfinal rpm release packages' do
         expect(Pkg::Paths.release_package_link_path('el-8-x86_64', true))
@@ -399,7 +400,7 @@ describe 'Pkg::Paths' do
       end
       it 'returns the appropriate link path for nonfinal deb release packages' do
         expect(Pkg::Paths.release_package_link_path('debian-10-i386', true))
-          .to eq("#{nonfinal_apt_repo_path}/#{nonfinal_repo_name}-release-buster.deb")
+          .to eq("#{puppet7_nonfinal_apt_repo_path}/#{nonfinal_repo_name}-release-buster.deb")
       end
       it 'returns nil for package formats that do not have release packages' do
         expect(Pkg::Paths.release_package_link_path('osx-10.15-x86_64')).to eq(nil)

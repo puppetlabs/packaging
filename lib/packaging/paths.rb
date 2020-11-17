@@ -282,7 +282,7 @@ module Pkg::Paths
     when 'rpm'
       nonfinal ? Pkg::Config.nonfinal_yum_repo_path : Pkg::Config.yum_repo_path
     when 'deb'
-      nonfinal ? Pkg::Config.nonfinal_apt_repo_path : Pkg::Config.apt_repo_path
+      Pkg::Paths.apt_repo_path(nonfinal: nonfinal)
     when 'dmg'
       nonfinal ? Pkg::Config.nonfinal_dmg_path : Pkg::Config.dmg_path
     when 'swix'
@@ -362,21 +362,51 @@ module Pkg::Paths
     return full_component
   end
 
-  # Given a repo name and a final/nonfinal (aka nightly) designation, fetch from
-  # build-data the correct shell commands to generate the target repo.
-  def apt_repo_generator(nonfinal: true)
+  # Based upon the repo_name and the final/nonfinal state, create a hash with correct
+  # repo paths and repo generator bash-code blocks
+  def get_apt_repo_paths(nonfinal:)
     if nonfinal
-      # Nightly/nonfinal repos
       if %w[puppet7 puppet7-nightly].include? Pkg::Config.repo_name
-        return Pkg::Config.puppet7_nonfinal_apt_repo_generate
+        return {
+          apt_repo_path:         Pkg::Config.puppet7_nonfinal_apt_repo_path,
+          apt_repo_staging_path: Pkg::Config.puppet7_nonfinal_apt_repo_staging_path,
+          apt_repo_generate:     Pkg::Config.puppet7_nonfinal_apt_repo_generate
+        }
       end
-      return Pkg::Config.nonfinal_apt_repo_command
+      # Pre-puppet7 nonfinal case
+      return {
+        apt_repo_path:         Pkg::Config.nonfinal_apt_repo_path,
+        apt_repo_staging_path: Pkg::Config.nonfinal_apt_repo_staging_path,
+        apt_repo_generate:     Pkg::Config.nonfinal_apt_repo_command
+      }
     end
 
-    # stable / not-nonfinal repos
+    # stable / "not-nonfinal" repos
     if %w[puppet7 puppet7-nightly].include? Pkg::Config.repo_name
-      return Pkg::Config.puppet7_stable_apt_repo_generate
+      return {
+        apt_repo_path:         Pkg::Config.puppet7_apt_repo_path,
+        apt_repo_staging_path: Pkg::Config.puppet7_apt_repo_staging_path,
+        apt_repo_generate:     Pkg::Config.puppet7_apt_repo_generate
+      }
     end
-    return Pkg::Config.apt_repo_command
+    # Pre-puppet7 stable / "not-nonfinal" case
+    return {
+      apt_repo_path:         Pkg::Config.apt_repo_path,
+      apt_repo_staging_path: Pkg::Config.apt_repo_staging_path,
+      apt_repo_generate:     Pkg::Config.apt_repo_command
+    }
+  end
+
+  # Convenience methods to return just the desired key of th apt_repo_paths
+  def apt_repo_path(nonfinal:)
+    Pkg::Paths.get_apt_repo_paths(nonfinal: nonfinal)[:apt_repo_path]
+  end
+
+  def apt_repo_staging_path(nonfinal:)
+    Pkg::Paths.get_apt_repo_paths(nonfinal: nonfinal)[:apt_repo_staging_path]
+  end
+
+  def apt_repo_generate(nonfinal:)
+    Pkg::Paths.get_apt_repo_paths(nonfinal: nonfinal)[:apt_repo_generate]
   end
 end

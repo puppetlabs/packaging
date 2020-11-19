@@ -4,6 +4,10 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.99.74] - 2020-11-19
+### Changed
+- Update bundle installs to use ruby 2.5.1
+
 ## [0.99.73] - 2020-10-28
 ### Changed
 - (RE-13722) make a semi-revert of the APT repository path changes, labeling them as
@@ -693,7 +697,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.72...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.74...HEAD
+[0.99.74]: https://github.com/puppetlabs/packaging/compare/0.99.73...0.99.74
 [0.99.73]: https://github.com/puppetlabs/packaging/compare/0.99.72...0.99.73
 [0.99.72]: https://github.com/puppetlabs/packaging/compare/0.99.71...0.99.72
 [0.99.71]: https://github.com/puppetlabs/packaging/compare/0.99.70...0.99.71

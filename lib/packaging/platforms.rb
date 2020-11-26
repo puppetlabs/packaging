@@ -248,7 +248,7 @@ module Pkg
         },
         '20.04' => {
           codename: 'focal',
-          architectures: ['amd64'],
+          architectures: ['amd64', 'aarch64'],
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,

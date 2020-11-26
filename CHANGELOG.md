@@ -4,6 +4,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 - (PA-3478) add Ubuntu 2004 aarch64 to platform hash
+- (PA-3497) accommodate arm64 debian packages for aarch64
 
 ## [0.99.74] - 2020-11-19
 ### Changed

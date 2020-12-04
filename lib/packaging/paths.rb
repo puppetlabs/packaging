@@ -16,9 +16,9 @@ module Pkg::Paths
     if source_formats.find { |fmt| path =~ /#{fmt}$/ }
       return Pkg::Platforms.get_attribute_for_platform_version(platform, version, :source_architecture)
     end
-    arches.find { |a| path.include?(a) } || arches[0]
+    arches.find { |a| path.include?(package_arch(platform, a)) } || arches[0]
   rescue
-    arches.find { |a| path.include?(a) } || arches[0]
+    arches.find { |a| path.include?(package_arch(platform, a)) } || arches[0]
   end
 
   # Given a path to an artifact, divine the appropriate platform tag associated
@@ -361,4 +361,15 @@ module Pkg::Paths
     return base_component if component_qualifier == 'repos'
     return full_component
   end
+
+  #for ubuntu-20.04-aarch64, debian package architecture is arm64
+  def package_arch(platform, arch)
+    if platform == 'ubuntu' && arch == 'aarch64'
+      return 'arm64'
+    end
+    arch
+  end
+
+  private :package_arch
+
 end

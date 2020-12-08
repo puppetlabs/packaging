@@ -3,6 +3,9 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.75] - 2020-12-08
+### Added
 - (PA-3478) add Ubuntu 2004 aarch64 to platform hash
 - (PA-3497) accommodate arm64 debian packages for aarch64
 
@@ -699,7 +702,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.74...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.75...HEAD
+[0.99.75]: https://github.com/puppetlabs/packaging/compare/0.99.74...0.99.75
 [0.99.74]: https://github.com/puppetlabs/packaging/compare/0.99.73...0.99.74
 [0.99.73]: https://github.com/puppetlabs/packaging/compare/0.99.72...0.99.73
 [0.99.72]: https://github.com/puppetlabs/packaging/compare/0.99.71...0.99.72

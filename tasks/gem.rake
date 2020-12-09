@@ -150,20 +150,10 @@ namespace :package do
     Pkg::Config.gemversion = Pkg::Util::Version.extended_dot_version
     package_gem
   end
-
-  # PA-3356: temporary task to ship puppet 7 nightly gem
-  # TODO: PA-3358 - remove when puppet 7 is officialy out
-  task :puppet_7_nightly_gem => ["clean"] do
-    Pkg::Config.gemversion = Pkg::Util::Version.extended_dot_version.gsub(/6\.\d+\.\d+/, '7.0.0')
-    package_gem
-  end
 end
 
 # An alias task to simplify our remote logic in jenkins.rake
 namespace :pl do
   task :gem => "package:gem"
   task :nightly_gem => "package:nightly_gem"
-  # PA-3356: temporary task to ship puppet 7 nightly gem
-  # TODO: PA-3358 - remove when puppet 7 is officialy out
-  task :puppet_7_nightly_gem => "package:puppet_7_nightly_gem"
 end

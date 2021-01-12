@@ -17,7 +17,7 @@ describe "Pkg::Util::Git_tag" do
 
   context "branch?" do
     it "sets ref type as a branch when passed a branch" do
-      git_tag = Pkg::Util::Git_tag.new("git://github.com/puppetlabs/leatherman.git", "master")
+      git_tag = Pkg::Util::Git_tag.new("git://github.com/puppetlabs/leatherman.git", "main")
       expect(git_tag.branch?).to eq(true)
     end
   end

@@ -322,7 +322,8 @@ module Pkg::Paths
     if %w(puppet7 puppet7-nightly
           puppet6 puppet6-nightly
           puppet5 puppet5-nightly
-          puppet).include? repo_name
+          puppet
+          puppet-tools).include? repo_name
       return File.join(remote_repo_path, 'pool', code_name, repo_name, project[0], project)
     end
 

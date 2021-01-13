@@ -4,7 +4,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 ### Fixed
- - `puppet-tools` repository was missed in the apt path updates.
+ - `puppet-tools` and `puppet-nightly` repositories were missed in the apt path updates.
 
 ### Changed
  - (PA-3358) Removed puppet 7 nightly gem rake task

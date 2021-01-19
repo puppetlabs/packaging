@@ -404,7 +404,7 @@ deb_build_mirrors:
 # Who is packaging. Turns up in various packaging artifacts
 packager: 'puppetlabs'
 # GPG key ID of the signer
-gpg_key: '7F438280EF8D349F'
+gpg_key: '4528B6CD9E61EF26'
 # Whether to require tarball signing as a prerequisite of other package building
 sign_tar: false
 # a space separated list of mock configs. These are the rpm distributions to package for. If a noarch package, only one arch of each is needed.

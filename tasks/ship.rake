@@ -444,6 +444,16 @@ namespace :pl do
     end
   end
 
+  desc 'Create the rolling repo links'
+  task create_repo_links: 'pl:fetch' do
+    Pkg::Util::Ship.create_rolling_repo_links
+  end
+
+  desc 'Create rolling repo links for nightlies'
+  task create_nightly_repo_links: 'pl:fetch' do
+    Pkg::Util::Ship.create_rolling_repo_links(true)
+  end
+
   desc 'Test out the ship requirements'
   task ship_check: 'pl:fetch' do
     errs = []
@@ -517,15 +527,6 @@ namespace :pl do
       end
     end
 
-    desc 'Create the rolling repo links'
-    task create_repo_links: 'pl:fetch' do
-      Pkg::Util::Ship.create_rolling_repo_links
-    end
-
-    desc 'Create rolling repo links for nightlies'
-    task create_nightly_repo_links: 'pl:fetch' do
-      Pkg::Util::Ship.create_rolling_repo_links(true)
-    end
   end
 
   # It is odd to namespace this ship task under :jenkins, but this task is

@@ -3,6 +3,9 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- (PA-3531) Add support for RedHat 8 ppc64le
+
 ### Fixed
  - `puppet-tools` repository was missed in the apt path updates.
  - `create_link` tasks were initially created under the wrong namespace, these

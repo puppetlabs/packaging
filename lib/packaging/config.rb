@@ -6,6 +6,7 @@ module Pkg
   #
   class Config
     require 'packaging/config/params.rb'
+    require 'packaging/config/validations.rb'
     require 'yaml'
 
     class << self
@@ -386,6 +387,29 @@ module Pkg
           if self.instance_variable_get("@#{v[:var]}")
             warn v[:message]
           end
+        end
+      end
+
+      ##
+      #   Ask for validation of BUILD_PARAMS
+      #
+      def perform_validations
+        error_count = 0
+        Pkg::Params::VALIDATIONS.each do |v|
+          variable_name = v[:var]
+          variable_value = self.instance_variable_get("@#{v[:var]}")
+          validations = v[:validations]
+          validations.each do |validation|
+            result = Pkg::ConfigValidations.send(validation, variable_value)
+            if (result == false)
+              puts "ERROR: variable \"#{variable_name}\" failed validation \"#{validation}\""
+              error_count += 1
+            end
+          end
+        end
+
+        if error_count != 0
+          fail "ERROR: #{error_count} validation failure(s)."
         end
       end
 

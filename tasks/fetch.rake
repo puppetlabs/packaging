@@ -30,28 +30,31 @@ namespace :pl do
   task :fetch do
     # Remove .packaging directory from old-style extras loading
     rm_rf "#{ENV['HOME']}/.packaging" if File.directory?("#{ENV['HOME']}/.packaging")
+
     # Touch the .packaging file which is allows packaging to present remote tasks
     touch "#{ENV['HOME']}/.packaging"
 
     begin
-      temp_build_data_dir = Pkg::Util::File.mktemp
-      %x(git clone #{data_repo} #{temp_build_data_dir})
-      if $?.success?
-        Dir.chdir(temp_build_data_dir) do
-          [team_data_branch, project_data_branch].each do |branch|
-            %x(git checkout #{branch})
-            if $?.success?
-              Pkg::Util::RakeUtils.invoke_task("pl:load_extras", temp_build_data_dir)
-            else
-              warn "Unable to load build_defaults from branch '#{branch}' in '#{data_repo}'. Skipping."
-            end
+      build_data_directory = Pkg::Util::File.mktemp
+      %x(git clone #{data_repo} #{build_data_directory})
+      unless $?.success?
+        fail 'Error: could not fetch the build-data repo. Maybe you do not have the correct permissions?'
+      end
+
+      Dir.chdir(build_data_directory) do
+        [team_data_branch, project_data_branch].each do |branch|
+          %x(git checkout #{branch})
+          unless $?.success?
+            warn "Warning: no build_defaults found in branch '#{branch}' of '#{data_repo}'. Skipping."
+            next
           end
+          Pkg::Util::RakeUtils.invoke_task('pl:load_extras', build_data_directory)
         end
-      else
-        fail "There was an error attempting to fetch the build-data repo. Maybe you do not have the correct permissions?"
       end
     ensure
-      rm_rf temp_build_data_dir
+      rm_rf build_data_directory
     end
+
+    Pkg::Util::RakeUtils.invoke_task('config:validate')
   end
 end

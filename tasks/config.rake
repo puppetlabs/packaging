@@ -6,6 +6,11 @@ namespace :config do
     end
   end
 
+  desc "validate Pkg::Config values for this repo"
+  task :validate do
+    Pkg::Config.perform_validations
+  end
+
   task :print_hosts => 'pl:fetch' do
     Pkg::Util.filter_configs('host').each do |key, value|
       puts "#{key}: #{value}"

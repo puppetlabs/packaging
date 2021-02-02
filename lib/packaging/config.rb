@@ -393,6 +393,9 @@ module Pkg
       ##
       #   Ask for validation of BUILD_PARAMS
       #
+      #   Issued as warnings initially but the intent is to turn this into
+      #   a failure.
+      #
       def perform_validations
         error_count = 0
         Pkg::Params::VALIDATIONS.each do |v|
@@ -400,16 +403,15 @@ module Pkg
           variable_value = self.instance_variable_get("@#{v[:var]}")
           validations = v[:validations]
           validations.each do |validation|
-            result = Pkg::ConfigValidations.send(validation, variable_value)
-            if (result == false)
-              puts "ERROR: variable \"#{variable_name}\" failed validation \"#{validation}\""
+            unless Pkg::ConfigValidations.send(validation, variable_value)
+              warn "Warning: variable \"#{variable_name}\" failed validation \"#{validation}\""
               error_count += 1
             end
           end
         end
 
         if error_count != 0
-          fail "ERROR: #{error_count} validation failure(s)."
+          warn "Warning: #{error_count} validation failure(s)."
         end
       end
 

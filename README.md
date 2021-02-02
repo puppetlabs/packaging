@@ -935,7 +935,7 @@ files:
     Performs an ssh call to the package server that calls a server-side rake
     task. The rake task takes the debian packages that have (presumably) been
     shipped via `pl:ship_debs` and invokes
-    [freight](https://github.com/rcrowley/freight) with them, which places them
+    [freight](https://github.com/freight-team/freight) with them, which places them
     in the apt repository.
 
 * **pl:remote:update_yum_repo**

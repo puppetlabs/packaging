@@ -5,11 +5,12 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ## [Unreleased]
 ### Added
 - (PA-3531) Add support for RedHat 8 ppc64le
+- (RE-11821) Create a configuration-validation hook after a pl:fetch
 
 ### Fixed
- - `puppet-tools` and `puppet-nightly` repositories were missed in the apt path updates.
- - `create_link` tasks were initially created under the wrong namespace, these
-    have been moved to under the `pl` namespace.
+- `puppet-tools` and `puppet-nightly` repositories were missed in the apt path updates.
+- `create_link` tasks were initially created under the wrong namespace, these
+   have been moved to under the `pl` namespace.
 
 ### Changed
  - (PA-3358) Removed puppet 7 nightly gem rake task

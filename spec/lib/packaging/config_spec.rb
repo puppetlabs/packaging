@@ -259,7 +259,7 @@ describe "Pkg::Config" do
     end
 
     it "should return a hash mapping platform tags to paths" do
-      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(artifacts, nil)
+      allow(Pkg::Util::Net).to receive(:remote_execute).and_return(artifacts, nil)
       expect(Pkg::Config.platform_data.keys).to eql(platform_tags)
     end
 
@@ -279,21 +279,21 @@ describe "Pkg::Config" do
     end
 
     it "should not use 'f' in fedora platform tags" do
-      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(fedora_artifacts, nil)
+      allow(Pkg::Util::Net).to receive(:remote_execute).and_return(fedora_artifacts, nil)
       data = Pkg::Config.platform_data
       expect(data).to include('fedora-31-x86_64')
       expect(data).not_to include('fedora-f31-x86_64')
     end
 
     it "should collect packages whose extname differ from package_format" do
-      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(solaris_artifacts, nil)
+      allow(Pkg::Util::Net).to receive(:remote_execute).and_return(solaris_artifacts, nil)
       data = Pkg::Config.platform_data
       expect(data).to include('solaris-10-i386' => {:artifact => './solaris/10/PC1/puppet-agent-5.3.2-1.i386.pkg.gz', :repo_config => nil})
       expect(data).to include('solaris-11-sparc' => {:artifact => './solaris/11/PC1/puppet-agent@5.3.2,5.11-1.sparc.p5p', :repo_config => nil})
     end
 
     it "should collect versioned msis" do
-      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(windows_artifacts, nil)
+      allow(Pkg::Util::Net).to receive(:remote_execute).and_return(windows_artifacts, nil)
       data = Pkg::Config.platform_data
       expect(data['windows-2012-x86']).to include(:artifact => './windows/puppet-agent-5.3.2-x86.msi')
       expect(data['windows-2012-x64']).to include(:artifact => './windows/puppet-agent-5.3.2-x64.msi')
@@ -301,13 +301,13 @@ describe "Pkg::Config" do
     end
 
     it "should not collect debug packages" do
-      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(stretch_artifacts, nil)
+      allow(Pkg::Util::Net).to receive(:remote_execute).and_return(stretch_artifacts, nil)
       data = Pkg::Config.platform_data
       expect(data['debian-9-amd64']).to include(:artifact => './deb/stretch/PC1/puppet-agent_5.3.2.658.gc79ef9a-1stretch_amd64.deb')
     end
 
     it "should collect packages that don't match the project name" do
-      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(artifacts_not_matching_project, nil)
+      allow(Pkg::Util::Net).to receive(:remote_execute).and_return(artifacts_not_matching_project, nil)
       data = Pkg::Config.platform_data
       expect(data['ubuntu-16.04-amd64']).to include(:artifact => './deb/xenial/pe-postgresql-contrib_2019.1.9.6.12-1xenial_amd64.deb')
       expect(data['ubuntu-16.04-amd64'][:additional_artifacts].size).to eq(3)
@@ -317,13 +317,13 @@ describe "Pkg::Config" do
     end
 
     it "should use 'ppc' instead of 'power' in aix paths" do
-      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(aix_artifacts, nil)
+      allow(Pkg::Util::Net).to receive(:remote_execute).and_return(aix_artifacts, nil)
       data = Pkg::Config.platform_data
       expect(data['aix-6.1-power']).to include(:artifact => './aix/6.1/PC1/ppc/puppet-agent-5.3.2-1.aix6.1.ppc.rpm')
     end
 
     it "should not record an aix repo config" do
-      allow(Pkg::Util::Net).to receive(:remote_ssh_cmd).and_return(aix_artifacts, nil)
+      allow(Pkg::Util::Net).to receive(:remote_execute).and_return(aix_artifacts, nil)
       data = Pkg::Config.platform_data
       expect(data['aix-6.1-power'][:repo_config]).to be_nil
     end

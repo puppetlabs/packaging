@@ -39,7 +39,7 @@ namespace :pl do
     task :deploy_staged_apt_archives_to_s3 => 'pl:fetch' do
       command = 'sudo /usr/local/bin/s3_repo_sync.sh release-archives.puppet.com/apt'
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
+        Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, command)
       end
     end
 
@@ -47,7 +47,7 @@ namespace :pl do
     task :deploy_staged_yum_archives_to_s3 => 'pl:fetch' do
       command = 'sudo /usr/local/bin/s3_repo_sync.sh release-archives.puppet.com/yum'
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
+        Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, command)
       end
     end
 
@@ -55,7 +55,7 @@ namespace :pl do
     task :deploy_staged_downloads_archives_to_s3 => 'pl:fetch' do
       command = 'sudo /usr/local/bin/s3_repo_sync.sh release-archives.puppet.com/downloads'
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
+        Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, command)
       end
     end
 
@@ -67,4 +67,3 @@ namespace :pl do
     end
   end
 end
-

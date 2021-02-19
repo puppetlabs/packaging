@@ -26,10 +26,10 @@ cd #{remote_repo} ;
 #{Pkg::Util::Net.remote_bundle_install_command}
 bundle exec rake pl:jenkins:sign_repos GPG_KEY=#{Pkg::Util::Gpg.key} PARAMS_FILE=#{build_params}
 DOC
-      Pkg::Util::Net.remote_ssh_cmd(signing_server, rake_command)
+      Pkg::Util::Net.remote_execute(signing_server, rake_command)
       Pkg::Util::Net.rsync_from("#{remote_repo}/repos/", signing_server, target)
-      Pkg::Util::Net.remote_ssh_cmd(signing_server, "rm -rf #{remote_repo}")
-      Pkg::Util::Net.remote_ssh_cmd(signing_server, "rm #{build_params}")
+      Pkg::Util::Net.remote_execute(signing_server, "rm -rf #{remote_repo}")
+      Pkg::Util::Net.remote_execute(signing_server, "rm #{build_params}")
       puts "Signed packages staged in '#{target}' directory"
     end
 
@@ -48,7 +48,7 @@ DOC
       target_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target_prefix}_repos"
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
         # Ship the now signed repos to the distribution server
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{target_dir}")
+        Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, "mkdir -p #{target_dir}")
         Pkg::Util::Net.rsync_to("#{target_prefix}_repos/", Pkg::Config.distribution_server, target_dir)
       end
     end
@@ -244,11 +244,11 @@ DOC
       local_pa_latest = "#{pa_source}-latest"
       local_pe_latest = "#{pe_target}-latest"
 
-      Pkg::Util::Net.remote_ssh_cmd(target_host, "mkdir -p '#{pe_target}'")
-      Pkg::Util::Net.remote_ssh_cmd(target_host, "mkdir -p '#{local_pe_latest}'")
-      Pkg::Util::Net.remote_ssh_cmd(target_host, "cp -r #{local_pa_latest}/* #{local_pe_latest}")
-      Pkg::Util::Net.remote_ssh_cmd(target_host, "sed -i 's|/#{File.basename(local_pa_latest)}|/#{pe_version}/#{File.basename(local_pa_latest)}|' #{local_pe_latest}/repo_configs/*/*")
-      Pkg::Util::Net.remote_ssh_cmd(target_host, "ln -sf '#{local_pa}' '#{local_pe}'")
+      Pkg::Util::Net.remote_execute(target_host, "mkdir -p '#{pe_target}'")
+      Pkg::Util::Net.remote_execute(target_host, "mkdir -p '#{local_pe_latest}'")
+      Pkg::Util::Net.remote_execute(target_host, "cp -r #{local_pa_latest}/* #{local_pe_latest}")
+      Pkg::Util::Net.remote_execute(target_host, "sed -i 's|/#{File.basename(local_pa_latest)}|/#{pe_version}/#{File.basename(local_pa_latest)}|' #{local_pe_latest}/repo_configs/*/*")
+      Pkg::Util::Net.remote_execute(target_host, "ln -sf '#{local_pa}' '#{local_pe}'")
     end
 
     task :nightly_repos => ["pl:fetch"] do

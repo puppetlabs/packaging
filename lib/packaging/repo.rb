@@ -110,7 +110,11 @@ module Pkg::Repo
       cmd = "[ -d #{artifact_directory} ] || exit 1 ; "
       cmd << "pushd #{artifact_directory} > /dev/null && "
       cmd << "find . -name '*.#{pkg_ext}' -print0 | xargs --no-run-if-empty -0 -I {} dirname {} "
-      stdout, stderr = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, cmd, true)
+      stdout, _ = Pkg::Util::Net.remote_execute(
+                Pkg::Config.distribution_server,
+                cmd,
+                { capture_output: true }
+              )
       return stdout.split
     rescue => e
       fail "Error: Could not retrieve directories that contain #{pkg_ext} packages in #{Pkg::Config.distribution_server}:#{artifact_directory}"
@@ -120,7 +124,7 @@ module Pkg::Repo
       cmd = "[ -d #{artifact_parent_directory}/artifacts ] || exit 1 ; "
       cmd << "pushd #{artifact_parent_directory} > /dev/null && "
       cmd << 'rsync --archive --verbose --one-file-system --ignore-existing artifacts/ repos/ '
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, cmd)
+      Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, cmd)
     rescue => e
       fail "Error: Could not populate repos directory in #{Pkg::Config.distribution_server}:#{artifact_parent_directory}"
     end
@@ -143,7 +147,9 @@ module Pkg::Repo
         __APT_PLATFORMS__: Pkg::Config.apt_releases.join(' '),
         __GPG_KEY__: Pkg::Util::Gpg.key
       }
-      Pkg::Util::Net.remote_ssh_cmd(remote_host, Pkg::Util::Misc.search_and_replace(command, whitelist))
+      Pkg::Util::Net.remote_execute(
+        remote_host,
+        Pkg::Util::Misc.search_and_replace(command, whitelist))
     end
   end
 end

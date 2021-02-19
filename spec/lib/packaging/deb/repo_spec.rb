@@ -92,10 +92,10 @@ describe "Pkg::Deb::Repo" do
       Pkg::Repo.should_receive(:directories_that_contain_packages).and_return(pkg_directories)
       Pkg::Repo.should_receive(:populate_repo_directory)
       Pkg::Deb::Repo.should_receive(:repo_creation_command).and_return(command)
-      Pkg::Util::Net.should_receive(:remote_ssh_cmd).with(Pkg::Config.distribution_server, command)
+      Pkg::Util::Net.should_receive(:remote_execute).with(Pkg::Config.distribution_server, command)
       Pkg::Deb::Repo.should_receive(:generate_repo_configs)
       Pkg::Deb::Repo.should_receive(:ship_repo_configs)
-      Pkg::Util::Net.should_receive(:remote_ssh_cmd).with(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/repos/.lock" )
+      Pkg::Util::Net.should_receive(:remote_execute).with(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/repos/.lock" )
       Pkg::Deb::Repo.create_repos
     end
   end
@@ -115,7 +115,7 @@ describe "Pkg::Deb::Repo" do
       repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/repo_configs/deb"
       Pkg::Util::File.should_receive(:empty_dir?).with("pkg/repo_configs/deb").and_return(false)
       Pkg::Util::RakeUtils.should_receive(:invoke_task).with("pl:fetch")
-      Pkg::Util::Net.should_receive(:remote_ssh_cmd).with(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
+      Pkg::Util::Net.should_receive(:remote_execute).with(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
       Pkg::Util::Execution.should_receive(:retry_on_fail).with(:times => 3)
       Pkg::Deb::Repo.ship_repo_configs
     end

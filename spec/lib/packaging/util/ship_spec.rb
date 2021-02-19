@@ -126,7 +126,7 @@ describe '#Pkg::Util::Ship' do
       # All of these expects must be called in the same block in order for the
       # tests to work without actually shipping anything
       expect(Pkg::Util::Net)
-        .to receive(:remote_ssh_cmd)
+        .to receive(:remote_execute)
               .with(test_staging_server, /#{test_remote_path}/)
               .exactly(retrieved_packages.count).times
       expect(Pkg::Util::Net)
@@ -167,7 +167,7 @@ describe '#Pkg::Util::Ship' do
       # All of these expects must be called in the same block in order for the
       # tests to work without actually shipping anything
       expect(Pkg::Util::Net)
-        .to receive(:remote_ssh_cmd)
+        .to receive(:remote_execute)
               .with(test_staging_server, /#{test_remote_path}/)
       expect(Pkg::Util::Net)
         .to receive(:rsync_to)

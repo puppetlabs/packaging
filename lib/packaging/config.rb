@@ -81,7 +81,11 @@ module Pkg
         dir = "/opt/jenkins-builds/#{self.project}/#{self.ref}"
         cmd = "if [ -s \"#{dir}/artifacts\" ]; then cd #{dir};"\
               "find ./artifacts/ -mindepth 2 -type f; fi"
-        artifacts, _ = Pkg::Util::Net.remote_ssh_cmd(self.builds_server, cmd, true)
+        artifacts, _ = Pkg::Util::Net.remote_execute(
+                     self.builds_server,
+                     cmd,
+                     { capture_output: true }
+                   )
 
         artifacts = artifacts.split("\n")
         data = {}

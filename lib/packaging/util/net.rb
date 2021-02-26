@@ -20,13 +20,11 @@ module Pkg::Util::Net
     end
 
     # Check that the current host matches the one we think it should
-    def check_host(host, args = { :required => true })
-      if hostname == host
-        return true
-      else
-        fail "#{hostname} does not match #{host}" if args[:required]
-        return nil
-      end
+    def check_host(host, options = { required: true })
+      return true if hostname == host
+
+      fail "Error: #{hostname} does not match #{host}" if options[:required]
+      return nil
     end
 
     # @param hosts - An array of hosts to try ssh-ing into
@@ -93,19 +91,29 @@ module Pkg::Util::Net
         return ''
       end
 
-      puts "Executing '#{remote_command}'"
+      # We're forced to make different calls depending on the capture_output option
+      # because something about our #capture3 method screws up gpg. This should
+      # be untangled.
+      if options[:capture_output]
+        stdout, stderr, exitstatus = Pkg::Util::Execution.capture3(remote_command)
+        Pkg::Util::Execution.success?(exitstatus) or
+          raise "Remote ssh command (\"#{remote_command}\") failed."
+        return stdout, stderr
+      end
 
-      stdout, stderr, exitstatus = Pkg::Util::Execution.capture3(remote_command)
-      Pkg::Util::Execution.success?(exitstatus) or raise "Remote ssh command failed."
-      return stdout, stderr if options[:capture_output]
-      return ''
+      # Pkg::Util::Execution.capture3 reports its command but Kernel.system does not
+      # Let's print it out for some amount of consistency.
+      puts "Remote Execute: '#{remote_command}'"
+      Kernel.system(remote_command)
+      Pkg::Util::Execution.success? or
+        raise "Remote ssh command (\"#{remote_command}\") failed."
     end
 
     ###
     ### Deprecated method implemented as a shim to the new `remote_execute` method
     ###
     def remote_ssh_cmd(target, command, capture_output = false, extra_options = '', fail_fast = true, trace = false)  # rubocop:disable Style/ParameterLists
-
+      puts "Warn: \"remote_ssh_cmd\" call in packaging is deprecated. Use \"remote_execute\" instead."
       remote_execute(target, command, {
                        capture_output: capture_output,
                        extra_options: extra_options,

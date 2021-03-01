@@ -11,6 +11,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 - `puppet-tools` and `puppet-nightly` repositories were missed in the apt path updates.
 - `create_link` tasks were initially created under the wrong namespace, these
    have been moved to under the `pl` namespace.
+- SHA1 signing servers were updated
 
 ### Changed
  - (PA-3358) Removed puppet 7 nightly gem rake task

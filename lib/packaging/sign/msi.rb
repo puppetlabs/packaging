@@ -71,9 +71,8 @@ for msipath in #{msis.join(" ")}; do
     echo "$msi is already signed, skipping . . ." ;
   else
     tries=5
-    sha1Servers=(http://timestamp.verisign.com/scripts/timstamp.dll
-    http://timestamp.globalsign.com/scripts/timstamp.dll
-    http://www.startssl.com/timestamp)
+    sha1Servers=(http://timestamp.digicert.com/sha1/timestamp
+    http://timestamp.comodoca.com/authenticode)
     for timeserver in "${sha1Servers[@]}"; do
       for ((try=1; try<=$tries; try++)) do
         ret=$(/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe sign \

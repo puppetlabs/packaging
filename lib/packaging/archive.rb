@@ -33,7 +33,7 @@ module Pkg::Archive
       sudo chmod g+w -R #{Pkg::Config.yum_archive_path}
       mv #{full_directory} #{archive_path}
     CMD
-    Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
+    Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, command)
   end
 
   # Move directories from freight path (aka repo staging path) to archive staging paths
@@ -60,7 +60,7 @@ module Pkg::Archive
         mv $pool_directory /opt/tmp-apt
       done
     CMD
-    Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
+    Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, command)
   end
 
   # Move downloads directories to archive staging path
@@ -85,7 +85,7 @@ module Pkg::Archive
       sudo chmod g+w -R #{Pkg::Config.downloads_archive_path}
       mv #{full_directory} #{archive_path}
     CMD
-    Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
+    Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, command)
   end
 
   # Delete empty directories from repo paths on weth
@@ -104,7 +104,7 @@ module Pkg::Archive
           fi
         done
       CMD
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
+      Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, command)
     end
   end
 
@@ -112,7 +112,7 @@ module Pkg::Archive
   def remove_dead_symlinks
     base_paths.each do |path|
       command = "find #{path} -xtype l -delete"
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
+      Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, command)
     end
   end
 
@@ -120,7 +120,7 @@ module Pkg::Archive
   def delete_staged_archives
     archive_paths.each do |archive_path|
       command = "sudo rm -rf #{File.join(archive_path, '*')}"
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
+      Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, command)
     end
   end
 end

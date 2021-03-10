@@ -86,7 +86,7 @@ module Pkg::Util::Ship
           sub_string = 'pkg'
           remote_pkg = pkg.sub(sub_string, remote_path)
           remote_basepath = File.dirname(remote_pkg)
-          Pkg::Util::Net.remote_ssh_cmd(staging_server, "mkdir -p #{remote_basepath}")
+          Pkg::Util::Net.remote_execute(staging_server, "mkdir -p #{remote_basepath}")
           Pkg::Util::Net.rsync_to(
             File.join(tmpdir, pkg),
             staging_server,
@@ -202,7 +202,7 @@ module Pkg::Util::Ship
   def create_rolling_repo_link(platform_tag, staging_server, repo_path, nonfinal = false)
     command = rolling_repo_link_command(platform_tag, repo_path, nonfinal)
 
-    Pkg::Util::Net.remote_ssh_cmd(staging_server, command) unless command.nil?
+    Pkg::Util::Net.remote_execute(staging_server, command) unless command.nil?
   rescue => e
     fail "Failed to create rolling repo link for '#{platform_tag}'.\n#{e}\n#{e.backtrace}"
   end
@@ -265,13 +265,13 @@ module Pkg::Util::Ship
         fi
         ln -sf #{remote_path} #{link_path}
       CMD
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, link_command)
+      Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, link_command)
     end
   end
 
   def test_ship(vm, ship_task)
     command = 'getent group release || groupadd release'
-    Pkg::Util::Net.remote_ssh_cmd(vm, command)
+    Pkg::Util::Net.remote_execute(vm, command)
     hosts_to_override = %w(
       APT_HOST
       DMG_HOST

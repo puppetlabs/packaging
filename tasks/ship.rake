@@ -83,7 +83,11 @@ namespace :pl do
           source_dir = 'pkg/solaris/11/'
         end
 
-        tmpdir, _ = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, 'mktemp -d -p /var/tmp', true)
+        tmpdir, _ = Pkg::Util::Net.remote_execute(
+                  Pkg::Config.ips_host,
+                  'mktemp -d -p /var/tmp',
+                  { capture_output: true }
+                )
         tmpdir.chomp!
 
         Pkg::Util::Net.rsync_to(source_dir, Pkg::Config.ips_host, tmpdir)
@@ -92,9 +96,9 @@ namespace :pl do
       sudo pkgrecv -s $pkg -d #{Pkg::Config.ips_path} '*';
       done)
 
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, remote_cmd)
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "sudo pkgrepo refresh -s #{Pkg::Config.ips_path}")
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.ips_host, "sudo /usr/sbin/svcadm restart svc:/application/pkg/server:#{Pkg::Config.ips_repo || 'default'}")
+        Pkg::Util::Net.remote_execute(Pkg::Config.ips_host, remote_cmd)
+        Pkg::Util::Net.remote_execute(Pkg::Config.ips_host, "sudo pkgrepo refresh -s #{Pkg::Config.ips_path}")
+        Pkg::Util::Net.remote_execute(Pkg::Config.ips_host, "sudo /usr/sbin/svcadm restart svc:/application/pkg/server:#{Pkg::Config.ips_repo || 'default'}")
       end
     end
 
@@ -104,7 +108,7 @@ namespace :pl do
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(times: 3) do
           cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.dmg_path, target_host: Pkg::Config.dmg_host, extra_flags: ['--update'])
-          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.dmg_staging_server, cmd)
+          Pkg::Util::Net.remote_execute(Pkg::Config.dmg_staging_server, cmd)
         end
       end
     end
@@ -115,7 +119,7 @@ namespace :pl do
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(times: 3) do
           cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.swix_path, target_host: Pkg::Config.swix_host, extra_flags: ['--update'])
-          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.swix_staging_server, cmd)
+          Pkg::Util::Net.remote_execute(Pkg::Config.swix_staging_server, cmd)
         end
       end
     end
@@ -130,7 +134,7 @@ namespace :pl do
         else
           Pkg::Util::Execution.retry_on_fail(times: 3) do
             cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.tarball_path, target_host: Pkg::Config.tar_host, extra_flags: ['--update'])
-            Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.tar_staging_server, cmd)
+            Pkg::Util::Net.remote_execute(Pkg::Config.tar_staging_server, cmd)
           end
         end
       end
@@ -146,7 +150,7 @@ namespace :pl do
         else
           Pkg::Util::Execution.retry_on_fail(times: 3) do
             cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.msi_path, target_host: Pkg::Config.msi_host, extra_flags: ['--update'])
-            Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.msi_staging_server, cmd)
+            Pkg::Util::Net.remote_execute(Pkg::Config.msi_staging_server, cmd)
           end
         end
       end
@@ -174,7 +178,7 @@ namespace :pl do
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
           command = 'sudo /usr/local/bin/s3_repo_sync.sh apt.puppetlabs.com'
-          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.apt_signing_server, command)
+          Pkg::Util::Net.remote_execute(Pkg::Config.apt_signing_server, command)
         end
       end
     end
@@ -200,7 +204,7 @@ namespace :pl do
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
           command = 'sudo /usr/local/bin/s3_repo_sync.sh yum.puppetlabs.com'
-          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.yum_staging_server, command)
+          Pkg::Util::Net.remote_execute(Pkg::Config.yum_staging_server, command)
         end
       end
     end
@@ -211,7 +215,7 @@ namespace :pl do
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(:times => 3) do
           command = 'sudo /usr/local/bin/s3_repo_sync.sh downloads.puppetlabs.com'
-          Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
+          Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, command)
         end
       end
     end
@@ -228,7 +232,7 @@ namespace :pl do
       puts "Deploying nightly builds from #{Pkg::Config.staging_server} to AWS S3..."
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
         command = 'sudo /usr/local/bin/s3_repo_sync.sh nightlies.puppet.com'
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
+        Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, command)
       end
     end
 
@@ -242,7 +246,7 @@ namespace :pl do
             ['apt', 'yum'].each do |repo|
               # Don't --delete so that folks using archived packages can continue to do so
               command = "sudo su - rsync --command 'rsync --verbose -a --exclude '*.html' /opt/repo-s3-stage/repositories/#{repo}.puppetlabs.com/ rsync@#{rsync_server}:/opt/repository/#{repo}'"
-              Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, command)
+              Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, command)
             end
           end
         end
@@ -263,7 +267,7 @@ namespace :pl do
 
       command += %(; sync)
 
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.gem_host, command)
+      Pkg::Util::Net.remote_execute(Pkg::Config.gem_host, command)
     end
   end
 
@@ -499,7 +503,11 @@ namespace :pl do
     # Check for ability to sign OSX. Should just need to be able to unlock keychain
     begin
       unless ssh_errs.include?(Pkg::Config.osx_signing_server)
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.osx_signing_server, %(/usr/bin/security -q unlock-keychain -p "#{Pkg::Config.osx_signing_keychain_pw}" "#{Pkg::Config.osx_signing_keychain}"), false, '-oBatchMode=yes')
+        Pkg::Util::Net.remote_execute(
+          Pkg::Config.osx_signing_server,
+          %(/usr/bin/security -q unlock-keychain -p "#{Pkg::Config.osx_signing_keychain_pw}" "#{Pkg::Config.osx_signing_keychain}"),
+          { extra_options: '-oBatchMode=yes' }
+        )
       end
     rescue
       errs << "Unlocking the OSX keychain failed! Check the password in your .bashrc on #{Pkg::Config.osx_signing_server}"
@@ -652,8 +660,8 @@ namespace :pl do
       end
 
       Pkg::Util::Execution.retry_on_fail(times: 3) do
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir --mode=775 -p #{project_basedir}")
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{artifact_dir}")
+        Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, "mkdir --mode=775 -p #{project_basedir}")
+        Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, "mkdir -p #{artifact_dir}")
         Pkg::Util::Net.rsync_to("#{local_dir}/", Pkg::Config.distribution_server, "#{artifact_dir}/", extra_flags: ['--ignore-existing', '--exclude repo_configs'])
       end
 

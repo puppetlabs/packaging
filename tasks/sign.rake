@@ -144,10 +144,10 @@ cd #{remote_repo} ;
 #{Pkg::Util::Net.remote_bundle_install_command}
 bundle exec rake #{sign_tasks.map { |task| task + "[#{root_dir}]" }.join(" ")} PARAMS_FILE=#{build_params}
 DOC
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.signing_server, rake_command)
+      Pkg::Util::Net.remote_execute(Pkg::Config.signing_server, rake_command)
       Pkg::Util::Net.rsync_from("#{remote_repo}/#{root_dir}/", Pkg::Config.signing_server, "#{root_dir}/")
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.signing_server, "rm -rf #{remote_repo}")
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.signing_server, "rm #{build_params}")
+      Pkg::Util::Net.remote_execute(Pkg::Config.signing_server, "rm -rf #{remote_repo}")
+      Pkg::Util::Net.remote_execute(Pkg::Config.signing_server, "rm #{build_params}")
       puts "Signed packages staged in #{root_dir}/ directory"
     end
   end

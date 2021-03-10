@@ -15,10 +15,10 @@ module Pkg::Sign::Dmg
     work_dir  = "/tmp/#{Pkg::Util.rand_string}"
     mount     = File.join(work_dir, "mount")
     signed    = File.join(work_dir, "signed")
-    Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "mkdir -p #{mount} #{signed}")
+    Pkg::Util::Net.remote_execute(ssh_host_string, "mkdir -p #{mount} #{signed}")
     dmgs = Dir.glob("#{target_dir}/apple/**/*.dmg")
     Pkg::Util::Net.rsync_to(dmgs.join(" "), rsync_host_string, work_dir)
-    Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, %Q[for dmg in #{dmgs.map { |d| File.basename(d, ".dmg") }.join(" ")}; do
+    Pkg::Util::Net.remote_execute(ssh_host_string, %Q[for dmg in #{dmgs.map { |d| File.basename(d, ".dmg") }.join(" ")}; do
       /usr/bin/hdiutil attach #{work_dir}/$dmg.dmg -mountpoint #{mount} -nobrowse -quiet ;
       /usr/bin/security -q unlock-keychain -p "#{Pkg::Config.osx_signing_keychain_pw}" "#{Pkg::Config.osx_signing_keychain}" ;
         for pkg in $(ls #{mount}/*.pkg | xargs -n 1 basename); do
@@ -36,6 +36,6 @@ module Pkg::Sign::Dmg
     dmgs.each do | dmg |
       Pkg::Util::Net.rsync_from("#{work_dir}/#{File.basename(dmg)}", rsync_host_string, File.dirname(dmg))
     end
-    Pkg::Util::Net.remote_ssh_cmd(ssh_host_string, "if [ -d '#{work_dir}' ]; then rm -rf '#{work_dir}'; fi")
+    Pkg::Util::Net.remote_execute(ssh_host_string, "if [ -d '#{work_dir}' ]; then rm -rf '#{work_dir}'; fi")
   end
 end

@@ -128,7 +128,7 @@ describe "#Pkg::Repo" do
     end
 
     it 'should execute command if optional params are nil' do
-      expect(Pkg::Util::Net).to receive(:remote_ssh_cmd).with(remote_host, "some command with #{repo_name} and #{repo_path} and stuff")
+      expect(Pkg::Util::Net).to receive(:remote_execute).with(remote_host, "some command with #{repo_name} and #{repo_path} and stuff")
       Pkg::Repo.update_repo(remote_host, repo_command, { :repo_name => repo_name, :repo_path => repo_path })
     end
   end

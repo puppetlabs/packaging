@@ -35,7 +35,7 @@ namespace :pl do
       end
 
       # If the archive directory exists, move old VMs to it
-      Pkg::Util::Net.remote_ssh_cmd(target_host, "if [ -d #{target_directory}/archive ]; then #{archive_cmd}; fi")
+      Pkg::Util::Net.remote_execute(target_host, "if [ -d #{target_directory}/archive ]; then #{archive_cmd}; fi")
 
       # Ship VM and md5 to host
       Pkg::Util::Net.rsync_to(vm, target_host, target_directory)
@@ -45,10 +45,10 @@ namespace :pl do
       link_target.each do |link|
         link_path = File.join(target_directory, link)
         link_md5_path = "#{link_path}.md5"
-        Pkg::Util::Net.remote_ssh_cmd(target_host, "if [[ -L '#{link_path}' ]] && [[ ! -e '#{link_path}' ]] ; then echo '#{link_path} is a broken link, deleting' ; unlink '#{link_path}' ; fi")
-        Pkg::Util::Net.remote_ssh_cmd(target_host, "if [[ -L '#{link_md5_path}' ]] && [[ ! -e '#{link_md5_path}' ]] ; then echo '#{link_md5_path} is a broken link, deleting' ; unlink '#{link_md5_path}' ; fi")
-        Pkg::Util::Net.remote_ssh_cmd(target_host, "cd #{target_directory} ; ln -sf #{File.basename(vm)} #{link}")
-        Pkg::Util::Net.remote_ssh_cmd(target_host, "cd #{target_directory} ; ln -sf #{File.basename(md5)} #{link}.md5")
+        Pkg::Util::Net.remote_execute(target_host, "if [[ -L '#{link_path}' ]] && [[ ! -e '#{link_path}' ]] ; then echo '#{link_path} is a broken link, deleting' ; unlink '#{link_path}' ; fi")
+        Pkg::Util::Net.remote_execute(target_host, "if [[ -L '#{link_md5_path}' ]] && [[ ! -e '#{link_md5_path}' ]] ; then echo '#{link_md5_path} is a broken link, deleting' ; unlink '#{link_md5_path}' ; fi")
+        Pkg::Util::Net.remote_execute(target_host, "cd #{target_directory} ; ln -sf #{File.basename(vm)} #{link}")
+        Pkg::Util::Net.remote_execute(target_host, "cd #{target_directory} ; ln -sf #{File.basename(md5)} #{link}.md5")
       end
 
       puts "'#{vm}' and '#{md5}' have been shipped via rsync to '#{target_host}/#{target_directory}'"

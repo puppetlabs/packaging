@@ -16,7 +16,7 @@ module Pkg::Rpm::Repo
 
       Pkg::Util::RakeUtils.invoke_task("pl:fetch")
       repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}/rpm"
-      Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
+      Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
         Pkg::Util::Net.rsync_to("pkg/#{target}/rpm/", Pkg::Config.distribution_server, repo_dir)
       end
@@ -215,7 +215,7 @@ module Pkg::Rpm::Repo
       command = Pkg::Rpm::Repo.repo_creation_command(File.join(artifact_directory, directory), artifact_paths)
 
       begin
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, command)
+        Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, command)
         # Now that we've created our package repositories, we can generate repo
         # configurations for use with downstream jobs, acceptance clients, etc.
         Pkg::Rpm::Repo.generate_repo_configs
@@ -224,7 +224,7 @@ module Pkg::Rpm::Repo
         Pkg::Rpm::Repo.ship_repo_configs
       ensure
         # Always remove the lock file, even if we've failed
-        Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/repos/.lock")
+        Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/repos/.lock")
       end
     end
 
@@ -248,7 +248,7 @@ module Pkg::Rpm::Repo
     def deploy_repos(yum_path, origin_server, destination_server, dryrun = false)
       rsync_command = repo_deployment_command(yum_path, yum_path, destination_server, dryrun)
 
-      Pkg::Util::Net.remote_ssh_cmd(origin_server, rsync_command)
+      Pkg::Util::Net.remote_execute(origin_server, rsync_command)
     end
   end
 end

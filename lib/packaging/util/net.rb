@@ -20,13 +20,11 @@ module Pkg::Util::Net
     end
 
     # Check that the current host matches the one we think it should
-    def check_host(host, args = { :required => true })
-      if hostname == host
-        return true
-      else
-        fail "#{hostname} does not match #{host}" if args[:required]
-        return nil
-      end
+    def check_host(host, options = { required: true })
+      return true if hostname == host
+
+      fail "Error: #{hostname} does not match #{host}" if options[:required]
+      return nil
     end
 
     # @param hosts - An array of hosts to try ssh-ing into
@@ -38,7 +36,7 @@ module Pkg::Util::Net
       errs = []
       Array(hosts).flatten.each do |host|
         begin
-          remote_ssh_cmd(host, 'exit', false, '-oBatchMode=yes')
+          remote_execute(host, 'exit', { extra_options: '-oBatchMode=yes' })
         rescue
           errs << host
         end
@@ -56,7 +54,8 @@ module Pkg::Util::Net
       errs = []
       Array(hosts).flatten.each do |host|
         begin
-          remote_ssh_cmd(host, "gpg --list-secret-keys #{gpg} > /dev/null 2&>1", false, '-oBatchMode=yes')
+          remote_execute(host, "gpg --list-secret-keys #{gpg} > /dev/null 2&>1",
+                         { extra_options: '-oBatchMode=yes' })
         rescue
           errs << host
         end
@@ -64,40 +63,62 @@ module Pkg::Util::Net
       return errs
     end
 
-    def remote_ssh_cmd(target, command, capture_output = false, extra_options = '', fail_fast = true, trace = false)  # rubocop:disable Style/ParameterLists
+    def remote_execute(target_host, command, user_options = {})
+      option_defaults = {
+        capture_output: false,
+        extra_options: '',
+        fail_fast: true,
+        trace: false
+      }
+      options = option_defaults.merge(user_options)
 
       ssh = Pkg::Util::Tool.check_tool('ssh')
 
       # we pass some pretty complicated commands in via ssh. We need this to fail
       # if any part of the remote ssh command fails.
       shell_flags = ''
-      shell_flags += 'set -e;' if fail_fast
-      shell_flags += 'set -x;' if trace
+      shell_flags += 'set -e;' if options[:fail_fast]
+      shell_flags += 'set -x;' if options[:trace]
       shell_commands = "#{shell_flags}#{command}"
 
-      cmd = "#{ssh} #{extra_options} -t #{target} '#{shell_commands.gsub("'", "'\\\\''")}'"
+      remote_command = "#{ssh} #{options[:extra_options]} -t #{target_host} " +
+                       "'#{shell_commands.gsub("'", "'\\\\''")}'"
 
       # This is NOT a good way to support this functionality.
-      # It needs to be refactored into a set of methods that
-      # other methods can use to safely and deterministically
-      # support dry-run operations.
-      # But I need to ship packages RIGHT NOW.
-      # - Ryan McKern, 13/01/2016
       if ENV['DRYRUN']
         puts "[DRY-RUN] Executing '#{command}' on #{target}"
         puts "[DRY-RUN] #{cmd}"
-        return
+        return ''
       end
 
-      puts "Executing '#{command}' on #{target}"
-      if capture_output
-        stdout, stderr, exitstatus = Pkg::Util::Execution.capture3(cmd)
-        Pkg::Util::Execution.success?(exitstatus) or raise "Remote ssh command failed."
+      # We're forced to make different calls depending on the capture_output option
+      # because something about our #capture3 method screws up gpg. This should
+      # be untangled.
+      if options[:capture_output]
+        stdout, stderr, exitstatus = Pkg::Util::Execution.capture3(remote_command)
+        Pkg::Util::Execution.success?(exitstatus) or
+          raise "Remote ssh command (\"#{remote_command}\") failed."
         return stdout, stderr
-      else
-        Kernel.system(cmd)
-        Pkg::Util::Execution.success? or raise "Remote ssh command failed."
       end
+
+      # Pkg::Util::Execution.capture3 reports its command but Kernel.system does not
+      # Let's print it out for some amount of consistency.
+      puts "Remote Execute: '#{remote_command}'"
+      Kernel.system(remote_command)
+      Pkg::Util::Execution.success? or
+        raise "Remote ssh command (\"#{remote_command}\") failed."
+    end
+
+    ###
+    ### Deprecated method implemented as a shim to the new `remote_execute` method
+    ###
+    def remote_ssh_cmd(target, command, capture_output = false, extra_options = '', fail_fast = true, trace = false)  # rubocop:disable Style/ParameterLists
+      puts "Warn: \"remote_ssh_cmd\" call in packaging is deprecated. Use \"remote_execute\" instead."
+      remote_execute(target, command, {
+                       capture_output: capture_output,
+                       extra_options: extra_options,
+                       fail_fast: fail_fast,
+                       trace: trace })
     end
 
     # Construct a valid rsync command
@@ -272,17 +293,17 @@ module Pkg::Util::Net
 
     def remote_set_ownership(host, owner, group, files)
       remote_cmd = "for file in #{files.join(" ")}; do if [[ -d $file ]] || ! `lsattr $file | grep -q '\\-i\\-'`; then sudo chown #{owner}:#{group} $file; else echo \"$file is immutable\"; fi; done"
-      Pkg::Util::Net.remote_ssh_cmd(host, remote_cmd)
+      Pkg::Util::Net.remote_execute(host, remote_cmd)
     end
 
     def remote_set_permissions(host, permissions, files)
       remote_cmd = "for file in #{files.join(" ")}; do if [[ -d $file ]] || ! `lsattr $file | grep -q '\\-i\\-'`; then sudo chmod #{permissions} $file; else echo \"$file is immutable\"; fi; done"
-      Pkg::Util::Net.remote_ssh_cmd(host, remote_cmd)
+      Pkg::Util::Net.remote_execute(host, remote_cmd)
     end
 
     # Remotely set the immutable bit on a list of files
     def remote_set_immutable(host, files)
-      Pkg::Util::Net.remote_ssh_cmd(host, "sudo chattr +i #{files.join(" ")}")
+      Pkg::Util::Net.remote_execute(host, "sudo chattr +i #{files.join(" ")}")
     end
 
     # Create a symlink indicating the latest version of a package
@@ -328,7 +349,8 @@ module Pkg::Util::Net
         ln -sf "$link_target" #{full_package_name}-latest.#{platform_ext}
       CMD
 
-      _, err = Pkg::Util::Net.remote_ssh_cmd(Pkg::Config.staging_server, cmd, true)
+      _, err = Pkg::Util::Net.remote_execute(
+           Pkg::Config.staging_server, cmd, { capture_output: true })
       $stderr.puts err
     end
 
@@ -365,7 +387,7 @@ module Pkg::Util::Net
 #{tar} -zxvf /tmp/#{tarball_name}.tar.gz -C /tmp/ ;
 git clone --recursive /tmp/#{tarball_name} #{git_bundle_directory} ;
 DOC
-      Pkg::Util::Net.remote_ssh_cmd(host, command)
+      Pkg::Util::Net.remote_execute(host, command)
       return git_bundle_directory
     end
 

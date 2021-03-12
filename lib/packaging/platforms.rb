@@ -12,13 +12,6 @@ module Pkg
     # Each element in this hash
     PLATFORM_INFO = {
       'aix' => {
-        '6.1' => {
-          architectures: ['power'],
-          source_architecture: 'SRPMS',
-          package_format: 'rpm',
-          source_package_formats: ['src.rpm'],
-          repo: false,
-        },
         '7.1' => {
           architectures: ['power'],
           source_architecture: 'SRPMS',

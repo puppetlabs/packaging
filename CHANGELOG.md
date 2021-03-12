@@ -4,6 +4,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 - (RE-11477) Remove support for cisco-wrlinux and eos as those were EOL'd for platform6.
+- (RE-13479) Remove support for AIX 6.1
 
 ## [0.99.76] - 2021-03-21
 ### Added

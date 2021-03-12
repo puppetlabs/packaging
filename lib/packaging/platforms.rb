@@ -28,25 +28,6 @@ module Pkg
         },
       },
 
-      'cisco-wrlinux' => {
-        '5' => {
-          architectures: ['x86_64'],
-          source_architecture: 'SRPMS',
-          package_format: 'rpm',
-          source_package_formats: ['src.rpm'],
-          signature_format: 'v4',
-          repo: true,
-        },
-        '7' => {
-          architectures: ['x86_64'],
-          source_architecture: 'SRPMS',
-          package_format: 'rpm',
-          source_package_formats: ['src.rpm'],
-          signature_format: 'v4',
-          repo: true,
-        },
-      },
-
       'debian' => {
         '8' => {
           codename: 'jessie',
@@ -107,14 +88,6 @@ module Pkg
           signature_format: 'v4',
           repo: true,
         }
-      },
-
-      'eos' => {
-        '4' => {
-          architectures: ['i386'],
-          package_format: 'swix',
-          repo: false,
-        },
       },
 
       'fedora' => {

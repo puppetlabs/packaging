@@ -103,11 +103,11 @@ describe "#Pkg::Repo" do
     let(:optional_arg) { 'repo_name' }
 
     it 'should return true if command requires arg' do
-      expect(Pkg::Repo.argument_required?(required_arg, repo_command)).to be_true
+      expect(Pkg::Repo.argument_required?(required_arg, repo_command)).to be true
     end
 
     it 'should return false if command does not need arg' do
-      expect(Pkg::Repo.argument_required?(optional_arg, repo_command)).to be_false
+      expect(Pkg::Repo.argument_required?(optional_arg, repo_command)).to be false
     end
   end
 

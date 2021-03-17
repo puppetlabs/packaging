@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "Pkg::Util::RakeUtils" do
+describe 'Pkg::Util::RakeUtils' do
   let(:foo_defined?) { Rake::Task.task_defined?(:foo) }
   let(:bar_defined?) { Rake::Task.task_defined?(:bar) }
   let(:define_foo)   { body = proc{}; Rake::Task.define_task(:foo, &body) }
@@ -12,21 +12,21 @@ describe "Pkg::Util::RakeUtils" do
     end
   end
 
-  describe "#task_defined?" do
-    context "given a Rake::Task task name" do
-      it "should return true if the task exists" do
-        Rake::Task.stub(:task_defined?).with(:foo) {true}
-        expect(Pkg::Util::RakeUtils.task_defined?(:foo)).to be_true
+  describe '#task_defined?' do
+    context 'given a Rake::Task task name' do
+      it 'should return true if the task exists' do
+        allow(Rake::Task).to receive(:task_defined?).with(:foo).and_return true
+        expect(Pkg::Util::RakeUtils.task_defined?(:foo)).to be true
       end
-      it "should return false if the task does not exist" do
-        Rake::Task.stub(:task_defined?).with(:foo) {false}
-        expect(Pkg::Util::RakeUtils.task_defined?(:foo)).to be_false
+      it 'should return false if the task does not exist' do
+        allow(Rake::Task).to receive(:task_defined?).with(:foo).and_return false
+        expect(Pkg::Util::RakeUtils.task_defined?(:foo)).to be false
       end
     end
   end
 
-  describe "#get_task" do
-    it "should return a task object for a named task" do
+  describe '#get_task' do
+    it 'should return a task object for a named task' do
       foo = nil
       if !foo_defined?
         foo = define_foo
@@ -39,8 +39,8 @@ describe "Pkg::Util::RakeUtils" do
     end
   end
 
-  describe "#add_dependency" do
-    it "should add a dependency to a given rake task" do
+  describe '#add_dependency' do
+    it 'should add a dependency to a given rake task' do
       foo = nil
       bar = nil
       if !foo_defined?
@@ -54,13 +54,13 @@ describe "Pkg::Util::RakeUtils" do
         bar = Rake::Task[:bar]
       end
       Pkg::Util::RakeUtils.add_dependency(foo, bar)
-      expect(Rake::Task["foo"].prerequisites).to include(bar)
+      expect(Rake::Task['foo'].prerequisites).to include(bar)
     end
   end
 
-  describe "#evaluate_pre_tasks" do
-    context "Given a data file with :pre_tasks defined" do
-      it "should, for each k=>v pair, add v as a dependency to k" do
+  describe '#evaluate_pre_tasks' do
+    context 'Given a data file with :pre_tasks defined' do
+      it 'should, for each k=>v pair, add v as a dependency to k' do
         Pkg::Config.config_from_yaml(File.join(FIXTURES, 'util', 'pre_tasks.yaml'))
         expect(Pkg::Util::RakeUtils).to receive(:add_dependency)
         Pkg::Util::RakeUtils.evaluate_pre_tasks

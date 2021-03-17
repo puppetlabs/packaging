@@ -128,7 +128,7 @@ DOC
 
       it 'does not fail if there are no rpms to sign' do
         allow(Dir).to receive(:[]).with("#{rpm_directory}/**/*.rpm").and_return([])
-        expect(Pkg::Sign::Rpm.sign_all(rpm_directory)).to_not raise_error
+        expect { Pkg::Sign::Rpm.sign_all(rpm_directory) }.to_not raise_error
       end
     end
   end

@@ -142,8 +142,8 @@ describe "Pkg::Config" do
   describe "#new" do
     Build_Params.each do |param|
       it "should have r/w accessors for #{param}" do
-        Pkg::Config.should respond_to(param)
-        Pkg::Config.should respond_to("#{param.to_s}=")
+        expect(Pkg::Config).to respond_to(param)
+        expect(Pkg::Config).to respond_to("#{param.to_s}=")
       end
     end
   end
@@ -153,7 +153,7 @@ describe "Pkg::Config" do
     context "given a valid params hash #{good_params}" do
       it "should set instance variable values for each param" do
         good_params.each do |param, value|
-          Pkg::Config.should_receive(:instance_variable_set).with("@#{param}", value)
+          expect(Pkg::Config).to receive(:instance_variable_set).with("@#{param}", value)
         end
         Pkg::Config.config_from_hash(good_params)
       end
@@ -163,12 +163,12 @@ describe "Pkg::Config" do
     context "given an invalid params hash #{bad_params}" do
       bad_params.each do |param, value|
         it "should print a warning that param '#{param}' is not valid" do
-          Pkg::Config.should_receive(:warn).with(/No build data parameter found for '#{param}'/)
+          expect(Pkg::Config).to receive(:warn).with(/No build data parameter found for '#{param}'/)
           Pkg::Config.config_from_hash(bad_params)
         end
 
         it "should not try to set instance variable @:#{param}" do
-          Pkg::Config.should_not_receive(:instance_variable_set).with("@#{param}", value)
+          expect(Pkg::Config).not_to receive(:instance_variable_set).with("@#{param}", value)
           Pkg::Config.config_from_hash(bad_params)
         end
       end
@@ -177,17 +177,17 @@ describe "Pkg::Config" do
     mixed_params = { :sign_tar => true, :baz => 'qux' }
     context "given a hash with both valid and invalid params" do
       it "should set the valid param" do
-        Pkg::Config.should_receive(:instance_variable_set).with("@sign_tar", true)
+        expect(Pkg::Config).to receive(:instance_variable_set).with("@sign_tar", true)
         Pkg::Config.config_from_hash(mixed_params)
       end
 
       it "should issue a warning that the invalid param is not valid" do
-        Pkg::Config.should_receive(:warn).with(/No build data parameter found for 'baz'/)
+        expect(Pkg::Config).to receive(:warn).with(/No build data parameter found for 'baz'/)
         Pkg::Config.config_from_hash(mixed_params)
       end
 
       it "should not try to set instance variable @:baz" do
-        Pkg::Config.should_not_receive(:instance_variable_set).with("@baz", "qux")
+        expect(Pkg::Config).not_to receive(:instance_variable_set).with("@baz", "qux")
         Pkg::Config.config_from_hash(mixed_params)
       end
     end
@@ -196,7 +196,7 @@ describe "Pkg::Config" do
   describe "#params" do
     it "should return a hash containing keys for all build parameters" do
       params = Pkg::Config.config
-      Build_Params.each { |param| params.has_key?(param).should == true }
+      Build_Params.each { |param| expect(params.has_key?(param)).to be true }
     end
   end
 
@@ -332,9 +332,9 @@ describe "Pkg::Config" do
   describe "#config_to_yaml" do
     it "should write a valid yaml file" do
       file = double('file')
-      File.should_receive(:open).with(anything(), 'w').and_yield(file)
-      file.should_receive(:puts).with(instance_of(String))
-      YAML.should_receive(:load_file).with(file)
+      expect(File).to receive(:open).with(anything(), 'w').and_yield(file)
+      expect(file).to receive(:puts).with(instance_of(String))
+      expect(YAML).to receive(:load_file).with(file)
       expect { YAML.load_file(file) }.to_not raise_error
       Pkg::Config.config_to_yaml
     end
@@ -410,7 +410,7 @@ describe "Pkg::Config" do
   describe "#cow_list" do
     it "should return a list of the cows for a project" do
       Pkg::Config.cows = "base-lucid-i386.cow base-lucid-amd64.cow base-precise-i386.cow base-precise-amd64.cow base-quantal-i386.cow base-quantal-amd64.cow base-saucy-i386.cow base-saucy-amd64.cow base-sid-i386.cow base-sid-amd64.cow base-squeeze-i386.cow base-squeeze-amd64.cow base-stable-i386.cow base-stable-amd64.cow base-testing-i386.cow base-testing-amd64.cow base-trusty-i386.cow base-trusty-amd64.cow base-unstable-i386.cow base-unstable-amd64.cow base-wheezy-i386.cow base-wheezy-amd64.cow"
-      Pkg::Config.cow_list.should eq "lucid precise quantal saucy sid squeeze stable testing trusty unstable wheezy"
+      expect(Pkg::Config.cow_list).to eq "lucid precise quantal saucy sid squeeze stable testing trusty unstable wheezy"
     end
   end
 
@@ -441,27 +441,27 @@ describe "Pkg::Config" do
     it "should set tar_host to staging_server" do
       Pkg::Config.config_from_hash({ :staging_server => 'foo' })
       Pkg::Config.issue_reassignments
-      Pkg::Config.tar_host.should eq("foo")
+      expect(Pkg::Config.tar_host).to eq 'foo'
     end
   end
 
   describe "#config_to_hash" do
     it "should return a hash object" do
       hash = Pkg::Config.config_to_hash
-      hash.should be_a(Hash)
+      expect(hash).to be_a(Hash)
     end
 
     it "should return a hash with the current parameters" do
       Pkg::Config.apt_host = "foo"
-      Pkg::Config.config_to_hash[:apt_host].should eq("foo")
+      expect(Pkg::Config.config_to_hash[:apt_host]).to eq 'foo'
       Pkg::Config.apt_host = "bar"
-      Pkg::Config.config_to_hash[:apt_host].should eq("bar")
+      expect(Pkg::Config.config_to_hash[:apt_host]).to eq 'bar'
     end
   end
 
   describe "#load_default_configs" do
     before(:each) do
-      @project_root = double('project_root')
+      @project_root = double('project_root').to_s
       Pkg::Config.project_root = @project_root
       @test_project_data = File.join(Pkg::Config.project_root, 'ext', 'project_data.yaml')
       @test_build_defaults = File.join(Pkg::Config.project_root, 'ext', 'build_defaults.yaml')
@@ -549,7 +549,7 @@ describe "Pkg::Config" do
       when :bool
         it "should set boolean value on #{v[:var]} for :type == :bool" do
           ENV[v[:envvar].to_s] = "FOO"
-          Pkg::Util.stub(:boolean_value) {"FOO"}
+          allow(Pkg::Util).to receive(:boolean_value).and_return "FOO"
           allow(Pkg::Config).to receive(:instance_variable_set)
           expect(Pkg::Util).to receive(:boolean_value).with("FOO")
           expect(Pkg::Config).to receive(:instance_variable_set).with("@#{v[:var]}", "FOO")
@@ -558,7 +558,7 @@ describe "Pkg::Config" do
       when :array
         it "should set Pkg::Config##{v[:var]} to an Array for :type == :array" do
           ENV[v[:envvar].to_s] = "FOO BAR ARR RAY"
-          Pkg::Config.stub(:string_to_array) {%w(FOO BAR ARR RAY)}
+          allow(Pkg::Config).to receive(:string_to_array).and_return %w(FOO BAR ARR RAY)
           allow(Pkg::Config).to receive(:instance_variable_set)
           expect(Pkg::Config).to receive(:string_to_array).with("FOO BAR ARR RAY")
           expect(Pkg::Config).to receive(:instance_variable_set).with("@#{v[:var]}", %w(FOO BAR ARR RAY))
@@ -567,7 +567,7 @@ describe "Pkg::Config" do
       else
         it "should set Pkg::Config##{v[:var]} to ENV[#{v[:envvar].to_s}]" do
           ENV[v[:envvar].to_s] = "FOO"
-          Pkg::Util.stub(:boolean_value) {"FOO"}
+          allow(Pkg::Util).to receive(:boolean_value).and_return "FOO"
           allow(Pkg::Config).to receive(:instance_variable_set)
           expect(Pkg::Config).to receive(:instance_variable_set).with("@#{v[:var]}", "FOO")
           Pkg::Config.load_envvars

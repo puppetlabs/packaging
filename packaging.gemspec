@@ -15,13 +15,15 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = '>= 2.0.0'
 
-  gem.add_development_dependency('rspec', ['~> 2.14.1'])
-  gem.add_development_dependency('rubocop', ['~> 0.24.1'])
   gem.add_development_dependency('pry')
+  gem.add_development_dependency('rubocop', ['~> 1.10'])
+  gem.add_development_dependency('rspec', ['~> 3.10'])
+
+  gem.add_runtime_dependency('artifactory', ['~> 3'])
+  gem.add_runtime_dependency('csv', ['~> 3.1'])
   gem.add_runtime_dependency('rake', ['>= 12.3'])
-  gem.add_runtime_dependency('artifactory', ['~> 2'])
   gem.add_runtime_dependency('release-metrics')
-  gem.add_runtime_dependency('csv', ['3.1.5'])
+
   gem.require_path = 'lib'
 
   # Ensure the gem is built out of versioned files

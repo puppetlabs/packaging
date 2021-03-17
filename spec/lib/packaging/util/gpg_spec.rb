@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe "Pkg::Util::Gpg" do
-  let(:gpg)      { "/local/bin/gpg" }
-  let(:keychain) { "/usr/local/bin/keychain" }
-  let(:gpg_key)  { "abcd1234" }
-  let(:target_file) { "/tmp/file" }
+describe 'Pkg::Util::Gpg' do
+  let(:gpg)      { '/local/bin/gpg' }
+  let(:keychain) { '/usr/local/bin/keychain' }
+  let(:gpg_key)  { 'abcd1234' }
+  let(:target_file) { '/tmp/file' }
 
   before(:each) do
     reset_env(['RPM_GPG_AGENT'])
@@ -12,36 +12,36 @@ describe "Pkg::Util::Gpg" do
   end
 
   describe '#key' do
-    it "fails if Pkg::Config.gpg_key isn't set" do
+    it 'fails if Pkg::Config.gpg_key is not set' do
       allow(Pkg::Config).to receive(:gpg_key).and_return(nil)
       expect { Pkg::Util::Gpg.key }.to raise_error(RuntimeError)
     end
-    it "fails if Pkg::Config.gpg_key is an empty string" do
+    it 'fails if Pkg::Config.gpg_key is an empty string' do
       allow(Pkg::Config).to receive(:gpg_key).and_return('')
       expect { Pkg::Util::Gpg.key }.to raise_error(RuntimeError)
     end
   end
 
   describe '#kill_keychain' do
-    it "doesn't reload the keychain if already loaded" do
-      Pkg::Util::Gpg.instance_variable_set("@keychain_loaded", true)
-      Pkg::Util::Gpg.should_receive(:kill_keychain).never
-      Pkg::Util::Gpg.should_receive(:start_keychain).never
+    it 'does not reload the keychain if already loaded' do
+      Pkg::Util::Gpg.instance_variable_set('@keychain_loaded', true)
+      expect(Pkg::Util::Gpg).not_to receive(:kill_keychain)
+      expect(Pkg::Util::Gpg).not_to receive(:start_keychain)
       Pkg::Util::Gpg.load_keychain
-      Pkg::Util::Gpg.instance_variable_set("@keychain_loaded", nil)
+      Pkg::Util::Gpg.instance_variable_set('@keychain_loaded', nil)
     end
 
-    it "doesn't reload the keychain if ENV['RPM_GPG_AGENT'] is set" do
+    it "does not reload the keychain if ENV['RPM_GPG_AGENT'] is set" do
       ENV['RPM_GPG_AGENT'] = 'blerg'
-      Pkg::Util::Gpg.should_receive(:kill_keychain).never
-      Pkg::Util::Gpg.should_receive(:start_keychain).never
+      expect(Pkg::Util::Gpg).not_to receive(:kill_keychain)
+      expect(Pkg::Util::Gpg).not_to receive(:start_keychain)
       Pkg::Util::Gpg.load_keychain
     end
 
     it 'kills and starts the keychain if not loaded already' do
-      Pkg::Util::Gpg.instance_variable_set("@keychain_loaded", nil)
-      Pkg::Util::Gpg.should_receive(:kill_keychain).once
-      Pkg::Util::Gpg.should_receive(:start_keychain).once
+      Pkg::Util::Gpg.instance_variable_set('@keychain_loaded', nil)
+      expect(Pkg::Util::Gpg).to receive(:kill_keychain).once
+      expect(Pkg::Util::Gpg).to receive(:start_keychain).once
       Pkg::Util::Gpg.load_keychain
     end
   end
@@ -49,15 +49,15 @@ describe "Pkg::Util::Gpg" do
   describe '#sign_file' do
     it 'adds special flags if RPM_GPG_AGENT is set' do
       ENV['RPM_GPG_AGENT'] = 'blerg'
-      additional_flags = "--no-tty --use-agent"
-      Pkg::Util::Tool.should_receive(:find_tool).with('gpg').and_return(gpg)
-      Pkg::Util::Execution.should_receive(:capture3).with("#{gpg}\s#{additional_flags}\s--armor --detach-sign -u #{gpg_key} #{target_file}")
+      additional_flags = '--no-tty --use-agent'
+      expect(Pkg::Util::Tool).to receive(:find_tool).with('gpg').and_return(gpg)
+      expect(Pkg::Util::Execution).to receive(:capture3).with("#{gpg}\s#{additional_flags}\s--armor --detach-sign -u #{gpg_key} #{target_file}")
       Pkg::Util::Gpg.sign_file(target_file)
     end
 
     it 'signs without extra flags when RPM_GPG_AGENT is not set' do
-      Pkg::Util::Tool.should_receive(:find_tool).with('gpg').and_return(gpg)
-      Pkg::Util::Execution.should_receive(:capture3).with("#{gpg}\s\s--armor --detach-sign -u #{gpg_key} #{target_file}")
+      expect(Pkg::Util::Tool).to receive(:find_tool).with('gpg').and_return(gpg)
+      expect(Pkg::Util::Execution).to receive(:capture3).with("#{gpg}\s\s--armor --detach-sign -u #{gpg_key} #{target_file}")
       Pkg::Util::Gpg.sign_file(target_file)
     end
   end

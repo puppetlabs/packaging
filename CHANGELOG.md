@@ -3,8 +3,11 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- Refresh gem dependencies with recent versions
+- Remove deprecated spec usage.
 
-## [0.99.76] - 2021-03-21
+## [0.99.76] - 2021-03-01
 ### Added
 - (PA-3531) Add support for RedHat 8 ppc64le
 - (RE-11821) Create a configuration-validation hook after a pl:fetch

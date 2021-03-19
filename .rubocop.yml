@@ -8,7 +8,7 @@ AllCops:
     - 'vendor/**/*'
 
 
-Lint/ConditionPosition:
+Layout/ConditionPosition:
   Enabled: true
 
 Lint/ElseLayout:
@@ -17,19 +17,12 @@ Lint/ElseLayout:
 Lint/UnreachableCode:
   Enabled: true
 
-Lint/UselessComparison:
-  Enabled: true
-
 # MAYBE useful - no return inside ensure block.
 Lint/EnsureReturn:
   Enabled: true
 
 # MAYBE useful - errors when rescue {} happens.
-Lint/HandleExceptions:
-  Enabled: false
-
-# MAYBE useful - catches while 1
-Lint/LiteralInCondition:
+Lint/SuppressedException:
   Enabled: false
 
 # MAYBE useful - but too many instances
@@ -40,81 +33,64 @@ Lint/ShadowingOuterLocalVariable:
 Lint/LiteralInInterpolation:
   Enabled: true
 
-
-# DISABLED really useless. Detects return as last statement.
 Style/RedundantReturn:
   Enabled: false
 
-# DISABLED since the instances do not seem to indicate any specific errors.
 Lint/AmbiguousOperator:
   Enabled: false
 
-# DISABLED since for all the checked, we are basically checking nil
 # TODO: Change the checking so that if the variable being assigned to has
 # a value ALREADY, then raise an error.
 Lint/AssignmentInCondition:
   Enabled: false
 
-# DISABLED - not useful
-Style/SpaceBeforeComment:
+Layout/SpaceBeforeComment:
   Enabled: false
 
-# DISABLED - not useful
 Style/HashSyntax:
   Enabled: false
 
 # USES: as shortcut for non nil&valid checking a = x() and a.empty?
-# DISABLED - not useful
 Style/AndOr:
   Enabled: false
 
-# DISABLED - not useful
 Style/RedundantSelf:
   Enabled: false
 
-# DISABLED - not useful
-Style/MethodLength:
+Metrics/MethodLength:
   Enabled: false
 
-# DISABLED - not useful
 Style/WhileUntilModifier:
   Enabled: false
 
-# DISABLED - the offender is just haskell envy
 Lint/AmbiguousRegexpLiteral:
   Enabled: false
 
-# DISABLED
-Lint/Eval:
-  Enabled: false
-# DISABLED
-Lint/BlockAlignment:
+Security/Eval:
   Enabled: false
 
-# DISABLED
-Lint/DefEndAlignment:
+Layout/BlockAlignment:
   Enabled: false
 
-# DISABLED
-Lint/EndAlignment:
+Layout/DefEndAlignment:
   Enabled: false
 
-# DISABLED
+Layout/EndAlignment:
+  Enabled: false
+
 Lint/DeprecatedClassMethods:
   Enabled: false
 
-# DISABLED
 Lint/Loop:
   Enabled: false
 
-# DISABLED
 Lint/ParenthesesAsGroupedExpression:
   Enabled: false
 
 Lint/RescueException:
   Enabled: false
 
-Lint/StringConversionInInterpolation:
+Lint/RedundantStringCoercion:
   Enabled: false
 
 Lint/UnusedBlockArgument:
@@ -123,37 +99,25 @@ Lint/UnusedBlockArgument:
 Lint/UnusedMethodArgument:
   Enabled: false
 
-# DISABLED - TODO
 Lint/UselessAccessModifier:
   Enabled: false
 
-# DISABLED - TODO
 Lint/UselessAssignment:
   Enabled: false
 
-# DISABLED - TODO
 Lint/Void:
   Enabled: false
 
-Style/AccessModifierIndentation:
+Layout/AccessModifierIndentation:
   Enabled: false
 
-Style/AccessorMethodName:
+Naming/AccessorMethodName:
   Enabled: false
 
 Style/Alias:
   Enabled: false
 
-Style/AlignArray:
-  Enabled: false
-
-Style/AlignHash:
-  Enabled: false
-
-Style/AlignParameters:
-  Enabled: false
-
-Style/BlockNesting:
+Metrics/BlockNesting:
   Enabled: false
 
 Style/AsciiComments:
@@ -162,22 +126,16 @@ Style/AsciiComments:
 Style/Attr:
   Enabled: false
 
-Style/Blocks:
-  Enabled: false
-
-Style/BracesAroundHashParameters:
-  Enabled: false
-
 Style/CaseEquality:
   Enabled: false
 
-Style/CaseIndentation:
+Layout/CaseIndentation:
   Enabled: false
 
 Style/CharacterLiteral:
   Enabled: false
 
-Style/ClassAndModuleCamelCase:
+Naming/ClassAndModuleCamelCase:
   Enabled: false
 
 Style/ClassAndModuleChildren:
@@ -186,7 +144,7 @@ Style/ClassAndModuleChildren:
 Style/ClassCheck:
   Enabled: false
 
-Style/ClassLength:
+Metrics/ClassLength:
   Enabled: false
 
 Style/ClassMethods:
@@ -198,76 +156,58 @@ Style/ClassVars:
 Style/WhenThen:
   Enabled: false
 
-
-# DISABLED - not useful
 Style/WordArray:
   Enabled: false
 
-Style/UnneededPercentQ:
+Layout/SpaceBeforeSemicolon:
+  Enabled: true
+
+Layout/SpaceInsideBlockBraces:
+  Enabled: true
+
+Layout/SpaceInsideHashLiteralBraces:
+  Enabled: true
+
+Layout/SpaceInsideParens:
+  Enabled: true
+
+Layout/LeadingCommentSpace:
   Enabled: false
 
-Style/Tab:
-  Enabled: false
-
-Style/SpaceBeforeSemicolon:
+Layout/SpaceBeforeFirstArg:
   Enabled: true
 
-Style/TrailingBlankLines:
-  Enabled: false
-
-Style/SpaceInsideBlockBraces:
+Layout/SpaceAfterColon:
   Enabled: true
 
-Style/SpaceInsideBrackets:
+Layout/SpaceAfterComma:
   Enabled: true
 
-Style/SpaceInsideHashLiteralBraces:
+Layout/SpaceAfterMethodName:
   Enabled: true
 
-Style/SpaceInsideParens:
+Layout/SpaceAfterNot:
   Enabled: true
 
-Style/LeadingCommentSpace:
-  Enabled: false
-
-Style/SingleSpaceBeforeFirstArg:
+Layout/SpaceAfterSemicolon:
   Enabled: true
 
-Style/SpaceAfterColon:
+Layout/SpaceAroundEqualsInParameterDefault:
   Enabled: true
 
-Style/SpaceAfterComma:
+Layout/SpaceAroundOperators:
   Enabled: true
 
-Style/SpaceAfterControlKeyword:
+Layout/SpaceBeforeBlockBraces:
   Enabled: true
 
-Style/SpaceAfterMethodName:
+Layout/SpaceBeforeComma:
   Enabled: true
-
-Style/SpaceAfterNot:
-  Enabled: true
-
-Style/SpaceAfterSemicolon:
-  Enabled: true
-
-Style/SpaceAroundEqualsInParameterDefault:
-  Enabled: true
-
-Style/SpaceAroundOperators:
-  Enabled: true
-
-Style/SpaceBeforeBlockBraces:
-  Enabled: true
-
-Style/SpaceBeforeComma:
-  Enabled: true
-
 
 Style/CollectionMethods:
   Enabled: false
 
-Style/CommentIndentation:
+Layout/CommentIndentation:
   Enabled: false
 
 Style/ColonMethodCall:
@@ -276,10 +216,10 @@ Style/ColonMethodCall:
 Style/CommentAnnotation:
   Enabled: false
 
-Style/CyclomaticComplexity:
+Metrics/CyclomaticComplexity:
   Enabled: false
 
-Style/ConstantName:
+Naming/ConstantName:
   Enabled: false
 
 Style/Documentation:
@@ -288,50 +228,40 @@ Style/Documentation:
 Style/DefWithParentheses:
   Enabled: false
 
-Style/DeprecatedHashMethods:
+Style/PreferredHashMethods:
   Enabled: false
 
-Style/DotPosition:
+Layout/DotPosition:
   Enabled: false
 
-# DISABLED - used for converting to bool
 Style/DoubleNegation:
   Enabled: false
 
 Style/EachWithObject:
   Enabled: false
 
-Style/EmptyLineBetweenDefs:
+Layout/EmptyLineBetweenDefs:
   Enabled: false
 
-Style/IndentArray:
-  Enabled: false
-
-Style/IndentHash:
-  Enabled: false
-
-Style/IndentationConsistency:
+Layout/IndentationConsistency:
   Enabled: true
 
-Style/IndentationWidth:
+Layout/IndentationWidth:
   Enabled: true
 
-Style/EmptyLines:
+Layout/EmptyLines:
   Enabled: false
 
-Style/EmptyLinesAroundAccessModifier:
-  Enabled: false
-
-Style/EmptyLinesAroundBody:
+Layout/EmptyLinesAroundAccessModifier:
   Enabled: false
 
 Style/EmptyLiteral:
   Enabled: false
 
-Style/LineLength:
+Layout/LineLength:
   Enabled: false
 
-Style/MethodCallParentheses:
+Style/MethodCallWithoutArgsParentheses:
   Enabled: true
 
 Style/MethodDefParentheses:
@@ -340,13 +270,10 @@ Style/MethodDefParentheses:
 Style/LineEndConcatenation:
   Enabled: false
 
-Style/TrailingWhitespace:
+Layout/TrailingWhitespace:
   Enabled: true
 
 Style/StringLiterals:
-  Enabled: false
-
-Style/TrailingComma:
   Enabled: false
 
 Style/GlobalVars:
@@ -387,13 +314,13 @@ Style/UnlessElse:
   Enabled: true
 
 # This pushes preference for shell commands as backticks instead of %x
-Style/UnneededPercentX:
+Style/RedundantPercentQ:
   Enabled: false
 
 Style/VariableInterpolation:
   Enabled: true
 
-Style/VariableName:
+Naming/VariableName:
   Enabled: true
 
 Style/WhileUntilDo:
@@ -402,7 +329,7 @@ Style/WhileUntilDo:
 Style/EvenOdd:
   Enabled: true
 
-Style/FileName:
+Naming/FileName:
   Enabled: true
 
 Style/For:
@@ -411,7 +338,7 @@ Style/For:
 Style/Lambda:
   Enabled: false
 
-Style/MethodName:
+Naming/MethodName:
   Enabled: false
 
 Style/MultilineTernaryOperator:
@@ -447,7 +374,7 @@ Style/NumericLiterals:
 Style/OneLineConditional:
   Enabled: true
 
-Style/OpMethod:
+Naming/BinaryOperatorParameterName:
   Enabled: true
 
 Style/ParenthesesAroundCondition:
@@ -459,7 +386,7 @@ Style/PercentLiteralDelimiters:
 Style/PerlBackrefs:
   Enabled: false
 
-Style/PredicateName:
+Naming/PredicateName:
   Enabled: false
 
 Style/RedundantException:
@@ -467,7 +394,6 @@ Style/RedundantException:
 
 Style/SelfAssignment:
   Enabled: true
-
 
 Style/Proc:
   Enabled: true
@@ -487,13 +413,10 @@ Style/RegexpLiteral:
 Lint/UnderscorePrefixedVariableName:
   Enabled: true
 
-Style/ParameterLists:
+Metrics/ParameterLists:
   Enabled: true
 
 Lint/RequireParentheses:
-  Enabled: true
-
-Lint/SpaceBeforeFirstArg:
   Enabled: true
 
 Style/ModuleFunction:
@@ -507,3 +430,62 @@ Style/IfWithSemicolon:
 
 Style/Encoding:
   Enabled: false
+
+Gemspec/DateAssignment:
+  Enabled: true
+Layout/SpaceBeforeBrackets:
+  Enabled: true
+Lint/AmbiguousAssignment:
+  Enabled: true
+Lint/DeprecatedConstants:
+  Enabled: true
+Lint/DuplicateBranch:
+  Enabled: true
+Lint/DuplicateRegexpCharacterClassElement:
+  Enabled: true
+Lint/EmptyBlock:
+  Enabled: true
+Lint/EmptyClass:
+  Enabled: true
+Lint/LambdaWithoutLiteralBlock:
+  Enabled: true
+Lint/NoReturnInBeginEndBlocks:
+  Enabled: true
+Lint/NumberedParameterAssignment:
+  Enabled: true
+Lint/OrAssignmentToConstant:
+  Enabled: true
+Lint/RedundantDirGlobSort:
+  Enabled: true
+Lint/SymbolConversion:
+  Enabled: true
+Lint/ToEnumArguments:
+  Enabled: true
+Lint/TripleQuotes:
+  Enabled: true
+Lint/UnexpectedBlockArity:
+  Enabled: true
+Lint/UnmodifiedReduceAccumulator:
+  Enabled: true
+Style/ArgumentsForwarding:
+  Enabled: true
+Style/CollectionCompact:
+  Enabled: true
+Style/DocumentDynamicEvalDefinition:
+  Enabled: true
+Style/EndlessMethod:
+  Enabled: true
+Style/HashConversion:
+  Enabled: true
+Style/HashExcept:
+  Enabled: true
+Style/IfWithBooleanLiteralBranches:
+  Enabled: true
+Style/NegatedIfElseCondition:
+  Enabled: true
+Style/NilLambda:
+  Enabled: true
+Style/RedundantArgument:
+  Enabled: true
+Style/SwapValues:
+  Enabled: true

@@ -37,19 +37,19 @@ namespace :pl do
       # Generate an XML file for every job configuration erb and attempt to
       # create a jenkins job from that XML config
       templates.each do |t|
-        erb_template  = File.join(template_dir, t)
+        erb_template = File.join(template_dir, t)
         xml_file = File.join(work_dir, t.gsub('.erb', ''))
         Pkg::Util::File.erb_file(erb_template, xml_file, nil, :binding => Pkg::Config.get_binding)
         # If we're creating a job meant to run on a windows box, we need to limit the path length
         # Max path length allowed is 260 chars, which we manage to exceed with this job name. Luckily,
         # simply using the short sha rather than the long sha gets us just under the length limit. Gross fix,
         # I know, but hey, it works for now.
-        if t == "msi.xml.erb"
-          ref = Pkg::Config.short_ref
-        else
-          ref = Pkg::Config.ref
-        end
-        job_name  = "#{Pkg::Config.project}-#{t.gsub('.xml.erb', '')}-#{Pkg::Config.build_date}-#{ref}"
+        ref = if t == "msi.xml.erb"
+                Pkg::Config.short_ref
+              else
+                Pkg::Config.ref
+              end
+        job_name = "#{Pkg::Config.project}-#{t.gsub('.xml.erb', '')}-#{Pkg::Config.build_date}-#{ref}"
         puts "Checking for existence of #{job_name}..."
         if Pkg::Util::Jenkins.jenkins_job_exists?(job_name)
           raise "Job #{job_name} already exists on #{Pkg::Config.jenkins_build_host}"
@@ -63,6 +63,7 @@ namespace :pl do
             unless Pkg::Util::Jenkins.jenkins_job_exists?(job_name)
               raise "Unable to verify Jenkins job, trying again..."
             end
+
             puts "Jenkins job created at #{url}"
           end
         end
@@ -71,7 +72,7 @@ namespace :pl do
       packaging_name = "#{Pkg::Config.project}-packaging-#{Pkg::Config.build_date}-#{Pkg::Config.ref}"
       Pkg::Util::RakeUtils.invoke_task("pl:jenkins:trigger_dynamic_job", packaging_name)
 
-      if poll_interval > 0
+      if poll_interval.positive?
         ##
         # Wait for the '*packaging*' job to finish.
         #
@@ -146,30 +147,30 @@ namespace :pl do
       bundle = Pkg::Util::Git.bundle('HEAD')
 
       # Create a string of metrics to send to Jenkins for data analysis
-      if Pkg::Config.pe_version
-        metrics = "#{ENV['USER']}~#{Pkg::Config.version}~#{Pkg::Config.pe_version}~#{Pkg::Config.team}"
-      else
-        metrics = "#{ENV['USER']}~#{Pkg::Config.version}~N/A~#{Pkg::Config.team}"
-      end
+      metrics = if Pkg::Config.pe_version
+                  "#{ENV['USER']}~#{Pkg::Config.version}~#{Pkg::Config.pe_version}~#{Pkg::Config.team}"
+                else
+                  "#{ENV['USER']}~#{Pkg::Config.version}~N/A~#{Pkg::Config.team}"
+                end
 
       # Construct the parameters, which is an array of hashes we turn into JSON
       parameters = [{ "name" => "BUILD_PROPERTIES", "file"  => "file0" },
                     { "name" => "PROJECT_BUNDLE",   "file"  => "file1" },
-                    { "name" => "PROJECT",          "value" => "#{Pkg::Config.project}" },
-                    { "name" => "METRICS",          "value" => "#{metrics}" }]
+                    { "name" => "PROJECT",          "value" => Pkg::Config.project.to_s },
+                    { "name" => "METRICS",          "value" => metrics.to_s }]
 
       # Contruct the json string
       json = JSON.generate("parameter" => parameters)
 
       # The args array that holds  all of the arguments we pass
       # to the curl utility method.
-      curl_args =  [
-      "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
-      "-Fname=PROJECT_BUNDLE",   "-Ffile1=@#{bundle}",
-      "-Fname=PROJECT",          "-Fvalue=#{Pkg::Config.project}",
-      "-Fname=METRICS",          "-Fvalue=#{metrics}",
-      "-FSubmit=Build",
-      "-Fjson=#{json.to_json}",
+      curl_args = [
+        "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
+        "-Fname=PROJECT_BUNDLE",   "-Ffile1=@#{bundle}",
+        "-Fname=PROJECT",          "-Fvalue=#{Pkg::Config.project}",
+        "-Fname=METRICS",          "-Fvalue=#{metrics}",
+        "-FSubmit=Build",
+        "-Fjson=#{json.to_json}"
       ]
 
       # Contstruct the job url

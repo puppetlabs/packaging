@@ -15,8 +15,8 @@ end
 team_data_branch = Pkg::Config.team
 
 if Pkg::Config.build_pe
-  project_data_branch = 'pe-' + project_data_branch unless project_data_branch =~ /^pe-/
-  team_data_branch = 'pe-' + team_data_branch unless team_data_branch =~ /^pe-/
+  project_data_branch = "pe-#{project_data_branch}" unless project_data_branch =~ /^pe-/
+  team_data_branch = "pe-#{team_data_branch}" unless team_data_branch =~ /^pe-/
 end
 
 # The pl:fetch task pulls down two files from the build-data repo that contain additional

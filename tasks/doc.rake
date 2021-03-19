@@ -12,9 +12,9 @@ if Pkg::Config.build_doc
     RDoc::Task.new(:doc) do |rdoc|
       rdoc.rdoc_dir = 'doc'
       rdoc.title = "#{Pkg::Config.project} version #{Pkg::Config.version}"
-      Pkg::Config.gem_rdoc_options.each do |option|
-        rdoc.options << option
-      end unless Pkg::Config.gem_rdoc_options.nil?
+      Pkg::Config.gem_rdoc_options&.each do |option|
+          rdoc.options << option
+        end
     end
   end
 end

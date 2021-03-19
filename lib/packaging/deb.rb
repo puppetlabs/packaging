@@ -8,6 +8,7 @@ module Pkg::Deb
       if elements.nil?
         fail "Didn't get a matching cow, e.g. 'base-squeeze-i386'"
       end
+
       dist = elements[1]
       arch = elements[2]
       if Pkg::Config.build_pe

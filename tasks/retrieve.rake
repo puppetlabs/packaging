@@ -13,10 +13,11 @@
 namespace :pl do
   namespace :jenkins do
     desc "Retrieve packages from the distribution server\. Check out commit to retrieve"
-    task :retrieve, [:remote_target, :local_target] => 'pl:fetch' do |t, args|
+    task :retrieve, %i[remote_target local_target] => 'pl:fetch' do |t, args|
       unless Pkg::Config.project
         fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT_OVERRIDE' environment variable."
       end
+
       remote_target = args.remote_target || "artifacts"
       local_target = args.local_target || "pkg"
       mkdir_p local_target
@@ -28,6 +29,7 @@ namespace :pl do
         Pkg::Retrieve.retrieve_all(build_url, build_path, local_target)
       end
       fail "Uh oh, looks like we didn't find anything in #{local_target} when attempting to retrieve from #{build_url}!" if Dir["#{local_target}/*"].empty?
+
       puts "Packages staged in #{local_target}"
     end
   end
@@ -37,10 +39,11 @@ if Pkg::Config.build_pe
   namespace :pe do
     namespace :jenkins do
       desc "Retrieve packages from the distribution server\. Check out commit to retrieve"
-      task :retrieve, [:remote_target, :local_target] => 'pl:fetch' do |t, args|
+      task :retrieve, %i[remote_target local_target] => 'pl:fetch' do |t, args|
         unless Pkg::Config.project
           fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT_OVERRIDE' environment variable."
         end
+
         remote_target = args.remote_target || "artifacts"
         local_target = args.local_target || "pkg"
         build_url = "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{remote_target}"

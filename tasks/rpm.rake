@@ -30,7 +30,7 @@ def build_rpm(buildarg = "-bs")
   rpm_old_version = '--define "_source_filedigest_algorithm 1" --define "_binary_filedigest_algorithm 1" \
      --define "_binary_payload w9.gzdio" --define "_source_payload w9.gzdio" \
      --define "_default_patch_fuzz 2"'
-  args = rpm_define + ' ' + rpm_old_version
+  args = "#{rpm_define} #{rpm_old_version}"
   FileUtils.mkdir_p('pkg/srpm')
   if buildarg == '-ba'
     FileUtils.mkdir_p('pkg/rpm')
@@ -47,7 +47,7 @@ def build_rpm(buildarg = "-bs")
   puts
   output = FileList['pkg/*/*.rpm']
   puts "Wrote:"
-  output.each do | line |
+  output.each do |line|
     puts line
   end
 end
@@ -63,4 +63,3 @@ namespace :package do
     build_rpm("-ba")
   end
 end
-

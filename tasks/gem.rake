@@ -3,7 +3,7 @@ require 'rubygems/package_task'
 def glob_gem_files
   gem_files = []
   gem_excludes_file_list = []
-  gem_excludes_raw = Pkg::Config.gem_excludes.nil? ? [] : Pkg::Config.gem_excludes.split(' ')
+  gem_excludes_raw = Pkg::Config.gem_excludes.nil? ? [] : Pkg::Config.gem_excludes.split
   gem_excludes_raw << 'ext/packaging'
   gem_excludes_raw << 'pkg'
   gem_excludes_raw.each do |exclude|
@@ -13,7 +13,7 @@ def glob_gem_files
       gem_excludes_file_list << exclude
     end
   end
-  files = FileList[Pkg::Config.gem_files.split(' ')]
+  files = FileList[Pkg::Config.gem_files.split]
   files.each do |file|
     if File.directory?(file)
       gem_files += FileList["#{file}/**/*"]
@@ -54,25 +54,25 @@ def create_default_gem_spec
     s.require_path = Pkg::Config.gem_require_path                    unless Pkg::Config.gem_require_path.nil?
     s.required_ruby_version = Pkg::Config.gem_required_ruby_version  unless Pkg::Config.gem_required_ruby_version.nil?
     s.required_rubygems_version = Pkg::Config.gem_required_rubygems_version unless Pkg::Config.gem_required_rubygems_version.nil?
-    s.test_files = FileList[Pkg::Config.gem_test_files.split(' ')]   unless Pkg::Config.gem_test_files.nil?
-    s.rubyforge_project = Pkg::Config.gem_forge_project              unless Pkg::Config.gem_forge_project.nil?
-    Pkg::Config.gem_rdoc_options.each do |option|
-      s.rdoc_options << option
-    end unless Pkg::Config.gem_rdoc_options.nil?
+    s.test_files = FileList[Pkg::Config.gem_test_files.split] unless Pkg::Config.gem_test_files.nil?
+    s.rubyforge_project = Pkg::Config.gem_forge_project unless Pkg::Config.gem_forge_project.nil?
+    Pkg::Config.gem_rdoc_options&.each do |option|
+        s.rdoc_options << option
+      end
   end
 
-  Pkg::Config.gem_runtime_dependencies.each do |gem, version|
-    spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => :runtime)
-  end unless Pkg::Config.gem_runtime_dependencies.nil?
+  Pkg::Config.gem_runtime_dependencies&.each do |gem, version|
+      spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => :runtime)
+    end
 
-  Pkg::Config.gem_development_dependencies.each do |gem, version|
-    spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => :development)
-  end unless Pkg::Config.gem_development_dependencies.nil?
+  Pkg::Config.gem_development_dependencies&.each do |gem, version|
+      spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => :development)
+    end
   spec
 end
 
 def create_gem(spec, gembuilddir)
-  gem_files = glob_gem_files + FileList[(Pkg::Config.gem_test_files || '').split(' ')]
+  gem_files = glob_gem_files + FileList[(Pkg::Config.gem_test_files || '').split]
   workdir = File.join(Pkg::Util::File.mktemp)
 
   bench = Benchmark.realtime do
@@ -99,6 +99,7 @@ end
 
 def unknown_gems_platform?(platform)
   return true if platform.os == "unknown"
+
   false
 end
 
@@ -106,9 +107,11 @@ def create_platform_specific_gems
   Pkg::Config.gem_platform_dependencies.each do |platform, dependency_hash|
     spec = create_default_gem_spec
     pf = Gem::Platform.new(platform)
-    fail "
-      Platform: '#{platform}' is not recognized by rubygems.
-      This is probably an erroneous 'gem_platform_dependencies' entry!" if unknown_gems_platform?(pf)
+    if unknown_gems_platform?(pf)
+      fail "
+        Platform: '#{platform}' is not recognized by rubygems.
+        This is probably an erroneous 'gem_platform_dependencies' entry!"
+    end
     spec.platform = pf
     dependency_hash.each do |type, gems|
       t = case type

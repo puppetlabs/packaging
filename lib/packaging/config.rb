@@ -5,8 +5,8 @@ module Pkg
   #   have it set via accessors, and serialize it back to yaml for easy transport.
   #
   class Config
-    require 'packaging/config/params.rb'
-    require 'packaging/config/validations.rb'
+    require 'packaging/config/params'
+    require 'packaging/config/validations'
     require 'yaml'
 
     class << self
@@ -15,7 +15,7 @@ module Pkg
       #   names without "@"" to their corresponding values.
       #
       def instance_values
-        Hash[instance_variables.map { |name| [name[1..-1], instance_variable_get(name)] }]
+        instance_variables.map { |name| [name[1..-1], instance_variable_get(name)] }.to_h
       end
 
       #   Every element in Pkg::Params::BUILD_PARAMS is a configurable setting
@@ -81,11 +81,11 @@ module Pkg
         dir = "/opt/jenkins-builds/#{self.project}/#{self.ref}"
         cmd = "if [ -s \"#{dir}/artifacts\" ]; then cd #{dir};"\
               "find ./artifacts/ -mindepth 2 -type f; fi"
-        artifacts, _ = Pkg::Util::Net.remote_execute(
-                     self.builds_server,
-                     cmd,
-                     { capture_output: true }
-                   )
+        artifacts, = Pkg::Util::Net.remote_execute(
+          self.builds_server,
+          cmd,
+          { capture_output: true }
+        )
 
         artifacts = artifacts.split("\n")
         data = {}
@@ -117,9 +117,9 @@ module Pkg
           if platform == 'solaris'
             next if version == '10' && File.extname(artifact) != '.gz'
             next if version == '11' && File.extname(artifact) != '.p5p'
-          else
-            next if File.extname(artifact) != ".#{package_format}"
-          end
+          elsif File.extname(artifact) != ".#{package_format}"
+            next
+end
 
           # Don't want to include debian debug packages
           next if /-dbgsym/.match(File.basename(artifact))
@@ -227,8 +227,8 @@ module Pkg
       # the debian changelog.
       #
       def cow_list
-        self.cows.split(' ').map do
-          |cow| cow.split('-')[1]
+        self.cows.split.map do |cow|
+          cow.split('-')[1]
         end.uniq.join(' ')
       end
 
@@ -422,7 +422,8 @@ module Pkg
       def string_to_array(str)
         delimiters = /[,\s;]/
         return str if str.respond_to?('each')
-        str.split(delimiters).reject { |s| s.empty? }.map { |s| s.strip }
+
+        str.split(delimiters).reject(&:empty?).map(&:strip)
       end
 
       # This method is duplicated from enterprise-dist so we can access it here.
@@ -441,10 +442,12 @@ module Pkg
       def deb_build_targets
         if self.vanagon_project
           fail "ERROR: Could not find any deb targets. Try adding `deb_targets` to your build_defaults.yaml. If you don't want to build any debs, set this to an empty string." unless self.deb_targets
-          self.deb_targets.split(' ')
+
+          self.deb_targets.split
         else
           fail "ERROR: Could not find any deb targets. Try adding `cows` to your build_defaults.yaml. If you don't want to build any debs, set this to an empty string." unless self.cows
-          self.cows.split(' ').map do |cow|
+
+          self.cows.split.map do |cow|
             codename, arch = self.cow_to_codename_arch(cow)
             "#{codename}-#{arch}"
           end
@@ -454,10 +457,12 @@ module Pkg
       def rpm_build_targets
         if self.vanagon_project
           fail "ERROR: Could not find any rpm targets. Try adding `rpm_targets` to your build_defaults.yaml. If you don't want to build any rpms, set this to an empty string." unless self.rpm_targets
-          self.rpm_targets.split(' ')
+
+          self.rpm_targets.split
         else
           fail "ERROR: Could not find any rpm targets. Try adding `final_mocks` to your build_defaults.yaml. If you don't want to build any rpms, set this to an empty string." unless self.final_mocks
-          self.final_mocks.split(' ').map do |mock|
+
+          self.final_mocks.split.map do |mock|
             platform, version, arch = self.mock_to_dist_version_arch(mock)
             "#{platform}-#{version}-#{arch}"
           end

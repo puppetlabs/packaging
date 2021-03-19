@@ -48,6 +48,7 @@ module Pkg::Rpm::Repo
 
       artifact_paths.each do |path|
         next if path.include? 'aix'
+
         cmd << "if [ -d #{path}  ]; then "
         cmd << "pushd #{path} && "
         cmd << '$createrepo --checksum=sha --checkts --update --delta-workers=0 --database . && '
@@ -75,7 +76,7 @@ module Pkg::Rpm::Repo
       path = Pathname.new(origin_path)
       dest_path = Pathname.new(destination_path)
 
-      options = %w(
+      options = %w[
         rsync
         --recursive
         --links
@@ -91,16 +92,16 @@ module Pkg::Rpm::Repo
         --no-perms
         --no-owner
         --no-group
-      )
+      ]
 
       options << '--dry-run' if dryrun
       options << path
 
-      if destination
-        options << "#{destination}:#{dest_path.parent}"
-      else
-        options << "#{dest_path.parent}"
-      end
+      options << if destination
+                   "#{destination}:#{dest_path.parent}"
+                 else
+                   dest_path.parent.to_s
+                 end
 
       options.join("\s")
     end
@@ -117,9 +118,9 @@ module Pkg::Rpm::Repo
       FileUtils.mkdir_p("pkg/#{target}")
       config_url = "#{base_url}/#{target}/rpm/"
       begin
-        stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
+        stdout, = Pkg::Util::Execution.capture3("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
         stdout
-      rescue => e
+      rescue StandardError => e
         fail "Couldn't retrieve rpm yum repo configs.\n#{e}"
       end
     end
@@ -149,7 +150,7 @@ module Pkg::Rpm::Repo
       # repodata folders in them, and second that those same directories also
       # contain rpms
       #
-      stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} --spider -r -l 5 --no-parent #{repo_base} 2>&1")
+      stdout, = Pkg::Util::Execution.capture3("#{wget} --spider -r -l 5 --no-parent #{repo_base} 2>&1")
       stdout = stdout.split.uniq.reject { |x| x =~ /\?|index/ }.select { |x| x =~ /http:.*repodata\/$/ }
 
       # RPMs will always exist at the same directory level as the repodata
@@ -157,7 +158,7 @@ module Pkg::Rpm::Repo
       #
       yum_repos = []
       stdout.map { |x| x.chomp('repodata/') }.each do |url|
-        output, _, _ = Pkg::Util::Execution.capture3("#{wget} --spider -r -l 1 --no-parent #{url} 2>&1")
+        output, = Pkg::Util::Execution.capture3("#{wget} --spider -r -l 1 --no-parent #{url} 2>&1")
         unless output.split.uniq.reject { |x| x =~ /\?|index/ }.select { |x| x =~ /http:.*\.rpm$/ }.empty?
           yum_repos << url
         end
@@ -204,7 +205,7 @@ module Pkg::Rpm::Repo
     end
 
     def create_local_repos(directory = "repos")
-      stdout, _, _ = Pkg::Util::Execution.capture3("bash -c '#{repo_creation_command(directory)}'")
+      stdout, = Pkg::Util::Execution.capture3("bash -c '#{repo_creation_command(directory)}'")
       stdout
     end
 

@@ -5,7 +5,6 @@ module Pkg
     include FileUtils
 
     attr_accessor :files, :project, :version, :excludes, :target, :templates
-    attr_reader :tar
 
     def initialize
       @tar      = Pkg::Util::Tool.find_tool('tar', :required => true)
@@ -22,10 +21,11 @@ module Pkg
       # separated, we hope)(deprecated) or an array.
       #
       if Pkg::Config.tar_excludes
-        if Pkg::Config.tar_excludes.is_a?(String)
+        case Pkg::Config.tar_excludes
+        when String
           warn "warning: `tar_excludes` should be an array, not a string"
-          @excludes = Pkg::Config.tar_excludes.split(' ')
-        elsif Pkg::Config.tar_excludes.is_a?(Array)
+          @excludes = Pkg::Config.tar_excludes.split
+        when Array
           @excludes = Pkg::Config.tar_excludes
         else
           fail "Tarball excludes must either be an array or a string, not #{@excludes.class}"
@@ -45,6 +45,7 @@ module Pkg
       if Pkg::Config.templates
         @templates = Pkg::Config.templates.dup
         fail "templates must be an array" unless @templates.is_a?(Array)
+
         expand_templates
       end
     end
@@ -56,8 +57,8 @@ module Pkg
       patterns =
         case @files
         when String
-          $stderr.puts "warning: `files` should be an array, not a string"
-          @files.split(' ')
+          warn "warning: `files` should be an array, not a string"
+          @files.split
         when Array
           @files
         else
@@ -74,10 +75,11 @@ module Pkg
     # returned to the array untouched.
     def expand_templates
       @templates.map! do |tempfile|
-        if tempfile.is_a?(String)
+        case tempfile
+        when String
           # Expand possible globs to all matching entries
           Dir.glob(File.join(Pkg::Config::project_root, tempfile))
-        elsif tempfile.is_a?(Hash)
+        when Hash
           tempfile
         end
       end
@@ -100,10 +102,11 @@ module Pkg
       # source,with the extension removed. If it is a hash, we assume nothing
       # and use the provided source and target.
       @templates.each do |cur_template|
-        if cur_template.is_a?(String)
+        case cur_template
+        when String
           template_file = File.expand_path(cur_template)
           target_file = template_file.sub(File.extname(template_file), "")
-        elsif cur_template.is_a?(Hash)
+        when Hash
           template_file = File.expand_path(cur_template["source"])
           target_file = File.expand_path(cur_template["target"])
         end
@@ -137,10 +140,11 @@ module Pkg
     def tar(target, source)
       mkpath File.dirname(target)
       cd File.dirname(source) do
-        %x(#{@tar} #{@excludes.map { |x| (" --exclude #{x} ") }.join if @excludes} -zcf '#{File.basename(target)}' '#{File.basename(source)}')
+        %x(#{@tar} #{@excludes&.map { |x| " --exclude #{x} " }&.join} -zcf '#{File.basename(target)}' '#{File.basename(source)}')
         unless $?.success?
           fail "Failed to create .tar.gz archive with #{@tar}. Please ensure the tar command in your path accepts the flags '-c', '-z', and '-f'"
         end
+
         mv File.basename(target), target
       end
     end
@@ -157,7 +161,5 @@ module Pkg
       self.tar(@target, workdir)
       self.clean_up workdir
     end
-
   end
 end
-

@@ -32,6 +32,7 @@ module Pkg::Util::Misc
       unless data.is_a?(Hash)
         raise "Hash required. Got '#{data.class}' when parsing '#{file}'"
       end
+
       # We explicity return data here b/c the unless clause above will cause the
       # Function to return nil.
       #               -Sean P. M. 05/11/2016
@@ -57,7 +58,7 @@ module Pkg::Util::Misc
     def check_rubygems_ownership(gem_name)
       require 'yaml'
       credentials = YAML.load_file("#{ENV['HOME']}/.gem/credentials")
-      gems = YAML.load(%x(curl -H 'Authorization:#{credentials[:rubygems_api_key]}' https://rubygems.org/api/v1/gems.yaml))
+      gems = YAML.safe_load(%x(curl -H 'Authorization:#{credentials[:rubygems_api_key]}' https://rubygems.org/api/v1/gems.yaml))
       gems.each do |gem|
         if gem['name'] == gem_name
           return true

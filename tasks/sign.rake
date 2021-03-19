@@ -73,6 +73,7 @@ namespace :pl do
       end
     end
     fail unless signed
+
     puts "All rpms signed"
   end
 
@@ -139,11 +140,11 @@ namespace :pl do
       remote_repo   = Pkg::Util::Net.remote_unpack_git_bundle(Pkg::Config.signing_server, 'HEAD', nil, signing_bundle)
       build_params  = Pkg::Util::Net.remote_buildparams(Pkg::Config.signing_server, Pkg::Config)
       Pkg::Util::Net.rsync_to(root_dir, Pkg::Config.signing_server, remote_repo)
-      rake_command = <<-DOC
-cd #{remote_repo} ;
-#{Pkg::Util::Net.remote_bundle_install_command}
-bundle exec rake #{sign_tasks.map { |task| task + "[#{root_dir}]" }.join(" ")} PARAMS_FILE=#{build_params}
-DOC
+      rake_command = <<~DOC
+        cd #{remote_repo} ;
+        #{Pkg::Util::Net.remote_bundle_install_command}
+        bundle exec rake #{sign_tasks.map { |task| task + "[#{root_dir}]" }.join(' ')} PARAMS_FILE=#{build_params}
+      DOC
       Pkg::Util::Net.remote_execute(Pkg::Config.signing_server, rake_command)
       Pkg::Util::Net.rsync_from("#{remote_repo}/#{root_dir}/", Pkg::Config.signing_server, "#{root_dir}/")
       Pkg::Util::Net.remote_execute(Pkg::Config.signing_server, "rm -rf #{remote_repo}")

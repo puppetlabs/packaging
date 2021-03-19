@@ -16,7 +16,7 @@ namespace :pl do
   desc "Write all package build parameters to a yaml file, pass OUTPUT_DIR to specify outut location"
   task :write_build_params do
     if ENV['TASK']
-      task_args = ENV['TASK'].split(' ')
+      task_args = ENV['TASK'].split
       Pkg::Config.task = { :task => task_args[0], :args => task_args[1..-1] }
     end
     Pkg::Config.config_to_yaml(ENV['OUTPUT_DIR'])
@@ -37,10 +37,11 @@ namespace :pl do
     # We want a string that is the from "@<param name>"
     if param = args.param
       getter = param.dup
-      if param[0] == ':'
+      case param[0]
+      when ':'
         getter = param[1..-1]
         param[0] = "@"
-      elsif param[0] == "@"
+      when "@"
         getter = param[1..-1]
       else
         param.insert(0, "@")
@@ -62,4 +63,3 @@ namespace :pl do
     end
   end
 end
-

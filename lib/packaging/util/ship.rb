@@ -3,12 +3,13 @@ require 'tmpdir'
 module Pkg::Util::Ship
   module_function
 
-  def collect_packages(pkg_exts, excludes = []) # rubocop:disable Metrics/MethodLength
+  def collect_packages(pkg_exts, excludes = [])
     pkgs = pkg_exts.map { |ext| Dir.glob(ext) }.flatten
     return [] if pkgs.empty?
-    excludes.each do |exclude|
-      pkgs.delete_if { |p| p.match(exclude) }
-    end if excludes
+
+    excludes&.each do |exclude|
+        pkgs.delete_if { |p| p.match(exclude) }
+      end
     if pkgs.empty?
       $stdout.puts "No packages with (#{pkg_exts.join(', ')}) extensions found staged in 'pkg'"
       $stdout.puts "Maybe your excludes argument (#{excludes}) is too restrictive?"
@@ -59,13 +60,13 @@ module Pkg::Util::Ship
   #   false (most paths will be platform dependent), but set to true for gems
   #   and tarballs since those just land directly under /opt/downloads/<project>
   #
-  # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
   def ship_pkgs(pkg_exts, staging_server, remote_path, opts = {})
     options = {
       excludes: [],
       chattr: true,
       platform_independent: false,
-      nonfinal: false }.merge(opts)
+      nonfinal: false
+    }.merge(opts)
 
     # First find the packages to be shipped. We must find them before moving
     # to our temporary staging directory
@@ -203,7 +204,7 @@ module Pkg::Util::Ship
     command = rolling_repo_link_command(platform_tag, repo_path, nonfinal)
 
     Pkg::Util::Net.remote_execute(staging_server, command) unless command.nil?
-  rescue => e
+  rescue StandardError => e
     fail "Failed to create rolling repo link for '#{platform_tag}'.\n#{e}\n#{e.backtrace}"
   end
 
@@ -272,7 +273,7 @@ module Pkg::Util::Ship
   def test_ship(vm, ship_task)
     command = 'getent group release || groupadd release'
     Pkg::Util::Net.remote_execute(vm, command)
-    hosts_to_override = %w(
+    hosts_to_override = %w[
       APT_HOST
       DMG_HOST
       GEM_HOST
@@ -291,7 +292,7 @@ module Pkg::Util::Ship
       TAR_STAGING_SERVER
       YUM_STAGING_SERVER
       STAGING_SERVER
-    )
+    ]
     hosts_to_override.each do |host|
       ENV[host] = vm
     end

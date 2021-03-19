@@ -2,7 +2,6 @@
 require 'fileutils'
 
 module Pkg::Util::File
-
   class << self
     def exist?(file)
       ::File.exist?(file)
@@ -15,7 +14,7 @@ module Pkg::Util::File
 
     def mktemp
       mktemp = Pkg::Util::Tool.find_tool('mktemp', :required => true)
-      stdout, _, _ = Pkg::Util::Execution.capture3("#{mktemp} -d -t pkgXXXXXX")
+      stdout, = Pkg::Util::Execution.capture3("#{mktemp} -d -t pkgXXXXXX")
       stdout.strip
     end
 
@@ -44,6 +43,7 @@ module Pkg::Util::File
       if !exists and args[:required]
         fail "Required file #{file} could not be found"
       end
+
       exists
     end
 
@@ -52,6 +52,7 @@ module Pkg::Util::File
       if !writable and args[:required]
         fail "File #{file} is not writable"
       end
+
       writable
     end
 
@@ -79,7 +80,7 @@ module Pkg::Util::File
         target_opts = "-C #{target}"
       end
       if file_exists?(source, :required => true)
-        stdout, _, _ = Pkg::Util::Execution.capture3(%Q(#{tar} #{options} #{target_opts} -xf #{source}))
+        stdout, = Pkg::Util::Execution.capture3(%(#{tar} #{options} #{target_opts} -xf #{source}))
         stdout
       end
     end
@@ -98,11 +99,11 @@ module Pkg::Util::File
       # FileList and eliminate many lines of code and comment.
       Dir.chdir(Pkg::Config.project_root) do
         file_patterns.each do |pattern|
-          if File.directory?(pattern) and !Pkg::Util::File.empty_dir?(pattern)
-            install << Dir[pattern + "/**/*"]
-          else
-            install << Dir[pattern]
-          end
+          install << if File.directory?(pattern) and !Pkg::Util::File.empty_dir?(pattern)
+                       Dir["#{pattern}/**/*"]
+                     else
+                       Dir[pattern]
+                     end
         end
         install.flatten!
 
@@ -122,4 +123,3 @@ module Pkg::Util::File
     end
   end
 end
-

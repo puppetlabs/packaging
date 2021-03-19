@@ -30,6 +30,7 @@ namespace :vanagon do
     Rake::Task["vanagon:check_tags"].invoke
     puts "Does this look correct?"
     return unless Pkg::Util.ask_yes_or_no
+
     Rake::Task["pl:jenkins:uber_build"].invoke(args.poll_interval)
   end
 end

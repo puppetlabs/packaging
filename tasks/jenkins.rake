@@ -103,7 +103,7 @@ namespace :pl do
       # a PE build, so we always this along as an environment variable task
       # argument if its the case.
       #
-      Pkg::Config.task = { :task => "#{build_task}", :args => nil }
+      Pkg::Config.task = { :task => build_task.to_s, :args => nil }
       Pkg::Config.task[:args] = ["PE_BUILD=true"] if @build_pe
       #
       # Determine the type of build we're doing to inform jenkins
@@ -126,9 +126,9 @@ namespace :pl do
         when /deb/ then Pkg::Config.default_cow.split('-')[1]
         when /rpm/
           if Pkg::Config.pe_version
-            Pkg::Config.final_mocks.split(' ')[0].split('-')[2]
+            Pkg::Config.final_mocks.split[0].split('-')[2]
           else
-            Pkg::Config.final_mocks.split(' ')[0].split('-')[1..2].join("")
+            Pkg::Config.final_mocks.split[0].split('-')[1..2].join
           end
         when /dmg/ then "apple"
         when /gem/ then "gem"
@@ -137,11 +137,11 @@ namespace :pl do
         else raise "Could not determine build type for #{build_task}"
       end
 
-      if Pkg::Config.pe_version
-        metrics = "#{ENV['USER']}~#{Pkg::Config.version}~#{Pkg::Config.pe_version}~#{dist}~#{Pkg::Config.team}"
-      else
-        metrics = "#{ENV['USER']}~#{Pkg::Config.version}~N/A~#{dist}~#{Pkg::Config.team}"
-      end
+      metrics = if Pkg::Config.pe_version
+                  "#{ENV['USER']}~#{Pkg::Config.version}~#{Pkg::Config.pe_version}~#{dist}~#{Pkg::Config.team}"
+                else
+                  "#{ENV['USER']}~#{Pkg::Config.version}~N/A~#{dist}~#{Pkg::Config.team}"
+                end
       #
       # Create the data files to send to jenkins
       properties = Pkg::Config.config_to_yaml
@@ -150,9 +150,9 @@ namespace :pl do
       # Construct the parameters, which is an array of hashes we turn into JSON
       parameters = [{ "name" => "BUILD_PROPERTIES", "file"  => "file0" },
                     { "name" => "PROJECT_BUNDLE",   "file"  => "file1" },
-                    { "name" => "PROJECT",          "value" => "#{Pkg::Config.project}" },
-                    { "name" => "BUILD_TYPE",       "label" => "#{build_type}" },
-                    { "name" => "METRICS",          "value" => "#{metrics}" }]
+                    { "name" => "PROJECT",          "value" => Pkg::Config.project.to_s },
+                    { "name" => "BUILD_TYPE",       "label" => build_type.to_s },
+                    { "name" => "METRICS",          "value" => metrics.to_s }]
 
       # Initialize the args array that will hold all of the arguments we pass
       # to the curl utility method.
@@ -172,14 +172,14 @@ namespace :pl do
       # Construct the remaining form arguments. For visual clarity, params that are tied
       # together are on the same line.
       #
-      args <<  [
-      "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
-      "-Fname=PROJECT_BUNDLE",   "-Ffile1=@#{bundle}",
-      "-Fname=PROJECT",          "-Fvalue=#{Pkg::Config.project}",
-      "-Fname=BUILD_TYPE",       "-Fvalue=#{build_type}",
-      "-Fname=METRICS",          "-Fvalue=#{metrics}",
-      "-FSubmit=Build",
-      "-Fjson=#{json.to_json}",
+      args << [
+        "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
+        "-Fname=PROJECT_BUNDLE",   "-Ffile1=@#{bundle}",
+        "-Fname=PROJECT",          "-Fvalue=#{Pkg::Config.project}",
+        "-Fname=BUILD_TYPE",       "-Fvalue=#{build_type}",
+        "-Fname=METRICS",          "-Fvalue=#{metrics}",
+        "-FSubmit=Build",
+        "-Fjson=#{json.to_json}"
       ]
 
       # We have several arrays inside args by now, flatten it up.
@@ -232,7 +232,7 @@ namespace :pl do
     # DOSing it with our packaging.
     desc "Queue pl:deb_all on jenkins builder"
     task :deb_all => "pl:fetch" do
-      Pkg::Config.cows.split(' ').each do |cow|
+      Pkg::Config.cows.split.each do |cow|
         Pkg::Config.default_cow = cow
         Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pl:deb")
         sleep 5
@@ -242,7 +242,7 @@ namespace :pl do
     # This does the mocks in parallel
     desc "Queue pl:mock_all on jenkins builder"
     task :mock_all => "pl:fetch" do
-      Pkg::Config.final_mocks.split(' ').each do |mock|
+      Pkg::Config.final_mocks.split.each do |mock|
         Pkg::Config.default_mock = mock
         Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pl:mock")
         sleep 5
@@ -250,7 +250,7 @@ namespace :pl do
     end
 
     task :uber_ship_lite => "pl:fetch" do
-      tasks = %w(
+      tasks = %w[
         jenkins:retrieve
         jenkins:sign_all
         ship_rpms
@@ -260,7 +260,7 @@ namespace :pl do
         ship_tar
         ship_msi
         ship_gem
-      )
+      ]
       tasks.map { |t| "pl:#{t}" }.each do |t|
         puts "Running #{t} . . ."
         Rake::Task[t].invoke
@@ -270,13 +270,13 @@ namespace :pl do
       # add the release to release-metrics
       begin
         Rake::Task["pl:update_release_metrics"].invoke
-      rescue => e
+      rescue StandardError => e
         fail "Error updating release-metrics:\n#{e}\nYou will need to add this release manually."
       end
     end
 
     task :stage_nightlies => "pl:fetch" do
-      tasks = %w(
+      tasks = %w[
         jenkins:retrieve
         jenkins:sign_all
         ship_nightly_rpms
@@ -284,7 +284,7 @@ namespace :pl do
         ship_nightly_dmg
         ship_nightly_swix
         ship_nightly_msi
-      )
+      ]
       tasks.map { |t| "pl:#{t}" }.each do |t|
         puts "Running #{t} . . ."
         Rake::Task[t].invoke
@@ -324,7 +324,7 @@ namespace :pl do
 
     desc "Retrieve packages built by jenkins, sign, and ship all!"
     task :uber_ship => "pl:fetch" do
-      uber_tasks = %w(
+      uber_tasks = %w[
         jenkins:retrieve
         jenkins:sign_all
         uber_ship
@@ -342,7 +342,7 @@ namespace :pl do
         remote:deploy_yum_repo_to_s3
         remote:deploy_downloads_to_s3
         remote:deploy_to_rsync_server
-      )
+      ]
 
       if Pkg::Util.boolean_value(Pkg::Config.answer_override) && !Pkg::Config.foss_only
         fail "Using ANSWER_OVERRIDE without FOSS_ONLY=true is dangerous!"
@@ -456,7 +456,7 @@ if Pkg::Config.build_pe
       desc "Queue pe:deb_all on jenkins builder"
       task :deb_all => "pl:fetch" do
         Pkg::Util.check_var("PE_VER", Pkg::Config.pe_version)
-        Pkg::Config.cows.split(' ').each do |cow|
+        Pkg::Config.cows.split.each do |cow|
           Pkg::Config.default_cow = cow
           Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pe:deb")
           sleep 5
@@ -466,7 +466,7 @@ if Pkg::Config.build_pe
       # This does the mocks in parallel
       desc "Queue pe:mock_all on jenkins builder"
       task :mock_all => "pl:fetch" do
-        Pkg::Config.final_mocks.split(' ').each do |mock|
+        Pkg::Config.final_mocks.split.each do |mock|
           Pkg::Config.default_mock = mock
           Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pe:mock")
           sleep 5
@@ -518,13 +518,13 @@ namespace :pl do
       end
 
       # Assemble the JSON string for the JSON parameter
-      json = JSON.generate("parameter" => [{ "name" => "SHA", "value"  => "#{Pkg::Config.ref}" }])
+      json = JSON.generate("parameter" => [{ "name" => "SHA", "value" => Pkg::Config.ref.to_s }])
 
       # Assemble our arguments to the post
       args = [
-      "-Fname=SHA", "-Fvalue=#{Pkg::Config.ref}",
-      "-Fjson=#{json.to_json}",
-      "-FSubmit=Build"
+        "-Fname=SHA", "-Fvalue=#{Pkg::Config.ref}",
+        "-Fjson=#{json.to_json}",
+        "-FSubmit=Build"
       ]
 
       _, retval = Pkg::Util::Net.curl_form_data(uri, args)

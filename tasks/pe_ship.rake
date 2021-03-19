@@ -12,16 +12,13 @@ if Pkg::Config.build_pe
           Pkg::Util::Net.rsync_to('pkg/pe/rpm/', Pkg::Config.yum_host, Pkg::Config.yum_target_path)
         end
       end
-      if Pkg::Config.team == 'release'
-
-        # If this is not a feature branch or release branch, we need to link the
-        # shipped packages into the feature repos and update their metadata.
-        unless Pkg::Config.pe_feature_branch || Pkg::Config.pe_release_branch
-          puts "Linking RPMs to feature repo"
-          Pkg::Util::RakeUtils.invoke_task("pe:remote:link_shipped_rpms_to_feature_repo")
-          Pkg::Util::RakeUtils.invoke_task("pe:remote:update_yum_repo")
-        end
-      end
+      # If this is not a feature branch or release branch, we need to link the
+# shipped packages into the feature repos and update their metadata.
+      if Pkg::Config.team == 'release' && !(Pkg::Config.pe_feature_branch || Pkg::Config.pe_release_branch)
+        puts "Linking RPMs to feature repo"
+        Pkg::Util::RakeUtils.invoke_task("pe:remote:link_shipped_rpms_to_feature_repo")
+        Pkg::Util::RakeUtils.invoke_task("pe:remote:update_yum_repo")
+              end
     end
 
     desc "Ship PE debs to #{Pkg::Config.apt_host}"
@@ -74,7 +71,6 @@ if Pkg::Config.build_pe
             Rake::Task["pe:remote:apt"].reenable
             Rake::Task["pe:remote:apt"].invoke(target_path, dist)
           end
-
         end
       end
 
@@ -116,14 +112,14 @@ if Pkg::Config.build_pe
             end
           end
 
-          unless Dir["pkg/pe/deb/#{dist}/*"].select { |i| i !~ /^.*\.deb$/ }.empty?
+          unless Dir["pkg/pe/deb/#{dist}/*"].reject { |i| i =~ /^.*\.deb$/ }.empty?
             # Ship source files to source dir, e.g. 'squeeze-source'
             Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*", Pkg::Config.apt_host, "#{base_path}/#{dist}-source", extra_flags: ["--exclude '*.deb'", "--ignore-existing"])
           end
 
           files = Dir["pkg/pe/deb/#{dist}/*{_#{arch},all}.deb"].map { |f| "#{archive_path}/#{File.basename(f)}" }
 
-          files += Dir["pkg/pe/deb/#{dist}/*"].select { |f| f !~ /^.*\.deb$/ }.map { |f| "#{base_path}/#{dist}-source/#{File.basename(f)}" }
+          files += Dir["pkg/pe/deb/#{dist}/*"].reject { |f| f =~ /^.*\.deb$/ }.map { |f| "#{base_path}/#{dist}-source/#{File.basename(f)}" }
         end
       end
       # If this is not a feature branch or release branch, we need to link the
@@ -137,14 +133,13 @@ if Pkg::Config.build_pe
     namespace :remote do
       desc "Update remote rpm repodata for PE on #{Pkg::Config.yum_host}"
       task :update_yum_repo => "pl:fetch" do
-
         # Paths to the repos.
         repo_base_path = Pkg::Config.yum_target_path
 
         # This entire command is going to be passed across SSH, but it's unwieldy on a
         # single line. By breaking it into a series of concatenated strings, we can maintain
         # a semblance of formatting and structure (nevermind readability).
-        command  = %(for dir in #{repo_base_path}/{#{rpm_family_and_version.join(",")}}-*; do)
+        command  = %(for dir in #{repo_base_path}/{#{rpm_family_and_version.join(',')}}-*; do)
         command += %(  sudo createrepo --checksum=sha --checkts --update --delta-workers=0 --quiet --database --update $dir; )
         command += %(done; )
         command += %(sync)
@@ -159,7 +154,7 @@ if Pkg::Config.build_pe
         incoming_dir or fail "Adding packages to apt repo requires an incoming directory"
         Pkg::Util::RakeUtils.invoke_task("pl:fetch")
 
-        cmd = <<-eos
+        cmd = <<-RUN_APTLY
           if ! flock --wait 1200 /opt/tools/aptly/db/LOCK --command /bin/true; then
             echo "Unable to acquire aptly lock, giving up" 1>&2
             exit 1
@@ -170,12 +165,12 @@ if Pkg::Config.build_pe
           else
             aptly publish repo -gpg-key=\"8BBEB79B\" #{Pkg::Config::pe_version}-#{dist} #{Pkg::Config::pe_version}
           fi
-        eos
+        RUN_APTLY
         stdout, stderr = Pkg::Util::Net.remote_execute(
-                  Pkg::Config.apt_host,
-                  cmd,
-                  { capture_output: true }
-                )
+          Pkg::Config.apt_host,
+          cmd,
+          { capture_output: true }
+        )
 
         output = stdout.to_s + stderr.to_s
 
@@ -190,13 +185,13 @@ if Pkg::Config.build_pe
 
         puts "Cleaning up apt repo 'incoming' dir on #{Pkg::Config.apt_host}"
         Pkg::Util::Net.remote_execute(Pkg::Config.apt_host, "rm -r #{incoming_dir}")
-
       end
 
       # Throw more tires on the fire
       desc "Remotely link shipped rpm packages into feature repo on #{Pkg::Config.yum_host}"
       task :link_shipped_rpms_to_feature_repo => "pl:fetch" do
         next if Pkg::Config.pe_feature_branch
+
         repo_base_path = Pkg::Config.yum_target_path
         feature_repo_path = Pkg::Config.yum_target_path(true)
         pkgs = FileList['pkg/pe/rpm/**/*.rpm'].select { |path| path.gsub!('pkg/pe/rpm/', '') }
@@ -211,6 +206,7 @@ if Pkg::Config.build_pe
       desc "Remotely link shipped deb packages into feature repo on #{Pkg::Config.apt_host}"
       task :link_shipped_debs_to_feature_repo => "pl:fetch" do
         next if Pkg::Config.pe_feature_branch
+
         base_path = Pkg::Config.apt_target_path
         feature_base_path = Pkg::Config.apt_target_path(true)
         pkgs = FileList["pkg/pe/deb/**/*.deb"].select { |path| path.gsub!('pkg/pe/deb/', '') }

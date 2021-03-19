@@ -19,7 +19,7 @@ task :setup do
   # Read the Apple file-mappings
   begin
     @source_files        = Pkg::Util::Serialization.load_yaml('ext/osx/file_mapping.yaml')
-  rescue => e
+  rescue StandardError => e
     fail "Could not load Apple file mappings from 'ext/osx/file_mapping.yaml'\n#{e}"
   end
   @package_name          = Pkg::Config.project
@@ -46,10 +46,10 @@ def make_directory_tree
   project_tmp    = "#{Pkg::Util::File.mktemp}/#{@package_name}"
   @scratch       = "#{project_tmp}/#{@title}"
   @working_tree  = {
-     'scripts'   => "#{@scratch}/scripts",
-     'resources' => "#{@scratch}/resources",
-     'working'   => "#{@scratch}/root",
-     'payload'   => "#{@scratch}/payload",
+    'scripts' => "#{@scratch}/scripts",
+    'resources' => "#{@scratch}/resources",
+    'working' => "#{@scratch}/root",
+    'payload' => "#{@scratch}/payload"
   }
   puts "Cleaning Tree: #{project_tmp}"
   rm_rf(project_tmp)
@@ -58,11 +58,11 @@ def make_directory_tree
   end
 
   if File.exists?('ext/osx/postflight.erb')
-    Pkg::Util::File.erb_file 'ext/osx/postflight.erb', "#{@working_tree["scripts"]}/postinstall", false, :binding => binding
+    Pkg::Util::File.erb_file 'ext/osx/postflight.erb', "#{@working_tree['scripts']}/postinstall", false, :binding => binding
   end
 
   if File.exists?('ext/osx/preflight.erb')
-    Pkg::Util::File.erb_file 'ext/osx/preflight.erb', "#{@working_tree["scripts"]}/preinstall", false, :binding => binding
+    Pkg::Util::File.erb_file 'ext/osx/preflight.erb', "#{@working_tree['scripts']}/preinstall", false, :binding => binding
   end
 
   if File.exists?('ext/osx/prototype.plist.erb')
@@ -72,7 +72,6 @@ def make_directory_tree
   if File.exists?('ext/packaging/static_artifacts/PackageInfo.plist')
     cp 'ext/packaging/static_artifacts/PackageInfo.plist', "#{@scratch}/PackageInfo.plist"
   end
-
 end
 
 # method:        build_dmg
@@ -113,14 +112,9 @@ def build_dmg
     -format #{dmg_format} \
     #{dmg_file}")
 
-  if File.directory?("#{pwd}/pkg/apple")
-    sh "sudo mv #{pwd}/#{dmg_file} #{pwd}/pkg/apple/#{dmg_file}"
-    puts "moved:   #{dmg_file} has been moved to #{pwd}/pkg/apple/#{dmg_file}"
-  else
-    mkdir_p("#{pwd}/pkg/apple")
-    sh "sudo mv #{pwd}/#{dmg_file} #{pwd}/pkg/apple/#{dmg_file}"
-    puts "moved:   #{dmg_file} has been moved to #{pwd}/pkg/apple/#{dmg_file}"
-  end
+  mkdir_p("#{pwd}/pkg/apple")
+  sh "sudo mv #{pwd}/#{dmg_file} #{pwd}/pkg/apple/#{dmg_file}"
+  puts "moved:   #{dmg_file} has been moved to #{pwd}/pkg/apple/#{dmg_file}"
 end
 
 # method:        pack_source
@@ -131,7 +125,7 @@ end
 #                installed as the package's payload.
 #
 def pack_source
-  work          = "#{@working_tree['working']}"
+  work = (@working_tree['working']).to_s
   source = pwd
 
   # Make all necessary directories
@@ -142,33 +136,30 @@ def pack_source
   end
 
   # Install directory contents into place
-  unless @source_files['directories'].nil?
-    @source_files['directories'].each do |dir, params|
+  @source_files['directories']&.each do |dir, params|
       unless FileList["#{source}/#{dir}/*"].empty?
         cmd = "#{DITTO} #{source}/#{dir}/ #{work}/#{params['path']}"
         puts cmd
         system(cmd)
       end
     end
-  end
 
   # Setup a preinstall script and replace variables in the files with
   # the correct paths.
   if File.exists?("#{@working_tree['scripts']}/preinstall")
-    chmod(0755, "#{@working_tree['scripts']}/preinstall")
+    chmod(0o755, "#{@working_tree['scripts']}/preinstall")
     sh "sudo chown root:wheel #{@working_tree['scripts']}/preinstall"
   end
 
   # Setup a postinstall from from the erb created earlier
   if File.exists?("#{@working_tree['scripts']}/postinstall")
-    chmod(0755, "#{@working_tree['scripts']}/postinstall")
+    chmod(0o755, "#{@working_tree['scripts']}/postinstall")
     sh "sudo chown root:wheel #{@working_tree['scripts']}/postinstall"
   end
 
   # Do a run through first setting the specified permissions then
   # making sure 755 is set for all directories
-  unless @source_files['directories'].nil?
-    @source_files['directories'].each do |dir, params|
+  @source_files['directories']&.each do |dir, params|
       owner = params['owner']
       group = params['group']
       perms = params['perms']
@@ -210,11 +201,9 @@ def pack_source
       #
       sh "sudo chown -R #{owner}:#{group} #{work}/#{path}"
     end
-  end
 
   # Install any files
-  unless @source_files['files'].nil?
-    @source_files['files'].each do |file, params|
+  @source_files['files']&.each do |file, params|
       owner = params['owner']
       group = params['group']
       perms = params['perms']
@@ -226,7 +215,6 @@ def pack_source
         system(cmd)
       end
     end
-  end
 
   # Hackery here. Our packages were using /usr/bin/env ruby and installing to
   # system ruby loadpath, which breaks horribly in a multi-ruby (rbenv, etc)
@@ -235,13 +223,11 @@ def pack_source
   # ruby approach to this instead of shelling out to sed, but the problem is
   # we've already set ownership on these files, almost exclusively to root, and
   # thus we need to sudo out.
-  if @source_files['directories'] and @source_files['directories']['bin']
-    if bindir = @source_files['directories']['bin']['path']
-      Dir[File.join(work, bindir, '*')].each do |binfile|
-        sh "sudo /usr/bin/sed -E -i '' '1 s,^#![[:space:]]*/usr/bin/env[[:space:]]+ruby$,#!/usr/bin/ruby,' #{binfile}"
-      end
+  if @source_files['directories'] and @source_files['directories']['bin'] && bindir = @source_files['directories']['bin']['path']
+    Dir[File.join(work, bindir, '*')].each do |binfile|
+      sh "sudo /usr/bin/sed -E -i '' '1 s,^#![[:space:]]*/usr/bin/env[[:space:]]+ruby$,#!/usr/bin/ruby,' #{binfile}"
     end
-  end
+    end
 end
 
 namespace :package do

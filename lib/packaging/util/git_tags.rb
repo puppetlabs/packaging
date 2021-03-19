@@ -1,6 +1,6 @@
 module Pkg::Util
   class Git_tag
-    attr_reader :address, :ref, :ref_name, :ref_type, :branch_name
+    attr_reader :address, :ref, :ref_name, :ref_type
 
     GIT = Pkg::Util::Tool::GIT
     DEVNULL = Pkg::Util::OS::DEVNULL
@@ -43,7 +43,7 @@ module Pkg::Util
     # Fetch the full ref using ls-remote, this should raise an error if it returns non-zero
     # because that means this ref doesn't exist in the repo
     def fetch_full_ref
-      stdout, _, _ = Pkg::Util::Execution.capture3("#{GIT} ls-remote --tags --heads --exit-code #{address} #{ref}")
+      stdout, = Pkg::Util::Execution.capture3("#{GIT} ls-remote --tags --heads --exit-code #{address} #{ref}")
       stdout.split.last
     rescue RuntimeError => e
       raise "ERROR : Not a ref or sha!\n#{e}"

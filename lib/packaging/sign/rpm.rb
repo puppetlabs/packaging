@@ -44,6 +44,7 @@ module Pkg::Sign::Rpm
     # which bails out with non-0 exit codes. Instead, check that the output
     # looks more-or-less how we expect it to.
     fail "Something went wrong checking the signature of #{rpm}." unless signature_check_output.include? "Header"
+
     return signature_check_output.include? "key ID #{key}"
   end
 
@@ -70,7 +71,7 @@ module Pkg::Sign::Rpm
     v4_rpms = []
     rpms_to_sign.each do |rpm|
       platform_tag = Pkg::Paths.tag_from_artifact_path(rpm)
-      platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
+      platform, version, = Pkg::Platforms.parse_platform_tag(platform_tag)
 
       # We don't sign AIX rpms
       next if platform_tag.include?('aix')
@@ -103,6 +104,7 @@ module Pkg::Sign::Rpm
     # Using the map of paths to basenames, we re-hardlink the rpms we deleted.
     all_rpms.each do |link_path, rpm_filename|
       next if File.exist? link_path
+
       FileUtils.mkdir_p(File.dirname(link_path))
       # Find paths where the signed rpm has the same basename, but different
       # full path, as the one we need to link.

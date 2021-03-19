@@ -3,9 +3,7 @@ require 'net/http'
 require 'json'
 
 module Pkg::Util::Jenkins
-
   class << self
-
     # Use the curl to create a jenkins job from a valid XML
     # configuration file.
     # Returns the URL to the job
@@ -25,6 +23,7 @@ module Pkg::Util::Jenkins
       form_args = ["--silent", "--fail"]
       output, retval = Pkg::Util::Net.curl_form_data(job_url, form_args, :quiet => true)
       return output if retval.nil?
+
       return Pkg::Util::Execution.success?(retval)
     end
 
@@ -64,6 +63,7 @@ module Pkg::Util::Jenkins
       unless response.code == '200'
         raise "Unable to query #{uri}, please check that it is valid."
       end
+
       return JSON.parse(response.body)
     end
 
@@ -90,6 +90,5 @@ module Pkg::Util::Jenkins
 
       wait_for_build job_hash['lastBuild']['url']
     end
-
   end
 end

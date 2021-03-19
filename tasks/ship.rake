@@ -72,22 +72,22 @@ namespace :pl do
     end
 
     desc "Update remote ips repository on #{Pkg::Config.ips_host}"
-    task :update_ips_repo  => 'pl:fetch' do
+    task :update_ips_repo => 'pl:fetch' do
       if Dir['pkg/ips/pkgs/**/*'].empty? && Dir['pkg/solaris/11/**/*'].empty?
         $stdout.puts "There aren't any p5p packages in pkg/ips/pkgs or pkg/solaris/11. Maybe something went wrong?"
       else
 
-        if !Dir['pkg/ips/pkgs/**/*'].empty?
-          source_dir = 'pkg/ips/pkgs/'
-        else
-          source_dir = 'pkg/solaris/11/'
-        end
+        source_dir = if Dir['pkg/ips/pkgs/**/*'].empty?
+                       'pkg/solaris/11/'
+                     else
+                       'pkg/ips/pkgs/'
+                     end
 
-        tmpdir, _ = Pkg::Util::Net.remote_execute(
-                  Pkg::Config.ips_host,
-                  'mktemp -d -p /var/tmp',
-                  { capture_output: true }
-                )
+        tmpdir, = Pkg::Util::Net.remote_execute(
+          Pkg::Config.ips_host,
+          'mktemp -d -p /var/tmp',
+          { capture_output: true }
+        )
         tmpdir.chomp!
 
         Pkg::Util::Net.rsync_to(source_dir, Pkg::Config.ips_host, tmpdir)
@@ -304,12 +304,13 @@ namespace :pl do
           puts 'This will ship to an internal gem mirror, a public file server, and rubygems.org'
           puts "Do you want to start shipping the rubygem '#{gem_file}'?"
           next unless Pkg::Util.ask_yes_or_no
+
           Rake::Task['pl:ship_gem_to_rubygems'].execute(file: gem_file)
         end
 
         Rake::Task['pl:ship_gem_to_downloads'].invoke
       else
-        $stderr.puts 'Not shipping development gem using odd_even strategy for the sake of your users.'
+        warn 'Not shipping development gem using odd_even strategy for the sake of your users.'
       end
     end
   end
@@ -321,6 +322,7 @@ namespace :pl do
     if Pkg::Config.build_gem
       fail 'Value `Pkg::Config.gem_host` not defined, skipping nightly ship' unless Pkg::Config.gem_host
       fail 'Value `Pkg::Config.nonfinal_gem_path` not defined, skipping nightly ship' unless Pkg::Config.nonfinal_gem_path
+
       FileList['pkg/*.gem'].each do |gem_file|
         Pkg::Gem.ship_to_internal_mirror(gem_file)
       end
@@ -509,7 +511,7 @@ namespace :pl do
           { extra_options: '-oBatchMode=yes' }
         )
       end
-    rescue
+    rescue StandardError
       errs << "Unlocking the OSX keychain failed! Check the password in your .bashrc on #{Pkg::Config.osx_signing_server}"
     end
 
@@ -534,7 +536,6 @@ namespace :pl do
         puts " * #{err}"
       end
     end
-
   end
 
   # It is odd to namespace this ship task under :jenkins, but this task is
@@ -550,17 +551,24 @@ namespace :pl do
       unless Pkg::Config.project
         fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT_OVERRIDE' environment variable."
       end
+
       artifactory = Pkg::ManageArtifactory.new(Pkg::Config.project, Pkg::Config.ref)
 
       local_dir = args.local_dir || 'pkg'
       Dir.glob("#{local_dir}/**/*").reject { |e| File.directory? e }.each do |artifact|
+        # Always upload new yaml or json files
         if File.extname(artifact) == ".yaml" || File.extname(artifact) == ".json"
           artifactory.deploy_package(artifact)
-        elsif artifactory.package_exists_on_artifactory?(artifact)
-          warn "Attempt to upload '#{artifact}' failed. Package already exists!"
-        else
-          artifactory.deploy_package(artifact)
+          next
         end
+
+        if artifactory.package_exists_on_artifactory?(artifact)
+          ## This should be an error.
+          warn "Attempt to upload '#{artifact}' failed. Package already exists!"
+          next
+        end
+
+        artifactory.deploy_package(artifact)
       end
     end
 
@@ -570,6 +578,7 @@ namespace :pl do
       unless Pkg::Config.project
         fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT_OVERRIDE' environment variable."
       end
+
       target = args.target || 'artifacts'
       local_dir = args.local_dir || 'pkg'
       project_basedir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
@@ -649,6 +658,7 @@ namespace :pl do
           link_filename = File.join(local_dir, platform, "#{Pkg::Config.project}-#{arch}.msi")
 
           next unless !packages.include?(link_filename) && packages.include?(package_filename)
+
           # Dear future code spelunkers:
           # Using symlinks instead of hard links causes failures when we try
           # to set these files to be immutable. Also be wary of whether the

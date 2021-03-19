@@ -21,11 +21,11 @@ namespace :pl do
       remote_repo   = Pkg::Util::Net.remote_unpack_git_bundle(signing_server, 'HEAD', nil, signing_bundle)
       build_params  = Pkg::Util::Net.remote_buildparams(signing_server, Pkg::Config)
       Pkg::Util::Net.rsync_to('repos', signing_server, remote_repo)
-      rake_command = <<-DOC
-cd #{remote_repo} ;
-#{Pkg::Util::Net.remote_bundle_install_command}
-bundle exec rake pl:jenkins:sign_repos GPG_KEY=#{Pkg::Util::Gpg.key} PARAMS_FILE=#{build_params}
-DOC
+      rake_command = <<~DOC
+        cd #{remote_repo} ;
+        #{Pkg::Util::Net.remote_bundle_install_command}
+        bundle exec rake pl:jenkins:sign_repos GPG_KEY=#{Pkg::Util::Gpg.key} PARAMS_FILE=#{build_params}
+      DOC
       Pkg::Util::Net.remote_execute(signing_server, rake_command)
       Pkg::Util::Net.rsync_from("#{remote_repo}/repos/", signing_server, target)
       Pkg::Util::Net.remote_execute(signing_server, "rm -rf #{remote_repo}")
@@ -54,7 +54,7 @@ DOC
     end
 
     # This task should be invoked after prepare_signed_repos, so that there are repos to pack up.
-    task :pack_signed_repo, [:path_to_repo, :name_of_archive, :versioning] => ["pl:fetch"] do |t, args|
+    task :pack_signed_repo, %i[path_to_repo name_of_archive versioning] => ["pl:fetch"] do |t, args|
       # path_to_repo should be relative to ./pkg
       path_to_repo = args.path_to_repo or fail ":path_to_repo is a required argument for #{t}"
       name_of_archive = args.name_of_archive or fail ":name_of_archive is a required argument for #{t}"
@@ -62,26 +62,27 @@ DOC
       Pkg::Repo.create_signed_repo_archive(path_to_repo, name_of_archive, versioning)
     end
 
-    task :pack_all_signed_repos_individually, [:name_of_archive, :versioning] => ["pl:fetch"] do |t, args|
+    task :pack_all_signed_repos_individually, %i[name_of_archive versioning] => ["pl:fetch"] do |t, args|
       name_of_archive = args.name_of_archive or fail ":name_of_archive is a required argument for #{t}"
       versioning = args.versioning or fail ":versioning is a required argument for #{t}"
       Pkg::Repo.create_all_repo_archives(name_of_archive, versioning)
     end
 
-    task :prepare_signed_repos, [:target_host, :target_prefix, :versioning] => ["clean", "pl:fetch"] do |t, args|
+    task :prepare_signed_repos, %i[target_host target_prefix versioning] => ["clean", "pl:fetch"] do |t, args|
       target_host = args.target_host or fail ":target_host is a required argument to #{t}"
       target_prefix = args.target_prefix or fail ":target_prefix is a required argument for #{t}"
       versioning = args.versioning or fail ":versioning is a required argument for #{t}"
       mkdir("pkg")
 
       Dir.chdir("pkg") do
-        if versioning == 'ref'
+        case versioning
+        when 'ref'
           local_target = File.join(Pkg::Config.project, Pkg::Config.ref)
-        elsif versioning == 'version'
+        when 'version'
           local_target = File.join(Pkg::Config.project, Pkg::Util::Version.dot_version)
         end
 
-        FileUtils.mkdir_p([local_target, Pkg::Config.project + "-latest"])
+        FileUtils.mkdir_p([local_target, "#{Pkg::Config.project}-latest"])
 
         # Rake task dependencies with arguments are nuts, so we just directly
         # invoke them here.  We want the signed_* directories staged as
@@ -106,7 +107,7 @@ DOC
         # names stay the same between runs. Their contents have the ref
         # stripped off and the project replaced by $project-latest. Then the
         # repos directory is a symlink to the last pushed ref's repos.
-        FileUtils.cp_r(File.join(local_target, "repo_configs"), Pkg::Config.project + "-latest", { :preserve => true })
+        FileUtils.cp_r(File.join(local_target, "repo_configs"), "#{Pkg::Config.project}-latest", { :preserve => true })
 
         # Now we need to remove the ref and replace $project with
         # $project-latest so that it will work as a pinned latest repo
@@ -114,7 +115,7 @@ DOC
         Dir.glob("#{Pkg::Config.project}-latest/repo_configs/**/*").select { |t_config| File.file?(t_config) }.each do |config|
           new_contents = File.read(config)
           new_contents.gsub!(%r{#{Pkg::Config.ref}/}, "")
-          new_contents.gsub!(%r{#{Pkg::Config.project}/}, Pkg::Config.project + "-latest/")
+          new_contents.gsub!(%r{#{Pkg::Config.project}/}, "#{Pkg::Config.project}-latest/")
           new_contents.gsub!(Pkg::Config.ref, "latest")
 
           File.open(config, "w") { |file| file.puts new_contents }
@@ -136,11 +137,11 @@ DOC
         end
 
         # Make a latest symlink for the project
-        FileUtils.ln_sf(File.join("..", local_target, "repos"), File.join(Pkg::Config.project + "-latest"), :verbose => true)
+        FileUtils.ln_sf(File.join("..", local_target, "repos"), File.join("#{Pkg::Config.project}-latest"), :verbose => true)
       end
     end
 
-    task :deploy_signed_repos, [:target_host, :target_basedir, :foss_only] => "pl:fetch" do |t, args|
+    task :deploy_signed_repos, %i[target_host target_basedir foss_only] => "pl:fetch" do |t, args|
       target_host = args.target_host or fail ":target_host is a required argument to #{t}"
       target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
       include_paths = []
@@ -158,11 +159,11 @@ DOC
 
       # Get the directories together - we need to figure out which bits to ship based on the include_path
       # First we get the build itself
-      Pkg::Util::Execution.capture3(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}/**/#{path}" }.join(' ') } | sort > include_file))
+      Pkg::Util::Execution.capture3(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}/**/#{path}" }.join(' ')} | sort > include_file))
       Pkg::Util::Execution.capture3(%(mkdir -p tmp && tar -T include_file -cf - | (cd ./tmp && tar -xf -)))
 
       # Then we find grab the appropriate meta-data only
-      Pkg::Util::Execution.capture3(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}-latest/#{path}" unless path.include? "repos" }.join(' ') } | sort > include_file_latest))
+      Pkg::Util::Execution.capture3(%(find #{include_paths.map { |path| "pkg/#{Pkg::Config.project}-latest/#{path}" unless path.include? 'repos' }.join(' ')} | sort > include_file_latest))
 
       #include /repos in the include_file_latest so we correctly include the symlink in the final file list to ship
       Pkg::Util::Execution.capture3(%(echo "pkg/#{Pkg::Config.project}-latest/repos" >> include_file_latest))
@@ -173,7 +174,7 @@ DOC
         # First we ship the latest and clean up any repo-configs that are no longer valid with --delete-after
         Pkg::Util::Net.rsync_to("#{Pkg::Config.project}-latest", target_host, target_basedir, extra_flags: ["--delete-after", "--keep-dirlinks"])
         # Then we ship the sha version with default rsync flags
-        Pkg::Util::Net.rsync_to("#{Pkg::Config.project}", target_host, target_basedir)
+        Pkg::Util::Net.rsync_to(Pkg::Config.project.to_s, target_host, target_basedir)
       end
 
       puts "'#{Pkg::Config.ref}' of '#{Pkg::Config.project}' has been shipped to '#{target_host}:#{target_basedir}'"
@@ -225,16 +226,17 @@ DOC
     #        a github ref. Valid values are 'version' and 'ref'
     # @param pe_version the PE-version to deploy to.
     #        ex: 2015.2
-    task :link_signed_repos, [:target_host, :remote_dir, :versioning, :pe_version] => ["pl:fetch"] do |t, args|
+    task :link_signed_repos, %i[target_host remote_dir versioning pe_version] => ["pl:fetch"] do |t, args|
       target_host = args.target_host or fail ":target_host is a required argument for #{t}"
       remote_dir = args.remote_dir or fail ":remote_dir is a required argument for #{t}"
       versioning = args.versioning or fail ":versioning is a required argument for #{t}"
       pe_version = args.pe_version or fail ":pe_version is a required argument for #{t}"
 
-      if versioning == 'ref'
+      case versioning
+      when 'ref'
         version_string = Pkg::Config.ref
-      elsif versioning == 'version'
-        version_string =  Pkg::Util::Version.dot_version
+      when 'version'
+        version_string = Pkg::Util::Version.dot_version
       end
 
       pa_source = File.join(remote_dir, Pkg::Config.project)
@@ -255,7 +257,7 @@ DOC
       Pkg::Util::RakeUtils.invoke_task("pl:jenkins:generate_signed_repos", 'nightly')
     end
 
-    task :deploy_nightly_repos, [:target_host, :target_basedir] => ["pl:fetch"] do |t, args|
+    task :deploy_nightly_repos, %i[target_host target_basedir] => ["pl:fetch"] do |t, args|
       target_host = args.target_host or fail ":target_host is a required argument to #{t}"
       target_basedir = args.target_basedir or fail ":target_basedir is a required argument to #{t}"
       Pkg::Util::RakeUtils.invoke_task("pl:jenkins:prepare_signed_repos", target_host, 'nightly', 'ref')

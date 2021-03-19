@@ -5,13 +5,11 @@ require 'digest'
 require 'packaging/artifactory/extensions'
 
 module Pkg
-
   # The Artifactory class
   # This class provides automation to access the artifactory repos maintained
   # by the Release Engineering team at Puppet. It has the ability to both push
   # artifacts to the repos, and to retrieve them back from the repos.
   class ManageArtifactory
-
     # The Artifactory property that the artifactCleanup user plugin
     # {https://github.com/jfrog/artifactory-user-plugins/tree/master/cleanup/artifactCleanup}
     # uses to tell it to not clean a particular artifact
@@ -109,6 +107,7 @@ module Pkg
       if data[:package_format] == 'deb'
         return "deb #{@artifactory_uri}/#{data[:repo_name]} #{data[:codename]} #{data[:repo_subdirectories]}"
       end
+
       raise "The platform '#{platform_tag}' is not an apt-based system."
     end
 
@@ -130,6 +129,7 @@ module Pkg
   #repo_gpgcheck=1
         DOC
       end
+
       raise "The platform '#{platform_tag}' is not a yum-based system"
     end
 
@@ -186,10 +186,10 @@ module Pkg
           architecture = 'all'
         end
         properties_hash.merge!({
-          'deb.distribution' => data[:codename],
-          'deb.component' => data[:repo_subdirectories],
-          'deb.architecture' => architecture,
-        })
+                                 'deb.distribution' => data[:codename],
+                                 'deb.component' => data[:repo_subdirectories],
+                                 'deb.architecture' => architecture
+                               })
       end
       properties_hash
     end
@@ -224,7 +224,7 @@ module Pkg
         deploy_properties(platform_tag, File.basename(package)),
         headers
       )
-    rescue
+    rescue StandardError
       raise "Attempt to upload '#{package}' to #{File.join(@artifactory_uri, data[:full_artifactory_path])} failed"
     end
 
@@ -235,8 +235,8 @@ module Pkg
     # @return [String] The contents of the YAML file
     def retrieve_yaml_data(pkg, ref)
       yaml_url = "#{@artifactory_uri}/#{DEFAULT_REPO_TYPE}/#{DEFAULT_REPO_BASE}/#{pkg}/#{ref}/#{ref}.yaml"
-      open(yaml_url) { |f| f.read }
-    rescue
+      open(yaml_url, &:read)
+    rescue StandardError
       raise "Failed to load YAML data for #{pkg} at #{ref} from #{yaml_url}!"
     end
 
@@ -247,7 +247,7 @@ module Pkg
     #   project_version, and platform_tag
     def package_name(platform_data, platform_tag)
       return File.basename(platform_data[platform_tag][:artifact])
-    rescue
+    rescue StandardError
       fail_message = <<-DOC
   Package name could not be found from loaded yaml data. Either this package
   does not exist, or '#{platform_tag}' is not present in this dataset.
@@ -269,7 +269,7 @@ module Pkg
       packages.flatten!
       packages.reject! { |package| package.nil? || package.empty? }
       packages.map { |package| File.basename(package) }
-    rescue
+    rescue StandardError
       fail_message = <<-DOC
   Package name could not be found from loaded yaml data. Either this package
   does not exist, or '#{platform_tag}' is not present in this dataset.
@@ -296,17 +296,19 @@ module Pkg
     def promote_package(pkg, ref, platform_tag, repository, debian_component = nil)
       # load package metadata
       yaml_content = retrieve_yaml_data(pkg, ref)
-      yaml_data = YAML::load(yaml_content)
+      yaml_data = YAML::safe_load(yaml_content)
 
       # get the artifact name
       artifact_names = all_package_names(yaml_data[:platform_data], platform_tag)
       artifact_names.each do |artifact_name|
         artifact_search_results = Artifactory::Resource::Artifact.search(
-          name: artifact_name, :artifactory_uri => @artifactory_uri)
+          name: artifact_name, :artifactory_uri => @artifactory_uri
+        )
 
         if artifact_search_results.empty?
           raise "Error: could not find PKG=#{pkg} at REF=#{ref} for #{platform_tag}"
         end
+
         artifact_to_promote = artifact_search_results[0]
 
         # This makes an assumption that we're using some consistent repo names
@@ -334,10 +336,10 @@ module Pkg
           if e.message =~ /(destination and source are the same|user doesn't have permissions to override)/i
             puts "Skipping promotion of #{artifact_name}; it has already been promoted"
           else
-            puts "#{e.message}"
+            puts e.message.to_s
             raise e
           end
-        rescue => e
+        rescue StandardError => e
           puts "Something went wrong promoting #{artifact_name}!"
           raise e
         end
@@ -355,7 +357,7 @@ module Pkg
         puts "Grabbing the #{dist} packages from artifactory"
         packages.each do |name, info|
           filename = info['filename']
-          artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"], name: filename)
+          artifacts = Artifactory::Resource::Artifact.checksum_search(md5: (info['md5']).to_s, repos: ["rpm_enterprise__local", "debian_enterprise__local"], name: filename)
           artifact_to_download = artifacts.select { |artifact| artifact.download_uri.include? remote_path }.first
           # If we found matching artifacts, but not in the correct path, copy the artifact to the correct path
           # This should help us keep repos up to date with the packages we are expecting to be there
@@ -363,12 +365,12 @@ module Pkg
           if artifact_to_download.nil? && !artifacts.empty?
             artifact_to_copy = artifacts.first
             copy_artifact(artifact_to_copy, artifact_to_copy.repo, "#{remote_path}/#{dist}/#{filename}")
-            artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"], name: filename)
+            artifacts = Artifactory::Resource::Artifact.checksum_search(md5: (info['md5']).to_s, repos: ["rpm_enterprise__local", "debian_enterprise__local"], name: filename)
             artifact_to_download = artifacts.select { |artifact| artifact.download_uri.include? remote_path }.first
           end
 
           if artifact_to_download.nil?
-            message = "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]}"
+            message = "Error: what the hell, could not find package #{filename} with md5sum #{info['md5']}"
             unless remote_path.empty?
               message += " in #{remote_path}"
             end
@@ -391,14 +393,16 @@ module Pkg
       check_authorization
       ship_paths.each do |path|
         Dir.foreach(local_tarball_directory) do |pe_tarball|
-          next if pe_tarball == '.' || pe_tarball == ".."
+          next if ['.', ".."].include?(pe_tarball)
+
           begin
             puts "Uploading #{pe_tarball} to #{target_repo}/#{path}#{pe_tarball}"
             artifact = Artifactory::Resource::Artifact.new(
-              local_path: "#{local_tarball_directory}/#{pe_tarball}")
+              local_path: "#{local_tarball_directory}/#{pe_tarball}"
+            )
             artifact.upload(target_repo, "#{path}#{pe_tarball}")
           rescue Errno::EPIPE
-            STDERR.puts "Warning: Could not upload #{pe_tarball} to #{target_repo}/#{path}. Skipping."
+            warn "Warning: Could not upload #{pe_tarball} to #{target_repo}/#{path}. Skipping."
             next
           end
         end
@@ -416,6 +420,7 @@ module Pkg
     #   "X-Checksum-Md5" and "X-Checksum-Sha1" are typical
     def upload_file(local_path, target_repo, target_path, properties = {}, headers = {})
       fail "Error: Couldn't find file at #{local_path}." unless File.exist? local_path
+
       check_authorization
       artifact = Artifactory::Resource::Artifact.new(local_path: local_path)
       full_upload_path = File.join(target_path, File.basename(local_path))
@@ -490,6 +495,7 @@ module Pkg
       filename ||= artifact_name
       artifacts = search_with_path(artifact_name, repo, path)
       return nil if artifacts.empty?
+
       # Only download the first of the artifacts since we're saving them to
       # the same location anyways
       artifacts.first.download(target, filename: filename)
@@ -506,6 +512,7 @@ module Pkg
       artifacts.each do |artifact|
         next unless artifact.download_uri.include? remote_path
         next if artifact.download_uri.include? "-rc"
+
         artifact.download(local_path)
       end
     end
@@ -535,6 +542,7 @@ module Pkg
       final_tarballs.each do |artifact|
         next unless artifact.download_uri.include? remote_path
         next if artifact.download_uri.include? "-rc"
+
         filename = File.basename(artifact.download_uri)
         # Artifactory does NOT like when you use `File.join`, so let's concatenate!
         full_target_path = "#{repo}/#{target_path}/#{filename}"
@@ -557,13 +565,14 @@ module Pkg
       begin
         artifact.copy(artifactory_target_path)
       rescue Artifactory::Error::HTTPError
-        STDERR.puts "Could not copy #{artifactory_target_path}. Source and destination are the same. Skipping..."
+        warn "Could not copy #{artifactory_target_path}. Source and destination are the same. Skipping..."
       end
 
       if File.extname(filename) == '.deb'
         target_debian_component ||= Pkg::Paths.debian_component_from_path(target_path)
         copied_artifact_search = search_with_path(filename, target_repo, target_path)
         fail "Error: what the hell, could not find just-copied package #{filename} under #{target_repo}/#{target_path}" if copied_artifact_search.empty?
+
         copied_artifact = copied_artifact_search.first
         properties = { 'deb.component' => target_debian_component }
         copied_artifact.properties(properties)
@@ -579,10 +588,11 @@ module Pkg
         puts "Copying #{dist} packages..."
         packages.each do |name, info|
           filename = info["filename"]
-          artifact = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"], name: filename).first
+          artifact = Artifactory::Resource::Artifact.checksum_search(md5: (info['md5']).to_s, repos: ["rpm_enterprise__local", "debian_enterprise__local"], name: filename).first
           if artifact.nil?
-            raise "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]}"
+            raise "Error: what the hell, could not find package #{filename} with md5sum #{info['md5']}"
           end
+
           copy_artifact(artifact, artifact.repo, "#{target_path}/#{dist}/#{filename}")
         end
       end
@@ -612,10 +622,12 @@ module Pkg
       manifest.each do |dist, packages|
         packages.each do |package_name, info|
           next unless package_name == package
+
           filename = info["filename"]
-          artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: repos, name: filename)
+          artifacts = Artifactory::Resource::Artifact.checksum_search(md5: (info['md5']).to_s, repos: repos, name: filename)
           artifacts.each do |artifact|
             next unless artifact.download_uri.include? remote_path
+
             puts "Removing reverted package #{artifact.download_uri}"
             artifact.delete
           end
@@ -631,17 +643,19 @@ module Pkg
     def purge_copied_pe_tarballs(tarball_path, pe_repo)
       check_authorization
       Dir.foreach("#{tarball_path}/") do |pe_tarball|
-        next if pe_tarball == '.' || pe_tarball == ".."
+        next if ['.', ".."].include?(pe_tarball)
+
         md5 = Digest::MD5.file("#{tarball_path}/#{pe_tarball}").hexdigest
         artifacts_to_delete = Artifactory::Resource::Artifact.checksum_search(md5: md5, repos: pe_repo, name: pe_tarball)
         next if artifacts_to_delete.nil?
+
         begin
           artifacts_to_delete.each do |artifact|
             puts "Removing #{pe_tarball} from #{pe_repo}... "
             artifact.delete
           end
         rescue Artifactory::Error::HTTPError
-          STDERR.puts "Error: cannot remove #{pe_tarball}, do you have the right permissions?"
+          warn "Error: cannot remove #{pe_tarball}, do you have the right permissions?"
         end
       end
     end

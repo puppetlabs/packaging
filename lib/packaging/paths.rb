@@ -2,7 +2,6 @@
 # This includes both reporting the correct path and divining the platform
 # tag associated with a variety of paths
 #
-# rubocop:disable Metrics/ModuleLength
 module Pkg::Paths
   include Pkg::Platforms
 
@@ -16,15 +15,16 @@ module Pkg::Paths
     if source_formats.find { |fmt| path =~ /#{fmt}$/ }
       return Pkg::Platforms.get_attribute_for_platform_version(platform, version, :source_architecture)
     end
+
     arches.find { |a| path.include?(package_arch(platform, a)) } || arches[0]
-  rescue
+  rescue StandardError
     arches.find { |a| path.include?(package_arch(platform, a)) } || arches[0]
   end
 
   # Given a path to an artifact, divine the appropriate platform tag associated
   # with the artifact and path
   def tag_from_artifact_path(path)
-    platform = Pkg::Platforms.supported_platforms.find { |p| path =~ /(\/|\.)#{p}[^\.]/ }
+    platform = Pkg::Platforms.supported_platforms.find { |p| path =~ /(\/|\.)#{p}[^.]/ }
     platform = 'windowsfips' if path =~ /windowsfips/
 
     codename = Pkg::Platforms.codenames.find { |c| path =~ /\/#{c}/ }
@@ -40,7 +40,7 @@ module Pkg::Paths
     arch = arch_from_artifact_path(platform, version, path)
 
     return "#{platform}-#{version}-#{arch}"
-  rescue
+  rescue StandardError
     fmt = Pkg::Platforms.all_supported_package_formats.find { |ext| path =~ /#{ext}$/ }
 
     # We need to make sure this is actually a file, and not simply a path
@@ -98,6 +98,7 @@ module Pkg::Paths
 
   def link_name(nonfinal = false)
     return Pkg::Config.nonfinal_repo_link_target if nonfinal
+
     return Pkg::Config.repo_link_target
   end
 
@@ -117,7 +118,7 @@ module Pkg::Paths
 
       # In puppet7 and beyond, we moved the repo_name to the top to allow each
       # puppet major release to have its own apt repo.
-      if %w(FUTURE-puppet7 FUTURE-puppet7-nightly).include? repo_name
+      if %w[FUTURE-puppet7 FUTURE-puppet7-nightly].include? repo_name
         return File.join(prefix, apt_repo_name(is_nonfinal), debian_code_name)
       end
 
@@ -125,12 +126,10 @@ module Pkg::Paths
       return File.join(prefix, debian_code_name, apt_repo_name(is_nonfinal))
     when 'dmg'
       return File.join(prefix, 'mac', repo_name(is_nonfinal))
-    when 'msi'
+    when 'msi', 'swix'
       return File.join(prefix, platform_name, repo_name(is_nonfinal))
     when 'rpm'
       return File.join(prefix, yum_repo_name(is_nonfinal))
-    when 'swix'
-      return File.join(prefix, platform_name, repo_name(is_nonfinal))
     when 'svr4', 'ips'
       return File.join(prefix, 'solaris', repo_name(is_nonfinal))
     else
@@ -151,7 +150,7 @@ module Pkg::Paths
     case package_format
     when 'rpm'
       return File.join(prefix, link)
-    when 'swix'
+    when 'swix', 'msi'
       return File.join(prefix, platform_name, link)
     when 'deb'
       debian_code_name = Pkg::Platforms.get_attribute(platform_tag, :codename)
@@ -160,8 +159,6 @@ module Pkg::Paths
       return File.join(prefix, 'solaris', link)
     when 'dmg'
       return File.join(prefix, 'mac', link)
-    when 'msi'
-      return File.join(prefix, platform_name, link)
     else
       raise "Error: Unknown package format '#{package_format}'"
     end
@@ -170,7 +167,7 @@ module Pkg::Paths
   # Given platform information, create symlink target (base_path) and link path in the
   # form of a 2-element array
   def artifacts_base_path_and_link_path(platform_tag, prefix = 'artifacts', is_nonfinal = false)
-    platform_name, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
+    platform_name, = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
 
     path_data = {
@@ -189,23 +186,19 @@ module Pkg::Paths
   end
 
   def artifacts_path(platform_tag, path_prefix = 'artifacts', nonfinal = false)
-    base_path, _ = artifacts_base_path_and_link_path(platform_tag, path_prefix, nonfinal)
+    base_path, = artifacts_base_path_and_link_path(platform_tag, path_prefix, nonfinal)
     platform, version, architecture = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
 
     case package_format
     when 'rpm'
       File.join(base_path, platform, version, architecture)
-    when 'swix'
+    when 'swix', 'dmg'
       File.join(base_path, version, architecture)
-    when 'deb'
+    when 'deb', 'msi'
       base_path
     when 'svr4', 'ips'
       File.join(base_path, version)
-    when 'dmg'
-      File.join(base_path, version, architecture)
-    when 'msi'
-      base_path
     else
       raise "Not sure where to find packages with a package format of '#{package_format}'"
     end
@@ -306,24 +299,24 @@ module Pkg::Paths
       fail "Can't determine path for non-debian platform #{platform_tag}."
     end
 
-    platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
+    platform, version, = Pkg::Platforms.parse_platform_tag(platform_tag)
     code_name = Pkg::Platforms.codename_for_platform_version(platform, version)
     remote_repo_path = remote_repo_base(platform_tag, nonfinal: nonfinal)
 
     # In puppet7 and beyond, we moved the puppet major version to near the top to allow each
     # puppet major release to have its own apt repo, for example:
     # /opt/repository/apt/puppet7/pool/bionic/p/puppet-agent
-    if %w(FUTURE-puppet7 FUTURE-puppet7-nightly).include? repo_name
+    if %w[FUTURE-puppet7 FUTURE-puppet7-nightly].include? repo_name
       return File.join(remote_repo_path, repo_name, 'pool', code_name, project[0], project)
     end
 
     # For repos prior to puppet7, the puppet version was part of the repository
     # For example: /opt/repository/apt/pool/bionic/puppet6/p/puppet-agent
-    if %w(puppet7 puppet7-nightly
+    if %w[puppet7 puppet7-nightly
           puppet6 puppet6-nightly
           puppet5 puppet5-nightly
-          puppet  puppet-nightly
-          puppet-tools).include? repo_name
+          puppet puppet-nightly
+          puppet-tools].include? repo_name
       return File.join(remote_repo_path, 'pool', code_name, repo_name, project[0], project)
     end
 
@@ -331,7 +324,7 @@ module Pkg::Paths
   end
 
   def release_package_link_path(platform_tag, nonfinal = false)
-    platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
+    platform, version, = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
     case package_format
     when 'rpm'
@@ -350,8 +343,9 @@ module Pkg::Paths
   def debian_component_from_path(path)
     # substitute '.' and '/' since those aren't valid characters for debian components
     matches = path.match(/(\d+\.\d+|master|main)\/(\w+)/)
-    regex_for_substitution = /[\.\/]/
+    regex_for_substitution = /[.\/]/
     fail "Error: Could not determine Debian Component from path #{path}" if matches.nil?
+
     base_component = matches[1]
     component_qualifier = matches[2]
     full_component = "#{base_component}/#{component_qualifier}"
@@ -360,6 +354,7 @@ module Pkg::Paths
       full_component.gsub!(regex_for_substitution, '_')
     end
     return base_component if component_qualifier == 'repos'
+
     return full_component
   end
 
@@ -368,9 +363,9 @@ module Pkg::Paths
     if platform == 'ubuntu' && arch == 'aarch64'
       return 'arm64'
     end
+
     arch
   end
 
   private :package_arch
-
 end

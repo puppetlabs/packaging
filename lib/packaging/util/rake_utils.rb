@@ -55,6 +55,7 @@ module Pkg::Util::RakeUtils
         unless Pkg::Config.pre_tasks.is_a?(Hash)
           fail "The 'pre_tasks' key must be a Hash of depender => dependency pairs"
         end
+
         Pkg::Config.pre_tasks.each do |depender, dependency|
           add_dependency(depender, dependency)
         end

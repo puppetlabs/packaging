@@ -21,6 +21,7 @@ def mock_artifact(mock_config, cmd_args, mockfile)
   unless mock = Pkg::Util::Tool.find_tool('mock')
     raise "mock is required for building srpms with mock. Please install mock and try again."
   end
+
   randomize = Pkg::Config.random_mockroot
   configdir = nil
   basedir = File.join('var', 'lib', 'mock')
@@ -37,17 +38,16 @@ def mock_artifact(mock_config, cmd_args, mockfile)
 
     # Return a FileList of the build artifacts
     return FileList[File.join(result_dir, '*.rpm')]
-
-  rescue RuntimeError => error
+  rescue RuntimeError => e
     build_log = File.join(result_dir, 'build.log')
     root_log  = File.join(result_dir, 'root.log')
     content   = File.read(build_log) if File.readable?(build_log)
 
     if File.readable?(root_log)
-      $stderr.puts File.read(root_log)
+      warn File.read(root_log)
     end
     if content and content.lines.count > 2
-      $stderr.puts content
+      warn content
     end
 
     # Any useful info has now been gleaned from the logs in the case of a
@@ -60,7 +60,7 @@ def mock_artifact(mock_config, cmd_args, mockfile)
       sh "sudo -n rm -r #{result_dir}"
     end
 
-    raise error
+    raise e
   ensure
     # Unlike basedir, which we keep in the success case, we don't need
     # configdir anymore either way, so we always clean it up if we're using
@@ -79,6 +79,7 @@ def mock_srpm(mock_config, spec, sources, mockfile, defines = nil)
   unless srpms.size == 1
     fail "#{srpms} contains an unexpected number of artifacts."
   end
+
   srpms[0]
 end
 
@@ -99,14 +100,14 @@ def mock_el_family(mock_config)
     family = mock_config.match(/^pupent-(\d\.\d-)?([a-z]+)([0-9]+)-(.*)$/)[2]
   else
     first, second = mock_config.split('-')
-    if first == 'el' || first == 'fedora'
+    if ['el', 'fedora'].include?(first)
       family = first
     elsif first == 'pl'
-      if second.match(/^\d+$/)
-        family = 'el'
-      else
-        family = second
-      end
+      family = if second.match(/^\d+$/)
+                 'el'
+               else
+                 second
+               end
     end
   end
   family
@@ -122,11 +123,11 @@ def mock_el_ver(mock_config)
     version = mock_config.match(/^pupent-(\d\.\d-)?([a-z]+)([0-9]+)-(.*)$/)[3]
   else
     first, second, third = mock_config.split('-')
-    if (first == 'el' || first == 'fedora') || (first == 'pl' && second.match(/^\d+$/))
-      version = second
-    else
-      version = third
-    end
+    version = if ['el', 'fedora'].include?(first) || (first == 'pl' && second.match(/^\d+$/))
+                second
+              else
+                third
+              end
   end
   if [first, second].include?('fedora')
     version = "f#{version}"
@@ -137,12 +138,12 @@ end
 # Return the RPM family and version for a Vanagon or Packaging repo built project.
 def rpm_family_and_version
   if Pkg::Config.vanagon_project
-    Pkg::Config.rpm_targets.split(' ').map do |target|
+    Pkg::Config.rpm_targets.split.map do |target|
       rpm_el_family, rpm_el_version, arch = target.split('-')
       "#{rpm_el_family}-#{rpm_el_version}"
     end
   else
-    Pkg::Config.final_mocks.split.map { |mock| "#{mock_el_family(mock)}-#{mock_el_ver(mock) }" }
+    Pkg::Config.final_mocks.split.map { |mock| "#{mock_el_family(mock)}-#{mock_el_ver(mock)}" }
   end
 end
 
@@ -174,7 +175,7 @@ def mock_defines(mock_config)
   version = mock_el_ver(mock_config)
   defines = ""
   if version =~ /^(4|5)$/ or family == "sles"
-    defines = %Q(--define "dist .#{family}#{version}" \
+    defines = %(--define "dist .#{family}#{version}" \
       --define "_source_filedigest_algorithm 1" \
       --define "_binary_filedigest_algorithm 1" \
       --define "_binary_payload w9.gzdio" \
@@ -185,7 +186,7 @@ def mock_defines(mock_config)
 end
 
 def build_rpm_with_mock(mocks)
-  mocks.split(' ').each do |mock_config|
+  mocks.split.each do |mock_config|
     family  = mock_el_family(mock_config)
     version = mock_el_ver(mock_config)
     subdir  = if Pkg::Config.yum_repo_name
@@ -318,9 +319,9 @@ end
 def randomize_mock_config_dir(mock_config, mockfile)
   # basedir will be the location of our temporary mock root
   basedir = Pkg::Util::File.mktemp
-  chown("#{ENV['USER']}", "mock", basedir)
+  chown((ENV['USER']).to_s, "mock", basedir)
   # Mock requires the sticky bit be set on the basedir
-  chmod(02775, basedir)
+  chmod(0o2775, basedir)
   mockfile ||= File.join('/', 'etc', 'mock', "#{mock_config}.cfg")
   puts "Setting mock basedir to #{basedir}"
   # Create a new mock config file with 'basedir' set to our basedir
@@ -337,7 +338,7 @@ namespace :pl do
   desc "Use default mock to make a final rpm, keyed to PL infrastructure, pass MOCK to specify config"
   task :mock => "package:tar" do
     # If default mock isn't specified, just take the first one in the Pkg::Config.final_mocks list
-    Pkg::Config.default_mock ||= Pkg::Config.final_mocks.split(' ')[0]
+    Pkg::Config.default_mock ||= Pkg::Config.final_mocks.split[0]
     build_rpm_with_mock(Pkg::Config.default_mock)
   end
 

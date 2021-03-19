@@ -1,9 +1,7 @@
 # Utility methods for handling system calls and interactions
 
 module Pkg::Util::Execution
-
   class << self
-
     # Alias to $?.success? that makes success? slightly easier to test and stub
     # If immediately run, $? will not be instanciated, so only call success? if
     # $? exists, otherwise return nil
@@ -71,9 +69,9 @@ module Pkg::Util::Execution
             blk.call
             success = true
             break
-          rescue => err
+          rescue StandardError => e
             puts "An error was encountered evaluating block. Retrying.."
-            exception = err.to_s + "\n" + err.backtrace.join("\n")
+            exception = "#{e.to_s}\n#{e.backtrace.join("\n")}"
           end
         end
       else

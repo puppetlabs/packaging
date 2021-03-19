@@ -1,7 +1,6 @@
 namespace :package do
   desc "Create a source tar archive"
   task :tar => [:clean] do
-
     if Pkg::Config.pre_tar_task
       Pkg::Util::RakeUtils.invoke_task(Pkg::Config.pre_tar_task)
     end
@@ -14,7 +13,7 @@ namespace :package do
     # by the tar class. Otherwise, we load what we consider to be the "default"
     # set, which is default for historical purposes.
     #
-    tar.templates ||= Dir[File.join(Pkg::Config.project_root, "ext", "**", "*.erb")].select { |i| i !~ /ext\/packaging|ext\/osx/ }
+    tar.templates ||= Dir[File.join(Pkg::Config.project_root, "ext", "**", "*.erb")].reject { |i| i =~ /ext\/packaging|ext\/osx/ }
 
     tar.pkg!
 
@@ -25,4 +24,3 @@ end
 namespace :pl do
   task :tar => ["package:tar"]
 end
-

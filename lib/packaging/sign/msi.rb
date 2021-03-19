@@ -11,7 +11,7 @@ module Pkg::Sign::Msi
     Pkg::Util::Net.remote_execute(ssh_host_string, "mkdir -p C:/#{work_dir}")
     msis = Dir.glob("#{target_dir}/windows*/**/*.msi")
     Pkg::Util::Net.rsync_to(msis.join(" "), rsync_host_string, "/cygdrive/c/#{work_dir}",
-                           extra_flags: ["--ignore-existing --relative"])
+                            extra_flags: ["--ignore-existing --relative"])
 
     # Please Note:
     # We are currently adding two signatures to the msi.
@@ -63,60 +63,60 @@ module Pkg::Sign::Msi
     #
     # Once we no longer support Windows 8/Windows Vista, we can remove the
     # first Sha1 signature.
-    sign_command = <<-CMD
-for msipath in #{msis.join(" ")}; do
-  msi="$(basename $msipath)"
-  msidir="C:/#{work_dir}/$(dirname $msipath)"
-  if "/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe" verify -in "$msidir/$msi" ; then
-    echo "$msi is already signed, skipping . . ." ;
-  else
-    tries=5
-    sha1Servers=(http://timestamp.digicert.com/sha1/timestamp
-    http://timestamp.comodoca.com/authenticode)
-    for timeserver in "${sha1Servers[@]}"; do
-      for ((try=1; try<=$tries; try++)) do
-        ret=$(/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe sign \
-          -n "Puppet" -i "http://www.puppet.com" \
-          -h sha1 \
-          -pkcs12 "#{Pkg::Config.msi_signing_cert}" \
-          -pass "#{Pkg::Config.msi_signing_cert_pw}" \
-          -t "$timeserver" \
-          -in "$msidir/$msi" \
-          -out "$msidir/signed-$msi")
-        if [[ $ret == *"Succeeded"* ]]; then break; fi
-      done;
-      if [[ $ret == *"Succeeded"* ]]; then break; fi
-    done;
-    echo $ret
-    if [[ $ret != *"Succeeded"* ]]; then exit 1; fi
-    sha256Servers=(http://timestamp.digicert.com/sha256/timestamp
-      http://timestamp.comodoca.com?td=sha256)
-    for timeserver in "${sha256Servers[@]}"; do
-      for ((try=1; try<=$tries; try++)) do
-        ret=$(/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe sign \
-          -n "Puppet" -i "http://www.puppet.com" \
-          -nest -h sha256 \
-          -pkcs12 "#{Pkg::Config.msi_signing_cert}" \
-          -pass "#{Pkg::Config.msi_signing_cert_pw}" \
-          -ts "$timeserver" \
-          -in "$msidir/signed-$msi" \
-          -out "$msidir/$msi")
-        if [[ $ret == *"Succeeded"* ]]; then break; fi
-      done;
-      if [[ $ret == *"Succeeded"* ]]; then break; fi
-    done;
-    echo $ret
-    if [[ $ret != *"Succeeded"* ]]; then exit 1; fi
-  fi
-done
-CMD
+    sign_command = <<~CMD
+      for msipath in #{msis.join(' ')}; do
+        msi="$(basename $msipath)"
+        msidir="C:/#{work_dir}/$(dirname $msipath)"
+        if "/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe" verify -in "$msidir/$msi" ; then
+          echo "$msi is already signed, skipping . . ." ;
+        else
+          tries=5
+          sha1Servers=(http://timestamp.digicert.com/sha1/timestamp
+          http://timestamp.comodoca.com/authenticode)
+          for timeserver in "${sha1Servers[@]}"; do
+            for ((try=1; try<=$tries; try++)) do
+              ret=$(/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe sign \
+                -n "Puppet" -i "http://www.puppet.com" \
+                -h sha1 \
+                -pkcs12 "#{Pkg::Config.msi_signing_cert}" \
+                -pass "#{Pkg::Config.msi_signing_cert_pw}" \
+                -t "$timeserver" \
+                -in "$msidir/$msi" \
+                -out "$msidir/signed-$msi")
+              if [[ $ret == *"Succeeded"* ]]; then break; fi
+            done;
+            if [[ $ret == *"Succeeded"* ]]; then break; fi
+          done;
+          echo $ret
+          if [[ $ret != *"Succeeded"* ]]; then exit 1; fi
+          sha256Servers=(http://timestamp.digicert.com/sha256/timestamp
+            http://timestamp.comodoca.com?td=sha256)
+          for timeserver in "${sha256Servers[@]}"; do
+            for ((try=1; try<=$tries; try++)) do
+              ret=$(/cygdrive/c/tools/osslsigncode-fork/osslsigncode.exe sign \
+                -n "Puppet" -i "http://www.puppet.com" \
+                -nest -h sha256 \
+                -pkcs12 "#{Pkg::Config.msi_signing_cert}" \
+                -pass "#{Pkg::Config.msi_signing_cert_pw}" \
+                -ts "$timeserver" \
+                -in "$msidir/signed-$msi" \
+                -out "$msidir/$msi")
+              if [[ $ret == *"Succeeded"* ]]; then break; fi
+            done;
+            if [[ $ret == *"Succeeded"* ]]; then break; fi
+          done;
+          echo $ret
+          if [[ $ret != *"Succeeded"* ]]; then exit 1; fi
+        fi
+      done
+    CMD
 
     Pkg::Util::Net.remote_execute(
       ssh_host_string,
       sign_command,
       { fail_fast: false }
     )
-    msis.each do | msi |
+    msis.each do |msi|
       Pkg::Util::Net.rsync_from("/cygdrive/c/#{work_dir}/#{msi}", rsync_host_string, File.dirname(msi))
     end
     Pkg::Util::Net.remote_execute(ssh_host_string, "if [ -d '/cygdrive/c/#{work_dir}' ]; then rm -rf '/cygdrive/c/#{work_dir}'; fi")

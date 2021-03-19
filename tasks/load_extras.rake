@@ -10,6 +10,7 @@ namespace :pl do
     unless ENV['PARAMS_FILE'] && ENV['PARAMS_FILE'] != ''
       tempdir = args.tempdir
       raise "pl:load_extras requires a directory containing extras data" if tempdir.nil?
+
       Pkg::Config.config_from_yaml("#{tempdir}/#{Pkg::Config.builder_data_file}")
 
       # Environment variables take precedence over those loaded from configs,
@@ -18,4 +19,3 @@ namespace :pl do
     end
   end
 end
-

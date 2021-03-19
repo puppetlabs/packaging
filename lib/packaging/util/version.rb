@@ -80,7 +80,6 @@ module Pkg::Util::Version
     # 5.3.0.rc4-1
     # 3.0.5.rc6.24.g431768c-1
     #
-    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     def base_pkg_version(version = Pkg::Config.version)
       return "#{dot_version(version)}-#{Pkg::Config.release}".split('-') if final?(version) || Pkg::Config.vanagon_project
 
@@ -94,7 +93,7 @@ module Pkg::Util::Version
       end
 
       if new_version.include?('dirty')
-        new_version = new_version.sub(/\.?dirty/, '') + 'dirty'
+        new_version = "#{new_version.sub(/\.?dirty/, '')}dirty"
       end
 
       new_version.split('-')
@@ -118,13 +117,7 @@ module Pkg::Util::Version
     #
     def final?(version = Pkg::Config.version)
       case version
-      when /rc/
-        false
-      when /SNAPSHOT/
-        false
-      when /g[a-f0-9]{7}/
-        false
-      when /^(\d+\.)+\d+-\d+/
+      when /rc/, /SNAPSHOT/, /g[a-f0-9]{7}/, /^(\d+\.)+\d+-\d+/
         false
       when /-dirty/
         Pkg::Config.allow_dirty_tree
@@ -142,33 +135,31 @@ module Pkg::Util::Version
     # If you invoke this the version will only be modified in the temporary copy,
     # with the intent that it never change the official source tree.
     #
-    # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/CyclomaticComplexity
-    # rubocop:disable Metrics/PerceivedComplexity
     def versionbump(workdir = nil)
       version = ENV['VERSION'] || Pkg::Config.version.to_s.strip
-      new_version = '"' + version + '"'
+      new_version = "\"#{version}\""
 
-      version_file = "#{workdir ? workdir + '/' : ''}#{Pkg::Config.version_file}"
+      version_file = "#{workdir ? "#{workdir}/" : ''}#{Pkg::Config.version_file}"
 
       # Read the previous version file in...
       contents = IO.read(version_file)
 
       # Match version files containing 'VERSION = "x.x.x"' and just x.x.x
-      if contents =~ /VERSION =.*/
-        old_version = contents.match(/VERSION =.*/).to_s.split[-1]
-      else
-        old_version = contents
-      end
+      old_version = if contents =~ /VERSION =.*/
+                      contents.match(/VERSION =.*/).to_s.split[-1]
+                    else
+                      contents
+                    end
 
       puts "Updating #{old_version} to #{new_version} in #{version_file}"
-      if contents =~ /@DEVELOPMENT_VERSION@/
+      case contents
+      when /@DEVELOPMENT_VERSION@/
         contents.gsub!('@DEVELOPMENT_VERSION@', version)
-      elsif contents =~ /version\s*=\s*[\'"]DEVELOPMENT[\'"]/
+      when /version\s*=\s*['"]DEVELOPMENT['"]/
         contents.gsub!(/version\s*=\s*['"]DEVELOPMENT['"]/, "version = '#{version}'")
-      elsif contents =~ /VERSION = #{old_version}/
+      when /VERSION = #{old_version}/
         contents.gsub!("VERSION = #{old_version}", "VERSION = #{new_version}")
-      elsif contents =~ /#{Pkg::Config.project.upcase}VERSION = #{old_version}/
+      when /#{Pkg::Config.project.upcase}VERSION = #{old_version}/
         contents.gsub!("#{Pkg::Config.project.upcase}VERSION = #{old_version}", "#{Pkg::Config.project.upcase}VERSION = #{new_version}")
       else
         contents.gsub!(old_version, Pkg::Config.version)
@@ -182,14 +173,14 @@ module Pkg::Util::Version
     # input json file and output if it "looks tagged" or not
     #
     # @param json_data [hash] json data hash containing the ref to check
-    def report_json_tags(json_data) # rubocop:disable Metrics/AbcSize
-      puts 'component: ' + File.basename(json_data['url'])
-      puts 'ref: ' + json_data['ref'].to_s
-      if Pkg::Util::Git.remote_tagged?(json_data['url'], json_data['ref'].to_s)
-        tagged = 'Tagged? [ Yes ]'
-      else
-        tagged = 'Tagged? [ No  ]'
-      end
+    def report_json_tags(json_data)
+      puts "component: #{File.basename(json_data['url'])}"
+      puts "ref: #{json_data['ref'].to_s}"
+      tagged = if Pkg::Util::Git.remote_tagged?(json_data['url'], json_data['ref'].to_s)
+                 'Tagged? [ Yes ]'
+               else
+                 'Tagged? [ No  ]'
+               end
       col_len = (ENV['COLUMNS'] || 70).to_i
       puts format("\n%#{col_len}s\n\n", tagged)
       puts '*' * col_len

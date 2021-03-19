@@ -1,11 +1,11 @@
-@metrics          = []
+@metrics = []
 def add_shipped_metrics(args)
   @metrics << {
-    :type         => 'shipped',
-    :package      => (args[:package]             || Pkg::Config.project),
-    :version      => (args[:version]             || Pkg::Config.version),
-    :pe_version   => (args[:pe_version]          || Pkg::Config.pe_version),
-    :is_rc        => (args[:is_rc]               || false),
+    :type => 'shipped',
+    :package => (args[:package]             || Pkg::Config.project),
+    :version => (args[:version]             || Pkg::Config.version),
+    :pe_version => (args[:pe_version] || Pkg::Config.pe_version),
+    :is_rc => (args[:is_rc] || false)
   }
 end
 
@@ -22,11 +22,11 @@ def post_shipped_metrics
     res = Net::HTTP.post_form(
       uri,
       {
-        'type'          => type,
-        'package'       => package,
-        'version'       => version,
-        'pe_version'    => pe_version,
-        'is_rc'         => is_rc,
+        'type' => type,
+        'package' => package,
+        'version' => version,
+        'pe_version' => pe_version,
+        'is_rc' => is_rc
       }
     )
   end

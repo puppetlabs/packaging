@@ -4,7 +4,6 @@ require 'set'
 # explicitly supports
 module Pkg
   module Platforms
-
     module_function
 
     DEBIAN_SOURCE_FORMATS = ['debian.tar.gz', 'orig.tar.gz', 'dsc', 'changes']
@@ -17,15 +16,15 @@ module Pkg
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
-          repo: false,
+          repo: false
         },
         '7.1' => {
           architectures: ['power'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
-          repo: false,
-        },
+          repo: false
+        }
       },
 
       'cisco-wrlinux' => {
@@ -35,7 +34,7 @@ module Pkg
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
           signature_format: 'v4',
-          repo: true,
+          repo: true
         },
         '7' => {
           architectures: ['x86_64'],
@@ -43,8 +42,8 @@ module Pkg
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
           signature_format: 'v4',
-          repo: true,
-        },
+          repo: true
+        }
       },
 
       'debian' => {
@@ -54,7 +53,7 @@ module Pkg
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,
-          repo: true,
+          repo: true
         },
         '9' => {
           codename: 'stretch',
@@ -62,7 +61,7 @@ module Pkg
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,
-          repo: true,
+          repo: true
         },
         '10' => {
           codename: 'buster',
@@ -70,8 +69,8 @@ module Pkg
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,
-          repo: true,
-        },
+          repo: true
+        }
       },
 
       'el' => {
@@ -81,7 +80,7 @@ module Pkg
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
           signature_format: 'v3',
-          repo: true,
+          repo: true
         },
         '6' => {
           architectures: ['x86_64', 'i386'],
@@ -89,7 +88,7 @@ module Pkg
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
           signature_format: 'v4',
-          repo: true,
+          repo: true
         },
         '7' => {
           architectures: ['x86_64', 'ppc64le', 'aarch64'],
@@ -97,7 +96,7 @@ module Pkg
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
           signature_format: 'v4',
-          repo: true,
+          repo: true
         },
         '8' => {
           architectures: ['x86_64', 'ppc64le', 'aarch64'],
@@ -105,7 +104,7 @@ module Pkg
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
           signature_format: 'v4',
-          repo: true,
+          repo: true
         }
       },
 
@@ -113,8 +112,8 @@ module Pkg
         '4' => {
           architectures: ['i386'],
           package_format: 'swix',
-          repo: false,
-        },
+          repo: false
+        }
       },
 
       'fedora' => {
@@ -124,7 +123,7 @@ module Pkg
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
           signature_format: 'v4',
-          repo: true,
+          repo: true
         },
         '31' => {
           architectures: ['x86_64'],
@@ -132,7 +131,7 @@ module Pkg
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
           signature_format: 'v4',
-          repo: true,
+          repo: true
         },
         '32' => {
           architectures: ['x86_64'],
@@ -140,26 +139,26 @@ module Pkg
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
           signature_format: 'v4',
-          repo: true,
-        },
+          repo: true
+        }
       },
 
       'osx' => {
         '10.13' => {
           architectures: ['x86_64'],
           package_format: 'dmg',
-          repo: false,
+          repo: false
         },
         '10.14' => {
           architectures: ['x86_64'],
           package_format: 'dmg',
-          repo: false,
+          repo: false
         },
         '10.15' => {
           architectures: ['x86_64'],
           package_format: 'dmg',
-          repo: false,
-        },
+          repo: false
+        }
       },
 
       'redhatfips' => {
@@ -169,7 +168,7 @@ module Pkg
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
           signature_format: 'v3',
-          repo: true,
+          repo: true
         }
       },
 
@@ -180,7 +179,7 @@ module Pkg
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
           signature_format: 'v3',
-          repo: true,
+          repo: true
         },
         '12' => {
           architectures: ['x86_64', 'ppc64le'],
@@ -188,7 +187,7 @@ module Pkg
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
           signature_format: 'v4',
-          repo: true,
+          repo: true
         },
         '15' => {
           architectures: ['x86_64', 'ppc64le'],
@@ -196,21 +195,21 @@ module Pkg
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
           signature_format: 'v4',
-          repo: true,
-        },
+          repo: true
+        }
       },
 
       'solaris' => {
         '10' => {
           architectures: ['i386', 'sparc'],
           package_format: 'svr4',
-          repo: false,
+          repo: false
         },
         '11' => {
           architectures: ['i386', 'sparc'],
           package_format: 'ips',
-          repo: false,
-        },
+          repo: false
+        }
       },
 
       'ubuntu' => {
@@ -220,7 +219,7 @@ module Pkg
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,
-          repo: true,
+          repo: true
         },
         '16.04' => {
           codename: 'xenial',
@@ -228,7 +227,7 @@ module Pkg
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,
-          repo: true,
+          repo: true
         },
         '18.04' => {
           codename: 'bionic',
@@ -236,7 +235,7 @@ module Pkg
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,
-          repo: true,
+          repo: true
         },
         '18.10' => {
           codename: 'cosmic',
@@ -244,7 +243,7 @@ module Pkg
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,
-          repo: true,
+          repo: true
         },
         '20.04' => {
           codename: 'focal',
@@ -252,24 +251,24 @@ module Pkg
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,
-          repo: true,
-        },
+          repo: true
+        }
       },
 
       'windows' => {
         '2012' => {
           architectures: ['x86', 'x64'],
           package_format: 'msi',
-          repo: false,
+          repo: false
         }
       },
       'windowsfips' => {
         '2012' => {
           architectures: ['x64'],
           package_format: 'msi',
-          repo: false,
+          repo: false
         }
-      },
+      }
     }.freeze
 
     # @return [Array] An array of Strings, containing all of the supported
@@ -282,7 +281,7 @@ module Pkg
     #   versions for the given platform
     def versions_for_platform(platform)
       PLATFORM_INFO[platform].keys
-    rescue
+    rescue StandardError
       raise "No information found for '#{platform}'"
     end
 
@@ -324,7 +323,7 @@ module Pkg
       # AIX uses 'ppc' as its architecture in paths and file names
       architecture = 'ppc' if platform == 'aix'
       return [platform, version, architecture]
-    rescue
+    rescue StandardError
       raise "Could not verify that '#{platform_tag}' is a valid tag"
     end
 
@@ -333,7 +332,7 @@ module Pkg
     #   platform-version-arch
     # @return [Hash] The hash of data associated with the given platform version
     def platform_lookup(platform_tag)
-      platform, version, _ = parse_platform_tag(platform_tag)
+      platform, version, = parse_platform_tag(platform_tag)
       PLATFORM_INFO[platform][version]
     end
 
@@ -345,12 +344,14 @@ module Pkg
     def get_attribute(platform_tag, attribute_name)
       info = platform_lookup(platform_tag)
       raise "#{platform_tag} doesn't have information about #{attribute_name} available" unless info.key?(attribute_name)
+
       info[attribute_name]
     end
 
     def get_attribute_for_platform_version(platform, version, attribute_name)
       info = PLATFORM_INFO[platform][version]
       raise "#{platform_tag} doesn't have information about #{attribute_name} available" unless info.key?(attribute_name)
+
       info[attribute_name]
     end
 
@@ -443,7 +444,7 @@ module Pkg
       if include_source
         begin
           source_architecture = Array(get_attribute_for_platform_version(platform, version, :source_architecture))
-        rescue
+        rescue StandardError
         end
       end
       return (platform_architectures + source_architecture).flatten

@@ -97,14 +97,16 @@ describe 'Pkg::Platforms' do
   end
 
   describe '#platform_lookup' do
-    it 'should return a hash of platform info' do
-      expect(Pkg::Platforms.platform_lookup('osx-10.15-x86_64')).to be_instance_of(Hash)
-    end
-
-    it 'should include at least arch and package format keys' do
-      expect(Pkg::Platforms.platform_lookup('osx-10.15-x86_64').keys).to include(:architectures)
-      expect(Pkg::Platforms.platform_lookup('osx-10.15-x86_64').keys).to include(:package_format)
-    end
+    ['osx-10.15-x86_64', 'osx-11-x86_64'].each do |platform|
+      it 'should return a hash of platform info' do
+        expect(Pkg::Platforms.platform_lookup(platform)).to be_instance_of(Hash)
+      end
+  
+      it 'should include at least arch and package format keys' do
+        expect(Pkg::Platforms.platform_lookup(platform).keys).to include(:architectures)
+        expect(Pkg::Platforms.platform_lookup(platform).keys).to include(:package_format)
+      end
+    end 
   end
 
   describe '#get_attribute' do

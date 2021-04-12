@@ -33,6 +33,7 @@ describe 'Pkg::Paths' do
       'pkg/pe/deb/bionic/pe-puppetserver_2019.8.2.32-1bionic_all.deb' => 'ubuntu-18.04-amd64',
       'artifacts/deb/focal/puppet6/puppetdb_6.13.0-1focal_all.deb' => 'ubuntu-20.04-amd64',
       'pkg/apple/10.15/puppet6/x86_64/puppet-agent-6.19.0-1.osx10.15.dmg' => 'osx-10.15-x86_64',
+      'pkg/apple/11/puppet6/x86_64/puppet-agent-6.19.0-1.osx11.dmg' => 'osx-11-x86_64',
       'pkg/windows/puppet-agent-1.9.0-x86.msi' => 'windows-2012-x86',
       'pkg/pe/rpm/el-6-i386/pe-puppetserver-2017.3.0.3-1.el6.src.rpm' => 'el-6-SRPMS',
       'pkg/pe/deb/xenial/pe-puppetserver_2017.3.0.3-1puppet1.orig.tar.gz' => 'ubuntu-16.04-source',
@@ -121,6 +122,11 @@ describe 'Pkg::Paths' do
       it 'should be correct for osx' do
         expect(Pkg::Paths.artifacts_path('osx-10.15-x86_64'))
           .to eq('artifacts/mac/puppet6/10.15/x86_64')
+      end
+
+      it 'should be correct for osx11' do
+        expect(Pkg::Paths.artifacts_path('osx-11-x86_64'))
+          .to eq('artifacts/mac/puppet6/11/x86_64')
       end
 
       it 'should be correct for windows' do
@@ -366,6 +372,7 @@ describe 'Pkg::Paths' do
       end
       it 'returns nil for package formats that do not have release packages' do
         expect(Pkg::Paths.release_package_link_path('osx-10.15-x86_64')).to eq(nil)
+        expect(Pkg::Paths.release_package_link_path('osx-11-x86_64')).to eq(nil)
         expect(Pkg::Paths.release_package_link_path('windows-2012-x86')).to eq(nil)
       end
     end
@@ -403,6 +410,7 @@ describe 'Pkg::Paths' do
       end
       it 'returns nil for package formats that do not have release packages' do
         expect(Pkg::Paths.release_package_link_path('osx-10.15-x86_64')).to eq(nil)
+        expect(Pkg::Paths.release_package_link_path('osx-11-x86_64')).to eq(nil)
         expect(Pkg::Paths.release_package_link_path('windows-2012-x86')).to eq(nil)
       end
     end

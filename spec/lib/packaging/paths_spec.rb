@@ -3,7 +3,6 @@ require 'spec_helper'
 describe 'Pkg::Paths' do
   describe '#arch_from_artifact_path' do
     arch_transformations = {
-      ['artifacts/aix/6.1/puppet6/ppc/puppet-agent-6.9.0-1.aix6.1.ppc.rpm', 'aix', '6.1'] => 'power',
       ['pkg/el-8-x86_64/puppet-agent-6.9.0-1.el8.x86_64.rpm', 'el', '8'] => 'x86_64',
       ['pkg/el/8/puppet6/aarch64/puppet-agent-6.5.0.3094.g16b6fa6f-1.el8.aarch64.rpm', 'el', '8'] => 'aarch64',
       ['artifacts/fedora/32/puppet6/x86_64/puppet-agent-6.9.0-1.fc30.x86_64.rpm', 'fedora', '32'] => 'x86_64',
@@ -24,7 +23,6 @@ describe 'Pkg::Paths' do
 
   describe '#tag_from_artifact_path' do
     path_tranformations = {
-      'artifacts/aix/6.1/puppet6/ppc/puppet-agent-6.9.0-1.aix6.1.ppc.rpm' => 'aix-6.1-power',
       'pkg/el-7-x86_64/puppet-agent-5.5.22-1.el8.x86_64.rpm' => 'el-7-x86_64',
       'pkg/ubuntu-20.04-amd64/puppet-agent_5.5.22-1xenial_amd64.deb' => 'ubuntu-20.04-amd64',
       'pkg/windows/puppet-agent-5.5.22-x86.msi' => 'windows-2012-x86',

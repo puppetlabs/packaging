@@ -65,7 +65,6 @@ DOC
     describe '#sign_all' do
       let(:rpm_directory) { 'foo' }
       let(:rpms_not_to_sign) { [
-        "#{rpm_directory}/aix/6.1/PC1/ppc/puppet-agent-5.5.3-1.aix6.1.ppc.rpm",
         "#{rpm_directory}/aix/7.1/PC1/ppc/puppet-agent-5.5.3-1.aix7.1.ppc.rpm",
       ] }
       let(:v3_rpms) { [
@@ -77,7 +76,6 @@ DOC
       ] }
       let(:rpms) { rpms_not_to_sign + v3_rpms + v4_rpms }
       let(:already_signed_rpms) { [
-        "#{rpm_directory}/cisco-wrlinux/7/PC1/x86_64/puppet-agent-5.5.3-1.cisco_wrlinux7.x86_64.rpm",
         "#{rpm_directory}/el/6/PC1/x86_64/puppet-agent-5.5.3-1.el6.x86_64.rpm",
       ] }
       let(:noarch_rpms) { [

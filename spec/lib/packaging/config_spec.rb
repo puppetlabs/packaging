@@ -202,9 +202,7 @@ describe "Pkg::Config" do
 
   describe "#platform_data" do
     platform_tags = [
-      'eos-4-i386',
       'osx-10.15-x86_64',
-      'cisco-wrlinux-7-x86_64',
       'ubuntu-16.04-i386',
       'el-6-x86_64',
       'el-7-ppc64le',
@@ -212,16 +210,14 @@ describe "Pkg::Config" do
     ]
 
     artifacts = \
-      "./artifacts/eos/4/PC1/i386/puppet-agent-5.3.2-1.eos4.i386.swix\n" \
       "./artifacts/apple/10.15/PC1/x86_64/puppet-agent-5.3.2.658.gc79ef9a-1.osx10.15.dmg\n" \
-      "./artifacts/cisco-wrlinux/7/PC1/x86_64/puppet-agent-5.3.2-1.cisco_wrlinux7.x86_64.rpm\n" \
       "./artifacts/deb/xenial/PC1/puppet-agent_5.3.2-1xenial_i386.deb\n" \
       "./artifacts/el/6/PC1/x86_64/puppet-agent-5.3.2.658.gc79ef9a-1.el6.x86_64.rpm\n" \
       "./artifacts/el/7/PC1/ppc64le/puppet-agent-5.3.2-1.el7.ppc64le.rpm\n" \
       "./artifacts/sles/12/PC1/x86_64/puppet-agent-5.3.2-1.sles12.x86_64.rpm"
 
     aix_artifacts = \
-      "./artifacts/aix/6.1/PC1/ppc/puppet-agent-5.3.2-1.aix6.1.ppc.rpm"
+      "./artifacts/aix/7.1/PC1/ppc/puppet-agent-5.3.2-1.aix7.1.ppc.rpm"
 
     fedora_artifacts = \
       "./artifacts/fedora/31/PC1/x86_64/puppet-agent-5.3.2-1.fc31.x86_64.rpm"
@@ -319,13 +315,13 @@ describe "Pkg::Config" do
     it "should use 'ppc' instead of 'power' in aix paths" do
       allow(Pkg::Util::Net).to receive(:remote_execute).and_return(aix_artifacts, nil)
       data = Pkg::Config.platform_data
-      expect(data['aix-6.1-power']).to include(:artifact => './aix/6.1/PC1/ppc/puppet-agent-5.3.2-1.aix6.1.ppc.rpm')
+      expect(data['aix-7.1-power']).to include(:artifact => './aix/7.1/PC1/ppc/puppet-agent-5.3.2-1.aix7.1.ppc.rpm')
     end
 
     it "should not record an aix repo config" do
       allow(Pkg::Util::Net).to receive(:remote_execute).and_return(aix_artifacts, nil)
       data = Pkg::Config.platform_data
-      expect(data['aix-6.1-power'][:repo_config]).to be_nil
+      expect(data['aix-7.1-power'][:repo_config]).to be_nil
     end
   end
 

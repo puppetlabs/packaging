@@ -36,15 +36,15 @@ describe 'artifactory.rb' do
         :repo_config => '',
         :additional_artifacts => ["./windowsfips/puppet-agent-extras-5.3.1.34-x64.msi"],
       },
-      'eos-4-i386' => {
-        :artifact => "./eos/4/PC1/i386/puppet-agent-5.3.1.34.gf65f9ef-1.eos4.i386.swix",
-        :repo_config => '',
-        :additional_artifacts => ["./eos/4/PC1/i386/puppet-agent-extras-5.3.1.34.gf65f9ef-1.eos4.i386.swix"],
-      },
       'osx-10.15-x86_64' => {
         :artifact => "./apple/10.15/PC1/x86_64/puppet-agent-5.3.1.34.gf65f9ef-1.osx10.15.dmg",
         :repo_config => '',
         :additional_artifacts => ["./apple/10.15/PC1/x86_64/puppet-agent-extras-5.3.1.34.gf65f9ef-1.osx10.15.dmg"],
+      },
+      'osx-11-x86_64' => {
+        :artifact => "./apple/11/PC1/x86_64/puppet-agent-5.3.1.34.gf65f9ef-1.osx11.dmg",
+        :repo_config => '',
+        :additional_artifacts => ["./apple/11/PC1/x86_64/puppet-agent-extras-5.3.1.34.gf65f9ef-1.osx11.dmg"],
       },
       'solaris-10-sparc' => {
         :artifact => "./solaris/10/PC1/puppet-agent-5.3.1.34.gf65f9ef-1.sparc.pkg.gz",
@@ -89,17 +89,17 @@ describe 'artifactory.rb' do
       :package_name => 'path/to/a/windowsfips/package/puppet-agent-5.3.1.34-x64.msi',
       :all_package_names => ['puppet-agent-5.3.1.34-x64.msi','puppet-agent-extras-5.3.1.34-x64.msi']
     },
-    'eos-4-i386' => {
-      :toplevel_repo => 'generic',
-      :repo_subdirectories => "#{default_repo_name}/#{project}/#{project_version}/eos-4-i386",
-      :package_name => 'path/to/an/eos/4/package/puppet-agent-5.3.1.34.gf65f9ef-1.eos4.i386.swix',
-      :all_package_names => ['puppet-agent-5.3.1.34.gf65f9ef-1.eos4.i386.swix', 'puppet-agent-extras-5.3.1.34.gf65f9ef-1.eos4.i386.swix']
-    },
     'osx-10.15-x86_64' => {
       :toplevel_repo => 'generic',
       :repo_subdirectories => "#{default_repo_name}/#{project}/#{project_version}/osx-10.15-x86_64",
       :package_name => 'path/to/an/osx/10.15/package/puppet-agent-5.3.1.34.gf65f9ef-1.osx10.15.dmg',
       :all_package_names => ['puppet-agent-5.3.1.34.gf65f9ef-1.osx10.15.dmg', 'puppet-agent-extras-5.3.1.34.gf65f9ef-1.osx10.15.dmg']
+    },
+    'osx-11-x86_64' => {
+      :toplevel_repo => 'generic',
+      :repo_subdirectories => "#{default_repo_name}/#{project}/#{project_version}/osx-11-x86_64",
+      :package_name => 'path/to/an/osx/11/package/puppet-agent-5.3.1.34.gf65f9ef-1.osx11.dmg',
+      :all_package_names => ['puppet-agent-5.3.1.34.gf65f9ef-1.osx11.dmg', 'puppet-agent-extras-5.3.1.34.gf65f9ef-1.osx11.dmg']
     },
     'solaris-10-sparc' => {
       :toplevel_repo => 'generic',

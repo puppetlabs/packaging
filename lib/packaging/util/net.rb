@@ -112,7 +112,7 @@ module Pkg::Util::Net
     ###
     ### Deprecated method implemented as a shim to the new `remote_execute` method
     ###
-    def remote_ssh_cmd(target, command, capture_output = false, extra_options = '', fail_fast = true, trace = false)  # rubocop:disable Style/ParameterLists
+    def remote_ssh_cmd(target, command, capture_output = false, extra_options = '', fail_fast = true, trace = false)  # rubocop:disable Metrics/ParameterLists
       puts "Warn: \"remote_ssh_cmd\" call in packaging is deprecated. Use \"remote_execute\" instead."
       remote_execute(target, command, {
                        capture_output: capture_output,
@@ -392,9 +392,12 @@ DOC
     end
 
     def remote_bundle_install_command
-      export_packaging_location = ''
-      export_packaging_location = "export PACKAGING_LOCATION='#{ENV['PACKAGING_LOCATION']}';" if ENV['PACKAGING_LOCATION'] && !ENV['PACKAGING_LOCATION'].empty?
-      command = "source /usr/local/rvm/scripts/rvm; rvm use ruby-2.5.1; #{export_packaging_location} bundle install --path .bundle/gems ;"
+      %W[
+        source /usr/local/rvm/scripts/rvm;
+        rvm use ruby-2.5.1;
+        export GEM_SOURCE=https://artifactory.delivery.puppetlabs.net/artifactory/api/gems/rubygems/;
+        #{export_packaging_location} bundle install --path .bundle/gems
+      ].join(' ')
     end
 
     # Given a BuildInstance object and a host, send its params to the host. Return

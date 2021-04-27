@@ -281,6 +281,7 @@ namespace :pl do
     Pkg::Util::Ship.ship_rpms('pkg', Pkg::Config.nonfinal_yum_repo_path, nonfinal: true)
   end
 
+  ## This is the old-style
   desc "Ship cow-built debs to #{Pkg::Config.apt_signing_server}"
   task ship_debs: 'pl:fetch' do
     Pkg::Util::Ship.ship_debs('pkg', Pkg::Config.apt_repo_staging_path, chattr: false)
@@ -289,6 +290,16 @@ namespace :pl do
   desc "Ship nightly debs to #{Pkg::Config.apt_signing_server}"
   task ship_nightly_debs: 'pl:fetch' do
     Pkg::Util::Ship.ship_debs('pkg', Pkg::Config.nonfinal_apt_repo_staging_path, chattr: false, nonfinal: true)
+  end
+
+  ## This is the new-style apt stager
+  desc "Stage debs to #{Pkg::Config.apt_signing_server}"
+  task apt_stage_artifacts: 'pl:fetch' do
+    Pkg::Util::Ship.apt_stage_artifacts('stable')
+  end
+  desc "Stage nightly debs to #{Pkg::Config.apt_signing_server}"
+  task apt_stage_nightly_artifacts: 'pl:fetch' do
+    Pkg::Util::Ship.apt_stage_artifacts('nightly')
   end
 
   desc 'Ship built gem to rubygems.org, internal Gem mirror, and public file server'
@@ -430,21 +441,25 @@ namespace :pl do
 
   desc 'UBER ship: ship all the things in pkg'
   task uber_ship: 'pl:fetch' do
-    if Pkg::Util.confirm_ship(FileList['pkg/**/*'])
-      Rake::Task['pl:ship_rpms'].invoke
-      Rake::Task['pl:ship_debs'].invoke
-      Rake::Task['pl:ship_dmg'].invoke
-      Rake::Task['pl:ship_swix'].invoke
-      Rake::Task['pl:ship_nuget'].invoke
-      Rake::Task['pl:ship_tar'].invoke
-      Rake::Task['pl:ship_svr4'].invoke
-      Rake::Task['pl:ship_p5p'].invoke
-      Rake::Task['pl:ship_msi'].invoke
-      add_shipped_metrics(pe_version: ENV['PE_VER'], is_rc: !Pkg::Util::Version.final?) if Pkg::Config.benchmark
-      post_shipped_metrics if Pkg::Config.benchmark
-    else
+    unless Pkg::Util.confirm_ship(FileList['pkg/**/*'])
       puts 'Ship canceled'
       exit
+    end
+
+    Rake::Task['pl:ship_rpms'].invoke
+    Rake::Task['pl:ship_debs'].invoke
+    Rake::Task['pl:apt_stage_artifacts'].invoke
+    Rake::Task['pl:ship_dmg'].invoke
+    Rake::Task['pl:ship_swix'].invoke
+    Rake::Task['pl:ship_nuget'].invoke
+    Rake::Task['pl:ship_tar'].invoke
+    Rake::Task['pl:ship_svr4'].invoke
+    Rake::Task['pl:ship_p5p'].invoke
+    Rake::Task['pl:ship_msi'].invoke
+
+    if Pkg::Config.benchmark
+      add_shipped_metrics(pe_version: ENV['PE_VER'], is_rc: !Pkg::Util::Version.final?)
+      post_shipped_metrics
     end
   end
 
@@ -564,40 +579,32 @@ namespace :pl do
       end
     end
 
-    desc 'Ship pkg directory contents to distribution server'
+    desc 'Ship "pkg" directory contents to distribution server'
     task :ship, :target, :local_dir do |_t, args|
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')
       unless Pkg::Config.project
-        fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT_OVERRIDE' environment variable."
+        fail "Error: 'project' must be set in build_defaults.yaml or " \
+             "in the 'PROJECT_OVERRIDE' environment variable."
       end
+
       target = args.target || 'artifacts'
       local_dir = args.local_dir || 'pkg'
-      project_basedir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
-      artifact_dir = "#{project_basedir}/#{target}"
+      project_basedir = File.join(
+        Pkg::Config.jenkins_repo_path, Pkg::Config.project, Pkg::Config.ref
+      )
+      artifact_dir = File.join(project_basedir, target)
 
       # For EZBake builds, we also want to include the ezbake.manifest file to
       # get a snapshot of this build and all dependencies. We eventually will
       # create a yaml version of this file, but until that point we want to
       # make the original ezbake.manifest available
-      #
-      ezbake_manifest = File.join('ext', 'ezbake.manifest')
-      if File.exist?(ezbake_manifest)
-        cp(ezbake_manifest, File.join(local_dir, "#{Pkg::Config.ref}.ezbake.manifest"))
-      end
-      ezbake_yaml = File.join("ext", "ezbake.manifest.yaml")
-      if File.exists?(ezbake_yaml)
-        cp(ezbake_yaml, File.join(local_dir, "#{Pkg::Config.ref}.ezbake.manifest.yaml"))
-      end
+      Pkg::Util::EZbake.add_manifest(local_dir)
 
       # Inside build_metadata*.json files there is additional metadata containing
       # information such as git ref and dependencies that are needed at build
       # time. If these files exist, copy them downstream.
       # Typically these files are named 'ext/build_metadata.<project>.<platform>.json'
-      build_metadata_json_files = Dir.glob('ext/build_metadata*.json')
-      build_metadata_json_files.each do |source_file|
-        target_file = File.join(local_dir, "#{Pkg::Config.ref}.#{File.basename(source_file)}")
-        cp(source_file, target_file)
-      end
+      Pkg::Util::BuildMetadata.add_misc_json_files(local_dir)
 
       # Sadly, the packaging repo cannot yet act on its own, without living
       # inside of a packaging-repo compatible project. This means in order to
@@ -633,54 +640,14 @@ namespace :pl do
       # and if the source package exists before linking. Searching for the
       # packages has been restricted specifically to just the pkg/windows dir
       # on purpose, as this is where we currently have all windows packages
-      # building to. Once we move the Metadata about the output location in
-      # to one source of truth we can refactor this to use that to search
-      #                                           -Sean P. M. 08/12/16
+      # building to.
+      Pkg::Util::Windows.add_msi_links(local_dir)
 
-      {
-        'windows' => ['x86', 'x64'],
-        'windowsfips' => ['x64']
-      }.each_pair do |platform, archs|
-        packages = Dir["#{local_dir}/#{platform}/*"]
+      # Send packages to the distribution server.
+      Pkg::Util::DistributionServer.send_packages(local_dir, artifact_dir)
 
-        archs.each do |arch|
-          package_version = Pkg::Util::Git.describe.tr('-', '.')
-          package_filename = File.join(local_dir, platform, "#{Pkg::Config.project}-#{package_version}-#{arch}.msi")
-          link_filename = File.join(local_dir, platform, "#{Pkg::Config.project}-#{arch}.msi")
-
-          next unless !packages.include?(link_filename) && packages.include?(package_filename)
-          # Dear future code spelunkers:
-          # Using symlinks instead of hard links causes failures when we try
-          # to set these files to be immutable. Also be wary of whether the
-          # linking utility you're using expects the source path to be relative
-          # to the link target or pwd.
-          #
-          FileUtils.ln(package_filename, link_filename)
-        end
-      end
-
-      Pkg::Util::Execution.retry_on_fail(times: 3) do
-        Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, "mkdir --mode=775 -p #{project_basedir}")
-        Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, "mkdir -p #{artifact_dir}")
-        Pkg::Util::Net.rsync_to("#{local_dir}/", Pkg::Config.distribution_server, "#{artifact_dir}/", extra_flags: ['--ignore-existing', '--exclude repo_configs'])
-      end
-
-      # In order to get a snapshot of what this build looked like at the time
-      # of shipping, we also generate and ship the params file
-      #
-      Pkg::Config.config_to_yaml(local_dir)
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to("#{local_dir}/#{Pkg::Config.ref}.yaml", Pkg::Config.distribution_server, "#{artifact_dir}/", extra_flags: ["--exclude repo_configs"])
-      end
-
-      # If we just shipped a tagged version, we want to make it immutable
-      files = Dir.glob("#{local_dir}/**/*").select { |f| File.file?(f) and !f.include? "#{Pkg::Config.ref}.yaml" }.map do |file|
-        "#{artifact_dir}/#{file.sub(/^#{local_dir}\//, '')}"
-      end
-
-      Pkg::Util::Net.remote_set_ownership(Pkg::Config.distribution_server, 'root', 'release', files)
-      Pkg::Util::Net.remote_set_permissions(Pkg::Config.distribution_server, '0664', files)
-      Pkg::Util::Net.remote_set_immutable(Pkg::Config.distribution_server, files)
+      # Send deb packages to APT staging server
+      Pkg::Util::AptStagingServer.send_packages(local_dir)
     end
 
     desc 'Ship generated repository configs to the distribution server'

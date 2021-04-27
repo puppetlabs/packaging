@@ -22,7 +22,6 @@ module Pkg::Util::Git
     end
 
     # Git utility to create a new git bundle
-    # rubocop:disable Metrics/AbcSize
     def bundle(treeish, appendix = Pkg::Util.rand_string, temp = Pkg::Util::File.mktemp)
       fail_unless_repo
       Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} bundle create #{temp}/#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix} #{treeish} --tags")

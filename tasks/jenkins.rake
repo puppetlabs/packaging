@@ -104,20 +104,20 @@ namespace :pl do
       # argument if its the case.
       #
       Pkg::Config.task = { :task => "#{build_task}", :args => nil }
-      Pkg::Config.task[:args] = ["PE_BUILD=true"] if @build_pe
+      Pkg::Config.task[:args] = ['PE_BUILD=true'] if @build_pe
       #
       # Determine the type of build we're doing to inform jenkins
       build_type = case build_task
         when /deb/
           if Pkg::Config.default_cow.split('-')[1] =~ /cumulus/
-            "cumulus"
+            'cumulus'
           else
-            "deb"
+            'deb'
           end
-        when /mock/ then "rpm"
-        when /dmg|apple/ then "dmg"
-        when /gem/ then "gem"
-        when /tar/ then "tar"
+        when /mock/ then 'rpm'
+        when /dmg|apple/ then 'dmg'
+        when /gem/ then 'gem'
+        when /tar/ then 'tar'
         else raise "Could not determine build type for #{build_task}"
       end
 
@@ -128,12 +128,12 @@ namespace :pl do
           if Pkg::Config.pe_version
             Pkg::Config.final_mocks.split(' ')[0].split('-')[2]
           else
-            Pkg::Config.final_mocks.split(' ')[0].split('-')[1..2].join("")
+            Pkg::Config.final_mocks.split(' ')[0].split('-')[1..2].join('')
           end
-        when /dmg/ then "apple"
-        when /gem/ then "gem"
-        when /sles/ then "sles"
-        when /tar/ then "tar"
+        when /dmg/ then 'apple'
+        when /gem/ then 'gem'
+        when /sles/ then 'sles'
+        when /tar/ then 'tar'
         else raise "Could not determine build type for #{build_task}"
       end
 
@@ -148,11 +148,11 @@ namespace :pl do
       bundle = Pkg::Util::Git.bundle('HEAD')
 
       # Construct the parameters, which is an array of hashes we turn into JSON
-      parameters = [{ "name" => "BUILD_PROPERTIES", "file"  => "file0" },
-                    { "name" => "PROJECT_BUNDLE",   "file"  => "file1" },
-                    { "name" => "PROJECT",          "value" => "#{Pkg::Config.project}" },
-                    { "name" => "BUILD_TYPE",       "label" => "#{build_type}" },
-                    { "name" => "METRICS",          "value" => "#{metrics}" }]
+      parameters = [{ 'name' => 'BUILD_PROPERTIES', 'file'  => 'file0' },
+                    { 'name' => 'PROJECT_BUNDLE',   'file'  => 'file1' },
+                    { 'name' => 'PROJECT',          'value' => Pkg::Config.project },
+                    { 'name' => 'BUILD_TYPE',       'label' => build_type },
+                    { 'name' => 'METRICS',          'value' => metrics }]
 
       # Initialize the args array that will hold all of the arguments we pass
       # to the curl utility method.
@@ -162,23 +162,23 @@ namespace :pl do
       # send this value to the build job as well, so it knows to trigger a
       # downstream job, and with what URI.
       if ENV['DOWNSTREAM_JOB']
-        parameters << { "name" => "DOWNSTREAM_JOB", "value" => ENV['DOWNSTREAM_JOB'] }
-        args << ["-Fname=DOWNSTREAM_JOB", "-Fvalue=#{ENV['DOWNSTREAM_JOB']}"]
+        parameters << { 'name' => 'DOWNSTREAM_JOB', 'value' => ENV['DOWNSTREAM_JOB'] }
+        args << ['-Fname=DOWNSTREAM_JOB', "-Fvalue=#{ENV['DOWNSTREAM_JOB']}"]
       end
 
       # Contruct the json string
-      json = JSON.generate("parameter" => parameters)
+      json = JSON.generate('parameter' => parameters)
 
       # Construct the remaining form arguments. For visual clarity, params that are tied
       # together are on the same line.
       #
       args <<  [
-      "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
-      "-Fname=PROJECT_BUNDLE",   "-Ffile1=@#{bundle}",
-      "-Fname=PROJECT",          "-Fvalue=#{Pkg::Config.project}",
-      "-Fname=BUILD_TYPE",       "-Fvalue=#{build_type}",
-      "-Fname=METRICS",          "-Fvalue=#{metrics}",
-      "-FSubmit=Build",
+      '-Fname=BUILD_PROPERTIES', "-Ffile0=@#{properties}",
+      '-Fname=PROJECT_BUNDLE',   "-Ffile1=@#{bundle}",
+      '-Fname=PROJECT',          "-Fvalue=#{Pkg::Config.project}",
+      '-Fname=BUILD_TYPE',       "-Fvalue=#{build_type}",
+      '-Fname=METRICS',          "-Fvalue=#{metrics}",
+      '-FSubmit=Build',
       "-Fjson=#{json.to_json}",
       ]
 
@@ -198,7 +198,7 @@ namespace :pl do
           puts "Build submitted. To view your build results, go to #{job_url}"
           puts "Your packages will be available at http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
         else
-          fail "An error occurred submitting the job to jenkins. Take a look at the preceding http response for more info."
+          fail 'An error occurred submitting the job to jenkins. Take a look at the preceding http response for more info.'
         end
       ensure
         # Clean up after ourselves
@@ -213,16 +213,16 @@ end
 # A task listing for creating jenkins tasks for our various pl: and pe: build
 # tasks. We can assume deb, mock, but not gem/dmg.
 #
-tasks = ["deb", "mock", "tar"]
-tasks << "gem" if Pkg::Config.build_gem and !Pkg::Config.build_pe
-tasks << "dmg" if Pkg::Config.build_dmg and !Pkg::Config.build_pe
+tasks = %w(deb mock tar)
+tasks << 'gem' if Pkg::Config.build_gem and !Pkg::Config.build_pe
+tasks << 'dmg' if Pkg::Config.build_dmg and !Pkg::Config.build_pe
 
 namespace :pl do
   namespace :jenkins do
     tasks.each do |build_task|
       desc "Queue pl:#{build_task} build on jenkins builder"
-      task build_task => "pl:fetch" do
-        Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pl:#{build_task}")
+      task build_task => 'pl:fetch' do
+        Pkg::Util::RakeUtils.invoke_task('pl:jenkins:post_build', "pl:#{build_task}")
       end
     end
 
@@ -230,31 +230,32 @@ namespace :pl do
     # parallelize them. This breaks the cows up and posts a build for all of
     # them. We have to sleep 5 because jenkins drops the builds when we're
     # DOSing it with our packaging.
-    desc "Queue pl:deb_all on jenkins builder"
-    task :deb_all => "pl:fetch" do
+    desc 'Queue pl:deb_all on jenkins builder'
+    task :deb_all => 'pl:fetch' do
       Pkg::Config.cows.split(' ').each do |cow|
         Pkg::Config.default_cow = cow
-        Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pl:deb")
+        Pkg::Util::RakeUtils.invoke_task('pl:jenkins:post_build', 'pl:deb')
         sleep 5
       end
     end
 
     # This does the mocks in parallel
-    desc "Queue pl:mock_all on jenkins builder"
-    task :mock_all => "pl:fetch" do
+    desc 'Queue pl:mock_all on jenkins builder'
+    task :mock_all => 'pl:fetch' do
       Pkg::Config.final_mocks.split(' ').each do |mock|
         Pkg::Config.default_mock = mock
-        Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pl:mock")
+        Pkg::Util::RakeUtils.invoke_task('pl:jenkins:post_build', 'pl:mock')
         sleep 5
       end
     end
 
-    task :uber_ship_lite => "pl:fetch" do
+    task :uber_ship_lite => 'pl:fetch' do
       tasks = %w(
         jenkins:retrieve
         jenkins:sign_all
         ship_rpms
         ship_debs
+        apt_stage_artifacts
         ship_dmg
         ship_swix
         ship_tar
@@ -262,49 +263,50 @@ namespace :pl do
         ship_gem
       )
       tasks.map { |t| "pl:#{t}" }.each do |t|
-        puts "Running #{t} . . ."
+        puts "Running #{t}"
         Rake::Task[t].invoke
       end
       # mark the build as successfully shipped
-      Rake::Task["pl:jenkins:ship"].invoke("shipped")
+      Rake::Task['pl:jenkins:ship'].invoke('shipped')
       # add the release to release-metrics
       begin
-        Rake::Task["pl:update_release_metrics"].invoke
+        Rake::Task['pl:update_release_metrics'].invoke
       rescue => e
         fail "Error updating release-metrics:\n#{e}\nYou will need to add this release manually."
       end
     end
 
-    task :stage_nightlies => "pl:fetch" do
+    task :stage_nightlies => 'pl:fetch' do
       tasks = %w(
         jenkins:retrieve
         jenkins:sign_all
         ship_nightly_rpms
         ship_nightly_debs
+        apt_stage_nightly_debs
         ship_nightly_dmg
         ship_nightly_swix
         ship_nightly_msi
       )
       tasks.map { |t| "pl:#{t}" }.each do |t|
-        puts "Running #{t} . . ."
+        puts "Running #{t}"
         Rake::Task[t].invoke
       end
     end
 
-    task :ship_nightlies => "pl:fetch" do
+    task :ship_nightlies => 'pl:fetch' do
       Rake::Task['pl:jenkins:stage_nightlies'].invoke
       Rake::Task['pl:remote:update_nightly_repos'].invoke
       Rake::Task['pl:remote:deploy_nightlies_to_s3'].invoke
     end
 
-    task :ship_final => "pl:fetch" do
+    task :ship_final => 'pl:fetch' do
       Rake::Task['pl:jenkins:uber_ship_lite'].invoke
       Rake::Task['pl:remote:update_foss_repos'].invoke
       Rake::Task['pl:remote:deploy_final_builds_to_s3'].invoke
       Rake::Task['pl:remote:deploy_to_rsync_server'].invoke
     end
 
-    task :stage_release_packages => "pl:fetch" do
+    task :stage_release_packages => 'pl:fetch' do
       Rake::Task['pl:jenkins:uber_ship_lite'].invoke
       # Deb packages only appear in the freight directory until repo updates.
       # We must run that before creating symlinks so we can link from packages
@@ -313,7 +315,7 @@ namespace :pl do
       Pkg::Util::Ship.update_release_package_symlinks('pkg')
     end
 
-    task :stage_nightly_release_packages => "pl:fetch" do
+    task :stage_nightly_release_packages => 'pl:fetch' do
       Rake::Task['pl:jenkins:stage_nightlies'].invoke
       # Deb packages only appear in the freight directory until repo updates.
       # We must run that before creating symlinks so we can link from packages
@@ -322,8 +324,8 @@ namespace :pl do
       Pkg::Util::Ship.update_release_package_symlinks('pkg', true)
     end
 
-    desc "Retrieve packages built by jenkins, sign, and ship all!"
-    task :uber_ship => "pl:fetch" do
+    desc 'Retrieve packages built by jenkins, sign, and ship all!'
+    task :uber_ship => 'pl:fetch' do
       uber_tasks = %w(
         jenkins:retrieve
         jenkins:sign_all
@@ -345,32 +347,32 @@ namespace :pl do
       )
 
       if Pkg::Util.boolean_value(Pkg::Config.answer_override) && !Pkg::Config.foss_only
-        fail "Using ANSWER_OVERRIDE without FOSS_ONLY=true is dangerous!"
+        fail 'Using ANSWER_OVERRIDE without FOSS_ONLY=true is dangerous!'
       end
 
       # Some projects such as pl-build-tools do not stage to a separate server - so we do to deploy
-      uber_tasks.delete("remote:deploy_apt_repo") if Pkg::Config.apt_host == Pkg::Config.apt_signing_server
-      uber_tasks.delete("remote:deploy_yum_repo") if Pkg::Config.yum_host == Pkg::Config.yum_staging_server
-      uber_tasks.delete("remote:deploy_dmg_repo") if Pkg::Config.dmg_host == Pkg::Config.dmg_staging_server
-      uber_tasks.delete("remote:deploy_swix_repo") if Pkg::Config.swix_host == Pkg::Config.swix_staging_server
-      uber_tasks.delete("remote:deploy_tar_repo") if Pkg::Config.tar_host == Pkg::Config.tar_staging_server
+      uber_tasks.delete('remote:deploy_apt_repo') if Pkg::Config.apt_host == Pkg::Config.apt_signing_server
+      uber_tasks.delete('remote:deploy_yum_repo') if Pkg::Config.yum_host == Pkg::Config.yum_staging_server
+      uber_tasks.delete('remote:deploy_dmg_repo') if Pkg::Config.dmg_host == Pkg::Config.dmg_staging_server
+      uber_tasks.delete('remote:deploy_swix_repo') if Pkg::Config.swix_host == Pkg::Config.swix_staging_server
+      uber_tasks.delete('remote:deploy_tar_repo') if Pkg::Config.tar_host == Pkg::Config.tar_staging_server
 
       if Pkg::Config.s3_ship
-        uber_tasks.delete("remote:deploy_apt_repo")
-        uber_tasks.delete("remote:deploy_yum_repo")
-        uber_tasks.delete("remote:deploy_dmg_repo")
-        uber_tasks.delete("remote:deploy_swix_repo")
-        uber_tasks.delete("remote:deploy_msi_repo")
-        uber_tasks.delete("remote:deploy_tar_repo")
+        uber_tasks.delete('remote:deploy_apt_repo')
+        uber_tasks.delete('remote:deploy_yum_repo')
+        uber_tasks.delete('remote:deploy_dmg_repo')
+        uber_tasks.delete('remote:deploy_swix_repo')
+        uber_tasks.delete('remote:deploy_msi_repo')
+        uber_tasks.delete('remote:deploy_tar_repo')
       else
-        uber_tasks.delete("remote:deploy_apt_repo_to_s3")
-        uber_tasks.delete("remote:deploy_yum_repo_to_s3")
-        uber_tasks.delete("remote:deploy_downloads_to_s3")
-        uber_tasks.delete("remote:deploy_to_rsync_server")
+        uber_tasks.delete('remote:deploy_apt_repo_to_s3')
+        uber_tasks.delete('remote:deploy_yum_repo_to_s3')
+        uber_tasks.delete('remote:deploy_downloads_to_s3')
+        uber_tasks.delete('remote:deploy_to_rsync_server')
       end
 
       # Delete the ship_gem task if we aren't building gems
-      uber_tasks.delete("ship_gem") unless Pkg::Config.build_gem
+      uber_tasks.delete('ship_gem') unless Pkg::Config.build_gem
 
       # I'm adding this check here because if we rework the task ordering we're
       # probably going to need to muck about in here. -morgan
@@ -387,34 +389,34 @@ namespace :pl do
 
       # Don't update and deploy repos if packages don't exist
       # If we can't find a certain file type, delete the task
-      if Dir.glob("pkg/**/*.deb").empty?
-        uber_tasks.delete("remote:update_apt_repo")
-        uber_tasks.delete("remote:deploy_apt_repo")
+      if Dir.glob('pkg/**/*.deb').empty?
+        uber_tasks.delete('remote:update_apt_repo')
+        uber_tasks.delete('remote:deploy_apt_repo')
       end
 
-      if Dir.glob("pkg/**/*.rpm").empty?
-        uber_tasks.delete("remote:update_yum_repo")
-        uber_tasks.delete("remote:deploy_yum_repo")
+      if Dir.glob('pkg/**/*.rpm').empty?
+        uber_tasks.delete('remote:update_yum_repo')
+        uber_tasks.delete('remote:deploy_yum_repo')
       end
 
-      if Dir.glob("pkg/**/*.p5p").empty?
-        uber_tasks.delete("remote:update_ips_repo")
+      if Dir.glob('pkg/**/*.p5p').empty?
+        uber_tasks.delete('remote:update_ips_repo')
       end
 
-      if Dir.glob("pkg/**/*.dmg").empty?
-        uber_tasks.delete("remote:deploy_dmg_repo")
+      if Dir.glob('pkg/**/*.dmg').empty?
+        uber_tasks.delete('remote:deploy_dmg_repo')
       end
 
-      if Dir.glob("pkg/**/*.swix").empty?
-        uber_tasks.delete("remote:deploy_swix_repo")
+      if Dir.glob('pkg/**/*.swix').empty?
+        uber_tasks.delete('remote:deploy_swix_repo')
       end
 
-      if Dir.glob("pkg/**/*.msi").empty?
-        uber_tasks.delete("remote:deploy_msi_repo")
+      if Dir.glob('pkg/**/*.msi').empty?
+        uber_tasks.delete('remote:deploy_msi_repo')
       end
 
-      if Dir.glob("pkg/*.tar.gz").empty?
-        uber_tasks.delete("remote:deploy_tar_repo")
+      if Dir.glob('pkg/*.tar.gz').empty?
+        uber_tasks.delete('remote:deploy_tar_repo')
       end
 
       uber_tasks.map { |t| "pl:#{t}" }.each do |t|
@@ -422,11 +424,11 @@ namespace :pl do
         Rake::Task[t].invoke if Pkg::Util.ask_yes_or_no
       end
 
-      puts "Do you want to mark this release as successfully shipped?"
-      Rake::Task["pl:jenkins:ship"].invoke("shipped") if Pkg::Util.ask_yes_or_no
+      puts 'Do you want to mark this release as successfully shipped?'
+      Rake::Task['pl:jenkins:ship'].invoke('shipped') if Pkg::Util.ask_yes_or_no
     end
 
-    desc "Test shipping by replacing hosts with a VM"
+    desc 'Test shipping by replacing hosts with a VM'
     task :test_ship, [:vm, :ship_task] do |t, args|
       vm = args.vm or fail "`vm` is a required argument for #{t}"
       ship_task = args.ship_task or fail "`ship_task` is a required argument for #{t}"
@@ -443,9 +445,9 @@ if Pkg::Config.build_pe
     namespace :jenkins do
       tasks.each do |build_task|
         desc "Queue pe:#{build_task} build on jenkins builder"
-        task build_task => "pl:fetch" do
-          Pkg::Util.check_var("PE_VER", Pkg::Config.pe_version)
-          Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pe:#{build_task}")
+        task build_task => 'pl:fetch' do
+          Pkg::Util.check_var('PE_VER', Pkg::Config.pe_version)
+          Pkg::Util::RakeUtils.invoke_task('pl:jenkins:post_build', "pe:#{build_task}")
         end
       end
 
@@ -453,33 +455,39 @@ if Pkg::Config.build_pe
       # parallelize them. This breaks the cows up and posts a build for all of
       # them. We have to sleep 5 because jenkins drops the builds when we're
       # DOSing it with our packaging.
-      desc "Queue pe:deb_all on jenkins builder"
-      task :deb_all => "pl:fetch" do
-        Pkg::Util.check_var("PE_VER", Pkg::Config.pe_version)
+      desc 'Queue pe:deb_all on jenkins builder'
+      task :deb_all => 'pl:fetch' do
+        Pkg::Util.check_var('PE_VER', Pkg::Config.pe_version)
         Pkg::Config.cows.split(' ').each do |cow|
           Pkg::Config.default_cow = cow
-          Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pe:deb")
+          Pkg::Util::RakeUtils.invoke_task('pl:jenkins:post_build', 'pe:deb')
           sleep 5
         end
       end
 
       # This does the mocks in parallel
-      desc "Queue pe:mock_all on jenkins builder"
-      task :mock_all => "pl:fetch" do
+      desc 'Queue pe:mock_all on jenkins builder'
+      task :mock_all => 'pl:fetch' do
         Pkg::Config.final_mocks.split(' ').each do |mock|
           Pkg::Config.default_mock = mock
-          Pkg::Util::RakeUtils.invoke_task("pl:jenkins:post_build", "pe:mock")
+          Pkg::Util::RakeUtils.invoke_task('pl:jenkins:post_build', 'pe:mock')
           sleep 5
         end
       end
 
-      desc "Retrieve PE packages built by jenkins, sign, and ship all!"
-      task :uber_ship => "pl:fetch" do
-        Pkg::Util.check_var("PE_VER", Pkg::Config.pe_version)
-        ["pl:jenkins:retrieve", "pl:jenkins:sign_all", "pe:ship_rpms", "pe:ship_debs"].each do |task|
+      desc 'Retrieve PE packages built by jenkins, sign, and ship all!'
+      task :uber_ship => 'pl:fetch' do
+        Pkg::Util.check_var('PE_VER', Pkg::Config.pe_version)
+        %w(
+          pl:jenkins:retrieve
+          pl:jenkins:sign_all
+          pe:ship_rpms
+          pe:ship_debs
+          pe:apt_stage_artifacts
+        ).each do |task|
           Rake::Task[task].invoke
         end
-        Rake::Task["pl:jenkins:ship"].invoke("shipped")
+        Rake::Task['pl:jenkins:ship'].invoke('shipped')
       end
     end
   end
@@ -508,31 +516,30 @@ namespace :pl do
   namespace :jenkins do
     desc "Trigger a jenkins uri with SHA of HEAD as a string param, requires \"URI\""
     task :post, :uri do |t, args|
-      uri = (args.uri or ENV['URI']) or fail "pl:jenkins:post requires a URI, either via URI= or pl:jenkin:post[URI]"
+      uri = (args.uri or ENV['URI']) or fail 'pl:jenkins:post requires a URI, either via URI= or pl:jenkin:post[URI]'
 
       # We use JSON for parsing the json part of the submission.
       begin
         require 'json'
       rescue LoadError
-        fail "Couldn't require 'json'. JSON is required for sanely generating the string we curl to Jenkins."
+        fail 'Could not require "json". JSON is required for sanely generating the string we curl to Jenkins.'
       end
 
       # Assemble the JSON string for the JSON parameter
-      json = JSON.generate("parameter" => [{ "name" => "SHA", "value"  => "#{Pkg::Config.ref}" }])
+      json = JSON.generate('parameter' => [{ 'name' => 'SHA', 'value' => Pkg::Config.ref }])
 
       # Assemble our arguments to the post
       args = [
-      "-Fname=SHA", "-Fvalue=#{Pkg::Config.ref}",
+      '-Fname=SHA', "-Fvalue=#{Pkg::Config.ref}",
       "-Fjson=#{json.to_json}",
-      "-FSubmit=Build"
+      '-FSubmit=Build'
       ]
 
       _, retval = Pkg::Util::Net.curl_form_data(uri, args)
-      if Pkg::Util::Execution.success?(retval)
-        puts "Job triggered at #{uri}."
-      else
-        fail "An error occurred attempting to trigger the job at #{uri}. Please see the preceding http response for more info."
+      unless Pkg::Util::Execution.success?(retval)
+        fail "An error occurred attempting to trigger the job at #{uri}."
       end
+      puts "Job triggered at #{uri}."
     end
   end
 end

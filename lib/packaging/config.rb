@@ -80,7 +80,7 @@ module Pkg
 
         dir = "/opt/jenkins-builds/#{self.project}/#{self.ref}"
         cmd = "if [ -s \"#{dir}/artifacts\" ]; then cd #{dir};"\
-              "find ./artifacts/ -mindepth 2 -type f; fi"
+              "find ./artifacts -mindepth 2 -type f; fi"
         artifacts, _ = Pkg::Util::Net.remote_execute(
                      self.builds_server,
                      cmd,
@@ -95,6 +95,7 @@ module Pkg
           # the correct place. For 5.x and 6.x release streams the f prefix
           # has been removed and so tag will equal original_tag
           original_tag = Pkg::Paths.tag_from_artifact_path(artifact)
+          fail "Error: unrecognized artifact \"#{artifact}\"" if original_tag.nil?
 
           # Remove the f-prefix from the fedora platform tag keys so that
           # beaker can rely on consistent keys once we rip out the f for good
@@ -203,15 +204,18 @@ module Pkg
       # string. Accept an argument for the write target file. If not specified,
       # the name of the params file is the current git commit sha or tag.
       #
-      def config_to_yaml(target = nil)
-        file = "#{self.ref}.yaml"
-        target = target.nil? ? File.join(Pkg::Util::File.mktemp, "#{self.ref}.yaml") : File.join(target, file)
-        Pkg::Util::File.file_writable?(File.dirname(target), :required => true)
-        File.open(target, 'w') do |f|
+      def config_to_yaml(destination_directory = nil)
+        destination_directory = Pkg::Util::File.mktemp if destination_directory.nil?
+        config_yaml_file_name = "#{self.ref}.yaml"
+
+        config_yaml_path = File.join(destination_directory, config_yaml_file_name)
+
+        Pkg::Util::File.file_writable?(File.dirname(config_yaml_path), :required => true)
+        File.open(config_yaml_path, 'w') do |f|
           f.puts self.config_to_hash.to_yaml
         end
-        puts target
-        target
+        puts config_yaml_path
+        return config_yaml_path
       end
 
       ##

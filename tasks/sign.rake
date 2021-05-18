@@ -113,7 +113,9 @@ namespace :pl do
     task :sign_all, :root_dir do |_t, args|
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')
       root_dir = args.root_dir || $DEFAULT_DIRECTORY
-      Dir["#{root_dir}/*"].empty? and fail "There were no files found in #{root_dir}. Maybe you wanted to build/retrieve something first?"
+      if Dir["#{root_dir}/*"].empty?
+        fail "There were no files found in #{root_dir}. Perhaps build or retrieve something first?"
+      end
 
       # Because rpms and debs are laid out differently in PE under pkg/ they
       # have a different sign task to address this. Rather than create a whole
@@ -124,7 +126,7 @@ namespace :pl do
       # workflow for Puppet Enterprise. SIGNING_BUNDLE is the path to a tarball
       # containing a git bundle to be used as the environment for the packaging
       # repo in a signing operation.
-      signing_bundle = ENV['SIGNING_BUNDLE']
+      signing_bundle = Pkg::Config.signing_bundle
       rpm_sign_task = Pkg::Config.build_pe ? "pe:sign_rpms" : "pl:sign_rpms"
       deb_sign_task = Pkg::Config.build_pe ? "pe:sign_deb_changes" : "pl:sign_deb_changes"
       sign_tasks    = [rpm_sign_task]
@@ -136,18 +138,24 @@ namespace :pl do
       sign_tasks    << "pl:sign_svr4" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_ips" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_msi" if Pkg::Config.build_msi || Pkg::Config.vanagon_project
-      remote_repo   = Pkg::Util::Net.remote_unpack_git_bundle(Pkg::Config.signing_server, 'HEAD', nil, signing_bundle)
-      build_params  = Pkg::Util::Net.remote_buildparams(Pkg::Config.signing_server, Pkg::Config)
+      remote_repo   = Pkg::Util::Net.remote_unpack_git_bundle(
+        Pkg::Config.signing_server, 'HEAD', nil, signing_bundle)
+
       Pkg::Util::Net.rsync_to(root_dir, Pkg::Config.signing_server, remote_repo)
-      rake_command = <<-DOC
-cd #{remote_repo} ;
-#{Pkg::Util::Net.remote_bundle_install_command}
-bundle exec rake #{sign_tasks.map { |task| task + "[#{root_dir}]" }.join(" ")} PARAMS_FILE=#{build_params}
-DOC
-      Pkg::Util::Net.remote_execute(Pkg::Config.signing_server, rake_command)
-      Pkg::Util::Net.rsync_from("#{remote_repo}/#{root_dir}/", Pkg::Config.signing_server, "#{root_dir}/")
+      params_file = File.join(remote_repo, 'pkg', "#{Pkg::Config.ref}.yaml")
+
+      remote_sign_command = %W(
+        cd #{remote_repo};
+        export PARAMS_FILE=#{params_file};
+        #{Pkg::Util::Net.remote_bundle_install_command};
+        bundle exec rake #{sign_tasks.map { |task| task + "[#{root_dir}]" }.join(" ")}
+      ).join(' ')
+
+      Pkg::Util::Net.remote_execute(Pkg::Config.signing_server, remote_sign_command)
+
+      Pkg::Util::Net.rsync_from("#{remote_repo}/#{root_dir}/",
+                                Pkg::Config.signing_server, "#{root_dir}/")
       Pkg::Util::Net.remote_execute(Pkg::Config.signing_server, "rm -rf #{remote_repo}")
-      Pkg::Util::Net.remote_execute(Pkg::Config.signing_server, "rm #{build_params}")
       puts "Signed packages staged in #{root_dir}/ directory"
     end
   end

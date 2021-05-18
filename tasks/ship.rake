@@ -534,153 +534,37 @@ namespace :pl do
         puts " * #{err}"
       end
     end
-
   end
 
   # It is odd to namespace this ship task under :jenkins, but this task is
   # intended to be a component of the jenkins-based build workflow even if it
-  # doesn't interact with jenkins directly. The :target argument is so that we
-  # can invoke this task with a subdirectory of the standard distribution
-  # server path. That way we can separate out built artifacts from
-  # signed/actually shipped artifacts e.g. $path/shipped/ or $path/artifacts.
-  namespace :jenkins do
-    desc 'ship pkg directory contents to artifactory'
-    task :ship_to_artifactory, :local_dir do |_t, args|
-      Pkg::Util::RakeUtils.invoke_task('pl:fetch')
-      unless Pkg::Config.project
-        fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT_OVERRIDE' environment variable."
-      end
-      artifactory = Pkg::ManageArtifactory.new(Pkg::Config.project, Pkg::Config.ref)
+  # doesn't interact with jenkins directly.
 
-      local_dir = args.local_dir || 'pkg'
-      Dir.glob("#{local_dir}/**/*").reject { |e| File.directory? e }.each do |artifact|
-        if File.extname(artifact) == ".yaml" || File.extname(artifact) == ".json"
-          artifactory.deploy_package(artifact)
-        elsif artifactory.package_exists_on_artifactory?(artifact)
-          warn "Attempt to upload '#{artifact}' failed. Package already exists!"
-        else
-          artifactory.deploy_package(artifact)
-        end
-      end
+  # The :target argument is so that we can invoke this task with a
+  # subdirectory of the standard distribution server path. That way we
+  # can separate out built artifacts from signed/actually shipped
+  # artifacts: "$path/shipped" vs "$path/artifacts"
+  namespace :jenkins do
+    # For Artifactory, collect artifacts and metadata into a local "artifacts" directory,
+    # then create and upload a tarball of that directory.
+    desc '(deprecated): use pl:jenkins:ship'
+    task :ship_to_artifactory, :local_dir do |_t, args|
+      puts "Warning: 'ship_to_artifactory' task is deprecated. " \
+           "Shipping to Artifactory is part of 'pl:jenkins:ship' task."
     end
 
-    desc 'Ship pkg directory contents to distribution server'
+    # For the distribution server, collect artifacts and metadata into a local "artifacts"
+    # directory, then rsync the tree to the distribution server.
+    desc 'Ship "artifacts" directory contents to distribution server'
     task :ship, :target, :local_dir do |_t, args|
-      Pkg::Util::RakeUtils.invoke_task('pl:fetch')
-      unless Pkg::Config.project
-        fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT_OVERRIDE' environment variable."
-      end
-      target = args.target || 'artifacts'
       local_dir = args.local_dir || 'pkg'
-      project_basedir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
-      artifact_dir = "#{project_basedir}/#{target}"
+      target = args.target || 'artifacts'
 
-      # For EZBake builds, we also want to include the ezbake.manifest file to
-      # get a snapshot of this build and all dependencies. We eventually will
-      # create a yaml version of this file, but until that point we want to
-      # make the original ezbake.manifest available
-      #
-      ezbake_manifest = File.join('ext', 'ezbake.manifest')
-      if File.exist?(ezbake_manifest)
-        cp(ezbake_manifest, File.join(local_dir, "#{Pkg::Config.ref}.ezbake.manifest"))
-      end
-      ezbake_yaml = File.join("ext", "ezbake.manifest.yaml")
-      if File.exists?(ezbake_yaml)
-        cp(ezbake_yaml, File.join(local_dir, "#{Pkg::Config.ref}.ezbake.manifest.yaml"))
-      end
+      Pkg::Util::RakeUtils.invoke_task('pl:fetch')
 
-      # Inside build_metadata*.json files there is additional metadata containing
-      # information such as git ref and dependencies that are needed at build
-      # time. If these files exist, copy them downstream.
-      # Typically these files are named 'ext/build_metadata.<project>.<platform>.json'
-      build_metadata_json_files = Dir.glob('ext/build_metadata*.json')
-      build_metadata_json_files.each do |source_file|
-        target_file = File.join(local_dir, "#{Pkg::Config.ref}.#{File.basename(source_file)}")
-        cp(source_file, target_file)
-      end
+      Pkg::Ship::DistributionServer.ship(local_dir, target)
+      Pkg::Ship::Artifactory.ship(local_dir, target)
 
-      # Sadly, the packaging repo cannot yet act on its own, without living
-      # inside of a packaging-repo compatible project. This means in order to
-      # use the packaging repo for shipping and signing (things that really
-      # don't require build automation, specifically) we still need the project
-      # clone itself.
-      Pkg::Util::Git.bundle('HEAD', 'signing_bundle', local_dir)
-
-      # While we're bundling things, let's also make a git bundle of the
-      # packaging repo that we're using when we invoke pl:jenkins:ship. We can
-      # have a reasonable level of confidence, later on, that the git bundle on
-      # the distribution server was, in fact, the git bundle used to create the
-      # associated packages. This is because this ship task is automatically
-      # called upon completion each cell of the pl:jenkins:uber_build, and we
-      # have --ignore-existing set below. As such, the only git bundle that
-      # should possibly be on the distribution is the one used to create the
-      # packages.
-      # We're bundling the packaging repo because it allows us to keep an
-      # archive of the packaging source that was used to create the packages,
-      # so that later on if we need to rebuild an older package to audit it or
-      # for some other reason we're assured that the new package isn't
-      # different by virtue of the packaging automation.
-      if defined?(PACKAGING_ROOT)
-        packaging_bundle = ''
-        cd PACKAGING_ROOT do
-          packaging_bundle = Pkg::Util::Git.bundle('HEAD', 'packaging-bundle')
-        end
-        mv(packaging_bundle, local_dir)
-      end
-
-      # This is functionality to add the project-arch.msi links that have no
-      # version. The code itself looks for the link (if it's there already)
-      # and if the source package exists before linking. Searching for the
-      # packages has been restricted specifically to just the pkg/windows dir
-      # on purpose, as this is where we currently have all windows packages
-      # building to. Once we move the Metadata about the output location in
-      # to one source of truth we can refactor this to use that to search
-      #                                           -Sean P. M. 08/12/16
-
-      {
-        'windows' => ['x86', 'x64'],
-        'windowsfips' => ['x64']
-      }.each_pair do |platform, archs|
-        packages = Dir["#{local_dir}/#{platform}/*"]
-
-        archs.each do |arch|
-          package_version = Pkg::Util::Git.describe.tr('-', '.')
-          package_filename = File.join(local_dir, platform, "#{Pkg::Config.project}-#{package_version}-#{arch}.msi")
-          link_filename = File.join(local_dir, platform, "#{Pkg::Config.project}-#{arch}.msi")
-
-          next unless !packages.include?(link_filename) && packages.include?(package_filename)
-          # Dear future code spelunkers:
-          # Using symlinks instead of hard links causes failures when we try
-          # to set these files to be immutable. Also be wary of whether the
-          # linking utility you're using expects the source path to be relative
-          # to the link target or pwd.
-          #
-          FileUtils.ln(package_filename, link_filename)
-        end
-      end
-
-      Pkg::Util::Execution.retry_on_fail(times: 3) do
-        Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, "mkdir --mode=775 -p #{project_basedir}")
-        Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, "mkdir -p #{artifact_dir}")
-        Pkg::Util::Net.rsync_to("#{local_dir}/", Pkg::Config.distribution_server, "#{artifact_dir}/", extra_flags: ['--ignore-existing', '--exclude repo_configs'])
-      end
-
-      # In order to get a snapshot of what this build looked like at the time
-      # of shipping, we also generate and ship the params file
-      #
-      Pkg::Config.config_to_yaml(local_dir)
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to("#{local_dir}/#{Pkg::Config.ref}.yaml", Pkg::Config.distribution_server, "#{artifact_dir}/", extra_flags: ["--exclude repo_configs"])
-      end
-
-      # If we just shipped a tagged version, we want to make it immutable
-      files = Dir.glob("#{local_dir}/**/*").select { |f| File.file?(f) and !f.include? "#{Pkg::Config.ref}.yaml" }.map do |file|
-        "#{artifact_dir}/#{file.sub(/^#{local_dir}\//, '')}"
-      end
-
-      Pkg::Util::Net.remote_set_ownership(Pkg::Config.distribution_server, 'root', 'release', files)
-      Pkg::Util::Net.remote_set_permissions(Pkg::Config.distribution_server, '0664', files)
-      Pkg::Util::Net.remote_set_immutable(Pkg::Config.distribution_server, files)
     end
 
     desc 'Ship generated repository configs to the distribution server'

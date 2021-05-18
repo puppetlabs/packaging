@@ -80,7 +80,7 @@ module Pkg
 
         dir = "/opt/jenkins-builds/#{self.project}/#{self.ref}"
         cmd = "if [ -s \"#{dir}/artifacts\" ]; then cd #{dir};"\
-              "find ./artifacts/ -mindepth 2 -type f; fi"
+              "find ./artifacts -mindepth 2 -type f; fi"
         artifacts, _ = Pkg::Util::Net.remote_execute(
                      self.builds_server,
                      cmd,
@@ -169,9 +169,7 @@ module Pkg
       def add_additional_artifact(platform_data, tag, artifact)
         # Don't add noarch packages to additional_artifacts if the same package
         # is already the artifact
-        if !platform_data[tag][:artifact].nil? && File.basename(platform_data[tag][:artifact]) == File.basename(artifact)
-          return
-        end
+        return if File.basename(platform_data[tag][:artifact].to_s) == File.basename(artifact)
 
         platform_data[tag][:additional_artifacts] ||= []
 
@@ -203,15 +201,17 @@ module Pkg
       # string. Accept an argument for the write target file. If not specified,
       # the name of the params file is the current git commit sha or tag.
       #
-      def config_to_yaml(target = nil)
-        file = "#{self.ref}.yaml"
-        target = target.nil? ? File.join(Pkg::Util::File.mktemp, "#{self.ref}.yaml") : File.join(target, file)
-        Pkg::Util::File.file_writable?(File.dirname(target), :required => true)
-        File.open(target, 'w') do |f|
+      def config_to_yaml(yaml_output_directory = nil)
+        yaml_output_filename = "#{self.ref}.yaml"
+        yaml_output_directory = Pkg::Util::File.mktemp if yaml_output_directory.nil?
+        yaml_output_path = File.join(yaml_output_directory, yaml_output_filename)
+
+        Pkg::Util::File.file_writable?(yaml_output_directory, :required => true)
+        File.open(yaml_output_path, 'w') do |f|
           f.puts self.config_to_hash.to_yaml
         end
-        puts target
-        target
+        puts "Info: wrote '#{yaml_output_path}'"
+        return yaml_output_path
       end
 
       ##
@@ -242,14 +242,23 @@ module Pkg
       def default_packaging_root
         # Assume that PACKAGING_ROOT has been set, or set the PACKAGING_ROOT to
         # one directory above the LIBDIR
-        #
-        defined?(PACKAGING_ROOT) ? File.expand_path(PACKAGING_ROOT) : File.expand_path(File.join(LIBDIR, ".."))
+        if defined?(PACKAGING_ROOT)
+          File.expand_path(PACKAGING_ROOT)
+        else
+          File.expand_path(File.join(LIBDIR, ".."))
+        end
       end
 
       def load_default_configs
         got_config = false
-        default_project_data = { :path => File.join(@project_root, "ext", "project_data.yaml"), :required => false }
-        default_build_defaults = { :path => File.join(@project_root, "ext", "build_defaults.yaml"), :required => true }
+        default_project_data = {
+          path: File.join(@project_root, "ext", "project_data.yaml"),
+          required: false
+        }
+        default_build_defaults = {
+          path: File.join(@project_root, "ext", "build_defaults.yaml"),
+          required: true
+        }
 
         [default_project_data, default_build_defaults].each do |config|
           if File.readable? config[:path]
@@ -284,20 +293,21 @@ module Pkg
       #   with loading rpmversion in the Tar object vs rpmversion in the
       #   Config, I opt for the latter. It's basically a lose-lose, since it
       #   really belongs in the Rpm object.
-
       def load_versioning
-        if @project_root and Pkg::Util::Git.describe
-          @ref         = Pkg::Util::Git.sha_or_tag
-          @short_ref   = Pkg::Util::Git.sha_or_tag(7)
-          @version     = Pkg::Util::Version.dash_version
-          @gemversion  = Pkg::Util::Version.dot_version
-          @debversion  = Pkg::Util::Version.debversion
-          @origversion = Pkg::Util::Version.origversion
-          @rpmversion  = Pkg::Util::Version.rpmversion
-          @rpmrelease  = Pkg::Util::Version.rpmrelease
-        else
-          puts "Skipping determination of version via git describe, Pkg::Config.project_root is not set to the path of a tagged git repo."
+        unless @project_root && Pkg::Util::Git.describe
+          puts "Info: Skipping versioning via git describe, " \
+               "Pkg::Config.project_root is not set to the path of a tagged git repo."
+          return
         end
+
+        @ref         = Pkg::Util::Git.sha_or_tag
+        @short_ref   = Pkg::Util::Git.sha_or_tag(7)
+        @version     = Pkg::Util::Version.dash_version
+        @gemversion  = Pkg::Util::Version.dot_version
+        @debversion  = Pkg::Util::Version.debversion
+        @origversion = Pkg::Util::Version.origversion
+        @rpmversion  = Pkg::Util::Version.rpmversion
+        @rpmrelease  = Pkg::Util::Version.rpmrelease
       end
 
       ##
@@ -352,17 +362,18 @@ module Pkg
       #   after overrides.
       #
       def load_overrides
-        if ENV['PARAMS_FILE'] && ENV['PARAMS_FILE'] != ''
-          if File.readable?(ENV['PARAMS_FILE'])
-            project_root = self.instance_variable_get("@project_root")
-            packaging_root = self.instance_variable_get("@packaging_root")
-            self.config_from_yaml(ENV['PARAMS_FILE'])
-            self.instance_variable_set("@project_root", project_root) if project_root
-            self.instance_variable_set("@packaging_root", packaging_root) if packaging_root
-          else
-            fail "PARAMS_FILE was set, but not to the path to a readable file."
-          end
+        return if ENV['PARAMS_FILE'].to_s.empty?
+
+        params_file = ENV['PARAMS_FILE']
+        unless File.readable?(params_file)
+          fail "Error: PARAMS_FILE was set ('#{params_file}') but it is not readable."
         end
+
+        project_root = self.instance_variable_get("@project_root")
+        packaging_root = self.instance_variable_get("@packaging_root")
+        self.config_from_yaml(params_file)
+        self.instance_variable_set("@project_root", project_root) if project_root
+        self.instance_variable_set("@packaging_root", packaging_root) if packaging_root
       end
 
       ##

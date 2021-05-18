@@ -62,6 +62,7 @@ describe 'Pkg::Util::Git' do
       allow(Pkg::Util::Git).to receive(:fail_unless_repo)
       allow(Pkg::Util::File).to receive(:mktemp) { temp }
       allow(Pkg::Util).to receive(:rand_string) { string }
+      allow(File).to receive(:delete).with("#{temp}/#{project}-#{version}-#{string}")
       expect(Pkg::Util::Execution).to receive(:capture3).with("#{Pkg::Util::Tool::GIT} bundle create #{temp}/#{project}-#{version}-#{string} #{treeish} --tags")
       expect(Dir).to receive(:chdir).with(temp)
       Pkg::Util::Git.bundle(treeish)
@@ -70,6 +71,7 @@ describe 'Pkg::Util::Git' do
     it 'should create a git bundle with random output directory' do
       allow(Pkg::Util::Git).to receive(:fail_unless_repo)
       allow(Pkg::Util::File).to receive(:mktemp) { temp }
+      allow(File).to receive(:delete).with("#{temp}/#{project}-#{version}-#{appendix}")
       expect(Pkg::Util::Execution).to receive(:capture3).with("#{Pkg::Util::Tool::GIT} bundle create #{temp}/#{project}-#{version}-#{appendix} #{treeish} --tags")
       expect(Dir).to receive(:chdir).with(temp)
       Pkg::Util::Git.bundle(treeish, appendix)
@@ -77,6 +79,7 @@ describe 'Pkg::Util::Git' do
 
     it 'should create a git bundle' do
       allow(Pkg::Util::Git).to receive(:fail_unless_repo)
+      allow(File).to receive(:delete).with("#{output_dir}/#{project}-#{version}-#{appendix}")
       expect(Pkg::Util::Execution).to receive(:capture3).with("#{Pkg::Util::Tool::GIT} bundle create #{output_dir}/#{project}-#{version}-#{appendix} #{treeish} --tags")
       expect(Dir).to receive(:chdir).with(output_dir)
       Pkg::Util::Git.bundle(treeish, appendix, output_dir)

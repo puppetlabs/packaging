@@ -22,15 +22,31 @@ module Pkg::Util::Git
     end
 
     # Git utility to create a new git bundle
-    # rubocop:disable Metrics/AbcSize
-    def bundle(treeish, appendix = Pkg::Util.rand_string, temp = Pkg::Util::File.mktemp)
+    def bundle(treeish, appendix = Pkg::Util.rand_string,
+               working_directory = Pkg::Util::File.mktemp)
       fail_unless_repo
-      Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} bundle create #{temp}/#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix} #{treeish} --tags")
-      Dir.chdir(temp) do
-        Pkg::Util::Execution.capture3("#{Pkg::Util::Tool.find_tool('tar')} -czf #{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix}.tar.gz #{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix}")
-        FileUtils.rm_rf("#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix}")
+
+      tar_command = Pkg::Util::Tool.find_tool('tar')
+      git_command = Pkg::Util::Tool::GIT
+
+      bundle_id = "#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix}"
+      bundle_path = "#{working_directory}/#{bundle_id}"
+      bundle_tarball = "#{bundle_id}.tar.gz"
+
+      git_bundle_command = %W(
+        #{git_command} bundle create #{bundle_path} #{treeish} --tags
+      ).join(' ')
+      Pkg::Util::Execution.capture3(git_bundle_command)
+
+      create_tarball_command = %W(
+        #{tar_command} -czf #{bundle_tarball} #{bundle_id}
+      ).join(' ')
+      Dir.chdir(working_directory) do
+        Pkg::Util::Execution.capture3(create_tarball_command)
       end
-      "#{temp}/#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix}.tar.gz"
+
+      File.delete(bundle_path)
+      return "#{working_directory}/#{bundle_tarball}"
     end
 
     def pull(remote, branch)

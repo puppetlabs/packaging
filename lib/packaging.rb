@@ -5,21 +5,23 @@ module Pkg
   $:.unshift(LIBDIR) unless
     $:.include?(File.dirname(__FILE__)) || $:.include?(LIBDIR)
 
-  require 'packaging/platforms'
   require 'packaging/util'
-  require 'packaging/config'
-  require 'packaging/paths'
-  require 'packaging/tar'
-  require 'packaging/deb'
-  require 'packaging/rpm'
-  require 'packaging/nuget'
-  require 'packaging/gem'
-  require 'packaging/repo'
-  require 'packaging/artifactory'
-  require 'packaging/retrieve'
-  require 'packaging/sign'
+
   require 'packaging/archive'
+  require 'packaging/artifactory'
+  require 'packaging/config'
+  require 'packaging/deb'
+  require 'packaging/gem'
   require 'packaging/metrics'
+  require 'packaging/nuget'
+  require 'packaging/paths'
+  require 'packaging/platforms'
+  require 'packaging/repo'
+  require 'packaging/retrieve'
+  require 'packaging/rpm'
+  require 'packaging/sign'
+  require 'packaging/ship'
+  require 'packaging/tar'
 
   # Load configuration defaults
   Pkg::Config.load_defaults

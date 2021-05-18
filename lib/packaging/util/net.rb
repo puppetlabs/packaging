@@ -286,18 +286,35 @@ module Pkg::Util::Net
     # Use the provided URL string to print important information with
     # ASCII emphasis
     def print_url_info(url_string)
-      puts "\n////////////////////////////////////////////////////////////////////////////////\n\n
-  Build submitted. To view your build progress, go to\n#{url_string}\n\n
-////////////////////////////////////////////////////////////////////////////////\n\n"
+      puts "\n#{'/' * 80}\n\n" \
+           "Build submitted. To view your build progress, go to\n#{url_string}\n\n" \
+           "#{'/' * 80}\n\n"
     end
 
     def remote_set_ownership(host, owner, group, files)
-      remote_cmd = "for file in #{files.join(" ")}; do if [[ -d $file ]] || ! `lsattr $file | grep -q '\\-i\\-'`; then sudo chown #{owner}:#{group} $file; else echo \"$file is immutable\"; fi; done"
+      remote_cmd = %W(
+        for file in #{files.join(" ")}; do
+          if [[ -d $file ]] || ! `lsattr $file | grep -q '\\-i\\-'`; then
+            sudo chown #{owner}:#{group} $file;
+          else
+            echo \"Info: $file is immutable\";
+          fi;
+        done
+      ).join(' ')
+
       Pkg::Util::Net.remote_execute(host, remote_cmd)
     end
 
     def remote_set_permissions(host, permissions, files)
-      remote_cmd = "for file in #{files.join(" ")}; do if [[ -d $file ]] || ! `lsattr $file | grep -q '\\-i\\-'`; then sudo chmod #{permissions} $file; else echo \"$file is immutable\"; fi; done"
+      remote_cmd = %W(
+        for file in #{files.join(" ")}; do
+          if [[ -d $file ]] || ! `lsattr $file | grep -q '\\-i\\-'`; then
+            sudo chmod #{permissions} $file;
+          else
+            echo \"Info: $file is immutable\";
+          fi;
+        done
+      ).join(' ')
       Pkg::Util::Net.remote_execute(host, remote_cmd)
     end
 
@@ -392,9 +409,16 @@ DOC
     end
 
     def remote_bundle_install_command
-      export_packaging_location = ''
-      export_packaging_location = "export PACKAGING_LOCATION='#{ENV['PACKAGING_LOCATION']}';" if ENV['PACKAGING_LOCATION'] && !ENV['PACKAGING_LOCATION'].empty?
-      command = "source /usr/local/rvm/scripts/rvm; rvm use ruby-2.5.1; #{export_packaging_location} bundle install --path .bundle/gems ;"
+      export_packaging_location = if ENV['PACKAGING_LOCATION'].to_s.empty?
+                                    ''
+                                  else
+                                    "export PACKAGING_LOCATION='#{ENV['PACKAGING_LOCATION']}';"
+                                  end
+      %W(
+        source /usr/local/rvm/scripts/rvm;
+        rvm use ruby-2.5.1;
+        #{export_packaging_location} bundle install --path .bundle/gems
+      ).join(' ')
     end
 
     # Given a BuildInstance object and a host, send its params to the host. Return

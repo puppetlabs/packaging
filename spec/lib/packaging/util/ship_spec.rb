@@ -115,6 +115,11 @@ describe '#Pkg::Util::Ship' do
     test_staging_server = 'foo.delivery.puppetlabs.net'
     test_remote_path = '/opt/repository/yum'
 
+    before :each do
+      allow(Pkg::Config).to receive(:repo_name).and_return('puppet6')
+      allow(FileUtils).to receive(:cp).at_least(:once).and_return(true)
+    end
+
     it 'ships the packages to the staging server' do
       allow(Pkg::Util::Ship)
         .to receive(:collect_packages)
@@ -149,8 +154,10 @@ describe '#Pkg::Util::Ship' do
         .to receive(:remote_set_immutable)
               .with(test_staging_server, anything)
               .exactly(retrieved_packages.count).times
+      reorganized_packages = Pkg::Util::Ship
+                               .reorganize_packages(retrieved_packages, Dir.mktmpdir)
       expect(Pkg::Util::Ship.ship_pkgs(['pkg/**/*.rpm'], test_staging_server, test_remote_path))
-        .to eq(true)
+        .to eq(reorganized_packages)
     end
 
     it 'ships packages containing the string `pkg` to the right place' do
@@ -187,7 +194,7 @@ describe '#Pkg::Util::Ship' do
               .with(test_staging_server, anything)
       expect(Pkg::Util::Ship.ship_pkgs(['pkg/**/*.rpm'], test_staging_server,
                                        test_remote_path, excludes: ['puppet-agent']))
-        .to eq(true)
+        .to eq(['pkg/puppet6/el/7/x86_64/puppet-agent-6.19.0-1.el7.x86_64.rpm'])
     end
 
     it 'returns false if there are no packages to ship' do

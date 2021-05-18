@@ -22,7 +22,7 @@ module Pkg::Util::Execution
     # purport to both return the results of the command execution (ala `%x{cmd}`)
     # while also raising an exception if a command does not succeed (ala `sh "cmd"`).
     def ex(command, debug = false)
-      puts "Executing '#{command}'..." if debug
+      puts "Executing '#{command}'" if debug
       ret = `#{command}`
       unless Pkg::Util::Execution.success?
         raise RuntimeError
@@ -41,7 +41,7 @@ module Pkg::Util::Execution
     # converting code to use that so I don't break more than I plan to.
     def capture3(command, debug = false)
       require 'open3'
-      puts "Executing '#{command}'..." if debug
+      puts "Executing '#{command}'" if debug
       stdout, stderr, ret = Open3.capture3(command)
       unless Pkg::Util::Execution.success?(ret)
         raise "#{stdout}#{stderr}"
@@ -61,25 +61,26 @@ module Pkg::Util::Execution
       success = false
       exception = ''
 
-      if args[:times].respond_to?(:times) and block_given?
-        args[:times].times do |i|
-          if args[:delay]
-            sleep args[:delay]
-          end
-
-          begin
-            blk.call
-            success = true
-            break
-          rescue => err
-            puts "An error was encountered evaluating block. Retrying.."
-            exception = err.to_s + "\n" + err.backtrace.join("\n")
-          end
-        end
-      else
-        fail "retry_on_fail requires and arg (:times => x) where x is an Integer/Fixnum, and a block to execute"
+      unless args[:times].respond_to?(:times) && block_given?
+        fail "retry_on_fail requires a :times argument and a block to execute"
       end
-      fail "Block failed maximum of #{args[:times]} tries. Exiting..\nLast failure was: #{exception}" unless success
+
+      args[:times].times do |i|
+        sleep args[:delay] if args[:delay]
+        begin
+          blk.call
+          success = true
+          break
+        rescue => err
+          puts "An error was encountered evaluating block. Retrying.."
+          exception = err.to_s + "\n" + err.backtrace.join("\n")
+        end
+      end
+
+      unless success
+        fail "Block failed maximum of #{args[:times]} tries. Exiting.\n" \
+             "Last failure was: #{exception}."
+      end
     end
   end
 end

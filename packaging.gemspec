@@ -6,7 +6,8 @@ Gem::Specification.new do |gem|
   gem.date    = Date.today.to_s
 
   gem.summary = "Puppet Labs' packaging automation"
-  gem.description = "Packaging automation written in Rake and Ruby. Easily build native packages for most platforms with a few data files and git."
+  gem.description = "Packaging automation written in Rake and Ruby. "\
+                    "Builds native packages for most platforms with a few data files and git."
   gem.license = "Apache-2.0"
 
   gem.authors  = ['Puppet Labs']
@@ -18,13 +19,17 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency('rspec', ['~> 2.14.1'])
   gem.add_development_dependency('rubocop', ['~> 0.24.1'])
   gem.add_development_dependency('pry-byebug')
-  gem.add_runtime_dependency('rake', ['>= 12.3'])
+
   gem.add_runtime_dependency('artifactory', ['~> 3'])
-  gem.add_runtime_dependency('release-metrics')
   gem.add_runtime_dependency('csv', ['3.1.5'])
+  gem.add_runtime_dependency('fileutils')
+  gem.add_runtime_dependency('release-metrics')
+  gem.add_runtime_dependency('rake', ['>= 12.3'])
+
   gem.require_path = 'lib'
 
   # Ensure the gem is built out of versioned files
-  gem.files = Dir['{lib,spec,static_artifacts,tasks,templates}/**/*', 'README*', 'LICENSE*'] & `git ls-files -z`.split("\0")
+  gem.files = Dir['{lib,spec,static_artifacts,tasks,templates}/**/*', 'README*', 'LICENSE*'] &
+              `git ls-files -z`.split("\0")
   gem.test_files = Dir['spec/**/*_spec.rb']
 end

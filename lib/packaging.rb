@@ -11,6 +11,7 @@ module Pkg
   require 'packaging/artifactory'
   require 'packaging/config'
   require 'packaging/deb'
+  require 'packaging/fetch'
   require 'packaging/gem'
   require 'packaging/metrics'
   require 'packaging/nuget'

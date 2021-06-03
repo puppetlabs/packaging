@@ -111,6 +111,12 @@ module Pkg::Util::Ship
     ship_pkgs(things_to_ship, Pkg::Config.yum_staging_server, remote_path, opts)
   end
 
+  def apt_stage_artifacts(local_staging_directory, repo_name)
+    Pkg::Util::Execution.ex(
+      "env REPO_NAME=#{repo_name} apt-stage-artifacts #{local_staging_directory}"
+    )
+  end
+
   def ship_debs(local_staging_directory, remote_path, opts = {})
     things_to_ship = [
       "#{local_staging_directory}/**/*.debian.tar.gz",
@@ -175,7 +181,7 @@ module Pkg::Util::Ship
       return nil
     end
 
-    cmd = <<-CMD
+    <<-ROLLING_REPO_LINK_COMMAND
       if [ ! -d #{base_path} ] ; then
         echo "Link target '#{base_path}' does not exist; skipping"
         exit 0
@@ -194,7 +200,7 @@ module Pkg::Util::Ship
         exit 1
       fi
       ln -s #{base_path} #{link_path}
-    CMD
+    ROLLING_REPO_LINK_COMMAND
   end
 
   def create_rolling_repo_link(platform_tag, staging_server, repo_path, nonfinal = false)

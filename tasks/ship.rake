@@ -1,4 +1,4 @@
-namespace :pl do
+day namespace :pl do
   namespace :remote do
     # These hacky bits execute a pre-existing rake task on the Pkg::Config.apt_host
     # The rake task takes packages in a specific directory and freights them
@@ -359,13 +359,21 @@ namespace :pl do
 
   desc "Ship cow-built debs to #{Pkg::Config.apt_signing_server}"
   task ship_debs: 'pl:fetch' do
+    # This is the original version. It manually uploads into a freight library.
     Pkg::Util::Ship.ship_debs('pkg', Pkg::Config.apt_repo_staging_path, chattr: false)
+
+    # Updated version. We allow freight to do the work for us.
+    Pkg::Util::Ship.apt_stage_artifacts('pkg', Pkg::Config.repo_name)
   end
 
   desc "Ship nightly debs to #{Pkg::Config.apt_signing_server}"
   task ship_nightly_debs: 'pl:fetch' do
+    # This is the original version. It manually uploads into a freight library.
     Pkg::Util::Ship.ship_debs('pkg', Pkg::Config.nonfinal_apt_repo_staging_path,
                               chattr: false, nonfinal: true)
+
+    # This is the original version. It manually uploads into a freight library.
+    Pkg::Util::Ship.apt_stage_artifacts('pkg', Pkg::Config.nonfinal_repo_name)
   end
 
   desc 'Ship built gem to rubygems.org, internal Gem mirror, and public file server'

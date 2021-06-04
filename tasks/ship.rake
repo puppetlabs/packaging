@@ -677,6 +677,7 @@ day namespace :pl do
 
       Pkg::Ship::DistributionServer.ship(local_dir, target)
       Pkg::Ship::Artifactory.ship(local_dir, target)
+      Pkg::Util::Ship.apt_stage_artifacts(local_dir, Pkg::Config.repo_name)
     end
 
     desc 'Ship generated repository configs to the distribution server'

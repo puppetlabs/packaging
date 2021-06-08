@@ -36,7 +36,8 @@ module Pkg::Repo
       Dir.chdir(File.join('pkg', local_target)) do
         puts "Info: Archiving #{repo_location} as #{archive_name}"
         target_tarball = File.join('repos', "#{archive_name}.tar.gz")
-        tar_command = "#{tar} --owner=0 --group=0 --create --gzip --file #{target_tarball} #{repo_location}"
+        tar_command = "#{tar} --owner=0 --group=0 --create --gzip " \
+                      "--file #{target_tarball} #{repo_location}"
         stdout, _, _ = Pkg::Util::Execution.capture3(tar_command)
         return stdout
       end
@@ -67,7 +68,8 @@ module Pkg::Repo
           tar_action = "--update"
         end
 
-        tar_command = "#{tar} --owner=0 --group=0 #{tar_action} --file #{all_repos_tarball_name} #{repo_tarball_path}"
+        tar_command = "#{tar} --owner=0 --group=0 #{tar_action} " \
+                      "--file #{all_repos_tarball_name} #{repo_tarball_path}"
         stdout, _, _ = Pkg::Util::Execution.capture3(tar_command)
         puts stdout
       end
@@ -117,7 +119,8 @@ module Pkg::Repo
               )
       return stdout.split
     rescue => e
-      fail "Error: Could not retrieve directories that contain #{pkg_ext} packages in #{Pkg::Config.distribution_server}:#{artifact_directory}"
+      fail "Error: Could not retrieve directories that contain #{pkg_ext} packages in " \
+           "#{Pkg::Config.distribution_server}:#{artifact_directory}: #{e}"
     end
 
     def populate_repo_directory(artifact_parent_directory)
@@ -126,7 +129,8 @@ module Pkg::Repo
       cmd << 'rsync --archive --verbose --one-file-system --ignore-existing artifacts/ repos/ '
       Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, cmd)
     rescue => e
-      fail "Error: Could not populate repos directory in #{Pkg::Config.distribution_server}:#{artifact_parent_directory}"
+      fail "Error: Could not populate repos directory in " \
+           "#{Pkg::Config.distribution_server}:#{artifact_parent_directory}: #{e}"
     end
 
     def argument_required?(argument_name, repo_command)
@@ -136,7 +140,9 @@ module Pkg::Repo
     def update_repo(remote_host, command, options = {})
       fail_message = "Error: Missing required argument '%s', update your build_defaults?"
       [:repo_name, :repo_path, :repo_host, :repo_url].each do |option|
-        fail fail_message % option.to_s if argument_required?(option.to_s, command) && !options[option]
+        if argument_required?(option.to_s, command) && !options[option]
+          fail format(fail_message, option.to_s)
+        end
       end
 
       whitelist = {

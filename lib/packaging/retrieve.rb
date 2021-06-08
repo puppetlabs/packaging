@@ -1,6 +1,53 @@
 module Pkg::Retrieve
   module_function
 
+  def retrieve(remote_target, local_target)
+    unless Pkg::Config.project
+      fail "Error: 'project' unset. Set the project in build_defaults.yaml or " \
+           "with the 'PROJECT_OVERRIDE' environment variable."
+    end
+
+    FileUtils.mkdir_p local_target
+
+    builds_server = Pkg::Config.builds_server
+    jenkins_repo_path = Pkg::Config.jenkins_repo_path
+    project = Pkg::Config.project
+    ref = Pkg::Config.ref
+      
+    build_url = "http://#{builds_server}/#{project}/#{ref}/#{remote_target}"
+    build_path = File.join(jenkins_repo_path, project, ref, remote_target)
+    local_target_path = File.join(Dir.pwd, local_target)
+
+    if Pkg::Config.foss_only
+      foss_only_retrieve(build_url, local_target)
+    else
+      retrieve_all(build_url, build_path, local_target)
+    end
+
+    if Dir["#{local_target}/*"].empty?
+      fail "Error: Retrieval from '#{build_url}' into '#{local_target_path}' failed. " \
+           "No artifacts were found."
+    end
+    puts "Info: Packages retrieved to '#{local_target_path}'"
+  end
+
+  def retrieve_pe(remote_target, local_target)
+    unless Pkg::Config.project
+      fail "Error: 'project' unset. Set the project in build_defaults.yaml or " \
+           "with the 'PROJECT_OVERRIDE' environment variable."
+    end
+
+    builds_server = Pkg::Config.builds_server
+    jenkins_repo_path = Pkg::Config.jenkins_repo_path
+    project = Pkg::Config.project
+    ref = Pkg::Config.ref
+      
+    build_url = "http://#{builds_server}/#{project}/#{ref}/#{remote_target}"
+    build_path = File.join(jenkins_repo_path, project, ref, remote_target)
+    Pkg::Retrieve.retrieve_all(build_url, build_path, local_target)
+  end
+
+  
   # --no-parent = Only descend when recursing, never ascend
   # --no-host-directories = Discard http://#{Pkg::Config.builds_server} when saving to disk
   # --level=0 = infinitely recurse, no limit

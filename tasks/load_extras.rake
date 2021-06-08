@@ -7,15 +7,8 @@
 # PL Release team
 namespace :pl do
   task :load_extras, :tempdir do |t, args|
-    unless ENV['PARAMS_FILE'] && ENV['PARAMS_FILE'] != ''
-      tempdir = args.tempdir
-      raise "pl:load_extras requires a directory containing extras data" if tempdir.nil?
-      Pkg::Config.config_from_yaml("#{tempdir}/#{Pkg::Config.builder_data_file}")
-
-      # Environment variables take precedence over those loaded from configs,
-      # so we make sure that any we clobbered are reset.
-      Pkg::Config.load_envvars
-    end
+    Pkg::Fetch.load_extras(args.tempdir)
   end
 end
+
 

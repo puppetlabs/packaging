@@ -111,9 +111,9 @@ module Pkg::Util::Ship
     ship_pkgs(things_to_ship, Pkg::Config.yum_staging_server, remote_path, opts)
   end
 
-  def apt_stage_artifacts(local_staging_directory, repo_name)
+  def apt_stage_artifacts(local_staging_directory, repo_type = :stable)
     Pkg::Util::Execution.ex(
-      "env REPO_NAME=#{repo_name} apt-stage-artifacts #{local_staging_directory}"
+      "apt-stage-artifacts --repo-type=#{repo_type.to_s} #{local_staging_directory}"
     )
   end
 

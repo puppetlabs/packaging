@@ -1,4 +1,4 @@
-day namespace :pl do
+namespace :pl do
   namespace :remote do
     # These hacky bits execute a pre-existing rake task on the Pkg::Config.apt_host
     # The rake task takes packages in a specific directory and freights them
@@ -8,7 +8,7 @@ day namespace :pl do
     desc "Update '#{Pkg::Config.repo_name}' yum repository on '#{Pkg::Config.yum_staging_server}'"
     task update_yum_repo: 'pl:fetch' do
       command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository/Rakefile mk_repo'
-      $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
+      puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       next unless Pkg::Util.ask_yes_or_no
 
       Pkg::Repo.update_repo(
@@ -25,7 +25,7 @@ day namespace :pl do
     desc "Update all final yum repositories on '#{Pkg::Config.yum_staging_server}'"
     task update_all_final_yum_repos: 'pl:fetch' do
       command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository/Rakefile mk_repo'
-      $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
+      puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       next unless Pkg::Util.ask_yes_or_no
 
       Pkg::Repo.update_repo(
@@ -42,7 +42,7 @@ day namespace :pl do
     desc "Update '#{Pkg::Config.nonfinal_repo_name}' nightly yum repository on '#{Pkg::Config.yum_staging_server}'"
     task update_nightlies_yum_repo: 'pl:fetch' do
       command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository-nightlies/Rakefile mk_repo'
-      $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
+      puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       next unless Pkg::Util.ask_yes_or_no
 
       Pkg::Repo.update_repo(
@@ -59,7 +59,7 @@ day namespace :pl do
     desc "Update all nightly yum repositories on '#{Pkg::Config.yum_staging_server}'"
     task update_all_nightlies_yum_repos: 'pl:fetch' do
       command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository-nightlies/Rakefile mk_repo'
-      $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
+      puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       next unless Pkg::Util.ask_yes_or_no
 
       Pkg::Repo.update_repo(
@@ -77,7 +77,7 @@ day namespace :pl do
 
     desc "Update remote apt repository on '#{Pkg::Config.apt_signing_server}'"
     task update_apt_repo: 'pl:fetch' do
-      $stdout.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
+      puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
       next unless Pkg::Util.ask_yes_or_no
 
       Pkg::Repo.update_repo(
@@ -94,7 +94,7 @@ day namespace :pl do
 
     desc "Update nightlies apt repository on '#{Pkg::Config.apt_signing_server}'"
     task update_nightlies_apt_repo: 'pl:fetch' do
-      $stdout.puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
+      puts "Really run remote repo update on '#{Pkg::Config.apt_signing_server}'? [y,n]"
       next unless Pkg::Util.ask_yes_or_no
 
       Pkg::Repo.update_repo(
@@ -124,7 +124,7 @@ day namespace :pl do
     desc "Update remote ips repository on #{Pkg::Config.ips_host}"
     task :update_ips_repo  => 'pl:fetch' do
       if Dir['pkg/ips/pkgs/**/*'].empty? && Dir['pkg/solaris/11/**/*'].empty?
-        $stdout.puts "Warning: No p5p packages found in pkg/ips/pkgs or pkg/solaris/11. Skipping."
+        puts "Warning: No p5p packages found in pkg/ips/pkgs or pkg/solaris/11. Skipping."
         next
       end
 
@@ -193,7 +193,7 @@ day namespace :pl do
 
       files = Dir.glob("pkg/#{Pkg::Config.project}-#{Pkg::Config.version}.tar.gz*")
       if files.empty?
-        puts 'There are no tarballs to ship'
+        $stderr.puts 'There are no tarballs to ship'
         next
       end
 
@@ -214,7 +214,7 @@ day namespace :pl do
 
       files = Dir.glob('pkg/windows/**/*.msi')
       if files.empty?
-        puts 'There are no MSIs to ship'
+        $stderr.puts 'There are no MSIs to ship'
         next
       end
 
@@ -303,7 +303,7 @@ day namespace :pl do
 
     desc "Sync nightlies.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3"
     task :deploy_nightlies_to_s3 => 'pl:fetch' do
-      puts "Deploying nightly builds from #{Pkg::Config.staging_server} to AWS S3..."
+      $stderr.puts "Deploying nightly builds from #{Pkg::Config.staging_server} to AWS S3"
       Pkg::Util::Execution.retry_on_fail(times: 3) do
         command = 'sudo /usr/local/bin/s3_repo_sync.sh nightlies.puppet.com'
         Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, command)
@@ -363,7 +363,7 @@ day namespace :pl do
     Pkg::Util::Ship.ship_debs('pkg', Pkg::Config.apt_repo_staging_path, chattr: false)
 
     # Updated version. We allow freight to do the work for us.
-    Pkg::Util::Ship.apt_stage_artifacts('pkg', Pkg::Config.repo_name)
+    Pkg::Util::Ship.apt_stage_artifacts('pkg', :stable)
   end
 
   desc "Ship nightly debs to #{Pkg::Config.apt_signing_server}"
@@ -372,8 +372,8 @@ day namespace :pl do
     Pkg::Util::Ship.ship_debs('pkg', Pkg::Config.nonfinal_apt_repo_staging_path,
                               chattr: false, nonfinal: true)
 
-    # This is the original version. It manually uploads into a freight library.
-    Pkg::Util::Ship.apt_stage_artifacts('pkg', Pkg::Config.nonfinal_repo_name)
+    # Updated version. We allow freight to do the work for us.
+    Pkg::Util::Ship.apt_stage_artifacts('pkg', :nightly)
   end
 
   desc 'Ship built gem to rubygems.org, internal Gem mirror, and public file server'
@@ -503,7 +503,7 @@ day namespace :pl do
   task ship_nuget: 'pl:fetch' do
     packages = Dir['pkg/**/*.nupkg']
     if packages.empty?
-      $stdout.puts "There aren't any nuget packages in pkg/windows. Skipping."
+      $stderr.puts "There aren't any nuget packages in pkg/windows. Skipping."
       next
     end
 
@@ -534,7 +534,7 @@ day namespace :pl do
   desc 'UBER ship: ship all the things in pkg'
   task uber_ship: 'pl:fetch' do
     unless Pkg::Util.confirm_ship(FileList['pkg/**/*'])
-      puts 'Ship canceled'
+      $stderr.puts 'Ship canceled'
       exit
     end
 
@@ -637,16 +637,16 @@ day namespace :pl do
       end
     end
 
-    puts "\n\n"
+    $stderr.puts "\n\n"
     unless errs.empty?
-      puts "Found #{errs.length} issues:"
+      $stderr.puts "Found #{errs.length} issues:"
       errs.each do |err|
-        puts " * #{err}"
+        $stderr.puts " * #{err}"
       end
       next
     end
 
-    puts 'Hooray! You should be good for shipping!'
+    $stderr.puts 'No errors found. You should be good for shipping.'
   end
 
   # It is odd to namespace this ship task under :jenkins, but this task is
@@ -662,8 +662,8 @@ day namespace :pl do
     # then create and upload a tarball of that directory.
     desc '(deprecated): use pl:jenkins:ship'
     task :ship_to_artifactory, :local_dir do |_t, args|
-      puts "Warning: 'ship_to_artifactory' task is deprecated. " \
-           "Shipping to Artifactory is part of 'pl:jenkins:ship' task."
+      $stderr.puts "Warning: 'ship_to_artifactory' task is deprecated. " \
+                   "Shipping to Artifactory is part of 'pl:jenkins:ship' task."
     end
 
     # For the distribution server, collect artifacts and metadata into a local "artifacts"
@@ -674,10 +674,8 @@ day namespace :pl do
       target = args.target || 'artifacts'
 
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')
-
       Pkg::Ship::DistributionServer.ship(local_dir, target)
       Pkg::Ship::Artifactory.ship(local_dir, target)
-      Pkg::Util::Ship.apt_stage_artifacts(local_dir, Pkg::Config.repo_name)
     end
 
     desc 'Ship generated repository configs to the distribution server'

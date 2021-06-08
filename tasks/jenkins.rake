@@ -194,12 +194,12 @@ namespace :pl do
       #
       begin
         _, retval = Pkg::Util::Net.curl_form_data(trigger_url, args)
-        if Pkg::Util::Execution.success?(retval)
-          puts "Build submitted. To view your build results, go to #{job_url}"
-          puts "Your packages will be available at http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
-        else
-          fail "An error occurred submitting the job to jenkins. Take a look at the preceding http response for more info."
+        unless Pkg::Util::Execution.success?(retval)
+          fail "An error occurred submitting the job to jenkins. See the preceding http response."
         end
+
+        puts "Build submitted. Go to #{job_url} for build information."
+        puts "Packages will be delivered to http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
       ensure
         # Clean up after ourselves
         rm bundle

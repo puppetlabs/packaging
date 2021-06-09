@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- (PA-3708) Add support for Debian 11 amd64
 
 ## [0.99.77] - 2021-06-01
 ### Added

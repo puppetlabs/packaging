@@ -46,6 +46,14 @@ module Pkg
           source_package_formats: DEBIAN_SOURCE_FORMATS,
           repo: true,
         },
+        '11' => {
+          codename: 'bullseye',
+          architectures: ['amd64'],
+          source_architecture: 'source',
+          package_format: 'deb',
+          source_package_formats: DEBIAN_SOURCE_FORMATS,
+          repo: true,
+        },
       },
 
       'el' => {
@@ -101,6 +109,14 @@ module Pkg
           repo: true,
         },
         '32' => {
+          architectures: ['x86_64'],
+          source_architecture: 'SRPMS',
+          package_format: 'rpm',
+          source_package_formats: ['src.rpm'],
+          signature_format: 'v4',
+          repo: true,
+        },
+        '34' => {
           architectures: ['x86_64'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',

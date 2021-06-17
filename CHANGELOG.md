@@ -3,13 +3,20 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- (PA-3708) Add support for Debian 11 amd64
+
 ### Fixed
 - (RE-14142) MacOS signing is fairly broken
+
+## [0.99.77] - 2021-06-01
+### Added
+- (PA-3614)  Add macOS 11 to platforms
+- (PA-3602)  Add Fedora 34 to platforms
 
 ### Changed
 - (RE-11477) Remove support for cisco-wrlinux and eos as those were EOL'd for platform6.
 - (RE-13479) Remove support for AIX 6.1
-- (PA-3614)  Add macOS 11 to platforms
 
 ## [0.99.76] - 2021-03-21
 ### Added
@@ -723,7 +730,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.76...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.77...HEAD
+[0.99.76]: https://github.com/puppetlabs/packaging/compare/0.99.76...0.99.77
 [0.99.76]: https://github.com/puppetlabs/packaging/compare/0.99.75...0.99.76
 [0.99.75]: https://github.com/puppetlabs/packaging/compare/0.99.74...0.99.75
 [0.99.74]: https://github.com/puppetlabs/packaging/compare/0.99.73...0.99.74

@@ -3,6 +3,10 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Fixed
+- (RE-14142) MacOS signing is fairly broken
+
+### Changed
 - (RE-11477) Remove support for cisco-wrlinux and eos as those were EOL'd for platform6.
 - (RE-13479) Remove support for AIX 6.1
 - (PA-3614)  Add macOS 11 to platforms

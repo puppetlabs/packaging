@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.78] - 2021-06-21
 ### Added
 - (PA-3708) Add support for Debian 11 amd64
 
@@ -730,8 +732,9 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.77...HEAD
-[0.99.76]: https://github.com/puppetlabs/packaging/compare/0.99.76...0.99.77
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.78...HEAD
+[0.99.78]: https://github.com/puppetlabs/packaging/compare/0.99.77...0.99.78
+[0.99.77]: https://github.com/puppetlabs/packaging/compare/0.99.76...0.99.77
 [0.99.76]: https://github.com/puppetlabs/packaging/compare/0.99.75...0.99.76
 [0.99.75]: https://github.com/puppetlabs/packaging/compare/0.99.74...0.99.75
 [0.99.74]: https://github.com/puppetlabs/packaging/compare/0.99.73...0.99.74

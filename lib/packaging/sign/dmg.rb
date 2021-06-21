@@ -1,41 +1,71 @@
 module Pkg::Sign::Dmg
   module_function
 
-  def sign(target_dir = 'pkg')
-    use_identity = "-i #{Pkg::Config.osx_signing_ssh_key}" unless Pkg::Config.osx_signing_ssh_key.nil?
-
-    if Pkg::Config.osx_signing_server =~ /@/
-      host_string = "#{Pkg::Config.osx_signing_server}"
-    else
-      host_string = "#{ENV['USER']}@#{Pkg::Config.osx_signing_server}"
+  def sign(pkg_directory = 'pkg')
+    use_identity = ''
+    unless Pkg::Config.osx_signing_ssh_key.nil?
+      use_identity = "-i #{Pkg::Config.osx_signing_ssh_key}"
     end
+
+    host_string = "#{ENV['USER']}@#{Pkg::Config.osx_signing_server}"
+    host_string = "#{Pkg::Config.osx_signing_server}" if Pkg::Config.osx_signing_server =~ /@/
+
     ssh_host_string = "#{use_identity} #{host_string}"
     rsync_host_string = "-e 'ssh #{use_identity}' #{host_string}"
 
-    work_dir  = "/tmp/#{Pkg::Util.rand_string}"
-    mount     = File.join(work_dir, "mount")
-    signed    = File.join(work_dir, "signed")
-    Pkg::Util::Net.remote_execute(ssh_host_string, "mkdir -p #{mount} #{signed}")
-    dmgs = Dir.glob("#{target_dir}/apple/**/*.dmg")
-    Pkg::Util::Net.rsync_to(dmgs.join(" "), rsync_host_string, work_dir)
-    Pkg::Util::Net.remote_execute(ssh_host_string, %Q[for dmg in #{dmgs.map { |d| File.basename(d, ".dmg") }.join(" ")}; do
-      /usr/bin/hdiutil attach #{work_dir}/$dmg.dmg -mountpoint #{mount} -nobrowse -quiet ;
-      /usr/bin/security -q unlock-keychain -p "#{Pkg::Config.osx_signing_keychain_pw}" "#{Pkg::Config.osx_signing_keychain}" ;
-        for pkg in $(ls #{mount}/*.pkg | xargs -n 1 basename); do
-          if /usr/sbin/pkgutil --check-signature #{mount}/$pkg ; then
-            echo "$pkg is already signed, skipping . . ." ;
-            cp #{mount}/$pkg #{signed}/$pkg ;
-          else
-            /usr/bin/productsign --keychain "#{Pkg::Config.osx_signing_keychain}" --sign "#{Pkg::Config.osx_signing_cert}" #{mount}/$pkg #{signed}/$pkg ;
-          fi
-        done
-      /usr/bin/hdiutil detach #{mount} -quiet ;
-      /bin/rm #{work_dir}/$dmg.dmg ;
-      /usr/bin/hdiutil create -volname $dmg -srcfolder #{signed}/ #{work_dir}/$dmg.dmg ;
-      /bin/rm #{signed}/* ; done])
-    dmgs.each do | dmg |
-      Pkg::Util::Net.rsync_from("#{work_dir}/#{File.basename(dmg)}", rsync_host_string, File.dirname(dmg))
+    remote_working_directory = "/tmp/#{Pkg::Util.rand_string}"
+    dmg_mount_point = File.join(remote_working_directory, "mount")
+    signed_items_directory    = File.join(remote_working_directory, "signed")
+
+    dmgs = Dir.glob("#{pkg_directory}/{apple,mac,osx}/**/*.dmg")
+    if dmgs.empty?
+      $stderr.puts "Error: no dmgs found in #{pkg_directory}/{apple,mac,osx}."
+      exit 1
     end
-    Pkg::Util::Net.remote_execute(ssh_host_string, "if [ -d '#{work_dir}' ]; then rm -rf '#{work_dir}'; fi")
+
+    dmg_basenames = dmgs.map { |d| File.basename(d, '.dmg') }.join(' ')
+
+    sign_package_command = %W[
+      for dmg in #{dmg_basenames}; do
+        /usr/bin/hdiutil attach #{remote_working_directory}/$dmg.dmg
+          -mountpoint #{dmg_mount_point} -nobrowse -quiet ;
+
+        /usr/bin/security -q unlock-keychain
+          -p "#{Pkg::Config.osx_signing_keychain_pw}" "#{Pkg::Config.osx_signing_keychain}" ;
+
+        for pkg in #{dmg_mount_point}/*.pkg; do
+          pkg_basename=$(basename $pkg) ;
+          if /usr/sbin/pkgutil --check-signature $pkg ; then
+            echo "Warning: $pkg is already signed, skipping" ;
+            cp $pkg #{signed_items_directory}/$pkg_basename ;
+            continue ;
+          fi ;
+
+          /usr/bin/productsign --keychain "#{Pkg::Config.osx_signing_keychain}"
+            --sign "#{Pkg::Config.osx_signing_cert}"
+            $pkg #{signed_items_directory}/$pkg_basename ;
+        done ;
+
+        /usr/bin/hdiutil detach #{dmg_mount_point} -quiet ;
+        /bin/rm #{remote_working_directory}/$dmg.dmg ;
+        /usr/bin/hdiutil create -volname $dmg
+          -srcfolder #{signed_items_directory}/ #{remote_working_directory}/$dmg.dmg ;
+        /bin/rm #{signed_items_directory}/* ;
+      done
+    ].join(' ')
+
+    Pkg::Util::Net.remote_execute(ssh_host_string,
+                                  "mkdir -p #{dmg_mount_point} #{signed_items_directory}")
+
+    Pkg::Util::Net.rsync_to(dmgs.join(' '), rsync_host_string, remote_working_directory)
+
+    Pkg::Util::Net.remote_execute(ssh_host_string, sign_package_command)
+
+    dmgs.each do |dmg|
+      Pkg::Util::Net.rsync_from(
+        "#{remote_working_directory}/#{File.basename(dmg)}", rsync_host_string, File.dirname(dmg))
+    end
+
+    Pkg::Util::Net.remote_execute(ssh_host_string, "rm -rf '#{remote_working_directory}'")
   end
 end

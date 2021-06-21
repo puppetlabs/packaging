@@ -6,6 +6,9 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ### Added
 - (PA-3708) Add support for Debian 11 amd64
 
+### Fixed
+- (RE-14142) MacOS signing is fairly broken
+
 ## [0.99.77] - 2021-06-01
 ### Added
 - (PA-3614)  Add macOS 11 to platforms

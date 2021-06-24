@@ -201,14 +201,6 @@ module Pkg
       },
 
       'ubuntu' => {
-        '14.04' => {
-          codename: 'trusty',
-          architectures: ['amd64', 'i386'],
-          source_architecture: 'source',
-          package_format: 'deb',
-          source_package_formats: DEBIAN_SOURCE_FORMATS,
-          repo: true,
-        },
         '16.04' => {
           codename: 'xenial',
           architectures: ['amd64', 'i386', 'ppc64el'],

@@ -9,7 +9,7 @@ module Pkg::Deb::Repo
     # take this list and combine it with the list of supported arches for each
     # given platform to ensure a complete set of architectures. We use this
     # when we initially create the repos and when we sign the repos.
-    DEBIAN_PACKAGING_ARCHES = %w[i386 amd64 arm64 armel armhf powerpc ppc64el sparc mips mipsel]
+    DEBIAN_PACKAGING_ARCHES = %w(i386 amd64 arm64 armel armhf powerpc ppc64el sparc mips mipsel)
 
     def reprepro_repo_name
       if Pkg::Config.apt_repo_name

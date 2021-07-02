@@ -43,7 +43,7 @@ module Pkg::Deb::Repo
       # First test if the directory even exists
       #
       begin
-        stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} --spider -r -l 1 --no-parent #{repo_base} 2>&1")
+        stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} --no-verbose --spider -r -l 1 --no-parent #{repo_base} 2>&1")
       rescue RuntimeError
         warn "No debian repos available for #{Pkg::Config.project} at #{Pkg::Config.ref}."
         return
@@ -76,7 +76,7 @@ module Pkg::Deb::Repo
       wget = Pkg::Util::Tool.check_tool("wget")
       FileUtils.mkdir_p("pkg/#{target}")
       config_url = "#{base_url}/#{target}/deb/"
-      stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
+      stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} --no-verbose -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
       stdout
     rescue => e
       fail "Couldn't retrieve deb apt repo configs.\n#{e}"

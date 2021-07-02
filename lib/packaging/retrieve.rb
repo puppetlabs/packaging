@@ -4,13 +4,15 @@ module Pkg::Retrieve
   # --no-parent = Only descend when recursing, never ascend
   # --no-host-directories = Discard http://#{Pkg::Config.builds_server} when saving to disk
   # --level=0 = infinitely recurse, no limit
-  # --cut-dirs 3 = will cut off #{Pkg::Config.project}, #{Pkg::Config.ref}, and the first directory in #{remote_target} from the url when saving to disk
+  # --cut-dirs 3 = will cut off #{Pkg::Config.project},
+  #   #{Pkg::Config.ref}, and the first directory in #{remote_target}
+  #   from the url when saving to disk
   # --directory-prefix = where to save to disk (defaults to ./)
   # --reject = Reject all hits that match the supplied regex
 
   def default_wget_command(local_target, url, additional_options = {})
     default_options = {
-      'quiet' => true,
+      'no-verbose' => true,
       'recursive' => true,
       'no-parent' => true,
       'no-host-directories' => true,

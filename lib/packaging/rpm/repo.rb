@@ -114,10 +114,12 @@ module Pkg::Rpm::Repo
 
     def retrieve_repo_configs(target = "repo_configs")
       wget = Pkg::Util::Tool.check_tool("wget")
+      wget_command = "#{wget} --no-verbose --recursive --no-parent --no-host-directories " \
+                     "--cut-dirs=3 --directory-prefix=pkg/#{target} --reject 'index*'"
       FileUtils.mkdir_p("pkg/#{target}")
       config_url = "#{base_url}/#{target}/rpm/"
       begin
-        stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
+        stdout, _, _ = Pkg::Util::Execution.capture3("#{wget_command} #{config_url}")
         stdout
       rescue => e
         fail "Couldn't retrieve rpm yum repo configs.\n#{e}"
@@ -149,15 +151,17 @@ module Pkg::Rpm::Repo
       # repodata folders in them, and second that those same directories also
       # contain rpms
       #
-      stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} --spider -r -l 5 --no-parent #{repo_base} 2>&1")
+      wget_command = "#{wget} --no-verbose --spider --recursive --level=5 --no-parent"
+      stdout, _, _ = Pkg::Util::Execution.capture3("#{wget_command} #{repo_base} 2>&1")
       stdout = stdout.split.uniq.reject { |x| x =~ /\?|index/ }.select { |x| x =~ /http:.*repodata\/$/ }
 
       # RPMs will always exist at the same directory level as the repodata
       # folder, which means if we go up a level we should find rpms
       #
       yum_repos = []
+      wget_command = "#{wget} --no-verbose --spider --recursive --level=1 --no-parent"
       stdout.map { |x| x.chomp('repodata/') }.each do |url|
-        output, _, _ = Pkg::Util::Execution.capture3("#{wget} --spider -r -l 1 --no-parent #{url} 2>&1")
+        output, _, _ = Pkg::Util::Execution.capture3("#{wget_command} #{url} 2>&1")
         unless output.split.uniq.reject { |x| x =~ /\?|index/ }.select { |x| x =~ /http:.*\.rpm$/ }.empty?
           yum_repos << url
         end

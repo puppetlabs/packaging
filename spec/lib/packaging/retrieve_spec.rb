@@ -31,7 +31,7 @@ describe 'Pkg::Retrieve' do
 
   describe '#default_wget_command' do
     let(:options) { [
-      "--quiet",
+      "--no-verbose",
       "--recursive",
       "--no-parent",
       "--no-host-directories",
@@ -54,14 +54,17 @@ describe 'Pkg::Retrieve' do
       it 'should add to existing options' do
         options.push('--convert-links')
         options.each do |option|
-          expect(Pkg::Retrieve.default_wget_command(local_target, build_url, {'convert-links' => true})).to include(option)
+          expect(Pkg::Retrieve.default_wget_command(local_target, build_url, {'convert-links' => true}))
+            .to include(option)
         end
       end
       it 'should replace default values' do
         options.push('--level=1').delete('--level=0')
-        expect(Pkg::Retrieve.default_wget_command(local_target, build_url, {'level' => 1})).to_not include('--level=0')
+        expect(Pkg::Retrieve.default_wget_command(local_target, build_url, {'level' => 1}))
+          .to_not include('--level=0')
         options.each do |option|
-          expect(Pkg::Retrieve.default_wget_command(local_target, build_url, {'level' => 1})).to include(option)
+          expect(Pkg::Retrieve.default_wget_command(local_target, build_url, {'level' => 1}))
+            .to include(option)
         end
       end
     end
@@ -70,12 +73,14 @@ describe 'Pkg::Retrieve' do
   describe '#foss_only_retrieve' do
     it 'should fail without foss_platforms' do
       allow(Pkg::Config).to receive(:foss_platforms).and_return(nil)
-      expect { Pkg::Retrieve.foss_only_retrieve(build_url, local_target) }.to raise_error(/I don't know anything about FOSS_PLATFORMS/)
+      expect { Pkg::Retrieve.foss_only_retrieve(build_url, local_target) }
+        .to raise_error(/Retrieve cancelled\./)
     end
 
     it 'should fail if cannot read <ref>.yaml' do
       allow(File).to receive(:readable?).with("#{local_target}/#{ref}.yaml").and_return(false)
-      expect { Pkg::Retrieve.foss_only_retrieve(build_url, local_target) }.to raise_error(/Couldn't read #{ref}.yaml/)
+      expect { Pkg::Retrieve.foss_only_retrieve(build_url, local_target) }
+        .to raise_error(/Couldn't read #{ref}.yaml/)
     end
 
     it 'should retrieve foss_only packages' do
@@ -97,4 +102,3 @@ describe 'Pkg::Retrieve' do
     end
   end
 end
-

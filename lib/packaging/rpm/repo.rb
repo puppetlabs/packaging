@@ -15,7 +15,8 @@ module Pkg::Rpm::Repo
       end
 
       Pkg::Util::RakeUtils.invoke_task("pl:fetch")
-      repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}/rpm"
+      repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}" \
+                 "/#{Pkg::Config.ref}/#{target}/rpm"
       Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
         Pkg::Util::Net.rsync_to("pkg/#{target}/rpm/", Pkg::Config.distribution_server, repo_dir)
@@ -112,7 +113,7 @@ module Pkg::Rpm::Repo
       end
     end
 
-    def retrieve_repo_configs(target = "repo_configs")
+    def retrieve_repo_configs(target = 'repo_configs')
       wget = Pkg::Util::Tool.check_tool("wget")
       wget_command = "#{wget} --no-verbose --recursive --no-parent --no-host-directories " \
                      "--cut-dirs=3 --directory-prefix=pkg/#{target} --reject 'index*'"
@@ -133,11 +134,11 @@ module Pkg::Rpm::Repo
     # pl-$project-$sha.conf, and can be placed in /etc/yum.repos.d to enable
     # clients to install these packages.
     #
-    def generate_repo_configs(source = "repos", target = "repo_configs", signed = false)
+    def generate_repo_configs(source = 'repos', target = 'repo_configs', signed = false)
       # We have a hard requirement on wget because of all the download magicks
       # we have to do
       #
-      wget = Pkg::Util::Tool.check_tool("wget")
+      wget = Pkg::Util::Tool.check_tool('wget')
 
       # This is the standard path to all build artifacts on the distribution
       # server for this commit
@@ -153,7 +154,8 @@ module Pkg::Rpm::Repo
       #
       wget_command = "#{wget} --no-verbose --spider --recursive --level=5 --no-parent"
       stdout, _, _ = Pkg::Util::Execution.capture3("#{wget_command} #{repo_base} 2>&1")
-      stdout = stdout.split.uniq.reject { |x| x =~ /\?|index/ }.select { |x| x =~ /http:.*repodata\/$/ }
+      stdout = stdout.split.uniq.reject { |x| x =~ /\?|index/ }
+                 .select { |x| x =~ /http:.*repodata\/$/ }
 
       # RPMs will always exist at the same directory level as the repodata
       # folder, which means if we go up a level we should find rpms
@@ -162,7 +164,8 @@ module Pkg::Rpm::Repo
       wget_command = "#{wget} --no-verbose --spider --recursive --level=1 --no-parent"
       stdout.map { |x| x.chomp('repodata/') }.each do |url|
         output, _, _ = Pkg::Util::Execution.capture3("#{wget_command} #{url} 2>&1")
-        unless output.split.uniq.reject { |x| x =~ /\?|index/ }.select { |x| x =~ /http:.*\.rpm$/ }.empty?
+        unless output.split.uniq.reject { |x| x =~ /\?|index/ }
+                 .select { |x| x =~ /http:.*\.rpm$/ }.empty?
           yum_repos << url
         end
       end
@@ -201,13 +204,16 @@ module Pkg::Rpm::Repo
 
         # Write the new config to a file under our repo configs dir
         #
-        config_file = File.join("pkg", target, "rpm", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{platform}-#{version}-#{arch}.repo")
+        config_file = File.join(
+          "pkg", target, "rpm",
+          "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{platform}-#{version}-#{arch}.repo")
         File.open(config_file, 'w') { |f| f.puts config }
       end
-      puts "Wrote yum configuration files for #{Pkg::Config.project} at #{Pkg::Config.ref} to pkg/#{target}/rpm"
+      puts "Wrote yum configuration files for #{Pkg::Config.project} at #{Pkg::Config.ref} " \
+           "to pkg/#{target}/rpm"
     end
 
-    def create_local_repos(directory = "repos")
+    def create_local_repos(directory = 'repos')
       stdout, _, _ = Pkg::Util::Execution.capture3("bash -c '#{repo_creation_command(directory)}'")
       stdout
     end

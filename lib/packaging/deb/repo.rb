@@ -9,7 +9,7 @@ module Pkg::Deb::Repo
     # take this list and combine it with the list of supported arches for each
     # given platform to ensure a complete set of architectures. We use this
     # when we initially create the repos and when we sign the repos.
-    DEBIAN_PACKAGING_ARCHES = ['i386', 'amd64', 'arm64', 'armel', 'armhf', 'powerpc', 'ppc64el', 'sparc', 'mips', 'mipsel']
+    DEBIAN_PACKAGING_ARCHES = %w[i386 amd64 arm64 armel armhf powerpc ppc64el sparc mips mipsel]
 
     def reprepro_repo_name
       if Pkg::Config.apt_repo_name
@@ -30,10 +30,10 @@ module Pkg::Deb::Repo
     # pl-$project-$sha.list, and can be placed in /etc/apt/sources.list.d to
     # enable clients to install these packages.
     #
-    def generate_repo_configs(source = "repos", target = "repo_configs")
+    def generate_repo_configs(source = 'repos', target = 'repo_configs')
       # We use wget to obtain a directory listing of what are presumably our deb repos
       #
-      wget = Pkg::Util::Tool.check_tool("wget")
+      wget = Pkg::Util::Tool.check_tool('wget')
 
       # This is the standard path to all debian build artifact repositories on
       # the distribution server for this commit
@@ -43,15 +43,16 @@ module Pkg::Deb::Repo
       # First test if the directory even exists
       #
       begin
-        stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} --no-verbose --spider -r -l 1 --no-parent #{repo_base} 2>&1")
+        wget_command = "#{wget} --no-verbose --spider --recursive --level=1 --no-parent"
+        stdout, _, _ = Pkg::Util::Execution.capture3("#{wget_command} #{repo_base} 2>&1")
       rescue RuntimeError
         warn "No debian repos available for #{Pkg::Config.project} at #{Pkg::Config.ref}."
         return
       end
 
       # We want to exclude index and robots files and only include the http: prefixed elements
-      repo_urls = stdout.split.uniq.reject { |x| x =~ /\?|index|robots/ }.select { |x| x =~ /http:/ }.map { |x| x.chomp('/') }
-
+      repo_urls = stdout.split.uniq.reject { |x| x =~ /\?|index|robots/ }
+                    .select { |x| x =~ /http:/ }.map { |x| x.chomp('/') }
 
       # Create apt sources.list files that can be added to hosts for installing
       # these packages. We use the list of distributions to create a config
@@ -64,19 +65,25 @@ module Pkg::Deb::Repo
         platform_tag = Pkg::Paths.tag_from_artifact_path(url)
         platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
         codename = Pkg::Platforms.codename_for_platform_version(platform, version)
-        repoconfig = ["# Packages for #{Pkg::Config.project} built from ref #{Pkg::Config.ref}",
-                      "deb #{url} #{codename} #{reprepro_repo_name}"]
-        config = File.join("pkg", target, "deb", "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{codename}.list")
+        repoconfig = [
+          "# Packages for #{Pkg::Config.project} built from ref #{Pkg::Config.ref}",
+          "deb #{url} #{codename} #{reprepro_repo_name}"
+        ]
+        config = File.join('pkg', target, 'deb',
+                           "pl-#{Pkg::Config.project}-#{Pkg::Config.ref}-#{codename}.list")
         File.open(config, 'w') { |f| f.puts repoconfig }
       end
-      puts "Wrote apt repo configs for #{Pkg::Config.project} at #{Pkg::Config.ref} to pkg/#{target}/deb."
+      puts "Wrote apt repo configs for #{Pkg::Config.project} at #{Pkg::Config.ref} " \
+           "to pkg/#{target}/deb."
     end
 
-    def retrieve_repo_configs(target = "repo_configs")
-      wget = Pkg::Util::Tool.check_tool("wget")
+    def retrieve_repo_configs(target = 'repo_configs')
+      wget = Pkg::Util::Tool.check_tool('wget')
       FileUtils.mkdir_p("pkg/#{target}")
       config_url = "#{base_url}/#{target}/deb/"
-      stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} --no-verbose -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
+      wget_command = "#{wget} --no-verbose --recursive --no-parent --no-host-directories " \
+                     "--cut-dirs=3 --directory-prefix=pkg/#{target} --reject 'index*'"
+      stdout, _, _ = Pkg::Util::Execution.capture3("#{wget_command} #{config_url}")
       stdout
     rescue => e
       fail "Couldn't retrieve deb apt repo configs.\n#{e}"
@@ -119,8 +126,13 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
 
     # This method is doing too much for its name
     def create_repos(directory = 'repos')
-      artifact_directory = File.join(Pkg::Config.jenkins_repo_path, Pkg::Config.project, Pkg::Config.ref)
-      artifact_paths = Pkg::Repo.directories_that_contain_packages(File.join(artifact_directory, 'artifacts'), 'deb')
+      artifact_directory = File.join(
+        Pkg::Config.jenkins_repo_path,
+        Pkg::Config.project,
+        Pkg::Config.ref)
+      artifact_paths = Pkg::Repo.directories_that_contain_packages(
+        File.join(artifact_directory, 'artifacts'),
+        'deb')
       Pkg::Repo.populate_repo_directory(artifact_directory)
       command = repo_creation_command(File.join(artifact_directory, 'repos'), artifact_paths)
 
@@ -134,7 +146,9 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
         Pkg::Deb::Repo.ship_repo_configs
       ensure
         # Always remove the lock file, even if we've failed
-        Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, "rm -f #{artifact_directory}/repos/.lock")
+        Pkg::Util::Net.remote_execute(
+          Pkg::Config.distribution_server,
+          "rm -f #{artifact_directory}/repos/.lock")
       end
     end
 
@@ -145,7 +159,8 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
       end
 
       Pkg::Util::RakeUtils.invoke_task("pl:fetch")
-      repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}/deb"
+      repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}" \
+                 "/#{Pkg::Config.ref}/#{target}/deb"
       Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
       Pkg::Util::Execution.retry_on_fail(:times => 3) do
         Pkg::Util::Net.rsync_to("pkg/#{target}/deb/", Pkg::Config.distribution_server, repo_dir)
@@ -178,7 +193,8 @@ Description: #{message} for #{dist}
 SignWith: #{Pkg::Config.gpg_key}"
           end
 
-          stdout, _, _ = Pkg::Util::Execution.capture3("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
+          reprepro_command = "#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export"
+          stdout, _, _ = Pkg::Util::Execution.capture3(reprepro_command)
           stdout
         end
       end
@@ -259,6 +275,5 @@ SignWith: #{Pkg::Config.gpg_key}"
         Pkg::Util::Net.remote_execute(destination_server, cp_command)
       end
     end
-
   end
 end

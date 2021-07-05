@@ -39,23 +39,24 @@ end
 
 def create_default_gem_spec
   spec = Gem::Specification.new do |s|
-    s.name = Pkg::Config.project                                     unless Pkg::Config.project.nil?
-    s.name = Pkg::Config.gem_name                                    unless Pkg::Config.gem_name.nil?
-    s.version = Pkg::Config.gemversion                               unless Pkg::Config.gemversion.nil?
-    s.author = Pkg::Config.author                                    unless Pkg::Config.author.nil?
-    s.email = Pkg::Config.email                                      unless Pkg::Config.email.nil?
-    s.homepage = Pkg::Config.homepage                                unless Pkg::Config.homepage.nil?
-    s.summary = Pkg::Config.summary                                  unless Pkg::Config.summary.nil?
-    s.summary = Pkg::Config.gem_summary                              unless Pkg::Config.gem_summary.nil?
-    s.description = Pkg::Config.description                          unless Pkg::Config.description.nil?
-    s.description = Pkg::Config.gem_description                      unless Pkg::Config.gem_description.nil?
-    s.files = glob_gem_files                                         unless glob_gem_files.nil?
-    s.executables = Pkg::Config.gem_executables                      unless Pkg::Config.gem_executables.nil?
-    s.require_path = Pkg::Config.gem_require_path                    unless Pkg::Config.gem_require_path.nil?
-    s.required_ruby_version = Pkg::Config.gem_required_ruby_version  unless Pkg::Config.gem_required_ruby_version.nil?
+    s.name = Pkg::Config.project                                            unless Pkg::Config.project.nil?
+    s.name = Pkg::Config.gem_name                                           unless Pkg::Config.gem_name.nil?
+    s.version = Pkg::Config.gemversion                                      unless Pkg::Config.gemversion.nil?
+    s.author = Pkg::Config.author                                           unless Pkg::Config.author.nil?
+    s.email = Pkg::Config.email                                             unless Pkg::Config.email.nil?
+    s.homepage = Pkg::Config.homepage                                       unless Pkg::Config.homepage.nil?
+    s.summary = Pkg::Config.summary                                         unless Pkg::Config.summary.nil?
+    s.summary = Pkg::Config.gem_summary                                     unless Pkg::Config.gem_summary.nil?
+    s.description = Pkg::Config.description                                 unless Pkg::Config.description.nil?
+    s.description = Pkg::Config.gem_description                             unless Pkg::Config.gem_description.nil?
+    s.files = glob_gem_files                                                unless glob_gem_files.nil?
+    s.executables = Pkg::Config.gem_executables                             unless Pkg::Config.gem_executables.nil?
+    s.require_path = Pkg::Config.gem_require_path                           unless Pkg::Config.gem_require_path.nil?
+    s.required_ruby_version = Pkg::Config.gem_required_ruby_version         unless Pkg::Config.gem_required_ruby_version.nil?
     s.required_rubygems_version = Pkg::Config.gem_required_rubygems_version unless Pkg::Config.gem_required_rubygems_version.nil?
-    s.test_files = FileList[Pkg::Config.gem_test_files.split(' ')]   unless Pkg::Config.gem_test_files.nil?
-    s.rubyforge_project = Pkg::Config.gem_forge_project              unless Pkg::Config.gem_forge_project.nil?
+    s.test_files = FileList[Pkg::Config.gem_test_files.split(' ')]          unless Pkg::Config.gem_test_files.nil?
+    s.license = Pkg::Config.gem_license                                     unless Pkg::Config.gem_license.nil?
+    s.rubyforge_project = Pkg::Config.gem_forge_project                     unless Pkg::Config.gem_forge_project.nil?
     Pkg::Config.gem_rdoc_options.each do |option|
       s.rdoc_options << option
     end unless Pkg::Config.gem_rdoc_options.nil?

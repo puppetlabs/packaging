@@ -52,6 +52,7 @@ describe "Pkg::Config" do
                   :gem_files,
                   :gem_forge_project,
                   :gem_host,
+                  :gem_license,
                   :gem_name,
                   :gem_path,
                   :gem_platform_dependencies,

@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- Add macOS 11 arm64 to platforms hash
 
 ## [0.99.78] - 2021-06-21
 ### Added

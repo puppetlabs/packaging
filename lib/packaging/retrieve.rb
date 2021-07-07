@@ -4,13 +4,15 @@ module Pkg::Retrieve
   # --no-parent = Only descend when recursing, never ascend
   # --no-host-directories = Discard http://#{Pkg::Config.builds_server} when saving to disk
   # --level=0 = infinitely recurse, no limit
-  # --cut-dirs 3 = will cut off #{Pkg::Config.project}, #{Pkg::Config.ref}, and the first directory in #{remote_target} from the url when saving to disk
+  # --cut-dirs 3 = will cut off #{Pkg::Config.project},
+  #   #{Pkg::Config.ref}, and the first directory in #{remote_target}
+  #   from the url when saving to disk
   # --directory-prefix = where to save to disk (defaults to ./)
   # --reject = Reject all hits that match the supplied regex
 
   def default_wget_command(local_target, url, additional_options = {})
     default_options = {
-      'quiet' => true,
+      'no-verbose' => true,
       'recursive' => true,
       'no-parent' => true,
       'no-host-directories' => true,
@@ -20,8 +22,8 @@ module Pkg::Retrieve
       'reject' => "'index*'",
     }
     options = default_options.merge(additional_options)
-    wget = Pkg::Util::Tool.check_tool('wget')
-    wget_command = wget
+    wget_command = Pkg::Util::Tool.check_tool('wget')
+
     options.each do |option, value|
       next unless value
       if value.is_a?(TrueClass)
@@ -39,37 +41,43 @@ module Pkg::Retrieve
   # your string (e.g. {'reject' => "'index*'"}).
   def default_wget(local_target, url, additional_options = {})
     wget_command = default_wget_command(local_target, url, additional_options)
-    puts "Executing #{wget_command} . . ."
+    puts "Executing #{wget_command}"
     %x(#{wget_command})
   end
 
   # This will always retrieve from under the 'artifacts' directory
   def foss_only_retrieve(build_url, local_target)
     unless Pkg::Config.foss_platforms
-      fail "FOSS_ONLY specified, but I don't know anything about FOSS_PLATFORMS. Retrieve cancelled."
+      fail "FOSS_ONLY specified, but 'foss_platforms' are not configured. Retrieve cancelled."
     end
     default_wget(local_target, "#{build_url}/", { 'level' => 1 })
     yaml_path = File.join(local_target, "#{Pkg::Config.ref}.yaml")
     unless File.readable?(yaml_path)
-      fail "Couldn't read #{Pkg::Config.ref}.yaml, which is necessary for FOSS_ONLY. Retrieve cancelled."
+      fail "Couldn't read #{Pkg::Config.ref}.yaml, which is necessary for FOSS_ONLY. " \
+           "Retrieve cancelled."
     end
     platform_data = Pkg::Util::Serialization.load_yaml(yaml_path)[:platform_data]
     platform_data.each do |platform, paths|
       path_to_retrieve = File.dirname(paths[:artifact])
-      default_wget(local_target, "#{build_url}/#{path_to_retrieve}/") if Pkg::Config.foss_platforms.include?(platform)
+      if Pkg::Config.foss_platforms.include?(platform)
+        default_wget(local_target, "#{build_url}/#{path_to_retrieve}/")
+      end
     end
   end
 
   def retrieve_all(build_url, rsync_path, local_target)
-    if Pkg::Util::Tool.find_tool("wget")
-      default_wget(local_target, "#{build_url}/")
-    else
-      warn "Could not find `wget` tool. Falling back to rsyncing from #{Pkg::Config.distribution_server}."
+    unless Pkg::Util::Tool.find_tool("wget")
+      warn "Could not find `wget` tool. Falling back to rsyncing " \
+           "from #{Pkg::Config.distribution_server}."
       begin
-        Pkg::Util::Net.rsync_from("#{rsync_path}/", Pkg::Config.distribution_server, "#{local_target}/")
+        Pkg::Util::Net.rsync_from(
+          "#{rsync_path}/", Pkg::Config.distribution_server, "#{local_target}/")
       rescue => e
         fail "Couldn't rsync packages from distribution server.\n#{e}"
       end
+      return
     end
+
+    default_wget(local_target, "#{build_url}/")
   end
 end

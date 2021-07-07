@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (RE-14078) Make output from 'wget' calls more consistent.
 
 ## [0.99.78] - 2021-06-21
 ### Added

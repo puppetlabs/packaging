@@ -4,22 +4,24 @@ module Pkg::Util
   require 'benchmark'
   require 'base64'
   require 'io/console'
+
+  require 'packaging/util/os'
+  require 'packaging/util/tool'
+  require 'packaging/util/version'
+
   require 'packaging/util/date'
   require 'packaging/util/execution'
   require 'packaging/util/file'
   require 'packaging/util/git'
+  require 'packaging/util/git_tags'
   require 'packaging/util/gpg'
   require 'packaging/util/jenkins'
   require 'packaging/util/misc'
   require 'packaging/util/net'
-  require 'packaging/util/os'
   require 'packaging/util/platform'
+  require 'packaging/util/rake_utils'
   require 'packaging/util/serialization'
   require 'packaging/util/ship'
-  require 'packaging/util/tool'
-  require 'packaging/util/rake_utils'
-  require 'packaging/util/version'
-  require 'packaging/util/git_tags'
 
   def self.boolean_value(var)
     return true if var == true || ( var.is_a?(String) && ( var.downcase == 'true' || var.downcase =~ /^y$|^yes$/))

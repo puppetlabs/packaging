@@ -250,9 +250,9 @@ describe "Pkg::Util::Net" do
 
   describe "#print_url_info" do
     it "should output correct formatting" do
-      Pkg::Util::Net.should_receive(:puts).with("\n////////////////////////////////////////////////////////////////////////////////\n\n
-  Build submitted. To view your build progress, go to\n#{target_uri}\n\n
-////////////////////////////////////////////////////////////////////////////////\n\n")
+      Pkg::Util::Net.should_receive(:puts).with("\n#{'/' * 80}\n\n" \
+           "Build submitted. To view your build progress, go to\nhttp://google.com\n\n" \
+           "#{'/' * 80}\n\n")
       Pkg::Util::Net.print_url_info(target_uri)
     end
   end

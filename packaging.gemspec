@@ -17,9 +17,9 @@ Gem::Specification.new do |gem|
 
   gem.add_development_dependency('rspec', ['~> 2.14.1'])
   gem.add_development_dependency('rubocop', ['~> 0.24.1'])
-  gem.add_development_dependency('pry')
+  gem.add_development_dependency('pry-byebug')
   gem.add_runtime_dependency('rake', ['>= 12.3'])
-  gem.add_runtime_dependency('artifactory', ['~> 2'])
+  gem.add_runtime_dependency('artifactory', ['~> 3'])
   gem.add_runtime_dependency('release-metrics')
   gem.add_runtime_dependency('csv', ['3.1.5'])
   gem.require_path = 'lib'

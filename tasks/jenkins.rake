@@ -249,6 +249,43 @@ namespace :pl do
       end
     end
 
+    task :exg_debug_uber_ship_lite => "pl:fetch" do
+      debug_host = ENV['DEBUG_SHIP_HOST']
+      if debug_host.to_s.empty?
+        puts "set DEBUG_SHIP_HOST to a vmpooler machine."
+        puts "Install rsync"
+        puts "groupadd release"
+        exit 1
+      end
+      Pkg::Config.staging_server = debug_host
+      Pkg::Config.apt_staging_server = debug_host
+      Pkg::Config.apt_signing_server = debug_host
+      Pkg::Config.dmg_staging_server = debug_host
+      Pkg::Config.msi_staging_server = debug_host
+      Pkg::Config.staging_server = debug_host
+      Pkg::Config.swix_staging_server = debug_host
+      Pkg::Config.tar_staging_server = debug_host
+      Pkg::Config.yum_staging_server = debug_host
+
+      tasks = %w(
+        jenkins:retrieve
+        ship_rpms
+        ship_debs
+        ship_dmg
+        ship_swix
+        ship_tar
+        ship_msi
+        ship_gem
+      )
+      tasks.map { |t| "pl:#{t}" }.each do |t|
+        puts "Info: Running #{t}:"
+        Rake::Task[t].invoke
+      end
+      # mark the build as successfully shipped
+      Rake::Task["pl:jenkins:ship"].invoke("shipped")
+    end
+    task :exglite => :exg_debug_uber_ship_lite
+
     task :uber_ship_lite => "pl:fetch" do
       tasks = %w(
         jenkins:retrieve
@@ -262,7 +299,7 @@ namespace :pl do
         ship_gem
       )
       tasks.map { |t| "pl:#{t}" }.each do |t|
-        puts "Running #{t} . . ."
+        puts "Info: Running #{t}:"
         Rake::Task[t].invoke
       end
       # mark the build as successfully shipped
@@ -286,7 +323,7 @@ namespace :pl do
         ship_nightly_msi
       )
       tasks.map { |t| "pl:#{t}" }.each do |t|
-        puts "Running #{t} . . ."
+        puts "Running #{t}"
         Rake::Task[t].invoke
       end
     end

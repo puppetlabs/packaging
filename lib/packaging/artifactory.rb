@@ -17,7 +17,9 @@ module Pkg
     # uses to tell it to not clean a particular artifact
     ARTIFACTORY_CLEANUP_SKIP_PROPERTY = 'cleanup.skip'
 
-    DEFAULT_REPO_TYPE = 'generic'
+    DEFAULT_ARTIFACTORY_SERVER = 'https://artifactory.delivery.puppetlabs.net/artifactory'
+
+    DEFAULT_REPO = 'generic'
     DEFAULT_REPO_BASE = 'development'
 
     # @param project [String] The name of the project this package is for
@@ -31,7 +33,7 @@ module Pkg
     # @option :repo_base [String] The base of all repos, set for consistency.
     #   This currently defaults to 'development'
     def initialize(project, project_version, opts = {})
-      @artifactory_uri = opts[:artifactory_uri] || 'https://artifactory.delivery.puppetlabs.net/artifactory'
+      @artifactory_uri = opts[:artifactory_uri] || DEFAULT_ARTIFACTORY_SERVER
       @repo_base = opts[:repo_base] || DEFAULT_REPO_BASE
 
       @project = project
@@ -40,19 +42,25 @@ module Pkg
       Artifactory.endpoint = @artifactory_uri
     end
 
-    # @param platform_tag [String] The platform tag string for the repo we need
+    attr_reader :repo_base
+    attr_reader :project
+    attr_reader :project_version
+
+
+    # @param platform_tag [String] The platform tag string ('<platform>-<version>' or
+    #   '<platform>-<version>-<arch>') for the repo we need
     #   information on. If generic information is needed, pass in `generic`
-    # @return [Array] An array containing three items, first being the main repo
-    #   name for the platform_tag, the second being the subdirectories of the
-    #   repo leading to the artifact we want to install, and the third being the
-    #   alternate subdirectories for a given repo. This last option is only
-    #   currently used for debian platforms, where the path to the repo
+    # @return [Array] An array containing three items:
+    #   0: the main repo name for the platform_tag
+    #   1: the subdirectories of the epo leading to the artifact we want to install
+    #   2: the alternate subdirectories for a given repo
+    #   The last element is only used for debian platforms, where the path to the repo
     #   specified in the list file is different than the full path to the repo.
     def location_for(platform_tag)
-      toplevel_repo = DEFAULT_REPO_TYPE
+      toplevel_repo = DEFAULT_REPO
       repo_subdirectories = File.join(@repo_base, @project, @project_version)
 
-      unless platform_tag == DEFAULT_REPO_TYPE
+      unless platform_tag == DEFAULT_REPO
         format = Pkg::Platforms.package_format_for_tag(platform_tag)
         platform, version, architecture = Pkg::Platforms.parse_platform_tag(platform_tag)
       end
@@ -60,12 +68,14 @@ module Pkg
       case format
       when 'rpm'
         toplevel_repo = 'rpm'
-        repo_subdirectories = File.join(repo_subdirectories, "#{platform}-#{version}-#{architecture}")
+        repo_subdirectories = File.join(
+          repo_subdirectories, "#{platform}-#{version}-#{architecture}")
       when 'deb'
         toplevel_repo = 'debian__local'
         repo_subdirectories = File.join(repo_subdirectories, "#{platform}-#{version}")
       when 'swix', 'dmg', 'svr4', 'ips'
-        repo_subdirectories = File.join(repo_subdirectories, "#{platform}-#{version}-#{architecture}")
+        repo_subdirectories = File.join(
+          repo_subdirectories, "#{platform}-#{version}-#{architecture}")
       when 'msi'
         repo_subdirectories = File.join(repo_subdirectories, "#{platform}-#{architecture}")
       end
@@ -77,7 +87,7 @@ module Pkg
     #   we need. If only the generic information is needed, pass in `generic`
     # @return [Hash] Returns a hash of data specific to this platform tag
     def platform_specific_data(platform_tag)
-      unless platform_tag == DEFAULT_REPO_TYPE
+      unless platform_tag == 'generic'
         platform, version, architecture = Pkg::Platforms.parse_platform_tag(platform_tag)
         package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
         if package_format == 'deb'
@@ -107,9 +117,11 @@ module Pkg
     def deb_list_contents(platform_tag)
       data = platform_specific_data(platform_tag)
       if data[:package_format] == 'deb'
-        return "deb #{@artifactory_uri}/#{data[:repo_name]} #{data[:codename]} #{data[:repo_subdirectories]}"
+        return format("deb %s/%s %s %s", @artifactory_uri, data[:repo_name],
+                       data[:codename], data[:repo_subdirectories])
+
       end
-      raise "The platform '#{platform_tag}' is not an apt-based system."
+      raise "Error: the platform '#{platform_tag}' is not an apt-based system."
     end
 
     # @param platform_tag [String] The platform to generate the repo file
@@ -136,21 +148,22 @@ module Pkg
     # Verify the correct environment variables are set in order to process
     # authorization to access the artifactory repos
     def check_authorization
-      unless (ENV['ARTIFACTORY_USERNAME'] && ENV['ARTIFACTORY_PASSWORD']) || ENV['ARTIFACTORY_API_KEY']
+      unless (ENV['ARTIFACTORY_USERNAME'] && ENV['ARTIFACTORY_PASSWORD']) ||
+             ENV['ARTIFACTORY_API_KEY']
         raise <<-DOC
-  Unable to determine credentials for Artifactory. Please set one of the
-  following environment variables:
+  Unable to determine credentials for Artifactory.
 
-  For basic authentication, please set:
+  For basic authentication, set:
   ARTIFACTORY_USERNAME
   ARTIFACTORY_PASSWORD
 
   If you would like to use the API key, ensure ARTIFACTORY_USERNAME and
-  ARTIFACTORY_PASSWORD are not set, as these take precedence. Instead, please
-  set:
+  ARTIFACTORY_PASSWORD are NOT set, as they take precedence.
+
+  Then set:
   ARTIFACTORY_API_KEY
 
-  You can also set the path to a pem file with your custom certificates with:
+  You can also set the path to a pem file with certificates using:
   ARTIFACTORY_SSL_PEM_FILE
         DOC
       end
@@ -194,38 +207,71 @@ module Pkg
       properties_hash
     end
 
-    # Basic method to check if a package exists on artifactory
-    # @param package [String] The full relative path to the package to be
-    #   checked, relative from the current working directory
-    # Return true if package already exists on artifactory
+    # Search for a package exists on artifactory
+    # @param package [String] name of the package to locate. Any leading directory information
+    #  is discarded. So: "/a/b/c/foo" will search just for artifacts named "foo"
+    # @return [Array] Artifactory search for packages named with the basename of the package.
     def package_exists_on_artifactory?(package)
       check_authorization
-      artifact = Artifactory::Resource::Artifact.search(name: File.basename(package), :artifactory_uri => @artifactory_uri)
-      if artifact.empty?
-        return false
-      else
-        return true
-      end
+      found_artifacts = Artifactory::Resource::Artifact.search(
+        name: File.basename(package),
+        artifactory_uri: @artifactory_uri
+      )
+      return false if found_artifacts.empty?
+
+      return found_artifacts
+    end
+
+    # Check if an artifact exists in the current repo_base
+    # @param artifact_path [String] path to artifact inside the repo
+    # @return [Hash] A hash with the artifact data
+    # @return false when the artifact is not found.
+    #
+    # The entire artifact_path is considered. If "x/y/foo" exists but "a/b/foo"
+    # does not, the search for "a/b/foo" will return false.
+    def artifact_exist?(artifact_path)
+      repo = DEFAULT_REPO
+      # Normalize path to not have leading '/'
+      artifact_path.delete_prefix!('/')
+
+      artifactory_api = '/api/storage'
+      artifact_root = "#{repo}/#{@repo_base}/#{@project}/#{@project_version}"
+      Artifactory.get("#{artifactory_api}/#{artifact_root}/#{artifact_path}")
+
+      # Artifactory.get will throw Artifactory::Error::HTTPError if it fails
+    rescue Artifactory::Error::HTTPError
+      return false
+    end
+
+    # @param local_archive_path [String] The path of the archive to be shipped.
+    def deploy_archive(local_archive_path)
+      artifact = Artifactory::Resource::Artifact.new(local_path: local_archive_path)
+      repo = DEFAULT_REPO
+      local_archive_filename = File.basename(local_archive_path)
+      remote_target_directory = File.join(@repo_base, @project, @project_version)
+      remote_target_path = File.join(remote_target_directory, local_archive_filename)
+      puts "Info: Uploading '#{local_archive_path}' to artifactory:/#{repo}/#{remote_target_path}"
+      artifact.upload_from_archive(repo, remote_target_path)
     end
 
     # @param package [String] The full relative path to the package to be
     #   shipped, relative from the current working directory
     def deploy_package(package)
-      platform_tag = Pkg::Paths.tag_from_artifact_path(package) || DEFAULT_REPO_TYPE
+      platform_tag = Pkg::Paths.tag_from_artifact_path(package) || DEFAULT_REPO
       data = platform_specific_data(platform_tag)
 
       check_authorization
       artifact = Artifactory::Resource::Artifact.new(local_path: package)
       artifact_md5 = Digest::MD5.file(package).hexdigest
       headers = { "X-Checksum-Md5" => artifact_md5 }
+      remote_path = File.join(data[:repo_subdirectories], File.basename(package))
+      puts "Info: Uploading '#{package}' to artifactory:/#{data[:repo_name]}/#{remote_path}"
       artifact.upload(
         data[:repo_name],
-        File.join(data[:repo_subdirectories], File.basename(package)),
+        remote_path,
         deploy_properties(platform_tag, File.basename(package)),
         headers
       )
-    rescue
-      raise "Attempt to upload '#{package}' to #{File.join(@artifactory_uri, data[:full_artifactory_path])} failed"
     end
 
     # @param pkg [String] The package to download YAML for
@@ -234,10 +280,8 @@ module Pkg
     #
     # @return [String] The contents of the YAML file
     def retrieve_yaml_data(pkg, ref)
-      yaml_url = "#{@artifactory_uri}/#{DEFAULT_REPO_TYPE}/#{DEFAULT_REPO_BASE}/#{pkg}/#{ref}/#{ref}.yaml"
+      yaml_url = "#{@artifactory_uri}/#{DEFAULT_REPO}/#{DEFAULT_REPO_BASE}/#{pkg}/#{ref}/#{ref}.yaml"
       open(yaml_url) { |f| f.read }
-    rescue
-      raise "Failed to load YAML data for #{pkg} at #{ref} from #{yaml_url}!"
     end
 
     # @param platform_data [Hash] The hash of the platform data that needs to be
@@ -318,7 +362,8 @@ module Pkg
           promotion_path = "debian_#{repository}/#{platform_tag}/#{artifact_name}"
           properties = { 'deb.component' => debian_component } unless debian_component.nil?
         else
-          raise "Error: Unknown promotion repository for #{artifact_name}! Only .rpm and .deb files are supported!"
+          raise "Error: Unknown promotion repository for #{artifact_name}. " \
+                "Only .rpm and .deb files are supported."
         end
 
         begin
@@ -326,8 +371,12 @@ module Pkg
           puts "promoting #{artifact_name} from #{source_path} to #{promotion_path}"
           artifact_to_promote.copy(promotion_path)
           unless properties.nil?
-            artifacts = Artifactory::Resource::Artifact.search(name: artifact_name, :artifactory_uri => @artifactory_uri)
-            promoted_artifact = artifacts.select { |artifact| artifact.download_uri =~ %r{#{promotion_path}} }.first
+            artifacts = Artifactory::Resource::Artifact.search(
+              name: artifact_name,
+              artifactory:  @artifactory_uri)
+            promoted_artifact = artifacts.select do |artifact|
+              artifact.download_uri =~ %r{#{promotion_path}}
+            end.first
             promoted_artifact.properties(properties)
           end
         rescue Artifactory::Error::HTTPError => e
@@ -344,43 +393,63 @@ module Pkg
       end
     end
 
-    # Using the manifest provided by enterprise-dist, grab the appropropriate packages from artifactory based on md5sum
+    # Using the manifest provided by enterprise-dist, grab the
+    # appropropriate packages from artifactory based on md5sum
     # @param staging_directory [String] location to download packages to
-    # @param manifest [File] JSON file containing information about what packages to download and the corresponding md5sums
+    # @param manifest [File] JSON file containing information about what packages to download
+    #        and the corresponding md5sums
     # @param remote_path [String] Optional partial path on the remote host containing packages
     #        Used to specify which subdirectories packages will be downloaded from.
+
     def download_packages(staging_directory, manifest, remote_path = '')
       check_authorization
       manifest.each do |dist, packages|
         puts "Grabbing the #{dist} packages from artifactory"
         packages.each do |name, info|
           filename = info['filename']
-          artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"], name: filename)
-          artifact_to_download = artifacts.select { |artifact| artifact.download_uri.include? remote_path }.first
-          # If we found matching artifacts, but not in the correct path, copy the artifact to the correct path
-          # This should help us keep repos up to date with the packages we are expecting to be there
-          # while helping us avoid 'what the hell, could not find package' errors
+          artifacts = Artifactory::Resource::Artifact.checksum_search(
+            md5: "#{info["md5"]}",
+            repos: ["rpm_enterprise__local", "debian_enterprise__local"],
+            name: filename)
+          artifact_to_download = artifacts.select do |artifact|
+            artifact.download_uri.include? remote_path
+          end.first
+
+          # If we found matching artifacts, but not in the correct
+          # path, copy the artifact to the correct path This should
+          # help us keep repos up to date with the packages we are
+          # expecting to be there while helping us avoid 'what the
+          # hell, could not find package' errors
+
           if artifact_to_download.nil? && !artifacts.empty?
             artifact_to_copy = artifacts.first
-            copy_artifact(artifact_to_copy, artifact_to_copy.repo, "#{remote_path}/#{dist}/#{filename}")
-            artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"], name: filename)
-            artifact_to_download = artifacts.select { |artifact| artifact.download_uri.include? remote_path }.first
+            copy_artifact(artifact_to_copy, artifact_to_copy.repo,
+                          "#{remote_path}/#{dist}/#{filename}")
+            artifacts = Artifactory::Resource::Artifact.checksum_search(
+              md5: "#{info["md5"]}",
+              repos: ["rpm_enterprise__local", "debian_enterprise__local"],
+              name: filename)
+            artifact_to_download = artifacts.select do |artifact|
+              artifact.download_uri.include? remote_path
+            end.first
           end
 
           if artifact_to_download.nil?
-            message = "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]}"
+            message = "Error: could not find package #{filename} with md5sum #{info["md5"]}"
             unless remote_path.empty?
               message += " in #{remote_path}"
             end
             raise message
-          else
-            full_staging_path = "#{staging_directory}/#{dist}"
-            puts "downloading #{artifact_to_download.download_uri} to #{File.join(full_staging_path, filename)}"
-            artifact_to_download.download(full_staging_path, filename: filename)
           end
+
+          full_staging_path = "#{staging_directory}/#{dist}"
+          puts "Info: downloading #{artifact_to_download.download_uri} to " \
+               "#{File.join(full_staging_path, filename)}"
+          artifact_to_download.download(full_staging_path, filename: filename)
         end
       end
     end
+
 
     # Ship PE tarballs to specified artifactory repo and paths
     # @param local_tarball_directory [String] the local directory containing the tarballs
@@ -423,7 +492,8 @@ module Pkg
         puts "Uploading #{local_path} to #{target_repo}/#{full_upload_path} . . ."
         artifact.upload(target_repo, full_upload_path, properties, headers)
       rescue Artifactory::Error::HTTPError => e
-        fail "Error: Upload failed. Ensure path #{target_path} exists in the #{target_repo} repository."
+        fail "Error: Upload failed: #{e}\n" \
+             "Ensure path #{target_path} exists in the #{target_repo} repository."
       end
     end
 
@@ -502,7 +572,8 @@ module Pkg
     # @param local_path [String] local path to download tarballs to
     def download_final_pe_tarballs(pe_version, repo, remote_path, local_path)
       check_authorization
-      artifacts = Artifactory::Resource::Artifact.search(name: pe_version, repos: repo, exact_match: false)
+      artifacts = Artifactory::Resource::Artifact.search(
+        name: pe_version, repos: repo, exact_match: false)
       artifacts.each do |artifact|
         next unless artifact.download_uri.include? remote_path
         next if artifact.download_uri.include? "-rc"
@@ -531,14 +602,15 @@ module Pkg
     # @param target_path [String] path copy tarballs to, assumes same repo
     def copy_final_pe_tarballs(pe_version, repo, remote_path, target_path)
       check_authorization
-      final_tarballs = Artifactory::Resource::Artifact.search(name: pe_version, repos: repo, exact_match: false)
+      final_tarballs = Artifactory::Resource::Artifact.search(
+        name: pe_version, repos: repo, exact_match: false)
       final_tarballs.each do |artifact|
         next unless artifact.download_uri.include? remote_path
         next if artifact.download_uri.include? "-rc"
         filename = File.basename(artifact.download_uri)
         # Artifactory does NOT like when you use `File.join`, so let's concatenate!
         full_target_path = "#{repo}/#{target_path}/#{filename}"
-        puts "INFO: Copying #{filename} to #{full_target_path} . . ."
+        puts "Info: Copying #{filename} to #{full_target_path}"
         artifact.copy(full_target_path)
       end
     end
@@ -557,75 +629,94 @@ module Pkg
       begin
         artifact.copy(artifactory_target_path)
       rescue Artifactory::Error::HTTPError
-        STDERR.puts "Could not copy #{artifactory_target_path}. Source and destination are the same. Skipping..."
+        STDERR.puts "Warning: Could not copy #{artifactory_target_path}. "\
+                    "Source and destination are the same. Skipping."
       end
 
       if File.extname(filename) == '.deb'
         target_debian_component ||= Pkg::Paths.debian_component_from_path(target_path)
         copied_artifact_search = search_with_path(filename, target_repo, target_path)
-        fail "Error: what the hell, could not find just-copied package #{filename} under #{target_repo}/#{target_path}" if copied_artifact_search.empty?
+
+        if copied_artifact_search.empty?
+          fail "Error: could not find just-copied package #{filename}" \
+               "under #{target_repo}/#{target_path}"
+        end
         copied_artifact = copied_artifact_search.first
         properties = { 'deb.component' => target_debian_component }
         copied_artifact.properties(properties)
       end
-     end
+    end
 
-    # When we cut a new PE branch, we need to copy the pe components into <pe_version>/{repos,feature,release}/<platform>
-    # @param manifest [File] JSON file containing information about what packages to download and the corresponding md5sums
-    # @param target_path [String] path on artifactory to copy components to, e.g. <pe_version>/release
+    # When we cut a new PE branch, we need to copy the pe components
+    # into <pe_version>/{repos,feature,release}/<platform>
+    # @param manifest [File] JSON file containing information about
+    #   what packages to download and the corresponding md5sums
+    # @param target_path [String] path on artifactory to copy
+    #   components to, e.g. <pe_version>/release
+
     def populate_pe_repos(manifest, target_path)
       check_authorization
       manifest.each do |dist, packages|
         puts "Copying #{dist} packages..."
         packages.each do |name, info|
           filename = info["filename"]
-          artifact = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"], name: filename).first
+          artifact = Artifactory::Resource::Artifact.checksum_search(
+            md5: "#{info["md5"]}",
+            repos: ["rpm_enterprise__local", "debian_enterprise__local"],
+            name: filename).first
           if artifact.nil?
-            raise "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]}"
+            raise "Error: could not find package #{filename} with md5sum #{info["md5"]}"
           end
           copy_artifact(artifact, artifact.repo, "#{target_path}/#{dist}/#{filename}")
         end
       end
     end
 
-    # Remove all artifacts in repo based on pattern, used when we purge all artifacts in release/ after PE release
+    # Remove all artifacts in repo based on pattern, used when we
+    # purge all artifacts in release/ after PE release
     # @param repos [Array] repos that we want to search for artifacts in
     # @param pattern [String] pattern for artifacts that should be deleted ex. `2019.1/release/*/*`
+
     def teardown_repo(repos, pattern)
       check_authorization
       repos.each do |repo|
         artifacts = Artifactory::Resource::Artifact.pattern_search(repo: repo, pattern: pattern)
         artifacts.each do |artifact|
-          puts "Deleting #{artifact.download_uri}"
+          puts "Info: deleting #{artifact.download_uri}"
           artifact.delete
         end
       end
     end
 
     # Remove promoted artifacts if promotion is reverted, use information provided in manifest
-    # @param manifest [File] JSON file containing information about what packages to download and the corresponding md5sums
+    # @param manifest [File] JSON file containing information about
+    #   what packages to download and the corresponding md5sums
     # @param remote_path [String] path on artifactory to promoted packages ex. 2019.1/repos/
     # @param package [String] package name ex. puppet-agent
     # @param repos [Array] the repos the promoted artifacts live
+
     def remove_promoted_packages(manifest, remote_path, package, repos)
       check_authorization
       manifest.each do |dist, packages|
         packages.each do |package_name, info|
           next unless package_name == package
           filename = info["filename"]
-          artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: repos, name: filename)
+          artifacts = Artifactory::Resource::Artifact.checksum_search(
+            md5: "#{info["md5"]}", repos: repos, name: filename)
           artifacts.each do |artifact|
             next unless artifact.download_uri.include? remote_path
-            puts "Removing reverted package #{artifact.download_uri}"
+            puts "Info: removing reverted package #{artifact.download_uri}"
             artifact.delete
           end
         end
       end
     end
 
-    # Remove shipped PE tarballs from artifactory
-    # Used when compose fails, we only want the tarball shipped to artifactory if all platforms succeed
-    # Identify which packages were created and shipped based on md5sum and remove them
+    # Remove shipped PE tarballs from artifactory Used when compose
+    # fails, we only want the tarball shipped to artifactory if all
+    # platforms succeed Identify which packages were created and
+    # shipped based on md5sum and remove them
+    #
     # @param tarball_path [String] the local path to the tarballs that were shipped
     # @param pe_repo [String] the artifactory repo the tarballs were shipped to
     def purge_copied_pe_tarballs(tarball_path, pe_repo)
@@ -633,15 +724,17 @@ module Pkg
       Dir.foreach("#{tarball_path}/") do |pe_tarball|
         next if pe_tarball == '.' || pe_tarball == ".."
         md5 = Digest::MD5.file("#{tarball_path}/#{pe_tarball}").hexdigest
-        artifacts_to_delete = Artifactory::Resource::Artifact.checksum_search(md5: md5, repos: pe_repo, name: pe_tarball)
+        artifacts_to_delete = Artifactory::Resource::Artifact.checksum_search(
+          md5: md5, repos: pe_repo, name: pe_tarball)
         next if artifacts_to_delete.nil?
+
         begin
           artifacts_to_delete.each do |artifact|
-            puts "Removing #{pe_tarball} from #{pe_repo}... "
+            puts "Info: Removing #{pe_tarball} from #{pe_repo}... "
             artifact.delete
           end
-        rescue Artifactory::Error::HTTPError
-          STDERR.puts "Error: cannot remove #{pe_tarball}, do you have the right permissions?"
+        rescue Artifactory::Error::HTTPError => e
+          STDERR.puts "Error: cannot remove #{pe_tarball}: #{e}, do you have correct permissions?"
         end
       end
     end

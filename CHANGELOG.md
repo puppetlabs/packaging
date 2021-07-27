@@ -5,6 +5,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ## [Unreleased]
 ### Added
 - Add macOS 11 arm64 to platforms hash
+- (PE-32530) update sign_dmg to handle multiple architectures
 
 ## [0.99.78] - 2021-06-21
 ### Added

@@ -553,7 +553,17 @@ namespace :pl do
       artifactory = Pkg::ManageArtifactory.new(Pkg::Config.project, Pkg::Config.ref)
 
       local_dir = args.local_dir || 'pkg'
-      Dir.glob("#{local_dir}/**/*").reject { |e| File.directory? e }.each do |artifact|
+      artifacts = Dir.glob("#{local_dir}/**/*").reject { |e| File.directory? e }
+      artifacts.sort! do |a, b|
+        if File.extname(a) =~ /(md5|sha\d+)/ && File.extname(b) !~ /(md5|sha\d+)/
+          1
+        elsif File.extname(b) =~ /(md5|sha\d+)/ && File.extname(a) !~ /(md5|sha\d+)/
+          -1
+        else
+          a <=> b
+        end
+      end
+      artifacts.each do |artifact|
         if File.extname(artifact) == ".yaml" || File.extname(artifact) == ".json"
           artifactory.deploy_package(artifact)
         elsif artifactory.package_exists_on_artifactory?(artifact)

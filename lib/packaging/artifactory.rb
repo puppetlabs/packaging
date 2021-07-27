@@ -224,8 +224,6 @@ module Pkg
         deploy_properties(platform_tag, File.basename(package)),
         headers
       )
-    rescue
-      raise "Attempt to upload '#{package}' to #{File.join(@artifactory_uri, data[:full_artifactory_path])} failed"
     end
 
     # @param pkg [String] The package to download YAML for

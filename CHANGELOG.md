@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- (PA-3870) Add Ubuntu 18.04 aarch64 to platforms hash
 
 ## [0.99.79] - 2021-07-27
 ### Added

@@ -219,7 +219,7 @@ module Pkg
         },
         '18.04' => {
           codename: 'bionic',
-          architectures: ['amd64', 'ppc64el'],
+          architectures: ['amd64', 'ppc64el', 'aarch64'],
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,

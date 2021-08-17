@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.80] - 2021-08-17
 ### Added
 - (PA-3870) Add Ubuntu 18.04 aarch64 to platforms hash
 
@@ -742,7 +744,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.79...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.80...HEAD
+[0.99.80]: https://github.com/puppetlabs/packaging/compare/0.99.79...0.99.80
 [0.99.79]: https://github.com/puppetlabs/packaging/compare/0.99.78...0.99.79
 [0.99.78]: https://github.com/puppetlabs/packaging/compare/0.99.77...0.99.78
 [0.99.77]: https://github.com/puppetlabs/packaging/compare/0.99.76...0.99.77

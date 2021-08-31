@@ -352,7 +352,7 @@ module Pkg
     #        Used to specify which subdirectories packages will be downloaded from.
     def download_packages(staging_directory, manifest, remote_path = '')
       check_authorization
-      download_repositories = %w[rpm_enterprise__local debian_enterprise__local]
+      download_repositories = %w(rpm_enterprise__local debian_enterprise__local)
       manifest.each do |dist, packages|
         packages.each do |name, info|
           package_file_name = info['filename']

@@ -6,6 +6,9 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ### Added
 - (PA-3870) Add Ubuntu 18.04 aarch64 to platforms hash
 
+### Changed
+- artifact download from Artifactory is a bit more verbose.
+
 ## [0.99.79] - 2021-07-27
 ### Added
 - Add macOS 11 arm64 to platforms hash

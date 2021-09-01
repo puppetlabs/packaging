@@ -342,40 +342,69 @@ module Pkg
       end
     end
 
-    # Using the manifest provided by enterprise-dist, grab the appropropriate packages from artifactory based on md5sum
+    # Using the manifest provided by enterprise-dist, grab the
+    # appropropriate packages from artifactory based on md5sum
+
     # @param staging_directory [String] location to download packages to
-    # @param manifest [File] JSON file containing information about what packages to download and the corresponding md5sums
+    # @param manifest [File] JSON file listing which packages to download and
+    #   the corresponding md5sums
     # @param remote_path [String] Optional partial path on the remote host containing packages
     #        Used to specify which subdirectories packages will be downloaded from.
     def download_packages(staging_directory, manifest, remote_path = '')
       check_authorization
+      download_repositories = %w(rpm_enterprise__local debian_enterprise__local)
       manifest.each do |dist, packages|
-        puts "Grabbing the #{dist} packages from artifactory"
         packages.each do |name, info|
-          filename = info['filename']
-          artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"], name: filename)
-          artifact_to_download = artifacts.select { |artifact| artifact.download_uri.include? remote_path }.first
-          # If we found matching artifacts, but not in the correct path, copy the artifact to the correct path
-          # This should help us keep repos up to date with the packages we are expecting to be there
-          # while helping us avoid 'what the hell, could not find package' errors
+          package_file_name = info['filename']
+          puts format(
+                 "Searching Artifactory [%s]%s for %s (md5: %s)",
+                 download_repositories.join(', '),
+                 remote_path.empty? ? '' : "/#{remote_path}",
+                 package_file_name,
+                 info['md5']
+               )
+          artifacts = Artifactory::Resource::Artifact.checksum_search(
+            md5: info['md5'],
+            repos: download_repositories,
+            name: package_file_name
+          )
+
+          artifact_to_download = artifacts.select do |artifact|
+            artifact.download_uri.include? remote_path
+          end.first
+
+          # If we found matching artifacts, but not in the correct
+          # path, copy the artifact to the correct path This should
+          # help us keep repos up to date with the packages we are
+          # expecting to be there while helping us avoid 'could not
+          # find package' errors
           if artifact_to_download.nil? && !artifacts.empty?
             artifact_to_copy = artifacts.first
-            copy_artifact(artifact_to_copy, artifact_to_copy.repo, "#{remote_path}/#{dist}/#{filename}")
-            artifacts = Artifactory::Resource::Artifact.checksum_search(md5: "#{info["md5"]}", repos: ["rpm_enterprise__local", "debian_enterprise__local"], name: filename)
-            artifact_to_download = artifacts.select { |artifact| artifact.download_uri.include? remote_path }.first
+            copy_artifact(artifact_to_copy, artifact_to_copy.repo,
+                          "#{remote_path}/#{dist}/#{package_file_name}")
+
+            # Now, search again to make sure we find them in the correct path.
+            artifacts = Artifactory::Resource::Artifact.checksum_search(
+              md5: info['md5'],
+              repos: download_repositories,
+              name: package_file_name
+            )
+            artifact_to_download = artifacts.select do |artifact|
+              artifact.download_uri.include? remote_path
+            end.first
           end
 
           if artifact_to_download.nil?
-            message = "Error: what the hell, could not find package #{filename} with md5sum #{info["md5"]}"
-            unless remote_path.empty?
-              message += " in #{remote_path}"
-            end
+            message = "Error: could not find package #{package_file_name} " \
+                      "with md5sum #{info['md5']}"
+            message += " in #{remote_path}" unless remote_path.empty?
             raise message
-          else
-            full_staging_path = "#{staging_directory}/#{dist}"
-            puts "downloading #{artifact_to_download.download_uri} to #{File.join(full_staging_path, filename)}"
-            artifact_to_download.download(full_staging_path, filename: filename)
           end
+
+          full_staging_path = "#{staging_directory}/#{dist}"
+          puts "Downloading #{artifact_to_download.download_uri} to " \
+               "#{File.join(full_staging_path, package_file_name)}"
+          artifact_to_download.download(full_staging_path, filename: package_file_name)
         end
       end
     end

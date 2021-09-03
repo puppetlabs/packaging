@@ -5,6 +5,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ## [Unreleased]
 ### Added
 - (PA-3870) Add Ubuntu 18.04 aarch64 to platforms hash
+- (RE-12419) Add pl:remote:sync_apt_repo_to_gcp task for new APT repo
 
 ## [0.99.79] - 2021-07-27
 ### Added

@@ -172,20 +172,10 @@ namespace :pl do
       end
     end
 
-    desc "Copy signed deb repos from #{Pkg::Config.apt_signing_server} to AWS S3"
-    task :deploy_apt_repo_to_s3 => 'pl:fetch' do
-      puts "Really run S3 sync to deploy Debian repos from #{Pkg::Config.apt_signing_server} to AWS S3? [y,n]"
-      if Pkg::Util.ask_yes_or_no
-        Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          command = 'sudo /usr/local/bin/s3_repo_sync.sh apt.puppetlabs.com'
-          Pkg::Util::Net.remote_execute(Pkg::Config.apt_signing_server, command)
-        end
-      end
-    end
-
     desc "Copy rpm repos from #{Pkg::Config.yum_staging_server} to #{Pkg::Config.yum_host}"
     task deploy_yum_repo: 'pl:fetch' do
-      puts "Really run remote rsync to deploy yum repos from #{Pkg::Config.yum_staging_server} to #{Pkg::Config.yum_host}? [y,n]"
+      puts "Really run remote rsync to deploy yum repos from #{Pkg::Config.yum_staging_server} " \
+           "to #{Pkg::Config.yum_host}? [y,n]"
       if Pkg::Util.ask_yes_or_no
         Pkg::Util::Execution.retry_on_fail(times: 3) do
           Pkg::Rpm::Repo.deploy_repos(
@@ -198,42 +188,73 @@ namespace :pl do
       end
     end
 
-    desc "Copy signed RPM repos from #{Pkg::Config.yum_staging_server} to AWS S3"
+    ##
+    ## S3 / GCP syncing
+    S3_REPO_SYNC = 'sudo /usr/local/bin/s3_repo_sync.sh'
+    GCP_REPO_SYNC = '/usr/local/bin/gcp_repo_sync'
+
+    desc "Sync signed apt repos from #{Pkg::Config.apt_signing_server} to AWS S3"
+    task :deploy_apt_repo_to_s3 => 'pl:fetch' do
+      sync_command = "#{S3_REPO_SYNC} apt.puppetlabs.com"
+      puts "Sync apt repos from #{Pkg::Config.apt_signing_server} to AWS S3? [y,n]"
+      next unless Pkg::Util.ask_yes_or_no
+
+      Pkg::Util::Execution.retry_on_fail(times: 3) do
+        Pkg::Util::Net.remote_execute(Pkg::Config.apt_signing_server, sync_command)
+      end
+    end
+
+    desc "Sync signed yum repos from #{Pkg::Config.yum_staging_server} to AWS S3"
     task :deploy_yum_repo_to_s3 => 'pl:fetch' do
-      puts "Really run S3 sync to deploy RPM repos from #{Pkg::Config.yum_staging_server} to AWS S3? [y,n]"
-      if Pkg::Util.ask_yes_or_no
-        Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          command = 'sudo /usr/local/bin/s3_repo_sync.sh yum.puppetlabs.com'
-          Pkg::Util::Net.remote_execute(Pkg::Config.yum_staging_server, command)
-        end
+      sync_command = "#{S3_REPO_SYNC} yum.puppetlabs.com"
+      puts "Sync yum repos from #{Pkg::Config.yum_staging_server} to AWS S3? [y,n]"
+      next unless Pkg::Util.ask_yes_or_no
+      Pkg::Util::Execution.retry_on_fail(times: 3) do
+        Pkg::Util::Net.remote_execute(Pkg::Config.yum_staging_server, sync_command)
       end
     end
 
     desc "Sync downloads.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3"
     task :deploy_downloads_to_s3 => 'pl:fetch' do
-      puts "Really run S3 sync to sync downloads.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3? [y,n]"
-      if Pkg::Util.ask_yes_or_no
-        Pkg::Util::Execution.retry_on_fail(:times => 3) do
-          command = 'sudo /usr/local/bin/s3_repo_sync.sh downloads.puppetlabs.com'
-          Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, command)
-        end
+      sync_command = "#{S3_REPO_SYNC} downloads.puppetlabs.com"
+      puts "Sync downloads.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3? [y,n]"
+      next unless Pkg::Util.ask_yes_or_no
+      Pkg::Util::Execution.retry_on_fail(times: 3) do
+        Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, sync_command)
       end
     end
+
+    desc "Sync nightlies.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3"
+    task :deploy_nightlies_to_s3 => 'pl:fetch' do
+      sync_command = "#{S3_REPO_SYNC} nightlies.puppetlabs.com"
+      puts "Syncing nightly builds from #{Pkg::Config.staging_server} to AWS S3"
+      Pkg::Util::Execution.retry_on_fail(times: 3) do
+        Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, sync_command)
+      end
+    end
+
+    desc "Sync signed apt repos from #{Pkg::Config.apt_signing_server} to Google Cloud Platform"
+    task :sync_apt_repo_to_gcp => 'pl:fetch' do
+      target_site = 'apt.repos.puppetlabs.com'
+      sync_command_puppet_6 = "#{GCP_REPO_SYNC} apt.repos.puppet.com puppet_6"
+      sync_command_puppet_7 = "#{GCP_REPO_SYNC} apt.repos.puppet.com puppet_7"
+      print "Sync apt repos from #{Pkg::Config.apt_signing_server} to #{target_site}? [y,n] "
+      next unless Pkg::Util.ask_yes_or_no
+      puts
+
+      Pkg::Util::Execution.retry_on_fail(times: 3) do
+        Pkg::Util::Net.remote_execute(Pkg::Config.apt_signing_server, sync_command_puppet_6)
+        Pkg::Util::Net.remote_execute(Pkg::Config.apt_signing_server, sync_command_puppet_7)
+      end
+    end
+    # Keep 'deploy' for backward compatibility
+    task :deploy_apt_repo_to_gcp => :sync_apt_repo_to_gcp
 
     desc "Sync apt, yum, and downloads.pl.com to AWS S3"
     task :deploy_final_builds_to_s3 => "pl:fetch" do
       Rake::Task['pl:remote:deploy_apt_repo_to_s3'].invoke
       Rake::Task['pl:remote:deploy_yum_repo_to_s3'].invoke
       Rake::Task['pl:remote:deploy_downloads_to_s3'].invoke
-    end
-
-    desc "Sync nightlies.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3"
-    task :deploy_nightlies_to_s3 => 'pl:fetch' do
-      puts "Deploying nightly builds from #{Pkg::Config.staging_server} to AWS S3..."
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        command = 'sudo /usr/local/bin/s3_repo_sync.sh nightlies.puppet.com'
-        Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, command)
-      end
     end
 
     desc "Sync yum and apt from #{Pkg::Config.staging_server} to rsync servers"

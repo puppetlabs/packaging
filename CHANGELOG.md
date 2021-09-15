@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- (PA-3768) Add RedHat 8 FIPS to platforms
 
 ## [0.99.80] - 2021-08-17
 ### Added

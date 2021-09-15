@@ -236,8 +236,8 @@ namespace :pl do
     desc "Sync signed apt repos from #{Pkg::Config.apt_signing_server} to Google Cloud Platform"
     task :sync_apt_repo_to_gcp => 'pl:fetch' do
       target_site = 'apt.repos.puppetlabs.com'
-      sync_command_puppet_6 = "#{GCP_REPO_SYNC} apt.repos.puppet.com puppet_6"
-      sync_command_puppet_7 = "#{GCP_REPO_SYNC} apt.repos.puppet.com puppet_7"
+      sync_command_puppet_6 = "#{GCP_REPO_SYNC} apt.repos.puppet.com puppet6"
+      sync_command_puppet_7 = "#{GCP_REPO_SYNC} apt.repos.puppet.com puppet7"
       print "Sync apt repos from #{Pkg::Config.apt_signing_server} to #{target_site}? [y,n] "
       next unless Pkg::Util.ask_yes_or_no
       puts

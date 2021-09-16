@@ -9,6 +9,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ## [0.99.80] - 2021-08-17
 ### Added
 - (PA-3870) Add Ubuntu 18.04 aarch64 to platforms hash
+- (RE-12419) Add pl:remote:sync_apt_repo_to_gcp task for new APT repo
 
 ### Changed
 - artifact download from Artifactory is a bit more verbose.

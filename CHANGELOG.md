@@ -3,13 +3,15 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.99.81]
 ### Added
 - (PA-3768) Add RedHat 8 FIPS to platforms
+- (RE-12419) Add pl:remote:sync_apt_repo_to_gcp task for new APT repo
 
 ## [0.99.80] - 2021-08-17
 ### Added
 - (PA-3870) Add Ubuntu 18.04 aarch64 to platforms hash
-- (RE-12419) Add pl:remote:sync_apt_repo_to_gcp task for new APT repo
 
 ### Changed
 - artifact download from Artifactory is a bit more verbose.
@@ -750,7 +752,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.80...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.99.81...HEAD
+[0.99.81]: https://github.com/puppetlabs/packaging/compare/0.99.80...0.99.81
 [0.99.80]: https://github.com/puppetlabs/packaging/compare/0.99.79...0.99.80
 [0.99.79]: https://github.com/puppetlabs/packaging/compare/0.99.78...0.99.79
 [0.99.78]: https://github.com/puppetlabs/packaging/compare/0.99.77...0.99.78

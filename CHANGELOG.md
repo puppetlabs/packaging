@@ -4,10 +4,13 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
-## [0.99.81]
+## [0.99.81] - 2021-09-23
 ### Added
 - (PA-3768) Add RedHat 8 FIPS to platforms
 - (RE-12419) Add pl:remote:sync_apt_repo_to_gcp task for new APT repo
+
+### Fixed
+- Fix confusion between nightlies.puppet.com and nightlies.puppetlabs.com
 
 ## [0.99.80] - 2021-08-17
 ### Added

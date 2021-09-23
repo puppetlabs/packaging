@@ -93,7 +93,7 @@ DOC
         # The repo configs have Pkg::Config.builds_server used in them, but that
         # is internal, so we need to replace it with our public server. We also
         # want them only to see repos, and not signed repos, since the host is
-        # called nightlies.puppetlabs.com. Here we replace those values in each
+        # called nightlies.puppet.com. Here we replace those values in each
         # config with the desired value.
         Dir.glob("#{local_target}/repo_configs/**/*").select { |t_config| File.file?(t_config) }.each do |config|
           new_contents = File.read(config).gsub(Pkg::Config.builds_server, target_host).gsub(/#{target_prefix}_repos/, "repos")

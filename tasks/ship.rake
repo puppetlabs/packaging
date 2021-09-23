@@ -224,9 +224,9 @@ namespace :pl do
       end
     end
 
-    desc "Sync nightlies.puppetlabs.com from #{Pkg::Config.staging_server} to AWS S3"
+    desc "Sync nightlies.puppet.com from #{Pkg::Config.staging_server} to AWS S3"
     task :deploy_nightlies_to_s3 => 'pl:fetch' do
-      sync_command = "#{S3_REPO_SYNC} nightlies.puppetlabs.com"
+      sync_command = "#{S3_REPO_SYNC} nightlies.puppet.com"
       puts "Syncing nightly builds from #{Pkg::Config.staging_server} to AWS S3"
       Pkg::Util::Execution.retry_on_fail(times: 3) do
         Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, sync_command)

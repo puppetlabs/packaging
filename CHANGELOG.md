@@ -4,13 +4,9 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
-## [0.100.1] - 2021-10-06
-### Fixed
-- (maint) Revert RE-13941. Need to fix severe bug.
-
 ## [0.100.0] - 2021-10-06
 ### Added
-- (RE-13941) Ship to new puppet-version based apt repos
+(RE-13941) Ship to new puppet-version based apt repos
   Broke some of the :ship tasks into smaller bits and moved them out of Rake.
   Introduced two new tasks, `pl:stage_nightly_debs` and `pl:stage_stable_debs`
   for sending debs to a staging area for repos based on puppet major version.
@@ -767,8 +763,7 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.100.1...HEAD
-[0.100.1]: https://github.com/puppetlabs/packaging/compare/0.100.0...0.100.1
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.100.0...HEAD
 [0.100.0]: https://github.com/puppetlabs/packaging/compare/0.99.81...0.100.0
 [0.99.81]: https://github.com/puppetlabs/packaging/compare/0.99.80...0.99.81
 [0.99.80]: https://github.com/puppetlabs/packaging/compare/0.99.79...0.99.80

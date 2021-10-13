@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.102.0] - 2021-10-13
 ### Added
 (RE-13941) 2nd attempt tp ship to new puppet-version based apt repos
   Broke some of the :ship tasks into smaller bits and moved them out of Rake.
@@ -773,7 +775,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.101.0...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.102.0...HEAD
+[0.102.0]: https://github.com/puppetlabs/packaging/compare/0.101.0...0.102.0
 [0.101.0]: https://github.com/puppetlabs/packaging/compare/0.100.0...0.101.0
 [0.100.0]: https://github.com/puppetlabs/packaging/compare/0.99.81...0.100.0
 [0.99.81]: https://github.com/puppetlabs/packaging/compare/0.99.80...0.99.81

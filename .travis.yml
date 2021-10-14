@@ -4,10 +4,9 @@ sudo: false
 notifications:
   email: false
 rvm:
+  - 2.3.8
   - 2.4.1
-  - 2.5.9
-  - 2.6.8
-  - 2.7.4
+  - 2.6.5
 
 env:
   - "CHECK='rspec spec --color --format documentation --order random'"
@@ -15,5 +14,7 @@ env:
 
 matrix:
   exclude:
+    - rvm: 2.3.8
+      env: "CHECK='rubocop -D'"
     - rvm: 2.4.1
       env: "CHECK='rubocop -D'"

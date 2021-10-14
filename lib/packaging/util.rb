@@ -4,12 +4,8 @@ module Pkg::Util
   require 'benchmark'
   require 'base64'
   require 'io/console'
-  require 'packaging/util/apt_staging_server'
-  require 'packaging/util/build_metadata'
   require 'packaging/util/date'
-  require 'packaging/util/distribution_server'
   require 'packaging/util/execution'
-  require 'packaging/util/ezbake'
   require 'packaging/util/file'
   require 'packaging/util/git'
   require 'packaging/util/gpg'
@@ -23,7 +19,6 @@ module Pkg::Util
   require 'packaging/util/tool'
   require 'packaging/util/rake_utils'
   require 'packaging/util/version'
-  require 'packaging/util/windows'
   require 'packaging/util/git_tags'
 
   def self.boolean_value(var)

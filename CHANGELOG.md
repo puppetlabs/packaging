@@ -3,10 +3,14 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Fixed
+- Revert back to 0.99.81 code. Updating Ruby version in the gemspec from 2.0 to 2.3
+  caused some moderately obscure breakage. It's clear that we need to take a different
+  direction for future feature additions.
 
 ## [0.102.0] - 2021-10-13
 ### Added
-(RE-13941) 2nd attempt tp ship to new puppet-version based apt repos
+- (RE-13941) 2nd attempt tp ship to new puppet-version based apt repos
   Broke some of the :ship tasks into smaller bits and moved them out of Rake.
   Introduced two new tasks, `pl:stage_nightly_debs` and `pl:stage_stable_debs`
   for sending debs to a staging area for repos based on puppet major version.
@@ -18,7 +22,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [0.100.0] - 2021-10-06
 ### Added
-(RE-13941) Ship to new puppet-version based apt repos
+- (RE-13941) Ship to new puppet-version based apt repos
   Broke some of the :ship tasks into smaller bits and moved them out of Rake.
   Introduced two new tasks, `pl:stage_nightly_debs` and `pl:stage_stable_debs`
   for sending debs to a staging area for repos based on puppet major version.

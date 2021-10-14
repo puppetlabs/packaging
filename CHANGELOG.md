@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.103.0] - 2021-10-14
 ### Fixed
 - Revert back to 0.99.81 code. Updating Ruby version in the gemspec from 2.0 to 2.3
   caused some moderately obscure breakage. It's clear that we need to take a different
@@ -779,7 +781,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.102.0...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.103.0...HEAD
+[0.103.0]: https://github.com/puppetlabs/packaging/compare/0.102.0...0.103.0
 [0.102.0]: https://github.com/puppetlabs/packaging/compare/0.101.0...0.102.0
 [0.101.0]: https://github.com/puppetlabs/packaging/compare/0.100.0...0.101.0
 [0.100.0]: https://github.com/puppetlabs/packaging/compare/0.99.81...0.100.0

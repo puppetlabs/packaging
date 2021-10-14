@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
   gem.email    = 'info@puppetlabs.com'
   gem.homepage = 'http://github.com/puppetlabs/packaging'
 
-  gem.required_ruby_version = '>= 2.3.0'
+  gem.required_ruby_version = '>= 2.5.0'
 
   gem.add_development_dependency('pry-byebug')
   gem.add_development_dependency('rspec', ['~> 2.14.1'])

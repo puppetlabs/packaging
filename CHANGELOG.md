@@ -3,6 +3,10 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+## [0.103.0] - 2021-10-14
+### Changed
+- Reverted 0.102.0 because of unanticipated side-effects of base Ruby upgrade from
+  2.0.0
 
 ## [0.102.0] - 2021-10-13
 ### Added

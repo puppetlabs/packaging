@@ -371,8 +371,7 @@ namespace :pl do
 
   desc "Ship nightly debs to #{Pkg::Config.apt_signing_server}"
   task ship_nightly_debs: 'pl:fetch' do
-    Pkg::Util::Ship.ship_debs(
-      'pkg', Pkg::Config.nonfinal_apt_repo_staging_path, chattr: false, nonfinal: true)
+    Pkg::Util::Ship.ship_debs('pkg', Pkg::Config.nonfinal_apt_repo_staging_path, chattr: false, nonfinal: true)
   end
 
   ## This is the new-style apt stager
@@ -535,6 +534,7 @@ namespace :pl do
 
     Rake::Task['pl:ship_rpms'].invoke
     Rake::Task['pl:ship_debs'].invoke
+    Rake::Task['pl:stage_stable_debs'].invoke
     Rake::Task['pl:ship_dmg'].invoke
     Rake::Task['pl:ship_swix'].invoke
     Rake::Task['pl:ship_nuget'].invoke
@@ -739,6 +739,64 @@ namespace :pl do
 
       # Send packages to the distribution server.
       Pkg::Util::DistributionServer.send_packages(local_dir, artifact_dir)
+
+      # Send deb packages to APT staging server
+      Pkg::Util::AptStagingServer.send_packages(local_dir)
+    end
+
+    desc 'TEST Ship "pkg" directory contents to distribution server'
+    task :exg_test_ship, :target, :local_dir do |_t, args|
+      Pkg::Util::RakeUtils.invoke_task('pl:fetch')
+      unless Pkg::Config.project
+        fail "Error: 'project' must be set in build_defaults.yaml or " \
+             "in the 'PROJECT_OVERRIDE' environment variable."
+      end
+
+      local_dir = args.local_dir || 'pkg'
+
+      # For EZBake builds, we also want to include the ezbake.manifest file to
+      # get a snapshot of this build and all dependencies. We eventually will
+      # create a yaml version of this file, but until that point we want to
+      # make the original ezbake.manifest available
+      Pkg::Util::EZbake.add_manifest(local_dir)
+
+      # Inside build_metadata*.json files there is additional metadata containing
+      # information such as git ref and dependencies that are needed at build
+      # time. If these files exist, copy them downstream.
+      # Typically these files are named 'ext/build_metadata.<project>.<platform>.json'
+      Pkg::Util::BuildMetadata.add_misc_json_files(local_dir)
+
+      # Sadly, the packaging repo cannot yet act on its own, without living
+      # inside of a packaging-repo compatible project. This means in order to
+      # use the packaging repo for shipping and signing (things that really
+      # don't require build automation, specifically) we still need the project
+      # clone itself.
+      Pkg::Util::Git.bundle('HEAD', 'signing_bundle', local_dir)
+
+      # While we're bundling things, let's also make a git bundle of the
+      # packaging repo that we're using when we invoke pl:jenkins:ship. We can
+      # have a reasonable level of confidence, later on, that the git bundle on
+      # the distribution server was, in fact, the git bundle used to create the
+      # associated packages. This is because this ship task is automatically
+      # called upon completion each cell of the pl:jenkins:uber_build, and we
+      # have --ignore-existing set below. As such, the only git bundle that
+      # should possibly be on the distribution is the one used to create the
+      # packages.
+      # We're bundling the packaging repo because it allows us to keep an
+      # archive of the packaging source that was used to create the packages,
+      # so that later on if we need to rebuild an older package to audit it or
+      # for some other reason we're assured that the new package isn't
+      # different by virtue of the packaging automation.
+      if defined?(PACKAGING_ROOT)
+        packaging_bundle = ''
+        cd PACKAGING_ROOT do
+          packaging_bundle = Pkg::Util::Git.bundle('HEAD', 'packaging-bundle')
+        end
+        mv(packaging_bundle, local_dir)
+      end
+
+      # Send deb packages to APT staging server
+      Pkg::Util::AptStagingServer.send_packages(local_dir)
     end
 
     desc 'Ship generated repository configs to the distribution server'

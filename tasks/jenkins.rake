@@ -286,7 +286,7 @@ namespace :pl do
         ship_nightly_msi
       )
       tasks.map { |t| "pl:#{t}" }.each do |t|
-        puts "Running #{t}:"
+        puts "Running #{t} . . ."
         Rake::Task[t].invoke
       end
     end

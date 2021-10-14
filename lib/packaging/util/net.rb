@@ -159,7 +159,7 @@ module Pkg::Util::Net
       raise(ArgumentError, "Cannot sync path '#{origin}' because both origin_host and target_host are nil. Perhaps you need to set TEAM=release ?") unless
         options[:origin_host] || options[:target_host]
 
-      cmd = %W[
+      cmd = %W(
         #{options[:bin]}
         --recursive
         --hard-links
@@ -169,7 +169,7 @@ module Pkg::Util::Net
         --no-perms
         --no-owner
         --no-group
-      ] + [*options[:extra_flags]]
+      ) + [*options[:extra_flags]]
 
       cmd << '--dry-run' if options[:dryrun]
       cmd << Pkg::Util.pseudo_uri(path: origin, host: options[:origin_host])

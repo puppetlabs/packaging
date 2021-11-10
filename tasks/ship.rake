@@ -566,6 +566,7 @@ namespace :pl do
   # signed/actually shipped artifacts e.g. $path/shipped/ or $path/artifacts.
   namespace :jenkins do
     desc 'ship pkg directory contents to artifactory'
+    # The equivalent to invoking this task is calling Pkg::Util::Ship.ship_to_artifactory(local_directory, target)
     task :ship_to_artifactory, :local_dir do |_t, args|
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')
       unless Pkg::Config.project
@@ -595,6 +596,7 @@ namespace :pl do
       end
     end
 
+    # The equivalent to invoking this task is calling Pkg::Util::Ship.ship(local_directory, target)
     desc 'Ship pkg directory contents to distribution server'
     task :ship, :target, :local_dir do |_t, args|
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')

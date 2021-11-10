@@ -10,6 +10,7 @@
 #
 namespace :pl do
   namespace :jenkins do
+    # The equivalent to invoking this task is calling Pkg::Util::Repo.deb_repos
     desc "Create apt repositories of build DEB packages for this SHA on the distributions erver"
     task :deb_repos => "pl:fetch" do
       Pkg::Deb::Repo.create_repos

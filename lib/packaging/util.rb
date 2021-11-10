@@ -20,6 +20,8 @@ module Pkg::Util
   require 'packaging/util/rake_utils'
   require 'packaging/util/version'
   require 'packaging/util/git_tags'
+  require 'packaging/util/sign'
+  require 'packaging/util/repo'
 
   def self.boolean_value(var)
     return true if var == true || ( var.is_a?(String) && ( var.downcase == 'true' || var.downcase =~ /^y$|^yes$/))

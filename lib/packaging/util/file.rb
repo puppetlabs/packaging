@@ -152,10 +152,10 @@ module Pkg::Util::File
       end
 
       # Remove .packaging directory from old-style extras loading
-      rm_rf "#{ENV['HOME']}/.packaging" if File.directory?("#{ENV['HOME']}/.packaging")
+      FileUtils.rm_rf "#{ENV['HOME']}/.packaging" if File.directory?("#{ENV['HOME']}/.packaging")
   
       # Touch the .packaging file which is allows packaging to present remote tasks
-      touch "#{ENV['HOME']}/.packaging"
+      FileUtils.touch "#{ENV['HOME']}/.packaging"
   
       begin
         build_data_directory = Pkg::Util::File.mktemp
@@ -175,7 +175,7 @@ module Pkg::Util::File
           end
         end
       ensure
-        rm_rf build_data_directory
+        FileUtils.rm_rf build_data_directory
       end
   
       Pkg::Util::RakeUtils.invoke_task('config:validate')

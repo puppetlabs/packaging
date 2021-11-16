@@ -4,6 +4,14 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.104.0] - 2021-11-10
+### Added
+(RE-13941) 3rd attempt tp ship to new puppet-version based apt repos
+  Broke some of the :ship tasks into smaller bits and moved them out of Rake.
+  Introduced two new tasks, `pl:stage_nightly_debs` and `pl:stage_stable_debs`
+  for sending debs to a staging area for repos based on puppet major version.
+  The above new tasks use a required set of shims from the `apt_stage_repos` gem.
+
 ## [0.103.0] - 2021-10-14
 ### Fixed
 - Revert back to 0.99.81 code. Updating Ruby version in the gemspec from 2.0 to 2.3
@@ -12,7 +20,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [0.102.0] - 2021-10-13
 ### Added
-- (RE-13941) 2nd attempt tp ship to new puppet-version based apt repos
+(RE-13941) 2nd attempt tp ship to new puppet-version based apt repos
   Broke some of the :ship tasks into smaller bits and moved them out of Rake.
   Introduced two new tasks, `pl:stage_nightly_debs` and `pl:stage_stable_debs`
   for sending debs to a staging area for repos based on puppet major version.
@@ -24,7 +32,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [0.100.0] - 2021-10-06
 ### Added
-- (RE-13941) Ship to new puppet-version based apt repos
+(RE-13941) Ship to new puppet-version based apt repos
   Broke some of the :ship tasks into smaller bits and moved them out of Rake.
   Introduced two new tasks, `pl:stage_nightly_debs` and `pl:stage_stable_debs`
   for sending debs to a staging area for repos based on puppet major version.
@@ -781,7 +789,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.103.0...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.104.0...HEAD
+[0.104.0]: https://github.com/puppetlabs/packaging/compare/0.103.0...0.104.0
 [0.103.0]: https://github.com/puppetlabs/packaging/compare/0.102.0...0.103.0
 [0.102.0]: https://github.com/puppetlabs/packaging/compare/0.101.0...0.102.0
 [0.101.0]: https://github.com/puppetlabs/packaging/compare/0.100.0...0.101.0

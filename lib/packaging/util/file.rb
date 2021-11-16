@@ -171,7 +171,7 @@ module Pkg::Util::File
               warn "Warning: no build_defaults found in branch '#{branch}' of '#{data_repo}'. Skipping."
               next
             end
-            Pkg::Util::RakeUtils::File.load_extras(build_data_directory)
+            load_extras(build_data_directory)
           end
         end
       ensure

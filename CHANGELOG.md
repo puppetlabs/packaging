@@ -3,6 +3,7 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+- (VANAGON-165) Create methods to replace the need for invoking rake tasks in vanagon. More specifically, methods were made for fetch, load_extras, rpm_repos, deb_repos, ship, ship_to_artifactory, and sign_all.
 
 ## [0.103.0] - 2021-10-14
 ### Fixed

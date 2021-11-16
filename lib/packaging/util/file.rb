@@ -121,7 +121,7 @@ module Pkg::Util::File
       Pkg::Util::Version.versionbump(workdir) if Pkg::Config.update_version_file
     end
 
-    # The pl:fetch task pulls down two files from the build-data repo that contain additional
+    # The fetch method pulls down two files from the build-data repo that contain additional
     # data specific to Puppet Labs release infrastructure intended to augment/override any
     # defaults specified in the source project repo, e.g. in ext/build_defaults.yaml
     #
@@ -152,10 +152,10 @@ module Pkg::Util::File
       end
 
       # Remove .packaging directory from old-style extras loading
-      FileUtils.rm_rf "#{ENV['HOME']}/.packaging" if File.directory?("#{ENV['HOME']}/.packaging")
+      FileUtils.rm_rf("#{ENV['HOME']}/.packaging") if File.directory?("#{ENV['HOME']}/.packaging")
   
       # Touch the .packaging file which is allows packaging to present remote tasks
-      FileUtils.touch "#{ENV['HOME']}/.packaging"
+      FileUtils.touch("#{ENV['HOME']}/.packaging")
   
       begin
         build_data_directory = Pkg::Util::File.mktemp
@@ -171,14 +171,33 @@ module Pkg::Util::File
               warn "Warning: no build_defaults found in branch '#{branch}' of '#{data_repo}'. Skipping."
               next
             end
-            Pkg::Util::RakeUtils.invoke_task('pl:load_extras', build_data_directory)
+            Pkg::Util::RakeUtils::File.load_extras(build_data_directory)
           end
         end
       ensure
-        FileUtils.rm_rf build_data_directory
+        FileUtils.rm_rf(build_data_directory)
       end
   
-      Pkg::Util::RakeUtils.invoke_task('config:validate')
+      Pkg::Config.perform_validations
+    end
+
+    # The load_extras method is intended to load variables
+    # from the extra yaml file downloaded by the pl:fetch task.
+    # The goal is to be able to augment/override settings in the
+    # source project's build_data.yaml and project_data.yaml with
+    # Puppet Labs-specific data, rather than having to clutter the
+    # generic tasks with data not generally useful outside the
+    # PL Release team
+    def load_extras(temp_directory)
+      unless ENV['PARAMS_FILE'] && ENV['PARAMS_FILE'] != ''
+        temp_directory = temp_directory
+        raise "load_extras requires a directory containing extras data" if temp_directory.nil?
+        Pkg::Config.config_from_yaml("#{temp_directory}/#{Pkg::Config.builder_data_file}")
+  
+        # Environment variables take precedence over those loaded from configs,
+        # so we make sure that any we clobbered are reset.
+        Pkg::Config.load_envvars
+      end
     end
   end
 end

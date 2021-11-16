@@ -316,11 +316,11 @@ module Pkg::Util::Ship
     #
     ezbake_manifest = File.join('ext', 'ezbake.manifest')
     if File.exist?(ezbake_manifest)
-      FileUtils.cp ezbake_manifest, File.join(local_directory, "#{Pkg::Config.ref}.ezbake.manifest")
+      FileUtils.cp(ezbake_manifest, File.join(local_directory, "#{Pkg::Config.ref}.ezbake.manifest"))
     end
     ezbake_yaml = File.join("ext", "ezbake.manifest.yaml")
     if File.exists?(ezbake_yaml)
-      FileUtils.cp ezbake_yaml, File.join(local_directory, "#{Pkg::Config.ref}.ezbake.manifest.yaml")
+      FileUtils.cp(ezbake_yaml, File.join(local_directory, "#{Pkg::Config.ref}.ezbake.manifest.yaml"))
     end
 
     # Inside build_metadata*.json files there is additional metadata containing
@@ -330,7 +330,7 @@ module Pkg::Util::Ship
     build_metadata_json_files = Dir.glob('ext/build_metadata*.json')
     build_metadata_json_files.each do |source_file|
       target_file = File.join(local_directory, "#{Pkg::Config.ref}.#{File.basename(source_file)}")
-      FileUtils.cp source_file, target_file
+      FileUtils.cp(source_file, target_file)
     end
 
     # Sadly, the packaging repo cannot yet act on its own, without living
@@ -359,7 +359,7 @@ module Pkg::Util::Ship
       Dir.chdir(PACKAGING_ROOT) do
         packaging_bundle = Pkg::Util::Git.bundle('HEAD', 'packaging-bundle')
       end
-      FileUtils.mv packaging_bundle, local_directory
+      FileUtils.mv(packaging_bundle, local_directory)
     end
 
     # This is functionality to add the project-arch.msi links that have no

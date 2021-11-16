@@ -5,9 +5,8 @@
 # Puppet Labs-specific data, rather than having to clutter the
 # generic tasks with data not generally useful outside the
 # PL Release team
-# 
-# The equivalent to invoking this task is calling Pkg::Util::RakeUtils::File.load_extras(temp_directory)
 namespace :pl do
+  # The equivalent to invoking this task is calling Pkg::Util::File.load_extras(temp_directory)
   task :load_extras, :tempdir do |t, args|
     unless ENV['PARAMS_FILE'] && ENV['PARAMS_FILE'] != ''
       tempdir = args.tempdir

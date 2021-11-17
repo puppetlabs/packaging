@@ -357,7 +357,7 @@ module Pkg::Util::Ship
   end
 
   # Ship pkg directory contents to distribution server
-  def ship(target='artifacts', local_directory='pkg')
+  def ship(target = 'artifacts', local_directory = 'pkg')
     Pkg::Util::File.fetch
 
     unless Pkg::Config.project
@@ -475,7 +475,7 @@ module Pkg::Util::Ship
     Pkg::Util::Net.remote_set_immutable(Pkg::Config.distribution_server, files)
   end
 
-  def ship_to_artifactory(local_directory='pkg')
+  def ship_to_artifactory(local_directory = 'pkg')
     Pkg::Util::File.fetch
     unless Pkg::Config.project
       fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT_OVERRIDE' environment variable."

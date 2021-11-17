@@ -137,7 +137,7 @@ module Pkg::Util::File
       # both PE and not PE, it has two files, one for PE, and the other for FOSS
       #
       data_repo = Pkg::Config.build_data_repo
-      
+
       if Pkg::Config.dev_build
         puts "NOTICE: This is a dev build!"
         project_data_branch = "#{Pkg::Config.project}-dev"
@@ -145,7 +145,7 @@ module Pkg::Util::File
         project_data_branch = Pkg::Config.project
       end
       team_data_branch = Pkg::Config.team
-      
+
       if Pkg::Config.build_pe
         project_data_branch = 'pe-' + project_data_branch unless project_data_branch =~ /^pe-/
         team_data_branch = 'pe-' + team_data_branch unless team_data_branch =~ /^pe-/
@@ -153,17 +153,17 @@ module Pkg::Util::File
 
       # Remove .packaging directory from old-style extras loading
       FileUtils.rm_rf("#{ENV['HOME']}/.packaging") if File.directory?("#{ENV['HOME']}/.packaging")
-  
+
       # Touch the .packaging file which is allows packaging to present remote tasks
       FileUtils.touch("#{ENV['HOME']}/.packaging")
-  
+
       begin
         build_data_directory = Pkg::Util::File.mktemp
         %x(git clone #{data_repo} #{build_data_directory})
         unless $?.success?
           fail 'Error: could not fetch the build-data repo. Maybe you do not have the correct permissions?'
         end
-  
+
         Dir.chdir(build_data_directory) do
           [team_data_branch, project_data_branch].each do |branch|
             %x(git checkout #{branch})
@@ -177,7 +177,7 @@ module Pkg::Util::File
       ensure
         FileUtils.rm_rf(build_data_directory)
       end
-  
+
       Pkg::Config.perform_validations
     end
 
@@ -193,7 +193,7 @@ module Pkg::Util::File
         temp_directory = temp_directory
         raise "load_extras requires a directory containing extras data" if temp_directory.nil?
         Pkg::Config.config_from_yaml("#{temp_directory}/#{Pkg::Config.builder_data_file}")
-  
+
         # Environment variables take precedence over those loaded from configs,
         # so we make sure that any we clobbered are reset.
         Pkg::Config.load_envvars

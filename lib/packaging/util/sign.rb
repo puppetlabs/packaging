@@ -4,9 +4,9 @@
 module Pkg::Util::Sign
   class << self
     # Sign all locally staged packages on signing server.
-    def sign_all(root_directory=nil)
+    def sign_all(root_directory = nil)
       Pkg::Util::File.fetch
-      root_directory = root_directory || ENV['DEFAULT_DIRECTORY']
+      root_directory ||= ENV['DEFAULT_DIRECTORY']
       Dir["#{root_directory}/*"].empty? and fail "There were no files found in #{root_directory}. \
       Maybe you wanted to build/retrieve something first?"
 

@@ -645,6 +645,7 @@ namespace :pl do
   # server path. That way we can separate out built artifacts from
   # signed/actually shipped artifacts e.g. $path/shipped/ or $path/artifacts.
   namespace :jenkins do
+    # The equivalent to invoking this task is calling Pkg::Util::Ship.ship_to_artifactory(local_directory, target)
     desc 'ship pkg directory contents to artifactory'
     task :ship_to_artifactory, :local_dir do |_t, args|
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')
@@ -673,6 +674,7 @@ namespace :pl do
       end
     end
 
+    # The equivalent to invoking this task is calling Pkg::Util::Ship.ship(local_directory, target)
     desc 'Ship "pkg" directory contents to distribution server'
     task :ship, :target, :local_dir do |_t, args|
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')

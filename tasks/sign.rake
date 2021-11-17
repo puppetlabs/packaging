@@ -107,8 +107,8 @@ namespace :pl do
   ##
   # This crazy piece of work establishes a remote repo on the signing
   # server, ships our packages out to it, signs them, and brings them back.
-  #
   namespace :jenkins do
+    # The equivalent to invoking this task is calling Pkg::Util::Sign.sign_all(root_directory)
     desc "Sign all locally staged packages on #{Pkg::Config.signing_server}"
     task :sign_all, :root_dir do |_t, args|
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')

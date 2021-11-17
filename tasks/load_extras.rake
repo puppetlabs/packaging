@@ -6,6 +6,7 @@
 # generic tasks with data not generally useful outside the
 # PL Release team
 namespace :pl do
+  # The equivalent to invoking this task is calling Pkg::Util::File.load_extras(temp_directory)
   task :load_extras, :tempdir do |t, args|
     unless ENV['PARAMS_FILE'] && ENV['PARAMS_FILE'] != ''
       tempdir = args.tempdir

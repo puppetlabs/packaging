@@ -11,6 +11,7 @@
 #
 namespace :pl do
   namespace :jenkins do
+    # The equivalent to invoking this task is calling Pkg::Util::Repo.rpm_repos
     desc "Create yum repositories of built RPM packages for this SHA on the distribution server"
     task :rpm_repos => "pl:fetch" do
       Pkg::Rpm::Repo.create_remote_repos

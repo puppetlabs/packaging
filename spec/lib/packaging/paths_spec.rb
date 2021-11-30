@@ -5,12 +5,11 @@ describe 'Pkg::Paths' do
     arch_transformations = {
       ['pkg/el-8-x86_64/puppet-agent-6.9.0-1.el8.x86_64.rpm', 'el', '8'] => 'x86_64',
       ['pkg/el/8/puppet6/aarch64/puppet-agent-6.5.0.3094.g16b6fa6f-1.el8.aarch64.rpm', 'el', '8'] => 'aarch64',
-      ['artifacts/fedora/32/puppet6/x86_64/puppet-agent-6.9.0-1.fc30.x86_64.rpm', 'fedora', '32'] => 'x86_64',
+      ['artifacts/fedora/32/puppet6/x86_64/puppet-agent-6.9.0-1.fc32.x86_64.rpm', 'fedora', '32'] => 'x86_64',
       ['pkg/ubuntu-16.04-amd64/puppet-agent_4.99.0-1xenial_amd64.deb', 'ubuntu', '16.04'] => 'amd64',
       ['artifacts/deb/focal/puppet6/puppet-agent_6.5.0.3094.g16b6fa6f-1focal_arm64.deb', 'ubuntu', '20.04'] => 'aarch64',
 
       ['artifacts/ubuntu-16.04-i386/puppetserver_5.0.1-0.1SNAPSHOT.2017.07.27T2346puppetlabs1.debian.tar.gz', 'ubuntu', '16.04'] => 'source',
-      ['artifacts/deb/jessie/PC1/puppetserver_5.0.1.master.orig.tar.gz', 'debian', '8'] => 'source',
       ['artifacts/el/6/PC1/SRPMS/puppetserver-5.0.1.master-0.1SNAPSHOT.2017.08.18T0951.el6.src.rpm', 'el', '6'] => 'SRPMS'
     }
     arch_transformations.each do |path_array, arch|
@@ -273,7 +272,7 @@ describe 'Pkg::Paths' do
         .to eq(fake_apt_repo_path)
     end
     it 'returns nonfinal_yum_repo_path for nonfinal rpms' do
-      expect(Pkg::Paths.remote_repo_base('fedora-31-x86_64', nonfinal: true))
+      expect(Pkg::Paths.remote_repo_base('fedora-34-x86_64', nonfinal: true))
         .to eq(fake_yum_nightly_repo_path)
     end
     it 'returns nonfinal_apt_repo_path for nonfinal debs' do

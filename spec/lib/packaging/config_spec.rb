@@ -223,7 +223,7 @@ describe "Pkg::Config" do
       "./artifacts/aix/7.1/PC1/ppc/puppet-agent-5.3.2-1.aix7.1.ppc.rpm"
 
     fedora_artifacts = \
-      "./artifacts/fedora/31/PC1/x86_64/puppet-agent-5.3.2-1.fc31.x86_64.rpm"
+      "./artifacts/fedora/32/PC1/x86_64/puppet-agent-5.3.2-1.fc32.x86_64.rpm"
 
     windows_artifacts = \
       "./artifacts/windows/puppet-agent-x64.msi\n" \
@@ -280,8 +280,8 @@ describe "Pkg::Config" do
     it "should not use 'f' in fedora platform tags" do
       allow(Pkg::Util::Net).to receive(:remote_execute).and_return(fedora_artifacts, nil)
       data = Pkg::Config.platform_data
-      expect(data).to include('fedora-31-x86_64')
-      expect(data).not_to include('fedora-f31-x86_64')
+      expect(data).to include('fedora-32-x86_64')
+      expect(data).not_to include('fedora-f32-x86_64')
     end
 
     it "should collect packages whose extname differ from package_format" do

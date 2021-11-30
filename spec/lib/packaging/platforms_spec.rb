@@ -26,7 +26,7 @@ describe 'Pkg::Platforms' do
 
   describe '#versions_for_platform' do
     it 'should return all supported versions for a given platform' do
-      expect(Pkg::Platforms.versions_for_platform('el')).to match_array(['5', '6', '7', '8'])
+      expect(Pkg::Platforms.versions_for_platform('el')).to match_array(['6', '7', '8'])
     end
 
     it 'should raise an error if given a nonexistent platform' do
@@ -36,7 +36,7 @@ describe 'Pkg::Platforms' do
 
   describe '#codenames' do
     it 'should return all codenames for a given platform' do
-      codenames = ['focal', 'bionic', 'bullseye', 'buster', 'cosmic', 'jessie', 'stretch', 'trusty', 'xenial']
+      codenames = ['focal', 'bionic', 'bullseye', 'buster', 'stretch', 'trusty', 'xenial']
       expect(Pkg::Platforms.codenames).to match_array(codenames)
     end
   end
@@ -101,12 +101,12 @@ describe 'Pkg::Platforms' do
       it 'should return a hash of platform info' do
         expect(Pkg::Platforms.platform_lookup(platform)).to be_instance_of(Hash)
       end
-  
+
       it 'should include at least arch and package format keys' do
         expect(Pkg::Platforms.platform_lookup(platform).keys).to include(:architectures)
         expect(Pkg::Platforms.platform_lookup(platform).keys).to include(:package_format)
       end
-    end 
+    end
   end
 
   describe '#get_attribute' do
@@ -166,7 +166,7 @@ describe 'Pkg::Platforms' do
 
   describe '#generic_platform_tag' do
     it 'fails for unsupported platforms' do
-      expect { Pkg::Platforms.generic_platform_tag('butts') }.to raise_error
+      expect { Pkg::Platforms.generic_platform_tag('noplatform') }.to raise_error
     end
 
     it 'returns a supported platform tag containing the supplied platform' do

@@ -3,6 +3,18 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Removed
+- EOL Platform support removals
+  - (RE-14105) EL 5
+  - (RE-14075) Debian 8
+  - (RE-14108) Fedora 30
+  - (RE-14111) Fedora 31
+  - (RE-14114) OSX 10.14
+  - (maint) OSX 10.13
+  - (maint) Ubuntu 18.10
+
+### Added
+- (PA-3614)  Add macOS 11 to platforms
 - (VANAGON-165) Create methods to replace the need for invoking rake tasks in vanagon. More specifically, methods were made for fetch, load_extras, rpm_repos, deb_repos, ship, ship_to_artifactory, and sign_all.
 
 ## [0.104.0] - 2021-11-10

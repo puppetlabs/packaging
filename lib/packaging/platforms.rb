@@ -22,14 +22,6 @@ module Pkg
       },
 
       'debian' => {
-        '8' => {
-          codename: 'jessie',
-          architectures: ['amd64', 'i386', 'powerpc'],
-          source_architecture: 'source',
-          package_format: 'deb',
-          source_package_formats: DEBIAN_SOURCE_FORMATS,
-          repo: true,
-        },
         '9' => {
           codename: 'stretch',
           architectures: ['amd64', 'i386'],
@@ -57,14 +49,6 @@ module Pkg
       },
 
       'el' => {
-        '5' => {
-          architectures: ['x86_64', 'i386'],
-          source_architecture: 'SRPMS',
-          package_format: 'rpm',
-          source_package_formats: ['src.rpm'],
-          signature_format: 'v3',
-          repo: true,
-        },
         '6' => {
           architectures: ['x86_64', 'i386'],
           source_architecture: 'SRPMS',
@@ -92,22 +76,6 @@ module Pkg
       },
 
       'fedora' => {
-        '30' => {
-          architectures: ['x86_64'],
-          source_architecture: 'SRPMS',
-          package_format: 'rpm',
-          source_package_formats: ['src.rpm'],
-          signature_format: 'v4',
-          repo: true,
-        },
-        '31' => {
-          architectures: ['x86_64'],
-          source_architecture: 'SRPMS',
-          package_format: 'rpm',
-          source_package_formats: ['src.rpm'],
-          signature_format: 'v4',
-          repo: true,
-        },
         '32' => {
           architectures: ['x86_64'],
           source_architecture: 'SRPMS',
@@ -127,16 +95,6 @@ module Pkg
       },
 
       'osx' => {
-        '10.13' => {
-          architectures: ['x86_64'],
-          package_format: 'dmg',
-          repo: false,
-        },
-        '10.14' => {
-          architectures: ['x86_64'],
-          package_format: 'dmg',
-          repo: false,
-        },
         '10.15' => {
           architectures: ['x86_64'],
           package_format: 'dmg',
@@ -228,14 +186,6 @@ module Pkg
         '18.04' => {
           codename: 'bionic',
           architectures: ['amd64', 'ppc64el', 'aarch64'],
-          source_architecture: 'source',
-          package_format: 'deb',
-          source_package_formats: DEBIAN_SOURCE_FORMATS,
-          repo: true,
-        },
-        '18.10' => {
-          codename: 'cosmic',
-          architectures: ['amd64', 'ppc64el'],
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,

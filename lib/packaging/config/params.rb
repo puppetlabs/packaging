@@ -120,6 +120,7 @@ module Pkg::Params
                   :nonfinal_svr4_path,
                   :nonfinal_swix_path,
                   :nonfinal_yum_repo_path,
+                  :notarize_osx,
                   :notify,
                   :nuget_host,
                   :nuget_repo_path,
@@ -334,7 +335,8 @@ module Pkg::Params
               { :var => :pe_feature_branch,       :val => false },
               { :var => :pe_release_branch,       :val => false },
               { :var => :s3_ship,                 :val => false },
-              { :var => :apt_releases,            :val => Pkg::Platforms.codenames }]
+              { :var => :apt_releases,            :val => Pkg::Platforms.codenames },
+              { :var => :notarize_osx,            :val => true }]
 
   # These are variables which, over time, we decided to rename or replace. For
   # backwards compatibility, we assign the value of the old/deprecated

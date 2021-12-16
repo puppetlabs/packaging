@@ -72,6 +72,14 @@ module Pkg
           source_package_formats: ['src.rpm'],
           signature_format: 'v4',
           repo: true,
+        },
+        '9' => {
+          architectures: ['x86_64'],
+          source_architecture: 'SRPMS',
+          package_format: 'rpm',
+          source_package_formats: ['src.rpm'],
+          signature_format: 'v4',
+          repo: true,
         }
       },
 

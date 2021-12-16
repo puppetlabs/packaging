@@ -14,6 +14,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
   - (maint) Ubuntu 18.10
 
 ### Added
+- (PA-4117) Add el-9 to platforms
 - (PA-3614)  Add macOS 11 to platforms
 - (VANAGON-165) Create methods to replace the need for invoking rake tasks in vanagon. More specifically, methods were made for fetch, load_extras, rpm_repos, deb_repos, ship, ship_to_artifactory, and sign_all.
 

@@ -640,14 +640,18 @@ namespace :pl do
 
   # It is odd to namespace this ship task under :jenkins, but this task is
   # intended to be a component of the jenkins-based build workflow even if it
-  # doesn't interact with jenkins directly. The :target argument is so that we
-  # can invoke this task with a subdirectory of the standard distribution
-  # server path. That way we can separate out built artifacts from
-  # signed/actually shipped artifacts e.g. $path/shipped/ or $path/artifacts.
+  # doesn't interact with jenkins directly.
+
+  # The :target argument is so that we can invoke this task with a
+  # subdirectory of the standard distribution server path. That way we
+  # can separate out built artifacts from signed/actually shipped
+  # artifacts: $path/shipped or $path/artifacts.
+
   namespace :jenkins do
-    # The equivalent to invoking this task is calling Pkg::Util::Ship.ship_to_artifactory(local_directory, target)
     desc 'ship pkg directory contents to artifactory'
     task :ship_to_artifactory, :local_dir do |_t, args|
+      # The equivalent to invoking this task is calling
+      # Pkg::Util::Ship.ship_to_artifactory(local_directory, target)
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')
       unless Pkg::Config.project
         fail "Error: 'project' must be set in build_defaults.yaml or " \
@@ -655,9 +659,15 @@ namespace :pl do
       end
 
       artifactory = Pkg::ManageArtifactory.new(Pkg::Config.project, Pkg::Config.ref)
-
       local_dir = args.local_dir || 'pkg'
-      Dir.glob("#{local_dir}/**/*").reject { |e| File.directory? e }.each do |artifact|
+
+      # Artifactory generates its own 'sha1' files. Shipping them confuses Artifactory
+      # terribly.
+      shippable = Dir.glob("#{local_dir}/**/*").reject do |e|
+        File.directory?(e) || File.extname(e) == '.sha1'
+      end
+
+      shippable.each do |artifact|
         # Always deploy yamls and jsons
         if artifact.end_with?('.yaml', '.json')
           artifactory.deploy_package(artifact)

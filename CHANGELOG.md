@@ -3,6 +3,9 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Fixed
+- (maint) Updated ship.rake to not ship .sha1 files to Artifactory. Artifactory has its own
+  checksum method and handing it .sha1 files confuses it.
 
 ## [0.105.0] - 2022-01-06
 ### Removed

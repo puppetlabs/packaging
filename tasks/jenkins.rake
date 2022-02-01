@@ -262,7 +262,7 @@ namespace :pl do
         ship_gem
       )
       tasks.map { |t| "pl:#{t}" }.each do |t|
-        puts "Running #{t} . . ."
+        puts "Running \"#{t}\""
         Rake::Task[t].invoke
       end
       # mark the build as successfully shipped
@@ -276,6 +276,9 @@ namespace :pl do
     end
 
     task :stage_nightlies => "pl:fetch" do
+      # debian weirdness: ship_nightly_debs uses the old methodology that posts to
+      # apt.puppet.com; stage_nightly_debs uses the updated methodology that posts to
+      # apt.repos.puppet.com
       tasks = %w(
         jenkins:retrieve
         jenkins:sign_all
@@ -286,15 +289,24 @@ namespace :pl do
         ship_nightly_msi
       )
       tasks.map { |t| "pl:#{t}" }.each do |t|
-        puts "Running #{t}:"
+        puts "Running \"#{t}\""
         Rake::Task[t].invoke
       end
     end
 
     task :ship_nightlies => "pl:fetch" do
+      ## nightlies.puppet.com
       Rake::Task['pl:jenkins:stage_nightlies'].invoke
       Rake::Task['pl:remote:update_nightly_repos'].invoke
       Rake::Task['pl:remote:deploy_nightlies_to_s3'].invoke
+
+      # This serves as a cheap feature toggle to avoid things not ready to
+      # use it. It should be removed in future versions.
+      if ENV['NIGHTLY_SHIP_TO_GCP']
+        ## apt.repos.puppet.com
+        Rake::Task['pl:stage_nightly_debs'].invoke
+        Rake::Task['pl:remote:sync_apt_repo_to_gcp'].invoke
+      end
     end
 
     task :ship_final => "pl:fetch" do

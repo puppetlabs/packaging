@@ -4,9 +4,12 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 ### Added
-(RE-13698) Added support to ship nightly debs to apt.repos.puppet.com. Introduced a temporary
+- (RE-13698) Added support to ship nightly debs to apt.repos.puppet.com. Introduced a temporary
   feature toggle, via the "NIGHTLY_SHIP_TO_GCP" environment variable that will add shipping
   to GCP as part of the pl:jenkins:ship_nightly task
+
+### Changed
+- (maint) Change to dependency of the Artifactory gem to ~> 3.0; 2.0 is very, very old.
 
 ## [0.106.0] - 2022-01-24
 ### Fixed

@@ -9,6 +9,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
   to GCP as part of the pl:jenkins:ship_nightly task
 
 ### Changed
+- (maint) Allow support for user@host for ssh to the solaris signing server
 - (maint) Change to dependency of the Artifactory gem to ~> 3.0; 2.0 is very, very old.
 
 ## [0.106.0] - 2022-01-24

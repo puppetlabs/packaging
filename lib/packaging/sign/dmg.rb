@@ -32,6 +32,29 @@ module Pkg::Sign::Dmg
 
       dmg_basenames = dmgs.map { |d| File.basename(d, '.dmg') }.join(' ')
 
+      notarization_commands = ''
+
+      if Pkg::Config.notarize_osx
+        notarization_commands = %W[
+          notarization_command="xcrun altool --notarize-app --primary-bundle-id "$dmg"
+            -u $PUPPET_APPLE_DEV_EMAIL -p $PUPPET_APPLE_DEV_PW --asc-provider $ASC_PROVIDER
+            --file #{remote_working_directory}/$dmg.dmg" ;
+          UUID=$($notarization_command | grep -Ewo '[[:xdigit:]]{8}(-[[:xdigit:]]{4}){3}-[[:xdigit:]]{12}') ;
+          notarization_info="xcrun altool --notarization-info $UUID -u $PUPPET_APPLE_DEV_EMAIL -p $PUPPET_APPLE_DEV_PW" ;
+          while $notarization_info | grep -q 'in progress'; do
+            echo "Waiting on Apple Notarization Service... sleep 10 and try again..." ;
+            sleep 10 ;
+          done ;
+          if $notarization_info | grep -q 'Package Approved'; then
+            echo "Package approved by apple notarization service. Stapling ticket to package." ;
+            xcrun stapler staple #{remote_working_directory}/$dmg.dmg ;
+          else
+            echo "Package could not be approved by apple notarization service. Exiting signing process..." ;
+            exit 1 ;
+          fi ;
+          ].join(' ')
+      end
+
       sign_package_command = %W[
         for dmg in #{dmg_basenames}; do
           /usr/bin/hdiutil attach #{remote_working_directory}/$dmg.dmg
@@ -58,6 +81,8 @@ module Pkg::Sign::Dmg
           /usr/bin/hdiutil create -size 100m -volname $dmg
             -srcfolder #{signed_items_directory}/ #{remote_working_directory}/$dmg.dmg ;
           /bin/rm #{signed_items_directory}/* ;
+
+          #{notarization_commands}
         done
       ].join(' ')
 

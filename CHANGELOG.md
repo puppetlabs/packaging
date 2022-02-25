@@ -32,8 +32,6 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 - (PA-4117) Add el-9 to platforms
 - (PA-3614)  Add macOS 11 to platforms
 - (VANAGON-165) Create methods to replace the need for invoking rake tasks in vanagon. More specifically, methods were made for fetch, load_extras, rpm_repos, deb_repos, ship, ship_to_artifactory, and sign_all.
-- (RE-13380) Added support for Apple Notarization. Sends package to Apple Notarization 
-  service, and then staples notarization ticket to package.
 
 ## [0.104.0] - 2021-11-10
 ### Added

@@ -55,7 +55,7 @@ module Pkg::Sign::Dmg
 
           /usr/bin/hdiutil detach #{dmg_mount_point} -quiet ;
           /bin/rm #{remote_working_directory}/$dmg.dmg ;
-          /usr/bin/hdiutil create -size 100m -volname $dmg
+          /usr/bin/hdiutil create -volname $dmg
             -srcfolder #{signed_items_directory}/ #{remote_working_directory}/$dmg.dmg ;
           /bin/rm #{signed_items_directory}/* ;
         done

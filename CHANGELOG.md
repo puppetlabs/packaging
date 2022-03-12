@@ -11,6 +11,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ### Changed
 - (maint) Allow support for user@host for ssh to the solaris signing server
 - (maint) Change to dependency of the Artifactory gem to ~> 3.0; 2.0 is very, very old.
+- (maint) Updated the signing certificate for Solaris
 
 ## [0.106.0] - 2022-01-24
 ### Fixed

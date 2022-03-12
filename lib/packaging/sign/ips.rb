@@ -45,10 +45,10 @@ module Pkg::Sign::Ips
 
       # We sign the entire repo
       # Paths to the  .pem files should live elsewhere rather than hardcoded here.
-      sign_cmd = "sudo -E /usr/bin/pkgsign -c /root/signing/signing_cert_2020.pem \
-                  -i /root/signing/Thawte_SHA256_Code_Signing_CA.pem \
-                  -i /root/signing/Thawte_Primary_Root_CA.pem \
-                  -k /root/signing/signing_key_2020.pem \
+      sign_cmd = "sudo -E /usr/bin/pkgsign -c /root/signing/signing_cert_2022.pem \
+                  -i /root/signing/DigiCert_Code_Signing_Certificate.pem \
+                  -i /root/signing/DigiCert_Trusted_Root.pem \
+                  -k /root/signing/signing_key_2022.pem \
                   -s 'file://#{work_dir}/repo' '*'"
       puts "Signing #{package} with #{sign_cmd} in #{work_dir}"
       Pkg::Util::Net.remote_execute(ssh_host_spec, sign_cmd.squeeze(' '))

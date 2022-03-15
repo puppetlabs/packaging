@@ -7,6 +7,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 - (RE-13698) Added support to ship nightly debs to apt.repos.puppet.com. Introduced a temporary
   feature toggle, via the "NIGHTLY_SHIP_TO_GCP" environment variable that will add shipping
   to GCP as part of the pl:jenkins:ship_nightly task
+- (PA-4219) Adds support for macOS 12 Monterey
 
 ### Changed
 - (maint) Allow support for user@host for ssh to the solaris signing server

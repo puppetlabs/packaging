@@ -314,6 +314,14 @@ namespace :pl do
       Rake::Task['pl:remote:update_foss_repos'].invoke
       Rake::Task['pl:remote:deploy_final_builds_to_s3'].invoke
       Rake::Task['pl:remote:deploy_to_rsync_server'].invoke
+
+      # This serves as a cheap feature toggle to avoid things not ready to
+      # use it. It should be removed in future versions.
+      if ENV['STABLE_SHIP_TO_GCP']
+        ## apt.repos.puppet.com
+        Rake::Task['pl:stage_stable_debs'].invoke
+        Rake::Task['pl:remote:sync_apt_repo_to_gcp'].invoke
+      end
     end
 
     task :stage_release_packages => "pl:fetch" do

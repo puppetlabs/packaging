@@ -38,7 +38,7 @@ module Pkg::Sign::Dmg
             -mountpoint #{dmg_mount_point} -nobrowse -quiet ;
 
           /usr/bin/security -q unlock-keychain
-            -p #{Pkg::Config.osx_signing_keychain_pw} #{Pkg::Config.osx_signing_keychain} ;
+            -p "#{Pkg::Config.osx_signing_keychain_pw}" "#{Pkg::Config.osx_signing_keychain}" ;
 
           for pkg in #{dmg_mount_point}/*.pkg; do
             pkg_basename=$(basename $pkg) ;
@@ -48,8 +48,8 @@ module Pkg::Sign::Dmg
               continue ;
             fi ;
 
-            /usr/bin/productsign --keychain #{Pkg::Config.osx_signing_keychain}
-              --sign #{Pkg::Config.osx_signing_cert}
+            /usr/bin/productsign --keychain "#{Pkg::Config.osx_signing_keychain}"
+              --sign "#{Pkg::Config.osx_signing_cert}"
               $pkg #{signed_items_directory}/$pkg_basename ;
           done ;
 

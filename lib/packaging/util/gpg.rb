@@ -1,6 +1,5 @@
 module Pkg::Util::Gpg
   class << self
-
     # Please note that this method is not used in determining what key is used
     # to sign the debian repos. That is defined in the freight config that
     # lives on our internal repo staging host. The debian conf/distribution
@@ -31,14 +30,14 @@ module Pkg::Util::Gpg
 
     def kill_keychain
       if keychain
-        stdout, _, _ = Pkg::Util::Execution.capture3("#{keychain} -k mine")
+        stdout, = Pkg::Util::Execution.capture3("#{keychain} -k mine")
         stdout
       end
     end
 
     def start_keychain
       if keychain
-        keychain_output, _, _ = Pkg::Util::Execution.capture3("#{keychain} -q --agents gpg --eval #{key}")
+        keychain_output, = Pkg::Util::Execution.capture3("#{keychain} -q --agents gpg --eval #{key}")
         keychain_output.chomp!
         new_env = keychain_output.match(/GPG_AGENT_INFO=([^;]*)/)
         ENV["GPG_AGENT_INFO"] = new_env[1]
@@ -56,7 +55,7 @@ module Pkg::Util::Gpg
           return true
         end
         use_tty = "--no-tty --use-agent" if ENV['RPM_GPG_AGENT']
-        stdout, _, _ = Pkg::Util::Execution.capture3("#{gpg} #{use_tty} --armor --detach-sign -u #{key} #{file}")
+        stdout, = Pkg::Util::Execution.capture3("#{gpg} #{use_tty} --armor --detach-sign -u #{key} #{file}")
         stdout
       else
         fail "No gpg available. Cannot sign #{file}."

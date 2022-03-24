@@ -123,7 +123,7 @@ namespace :pl do
     end
 
     desc "Update remote ips repository on #{Pkg::Config.ips_host}"
-    task :update_ips_repo  => 'pl:fetch' do
+    task :update_ips_repo => 'pl:fetch' do
       if Dir['pkg/ips/pkgs/**/*'].empty? && Dir['pkg/solaris/11/**/*'].empty?
         $stdout.puts "Error: there aren't any p5p packages in pkg/ips/pkgs or pkg/solaris/11."
         next
@@ -132,11 +132,11 @@ namespace :pl do
       source_dir = 'pkg/solaris/11/'
       source_dir = 'pkg/ips/pkgs/' unless Dir['pkg/ips/pkgs/**/*'].empty?
 
-      tmpdir, _ = Pkg::Util::Net.remote_execute(
-                Pkg::Config.ips_host,
+      tmpdir, = Pkg::Util::Net.remote_execute(
+        Pkg::Config.ips_host,
                 'mktemp -d -p /var/tmp',
                 { capture_output: true }
-              )
+      )
       tmpdir.chomp!
 
       Pkg::Util::Net.rsync_to(source_dir, Pkg::Config.ips_host, tmpdir)
@@ -240,8 +240,8 @@ namespace :pl do
 
     ##
     ## S3 / GCP syncing
-    S3_REPO_SYNC = 'sudo /usr/local/bin/s3_repo_sync.sh'
-    GCP_REPO_SYNC = '/usr/local/bin/gcp_repo_sync'
+    S3_REPO_SYNC = 'sudo /usr/local/bin/s3_repo_sync.sh'.freeze
+    GCP_REPO_SYNC = '/usr/local/bin/gcp_repo_sync'.freeze
 
     desc "Sync signed apt repos from #{Pkg::Config.apt_signing_server} to AWS S3"
     task :deploy_apt_repo_to_s3 => 'pl:fetch' do
@@ -372,7 +372,8 @@ namespace :pl do
   desc "Ship nightly debs to #{Pkg::Config.apt_signing_server}"
   task ship_nightly_debs: 'pl:fetch' do
     Pkg::Util::Ship.ship_debs(
-      'pkg', Pkg::Config.nonfinal_apt_repo_staging_path, chattr: false, nonfinal: true)
+      'pkg', Pkg::Config.nonfinal_apt_repo_staging_path, chattr: false, nonfinal: true
+    )
   end
 
   ## This is the new-style apt stager
@@ -635,7 +636,6 @@ namespace :pl do
         puts " * #{err}"
       end
     end
-
   end
 
   # It is odd to namespace this ship task under :jenkins, but this task is

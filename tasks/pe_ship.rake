@@ -74,7 +74,6 @@ if Pkg::Config.build_pe
             Rake::Task["pe:remote:apt"].reenable
             Rake::Task["pe:remote:apt"].invoke(target_path, dist)
           end
-
         end
       end
 
@@ -111,19 +110,15 @@ if Pkg::Config.build_pe
           end
 
           unless Dir["pkg/pe/deb/#{dist}/*_all.deb"].empty?
-            Pkg::Platforms.arches_for_codename(dist).each do |arch|
-              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*_all.deb", Pkg::Config.apt_host, "#{base_path}/#{dist}-#{arch}/")
+            Pkg::Platforms.arches_for_codename(dist).each do |a|
+              Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*_all.deb", Pkg::Config.apt_host, "#{base_path}/#{dist}-#{a}/")
             end
           end
 
-          unless Dir["pkg/pe/deb/#{dist}/*"].select { |i| i !~ /^.*\.deb$/ }.empty?
+          unless Dir["pkg/pe/deb/#{dist}/*"].reject { |i| i =~ /^.*\.deb$/ }.empty?
             # Ship source files to source dir, e.g. 'squeeze-source'
             Pkg::Util::Net.rsync_to("pkg/pe/deb/#{dist}/*", Pkg::Config.apt_host, "#{base_path}/#{dist}-source", extra_flags: ["--exclude '*.deb'", "--ignore-existing"])
           end
-
-          files = Dir["pkg/pe/deb/#{dist}/*{_#{arch},all}.deb"].map { |f| "#{archive_path}/#{File.basename(f)}" }
-
-          files += Dir["pkg/pe/deb/#{dist}/*"].select { |f| f !~ /^.*\.deb$/ }.map { |f| "#{base_path}/#{dist}-source/#{File.basename(f)}" }
         end
       end
       # If this is not a feature branch or release branch, we need to link the
@@ -137,14 +132,13 @@ if Pkg::Config.build_pe
     namespace :remote do
       desc "Update remote rpm repodata for PE on #{Pkg::Config.yum_host}"
       task :update_yum_repo => "pl:fetch" do
-
         # Paths to the repos.
         repo_base_path = Pkg::Config.yum_target_path
 
         # This entire command is going to be passed across SSH, but it's unwieldy on a
         # single line. By breaking it into a series of concatenated strings, we can maintain
         # a semblance of formatting and structure (nevermind readability).
-        command  = %(for dir in #{repo_base_path}/{#{rpm_family_and_version.join(",")}}-*; do)
+        command  = %(for dir in #{repo_base_path}/{#{rpm_family_and_version.join(',')}}-*; do)
         command += %(  sudo createrepo --checksum=sha --checkts --update --delta-workers=0 --quiet --database --update $dir; )
         command += %(done; )
         command += %(sync)
@@ -159,7 +153,7 @@ if Pkg::Config.build_pe
         incoming_dir or fail "Adding packages to apt repo requires an incoming directory"
         Pkg::Util::RakeUtils.invoke_task("pl:fetch")
 
-        cmd = <<-eos
+        cmd = <<-COMMAND
           if ! flock --wait 1200 /opt/tools/aptly/db/LOCK --command /bin/true; then
             echo "Unable to acquire aptly lock, giving up" 1>&2
             exit 1
@@ -170,12 +164,12 @@ if Pkg::Config.build_pe
           else
             aptly publish repo -gpg-key=\"8BBEB79B\" #{Pkg::Config::pe_version}-#{dist} #{Pkg::Config::pe_version}
           fi
-        eos
+        COMMAND
         stdout, stderr = Pkg::Util::Net.remote_execute(
-                  Pkg::Config.apt_host,
+          Pkg::Config.apt_host,
                   cmd,
                   { capture_output: true }
-                )
+        )
 
         output = stdout.to_s + stderr.to_s
 
@@ -190,7 +184,6 @@ if Pkg::Config.build_pe
 
         puts "Cleaning up apt repo 'incoming' dir on #{Pkg::Config.apt_host}"
         Pkg::Util::Net.remote_execute(Pkg::Config.apt_host, "rm -r #{incoming_dir}")
-
       end
 
       # Throw more tires on the fire
@@ -200,7 +193,7 @@ if Pkg::Config.build_pe
         repo_base_path = Pkg::Config.yum_target_path
         feature_repo_path = Pkg::Config.yum_target_path(true)
         pkgs = FileList['pkg/pe/rpm/**/*.rpm'].select { |path| path.gsub!('pkg/pe/rpm/', '') }
-        command  = %(for pkg in #{pkgs.join(' ')}; do)
+        command = %(for pkg in #{pkgs.join(' ')}; do)
         command += %(  sudo ln -f "#{repo_base_path}/$( dirname ${pkg} )/$( basename ${pkg} )" "#{feature_repo_path}/$( dirname ${pkg} )/" ; )
         command += %(done; )
         command += %(sync)
@@ -214,7 +207,7 @@ if Pkg::Config.build_pe
         base_path = Pkg::Config.apt_target_path
         feature_base_path = Pkg::Config.apt_target_path(true)
         pkgs = FileList["pkg/pe/deb/**/*.deb"].select { |path| path.gsub!('pkg/pe/deb/', '') }
-        command  = %(for pkg in #{pkgs.join(' ')}; do)
+        command = %(for pkg in #{pkgs.join(' ')}; do)
         command += %(  sudo ln -f "#{base_path}/$( dirname ${pkg} )-amd64/$( basename ${pkg} )" "#{feature_base_path}/$( dirname ${pkg} )-amd64/" ; )
         command += %(done; )
         command += %(sync)

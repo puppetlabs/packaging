@@ -2,14 +2,12 @@
 require 'fileutils'
 
 module Pkg::Deb::Repo
-
   class << self
-
     # This is the default set of arches we are using for our reprepro repos. We
     # take this list and combine it with the list of supported arches for each
     # given platform to ensure a complete set of architectures. We use this
     # when we initially create the repos and when we sign the repos.
-    DEBIAN_PACKAGING_ARCHES = ['i386', 'amd64', 'arm64', 'armel', 'armhf', 'powerpc', 'ppc64el', 'sparc', 'mips', 'mipsel']
+    DEBIAN_PACKAGING_ARCHES = ['i386', 'amd64', 'arm64', 'armel', 'armhf', 'powerpc', 'ppc64el', 'sparc', 'mips', 'mipsel'].freeze
 
     def reprepro_repo_name
       if Pkg::Config.apt_repo_name
@@ -43,7 +41,7 @@ module Pkg::Deb::Repo
       # First test if the directory even exists
       #
       begin
-        stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} --spider -r -l 1 --no-parent #{repo_base} 2>&1")
+        stdout, = Pkg::Util::Execution.capture3("#{wget} --spider -r -l 1 --no-parent #{repo_base} 2>&1")
       rescue RuntimeError
         warn "No debian repos available for #{Pkg::Config.project} at #{Pkg::Config.ref}."
         return
@@ -62,7 +60,7 @@ module Pkg::Deb::Repo
         # We want to skip the base_url, which wget returns as one of the results
         next if "#{url}/" == repo_base
         platform_tag = Pkg::Paths.tag_from_artifact_path(url)
-        platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
+        platform, version, = Pkg::Platforms.parse_platform_tag(platform_tag)
         codename = Pkg::Platforms.codename_for_platform_version(platform, version)
         repoconfig = ["# Packages for #{Pkg::Config.project} built from ref #{Pkg::Config.ref}",
                       "deb #{url} #{codename} #{reprepro_repo_name}"]
@@ -76,9 +74,9 @@ module Pkg::Deb::Repo
       wget = Pkg::Util::Tool.check_tool("wget")
       FileUtils.mkdir_p("pkg/#{target}")
       config_url = "#{base_url}/#{target}/deb/"
-      stdout, _, _ = Pkg::Util::Execution.capture3("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
+      stdout, = Pkg::Util::Execution.capture3("#{wget} -r -np -nH --cut-dirs 3 -P pkg/#{target} --reject 'index*' #{config_url}")
       stdout
-    rescue => e
+    rescue StandardError => e
       fail "Couldn't retrieve deb apt repo configs.\n#{e}"
     end
 
@@ -95,13 +93,13 @@ module Pkg::Deb::Repo
 
       artifact_paths.each do |path|
         platform_tag = Pkg::Paths.tag_from_artifact_path(path)
-        platform, version, _ = Pkg::Platforms. parse_platform_tag(platform_tag)
+        platform, version, = Pkg::Platforms. parse_platform_tag(platform_tag)
         codename = Pkg::Platforms.codename_for_platform_version(platform, version)
         arches = Pkg::Platforms.arches_for_codename(codename)
 
         cmd << "mkdir -p #{codename}/conf && "
         cmd << "pushd #{codename} ; "
-        cmd << %Q( [ -e 'conf/distributions' ] || echo "
+        cmd << %( [ -e 'conf/distributions' ] || echo "
 Origin: Puppet Labs
 Label: Puppet Labs
 Codename: #{codename}
@@ -139,7 +137,7 @@ Description: Apt repository for acceptance testing" >> conf/distributions ; )
     end
 
     def ship_repo_configs(target = "repo_configs")
-      if (!File.exist?("pkg/#{target}/deb")) || Pkg::Util::File.empty_dir?("pkg/#{target}/deb")
+      if !File.exist?("pkg/#{target}/deb") || Pkg::Util::File.empty_dir?("pkg/#{target}/deb")
         warn "No repo configs have been generated! Try pl:deb_repo_configs."
         return
       end
@@ -178,7 +176,7 @@ Description: #{message} for #{dist}
 SignWith: #{Pkg::Config.gpg_key}"
           end
 
-          stdout, _, _ = Pkg::Util::Execution.capture3("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
+          stdout, = Pkg::Util::Execution.capture3("#{reprepro} -vvv --confdir ./conf --dbdir ./db --basedir ./ export")
           stdout
         end
       end
@@ -204,7 +202,7 @@ SignWith: #{Pkg::Config.gpg_key}"
       # You may think "rsync doesn't actually remove the sticky bit, let's
       # remove the Dugo-s from the chmod". However, that will make your rsyncs
       # fail due to permission errors.
-      options = %w(
+      options = %w[
         rsync
         --itemize-changes
         --hard-links
@@ -222,14 +220,14 @@ SignWith: #{Pkg::Config.gpg_key}"
         --no-group
         --exclude='dists/*-*'
         --exclude='pool/*-*'
-      )
+      ]
 
       options << '--dry-run' if dryrun
       options << path
       if !destination.nil?
         options << "#{destination}:#{dest_path.parent}"
       else
-        options << "#{dest_path.parent}"
+        options << dest_path.parent.to_s
       end
       options.join("\s")
     end
@@ -259,6 +257,5 @@ SignWith: #{Pkg::Config.gpg_key}"
         Pkg::Util::Net.remote_execute(destination_server, cp_command)
       end
     end
-
   end
 end

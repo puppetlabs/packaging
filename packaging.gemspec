@@ -15,20 +15,20 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = '>= 2.3.0'
 
+  gem.add_development_dependency('pry')
   gem.add_development_dependency('pry-byebug')
   gem.add_development_dependency('rspec', ['~> 2.14.1'])
-  gem.add_development_dependency('rubocop', ['~> 0.24.1'])
-  gem.add_development_dependency('pry')
+  gem.add_development_dependency('rubocop', ['~> 0.49'])
 
   gem.add_runtime_dependency('apt_stage_artifacts')
   gem.add_runtime_dependency('artifactory', ['~> 3'])
   gem.add_runtime_dependency('csv', ['3.1.5'])
-  gem.add_runtime_dependency('release-metrics')
   gem.add_runtime_dependency('rake', ['>= 12.3'])
+  gem.add_runtime_dependency('release-metrics')
 
   gem.require_path = 'lib'
 
   # Ensure the gem is built out of versioned files
-  gem.files = Dir['{lib,spec,static_artifacts,tasks,templates}/**/*', 'README*', 'LICENSE*'] & `git ls-files -z`.split("\0")
+  gem.files = Dir['{lib,spec,static_artifacts,tasks,templates}/**/*', 'README*', 'LICENSE*'] & %x(git ls-files -z).split("\0")
   gem.test_files = Dir['spec/**/*_spec.rb']
 end

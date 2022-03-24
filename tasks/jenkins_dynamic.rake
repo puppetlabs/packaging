@@ -36,27 +36,27 @@ namespace :pl do
 
       # Generate an XML file for every job configuration erb and attempt to
       # create a jenkins job from that XML config
-      templates.each do |t|
-        erb_template  = File.join(template_dir, t)
-        xml_file = File.join(work_dir, t.gsub('.erb', ''))
+      templates.each do |template|
+        erb_template = File.join(template_dir, template)
+        xml_file = File.join(work_dir, template.gsub('.erb', ''))
         Pkg::Util::File.erb_file(erb_template, xml_file, nil, :binding => Pkg::Config.get_binding)
         # If we're creating a job meant to run on a windows box, we need to limit the path length
         # Max path length allowed is 260 chars, which we manage to exceed with this job name. Luckily,
         # simply using the short sha rather than the long sha gets us just under the length limit. Gross fix,
         # I know, but hey, it works for now.
-        if t == "msi.xml.erb"
+        if template == "msi.xml.erb"
           ref = Pkg::Config.short_ref
         else
           ref = Pkg::Config.ref
         end
-        job_name  = "#{Pkg::Config.project}-#{t.gsub('.xml.erb', '')}-#{Pkg::Config.build_date}-#{ref}"
+        job_name = "#{Pkg::Config.project}-#{template.gsub('.xml.erb', '')}-#{Pkg::Config.build_date}-#{ref}"
         puts "Checking for existence of #{job_name}..."
         if Pkg::Util::Jenkins.jenkins_job_exists?(job_name)
           raise "Job #{job_name} already exists on #{Pkg::Config.jenkins_build_host}"
         else
           Pkg::Util::Execution.retry_on_fail(:times => 3) do
             url = Pkg::Util::Jenkins.create_jenkins_job(job_name, xml_file)
-            if t == "packaging.xml.erb"
+            if template == "packaging.xml.erb"
               ENV["PACKAGE_BUILD_URL"] = url
             end
             puts "Verifying job created successfully..."
@@ -71,7 +71,7 @@ namespace :pl do
       packaging_name = "#{Pkg::Config.project}-packaging-#{Pkg::Config.build_date}-#{Pkg::Config.ref}"
       Pkg::Util::RakeUtils.invoke_task("pl:jenkins:trigger_dynamic_job", packaging_name)
 
-      if poll_interval > 0
+      if poll_interval.positive?
         ##
         # Wait for the '*packaging*' job to finish.
         #
@@ -155,15 +155,15 @@ namespace :pl do
       # Construct the parameters, which is an array of hashes we turn into JSON
       parameters = [{ "name" => "BUILD_PROPERTIES", "file"  => "file0" },
                     { "name" => "PROJECT_BUNDLE",   "file"  => "file1" },
-                    { "name" => "PROJECT",          "value" => "#{Pkg::Config.project}" },
-                    { "name" => "METRICS",          "value" => "#{metrics}" }]
+                    { "name" => "PROJECT",          "value" => Pkg::Config.project.to_s },
+                    { "name" => "METRICS",          "value" => metrics.to_s }]
 
       # Contruct the json string
       json = JSON.generate("parameter" => parameters)
 
       # The args array that holds  all of the arguments we pass
       # to the curl utility method.
-      curl_args =  [
+      curl_args = [
       "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
       "-Fname=PROJECT_BUNDLE",   "-Ffile1=@#{bundle}",
       "-Fname=PROJECT",          "-Fvalue=#{Pkg::Config.project}",

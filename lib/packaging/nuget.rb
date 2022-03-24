@@ -32,7 +32,6 @@ module Pkg::Nuget
           stdout, retval = Pkg::Util::Net.curl_form_data("#{uri}/#{package_path}", form_data + package_form_data)
         end
         fail "The Package upload (curl) failed with error #{retval}" unless Pkg::Util::Execution.success?(retval)
-        stdout
       end
     end
   end

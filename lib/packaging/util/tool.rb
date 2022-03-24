@@ -1,7 +1,6 @@
 # Utility methods for handling system binaries
 
 module Pkg::Util::Tool
-
   #   Set up utility methods for handling system binaries
   #
   class << self
@@ -15,7 +14,7 @@ module Pkg::Util::Tool
 
         if Pkg::Util::OS.windows? && File.extname(location).empty?
           exts = ENV['PATHEXT']
-          exts = exts ? exts.split(File::PATH_SEPARATOR) : %w(.EXE .BAT .CMD .COM)
+          exts = exts ? exts.split(File::PATH_SEPARATOR) : %w[.EXE .BAT .CMD .COM]
           exts.each do |ext|
             locationext = File.expand_path(location + ext)
 
@@ -30,12 +29,10 @@ module Pkg::Util::Tool
     end
 
     alias :has_tool :find_tool
-
   end
 
   #   Set up paths to system tools we use in the packaging repo
   #   no matter what distribution we're packaging for.
 
   GIT = Pkg::Util::Tool.check_tool('git')
-
 end

@@ -67,7 +67,7 @@ module Pkg::Retrieve
       warn "Could not find `wget` tool. Falling back to rsyncing from #{Pkg::Config.distribution_server}."
       begin
         Pkg::Util::Net.rsync_from("#{rsync_path}/", Pkg::Config.distribution_server, "#{local_target}/")
-      rescue => e
+      rescue StandardError => e
         fail "Couldn't rsync packages from distribution server.\n#{e}"
       end
     end

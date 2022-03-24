@@ -57,18 +57,24 @@ def create_default_gem_spec
     s.test_files = FileList[Pkg::Config.gem_test_files.split(' ')]          unless Pkg::Config.gem_test_files.nil?
     s.license = Pkg::Config.gem_license                                     unless Pkg::Config.gem_license.nil?
     s.rubyforge_project = Pkg::Config.gem_forge_project                     unless Pkg::Config.gem_forge_project.nil?
-    Pkg::Config.gem_rdoc_options.each do |option|
-      s.rdoc_options << option
-    end unless Pkg::Config.gem_rdoc_options.nil?
+    unless Pkg::Config.gem_rdoc_options.nil?
+      Pkg::Config.gem_rdoc_options.each do |option|
+        s.rdoc_options << option
+      end
+    end
   end
 
-  Pkg::Config.gem_runtime_dependencies.each do |gem, version|
-    spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => :runtime)
-  end unless Pkg::Config.gem_runtime_dependencies.nil?
+  unless Pkg::Config.gem_runtime_dependencies.nil?
+    Pkg::Config.gem_runtime_dependencies.each do |gem, version|
+      spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => :runtime)
+    end
+  end
 
-  Pkg::Config.gem_development_dependencies.each do |gem, version|
-    spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => :development)
-  end unless Pkg::Config.gem_development_dependencies.nil?
+  unless Pkg::Config.gem_development_dependencies.nil?
+    Pkg::Config.gem_development_dependencies.each do |gem, version|
+      spec = add_gem_dependency(:spec => spec, :gem => gem, :version => version, :type => :development)
+    end
+  end
   spec
 end
 
@@ -107,9 +113,11 @@ def create_platform_specific_gems
   Pkg::Config.gem_platform_dependencies.each do |platform, dependency_hash|
     spec = create_default_gem_spec
     pf = Gem::Platform.new(platform)
-    fail "
-      Platform: '#{platform}' is not recognized by rubygems.
-      This is probably an erroneous 'gem_platform_dependencies' entry!" if unknown_gems_platform?(pf)
+    if unknown_gems_platform?(pf)
+      fail "
+        Platform: '#{platform}' is not recognized by rubygems.
+        This is probably an erroneous 'gem_platform_dependencies' entry!"
+    end
     spec.platform = pf
     dependency_hash.each do |type, gems|
       t = case type

@@ -2,7 +2,6 @@
 require 'fileutils'
 
 module Pkg::Util::File
-
   class << self
     def exist?(file)
       ::File.exist?(file)
@@ -15,7 +14,7 @@ module Pkg::Util::File
 
     def mktemp
       mktemp = Pkg::Util::Tool.find_tool('mktemp', :required => true)
-      stdout, _, _ = Pkg::Util::Execution.capture3("#{mktemp} -d -t pkgXXXXXX")
+      stdout, = Pkg::Util::Execution.capture3("#{mktemp} -d -t pkgXXXXXX")
       stdout.strip
     end
 
@@ -79,7 +78,7 @@ module Pkg::Util::File
         target_opts = "-C #{target}"
       end
       if file_exists?(source, :required => true)
-        stdout, _, _ = Pkg::Util::Execution.capture3(%Q(#{tar} #{options} #{target_opts} -xf #{source}))
+        stdout, = Pkg::Util::Execution.capture3(%(#{tar} #{options} #{target_opts} -xf #{source}))
         stdout
       end
     end

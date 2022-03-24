@@ -21,7 +21,7 @@ module Pkg::Gem
         data['number'] == gem_version && data['platform'] == gem_platform
       end
       return !gem.empty?
-    rescue => e
+    rescue StandardError => e
       puts "Something went wrong searching for gem '#{gem_name}':"
       puts e
       puts "Perhaps you're shipping '#{gem_name}' for the first time?"
@@ -49,7 +49,7 @@ module Pkg::Gem
       gem_push_command << " --host #{options[:host]}" if options[:host]
       gem_push_command << " --key #{options[:key]}" if options[:key]
       Pkg::Util::Execution.capture3(gem_push_command)
-    rescue => e
+    rescue StandardError => e
       puts "###########################################"
       puts "#  Publishing to rubygems failed. Make sure your .gem/credentials"
       puts "#  file is set up and you are an owner of #{Pkg::Config.gem_name}"

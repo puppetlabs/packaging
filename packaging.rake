@@ -6,7 +6,7 @@ require File.join(File.dirname(__FILE__), 'lib', 'packaging.rb')
 
 # These are ordered
 
-PACKAGING_ROOT = File.expand_path(File.dirname(__FILE__))
+PACKAGING_ROOT = __dir__
 
 @using_loader = true
 

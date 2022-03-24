@@ -1,4 +1,4 @@
-@metrics          = []
+@metrics = []
 def add_shipped_metrics(args)
   @metrics << {
     :type         => 'shipped',
@@ -19,7 +19,7 @@ def post_shipped_metrics
     is_rc        = metric[:is_rc]
 
     uri = URI(Pkg::Config.metrics_url)
-    res = Net::HTTP.post_form(
+    Net::HTTP.post_form(
       uri,
       {
         'type'          => type,

@@ -4,5 +4,4 @@ module Pkg::Sign
   require 'packaging/sign/ips'
   require 'packaging/sign/msi'
   require 'packaging/sign/rpm'
-  module_function
 end

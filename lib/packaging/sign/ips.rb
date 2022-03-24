@@ -67,7 +67,8 @@ module Pkg::Sign::Ips
         Pkg::Util::Net.remote_execute(
           ssh_host_spec,
           "sudo -E /usr/bin/pkg contents -m -g #{signed_dir}/#{package_name} '*' " \
-          "| grep '^signature '")
+          "| grep '^signature '"
+        )
       rescue RuntimeError
         raise "Error: #{package_name} was not signed correctly."
       end

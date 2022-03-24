@@ -87,7 +87,7 @@ module Pkg::Util::Ship
     puts "Do you want to ship the above files to (#{staging_server})?"
     return false unless Pkg::Util.ask_yes_or_no
 
-    extra_flags = %w(--ignore-existing --delay-updates)
+    extra_flags = %w[--ignore-existing --delay-updates]
     extra_flags << '--dry-run' if ENV['DRYRUN']
 
     staged_pkgs.each do |pkg|
@@ -330,7 +330,7 @@ module Pkg::Util::Ship
   def test_ship(vm, ship_task)
     command = 'getent group release || groupadd release'
     Pkg::Util::Net.remote_execute(vm, command)
-    hosts_to_override = %w(
+    hosts_to_override = %w[
       APT_HOST
       DMG_HOST
       GEM_HOST
@@ -349,7 +349,7 @@ module Pkg::Util::Ship
       TAR_STAGING_SERVER
       YUM_STAGING_SERVER
       STAGING_SERVER
-    )
+    ]
     hosts_to_override.each do |host|
       ENV[host] = vm
     end

@@ -8,7 +8,7 @@ if Pkg::Config.pre_tar_task
       require 'bundler'
 
       class UI
-        LEVELS = %w(silent error warn confirm info debug)
+        LEVELS = %w[silent error warn confirm info debug].freeze
 
         def warn(message, newline = nil)
           puts message
@@ -30,15 +30,13 @@ if Pkg::Config.pre_tar_task
           puts message
         end
 
-        def confirm(message, newline = nil)
-        end
+        def confirm(message, newline = nil); end
 
         def debug?
           true
         end
 
-        def ask(message)
-        end
+        def ask(message); end
 
         def quiet?
           false
@@ -54,12 +52,12 @@ if Pkg::Config.pre_tar_task
         end
 
         def silence
-          old_level, @level = @level, "silent"
+          old_level = @level
+          @level = "silent"
           yield
         ensure
           @level = old_level
         end
-
       end
 
       class RGProxy < ::Gem::SilentUI

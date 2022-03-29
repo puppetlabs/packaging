@@ -110,7 +110,7 @@ module Pkg::Util::Net
     ###
     ### Deprecated method implemented as a shim to the new `remote_execute` method
     ###
-    def remote_ssh_cmd(target, command, capture_output = false, extra_options = '', fail_fast = true, trace = false) # rubocop:disable Style/ParameterLists
+    def remote_ssh_cmd(target, command, capture_output = false, extra_options = '', fail_fast = true, trace = false) # rubocop:disable Metrics/ParameterLists
       puts "Warn: \"remote_ssh_cmd\" call in packaging is deprecated. Use \"remote_execute\" instead."
       remote_execute(target, command, {
                        capture_output: capture_output,

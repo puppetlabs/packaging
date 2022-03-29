@@ -189,7 +189,7 @@ module Pkg::Params
                   yum_repo_command
                   yum_repo_name
                   yum_repo_path
-                  yum_staging_server].freeze
+                  yum_staging_server]
 
   # Environment variable overrides for Pkg::Config parameters
   #
@@ -304,7 +304,7 @@ module Pkg::Params
               { :var => :yum_repo_path,           :envvar => :YUM_REPO },
               { :var => :yum_staging_server,      :envvar => :YUM_STAGING_SERVER },
               { :var => :internal_gem_host,       :envvar => :INTERNAL_GEM_HOST },
-             ].freeze
+             ]
   # Default values that are supplied if the user does not supply them
   #
   # usage is the same as above
@@ -333,7 +333,7 @@ module Pkg::Params
               { :var => :pe_feature_branch,       :val => false },
               { :var => :pe_release_branch,       :val => false },
               { :var => :s3_ship,                 :val => false },
-              { :var => :apt_releases,            :val => Pkg::Platforms.codenames }].freeze
+              { :var => :apt_releases,            :val => Pkg::Platforms.codenames }]
 
   # These are variables which, over time, we decided to rename or replace. For
   # backwards compatibility, we assign the value of the old/deprecated
@@ -361,7 +361,7 @@ module Pkg::Params
                     { :oldvar => :yum_host,               :newvar => :swix_host },
                     { :oldvar => :yum_host,               :newvar => :dmg_host },
                     { :oldvar => :yum_host,               :newvar => :tar_host },
-                 ].freeze
+                 ]
 
 
   # These are variables that we have deprecated. If they are encountered in a
@@ -373,7 +373,7 @@ module Pkg::Params
     build_defaults.yaml or project_data.yaml" },
                   { :var => :gpg_name, :message => "
     DEPRECATED, 29-Jul-2014: 'gpg_name' has been replaced with 'gpg_key'.
-                   Please update this field in your build_defaults.yaml" }].freeze
+                   Please update this field in your build_defaults.yaml" }]
 
   # Provide an open-ended template for validating BUILD_PARAMS.
   #
@@ -382,5 +382,5 @@ module Pkg::Params
   #
   VALIDATIONS = [
     { :var => :project, :validations => [:not_empty?] }
-  ].freeze
+  ]
 end

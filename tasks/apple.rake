@@ -9,10 +9,10 @@
 #
 
 # Path to Binaries (Constants)
-CP            = '/bin/cp'.freeze
-INSTALL       = '/usr/bin/install'.freeze
-DITTO         = '/usr/bin/ditto'.freeze
-PKGBUILD      = '/usr/bin/pkgbuild'.freeze
+CP            = '/bin/cp'
+INSTALL       = '/usr/bin/install'
+DITTO         = '/usr/bin/ditto'
+PKGBUILD      = '/usr/bin/pkgbuild'
 
 # Setup task to populate all the variables
 task :setup do

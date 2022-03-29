@@ -13,10 +13,10 @@ module Pkg
     # The Artifactory property that the artifactCleanup user plugin
     # {https://github.com/jfrog/artifactory-user-plugins/tree/master/cleanup/artifactCleanup}
     # uses to tell it to not clean a particular artifact
-    ARTIFACTORY_CLEANUP_SKIP_PROPERTY = 'cleanup.skip'.freeze
+    ARTIFACTORY_CLEANUP_SKIP_PROPERTY = 'cleanup.skip'
 
-    DEFAULT_REPO_TYPE = 'generic'.freeze
-    DEFAULT_REPO_BASE = 'development'.freeze
+    DEFAULT_REPO_TYPE = 'generic'
+    DEFAULT_REPO_BASE = 'development'
 
     # @param project [String] The name of the project this package is for
     # @param project_version [String] The version of the project we want the

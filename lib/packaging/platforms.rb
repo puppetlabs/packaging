@@ -6,7 +6,7 @@ module Pkg
   module Platforms
     module_function
 
-    DEBIAN_SOURCE_FORMATS = ['debian.tar.gz', 'orig.tar.gz', 'dsc', 'changes'].freeze
+    DEBIAN_SOURCE_FORMATS = ['debian.tar.gz', 'orig.tar.gz', 'dsc', 'changes']
 
     # Each element in this hash
     PLATFORM_INFO = {
@@ -227,7 +227,7 @@ module Pkg
           repo: false,
         }
       },
-    }.freeze
+    }
 
     # @return [Array] An array of Strings, containing all of the supported
     #   platforms as defined in PLATFORM_INFO

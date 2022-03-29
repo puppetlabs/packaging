@@ -8,7 +8,7 @@ module Pkg::Util
     # A SHA1 sum is 20 characters long, but Git will match on
     # the first ~8 or so. And 8 is long enough for fun test sums
     # like 'cafebeef' or 'deadfeed`.
-    SHA1 = /[0-9A-F]{8,20}/i.freeze
+    SHA1 = /[0-9A-F]{8,20}/i
 
     def initialize(address, reference)
       @address = address

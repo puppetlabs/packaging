@@ -43,6 +43,9 @@ Layout/MultilineMethodCallIndentation:
 Style/RedundantReturn:
   Enabled: false
 
+Style/MutableConstant:
+  Enabled: false
+
 Lint/AmbiguousOperator:
   Enabled: true
 

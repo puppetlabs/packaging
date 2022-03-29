@@ -8,7 +8,7 @@ if Pkg::Config.pre_tar_task
       require 'bundler'
 
       class UI
-        LEVELS = %w[silent error warn confirm info debug].freeze
+        LEVELS = %w[silent error warn confirm info debug]
 
         def warn(message, newline = nil)
           puts message

@@ -240,8 +240,8 @@ namespace :pl do
 
     ##
     ## S3 / GCP syncing
-    S3_REPO_SYNC = 'sudo /usr/local/bin/s3_repo_sync.sh'.freeze
-    GCP_REPO_SYNC = '/usr/local/bin/gcp_repo_sync'.freeze
+    S3_REPO_SYNC = 'sudo /usr/local/bin/s3_repo_sync.sh'
+    GCP_REPO_SYNC = '/usr/local/bin/gcp_repo_sync'
 
     desc "Sync signed apt repos from #{Pkg::Config.apt_signing_server} to AWS S3"
     task :deploy_apt_repo_to_s3 => 'pl:fetch' do

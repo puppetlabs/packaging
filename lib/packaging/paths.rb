@@ -2,7 +2,6 @@
 # This includes both reporting the correct path and divining the platform
 # tag associated with a variety of paths
 #
-# rubocop:disable Metrics/ModuleLength
 module Pkg::Paths
   include Pkg::Platforms
 
@@ -17,7 +16,7 @@ module Pkg::Paths
       return Pkg::Platforms.get_attribute_for_platform_version(platform, version, :source_architecture)
     end
     arches.find { |a| path.include?(package_arch(platform, a)) } || arches[0]
-  rescue
+  rescue StandardError
     arches.find { |a| path.include?(package_arch(platform, a)) } || arches[0]
   end
 
@@ -40,7 +39,7 @@ module Pkg::Paths
     arch = arch_from_artifact_path(platform, version, path)
 
     return "#{platform}-#{version}-#{arch}"
-  rescue
+  rescue StandardError
     fmt = Pkg::Platforms.all_supported_package_formats.find { |ext| path =~ /#{ext}$/ }
 
     # We need to make sure this is actually a file, and not simply a path
@@ -117,7 +116,7 @@ module Pkg::Paths
 
       # In puppet7 and beyond, we moved the repo_name to the top to allow each
       # puppet major release to have its own apt repo.
-      if %w(FUTURE-puppet7 FUTURE-puppet7-nightly).include? repo_name
+      if %w[FUTURE-puppet7 FUTURE-puppet7-nightly].include? repo_name
         return File.join(prefix, apt_repo_name(is_nonfinal), debian_code_name)
       end
 
@@ -170,7 +169,7 @@ module Pkg::Paths
   # Given platform information, create symlink target (base_path) and link path in the
   # form of a 2-element array
   def artifacts_base_path_and_link_path(platform_tag, prefix = 'artifacts', is_nonfinal = false)
-    platform_name, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
+    platform_name, = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
 
     path_data = {
@@ -189,7 +188,7 @@ module Pkg::Paths
   end
 
   def artifacts_path(platform_tag, path_prefix = 'artifacts', nonfinal = false)
-    base_path, _ = artifacts_base_path_and_link_path(platform_tag, path_prefix, nonfinal)
+    base_path, = artifacts_base_path_and_link_path(platform_tag, path_prefix, nonfinal)
     platform, version, architecture = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
 
@@ -306,24 +305,24 @@ module Pkg::Paths
       fail "Can't determine path for non-debian platform #{platform_tag}."
     end
 
-    platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
+    platform, version, = Pkg::Platforms.parse_platform_tag(platform_tag)
     code_name = Pkg::Platforms.codename_for_platform_version(platform, version)
     remote_repo_path = remote_repo_base(platform_tag, nonfinal: nonfinal)
 
     # In puppet7 and beyond, we moved the puppet major version to near the top to allow each
     # puppet major release to have its own apt repo, for example:
     # /opt/repository/apt/puppet7/pool/bionic/p/puppet-agent
-    if %w(FUTURE-puppet7 FUTURE-puppet7-nightly).include? repo_name
+    if %w[FUTURE-puppet7 FUTURE-puppet7-nightly].include? repo_name
       return File.join(remote_repo_path, repo_name, 'pool', code_name, project[0], project)
     end
 
     # For repos prior to puppet7, the puppet version was part of the repository
     # For example: /opt/repository/apt/pool/bionic/puppet6/p/puppet-agent
-    if %w(puppet7 puppet7-nightly
+    if %w[puppet7 puppet7-nightly
           puppet6 puppet6-nightly
           puppet5 puppet5-nightly
-          puppet  puppet-nightly
-          puppet-tools).include? repo_name
+          puppet puppet-nightly
+          puppet-tools].include? repo_name
       return File.join(remote_repo_path, 'pool', code_name, repo_name, project[0], project)
     end
 
@@ -331,7 +330,7 @@ module Pkg::Paths
   end
 
   def release_package_link_path(platform_tag, nonfinal = false)
-    platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
+    platform, version, = Pkg::Platforms.parse_platform_tag(platform_tag)
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
     case package_format
     when 'rpm'
@@ -372,5 +371,4 @@ module Pkg::Paths
   end
 
   private :package_arch
-
 end

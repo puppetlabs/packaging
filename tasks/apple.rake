@@ -18,8 +18,8 @@ PKGBUILD      = '/usr/bin/pkgbuild'
 task :setup do
   # Read the Apple file-mappings
   begin
-    @source_files        = Pkg::Util::Serialization.load_yaml('ext/osx/file_mapping.yaml')
-  rescue => e
+    @source_files = Pkg::Util::Serialization.load_yaml('ext/osx/file_mapping.yaml')
+  rescue StandardError => e
     fail "Could not load Apple file mappings from 'ext/osx/file_mapping.yaml'\n#{e}"
   end
   @package_name          = Pkg::Config.project
@@ -58,11 +58,11 @@ def make_directory_tree
   end
 
   if File.exists?('ext/osx/postflight.erb')
-    Pkg::Util::File.erb_file 'ext/osx/postflight.erb', "#{@working_tree["scripts"]}/postinstall", false, :binding => binding
+    Pkg::Util::File.erb_file 'ext/osx/postflight.erb', "#{@working_tree['scripts']}/postinstall", false, :binding => binding
   end
 
   if File.exists?('ext/osx/preflight.erb')
-    Pkg::Util::File.erb_file 'ext/osx/preflight.erb', "#{@working_tree["scripts"]}/preinstall", false, :binding => binding
+    Pkg::Util::File.erb_file 'ext/osx/preflight.erb', "#{@working_tree['scripts']}/preinstall", false, :binding => binding
   end
 
   if File.exists?('ext/osx/prototype.plist.erb')
@@ -72,7 +72,6 @@ def make_directory_tree
   if File.exists?('ext/packaging/static_artifacts/PackageInfo.plist')
     cp 'ext/packaging/static_artifacts/PackageInfo.plist', "#{@scratch}/PackageInfo.plist"
   end
-
 end
 
 # method:        build_dmg
@@ -113,14 +112,9 @@ def build_dmg
     -format #{dmg_format} \
     #{dmg_file}")
 
-  if File.directory?("#{pwd}/pkg/apple")
-    sh "sudo mv #{pwd}/#{dmg_file} #{pwd}/pkg/apple/#{dmg_file}"
-    puts "moved:   #{dmg_file} has been moved to #{pwd}/pkg/apple/#{dmg_file}"
-  else
-    mkdir_p("#{pwd}/pkg/apple")
-    sh "sudo mv #{pwd}/#{dmg_file} #{pwd}/pkg/apple/#{dmg_file}"
-    puts "moved:   #{dmg_file} has been moved to #{pwd}/pkg/apple/#{dmg_file}"
-  end
+  mkdir_p("#{pwd}/pkg/apple") unless File.directory?("#{pwd}/pkg/apple")
+  sh "sudo mv #{pwd}/#{dmg_file} #{pwd}/pkg/apple/#{dmg_file}"
+  puts "moved:   #{dmg_file} has been moved to #{pwd}/pkg/apple/#{dmg_file}"
 end
 
 # method:        pack_source
@@ -131,7 +125,7 @@ end
 #                installed as the package's payload.
 #
 def pack_source
-  work          = "#{@working_tree['working']}"
+  work = (@working_tree['working']).to_s
   source = pwd
 
   # Make all necessary directories

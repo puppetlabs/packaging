@@ -3,12 +3,12 @@ module Pkg::Archive
 
   # Array of base paths for foss artifacts on weth
   def base_paths
-    [Pkg::Config.yum_repo_path, Pkg::Config.apt_repo_staging_path, Pkg::Config.apt_repo_path, '/opt/downloads'].compact.freeze
+    [Pkg::Config.yum_repo_path, Pkg::Config.apt_repo_staging_path, Pkg::Config.apt_repo_path, '/opt/downloads'].compact
   end
 
   # Array of paths for temporarily staging artifacts before syncing to release-archives on s3
   def archive_paths
-    [Pkg::Config.yum_archive_path, Pkg::Config.apt_archive_path, Pkg::Config.freight_archive_path, Pkg::Config.downloads_archive_path, '/opt/tmp-apt'].compact.freeze
+    [Pkg::Config.yum_archive_path, Pkg::Config.apt_archive_path, Pkg::Config.freight_archive_path, Pkg::Config.downloads_archive_path, '/opt/tmp-apt'].compact
   end
 
   # Move yum directories from repo path to archive staging path

@@ -47,7 +47,7 @@ def build_rpm(buildarg = "-bs")
   puts
   output = FileList['pkg/*/*.rpm']
   puts "Wrote:"
-  output.each do | line |
+  output.each do |line|
     puts line
   end
 end

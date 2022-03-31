@@ -1,7 +1,6 @@
 # Utilities for managing/querying date/time
 
 module Pkg::Util::Date
-
   class << self
     def timestamp(separator = nil)
       if s = separator

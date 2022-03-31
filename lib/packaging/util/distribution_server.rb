@@ -31,8 +31,8 @@ module Pkg::Util::DistributionServer
 
       # If we just shipped a tagged version, we want to make it immutable
       files = Dir.glob("#{local_source_directory}/**/*")
-                 .select { |f| File.file?(f) and !f.include? "#{Pkg::Config.ref}.yaml" }
-                 .map { |f| "#{remote_target_directory}/#{f.sub(/^#{local_source_directory}\//, '')}" }
+        .select { |f| File.file?(f) and !f.include? "#{Pkg::Config.ref}.yaml" }
+        .map { |f| "#{remote_target_directory}/#{f.sub(/^#{local_source_directory}\//, '')}" }
 
       Pkg::Util::Net.remote_set_ownership(Pkg::Config.distribution_server, 'root', 'release', files)
       Pkg::Util::Net.remote_set_permissions(Pkg::Config.distribution_server, '0664', files)

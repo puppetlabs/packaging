@@ -52,7 +52,7 @@ DOC
     end
 
     describe '#sign_all' do
-      let(:rpm_directory) { 'foo' }
+      let(:rpm_directory) { Dir.mktmpdir }
       let(:rpms_not_to_sign) { [
         "#{rpm_directory}/aix/7.1/PC1/ppc/puppet-agent-5.5.3-1.aix7.1.ppc.rpm",
       ] }

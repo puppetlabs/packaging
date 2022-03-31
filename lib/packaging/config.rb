@@ -81,11 +81,11 @@ module Pkg
         dir = "/opt/jenkins-builds/#{self.project}/#{self.ref}"
         cmd = "if [ -s \"#{dir}/artifacts\" ]; then cd #{dir};"\
               "find ./artifacts -mindepth 2 -type f; fi"
-        artifacts, _ = Pkg::Util::Net.remote_execute(
-                     self.builds_server,
+        artifacts, = Pkg::Util::Net.remote_execute(
+          self.builds_server,
                      cmd,
                      { capture_output: true }
-                   )
+        )
 
         artifacts = artifacts.split("\n")
         data = {}
@@ -118,8 +118,8 @@ module Pkg
           if platform == 'solaris'
             next if version == '10' && File.extname(artifact) != '.gz'
             next if version == '11' && File.extname(artifact) != '.p5p'
-          else
-            next if File.extname(artifact) != ".#{package_format}"
+          elsif File.extname(artifact) != ".#{package_format}"
+            next
           end
 
           # Don't want to include debian debug packages
@@ -231,8 +231,8 @@ module Pkg
       # the debian changelog.
       #
       def cow_list
-        self.cows.split(' ').map do
-          |cow| cow.split('-')[1]
+        self.cows.split(' ').map do |cow|
+          cow.split('-')[1]
         end.uniq.join(' ')
       end
 
@@ -426,7 +426,7 @@ module Pkg
       def string_to_array(str)
         delimiters = /[,\s;]/
         return str if str.respond_to?('each')
-        str.split(delimiters).reject { |s| s.empty? }.map { |s| s.strip }
+        str.split(delimiters).reject(&:empty?).map(&:strip)
       end
 
       # This method is duplicated from enterprise-dist so we can access it here.

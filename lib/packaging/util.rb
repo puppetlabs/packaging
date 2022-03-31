@@ -29,7 +29,7 @@ module Pkg::Util
   require 'packaging/util/repo'
 
   def self.boolean_value(var)
-    return true if var == true || ( var.is_a?(String) && ( var.downcase == 'true' || var.downcase =~ /^y$|^yes$/))
+    return true if var == true || (var.is_a?(String) && (var.downcase == 'true' || var.downcase =~ /^y$|^yes$/))
     return false
   end
 

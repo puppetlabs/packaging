@@ -1,7 +1,6 @@
 namespace :pl do
   namespace :jenkins do
-    task :deploy_learning_vm, [:vm, :md5, :target_bucket, :target_directory] => "pl:fetch" do |t, args|
-
+    task :deploy_learning_vm, %i[vm md5 target_bucket target_directory] => "pl:fetch" do |t, args|
       vm = args.vm or fail ":vm is a required argument for #{t}"
       md5 = args.md5 or fail ":md5 is a required argument for #{t}"
       target_bucket = args.target_bucket or fail ":target_bucket is a required argument for #{t}"
@@ -13,8 +12,7 @@ namespace :pl do
       puts "'#{vm}' and '#{md5}' have been shipped via s3 to '#{target_bucket}/#{target_directory}'"
     end
 
-    task :deploy_training_vm, [:vm, :md5, :target_host, :target_directory] => "pl:fetch" do |t, args|
-
+    task :deploy_training_vm, %i[vm md5 target_host target_directory] => "pl:fetch" do |t, args|
       vm = args.vm or fail ":vm is a required argument for #{t}"
       md5 = args.md5 or fail ":md5 is a required argument for #{t}"
       target_host = args.target_host or fail ":target_host is a required argument for #{t}"

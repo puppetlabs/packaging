@@ -4,7 +4,6 @@ require 'set'
 # explicitly supports
 module Pkg
   module Platforms
-
     module_function
 
     DEBIAN_SOURCE_FORMATS = ['debian.tar.gz', 'orig.tar.gz', 'dsc', 'changes']
@@ -228,7 +227,7 @@ module Pkg
           repo: false,
         }
       },
-    }.freeze
+    }
 
     # @return [Array] An array of Strings, containing all of the supported
     #   platforms as defined in PLATFORM_INFO
@@ -240,7 +239,7 @@ module Pkg
     #   versions for the given platform
     def versions_for_platform(platform)
       PLATFORM_INFO[platform].keys
-    rescue
+    rescue StandardError
       raise "No information found for '#{platform}'"
     end
 
@@ -282,7 +281,7 @@ module Pkg
       # AIX uses 'ppc' as its architecture in paths and file names
       architecture = 'ppc' if platform == 'aix'
       return [platform, version, architecture]
-    rescue
+    rescue StandardError
       raise "Could not verify that '#{platform_tag}' is a valid tag"
     end
 
@@ -291,7 +290,7 @@ module Pkg
     #   platform-version-arch
     # @return [Hash] The hash of data associated with the given platform version
     def platform_lookup(platform_tag)
-      platform, version, _ = parse_platform_tag(platform_tag)
+      platform, version, = parse_platform_tag(platform_tag)
       PLATFORM_INFO[platform][version]
     end
 
@@ -401,7 +400,7 @@ module Pkg
       if include_source
         begin
           source_architecture = Array(get_attribute_for_platform_version(platform, version, :source_architecture))
-        rescue
+        rescue StandardError # rubocop:disable Lint/SuppressedException
         end
       end
       return (platform_architectures + source_architecture).flatten

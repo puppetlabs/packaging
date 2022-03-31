@@ -1,9 +1,7 @@
 # Utility methods for handling system calls and interactions
 
 module Pkg::Util::Execution
-
   class << self
-
     # Alias to $?.success? that makes success? slightly easier to test and stub
     # If immediately run, $? will not be instanciated, so only call success? if
     # $? exists, otherwise return nil
@@ -23,7 +21,7 @@ module Pkg::Util::Execution
     # while also raising an exception if a command does not succeed (ala `sh "cmd"`).
     def ex(command, debug = false)
       puts "Executing '#{command}'..." if debug
-      ret = `#{command}`
+      ret = %x(#{command})
       unless Pkg::Util::Execution.success?
         raise RuntimeError
       end
@@ -71,7 +69,7 @@ module Pkg::Util::Execution
             blk.call
             success = true
             break
-          rescue => err
+          rescue StandardError => err
             puts "An error was encountered evaluating block. Retrying.."
             exception = err.to_s + "\n" + err.backtrace.join("\n")
           end

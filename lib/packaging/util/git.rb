@@ -22,7 +22,6 @@ module Pkg::Util::Git
     end
 
     # Git utility to create a new git bundle
-    # rubocop:disable Metrics/AbcSize
     def bundle(treeish, appendix = Pkg::Util.rand_string, temp = Pkg::Util::File.mktemp)
       fail_unless_repo
       Pkg::Util::Execution.capture3("#{Pkg::Util::Tool::GIT} bundle create #{temp}/#{Pkg::Config.project}-#{Pkg::Config.version}-#{appendix} #{treeish} --tags")
@@ -113,13 +112,12 @@ module Pkg::Util::Git
       end
     end
 
-    # rubocop:disable Style/GuardClause
     def fail_unless_repo
       unless repo?
         raise "Pkg::Config.project_root (#{Pkg::Config.project_root}) is not \
           a valid git repository"
       end
-    end
+end
 
     # Return the basename of the project repo
     def project_name

@@ -37,17 +37,16 @@ def mock_artifact(mock_config, cmd_args, mockfile)
 
     # Return a FileList of the build artifacts
     return FileList[File.join(result_dir, '*.rpm')]
-
   rescue RuntimeError => error
     build_log = File.join(result_dir, 'build.log')
     root_log  = File.join(result_dir, 'root.log')
     content   = File.read(build_log) if File.readable?(build_log)
 
     if File.readable?(root_log)
-      $stderr.puts File.read(root_log)
+      warn File.read(root_log)
     end
     if content and content.lines.count > 2
-      $stderr.puts content
+      warn content
     end
 
     # Any useful info has now been gleaned from the logs in the case of a
@@ -99,7 +98,7 @@ def mock_el_family(mock_config)
     family = mock_config.match(/^pupent-(\d\.\d-)?([a-z]+)([0-9]+)-(.*)$/)[2]
   else
     first, second = mock_config.split('-')
-    if first == 'el' || first == 'fedora'
+    if ['el', 'fedora'].include?(first)
       family = first
     elsif first == 'pl'
       if second.match(/^\d+$/)
@@ -122,7 +121,7 @@ def mock_el_ver(mock_config)
     version = mock_config.match(/^pupent-(\d\.\d-)?([a-z]+)([0-9]+)-(.*)$/)[3]
   else
     first, second, third = mock_config.split('-')
-    if (first == 'el' || first == 'fedora') || (first == 'pl' && second.match(/^\d+$/))
+    if ['el', 'fedora'].include?(first) || (first == 'pl' && second.match(/^\d+$/))
       version = second
     else
       version = third
@@ -138,11 +137,11 @@ end
 def rpm_family_and_version
   if Pkg::Config.vanagon_project
     Pkg::Config.rpm_targets.split(' ').map do |target|
-      rpm_el_family, rpm_el_version, arch = target.split('-')
+      rpm_el_family, rpm_el_version, = target.split('-')
       "#{rpm_el_family}-#{rpm_el_version}"
     end
   else
-    Pkg::Config.final_mocks.split.map { |mock| "#{mock_el_family(mock)}-#{mock_el_ver(mock) }" }
+    Pkg::Config.final_mocks.split.map { |mock| "#{mock_el_family(mock)}-#{mock_el_ver(mock)}" }
   end
 end
 
@@ -174,7 +173,7 @@ def mock_defines(mock_config)
   version = mock_el_ver(mock_config)
   defines = ""
   if version =~ /^(4|5)$/ or family == "sles"
-    defines = %Q(--define "dist .#{family}#{version}" \
+    defines = %(--define "dist .#{family}#{version}" \
       --define "_source_filedigest_algorithm 1" \
       --define "_binary_filedigest_algorithm 1" \
       --define "_binary_payload w9.gzdio" \
@@ -318,7 +317,7 @@ end
 def randomize_mock_config_dir(mock_config, mockfile)
   # basedir will be the location of our temporary mock root
   basedir = Pkg::Util::File.mktemp
-  chown("#{ENV['USER']}", "mock", basedir)
+  chown((ENV['USER']).to_s, "mock", basedir)
   # Mock requires the sticky bit be set on the basedir
   chmod(02775, basedir)
   mockfile ||= File.join('/', 'etc', 'mock', "#{mock_config}.cfg")

@@ -46,6 +46,7 @@ module ArtifactoryExtensions
       unless repo_uri.include?('/api/storage/')
         # rubocop:disable Style/PercentLiteralDelimiters
         repo_uri.sub!(%r(/#{params[:repo]}$), "/api/storage/#{params[:repo]}")
+        # rubocop:enable Style/PercentLiteralDelimiters
       end
       response['files'].map do |file_path|
         from_url("#{repo_uri}/#{file_path}", client: client)

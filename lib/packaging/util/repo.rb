@@ -2,7 +2,6 @@
 
 module Pkg::Util::Repo
   class << self
-
     # Create yum repositories of built RPM packages for this SHA on the distribution server
     def rpm_repos
       Pkg::Util::File.fetch

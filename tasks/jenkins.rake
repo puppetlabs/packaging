@@ -103,7 +103,7 @@ namespace :pl do
       # a PE build, so we always this along as an environment variable task
       # argument if its the case.
       #
-      Pkg::Config.task = { :task => "#{build_task}", :args => nil }
+      Pkg::Config.task = { :task => build_task.to_s, :args => nil }
       Pkg::Config.task[:args] = ["PE_BUILD=true"] if @build_pe
       #
       # Determine the type of build we're doing to inform jenkins
@@ -150,9 +150,9 @@ namespace :pl do
       # Construct the parameters, which is an array of hashes we turn into JSON
       parameters = [{ "name" => "BUILD_PROPERTIES", "file"  => "file0" },
                     { "name" => "PROJECT_BUNDLE",   "file"  => "file1" },
-                    { "name" => "PROJECT",          "value" => "#{Pkg::Config.project}" },
-                    { "name" => "BUILD_TYPE",       "label" => "#{build_type}" },
-                    { "name" => "METRICS",          "value" => "#{metrics}" }]
+                    { "name" => "PROJECT",          "value" => Pkg::Config.project.to_s },
+                    { "name" => "BUILD_TYPE",       "label" => build_type.to_s },
+                    { "name" => "METRICS",          "value" => metrics.to_s }]
 
       # Initialize the args array that will hold all of the arguments we pass
       # to the curl utility method.
@@ -172,7 +172,7 @@ namespace :pl do
       # Construct the remaining form arguments. For visual clarity, params that are tied
       # together are on the same line.
       #
-      args <<  [
+      args << [
       "-Fname=BUILD_PROPERTIES", "-Ffile0=@#{properties}",
       "-Fname=PROJECT_BUNDLE",   "-Ffile1=@#{bundle}",
       "-Fname=PROJECT",          "-Fvalue=#{Pkg::Config.project}",
@@ -250,7 +250,7 @@ namespace :pl do
     end
 
     task :uber_ship_lite => "pl:fetch" do
-      tasks = %w(
+      tasks = %w[
         jenkins:retrieve
         jenkins:sign_all
         ship_rpms
@@ -260,7 +260,7 @@ namespace :pl do
         ship_tar
         ship_msi
         ship_gem
-      )
+      ]
       tasks.map { |t| "pl:#{t}" }.each do |t|
         puts "Running \"#{t}\""
         Rake::Task[t].invoke
@@ -270,7 +270,7 @@ namespace :pl do
       # add the release to release-metrics
       begin
         Rake::Task["pl:update_release_metrics"].invoke
-      rescue => e
+      rescue StandardError => e
         fail "Error updating release-metrics:\n#{e}\nYou will need to add this release manually."
       end
     end
@@ -279,7 +279,7 @@ namespace :pl do
       # debian weirdness: ship_nightly_debs uses the old methodology that posts to
       # apt.puppet.com; stage_nightly_debs uses the updated methodology that posts to
       # apt.repos.puppet.com
-      tasks = %w(
+      tasks = %w[
         jenkins:retrieve
         jenkins:sign_all
         ship_nightly_rpms
@@ -287,7 +287,7 @@ namespace :pl do
         ship_nightly_dmg
         ship_nightly_swix
         ship_nightly_msi
-      )
+      ]
       tasks.map { |t| "pl:#{t}" }.each do |t|
         puts "Running \"#{t}\""
         Rake::Task[t].invoke
@@ -336,7 +336,7 @@ namespace :pl do
 
     desc "Retrieve packages built by jenkins, sign, and ship all!"
     task :uber_ship => "pl:fetch" do
-      uber_tasks = %w(
+      uber_tasks = %w[
         jenkins:retrieve
         jenkins:sign_all
         uber_ship
@@ -354,7 +354,7 @@ namespace :pl do
         remote:deploy_yum_repo_to_s3
         remote:deploy_downloads_to_s3
         remote:deploy_to_rsync_server
-      )
+      ]
 
       if Pkg::Util.boolean_value(Pkg::Config.answer_override) && !Pkg::Config.foss_only
         fail "Using ANSWER_OVERRIDE without FOSS_ONLY=true is dangerous!"
@@ -530,7 +530,7 @@ namespace :pl do
       end
 
       # Assemble the JSON string for the JSON parameter
-      json = JSON.generate("parameter" => [{ "name" => "SHA", "value"  => "#{Pkg::Config.ref}" }])
+      json = JSON.generate("parameter" => [{ "name" => "SHA", "value" => Pkg::Config.ref.to_s }])
 
       # Assemble our arguments to the post
       args = [

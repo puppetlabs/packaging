@@ -70,7 +70,7 @@ module Pkg::Sign::Rpm
     v4_rpms = []
     rpms_to_sign.each do |rpm|
       platform_tag = Pkg::Paths.tag_from_artifact_path(rpm)
-      platform, version, _ = Pkg::Platforms.parse_platform_tag(platform_tag)
+      platform, version, = Pkg::Platforms.parse_platform_tag(platform_tag)
 
       # We don't sign AIX rpms
       next if platform_tag.include?('aix')

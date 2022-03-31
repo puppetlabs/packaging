@@ -3,9 +3,7 @@ require 'net/http'
 require 'json'
 
 module Pkg::Util::Jenkins
-
   class << self
-
     # Use the curl to create a jenkins job from a valid XML
     # configuration file.
     # Returns the URL to the job
@@ -90,6 +88,5 @@ module Pkg::Util::Jenkins
 
       wait_for_build job_hash['lastBuild']['url']
     end
-
   end
 end

@@ -5,7 +5,6 @@ module Pkg
     include FileUtils
 
     attr_accessor :files, :project, :version, :excludes, :target, :templates
-    attr_reader :tar
 
     def initialize
       @tar      = Pkg::Util::Tool.find_tool('tar', :required => true)
@@ -56,7 +55,7 @@ module Pkg
       patterns =
         case @files
         when String
-          $stderr.puts "warning: `files` should be an array, not a string"
+          warn "warning: `files` should be an array, not a string"
           @files.split(' ')
         when Array
           @files
@@ -137,7 +136,7 @@ module Pkg
     def tar(target, source)
       mkpath File.dirname(target)
       cd File.dirname(source) do
-        %x(#{@tar} #{@excludes.map { |x| (" --exclude #{x} ") }.join if @excludes} -zcf '#{File.basename(target)}' '#{File.basename(source)}')
+        %x(#{@tar} #{@excludes.map { |x| " --exclude #{x} " }.join if @excludes} -zcf '#{File.basename(target)}' '#{File.basename(source)}')
         unless $?.success?
           fail "Failed to create .tar.gz archive with #{@tar}. Please ensure the tar command in your path accepts the flags '-c', '-z', and '-f'"
         end
@@ -157,7 +156,6 @@ module Pkg
       self.tar(@target, workdir)
       self.clean_up workdir
     end
-
   end
 end
 

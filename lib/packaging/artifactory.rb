@@ -353,6 +353,7 @@ module Pkg
       check_authorization
       download_repositories = %w[rpm_enterprise__local debian_enterprise__local]
       manifest.each do |dist, packages|
+        next if packages.nil?
         packages.each do |name, info|
           package_file_name = info['filename']
           puts format(

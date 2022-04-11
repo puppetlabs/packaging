@@ -292,7 +292,7 @@ module Pkg
     def promote_package(pkg, ref, platform_tag, repository, debian_component = nil)
       # load package metadata
       yaml_content = retrieve_yaml_data(pkg, ref)
-      yaml_data = YAML::safe_load(yaml_content)
+      yaml_data = YAML::safe_load(yaml_content, [Symbol])
 
       # get the artifact name
       artifact_names = all_package_names(yaml_data[:platform_data], platform_tag)

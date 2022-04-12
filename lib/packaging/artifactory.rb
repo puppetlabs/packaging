@@ -292,7 +292,7 @@ module Pkg
     def promote_package(pkg, ref, platform_tag, repository, debian_component = nil)
       # load package metadata
       yaml_content = retrieve_yaml_data(pkg, ref)
-      yaml_data = YAML::safe_load(yaml_content)
+      yaml_data = YAML::safe_load(yaml_content, [Symbol])
 
       # get the artifact name
       artifact_names = all_package_names(yaml_data[:platform_data], platform_tag)
@@ -353,6 +353,10 @@ module Pkg
       check_authorization
       download_repositories = %w[rpm_enterprise__local debian_enterprise__local]
       manifest.each do |dist, packages|
+        if packages.nil?
+          warn "Package list for #{dist} is empty, skipping"
+          next
+        end
         packages.each do |name, info|
           package_file_name = info['filename']
           puts format(

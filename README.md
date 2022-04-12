@@ -433,18 +433,18 @@ build_doc: false
 build_msi:
   puppet_for_the_win:
     ref: 'origin/master'
-    repo: 'git://github.com/puppetlabs/puppet_for_the_win.git'
+    repo: 'https://github.com/puppetlabs/puppet_for_the_win.git'
   facter:
     ref: 'refs/tags/2.1.0'
-    repo: 'git://github.com/puppetlabs/facter.git'
+    repo: 'https://github.com/puppetlabs/facter.git'
   hiera:
     ref: 'refs/tags/1.3.4'
-    repo: 'git://github.com/puppetlabs/hiera.git'
+    repo: 'https://github.com/puppetlabs/hiera.git'
   sys:
     ref:
       x86: 'origin/1.9.3-x86'
       x64: 'origin/2.0.0-x64'
-    repo: 'git://github.com/puppetlabs/puppet-win32-ruby.git'
+    repo: 'https://github.com/puppetlabs/puppet-win32-ruby.git'
 # Whether to present the Solaris 11 IPS packaging tasks
 # This requires suitable IPS packaging artifacts in the project in ext/ips
 build_ips: false

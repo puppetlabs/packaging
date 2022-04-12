@@ -24,7 +24,7 @@ describe "Pkg::Util::Git_tag" do
 
   context "tag?" do
     it "sets ref type as a tag when passed a tag" do
-      git_tag = Pkg::Util::Git_tag.new("git://github.com/puppetlabs/leatherman.git", "tags/0.6.2")
+      git_tag = Pkg::Util::Git_tag.new("https://github.com/puppetlabs/leatherman.git", "tags/0.6.2")
       expect(git_tag.tag?).to eq(true)
     end
 

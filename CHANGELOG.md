@@ -3,6 +3,11 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- (RE-13698) Added support to ship nightly and stable debs to apt.repos.puppet.com. Introduced
+  feature toggles, via the "NIGHTLY_SHIP_TO_GCP" and "STABLE_SHIP_TO_GCP" environment variables
+  that will add shipping to GCP as part of the pl:jenkins:ship_nightly and pl:jenkins:ship_final
+  tasks
 
 ## [0.107.0] - 2022-06-14
 ### Added
@@ -22,10 +27,6 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [0.106.1] - 2022-04-12
 ### Added
-- (RE-13698) Added support to ship nightly and stable debs to apt.repos.puppet.com. Introduced
-  feature toggles, via the "NIGHTLY_SHIP_TO_GCP" and "STABLE_SHIP_TO_GCP" environment variables
-  that will add shipping to GCP as part of the pl:jenkins:ship_nightly and pl:jenkins:ship_final
-  tasks
 - (PA-4219) Adds support for macOS 12 Monterey
 - (RE-14627) Add nil handling for no-op promotions
 
@@ -840,10 +841,14 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
+<<<<<<< HEAD
 [Unreleased]: https://github.com/puppetlabs/packaging/compare/0.107.0...HEAD
 [0.107.0]: https://github.com/puppetlabs/packaging/compare/0.106.3...0.107.0
 [0.106.3]: https://github.com/puppetlabs/packaging/compare/0.106.2...0.106.3
 [0.106.2]: https://github.com/puppetlabs/packaging/compare/0.106.1...0.106.2
+=======
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.106.1...HEAD
+>>>>>>> (maint) prepare for 0.160.1 release
 [0.106.1]: https://github.com/puppetlabs/packaging/compare/0.106.0...0.106.1
 [0.106.0]: https://github.com/puppetlabs/packaging/compare/0.105.0...0.106.0
 [0.105.0]: https://github.com/puppetlabs/packaging/compare/0.104.0...0.105.0

@@ -3,6 +3,9 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (RE-13764) Get rvm ruby version from environment variable instead of hard coded in remote
+  bundle install method.
 
 ## [0.106.1] - 2022-04-12
 ### Added

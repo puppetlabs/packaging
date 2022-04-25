@@ -394,9 +394,10 @@ module Pkg::Util::Net
     end
 
     def remote_bundle_install_command
+      rvm_ruby_version = '2.5.9' || ENV['RVM_RUBY_VERSION']
       export_packaging_location = "export PACKAGING_LOCATION='#{ENV['PACKAGING_LOCATION']}';" if ENV['PACKAGING_LOCATION'] && !ENV['PACKAGING_LOCATION'].empty?
       export_vanagon_location = "export VANAGON_LOCATION='#{ENV['VANAGON_LOCATION']}';" if ENV['VANAGON_LOCATION'] && !ENV['VANAGON_LOCATION'].empty?
-      "source /usr/local/rvm/scripts/rvm; rvm use ruby-2.5.1; #{export_packaging_location} #{export_vanagon_location} bundle install --path .bundle/gems ;"
+      "source /usr/local/rvm/scripts/rvm; rvm use ruby-#{rvm_ruby_version}; #{export_packaging_location} #{export_vanagon_location} bundle install --path .bundle/gems ;"
     end
 
     # Given a BuildInstance object and a host, send its params to the host. Return

@@ -147,6 +147,10 @@ describe 'Pkg::Paths' do
         expect(Pkg::Paths.artifacts_path('ubuntu-20.04-amd64'))
           .to eq('artifacts/FUTURE-puppet7/focal')
       end
+      it 'should be correct for jammy' do
+        expect(Pkg::Paths.artifacts_path('ubuntu-22.04-amd64'))
+          .to eq('artifacts/FUTURE-puppet7/jammy')
+      end
     end
   end
 
@@ -328,6 +332,8 @@ describe 'Pkg::Paths' do
           .to eq('/opt/repository/apt/FUTURE-puppet7/pool/bionic/p/puppet-agent')
         expect(Pkg::Paths.apt_package_base_path('ubuntu-20.04-amd64', 'FUTURE-puppet7', 'puppet-agent'))
           .to eq('/opt/repository/apt/FUTURE-puppet7/pool/focal/p/puppet-agent')
+        expect(Pkg::Paths.apt_package_base_path('ubuntu-22.04-amd64', 'FUTURE-puppet7', 'puppet-agent'))
+          .to eq('/opt/repository/apt/FUTURE-puppet7/pool/jammy/p/puppet-agent')
       end
       it 'returns the appropriate nonfinal repo path' do
         allow(Pkg::Paths).to receive(:remote_repo_base).and_return('/opt/repository-nightlies/apt')

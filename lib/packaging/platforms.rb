@@ -211,6 +211,14 @@ module Pkg
           source_package_formats: DEBIAN_SOURCE_FORMATS,
           repo: true,
         },
+        '22.04' => {
+          codename: 'jammy',
+          architectures: ['amd64', 'aarch64'],
+          source_architecture: 'source',
+          package_format: 'deb',
+          source_package_formats: DEBIAN_SOURCE_FORMATS,
+          repo: true,
+        },
       },
 
       'windows' => {

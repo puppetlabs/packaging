@@ -36,7 +36,7 @@ describe 'Pkg::Platforms' do
 
   describe '#codenames' do
     it 'should return all codenames for a given platform' do
-      codenames = ['focal', 'bionic', 'bullseye', 'buster', 'stretch', 'trusty', 'xenial']
+      codenames = ['focal', 'bionic', 'bullseye', 'buster', 'stretch', 'trusty', 'xenial', 'jammy']
       expect(Pkg::Platforms.codenames).to match_array(codenames)
     end
   end
@@ -46,6 +46,10 @@ describe 'Pkg::Platforms' do
       expect(Pkg::Platforms.codename_to_platform_version('xenial')).to eq(['ubuntu', '16.04'])
     end
 
+    it 'should return the platform and version corresponding to a given codename' do
+      expect(Pkg::Platforms.codename_to_platform_version('jammy')).to eq(['ubuntu', '22.04'])
+    end
+
     it 'should fail if given nil as a codename' do
       expect{Pkg::Platforms.codename_to_platform_version(nil)}.to raise_error
     end
@@ -53,7 +57,7 @@ describe 'Pkg::Platforms' do
 
   describe '#codename_for_platform_version' do
     it 'should return the codename corresponding to a given platform and version' do
-      expect(Pkg::Platforms.codename_for_platform_version('ubuntu', '16.04')).to eq('xenial')
+      expect(Pkg::Platforms.codename_for_platform_version('ubuntu', '22.04')).to eq('jammy')
     end
   end
 

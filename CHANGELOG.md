@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (RE-14611) Change msi sign method to use the gcp msi signer
 
 ## [0.106.1] - 2022-04-12
 ### Added

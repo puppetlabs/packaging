@@ -25,6 +25,8 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency('csv', ['3.1.5'])
   gem.add_runtime_dependency('rake', ['>= 12.3'])
   gem.add_runtime_dependency('release-metrics')
+  gem.add_runtime_dependency('googleauth')
+  gem.add_runtime_dependency('google-cloud-storage')
 
   gem.require_path = 'lib'
 

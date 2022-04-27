@@ -18,6 +18,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ## [0.106.3] - 2022-05-03
 ### Changed
 - (maint) Update rvm ruby version in remote bundle install to 2.7.5.
+- (RE-13764) Get rvm ruby version from environment variable instead of hard coded in remote
+  bundle install method.
 
 ## [0.106.2] - 2022-05-02
 ### Changed

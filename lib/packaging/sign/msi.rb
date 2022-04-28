@@ -11,10 +11,14 @@ module Pkg::Sign::Msi
     service_account_credentials = '/var/lib/jenkins/.creds/gcp-service-account-credentials-windows-signer.json'
     service_url = 'https://serverless-sign-4k7em2ejkq-uc.a.run.app/signMSI'
 
-    authorizer = Google::Auth::ServiceAccountCredentials.make_creds(
-      json_key_io: File.open(service_account_credentials),
-      target_audience: service_url
-    )
+    begin
+      authorizer = Google::Auth::ServiceAccountCredentials.make_creds(
+        json_key_io: File.open(service_account_credentials),
+        target_audience: service_url
+      )
+    rescue StandardError => e
+      fail "msis can only be signed by jenkins.\n#{e}"
+    end
 
     gcp_auth_token = authorizer.fetch_access_token!['id_token']
 

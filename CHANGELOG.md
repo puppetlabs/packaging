@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.106.2] - 2022-05-02
 ### Changed
 - (RE-14611) Change msi sign method to use the gcp msi signer
 - (RE-13764) Get rvm ruby version from environment variable instead of hard coded in remote
@@ -827,7 +829,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.106.1...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.106.2...HEAD
+[0.106.2]: https://github.com/puppetlabs/packaging/compare/0.106.1...0.106.2
 [0.106.1]: https://github.com/puppetlabs/packaging/compare/0.106.0...0.106.1
 [0.106.0]: https://github.com/puppetlabs/packaging/compare/0.105.0...0.106.0
 [0.105.0]: https://github.com/puppetlabs/packaging/compare/0.104.0...0.105.0

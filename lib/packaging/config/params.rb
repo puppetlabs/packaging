@@ -101,10 +101,8 @@ module Pkg::Params
                   msi_host
                   msi_name
                   msi_path
-                  msi_signing_cert
-                  msi_signing_cert_pw
-                  msi_signing_server
-                  msi_signing_ssh_key
+                  msi_signing_gcp_service_account_credentials
+                  msi_signing_service_url
                   msi_staging_server
                   name
                   nonfinal_apt_repo_command
@@ -244,10 +242,8 @@ module Pkg::Params
               { :var => :ips_signing_ssh_key,     :envvar => :IPS_SIGNING_SSH_KEY },
               { :var => :msi_host,                :envvar => :MSI_HOST },
               { :var => :msi_path,                :envvar => :MSI_PATH },
-              { :var => :msi_signing_cert,        :envvar => :MSI_SIGNING_CERT },
-              { :var => :msi_signing_cert_pw,     :envvar => :MSI_SIGNING_CERT_PW },
-              { :var => :msi_signing_server,      :envvar => :MSI_SIGNING_SERVER },
-              { :var => :msi_signing_ssh_key,     :envvar => :MSI_SIGNING_SSH_KEY },
+              { :var => :msi_signing_gcp_service_account_credentials, :envvar => :MSI_SIGNING_GCP_SERVICE_ACCOUNT_CREDENTIALS },
+              { :var => :msi_signing_service_url, :envvar => :MSI_SIGNING_SERVICE_URL },
               { :var => :msi_staging_server,      :envvar => :MSI_STAGING_SERVER },
               { :var => :nonfinal_apt_repo_command, :envvar => :NONFINAL_APT_REPO_COMMAND },
               { :var => :nonfinal_apt_repo_path, :envvar => :NONFINAL_APT_REPO_PATH },
@@ -328,8 +324,6 @@ module Pkg::Params
               { :var => :ips_inter_cert,          :val => '$IPS_INTER_CERT' },
               { :var => :ips_root_cert,           :val => '$IPS_ROOT_CERT' },
               { :var => :ips_signing_key,         :val => '$IPS_SIGNING_KEY' },
-              { :var => :msi_signing_cert,        :val => '$MSI_SIGNING_CERT' },
-              { :var => :msi_signing_cert_pw,     :val => '$MSI_SIGNING_CERT_PW' },
               { :var => :pe_feature_branch,       :val => false },
               { :var => :pe_release_branch,       :val => false },
               { :var => :s3_ship,                 :val => false },

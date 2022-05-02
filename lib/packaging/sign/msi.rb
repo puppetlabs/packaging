@@ -8,13 +8,13 @@ module Pkg::Sign::Msi
     require 'net/http'
     require 'uri'
 
-    service_account_credentials = '/var/lib/jenkins/.creds/gcp-service-account-credentials-windows-signer.json'
-    service_url = 'https://serverless-sign-4k7em2ejkq-uc.a.run.app/signMSI'
+    gcp_service_account_credentials = Pkg::Config.msi_signing_gcp_service_account_credentials
+    signing_service_url = Pkg::Config.msi_signing_service_url
 
     begin
       authorizer = Google::Auth::ServiceAccountCredentials.make_creds(
-        json_key_io: File.open(service_account_credentials),
-        target_audience: service_url
+        json_key_io: File.open(gcp_service_account_credentials),
+        target_audience: signing_service_url
       )
     rescue StandardError => e
       fail "msis can only be signed by jenkins.\n#{e}"
@@ -24,12 +24,12 @@ module Pkg::Sign::Msi
 
     gcp_storage = Google::Cloud::Storage.new(
       project_id: 'puppet-release-engineering',
-      credentials: service_account_credentials
+      credentials: gcp_service_account_credentials
     )
     tosign_bucket = gcp_storage.bucket('windows-tosign-bucket')
     signed_bucket = gcp_storage.bucket('windows-signed-bucket')
 
-    service_uri = URI.parse(service_url)
+    service_uri = URI.parse(signing_service_url)
     headers = { 'Content-Type': 'application/json', 'Authorization': "Bearer #{gcp_auth_token}" }
     http = Net::HTTP.new(service_uri.host, service_uri.port)
     http.use_ssl = true

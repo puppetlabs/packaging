@@ -843,19 +843,10 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 [Unreleased]: https://github.com/puppetlabs/packaging/compare/0.107.0...HEAD
 [0.107.0]: https://github.com/puppetlabs/packaging/compare/0.106.3...0.107.0
 [0.106.3]: https://github.com/puppetlabs/packaging/compare/0.106.2...0.106.3
 [0.106.2]: https://github.com/puppetlabs/packaging/compare/0.106.1...0.106.2
-=======
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.106.1...HEAD
->>>>>>> (maint) prepare for 0.160.1 release
-=======
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.106.2...HEAD
-[0.106.2]: https://github.com/puppetlabs/packaging/compare/0.106.1...0.106.2
->>>>>>> (maint) Update changelog for 0.106.2 release. (#1160)
 [0.106.1]: https://github.com/puppetlabs/packaging/compare/0.106.0...0.106.1
 [0.106.0]: https://github.com/puppetlabs/packaging/compare/0.105.0...0.106.0
 [0.105.0]: https://github.com/puppetlabs/packaging/compare/0.104.0...0.105.0

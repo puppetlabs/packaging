@@ -4,6 +4,10 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.106.3] - 2022-05-03
+### Changed
+- (maint) Update rvm ruby version in remote bundle install to 2.7.5.
+
 ## [0.106.2] - 2022-05-02
 ### Changed
 - (RE-14611) Change msi sign method to use the gcp msi signer
@@ -829,7 +833,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.106.2...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.106.3...HEAD
+[0.106.3]: https://github.com/puppetlabs/packaging/compare/0.106.2...0.106.3
 [0.106.2]: https://github.com/puppetlabs/packaging/compare/0.106.1...0.106.2
 [0.106.1]: https://github.com/puppetlabs/packaging/compare/0.106.0...0.106.1
 [0.106.0]: https://github.com/puppetlabs/packaging/compare/0.105.0...0.106.0

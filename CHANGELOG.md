@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- (PA-4117) Add Ubuntu 22.04
 
 ## [0.106.3] - 2022-05-03
 ### Changed

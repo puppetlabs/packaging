@@ -5,6 +5,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ## [Unreleased]
 ### Added
 - (PA-4117) Add Ubuntu 22.04
+- (maint) begin AWS to GCP transition for apt, yum, downloads by shipping to both AWS and GCP
 
 ## [0.106.3] - 2022-05-03
 ### Changed

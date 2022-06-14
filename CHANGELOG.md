@@ -3,9 +3,12 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.107.0] - 2022-06-14
 ### Added
 - (PA-4117) Add Ubuntu 22.04
-- (maint) begin AWS to GCP transition for apt, yum, downloads by shipping to both AWS and GCP
+- (maint) begin AWS to GCP transition for apt, yum, nightlies and downloads by shipping
+  to both AWS and GCP.
 
 ## [0.106.3] - 2022-05-03
 ### Changed
@@ -836,7 +839,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.106.3...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.107.0...HEAD
+[0.107.0]: https://github.com/puppetlabs/packaging/compare/0.106.3...0.107.0
 [0.106.3]: https://github.com/puppetlabs/packaging/compare/0.106.2...0.106.3
 [0.106.2]: https://github.com/puppetlabs/packaging/compare/0.106.1...0.106.2
 [0.106.1]: https://github.com/puppetlabs/packaging/compare/0.106.0...0.106.1

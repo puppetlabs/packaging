@@ -3,6 +3,11 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- (RE-13698) Added support to ship nightly and stable debs to apt.repos.puppet.com. Introduced
+  feature toggles, via the "NIGHTLY_SHIP_TO_GCP" and "STABLE_SHIP_TO_GCP" environment variables
+  that will add shipping to GCP as part of the pl:jenkins:ship_nightly and pl:jenkins:ship_final
+  tasks
 
 ## [0.107.0] - 2022-06-14
 ### Added
@@ -13,6 +18,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ## [0.106.3] - 2022-05-03
 ### Changed
 - (maint) Update rvm ruby version in remote bundle install to 2.7.5.
+- (RE-13764) Get rvm ruby version from environment variable instead of hard coded in remote
+  bundle install method.
 
 ## [0.106.2] - 2022-05-02
 ### Changed
@@ -22,9 +29,6 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [0.106.1] - 2022-04-12
 ### Added
-- (RE-13698) Added support to ship nightly debs to apt.repos.puppet.com. Introduced a temporary
-  feature toggle, via the "NIGHTLY_SHIP_TO_GCP" environment variable that will add shipping
-  to GCP as part of the pl:jenkins:ship_nightly task
 - (PA-4219) Adds support for macOS 12 Monterey
 - (RE-14627) Add nil handling for no-op promotions
 

@@ -1,6 +1,6 @@
 name: Ruby
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -8,16 +8,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: [ '2.5.x', '2.7.x' ]
+        ruby: [ '2.5.9', '2.7.6' ]
     steps:
     - uses: actions/checkout@master
     - name: Set up Ruby
-      uses: actions/setup-ruby@v1
+      uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
     - run: |
-        gem install bundler
-        bundle install --jobs 4 --retry 3
         bundle exec rspec spec --color --format documentation --order random
     - name: Rubocop
       run: |

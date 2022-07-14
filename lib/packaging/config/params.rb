@@ -79,6 +79,7 @@ module Pkg::Params
                   gemversion
                   gpg_key
                   gpg_name
+                  gpg_legacy_hosts
                   homepage
                   internal_gem_host
                   ips_build_host
@@ -231,6 +232,7 @@ module Pkg::Params
               { :var => :gem_host,                :envvar => :GEM_HOST },
               { :var => :gpg_key,                 :envvar => :GPG_KEY },
               { :var => :gpg_name,                :envvar => :GPG_NAME },
+              { :var => :gpg_legacy_hosts,        :envvar => :GPG_LEGACY_HOSTS, :type => :array },
               { :var => :ips_host,                :envvar => :IPS_HOST },
               { :var => :ips_inter_cert,          :envvar => :IPS_INTER_CERT },
               { :var => :ips_path,                :envvar => :IPS_PATH },

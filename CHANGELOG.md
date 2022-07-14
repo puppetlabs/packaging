@@ -8,6 +8,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
   feature toggles, via the "NIGHTLY_SHIP_TO_GCP" and "STABLE_SHIP_TO_GCP" environment variables
   that will add shipping to GCP as part of the pl:jenkins:ship_nightly and pl:jenkins:ship_final
   tasks
+- Added support for signing RPMs using gpg >= 2.1
 
 ## [0.107.0] - 2022-06-14
 ### Added

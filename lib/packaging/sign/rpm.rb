@@ -7,17 +7,21 @@ module Pkg::Sign::Rpm
     # use as the rpm signing tool.
     rpm_command = ENV['RPM'] || Pkg::Util::Tool.find_tool('rpm')
 
-    # If we're using the gpg agent for rpm signing, we don't want to specify the
-    # input for the passphrase, which is what '--passphrase-fd 3' does. However,
-    # if we're not using the gpg agent, this is required, and is part of the
-    # defaults on modern rpm. The fun part of gpg-agent signing of rpms is
-    # specifying that the gpg check command always return true
+    # on gpg >= 2.1 you need to specify the pinentry mode and not specify the
+    # batch option to get prompted for a passphrase
+    input_flag = "--pinentry-mode loopback"
     gpg_check_command = ''
-    input_flag = ''
+    gpg_legacy_hosts = Pkg::Config.gpg_legacy_hosts || []
+
+    # on gpg < 2.1 you need to specify --passphrase-fd 3 to get prompted for
+    # the passphrase
+    if gpg_legacy_hosts.include?(Pkg::Config.signing_server)
+      input_flag = "--passphrase-fd 3 --batch"
+    end
+
     if Pkg::Util.boolean_value(ENV['RPM_GPG_AGENT'])
       gpg_check_command = "--define '%__gpg_check_password_cmd /bin/true'"
-    else
-      input_flag = "--passphrase-fd 3"
+      input_flag = "--batch"
     end
 
     # Try this up to 5 times, to allow for incorrect passwords
@@ -25,7 +29,7 @@ module Pkg::Sign::Rpm
       # This definition of %__gpg_sign_cmd is the default on modern rpm. We
       # accept extra flags to override certain signing behavior for older
       # versions of rpm, e.g. specifying V3 signatures instead of V4.
-      Pkg::Util::Execution.capture3("#{rpm_command} #{gpg_check_command} --define '%_gpg_name #{Pkg::Util::Gpg.key}' --define '%__gpg_sign_cmd %{__gpg} gpg #{sign_flags} #{input_flag} --batch --no-verbose --no-armor --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm}")
+      Pkg::Util::Execution.capture3("#{rpm_command} #{gpg_check_command} --define '%_gpg_name #{Pkg::Util::Gpg.key}' --define '%__gpg /usr/bin/gpg' --define '%__gpg_sign_cmd %{__gpg} gpg #{sign_flags} #{input_flag} --no-verbose --no-armor --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm}")
     end
   end
 

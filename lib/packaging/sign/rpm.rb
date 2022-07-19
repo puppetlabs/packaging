@@ -16,12 +16,12 @@ module Pkg::Sign::Rpm
     # on gpg < 2.1 you need to specify --passphrase-fd 3 to get prompted for
     # the passphrase
     if gpg_legacy_hosts.include?(Pkg::Config.signing_server)
-      input_flag = "--passphrase-fd 3"
+      input_flag = "--passphrase-fd 3 --batch"
     end
 
     if Pkg::Util.boolean_value(ENV['RPM_GPG_AGENT'])
       gpg_check_command = "--define '%__gpg_check_password_cmd /bin/true'"
-      input_flag = "#{input_flag} --batch"
+      #input_flag = "#{input_flag} --batch"
     end
 
     # Try this up to 5 times, to allow for incorrect passwords

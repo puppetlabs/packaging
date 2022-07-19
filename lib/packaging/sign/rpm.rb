@@ -21,7 +21,7 @@ module Pkg::Sign::Rpm
 
     if Pkg::Util.boolean_value(ENV['RPM_GPG_AGENT'])
       gpg_check_command = "--define '%__gpg_check_password_cmd /bin/true'"
-      input_flag = "--batch"
+      input_flag = "--batch --no-tty"
     end
 
     # Try this up to 5 times, to allow for incorrect passwords

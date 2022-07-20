@@ -9,7 +9,7 @@ module Pkg::Sign::Rpm
 
     # on gpg >= 2.1 you need to specify the pinentry mode and not specify the
     # batch option to get prompted for a passphrase
-    input_flag = "--pinentry-mode loopback --no-tty"
+    input_flag = "--pinentry-mode loopback --no-tty --batch"
     gpg_check_command = ''
     gpg_legacy_hosts = Pkg::Config.gpg_legacy_hosts || []
 

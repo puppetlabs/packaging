@@ -29,7 +29,7 @@ module Pkg::Sign::Rpm
       # This definition of %__gpg_sign_cmd is the default on modern rpm. We
       # accept extra flags to override certain signing behavior for older
       # versions of rpm, e.g. specifying V3 signatures instead of V4.
-      Pkg::Util::Execution.capture3("#{rpm_command} #{gpg_check_command} --define '%_gpg_name #{Pkg::Util::Gpg.key}' --define '%__gpg /usr/bin/gpg' --define '%__gpg_sign_cmd %{__gpg} gpg #{sign_flags} #{input_flag} --no-verbose --no-armor --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm}")
+      Pkg::Util::Execution.capture3("#{rpm_command} #{gpg_check_command} --define '%_gpg_name #{Pkg::Util::Gpg.key}' --define '%__gpg /usr/bin/gpg' --define '%__gpg_sign_cmd %{__gpg} gpg #{sign_flags} #{input_flag} --no-armor --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm}")
     end
   end
 

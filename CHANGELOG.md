@@ -8,6 +8,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
   feature toggles, via the "NIGHTLY_SHIP_TO_GCP" and "STABLE_SHIP_TO_GCP" environment variables
   that will add shipping to GCP as part of the pl:jenkins:ship_nightly and pl:jenkins:ship_final
   tasks
+- (PA-4444) Adds Fedora 36 to platforms
 
 ## [0.107.0] - 2022-06-14
 ### Added

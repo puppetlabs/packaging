@@ -5,7 +5,7 @@ module Pkg::Sign::Rpm
     # To enable support for wrappers around rpm and thus support for gpg-agent
     # rpm signing, we have to be able to tell the packaging repo what binary to
     # use as the rpm signing tool.
-    rpm_command = ENV['RPM'] || Pkg::Util::Tool.find_tool('rpm')
+    rpm_executable = ENV['RPM'] || Pkg::Util::Tool.find_tool('rpm')
 
     # If we're using the gpg agent for rpm signing, we don't want to specify the
     # input for the passphrase, which is what '--passphrase-fd 3' does. However,
@@ -20,12 +20,34 @@ module Pkg::Sign::Rpm
       input_flag = "--passphrase-fd 3"
     end
 
+    # If gpg version is >=2.1, use the gpg1 binary to sign. Otherwise, use the standard sign command.
+    gpg_executable = if gpg_version_greater_than_21?
+                       "%__gpg /usr/bin/gpg1' --define '%__gpg_sign_cmd %{__gpg} gpg1"
+                     else
+                       '%__gpg_sign_cmd %{__gpg} gpg'
+                     end
+
+    # rubocop:disable Lint/NestedPercentLiteral
+    gpg_sign = %W[
+      #{gpg_executable} #{sign_flags} #{input_flag}
+      --batch --no-verbose --no-armor
+      --no-secmem-warning -u %{_gpg_name}
+      -sbo %{__signature_filename} %{__plaintext_filename}
+    ].join(' ')
+    # rubocop:enable Lint/NestedPercentLiteral
+
+    sign_command = %W[
+      #{rpm_executable} #{gpg_check_command}
+      --define '%_gpg_name #{Pkg::Util::Gpg.key}'
+      --define '#{gpg_sign}' --addsign #{rpm}
+    ].join(' ')
+
     # Try this up to 5 times, to allow for incorrect passwords
     Pkg::Util::Execution.retry_on_fail(:times => 5) do
       # This definition of %__gpg_sign_cmd is the default on modern rpm. We
       # accept extra flags to override certain signing behavior for older
       # versions of rpm, e.g. specifying V3 signatures instead of V4.
-      Pkg::Util::Execution.capture3("#{rpm_command} #{gpg_check_command} --define '%_gpg_name #{Pkg::Util::Gpg.key}' --define '%__gpg_sign_cmd %{__gpg} gpg #{sign_flags} #{input_flag} --batch --no-verbose --no-armor --no-secmem-warning -u %{_gpg_name} -sbo %{__signature_filename} %{__plaintext_filename}' --addsign #{rpm}")
+      Pkg::Util::Execution.capture3(sign_command)
     end
   end
 
@@ -111,5 +133,11 @@ module Pkg::Sign::Rpm
         FileUtils.ln(path, link_path, :force => true, :verbose => true)
       end
     end
+  end
+
+  def gpg_version_greater_than_21?
+    gpg_version_output = %x(gpg --version)
+    gpg_version = gpg_version_output.split(' ')[2]
+    Gem::Version.new(gpg_version) >= Gem::Version.new('2.1.0')
   end
 end

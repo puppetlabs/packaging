@@ -28,7 +28,7 @@ module Pkg::Sign::Rpm
                      end
 
     # rubocop:disable Lint/NestedPercentLiteral
-    gpg_sign = %W[
+    gpg_signing_macro = %W[
       #{gpg_executable} #{sign_flags} #{input_flag}
       --batch --no-verbose --no-armor
       --no-secmem-warning -u %{_gpg_name}
@@ -39,7 +39,7 @@ module Pkg::Sign::Rpm
     sign_command = %W[
       #{rpm_executable} #{gpg_check_command}
       --define '%_gpg_name #{Pkg::Util::Gpg.key}'
-      --define '#{gpg_sign}' --addsign #{rpm}
+      --define '#{gpg_signing_macro}' --addsign #{rpm}
     ].join(' ')
 
     # Try this up to 5 times, to allow for incorrect passwords

@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.107.1] - 2022-08-29
 ### Added
 - (RE-13698) Added support to ship nightly and stable debs to apt.repos.puppet.com. Introduced
   feature toggles, via the "NIGHTLY_SHIP_TO_GCP" and "STABLE_SHIP_TO_GCP" environment variables
@@ -845,7 +847,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.107.0...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.107.1...HEAD
+[0.107.1]: https://github.com/puppetlabs/packaging/compare/0.107.0...0.107.1
 [0.107.0]: https://github.com/puppetlabs/packaging/compare/0.106.3...0.107.0
 [0.106.3]: https://github.com/puppetlabs/packaging/compare/0.106.2...0.106.3
 [0.106.2]: https://github.com/puppetlabs/packaging/compare/0.106.1...0.106.2

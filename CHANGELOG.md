@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.107.2] - 2022-09-20
 ### Changed
 - (maint) Move GCP bucket names for MSI signing to params.
 
@@ -849,7 +851,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.107.1...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.107.2...HEAD
+[0.107.2]: https://github.com/puppetlabs/packaging/compare/0.107.1...0.107.2
 [0.107.1]: https://github.com/puppetlabs/packaging/compare/0.107.0...0.107.1
 [0.107.0]: https://github.com/puppetlabs/packaging/compare/0.106.3...0.107.0
 [0.106.3]: https://github.com/puppetlabs/packaging/compare/0.106.2...0.106.3

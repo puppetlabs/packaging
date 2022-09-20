@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (maint) Move GCP bucket names for MSI signing to params.
 
 ## [0.107.1] - 2022-08-29
 ### Added

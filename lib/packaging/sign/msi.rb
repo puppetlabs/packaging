@@ -26,8 +26,9 @@ module Pkg::Sign::Msi
       project_id: 'puppet-release-engineering',
       credentials: gcp_service_account_credentials
     )
-    tosign_bucket = gcp_storage.bucket('windows-tosign-bucket')
-    signed_bucket = gcp_storage.bucket('windows-signed-bucket')
+
+    tosign_bucket = gcp_storage.bucket(Pkg::Config.gcp_tosign_bucket)
+    signed_bucket = gcp_storage.bucket(Pkg::Config.gcp_signed_bucket)
 
     service_uri = URI.parse(signing_service_url)
     headers = { 'Content-Type': 'application/json', 'Authorization': "Bearer #{gcp_auth_token}" }

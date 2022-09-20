@@ -239,73 +239,58 @@ namespace :pl do
     end
 
     ##
-    ## S3 / GCP syncing
+    ## S3 syncing
     S3_REPO_SYNC = 'sudo /usr/local/bin/s3_repo_sync.sh'
-    GCP_REPO_SYNC = '/usr/local/bin/gcp_repo_sync'
 
-    desc "Sync signed apt repos from #{Pkg::Config.apt_signing_server} to S3 and GCP"
+    desc "Sync signed apt repos from #{Pkg::Config.apt_signing_server} to S3"
     task :deploy_apt_repo_to_s3 => 'pl:fetch' do
       s3_sync_command = "#{S3_REPO_SYNC} apt.puppetlabs.com"
-      gcp_sync_command = "#{GCP_REPO_SYNC} apt.puppetlabs.com"
 
-      puts "Sync apt repos from #{Pkg::Config.apt_signing_server} to S3 and GCP? [y,n]"
+      puts "Sync apt repos from #{Pkg::Config.apt_signing_server} to S3? [y,n]"
       next unless Pkg::Util.ask_yes_or_no
 
       Pkg::Util::Execution.retry_on_fail(times: 3) do
         Pkg::Util::Net.remote_execute(Pkg::Config.apt_signing_server, s3_sync_command)
       end
-
-      Pkg::Util::Execution.retry_on_fail(times: 3) do
-        Pkg::Util::Net.remote_execute(Pkg::Config.apt_signing_server, gcp_sync_command)
-      end
     end
 
-    desc "Sync signed yum repos from #{Pkg::Config.yum_staging_server} to S3 and GCP"
+    desc "Sync signed yum repos from #{Pkg::Config.yum_staging_server} to S3"
     task :deploy_yum_repo_to_s3 => 'pl:fetch' do
       s3_sync_command = "#{S3_REPO_SYNC} yum.puppetlabs.com"
-      gcp_sync_command = "#{GCP_REPO_SYNC} yum.puppetlabs.com"
-      puts "Sync yum repos from #{Pkg::Config.yum_staging_server} to S3 and GCP? [y,n]"
+
+      puts "Sync yum repos from #{Pkg::Config.yum_staging_server} to S3? [y,n]"
       next unless Pkg::Util.ask_yes_or_no
+
       Pkg::Util::Execution.retry_on_fail(times: 3) do
         Pkg::Util::Net.remote_execute(Pkg::Config.yum_staging_server, s3_sync_command)
       end
-
-      Pkg::Util::Execution.retry_on_fail(times: 3) do
-        Pkg::Util::Net.remote_execute(Pkg::Config.yum_staging_server, gcp_sync_command)
-      end
     end
 
-    desc "Sync downloads.puppetlabs.com from #{Pkg::Config.staging_server} to S3 and GCP"
+    desc "Sync downloads.puppetlabs.com from #{Pkg::Config.staging_server} to S3"
     task :deploy_downloads_to_s3 => 'pl:fetch' do
       s3_sync_command = "#{S3_REPO_SYNC} downloads.puppetlabs.com"
-      gcp_sync_command = "#{GCP_REPO_SYNC} downloads.puppetlabs.com"
-      puts "Sync downloads.puppetlabs.com from #{Pkg::Config.staging_server} to S3 and GCP? [y,n]"
+
+      puts "Sync downloads.puppetlabs.com from #{Pkg::Config.staging_server} to S3? [y,n]"
       next unless Pkg::Util.ask_yes_or_no
-      Pkg::Util::Execution.retry_on_fail(times: 3) do
-        Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, s3_sync_command)
-      end
 
       Pkg::Util::Execution.retry_on_fail(times: 3) do
-        Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, gcp_sync_command)
+        Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, s3_sync_command)
       end
     end
 
-    desc "Sync nightlies.puppet.com from #{Pkg::Config.staging_server} to S3 and GCP"
+    desc "Sync nightlies.puppet.com from #{Pkg::Config.staging_server} to S3"
     task :deploy_nightlies_to_s3 => 'pl:fetch' do
       s3_sync_command = "#{S3_REPO_SYNC} nightlies.puppet.com"
-      gcp_sync_command = "#{S3_REPO_SYNC} nightlies.puppet.com"
-      puts "Syncing nightly builds from #{Pkg::Config.staging_server} to S3 and GCP"
+
+      puts "Syncing nightly builds from #{Pkg::Config.staging_server} to S3"
       Pkg::Util::Execution.retry_on_fail(times: 3) do
         Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, s3_sync_command)
-      end
-
-      Pkg::Util::Execution.retry_on_fail(times: 3) do
-        Pkg::Util::Net.remote_execute(Pkg::Config.staging_server, gcp_sync_command)
       end
     end
 
     desc "Sync signed apt repos from #{Pkg::Config.apt_signing_server} to Google Cloud Platform"
     task :sync_apt_repo_to_gcp => 'pl:fetch' do
+      GCP_REPO_SYNC = '/usr/local/bin/gcp_repo_sync'
       target_site = 'apt.repos.puppet.com'
       sync_command_puppet_6 = "#{GCP_REPO_SYNC} #{target_site} puppet6"
       sync_command_puppet_7 = "#{GCP_REPO_SYNC} #{target_site} puppet7"

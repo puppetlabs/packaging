@@ -26,7 +26,7 @@ module Pkg::Sign::Msi
       project_id: 'puppet-release-engineering',
       credentials: gcp_service_account_credentials
     )
-    
+
     tosign_bucket = gcp_storage.bucket(Pkg::Config.gcp_tosign_bucket)
     signed_bucket = gcp_storage.bucket(Pkg::Config.gcp_signed_bucket)
 

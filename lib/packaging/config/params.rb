@@ -231,7 +231,7 @@ module Pkg::Params
               { :var => :foss_platforms,          :envvar => :FOSS_PLATFORMS,  :type => :array },
               { :var => :freight_archive_path,    :envvar => :FREIGHT_ARCHIVE_PATH },
               { :var => :gcp_signed_bucket,       :envvar => :GCP_SIGNED_BUCKET },
-              { :var => :gcp_tosign_bucket,       :envar  => :GCP_TOSIGN_BUCKET },
+              { :var => :gcp_tosign_bucket,       :envvar  => :GCP_TOSIGN_BUCKET },
               { :var => :gem_host,                :envvar => :GEM_HOST },
               { :var => :gpg_key,                 :envvar => :GPG_KEY },
               { :var => :gpg_name,                :envvar => :GPG_NAME },

@@ -16,10 +16,10 @@ describe 'artifactory.rb' do
         :repo_config => "../repo_configs/rpm/pl-puppet-agent-f65f9efbb727c3d2d72d6799c0fc345a726f27b5-el-6-x86_64.repo",
         :additional_artifacts => ["./el/6/PC1/x86_64/puppet-agent-extras-5.3.1.34.gf65f9ef-1.el6.x86_64.rpm"],
       },
-      'ubuntu-16.04-amd64' => {
-        :artifact => "./deb/xenial/PC1/puppet-agent_5.3.1.34.gf65f9ef-1xenial_amd64.deb",
-        :repo_config => "../repo_configs/deb/pl-puppet-agent-f65f9efbb727c3d2d72d6799c0fc345a726f27b5-xenial.list",
-        :additional_artifacts => ["./deb/xenial/PC1/puppet-agent-extras_5.3.1.34.gf65f9ef-1xenial_amd64.deb"],
+      'ubuntu-18.04-amd64' => {
+        :artifact => "./deb/bionic/PC1/puppet-agent_5.3.1.34.gf65f9ef-1bionic_amd64.deb",
+        :repo_config => "../repo_configs/deb/pl-puppet-agent-f65f9efbb727c3d2d72d6799c0fc345a726f27b5-bionic.list",
+        :additional_artifacts => ["./deb/bionic/PC1/puppet-agent-extras_5.3.1.34.gf65f9ef-1bionic_amd64.deb"],
       },
       'debian-10-amd64' => {
         :artifact => "./deb/buster/PC1/puppetdb_5.3.1.34.gf65f9ef-1buster_all.deb",
@@ -61,13 +61,13 @@ describe 'artifactory.rb' do
       :package_name => 'path/to/a/el/6/package/puppet-agent-5.3.1.34.gf65f9ef-1.el6.x86_64.rpm',
       :all_package_names => ['puppet-agent-5.3.1.34.gf65f9ef-1.el6.x86_64.rpm', 'puppet-agent-extras-5.3.1.34.gf65f9ef-1.el6.x86_64.rpm']
     },
-    'ubuntu-16.04-amd64' => {
+    'ubuntu-18.04-amd64' => {
       :toplevel_repo => 'debian__local',
-      :repo_subdirectories => "#{default_repo_name}/#{project}/#{project_version}/ubuntu-16.04",
-      :codename => 'xenial',
+      :repo_subdirectories => "#{default_repo_name}/#{project}/#{project_version}/ubuntu-18.04",
+      :codename => 'bionic',
       :arch => 'amd64',
-      :package_name => 'path/to/a/xenial/package/puppet-agent_5.3.1.34.gf65f9ef-1xenial_amd64.deb',
-      :all_package_names => ['puppet-agent_5.3.1.34.gf65f9ef-1xenial_amd64.deb', 'puppet-agent-extras_5.3.1.34.gf65f9ef-1xenial_amd64.deb']
+      :package_name => 'path/to/a/bionic/package/puppet-agent_5.3.1.34.gf65f9ef-1bionic_amd64.deb',
+      :all_package_names => ['puppet-agent_5.3.1.34.gf65f9ef-1bionic_amd64.deb', 'puppet-agent-extras_5.3.1.34.gf65f9ef-1bionic_amd64.deb']
     },
     'debian-10-amd64' => {
       :toplevel_repo => 'debian__local',

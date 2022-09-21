@@ -21,14 +21,6 @@ module Pkg
       },
 
       'debian' => {
-        '9' => {
-          codename: 'stretch',
-          architectures: ['amd64', 'i386'],
-          source_architecture: 'source',
-          package_format: 'deb',
-          source_package_formats: DEBIAN_SOURCE_FORMATS,
-          repo: true,
-        },
         '10' => {
           codename: 'buster',
           architectures: ['amd64', 'i386'],
@@ -83,22 +75,6 @@ module Pkg
       },
 
       'fedora' => {
-        '32' => {
-          architectures: ['x86_64'],
-          source_architecture: 'SRPMS',
-          package_format: 'rpm',
-          source_package_formats: ['src.rpm'],
-          signature_format: 'v4',
-          repo: true,
-        },
-        '34' => {
-          architectures: ['x86_64'],
-          source_architecture: 'SRPMS',
-          package_format: 'rpm',
-          source_package_formats: ['src.rpm'],
-          signature_format: 'v4',
-          repo: true,
-        },
         '36' => {
           architectures: ['x86_64'],
           source_architecture: 'SRPMS',
@@ -187,22 +163,6 @@ module Pkg
       },
 
       'ubuntu' => {
-        '14.04' => {
-          codename: 'trusty',
-          architectures: ['amd64', 'i386'],
-          source_architecture: 'source',
-          package_format: 'deb',
-          source_package_formats: DEBIAN_SOURCE_FORMATS,
-          repo: true,
-        },
-        '16.04' => {
-          codename: 'xenial',
-          architectures: ['amd64', 'i386', 'ppc64el'],
-          source_architecture: 'source',
-          package_format: 'deb',
-          source_package_formats: DEBIAN_SOURCE_FORMATS,
-          repo: true,
-        },
         '18.04' => {
           codename: 'bionic',
           architectures: ['amd64', 'ppc64el', 'aarch64'],

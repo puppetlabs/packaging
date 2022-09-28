@@ -3,6 +3,10 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Removed
+- (RE-14990) Start teardown of plans to migrate downloads/yum/apt/nightlys from S3 to GCP.
+  Leave in place the parts that were shipping to apt.repos.puppet.com as a later step should
+  we decide to move that to AWS.
 
 ## [0.107.2] - 2022-09-20
 ### Changed

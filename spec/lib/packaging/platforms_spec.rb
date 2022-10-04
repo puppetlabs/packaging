@@ -36,16 +36,12 @@ describe 'Pkg::Platforms' do
 
   describe '#codenames' do
     it 'should return all codenames for a given platform' do
-      codenames = ['focal', 'bionic', 'bullseye', 'buster', 'stretch', 'trusty', 'xenial', 'jammy']
+      codenames = ['focal', 'bionic', 'bullseye', 'buster', 'jammy']
       expect(Pkg::Platforms.codenames).to match_array(codenames)
     end
   end
 
   describe '#codename_to_platform_version' do
-    it 'should return the platform and version corresponding to a given codename' do
-      expect(Pkg::Platforms.codename_to_platform_version('xenial')).to eq(['ubuntu', '16.04'])
-    end
-
     it 'should return the platform and version corresponding to a given codename' do
       expect(Pkg::Platforms.codename_to_platform_version('jammy')).to eq(['ubuntu', '22.04'])
     end
@@ -62,18 +58,18 @@ describe 'Pkg::Platforms' do
   end
 
   describe '#arches_for_codename' do
-    it 'should return an array of arches corresponding to a given codename' do
-      expect(Pkg::Platforms.arches_for_codename('xenial')).to match_array(['amd64', 'i386', 'ppc64el'])
+    it 'should return an array of architectures corresponding to a given codename' do
+      expect(Pkg::Platforms.arches_for_codename('bionic')).to match_array(['amd64', 'aarch64', 'ppc64el'])
     end
 
-    it 'should be able to include source archietectures' do
-      expect(Pkg::Platforms.arches_for_codename('xenial', true)).to match_array(["amd64", "i386", "ppc64el", "source"])
+    it 'should be able to include source architectures' do
+      expect(Pkg::Platforms.arches_for_codename('bionic', true)).to match_array(["amd64", "aarch64", "ppc64el", "source"])
     end
   end
 
   describe '#codename_to_tags' do
     it 'should return an array of platform tags corresponding to a given codename' do
-      expect(Pkg::Platforms.codename_to_tags('xenial')).to match_array(['ubuntu-16.04-i386', 'ubuntu-16.04-amd64', "ubuntu-16.04-ppc64el"])
+      expect(Pkg::Platforms.codename_to_tags('bionic')).to match_array(['ubuntu-18.04-aarch64', 'ubuntu-18.04-amd64', "ubuntu-18.04-ppc64el"])
     end
   end
 
@@ -131,17 +127,17 @@ describe 'Pkg::Platforms' do
 
   describe '#parse_platform_tag' do
     test_cases = {
-      'debian-9-amd64' => ['debian', '9', 'amd64'],
+      'debian-10-amd64' => ['debian', '10', 'amd64'],
       'windows-2012-x86' => ['windows', '2012', 'x86'],
       'windowsfips-2012-x64' => ['windowsfips', '2012', 'x64'],
       'el-7-x86_64' => ['el', '7', 'x86_64'],
       'el-6' => ['el', '6', ''],
-      'xenial-amd64' => ['ubuntu', '16.04', 'amd64'],
-      'xenial' => ['ubuntu', '16.04', ''],
+      'bionic-amd64' => ['ubuntu', '18.04', 'amd64'],
+      'bionic' => ['ubuntu', '18.04', ''],
       'windows-2012' => ['windows', '2012', ''],
       'redhatfips-7-x86_64' => ['redhatfips', '7', 'x86_64'],
       'el-7-SRPMS' => ['el', '7', 'SRPMS'],
-      'ubuntu-16.04-source' => ['ubuntu', '16.04', 'source'],
+      'ubuntu-18.04-source' => ['ubuntu', '18.04', 'source'],
     }
 
     fail_cases = [

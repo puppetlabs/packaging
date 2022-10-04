@@ -52,7 +52,7 @@ describe '#Pkg::Util::Ship' do
     pkg/sles/12/puppet6/x86_64/puppet-agent-6.19.0-1.sles12.x86_64.rpm
     pkg/sles/15/puppet6/x86_64/puppet-agent-6.19.0-1.sles15.x86_64.rpm
     pkg/apple/10.15/puppet6/x86_64/puppet-agent-6.19.0-1.osx10.15.dmg
-    pkg/fedora/32/puppet6/x86_64/puppet-agent-6.19.0-1.fc32.x86_64.rpm
+    pkg/fedora/36/puppet6/x86_64/puppet-agent-6.19.0-1.fc32.x86_64.rpm
     pkg/windows/puppet-agent-6.19.0-x64.msi
     pkg/windows/puppet-agent-6.19.0-x86.msi
     pkg/windowsfips/puppet-agent-6.19.0-x64.msi
@@ -71,7 +71,7 @@ describe '#Pkg::Util::Ship' do
     pkg/puppet6/sles/12/x86_64/puppet-agent-6.19.0-1.sles12.x86_64.rpm
     pkg/puppet6/sles/15/x86_64/puppet-agent-6.19.0-1.sles15.x86_64.rpm
     pkg/mac/puppet6/10.15/x86_64/puppet-agent-6.19.0-1.osx10.15.dmg
-    pkg/puppet6/fedora/32/x86_64/puppet-agent-6.19.0-1.fc32.x86_64.rpm
+    pkg/puppet6/fedora/36/x86_64/puppet-agent-6.19.0-1.fc32.x86_64.rpm
     pkg/windows/puppet6/puppet-agent-6.19.0-x64.msi
     pkg/windows/puppet6/puppet-agent-6.19.0-x86.msi
     pkg/windowsfips/puppet6/puppet-agent-6.19.0-x64.msi

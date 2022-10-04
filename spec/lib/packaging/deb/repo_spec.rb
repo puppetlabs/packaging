@@ -6,7 +6,7 @@ describe "Pkg::Deb::Repo" do
   let(:project)       { "deb_repos" }
   let(:ref)           { "1234abcd" }
   let(:base_url)      { "http://#{builds_server}/#{project}/#{ref}" }
-  let(:cows)          { ["xenial", "trusty", "stretch", ""] }
+  let(:cows)          { ["bionic", "focal", "buster", ""] }
   let(:wget_results)  { cows.map {|cow| "#{base_url}/repos/apt/#{cow}" }.join("\n") }
   let(:wget_garbage)  { "\n and an index\nhttp://somethingelse.com/robots" }
   let(:repo_configs)  { cows.reject {|cow| cow.empty?}.map {|dist| "pkg/repo_configs/deb/pl-#{project}-#{ref}-#{dist}.list" } }
@@ -72,7 +72,7 @@ describe "Pkg::Deb::Repo" do
 
   describe "#repo_creation_command" do
     let(:prefix) { "thing" }
-    let(:artifact_directory) { ["/a/b/c/xenial"] }
+    let(:artifact_directory) { ["/a/b/c/bionic"] }
 
     it "returns a command to make repos" do
       command = Pkg::Deb::Repo.repo_creation_command(prefix, artifact_directory)
@@ -85,7 +85,7 @@ describe "Pkg::Deb::Repo" do
   describe "#create_repos" do
     let(:command) { "/usr/bin/make some repos" }
     let(:artifact_directory) { "/tmp/dir/thing" }
-    let(:pkg_directories) { ['place/to/deb/xenial', 'other/deb/trusty'] }
+    let(:pkg_directories) { ['place/to/deb/bionic', 'other/deb/focal'] }
 
     it "generates repo configs remotely and then ships them" do
       File.stub(:join) {artifact_directory}

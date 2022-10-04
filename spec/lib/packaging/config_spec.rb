@@ -205,7 +205,7 @@ describe "Pkg::Config" do
     platform_tags = [
       'osx-10.15-x86_64',
       'osx-11-x86_64',
-      'ubuntu-16.04-i386',
+      'ubuntu-18.04-amd64',
       'el-6-x86_64',
       'el-7-ppc64le',
       'sles-12-x86_64',
@@ -214,7 +214,7 @@ describe "Pkg::Config" do
     artifacts = \
       "./artifacts/apple/10.15/PC1/x86_64/puppet-agent-5.3.2.658.gc79ef9a-1.osx10.15.dmg\n" \
       "./artifacts/apple/11/PC1/x86_64/puppet-agent-5.3.2.658.gc79ef9a-1.osx11.dmg\n" \
-      "./artifacts/deb/xenial/PC1/puppet-agent_5.3.2-1xenial_i386.deb\n" \
+      "./artifacts/deb/bionic/PC1/puppet-agent_5.3.2-1bionic_amd64.deb\n" \
       "./artifacts/el/6/PC1/x86_64/puppet-agent-5.3.2.658.gc79ef9a-1.el6.x86_64.rpm\n" \
       "./artifacts/el/7/PC1/ppc64le/puppet-agent-5.3.2-1.el7.ppc64le.rpm\n" \
       "./artifacts/sles/12/PC1/x86_64/puppet-agent-5.3.2-1.sles12.x86_64.rpm"
@@ -223,7 +223,7 @@ describe "Pkg::Config" do
       "./artifacts/aix/7.1/PC1/ppc/puppet-agent-5.3.2-1.aix7.1.ppc.rpm"
 
     fedora_artifacts = \
-      "./artifacts/fedora/32/PC1/x86_64/puppet-agent-5.3.2-1.fc32.x86_64.rpm"
+      "./artifacts/fedora/36/PC1/x86_64/puppet-agent-5.3.2-1.fc36.x86_64.rpm"
 
     windows_artifacts = \
       "./artifacts/windows/puppet-agent-x64.msi\n" \
@@ -237,17 +237,17 @@ describe "Pkg::Config" do
       "./artifacts/solaris/11/PC1/puppet-agent@5.3.2,5.11-1.sparc.p5p\n" \
       "./artifacts/solaris/10/PC1/puppet-agent-5.3.2-1.i386.pkg.gz"
 
-    stretch_artifacts = \
-      "./artifacts/deb/stretch/PC1/puppet-agent-dbgsym_5.3.2-1stretch_i386.deb\n" \
-      "./artifacts/deb/stretch/PC1/puppet-agent_5.3.2-1stretch_i386.deb\n" \
-      "./artifacts/deb/stretch/PC1/puppet-agent_5.3.2.658.gc79ef9a-1stretch_amd64.deb\n" \
-      "./artifacts/deb/stretch/PC1/puppet-agent-dbgsym_5.3.2.658.gc79ef9a-1stretch_amd64.deb"
+    buster_artifacts = \
+      "./artifacts/deb/buster/PC1/puppet-agent-dbgsym_5.3.2-1buster_i386.deb\n" \
+      "./artifacts/deb/buster/PC1/puppet-agent_5.3.2-1buster_i386.deb\n" \
+      "./artifacts/deb/buster/PC1/puppet-agent_5.3.2.658.gc79ef9a-1buster_amd64.deb\n" \
+      "./artifacts/deb/buster/PC1/puppet-agent-dbgsym_5.3.2.658.gc79ef9a-1buster_amd64.deb"
 
     artifacts_not_matching_project = \
-      "./artifacts/deb/xenial/pe-postgresql-contrib_2019.1.9.6.12-1xenial_amd64.deb\n" \
-      "./artifacts/deb/xenial/pe-postgresql-devel_2019.1.9.6.12-1xenial_amd64.deb\n" \
-      "./artifacts/deb/xenial/pe-postgresql-server_2019.1.9.6.12-1xenial_amd64.deb\n" \
-      "./artifacts/deb/xenial/pe-postgresql_2019.1.9.6.12-1xenial_amd64.deb"
+      "./artifacts/deb/bionic/pe-postgresql-contrib_2019.1.9.6.12-1bionic_amd64.deb\n" \
+      "./artifacts/deb/bionic/pe-postgresql-devel_2019.1.9.6.12-1bionic_amd64.deb\n" \
+      "./artifacts/deb/bionic/pe-postgresql-server_2019.1.9.6.12-1bionic_amd64.deb\n" \
+      "./artifacts/deb/bionic/pe-postgresql_2019.1.9.6.12-1bionic_amd64.deb"
     project = 'puppet-agent'
     ref = '5.3.2'
 
@@ -280,8 +280,8 @@ describe "Pkg::Config" do
     it "should not use 'f' in fedora platform tags" do
       allow(Pkg::Util::Net).to receive(:remote_execute).and_return(fedora_artifacts, nil)
       data = Pkg::Config.platform_data
-      expect(data).to include('fedora-32-x86_64')
-      expect(data).not_to include('fedora-f32-x86_64')
+      expect(data).to include('fedora-36-x86_64')
+      expect(data).not_to include('fedora-f36-x86_64')
     end
 
     it "should collect packages whose extname differ from package_format" do
@@ -300,19 +300,19 @@ describe "Pkg::Config" do
     end
 
     it "should not collect debug packages" do
-      allow(Pkg::Util::Net).to receive(:remote_execute).and_return(stretch_artifacts, nil)
+      allow(Pkg::Util::Net).to receive(:remote_execute).and_return(buster_artifacts, nil)
       data = Pkg::Config.platform_data
-      expect(data['debian-9-amd64']).to include(:artifact => './deb/stretch/PC1/puppet-agent_5.3.2.658.gc79ef9a-1stretch_amd64.deb')
+      expect(data['debian-10-amd64']).to include(:artifact => './deb/buster/PC1/puppet-agent_5.3.2.658.gc79ef9a-1buster_amd64.deb')
     end
 
     it "should collect packages that don't match the project name" do
       allow(Pkg::Util::Net).to receive(:remote_execute).and_return(artifacts_not_matching_project, nil)
       data = Pkg::Config.platform_data
-      expect(data['ubuntu-16.04-amd64']).to include(:artifact => './deb/xenial/pe-postgresql-contrib_2019.1.9.6.12-1xenial_amd64.deb')
-      expect(data['ubuntu-16.04-amd64'][:additional_artifacts].size).to eq(3)
-      expect(data['ubuntu-16.04-amd64'][:additional_artifacts]).to include('./deb/xenial/pe-postgresql-devel_2019.1.9.6.12-1xenial_amd64.deb')
-      expect(data['ubuntu-16.04-amd64'][:additional_artifacts]).to include('./deb/xenial/pe-postgresql-server_2019.1.9.6.12-1xenial_amd64.deb')
-      expect(data['ubuntu-16.04-amd64'][:additional_artifacts]).to include('./deb/xenial/pe-postgresql_2019.1.9.6.12-1xenial_amd64.deb')
+      expect(data['ubuntu-18.04-amd64']).to include(:artifact => './deb/bionic/pe-postgresql-contrib_2019.1.9.6.12-1bionic_amd64.deb')
+      expect(data['ubuntu-18.04-amd64'][:additional_artifacts].size).to eq(3)
+      expect(data['ubuntu-18.04-amd64'][:additional_artifacts]).to include('./deb/bionic/pe-postgresql-devel_2019.1.9.6.12-1bionic_amd64.deb')
+      expect(data['ubuntu-18.04-amd64'][:additional_artifacts]).to include('./deb/bionic/pe-postgresql-server_2019.1.9.6.12-1bionic_amd64.deb')
+      expect(data['ubuntu-18.04-amd64'][:additional_artifacts]).to include('./deb/bionic/pe-postgresql_2019.1.9.6.12-1bionic_amd64.deb')
     end
 
     it "should use 'ppc' instead of 'power' in aix paths" do

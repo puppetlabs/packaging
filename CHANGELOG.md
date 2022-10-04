@@ -8,6 +8,10 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
   Leave in place the parts that were shipping to apt.repos.puppet.com as a later step should
   we decide to move that to AWS.
 
+### Removed
+
+- (maint) Removes deprecated platforms (Debian 9, Fedora 32 and 34, Ubuntu 16.04)
+
 ## [0.107.2] - 2022-09-20
 ### Changed
 - (maint) Move GCP bucket names for MSI signing to params.

@@ -3,13 +3,12 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.108.0] - 2022-10-04
 ### Removed
-- (RE-14990) Start teardown of plans to migrate downloads/yum/apt/nightlys from S3 to GCP.
+- (RE-14990) Start teardown of abandoned plans to migrate downloads/yum/apt/nightlys from S3 to GCP.
   Leave in place the parts that were shipping to apt.repos.puppet.com as a later step should
   we decide to move that to AWS.
-
-### Removed
-
 - (maint) Removes deprecated platforms (Debian 9, Fedora 32 and 34, Ubuntu 16.04)
 
 ## [0.107.2] - 2022-09-20
@@ -859,7 +858,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.107.2...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.108.0...HEAD
+[0.108.0]: https://github.com/puppetlabs/packaging/compare/0.107.2...0.108.0
 [0.107.2]: https://github.com/puppetlabs/packaging/compare/0.107.1...0.107.2
 [0.107.1]: https://github.com/puppetlabs/packaging/compare/0.107.0...0.107.1
 [0.107.0]: https://github.com/puppetlabs/packaging/compare/0.106.3...0.107.0

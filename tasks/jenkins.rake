@@ -302,10 +302,10 @@ namespace :pl do
 
       # This serves as a cheap feature toggle to avoid things not ready to
       # use it. It should be removed in future versions.
-      if ENV['NIGHTLY_SHIP_TO_GCP']
+      if ENV['SHIP_TO_APT_REPOS_PUPPET_COM']
         ## apt.repos.puppet.com
         Rake::Task['pl:stage_nightly_debs'].invoke
-        Rake::Task['pl:remote:sync_apt_repo_to_gcp'].invoke
+        Rake::Task['pl:remote:sync_apt_repo_to_s3'].invoke
       end
     end
 
@@ -317,10 +317,10 @@ namespace :pl do
 
       # This serves as a cheap feature toggle to avoid things not ready to
       # use it. It should be removed in future versions.
-      if ENV['STABLE_SHIP_TO_GCP']
+      if ENV['SHIP_TO_APT_REPOS_PUPPET_COM']
         ## apt.repos.puppet.com
         Rake::Task['pl:stage_stable_debs'].invoke
-        Rake::Task['pl:remote:sync_apt_repo_to_gcp'].invoke
+        Rake::Task['pl:remote:sync_apt_repo_to_s3'].invoke
       end
     end
 

@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (RE-13698) Resume work on new apt.repos.puppet.com shipping
 
 ## [0.108.0] - 2022-10-04
 ### Removed

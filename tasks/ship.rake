@@ -240,7 +240,9 @@ namespace :pl do
 
     ##
     ## S3 syncing
-    S3_REPO_SYNC = 'sudo /usr/local/bin/s3_repo_sync.sh'
+
+    ## TODO: this shouldn't need 'sudo'
+    S3_REPO_SYNC = 'sudo /usr/local/bin/s3_repo_sync'
 
     desc "Sync signed apt repos from #{Pkg::Config.apt_signing_server} to S3"
     task :deploy_apt_repo_to_s3 => 'pl:fetch' do
@@ -288,32 +290,31 @@ namespace :pl do
       end
     end
 
-    desc "Sync signed apt repos from #{Pkg::Config.apt_signing_server} to Google Cloud Platform"
-    task :sync_apt_repo_to_gcp => 'pl:fetch' do
-      GCP_REPO_SYNC = '/usr/local/bin/gcp_repo_sync'
-      target_site = 'apt.repos.puppet.com'
-      sync_command_puppet_6 = "#{GCP_REPO_SYNC} #{target_site} puppet6"
-      sync_command_puppet_7 = "#{GCP_REPO_SYNC} #{target_site} puppet7"
-      print "Sync apt repos from #{Pkg::Config.apt_signing_server} to #{target_site}? [y,n] "
+    desc "Sync signed apt repos from #{Pkg::Config.apt_signing_server} to S3"
+    task :sync_apt_repo_to_s3 => 'pl:fetch' do
+      sync_base_command = "#{S3_REPO_SYNC} apt.repos.puppet.com"
+      puppet_versions = %w[puppet7 puppet8]
+
+      print "Sync apt repos from #{Pkg::Config.apt_signing_server} to S3 ",
+            "(apt.repos.puppet.com)? [y,n] "
       next unless Pkg::Util.ask_yes_or_no
-      puts
 
-      Pkg::Util::Execution.retry_on_fail(times: 3) do
-        Pkg::Util::Net.remote_execute(Pkg::Config.apt_signing_server, sync_command_puppet_6)
-      end
-
-      Pkg::Util::Execution.retry_on_fail(times: 3) do
-        Pkg::Util::Net.remote_execute(Pkg::Config.apt_signing_server, sync_command_puppet_7)
+      puppet_versions.each do |puppetn|
+        sync_command = "#{sync_base_command} #{puppetn}"
+        Pkg::Util::Execution.retry_on_fail(times: 3) do
+          Pkg::Util::Net.remote_execute(Pkg::Config.apt_signing_server, sync_command)
+        end
       end
     end
     # Keep 'deploy' for backward compatibility
-    task :deploy_apt_repo_to_gcp => :sync_apt_repo_to_gcp
+    task :deploy_apt_repo_to_s3 => :sync_apt_repo_to_s3
 
     desc "Sync apt, yum, and downloads.pl.com to AWS S3"
     task :deploy_final_builds_to_s3 => "pl:fetch" do
       Rake::Task['pl:remote:deploy_apt_repo_to_s3'].invoke
       Rake::Task['pl:remote:deploy_yum_repo_to_s3'].invoke
       Rake::Task['pl:remote:deploy_downloads_to_s3'].invoke
+      Rask::Task['pl:remote:sync_apt_repo_to_s3'].invoke
     end
 
     desc "Sync yum and apt from #{Pkg::Config.staging_server} to rsync servers"

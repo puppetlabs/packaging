@@ -50,7 +50,7 @@ module Pkg::Rpm::Repo
         next if path.include? 'aix'
         cmd << "if [ -d #{path}  ]; then "
         cmd << "pushd #{path} && "
-        cmd << '$createrepo --checksum=sha --checkts --update --delta-workers=0 --database . && '
+        cmd << '$createrepo --checksum=sha --checkts --update --workers=0 --database . && '
         cmd << 'popd ; '
         cmd << 'fi ;'
       end

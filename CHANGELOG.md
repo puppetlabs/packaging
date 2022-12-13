@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (RE-15086) Stop forcing rpmsign to use gpg1
 
 ## [0.108.0] - 2022-10-04
 ### Removed

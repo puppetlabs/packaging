@@ -15,8 +15,6 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = '>= 2.3.0'
 
-  gem.add_development_dependency('pry')
-  gem.add_development_dependency('pry-byebug')
   gem.add_development_dependency('rspec', ['~> 2.14.1'])
   gem.add_development_dependency('rubocop', ['~> 0.49'])
 

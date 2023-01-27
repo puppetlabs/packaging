@@ -5,22 +5,23 @@ Gem::Specification.new do |gem|
   gem.version = %x(git describe --tags).gsub('-', '.').chomp
   gem.date    = Date.today.to_s
 
-  gem.summary = "Puppet Labs' packaging automation"
-  gem.description = "Packaging automation written in Rake and Ruby. Easily build native packages for most platforms with a few data files and git."
+  gem.summary = 'Puppet by Perforce packaging automation'
+  gem.description = 'Packaging automation for Puppet FOSS projects'
   gem.license = "Apache-2.0"
 
-  gem.authors  = ['Puppet Labs']
-  gem.email    = 'info@puppetlabs.com'
+  gem.authors  = ['Puppet By Perforce']
+  gem.email    = 'release@puppet.com'
   gem.homepage = 'http://github.com/puppetlabs/packaging'
 
   gem.required_ruby_version = '>= 2.3.0'
 
-  gem.add_development_dependency('rspec', ['~> 2.14.1'])
-  gem.add_development_dependency('rubocop', ['~> 0.49'])
+  gem.add_development_dependency('debug', '>= 1.0.0')
+  gem.add_development_dependency('rspec')
+  gem.add_development_dependency('rubocop')
 
   gem.add_runtime_dependency('apt_stage_artifacts')
   gem.add_runtime_dependency('artifactory', ['~> 3'])
-  gem.add_runtime_dependency('csv', ['3.1.5'])
+  gem.add_runtime_dependency('csv', ['>= 3.1.5'])
   gem.add_runtime_dependency('googleauth')
   gem.add_runtime_dependency('google-cloud-storage')
   gem.add_runtime_dependency('rake', ['>= 12.3'])

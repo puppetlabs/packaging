@@ -37,10 +37,11 @@ namespace :pl do
     # We want a string that is the from "@<param name>"
     if param = args.param
       getter = param.dup
-      if param[0] == ':'
+      case param[0]
+      when ':'
         getter = param[1..-1]
         param[0] = "@"
-      elsif param[0] == "@"
+      when "@"
         getter = param[1..-1]
       else
         param.insert(0, "@")
@@ -62,4 +63,3 @@ namespace :pl do
     end
   end
 end
-

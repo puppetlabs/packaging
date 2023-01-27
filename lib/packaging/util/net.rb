@@ -7,7 +7,7 @@ module Pkg::Util::Net
     def fetch_uri(uri, target)
       require 'open-uri'
       if Pkg::Util::File.file_writable?(File.dirname(target))
-        File.open(target, 'w') { |f| f.puts(URI.open(uri).read) }
+        File.open(target, 'w') { |f| f.puts(URI.parse(uri).read) }
       end
     end
 
@@ -33,11 +33,9 @@ module Pkg::Util::Net
     def check_host_ssh(hosts)
       errs = []
       Array(hosts).flatten.each do |host|
-        begin
-          remote_execute(host, 'exit', { extra_options: '-oBatchMode=yes' })
-        rescue StandardError
-          errs << host
-        end
+        remote_execute(host, 'exit', { extra_options: '-oBatchMode=yes' })
+      rescue StandardError
+        errs << host
       end
       return errs
     end
@@ -51,12 +49,10 @@ module Pkg::Util::Net
     def check_host_gpg(hosts, gpg)
       errs = []
       Array(hosts).flatten.each do |host|
-        begin
-          remote_execute(host, "gpg --list-secret-keys #{gpg} > /dev/null 2&>1",
-                         { extra_options: '-oBatchMode=yes' })
-        rescue StandardError
-          errs << host
-        end
+        remote_execute(host, "gpg --list-secret-keys #{gpg} > /dev/null 2&>1",
+                       { extra_options: '-oBatchMode=yes' })
+      rescue StandardError
+        errs << host
       end
       return errs
     end

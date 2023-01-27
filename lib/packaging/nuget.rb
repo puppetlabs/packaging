@@ -23,7 +23,7 @@ module Pkg::Nuget
       form_data = ["-H 'Authorization: Basic #{authentication}'", "-f"]
       packages.each do |pkg|
         puts "Working on package #{pkg}"
-        projname, version = File.basename(pkg).match(/^(.*)-([\d+\.]+)\.nupkg$/).captures
+        projname, version = File.basename(pkg).match(/^(.*)-([\d+.]+)\.nupkg$/).captures
         package_form_data = ["--upload-file #{pkg}"]
         package_path = "#{projname}/#{version}/#{File.basename(pkg)}"
         stdout = ''

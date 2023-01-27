@@ -93,7 +93,7 @@ module Pkg::Deb::Repo
 
       artifact_paths.each do |path|
         platform_tag = Pkg::Paths.tag_from_artifact_path(path)
-        platform, version, = Pkg::Platforms. parse_platform_tag(platform_tag)
+        platform, version, = Pkg::Platforms.parse_platform_tag(platform_tag)
         codename = Pkg::Platforms.codename_for_platform_version(platform, version)
         arches = Pkg::Platforms.arches_for_codename(codename)
 
@@ -224,10 +224,10 @@ SignWith: #{Pkg::Config.gpg_key}"
 
       options << '--dry-run' if dryrun
       options << path
-      if !destination.nil?
-        options << "#{destination}:#{dest_path.parent}"
-      else
+      if destination.nil?
         options << dest_path.parent.to_s
+      else
+        options << "#{destination}:#{dest_path.parent}"
       end
       options.join("\s")
     end

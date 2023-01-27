@@ -75,13 +75,14 @@ namespace :pl do
       mkdir("pkg")
 
       Dir.chdir("pkg") do
-        if versioning == 'ref'
+        case versioning
+        when 'ref'
           local_target = File.join(Pkg::Config.project, Pkg::Config.ref)
-        elsif versioning == 'version'
+        when 'version'
           local_target = File.join(Pkg::Config.project, Pkg::Util::Version.dot_version)
         end
 
-        FileUtils.mkdir_p([local_target, Pkg::Config.project + "-latest"])
+        FileUtils.mkdir_p([local_target, "#{Pkg::Config.project}-latest"])
 
         # Rake task dependencies with arguments are nuts, so we just directly
         # invoke them here.  We want the signed_* directories staged as
@@ -106,7 +107,7 @@ namespace :pl do
         # names stay the same between runs. Their contents have the ref
         # stripped off and the project replaced by $project-latest. Then the
         # repos directory is a symlink to the last pushed ref's repos.
-        FileUtils.cp_r(File.join(local_target, "repo_configs"), Pkg::Config.project + "-latest", { :preserve => true })
+        FileUtils.cp_r(File.join(local_target, "repo_configs"), "#{Pkg::Config.project}-latest", { :preserve => true })
 
         # Now we need to remove the ref and replace $project with
         # $project-latest so that it will work as a pinned latest repo
@@ -114,7 +115,7 @@ namespace :pl do
         Dir.glob("#{Pkg::Config.project}-latest/repo_configs/**/*").select { |t_config| File.file?(t_config) }.each do |config|
           new_contents = File.read(config)
           new_contents.gsub!(%r{#{Pkg::Config.ref}/}, "")
-          new_contents.gsub!(%r{#{Pkg::Config.project}/}, Pkg::Config.project + "-latest/")
+          new_contents.gsub!(%r{#{Pkg::Config.project}/}, "#{Pkg::Config.project}-latest/")
           new_contents.gsub!(Pkg::Config.ref, "latest")
 
           File.open(config, "w") { |file| file.puts new_contents }
@@ -136,7 +137,7 @@ namespace :pl do
         end
 
         # Make a latest symlink for the project
-        FileUtils.ln_sf(File.join("..", local_target, "repos"), File.join(Pkg::Config.project + "-latest"), :verbose => true)
+        FileUtils.ln_sf(File.join("..", local_target, "repos"), File.join("#{Pkg::Config.project}-latest"), :verbose => true)
       end
     end
 
@@ -231,10 +232,11 @@ namespace :pl do
       versioning = args.versioning or fail ":versioning is a required argument for #{t}"
       pe_version = args.pe_version or fail ":pe_version is a required argument for #{t}"
 
-      if versioning == 'ref'
+      case versioning
+      when 'ref'
         version_string = Pkg::Config.ref
-      elsif versioning == 'version'
-        version_string =  Pkg::Util::Version.dot_version
+      when 'version'
+        version_string = Pkg::Util::Version.dot_version
       end
 
       pa_source = File.join(remote_dir, Pkg::Config.project)

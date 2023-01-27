@@ -23,7 +23,7 @@ module Pkg::Paths
   # Given a path to an artifact, divine the appropriate platform tag associated
   # with the artifact and path
   def tag_from_artifact_path(path)
-    platform = Pkg::Platforms.supported_platforms.find { |p| path =~ /(\/|\.)#{p}[^\.]/ }
+    platform = Pkg::Platforms.supported_platforms.find { |p| path =~ /(\/|\.)#{p}[^.]/ }
     platform = 'windowsfips' if path =~ /windowsfips/
 
     codename = Pkg::Platforms.codenames.find { |c| path =~ /\/#{c}/ }
@@ -349,7 +349,7 @@ module Pkg::Paths
   def debian_component_from_path(path)
     # substitute '.' and '/' since those aren't valid characters for debian components
     matches = path.match(/(\d+\.\d+|master|main)\/(\w+)/)
-    regex_for_substitution = /[\.\/]/
+    regex_for_substitution = /[.\/]/
     fail "Error: Could not determine Debian Component from path #{path}" if matches.nil?
     base_component = matches[1]
     component_qualifier = matches[2]

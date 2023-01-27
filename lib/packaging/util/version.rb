@@ -93,7 +93,7 @@ module Pkg::Util::Version
       end
 
       if new_version.include?('dirty')
-        new_version = new_version.sub(/\.?dirty/, '') + 'dirty'
+        new_version = "#{new_version.sub(/\.?dirty/, '')}dirty"
       end
 
       new_version.split('-')
@@ -143,9 +143,11 @@ module Pkg::Util::Version
     #
     def versionbump(workdir = nil)
       version = ENV['VERSION'] || Pkg::Config.version.to_s.strip
-      new_version = '"' + version + '"'
+      new_version = "\"#{version}\""
 
+      # rubocop:disable Style/StringConcatenation
       version_file = "#{workdir ? workdir + '/' : ''}#{Pkg::Config.version_file}"
+      # rubocop:enable Style/StringConcatenation
 
       # Read the previous version file in...
       contents = IO.read(version_file)
@@ -160,7 +162,7 @@ module Pkg::Util::Version
       puts "Updating #{old_version} to #{new_version} in #{version_file}"
       if contents =~ /@DEVELOPMENT_VERSION@/
         contents.gsub!('@DEVELOPMENT_VERSION@', version)
-      elsif contents =~ /version\s*=\s*[\'"]DEVELOPMENT[\'"]/
+      elsif contents =~ /version\s*=\s*['"]DEVELOPMENT['"]/
         contents.gsub!(/version\s*=\s*['"]DEVELOPMENT['"]/, "version = '#{version}'")
       elsif contents =~ /VERSION = #{old_version}/
         contents.gsub!("VERSION = #{old_version}", "VERSION = #{new_version}")
@@ -179,8 +181,8 @@ module Pkg::Util::Version
     #
     # @param json_data [hash] json data hash containing the ref to check
     def report_json_tags(json_data)
-      puts 'component: ' + File.basename(json_data['url'])
-      puts 'ref: ' + json_data['ref'].to_s
+      puts "component: #{File.basename(json_data['url'])}"
+      puts "ref: #{json_data['ref'].to_s}"
       if Pkg::Util::Git.remote_tagged?(json_data['url'], json_data['ref'].to_s)
         tagged = 'Tagged? [ Yes ]'
       else

@@ -377,7 +377,7 @@ module Pkg::Util::Ship
       FileUtils.cp(ezbake_manifest, File.join(local_directory, "#{Pkg::Config.ref}.ezbake.manifest"))
     end
     ezbake_yaml = File.join("ext", "ezbake.manifest.yaml")
-    if File.exists?(ezbake_yaml)
+    if File.exist?(ezbake_yaml)
       FileUtils.cp(ezbake_yaml, File.join(local_directory, "#{Pkg::Config.ref}.ezbake.manifest.yaml"))
     end
 

@@ -66,14 +66,12 @@ module Pkg::Sign::Msi
 
     # Download the signed msis
     msis.each do |msi|
-      begin
-        signed_msi = signed_bucket.file(signed_msis[msi])
-        signed_msi.download(msi)
-      rescue StandardError => e
-        delete_tosign_msis(tosign_bucket, msis)
-        delete_signed_msis(signed_bucket, signed_msis)
-        fail "There was an error retrieving the signed msi:#{msi}.\n#{e}"
-      end
+      signed_msi = signed_bucket.file(signed_msis[msi])
+      signed_msi.download(msi)
+    rescue StandardError => e
+      delete_tosign_msis(tosign_bucket, msis)
+      delete_signed_msis(signed_bucket, signed_msis)
+      fail "There was an error retrieving the signed msi:#{msi}.\n#{e}"
     end
 
     # Cleanup buckets

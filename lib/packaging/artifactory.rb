@@ -236,7 +236,7 @@ module Pkg
     # @return [String] The contents of the YAML file
     def retrieve_yaml_data(pkg, ref)
       yaml_url = "#{@artifactory_uri}/#{DEFAULT_REPO_TYPE}/#{DEFAULT_REPO_BASE}/#{pkg}/#{ref}/#{ref}.yaml"
-      URI.open(yaml_url, &:read)
+      URI.parse(yaml_url).read
     rescue StandardError
       raise "Failed to load YAML data for #{pkg} at #{ref} from #{yaml_url}!"
     end

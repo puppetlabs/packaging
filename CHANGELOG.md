@@ -5,6 +5,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ## [Unreleased]
 ### Changed
 - (maint) make the 'artifact already exists' error more informative.
+- (maint) refactor rspec examples for Ruby 3.x compatibility.
+- (maint) Rubocop compliance changes.
 
 ## [0.108.2] - 2023-02-08
 ### Changed

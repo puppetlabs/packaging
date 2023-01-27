@@ -15,7 +15,7 @@ module Pkg::Util::EZbake
         )
       end
 
-      if File.exists?(ezbake_yaml)
+      if File.exist?(ezbake_yaml)
         FileUtils.cp(
           ezbake_yaml,
           File.join(target_directory, "#{Pkg::Config.ref}.ezbake.manifest.yaml")

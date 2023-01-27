@@ -78,18 +78,16 @@ namespace :pl do
 
   desc "Sign generated debian changes files. Defaults to PL Key, pass GPG_KEY to override"
   task :sign_deb_changes, :root_dir do |_t, args|
-    begin
-      deb_dir = args.root_dir || $DEFAULT_DIRECTORY
-      change_files = Dir["#{deb_dir}/**/*.changes"]
-      unless change_files.empty?
-        Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-        change_files.each do |file|
-          Pkg::Sign::Deb.sign_changes(file)
-        end
+    deb_dir = args.root_dir || $DEFAULT_DIRECTORY
+    change_files = Dir["#{deb_dir}/**/*.changes"]
+    unless change_files.empty?
+      Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
+      change_files.each do |file|
+        Pkg::Sign::Deb.sign_changes(file)
       end
-    ensure
-      Pkg::Util::Gpg.kill_keychain
     end
+  ensure
+    Pkg::Util::Gpg.kill_keychain
   end
 
   desc "Sign OSX packages"

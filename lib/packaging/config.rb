@@ -5,8 +5,8 @@ module Pkg
   #   have it set via accessors, and serialize it back to yaml for easy transport.
   #
   class Config
-    require 'packaging/config/params.rb'
-    require 'packaging/config/validations.rb'
+    require 'packaging/config/params'
+    require 'packaging/config/validations'
     require 'yaml'
 
     class << self
@@ -79,7 +79,7 @@ module Pkg
                           Pkg::Util::Net.check_host_ssh([self.builds_server]).empty?
 
         dir = "/opt/jenkins-builds/#{self.project}/#{self.ref}"
-        cmd = "if [ -s \"#{dir}/artifacts\" ]; then cd #{dir};"\
+        cmd = "if [ -s \"#{dir}/artifacts\" ]; then cd #{dir};" \
               "find ./artifacts -mindepth 2 -type f; fi"
         artifacts, = Pkg::Util::Net.remote_execute(
           self.builds_server,
@@ -132,12 +132,12 @@ module Pkg
 
           case package_format
           when 'deb'
-            repo_config = "../repo_configs/deb/pl-#{self.project}-#{self.ref}-"\
+            repo_config = "../repo_configs/deb/pl-#{self.project}-#{self.ref}-" \
                           "#{Pkg::Platforms.get_attribute(tag, :codename)}.list"
           when 'rpm'
             # Using original_tag here to not break legacy fedora repo targets
             unless tag.include? 'aix'
-              repo_config = "../repo_configs/rpm/pl-#{self.project}-"\
+              repo_config = "../repo_configs/rpm/pl-#{self.project}-" \
                             "#{self.ref}-#{original_tag}.repo"
             end
           when 'swix', 'svr4', 'ips', 'dmg', 'msi'

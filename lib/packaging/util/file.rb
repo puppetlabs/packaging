@@ -58,7 +58,7 @@ module Pkg::Util::File
 
     def erb_string(erbfile, b = binding)
       template = File.read(erbfile)
-      message  = ERB.new(template, nil, "-")
+      message  = ERB.new(template, trim_mode: "-")
       message.result(b)
     end
 
@@ -98,7 +98,7 @@ module Pkg::Util::File
       Dir.chdir(Pkg::Config.project_root) do
         file_patterns.each do |pattern|
           if File.directory?(pattern) and !Pkg::Util::File.empty_dir?(pattern)
-            install << Dir[pattern + "/**/*"]
+            install << Dir["#{pattern}/**/*"]
           else
             install << Dir[pattern]
           end
@@ -146,8 +146,8 @@ module Pkg::Util::File
       team_data_branch = Pkg::Config.team
 
       if Pkg::Config.build_pe
-        project_data_branch = 'pe-' + project_data_branch unless project_data_branch =~ /^pe-/
-        team_data_branch = 'pe-' + team_data_branch unless team_data_branch =~ /^pe-/
+        project_data_branch = "pe-#{project_data_branch}" unless project_data_branch =~ /^pe-/
+        team_data_branch = "pe-#{team_data_branch}" unless team_data_branch =~ /^pe-/
       end
 
       # Remove .packaging directory from old-style extras loading
@@ -189,7 +189,6 @@ module Pkg::Util::File
     # PL Release team
     def load_extras(temp_directory)
       unless ENV['PARAMS_FILE'] && ENV['PARAMS_FILE'] != ''
-        temp_directory = temp_directory
         raise "load_extras requires a directory containing extras data" if temp_directory.nil?
         Pkg::Config.config_from_yaml("#{temp_directory}/#{Pkg::Config.builder_data_file}")
 
@@ -200,4 +199,3 @@ module Pkg::Util::File
     end
   end
 end
-

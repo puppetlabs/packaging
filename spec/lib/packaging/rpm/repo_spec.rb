@@ -6,7 +6,7 @@ describe 'Pkg::Rpm::Repo' do
   let(:project)       { 'rpm_repos' }
   let(:ref)           { '1234abcd' }
   let(:base_url)      { "http://#{builds_server}/#{project}/#{ref}" }
-  let(:mocks)         { %w[el-5-i386 el-5-x86_64 el-5-SRPMS] }
+  let(:mocks)         { ['el-5-i386', 'el-5-x86_64', 'el-5-SRPMS'] }
   let(:wget_results) do
     mocks.map do |mock|
       dist, version, arch = mock.split('-')
@@ -41,7 +41,7 @@ describe 'Pkg::Rpm::Repo' do
       allow(Pkg::Util::Tool)
         .to receive(:find_tool)
         .with('wget', { required: true })
-        .and_return(false)
+        .and_return false
       expect { Pkg::Rpm::Repo.generate_repo_configs }.to raise_error(RuntimeError)
     end
 
@@ -63,7 +63,7 @@ describe 'Pkg::Rpm::Repo' do
     it 'writes the expected repo configs to disk' do
       expect(Pkg::Util::Tool)
         .to receive(:find_tool)
-        .with("wget", { required: true })
+        .with('wget', { required: true })
         .and_return(wget)
       expect(Pkg::Util::Execution)
         .to receive(:capture3)
@@ -76,7 +76,7 @@ describe 'Pkg::Rpm::Repo' do
           .with("#{wget} --spider -r -l 1 --no-parent #{cur_result} 2>&1")
           .and_return("#{cur_result}/thing.rpm")
       end
-      expect(FileUtils).to receive(:mkdir_p).with('pkg/repo_configs/rpm')
+      expect(FileUtils).to receive(:mkdir_p).with("pkg/repo_configs/rpm")
       config = []
       repo_configs.each_with_index do |repo_config, i|
         expect(Pkg::Paths).to receive(:tag_from_artifact_path).and_return(mocks[i])
@@ -89,24 +89,13 @@ describe 'Pkg::Rpm::Repo' do
     end
   end
 
-  describe '#retrieve_repo_configs' do
-    it 'fails if wget isn\'t available' do
-      allow(Pkg::Util::Tool)
-        .to receive(:find_tool)
-        .with('wget', { required: true })
-        .and_return(false)
-      expect { Pkg::Rpm::Repo.generate_repo_configs }.to raise_error(RuntimeError)
-    end
-
-    it 'fails if there are no deb repos available for the build' do
+  describe "#retrieve_repo_configs" do
+    it "fails if there are no deb repos available for the build" do
       expect(Pkg::Util::Tool)
         .to receive(:find_tool)
         .with('wget', { required: true })
         .and_return(wget)
-      expect(FileUtils)
-        .to receive(:mkdir_p)
-        .with('pkg/repo_configs')
-        .and_return(true)
+      expect(FileUtils).to receive(:mkdir_p).with('pkg/repo_configs').and_return(true)
       expect(Pkg::Util::Execution)
         .to receive(:capture3)
         .with("#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{base_url}/repo_configs/rpm/")
@@ -124,10 +113,8 @@ describe 'Pkg::Rpm::Repo' do
       expect(Pkg::Rpm::Repo)
         .to receive(:repo_creation_command)
         .with(target_directory)
-        .and_return("run this thing")
-      expect(Pkg::Util::Execution)
-        .to receive(:capture3)
-        .with("bash -c 'run this thing'")
+        .and_return('run this thing')
+      expect(Pkg::Util::Execution).to receive(:capture3).with("bash -c 'run this thing'")
       Pkg::Rpm::Repo.create_local_repos(target_directory)
     end
   end
@@ -157,9 +144,11 @@ describe 'Pkg::Rpm::Repo' do
   describe '#ship_repo_configs' do
     it 'warn if there are no repo configs to ship' do
       Pkg::Config.jenkins_repo_path = '/a/b/c/d'
-      expect(Dir).to receive(:exist?).with("pkg/repo_configs/rpm").and_return(false)
-      expect(Pkg::Rpm::Repo).to receive(:warn)
-      expect(Pkg::Util::RakeUtils).not_to receive(:invoke_task)
+      expect(Dir).to receive(:exist?).with("pkg/repo_configs/rpm").and_return(true)
+      expect(Dir).to receive(:empty?).with("pkg/repo_configs/rpm").and_return(true)
+      expect(Pkg::Rpm::Repo)
+        .to receive(:warn)
+        .with(/^No repo_configs found in.*Skipping repo shipping/)
       Pkg::Rpm::Repo.ship_repo_configs
     end
 
@@ -168,22 +157,14 @@ describe 'Pkg::Rpm::Repo' do
       Pkg::Config.project = 'thing2'
       Pkg::Config.ref = 'abcd1234'
       Pkg::Config.distribution_server = 'a.host.that.wont.exist'
-      repo_dir = File.join(
-        Pkg::Config.jenkins_repo_path,
-        Pkg::Config.project,
-        Pkg::Config.ref,
-        'repo_configs',
-        'rpm'
-      )
-      expect(Dir).to receive(:exist?).with('pkg/repo_configs/rpm').and_return(true)
-      expect(Dir).to receive(:empty?).with('pkg/repo_configs/rpm').and_return(false)
+      repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/repo_configs/rpm"
+      expect(Dir).to receive(:exist?).with("pkg/repo_configs/rpm").and_return(true)
+      expect(Dir).to receive(:empty?).with("pkg/repo_configs/rpm").and_return(false)
       expect(Pkg::Util::RakeUtils).to receive(:invoke_task).with('pl:fetch')
       expect(Pkg::Util::Net)
         .to receive(:remote_execute)
         .with(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
-      expect(Pkg::Util::Net)
-        .to receive(:rsync_to)
-        .with('pkg/repo_configs/rpm/', Pkg::Config.distribution_server, repo_dir)
+      expect(Pkg::Util::Execution).to receive(:retry_on_fail).with(times: 3)
       Pkg::Rpm::Repo.ship_repo_configs
     end
   end

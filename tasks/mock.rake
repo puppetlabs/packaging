@@ -158,11 +158,11 @@ def mock_template(mock_config)
   # for example, pupent-3.4-el5-i386.cfg would become pupent-el5-i386 while pupent-el7-x86_64 would remain unmodified.
   template = mock_config.sub(/([^-]*)-\d\.\d-([^-]*)-([^-]*)/, '\1-\2-\3')
   template_location = File.join(File::SEPARATOR, "etc", "mock", "#{template}.cfg.erb")
-  if File.exists?(template_location)
+  if File.exist?(template_location)
     return template, Pkg::Util::File.erb_file(template_location, nil, false, { :binding => binding })
-  else
-    return mock_config
   end
+
+  return mock_config
 end
 
 # Determine the appropriate rpm macro definitions based on the mock config name

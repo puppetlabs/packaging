@@ -3,6 +3,13 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Fixed
+- (maint) Pkg::Rpm::Repo.ship_repo_configs was not detecting the condition with no repos
+  to ship. This was causing a confusing error message later.
+
+### Changed
+- (maint) Updated the spec tests in repo_spec to use the newer 'expect' syntax.
+
 
 ## [0.108.1] - 2022-01-04
 ### Changed

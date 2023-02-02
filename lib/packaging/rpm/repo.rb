@@ -8,17 +8,35 @@ module Pkg::Rpm::Repo
       "http://#{Pkg::Config.builds_server}/#{Pkg::Config.project}/#{Pkg::Config.ref}"
     end
 
-    def ship_repo_configs(target = "repo_configs")
-      if Pkg::Util::File.empty_dir?("pkg/#{target}/rpm")
-        warn "No repo configs have been generated! Try pl:rpm_repo_configs."
+    def ship_repo_configs(repo_configs_directory = 'repo_configs')
+      local_repos_path = File.join('pkg', repo_configs_directory, 'rpm')
+
+      remote_repos_path = File.join(
+        Pkg::Config.jenkins_repo_path,
+        Pkg::Config.project,
+        Pkg::Config.ref,
+        repo_configs_directory,
+        'rpm'
+      )
+
+      if !Dir.exist?(local_repos_path) || Dir.empty?(local_repos_path)
+        warn "No repo_configs found in \"#{Dir.pwd}/#{local_repos_path}\". " \
+             'Skipping repo shipping.'
         return
       end
 
-      Pkg::Util::RakeUtils.invoke_task("pl:fetch")
-      repo_dir = "#{Pkg::Config.jenkins_repo_path}/#{Pkg::Config.project}/#{Pkg::Config.ref}/#{target}/rpm"
-      Pkg::Util::Net.remote_execute(Pkg::Config.distribution_server, "mkdir -p #{repo_dir}")
-      Pkg::Util::Execution.retry_on_fail(:times => 3) do
-        Pkg::Util::Net.rsync_to("pkg/#{target}/rpm/", Pkg::Config.distribution_server, repo_dir)
+      Pkg::Util::RakeUtils.invoke_task('pl:fetch')
+      Pkg::Util::Net.remote_execute(
+        Pkg::Config.distribution_server,
+        "mkdir -p #{remote_repos_path}"
+      )
+
+      Pkg::Util::Execution.retry_on_fail(times: 3) do
+        Pkg::Util::Net.rsync_to(
+          "#{local_repos_path}/",
+          Pkg::Config.distribution_server,
+          remote_repos_path
+        )
       end
     end
 

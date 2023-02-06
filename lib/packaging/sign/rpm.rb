@@ -86,11 +86,14 @@ module Pkg::Sign::Rpm
   end
 
   def passphrase_fd_flag
-    if Pkg::Util.boolean_value(ENV['RPM_GPG_AGENT'])
-      ''
-    else
-      '--passphrase-fd 3'
-    end
+    # We use passphrase caching on GPG >= 2.1, so no passphrase-fd is needed.
+    return '' unless gpg_version_older_than_21?
+
+    # If the user has provided us their gpg agent setup, don't muck with it.
+    return '' if Pkg::Util.boolean_value(ENV['RPM_GPG_AGENT'])
+
+    # Assume our old setup where expect is providing input on fd 3
+    return '--passphrase-fd 3'
   end
 
   def define_gpg_check_password_cmd
@@ -100,7 +103,6 @@ module Pkg::Sign::Rpm
       ''
     end
   end
-
 
   def signed?(rpm)
     # This should allow the `Pkg::Util::Gpg.key` method to fail if gpg_key is

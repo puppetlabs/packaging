@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.108.2] - 2023-02-08
 ### Changed
 - (maint) Updated the spec tests in repo_spec to use the newer 'expect' syntax.
 
@@ -11,7 +13,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
   to ship. This was causing a confusing error message later.
 - (RE-15086) Don't pass `--passphrase-fd 3` with gpg >= 2.1; it's no longer provided there.
 
-## [0.108.1] - 2022-01-04
+## [0.108.1] - 2023-01-04
 ### Changed
 - (RE-15086) Stop forcing rpmsign to use gpg1
 
@@ -869,7 +871,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.108.1...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.108.2...HEAD
+[0.108.2]: https://github.com/puppetlabs/packaging/compare/0.108.1...0.108.2
 [0.108.1]: https://github.com/puppetlabs/packaging/compare/0.108.0...0.108.1
 [0.108.0]: https://github.com/puppetlabs/packaging/compare/0.107.2...0.108.0
 [0.107.2]: https://github.com/puppetlabs/packaging/compare/0.107.1...0.107.2

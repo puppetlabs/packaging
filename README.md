@@ -1,7 +1,5 @@
 # Packaging
 
-[![Build Status](https://travis-ci.org/puppetlabs/packaging.png?branch=master)](https://travis-ci.org/puppetlabs/packaging)
-
 This is a repository for packaging automation for Puppet software.
 The goal is to abstract and automate packaging processes beyond individual
 software projects to a level where this repo can be cloned inside any project

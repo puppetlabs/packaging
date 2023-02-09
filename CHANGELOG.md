@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (maint) make the 'artifact already exists' error more informative.
 
 ## [0.108.2] - 2023-02-08
 ### Changed

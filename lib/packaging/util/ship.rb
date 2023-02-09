@@ -478,7 +478,8 @@ module Pkg::Util::Ship
   def ship_to_artifactory(local_directory = 'pkg')
     Pkg::Util::File.fetch
     unless Pkg::Config.project
-      fail "You must set the 'project' in build_defaults.yaml or with the 'PROJECT_OVERRIDE' environment variable."
+      fail 'Project missing. Set it with the "project" key in build_defaults.yaml or ' \
+           'with the "PROJECT_OVERRIDE" environment variable.'
     end
     artifactory = Pkg::ManageArtifactory.new(Pkg::Config.project, Pkg::Config.ref)
 
@@ -492,14 +493,23 @@ module Pkg::Util::Ship
         a <=> b
       end
     end
+
     artifacts.each do |artifact|
-      if File.extname(artifact) == ".yaml" || File.extname(artifact) == ".json"
+      # Always ship .yaml and .jsons even if they already exist
+      if %w[.yaml .json].include? File.extname(artifact)
         artifactory.deploy_package(artifact)
-      elsif artifactory.package_exists_on_artifactory?(artifact)
-        warn "Attempt to upload '#{artifact}' failed. Package already exists!"
-      else
-        artifactory.deploy_package(artifact)
+        next
       end
+
+      # Warn against anything that already exists
+      existing = artifactory.artifact_paths(artifact)
+      if existing.any?
+        warn "Uploading '#{artifact}' to Artifactory refused. " \
+             "Package already exists here: #{existing.join(', ')}"
+        next
+      end
+
+      artifactory.deploy_package(artifact)
     end
   end
 end

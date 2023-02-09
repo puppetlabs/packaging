@@ -680,8 +680,10 @@ namespace :pl do
         end
 
         # Don't deploy if the package already exists
-        if artifactory.package_exists_on_artifactory?(artifact)
-          warn "Attempt to upload '#{artifact}' failed. Package already exists."
+        existing_artifacts = artifactory.artifact_paths(artifact)
+        unless existing_artifacts.empty?
+          warn "Uploading '#{artifact}' to Artifactory refused. Artifact already exists here: ",
+               existing_artifacts.join(', ')
           next
         end
 

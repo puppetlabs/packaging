@@ -192,18 +192,23 @@ module Pkg
       properties_hash
     end
 
-    # Basic method to check if a package exists on artifactory
+    # Return a list of artifact paths for package. Returns empty array if none.
+    def artifact_paths(package)
+      check_authorization
+      Artifactory::Resource::Artifact.search(
+        name: File.basename(package),
+        artifactory_uri: @artifactory_uri
+      )
+    end
+
+    # Check if a package exists on artifactory
     # @param package [String] The full relative path to the package to be
     #   checked, relative from the current working directory
-    # Return true if package already exists on artifactory
+    # Return true if package already exists on artifactory.
+    # #artifact_paths, above, is more useful since it will inform where they are.
+    # This is kept for backward compatibility.
     def package_exists_on_artifactory?(package)
-      check_authorization
-      artifact = Artifactory::Resource::Artifact.search(name: File.basename(package), :artifactory_uri => @artifactory_uri)
-      if artifact.empty?
-        return false
-      else
-        return true
-      end
+      artifact_paths(package).any?
     end
 
     # @param package [String] The full relative path to the package to be

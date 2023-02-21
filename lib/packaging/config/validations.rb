@@ -4,7 +4,7 @@ module Pkg
       # As a validation, this one is kindof lame but is intended as a seed pattern for possibly
       # more robust ones.
       def not_empty?(value)
-        value.to_s.empty? ? false : true
+        value.to_s.any?
       end
     end
   end

@@ -18,7 +18,7 @@ module Pkg::Util::Tool
           exts.each do |ext|
             locationext = File.expand_path(location + ext)
 
-            return '"' + locationext + '"' if FileTest.executable?(locationext)
+            return "\"#{locationext}\"" if FileTest.executable?(locationext)
           end
         end
 

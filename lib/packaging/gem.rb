@@ -44,7 +44,7 @@ module Pkg::Gem
         puts "#{file} has already been shipped to rubygems, skipping."
         return
       end
-      Pkg::Util::File.file_exists?("#{ENV['HOME']}/.gem/credentials", :required => true)
+      Pkg::Util::File.file_exist?("#{ENV['HOME']}/.gem/credentials", :required => true)
       gem_push_command = "gem push #{file}"
       gem_push_command << " --host #{options[:host]}" if options[:host]
       gem_push_command << " --key #{options[:key]}" if options[:key]

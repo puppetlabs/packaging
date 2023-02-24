@@ -318,7 +318,8 @@ module Pkg::Paths
 
     # For repos prior to puppet7, the puppet version was part of the repository
     # For example: /opt/repository/apt/pool/bionic/puppet6/p/puppet-agent
-    if %w[puppet7 puppet7-nightly
+    if %w[puppet8 puppet8-nightly
+          puppet7 puppet7-nightly
           puppet6 puppet6-nightly
           puppet5 puppet5-nightly
           puppet puppet-nightly

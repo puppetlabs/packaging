@@ -683,7 +683,7 @@ namespace :pl do
         existing_artifacts = artifactory.artifact_paths(artifact)
         unless existing_artifacts.empty?
           warn "Uploading '#{artifact}' to Artifactory refused. Artifact already exists here: ",
-               existing_artifacts.join(', ')
+               existing_artifacts.map(&:uri).join(', ')
           next
         end
 

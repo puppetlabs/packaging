@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.109.1] - 2023-03-01
 ### Fixed
 - (maint) Fixed a bug in the 'artifact already exists' error where the path to the artifact
   wasn't printing correctly

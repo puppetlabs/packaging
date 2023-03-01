@@ -58,7 +58,14 @@ module Pkg::Util::File
 
     def erb_string(erbfile, b = binding)
       template = File.read(erbfile)
-      message  = ERB.new(template, trim_mode: "-")
+
+      # We should be using this but some images are pegged at Ruby <= 2.5; this interface
+      # changed at Ruby 2.6
+      # message  = ERB.new(template, safe_level: nil, trim_mode: '-')
+
+      # rubocop:disable Lint/ErbNewArguments
+      message = ERB.new(template, nil, '-')
+      # rubocop:enable Lint/ErbNewArguments
       message.result(b)
     end
 

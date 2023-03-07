@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (maint) Updated #update_ips_repo to be more resilient around location of p5p files.
 
 ## [0.109.1] - 2023-03-01
 ### Fixed

@@ -124,32 +124,41 @@ namespace :pl do
 
     desc "Update remote ips repository on #{Pkg::Config.ips_host}"
     task :update_ips_repo => 'pl:fetch' do
-      if Dir['pkg/ips/pkgs/**/*'].empty? && Dir['pkg/solaris/11/**/*'].empty?
-        $stdout.puts "Error: there aren't any p5p packages in pkg/ips/pkgs or pkg/solaris/11."
+      # This could be pkg/ips/pkgs/{i386,sparc} or pkg/solaris/11/{i386,sparc}
+      p5p_files = Dir.glob('pkg/**/*.p5p')
+      if p5p_files.empty?
+        puts "Error: there aren't any p5p packages in pkg/ips/pkgs or pkg/solaris/11."
         next
       end
 
-      source_dir = 'pkg/solaris/11/'
-      source_dir = 'pkg/ips/pkgs/' unless Dir['pkg/ips/pkgs/**/*'].empty?
-
-      tmpdir, = Pkg::Util::Net.remote_execute(
+      # This makes the historical assumption that all p5p files we want to ship exist in
+      # just one directory.
+      source_directory = File.dirname(p5p_files.first)
+      remote_working_directory = Pkg::Util::Net.remote_execute(
         Pkg::Config.ips_host,
-                'mktemp -d -p /var/tmp',
-                { capture_output: true }
+        'mktemp -d -p /var/tmp',
+        { capture_output: true }
+      )[0].chomp
+
+      Pkg::Util::Net.rsync_to(
+        "#{source_directory}/",
+        Pkg::Config.ips_host, remote_working_directory
       )
-      tmpdir.chomp!
 
-      Pkg::Util::Net.rsync_to(source_dir, Pkg::Config.ips_host, tmpdir)
-
-      remote_cmd = %(for pkg in #{tmpdir}/*.p5p; do
-        sudo pkgrecv -s $pkg -d #{Pkg::Config.ips_path} '*';
+      pkgrecv_scriptlet = %(for p5p_file in #{remote_working_directory}/*.p5p; do
+        sudo pkgrecv -s $p5p_file -d #{Pkg::Config.ips_path} '*';
       done)
 
-      Pkg::Util::Net.remote_execute(Pkg::Config.ips_host, remote_cmd)
-      Pkg::Util::Net.remote_execute(Pkg::Config.ips_host,
-        "sudo pkgrepo refresh -s #{Pkg::Config.ips_path}")
-      Pkg::Util::Net.remote_execute(Pkg::Config.ips_host,
-        "sudo /usr/sbin/svcadm restart svc:/application/pkg/server:#{Pkg::Config.ips_repo || 'default'}")
+      Pkg::Util::Net.remote_execute(Pkg::Config.ips_host, pkgrecv_scriptlet)
+      Pkg::Util::Net.remote_execute(
+        Pkg::Config.ips_host,
+        "sudo pkgrepo refresh -s #{Pkg::Config.ips_path}"
+      )
+      ips_repository = Pkg::Config.ips_repo || 'default'
+      Pkg::Util::Net.remote_execute(
+        Pkg::Config.ips_host,
+        "sudo /usr/sbin/svcadm restart svc:/application/pkg/server:#{ips_repository}"
+      )
     end
 
     desc "Move dmg repos from #{Pkg::Config.dmg_staging_server} to #{Pkg::Config.dmg_host}"

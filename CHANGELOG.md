@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.109.2] - 2023-03-07
 ### Changed
 - (maint) Updated #update_ips_repo to be more resilient around location of p5p files.
 
@@ -885,7 +887,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.109.1...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.109.2...HEAD
+[0.109.2]: https://github.com/puppetlabs/packaging/compare/0.109.1...0.109.2
 [0.109.1]: https://github.com/puppetlabs/packaging/compare/0.109.0...0.109.1
 [0.109.0]: https://github.com/puppetlabs/packaging/compare/0.108.2...0.109.0
 [0.108.2]: https://github.com/puppetlabs/packaging/compare/0.108.1...0.108.2

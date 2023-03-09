@@ -45,7 +45,6 @@ describe '#Pkg::Util::Ship' do
   # Sample data for #reorganize_packages and #ship_pkgs specs
   retrieved_packages = %w[
     pkg/deb/bionic/puppet6/puppet-agent_6.19.0-1bionic_amd64.deb
-    pkg/el/7/puppet6/aarch64/puppet-agent-6.19.0-1.el7.aarch64.rpm
     pkg/el/7/puppet6/ppc64le/puppet-agent-6.19.0-1.el7.ppc64le.rpm
     pkg/el/7/puppet6/x86_64/puppet-agent-6.19.0-1.el7.x86_64.rpm
     pkg/sles/12/puppet6/ppc64le/puppet-agent-6.19.0-1.sles12.ppc64le.rpm
@@ -64,7 +63,6 @@ describe '#Pkg::Util::Ship' do
   # Beware apple->mac transforms.
   expected_reorganized_packages = %w[
     pkg/bionic/puppet6/puppet-agent_6.19.0-1bionic_amd64.deb
-    pkg/puppet6/el/7/aarch64/puppet-agent-6.19.0-1.el7.aarch64.rpm
     pkg/puppet6/el/7/ppc64le/puppet-agent-6.19.0-1.el7.ppc64le.rpm
     pkg/puppet6/el/7/x86_64/puppet-agent-6.19.0-1.el7.x86_64.rpm
     pkg/puppet6/sles/12/ppc64le/puppet-agent-6.19.0-1.sles12.ppc64le.rpm

@@ -49,7 +49,7 @@ module Pkg
           repo: true,
         },
         '7' => {
-          architectures: ['x86_64', 'ppc64le'],
+          architectures: ['x86_64', 'ppc64le', 'aarch64'],
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],

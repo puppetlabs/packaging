@@ -3,8 +3,6 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
-### Removed
-- (RE-15200) Removed Red Hat 7 (aarch64) from PLATFORM_INFO
 
 ## [0.109.2] - 2023-03-07
 ### Changed

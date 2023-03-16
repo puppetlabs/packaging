@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (maint) Do not throw an error when pushing a gem to rubygems if it already has been pushed.
 
 ## [0.109.2] - 2023-03-07
 ### Changed

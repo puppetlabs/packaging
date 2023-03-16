@@ -48,7 +48,7 @@ module Pkg::Gem
       gem_push_command = "gem push #{file}"
       gem_push_command << " --host #{options[:host]}" if options[:host]
       gem_push_command << " --key #{options[:key]}" if options[:key]
-      Pkg::Util::Execution.capture3(gem_push_command)
+      Pkg::Util::Execution.capture3(gem_push_command, true)
     rescue StandardError => e
       puts "###########################################"
       puts "#  Publishing to rubygems failed. Make sure your .gem/credentials"
@@ -56,7 +56,15 @@ module Pkg::Gem
       puts "###########################################"
       puts
       puts e
-      raise e
+      # There appears to be a race condition where the rubygems versions api will not
+      # be updated in time between builders attempting to push a gem. We want to avoid
+      # failing here due to gem already being pushed, so if we identify this error
+      # we can just log it and move on. NOTE: the gem push documentation does not
+      # appear to provide a distinct error code for this kind of error so we rely on
+      # string matching the stdout/stderr from the Pkg::Uti::execution method.
+      unless e.message.match(/Repushing of gem versions is not allowed/)
+        raise e
+      end
     end
 
     def ship_to_internal_mirror(file)

@@ -32,6 +32,14 @@ module Pkg::Sign::Dmg
 
       dmg_basenames = dmgs.map { |d| File.basename(d, '.dmg') }.join(' ')
 
+      # (See: RE-15379) Refactor opportunity; we really shouldn't do this this way.
+      # When it works, it's fine, but diagnosing problems when we or Apple change
+      # the details is a pain. We should either have a script on the signing machine
+      # that does this work OR we should ship a script to the signing directory that
+      # can be modified/repeated when problems arise.
+      #
+      # Note especially, the '-size 200m' hack in the 'hdiutil create' command. This
+      # is useful but arbitrary at the moment and could cause problems in the future.
       sign_package_command = %W[
         for dmg in #{dmg_basenames}; do
           /usr/bin/hdiutil attach #{remote_working_directory}/$dmg.dmg
@@ -55,7 +63,7 @@ module Pkg::Sign::Dmg
 
           /usr/bin/hdiutil detach #{dmg_mount_point} -quiet ;
           /bin/rm #{remote_working_directory}/$dmg.dmg ;
-          /usr/bin/hdiutil create -volname $dmg
+          /usr/bin/hdiutil create -volname $dmg -size 200m
             -srcfolder #{signed_items_directory}/ #{remote_working_directory}/$dmg.dmg ;
           /bin/rm #{signed_items_directory}/* ;
         done

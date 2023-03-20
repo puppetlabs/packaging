@@ -4,6 +4,11 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.109.4] - 2023-03-20
+### Fixed
+- (RE-15738) To prevent 'No space left on device' errors while re-creating a MacOS dmg
+  with `hdiutil create` provide a size.
+
 ## [0.109.3] - 2023-03-16
 ### Changed
 - (maint) Do not throw an error when pushing a gem to rubygems if it already has been pushed.
@@ -891,7 +896,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.109.3...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.109.4...HEAD
+[0.109.4]: https://github.com/puppetlabs/packaging/compare/0.109.3...0.109.4
 [0.109.3]: https://github.com/puppetlabs/packaging/compare/0.109.2...0.109.3
 [0.109.2]: https://github.com/puppetlabs/packaging/compare/0.109.1...0.109.2
 [0.109.1]: https://github.com/puppetlabs/packaging/compare/0.109.0...0.109.1

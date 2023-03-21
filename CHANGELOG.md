@@ -4,7 +4,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
-## [0.109.5] - 2023-02-21
+## [0.109.5] - 2023-03-21
 ### Fixed
 - (RE-15738) The previous size choice of 200m for `hdiutil create` was too conservative.
   Increased to 500m for the moment in front of an actual fix.

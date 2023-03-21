@@ -38,7 +38,7 @@ module Pkg::Sign::Dmg
       # that does this work OR we should ship a script to the signing directory that
       # can be modified/repeated when problems arise.
       #
-      # Note especially, the '-size 200m' hack in the 'hdiutil create' command. This
+      # Note especially, the '-size 500m' hack in the 'hdiutil create' command. This
       # is useful but arbitrary at the moment and could cause problems in the future.
       sign_package_command = %W[
         for dmg in #{dmg_basenames}; do
@@ -63,7 +63,7 @@ module Pkg::Sign::Dmg
 
           /usr/bin/hdiutil detach #{dmg_mount_point} -quiet ;
           /bin/rm #{remote_working_directory}/$dmg.dmg ;
-          /usr/bin/hdiutil create -volname $dmg -size 200m
+          /usr/bin/hdiutil create -volname $dmg -size 500m
             -srcfolder #{signed_items_directory}/ #{remote_working_directory}/$dmg.dmg ;
           /bin/rm #{signed_items_directory}/* ;
         done

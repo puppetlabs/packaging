@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.109.5] - 2023-03-21
 ### Fixed
 - (RE-15738) The previous size choice of 200m for `hdiutil create` was too conservative.
   Increased to 500m for the moment in front of an actual fix.
@@ -899,7 +901,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.109.4...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.109.5...HEAD
+[0.109.5]: https://github.com/puppetlabs/packaging/compare/0.109.4...0.109.5
 [0.109.4]: https://github.com/puppetlabs/packaging/compare/0.109.3...0.109.4
 [0.109.3]: https://github.com/puppetlabs/packaging/compare/0.109.2...0.109.3
 [0.109.2]: https://github.com/puppetlabs/packaging/compare/0.109.1...0.109.2

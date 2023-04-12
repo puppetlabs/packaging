@@ -63,7 +63,7 @@ describe 'Pkg::Sign' do
         %W[#{rpm_directory}/aix/7.1/PC1/ppc/puppet-agent-5.5.3-1.aix7.1.ppc.rpm]
       end
       let(:v3_rpms) do
-        %W[#{rpm_directory}/sles/11/PC1/x86_64/puppet-agent-5.5.3-1.sles11.x86_64.rpm]
+        %W[#{rpm_directory}/redhatfips/7/PC1/x86_64/puppet-agent-5.5.3-1.redhatfips7.x86_64.rpm]
       end
       let(:v4_rpms) do
         %W[%#{rpm_directory}/el/7/PC1/aarch64/puppet-agent-5.5.3-1.el7.aarch64.rpm]

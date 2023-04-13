@@ -318,7 +318,7 @@ module Pkg::Params
               { :var => :build_data_repo,         :val => 'https://github.com/puppetlabs/build-data.git' },
               { :var => :build_date,              :val => Pkg::Util::Date.timestamp('-') },
               { :var => :release,                 :val => '1' },
-              { :var => :internal_gem_host,       :val => 'https://artifactory.delivery.puppetlabs.net/artifactory/api/gems/rubygems' },
+              { :var => :internal_gem_host,       :val => 'https://artifactory.delivery.puppetlabs.net/artifactory/api/gems/rubygems__local' },
               { :var => :build_tar,               :val => true },
               { :var => :dev_build,               :val => false },
               { :var => :osx_signing_cert,        :val => '$OSX_SIGNING_CERT' },

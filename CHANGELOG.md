@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (RE-15419) Update internal gem host to rubygems__local
 
 ## [0.109.5] - 2023-03-21
 ### Fixed

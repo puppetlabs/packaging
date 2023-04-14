@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.109.6] - 2023-04-14
 ### Changed
 - (RE-15419) Update internal gem host to rubygems__local
 
@@ -903,7 +905,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.109.5...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.109.6...HEAD
+[0.109.6]: https://github.com/puppetlabs/packaging/compare/0.109.5...0.109.6
 [0.109.5]: https://github.com/puppetlabs/packaging/compare/0.109.4...0.109.5
 [0.109.4]: https://github.com/puppetlabs/packaging/compare/0.109.3...0.109.4
 [0.109.3]: https://github.com/puppetlabs/packaging/compare/0.109.2...0.109.3

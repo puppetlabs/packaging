@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Fixed
+- (maint) Update keyword argument syntax in nightly repo Rake task
 
 ## [0.109.6] - 2023-04-14
 ### Changed

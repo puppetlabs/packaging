@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.109.7] - 2023-04-24
 ### Fixed
 - (maint) Update keyword argument syntax in nightly repo Rake task
 
@@ -907,7 +909,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.109.6...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.109.7...HEAD
+[0.109.7]: https://github.com/puppetlabs/packaging/compare/0.109.6...0.109.7
 [0.109.6]: https://github.com/puppetlabs/packaging/compare/0.109.5...0.109.6
 [0.109.5]: https://github.com/puppetlabs/packaging/compare/0.109.4...0.109.5
 [0.109.4]: https://github.com/puppetlabs/packaging/compare/0.109.3...0.109.4

@@ -390,7 +390,7 @@ module Pkg::Util::Net
     end
 
     def remote_bundle_install_command
-      rvm_ruby_version = ENV['RVM_RUBY_VERSION'] || '2.7.5'
+      rvm_ruby_version = ENV['RVM_RUBY_VERSION'] || '3.1.1'
       export_packaging_location = "export PACKAGING_LOCATION='#{ENV['PACKAGING_LOCATION']}';" if ENV['PACKAGING_LOCATION'] && !ENV['PACKAGING_LOCATION'].empty?
       export_vanagon_location = "export VANAGON_LOCATION='#{ENV['VANAGON_LOCATION']}';" if ENV['VANAGON_LOCATION'] && !ENV['VANAGON_LOCATION'].empty?
       "source /usr/local/rvm/scripts/rvm; rvm use ruby-#{rvm_ruby_version}; #{export_packaging_location} #{export_vanagon_location} bundle install --path .bundle/gems ;"

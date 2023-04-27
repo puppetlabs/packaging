@@ -52,7 +52,8 @@ describe 'Pkg::Paths' do
     ]
     failure_cases.each do |fail_path|
       it "should fail gracefully if given '#{fail_path}'" do
-        expect { Pkg::Paths.tag_from_artifact_path(fail_path) }.to raise_error
+        expect { Pkg::Paths.tag_from_artifact_path(fail_path) }
+          .to raise_error(RuntimeError, /Cannot determine tag/)
       end
     end
   end
@@ -81,7 +82,8 @@ describe 'Pkg::Paths' do
     it 'should fail if nonfinal_repo_name is not set for non-final version' do
       allow(Pkg::Config).to receive(:repo_name).and_return('puppet6')
       allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nil)
-      expect { Pkg::Paths.repo_name(true) }.to raise_error
+      expect { Pkg::Paths.repo_name(true) }
+        .to raise_error(RuntimeError, /Nonfinal is set to true/)
     end
   end
 
@@ -213,8 +215,8 @@ describe 'Pkg::Paths' do
 
     it 'should return `Pkg::Config.yum_repo_name` if `Pkg::Config.repo_name` is not set' do
       allow(Pkg::Config).to receive(:repo_name).and_return(nil)
-      allow(Pkg::Config).to receive(:yum_repo_name).and_return('FUTURE-puppet7')
-      expect(Pkg::Paths.yum_repo_name).to eq('FUTURE-puppet7')
+      allow(Pkg::Config).to receive(:yum_repo_name).and_return('puppet7')
+      expect(Pkg::Paths.yum_repo_name).to eq('puppet7')
     end
 
     it 'should return \'products\' if nothing is set' do
@@ -294,8 +296,6 @@ describe 'Pkg::Paths' do
           .to eq('/opt/repository/apt/pool/bionic/puppet6/p/puppet-agent')
         expect(Pkg::Paths.apt_package_base_path('debian-10-amd64', 'puppet6', 'bolt-server'))
           .to eq('/opt/repository/apt/pool/buster/puppet6/b/bolt-server')
-
-
       end
       it 'returns the appropriate nonfinal repo path' do
         allow(Pkg::Paths).to receive(:remote_repo_base).and_return('/opt/repository-nightlies/apt')

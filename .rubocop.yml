@@ -583,7 +583,7 @@ Style/For:
   Enabled: true
 
 Style/FormatString:
-  Enabled: true
+  Enabled: false
 
 Style/FormatStringToken:
   Enabled: false

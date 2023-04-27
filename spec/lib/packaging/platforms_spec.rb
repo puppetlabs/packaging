@@ -12,14 +12,14 @@ describe 'Pkg::Platforms' do
 
   describe '#formats' do
     it 'should return all package formats' do
-      fmts = ['rpm', 'deb', 'dmg', 'svr4', 'ips', 'msi']
-      expect(Pkg::Platforms.formats).to match_array(fmts)
+      package_formats = ['rpm', 'deb', 'dmg', 'svr4', 'ips', 'msi']
+      expect(Pkg::Platforms.formats).to match_array(package_formats)
     end
   end
 
   describe '#supported_platforms' do
     it 'should return all supported platforms' do
-      platforms = ['aix', 'debian', 'el', 'fedora', 'osx', 'redhatfips', 'sles', 'solaris', 'ubuntu', 'windows', 'windowsfips']
+      platforms = %w[aix debian el fedora osx redhatfips sles solaris ubuntu windows windowsfips]
       expect(Pkg::Platforms.supported_platforms).to match_array(platforms)
     end
   end
@@ -30,7 +30,8 @@ describe 'Pkg::Platforms' do
     end
 
     it 'should raise an error if given a nonexistent platform' do
-      expect{Pkg::Platforms.versions_for_platform('notaplatform') }.to raise_error
+      expect { Pkg::Platforms.versions_for_platform('notaplatform') }
+        .to raise_error(RuntimeError, /No information found/)
     end
   end
 
@@ -47,7 +48,8 @@ describe 'Pkg::Platforms' do
     end
 
     it 'should fail if given nil as a codename' do
-      expect{Pkg::Platforms.codename_to_platform_version(nil)}.to raise_error
+      expect { Pkg::Platforms.codename_to_platform_version(nil) }
+        .to raise_error(RuntimeError, /Unable to find a platform/)
     end
   end
 
@@ -59,27 +61,32 @@ describe 'Pkg::Platforms' do
 
   describe '#arches_for_codename' do
     it 'should return an array of architectures corresponding to a given codename' do
-      expect(Pkg::Platforms.arches_for_codename('bionic')).to match_array(['amd64', 'aarch64', 'ppc64el'])
+      expect(Pkg::Platforms.arches_for_codename('bionic'))
+        .to match_array(['amd64', 'aarch64', 'ppc64el'])
     end
 
     it 'should be able to include source architectures' do
-      expect(Pkg::Platforms.arches_for_codename('bionic', true)).to match_array(["amd64", "aarch64", "ppc64el", "source"])
+      expect(Pkg::Platforms.arches_for_codename('bionic', true))
+        .to match_array(["amd64", "aarch64", "ppc64el", "source"])
     end
   end
 
   describe '#codename_to_tags' do
     it 'should return an array of platform tags corresponding to a given codename' do
-      expect(Pkg::Platforms.codename_to_tags('bionic')).to match_array(['ubuntu-18.04-aarch64', 'ubuntu-18.04-amd64', "ubuntu-18.04-ppc64el"])
+      expect(Pkg::Platforms.codename_to_tags('bionic'))
+        .to match_array(['ubuntu-18.04-aarch64', 'ubuntu-18.04-amd64', "ubuntu-18.04-ppc64el"])
     end
   end
 
   describe '#arches_for_platform_version' do
     it 'should return an array of arches for a given platform and version' do
-      expect(Pkg::Platforms.arches_for_platform_version('sles', '12')).to match_array(['x86_64', 'ppc64le'])
+      expect(Pkg::Platforms.arches_for_platform_version('sles', '12'))
+        .to match_array(['x86_64', 'ppc64le'])
     end
 
     it 'should be able to include source architectures' do
-      expect(Pkg::Platforms.arches_for_platform_version('sles', '12', true)).to match_array(["SRPMS", "ppc64le", "x86_64"])
+      expect(Pkg::Platforms.arches_for_platform_version('sles', '12', true))
+        .to match_array(["SRPMS", "ppc64le", "x86_64"])
     end
   end
 
@@ -87,7 +94,7 @@ describe 'Pkg::Platforms' do
     it 'should return an array of platform tags' do
       tags = Pkg::Platforms.platform_tags
       expect(tags).to be_instance_of(Array)
-      expect(tags.count).to be > 0
+      expect(tags.count).to be_positive
     end
 
     it 'should include a basic platform' do
@@ -115,7 +122,8 @@ describe 'Pkg::Platforms' do
     end
 
     it 'fails with a reasonable error when specified attribute is not defined' do
-      expect { Pkg::Platforms.get_attribute('osx-10.15-x86_64', :signature_format) }.to raise_error(/doesn't have information/)
+      expect { Pkg::Platforms.get_attribute('osx-10.15-x86_64', :signature_format) }
+        .to raise_error(/doesn't have information/)
     end
   end
 
@@ -159,19 +167,22 @@ describe 'Pkg::Platforms' do
 
     fail_cases.each do |platform_tag|
       it "fails out for #{platform_tag}" do
-        expect { Pkg::Platforms.parse_platform_tag(platform_tag)}.to raise_error
+        expect { Pkg::Platforms.parse_platform_tag(platform_tag) }
+          .to raise_error(RuntimeError, /No information found|Could not verify/)
       end
     end
   end
 
   describe '#generic_platform_tag' do
     it 'fails for unsupported platforms' do
-      expect { Pkg::Platforms.generic_platform_tag('noplatform') }.to raise_error
+      expect { Pkg::Platforms.generic_platform_tag('noplatform') }
+        .to raise_error(RuntimeError, /No information found|Could not verify/)
     end
 
     it 'returns a supported platform tag containing the supplied platform' do
       Pkg::Platforms.supported_platforms.each do |platform|
-        expect(Pkg::Platforms.platform_tags).to include(Pkg::Platforms.generic_platform_tag(platform))
+        expect(Pkg::Platforms.platform_tags)
+          .to include(Pkg::Platforms.generic_platform_tag(platform))
       end
     end
   end

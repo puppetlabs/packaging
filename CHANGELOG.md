@@ -3,12 +3,16 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (RE-15382) Delete now-obsolete parts of apt.repos.puppet.com project.
 
 ## [0.109.7] - 2023-04-25
 ### Fixed
 - (maint) Update keyword argument syntax in nightly repo Rake task
+
 ### Changed
 - (maint) Use ruby 3.1.1 for remote bundle installs.
+
 ## [0.109.6] - 2023-04-14
 ### Changed
 - (RE-15419) Update internal gem host to rubygems__local

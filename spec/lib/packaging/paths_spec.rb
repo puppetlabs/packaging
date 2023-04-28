@@ -52,7 +52,8 @@ describe 'Pkg::Paths' do
     ]
     failure_cases.each do |fail_path|
       it "should fail gracefully if given '#{fail_path}'" do
-        expect { Pkg::Paths.tag_from_artifact_path(fail_path) }.to raise_error
+        expect { Pkg::Paths.tag_from_artifact_path(fail_path) }
+          .to raise_error(RuntimeError, /Cannot determine tag/)
       end
     end
   end
@@ -81,7 +82,8 @@ describe 'Pkg::Paths' do
     it 'should fail if nonfinal_repo_name is not set for non-final version' do
       allow(Pkg::Config).to receive(:repo_name).and_return('puppet6')
       allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nil)
-      expect { Pkg::Paths.repo_name(true) }.to raise_error
+      expect { Pkg::Paths.repo_name(true) }
+        .to raise_error(RuntimeError, /Nonfinal is set to true/)
     end
   end
 
@@ -131,25 +133,6 @@ describe 'Pkg::Paths' do
       it 'should be correct for windows' do
         expect(Pkg::Paths.artifacts_path('windows-2012-x64'))
           .to eq('artifacts/windows/puppet6')
-      end
-    end
-
-    context 'after puppet 7 apt changes' do
-      before :each do
-        allow(Pkg::Config).to receive(:repo_name).and_return('FUTURE-puppet7')
-      end
-
-      it 'should be correct for bionic' do
-        expect(Pkg::Paths.artifacts_path('ubuntu-18.04-amd64'))
-          .to eq('artifacts/FUTURE-puppet7/bionic')
-      end
-      it 'should be correct for focal' do
-        expect(Pkg::Paths.artifacts_path('ubuntu-20.04-amd64'))
-          .to eq('artifacts/FUTURE-puppet7/focal')
-      end
-      it 'should be correct for jammy' do
-        expect(Pkg::Paths.artifacts_path('ubuntu-22.04-amd64'))
-          .to eq('artifacts/FUTURE-puppet7/jammy')
       end
     end
   end
@@ -210,15 +193,16 @@ describe 'Pkg::Paths' do
     end
 
     it 'should return nonfinal_repo_name for nonfinal version' do
-      allow(Pkg::Config).to receive(:repo_name).and_return('FUTURE-puppet7')
-      allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return('FUTURE-puppet7-nightly')
-      expect(Pkg::Paths.apt_repo_name(true)).to eq('FUTURE-puppet7-nightly')
+      allow(Pkg::Config).to receive(:repo_name).and_return('puppet7')
+      allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return('puppet7-nightly')
+      expect(Pkg::Paths.apt_repo_name(true)).to eq('puppet7-nightly')
     end
 
     it 'should fail if nonfinal_repo_name is not set for non-final version' do
-      allow(Pkg::Config).to receive(:repo_name).and_return('FUTURE-puppet7')
+      allow(Pkg::Config).to receive(:repo_name).and_return('puppet7')
       allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nil)
-      expect { Pkg::Paths.apt_repo_name(true) }.to raise_error
+      expect { Pkg::Paths.apt_repo_name(true) }
+        .to raise_error(RuntimeError, /Nonfinal is set to true/)
     end
   end
 
@@ -231,8 +215,8 @@ describe 'Pkg::Paths' do
 
     it 'should return `Pkg::Config.yum_repo_name` if `Pkg::Config.repo_name` is not set' do
       allow(Pkg::Config).to receive(:repo_name).and_return(nil)
-      allow(Pkg::Config).to receive(:yum_repo_name).and_return('FUTURE-puppet7')
-      expect(Pkg::Paths.yum_repo_name).to eq('FUTURE-puppet7')
+      allow(Pkg::Config).to receive(:yum_repo_name).and_return('puppet7')
+      expect(Pkg::Paths.yum_repo_name).to eq('puppet7')
     end
 
     it 'should return \'products\' if nothing is set' do
@@ -242,15 +226,16 @@ describe 'Pkg::Paths' do
     end
 
     it 'should return nonfinal_repo_name for nonfinal version' do
-      allow(Pkg::Config).to receive(:repo_name).and_return('FUTURE-puppet7')
-      allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return('FUTURE-puppet7-nightly')
-      expect(Pkg::Paths.yum_repo_name(true)).to eq('FUTURE-puppet7-nightly')
+      allow(Pkg::Config).to receive(:repo_name).and_return('puppet7')
+      allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return('puppet7-nightly')
+      expect(Pkg::Paths.yum_repo_name(true)).to eq('puppet7-nightly')
     end
 
     it 'should fail if nonfinal_repo_name is not set for non-final version' do
-      allow(Pkg::Config).to receive(:repo_name).and_return('FUTURE-puppet7')
+      allow(Pkg::Config).to receive(:repo_name).and_return('puppet7')
       allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nil)
-      expect { Pkg::Paths.yum_repo_name(true) }.to raise_error
+      expect { Pkg::Paths.yum_repo_name(true) }
+        .to raise_error(RuntimeError, /Nonfinal is set to true/)
     end
   end
 
@@ -311,8 +296,6 @@ describe 'Pkg::Paths' do
           .to eq('/opt/repository/apt/pool/bionic/puppet6/p/puppet-agent')
         expect(Pkg::Paths.apt_package_base_path('debian-10-amd64', 'puppet6', 'bolt-server'))
           .to eq('/opt/repository/apt/pool/buster/puppet6/b/bolt-server')
-
-
       end
       it 'returns the appropriate nonfinal repo path' do
         allow(Pkg::Paths).to receive(:remote_repo_base).and_return('/opt/repository-nightlies/apt')
@@ -324,100 +307,43 @@ describe 'Pkg::Paths' do
           .to eq('/opt/repository-nightlies/apt/pool/buster/puppet6-nightly/p/pdk')
       end
     end
-
-    context 'for puppet 7 and after' do
-      it 'returns the approprate apt repo path' do
-        allow(Pkg::Paths).to receive(:remote_repo_base).and_return('/opt/repository/apt')
-        expect(Pkg::Paths.apt_package_base_path('ubuntu-18.04-amd64', 'FUTURE-puppet7', 'puppet-agent'))
-          .to eq('/opt/repository/apt/FUTURE-puppet7/pool/bionic/p/puppet-agent')
-        expect(Pkg::Paths.apt_package_base_path('ubuntu-20.04-amd64', 'FUTURE-puppet7', 'puppet-agent'))
-          .to eq('/opt/repository/apt/FUTURE-puppet7/pool/focal/p/puppet-agent')
-        expect(Pkg::Paths.apt_package_base_path('ubuntu-22.04-amd64', 'FUTURE-puppet7', 'puppet-agent'))
-          .to eq('/opt/repository/apt/FUTURE-puppet7/pool/jammy/p/puppet-agent')
-      end
-      it 'returns the appropriate nonfinal repo path' do
-        allow(Pkg::Paths).to receive(:remote_repo_base).and_return('/opt/repository-nightlies/apt')
-        expect(Pkg::Paths.apt_package_base_path('debian-10-amd64', 'FUTURE-puppet7-nightly', 'pdk', true))
-          .to eq('/opt/repository-nightlies/apt/FUTURE-puppet7-nightly/pool/buster/p/pdk')
-      end
-    end
   end
 
   describe '#release_package_link_path' do
-    context 'for puppet 6' do
-      repo_name = 'puppet6'
-      nonfinal_repo_name = 'puppet6-nightly'
-      yum_repo_path = '/opt/repository/yum'
-      apt_repo_path = '/opt/repository/apt'
-      nonfinal_yum_repo_path = '/opt/repository-nightlies/yum'
-      nonfinal_apt_repo_path = '/opt/repository-nightlies/apt'
-      before :each do
-        allow(Pkg::Config).to receive(:repo_name).and_return(repo_name)
-        allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nonfinal_repo_name)
-        allow(Pkg::Config).to receive(:yum_repo_path).and_return(yum_repo_path)
-        allow(Pkg::Config).to receive(:apt_repo_path).and_return(apt_repo_path)
-        allow(Pkg::Config).to receive(:nonfinal_yum_repo_path).and_return(nonfinal_yum_repo_path)
-        allow(Pkg::Config).to receive(:nonfinal_apt_repo_path).and_return(nonfinal_apt_repo_path)
-      end
-      it 'returns the appropriate link path for rpm release packages' do
-        expect(Pkg::Paths.release_package_link_path('sles-12-ppc64le'))
-          .to eq("#{yum_repo_path}/#{repo_name}-release-sles-12.noarch.rpm")
-      end
-      it 'returns the appropriate link path for deb release packages' do
-        expect(Pkg::Paths.release_package_link_path('ubuntu-18.04-amd64'))
-          .to eq("#{apt_repo_path}/#{repo_name}-release-bionic.deb")
-      end
-      it 'returns the appropriate link path for nonfinal rpm release packages' do
-        expect(Pkg::Paths.release_package_link_path('el-7-x86_64', true))
-          .to eq("#{nonfinal_yum_repo_path}/#{nonfinal_repo_name}-release-el-7.noarch.rpm")
-      end
-      it 'returns the appropriate link path for nonfinal deb release packages' do
-        expect(Pkg::Paths.release_package_link_path('debian-10-amd64', true))
-          .to eq("#{nonfinal_apt_repo_path}/#{nonfinal_repo_name}-release-buster.deb")
-      end
-      it 'returns nil for package formats that do not have release packages' do
-        expect(Pkg::Paths.release_package_link_path('osx-10.15-x86_64')).to eq(nil)
-        expect(Pkg::Paths.release_package_link_path('osx-11-x86_64')).to eq(nil)
-        expect(Pkg::Paths.release_package_link_path('windows-2012-x86')).to eq(nil)
-      end
+    repo_name = 'puppet8'
+    nonfinal_repo_name = 'puppet8-nightly'
+    yum_repo_path = '/opt/repository/yum'
+    apt_repo_path = '/opt/repository/apt'
+    nonfinal_yum_repo_path = '/opt/repository-nightlies/yum'
+    nonfinal_apt_repo_path = '/opt/repository-nightlies/apt'
+    before :each do
+      allow(Pkg::Config).to receive(:repo_name).and_return(repo_name)
+      allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nonfinal_repo_name)
+      allow(Pkg::Config).to receive(:yum_repo_path).and_return(yum_repo_path)
+      allow(Pkg::Config).to receive(:apt_repo_path).and_return(apt_repo_path)
+      allow(Pkg::Config).to receive(:nonfinal_yum_repo_path).and_return(nonfinal_yum_repo_path)
+      allow(Pkg::Config).to receive(:nonfinal_apt_repo_path).and_return(nonfinal_apt_repo_path)
     end
-
-    context 'for puppet 7' do
-      repo_name = 'FUTURE-puppet7'
-      nonfinal_repo_name = 'FUTURE-puppet7-nightly'
-      yum_repo_path = '/opt/repository/yum'
-      apt_repo_path = '/opt/repository/apt'
-      nonfinal_yum_repo_path = '/opt/repository-nightlies/yum'
-      nonfinal_apt_repo_path = '/opt/repository-nightlies/apt'
-      before :each do
-        allow(Pkg::Config).to receive(:repo_name).and_return(repo_name)
-        allow(Pkg::Config).to receive(:nonfinal_repo_name).and_return(nonfinal_repo_name)
-        allow(Pkg::Config).to receive(:yum_repo_path).and_return(yum_repo_path)
-        allow(Pkg::Config).to receive(:apt_repo_path).and_return(apt_repo_path)
-        allow(Pkg::Config).to receive(:nonfinal_yum_repo_path).and_return(nonfinal_yum_repo_path)
-        allow(Pkg::Config).to receive(:nonfinal_apt_repo_path).and_return(nonfinal_apt_repo_path)
-      end
-      it 'returns the appropriate link path for rpm release packages' do
-        expect(Pkg::Paths.release_package_link_path('sles-12-ppc64le'))
-          .to eq("#{yum_repo_path}/#{repo_name}-release-sles-12.noarch.rpm")
-      end
-      it 'returns the appropriate link path for deb release packages' do
-        expect(Pkg::Paths.release_package_link_path('ubuntu-20.04-amd64'))
-          .to eq("#{apt_repo_path}/#{repo_name}-release-focal.deb")
-      end
-      it 'returns the appropriate link path for nonfinal rpm release packages' do
-        expect(Pkg::Paths.release_package_link_path('el-8-x86_64', true))
-          .to eq("#{nonfinal_yum_repo_path}/#{nonfinal_repo_name}-release-el-8.noarch.rpm")
-      end
-      it 'returns the appropriate link path for nonfinal deb release packages' do
-        expect(Pkg::Paths.release_package_link_path('debian-10-i386', true))
-          .to eq("#{nonfinal_apt_repo_path}/#{nonfinal_repo_name}-release-buster.deb")
-      end
-      it 'returns nil for package formats that do not have release packages' do
-        expect(Pkg::Paths.release_package_link_path('osx-10.15-x86_64')).to eq(nil)
-        expect(Pkg::Paths.release_package_link_path('osx-11-x86_64')).to eq(nil)
-        expect(Pkg::Paths.release_package_link_path('windows-2012-x86')).to eq(nil)
-      end
+    it 'returns the appropriate link path for rpm release packages' do
+      expect(Pkg::Paths.release_package_link_path('sles-12-ppc64le'))
+        .to eq("#{yum_repo_path}/#{repo_name}-release-sles-12.noarch.rpm")
+    end
+    it 'returns the appropriate link path for deb release packages' do
+      expect(Pkg::Paths.release_package_link_path('ubuntu-18.04-amd64'))
+        .to eq("#{apt_repo_path}/#{repo_name}-release-bionic.deb")
+    end
+    it 'returns the appropriate link path for nonfinal rpm release packages' do
+      expect(Pkg::Paths.release_package_link_path('el-7-x86_64', true))
+        .to eq("#{nonfinal_yum_repo_path}/#{nonfinal_repo_name}-release-el-7.noarch.rpm")
+    end
+    it 'returns the appropriate link path for nonfinal deb release packages' do
+      expect(Pkg::Paths.release_package_link_path('debian-10-amd64', true))
+        .to eq("#{nonfinal_apt_repo_path}/#{nonfinal_repo_name}-release-buster.deb")
+    end
+    it 'returns nil for package formats that do not have release packages' do
+      expect(Pkg::Paths.release_package_link_path('osx-10.15-x86_64')).to eq(nil)
+      expect(Pkg::Paths.release_package_link_path('osx-11-x86_64')).to eq(nil)
+      expect(Pkg::Paths.release_package_link_path('windows-2012-x86')).to eq(nil)
     end
   end
 end

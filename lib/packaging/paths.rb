@@ -108,19 +108,9 @@ module Pkg::Paths
     platform_name = path_data[:platform_name]
     platform_tag = path_data[:platform_tag]
 
-    repo_name = Pkg::Config.repo_name
-
     case package_format
     when 'deb'
       debian_code_name = Pkg::Platforms.get_attribute(platform_tag, :codename)
-
-      # In puppet7 and beyond, we moved the repo_name to the top to allow each
-      # puppet major release to have its own apt repo.
-      if %w[FUTURE-puppet7 FUTURE-puppet7-nightly].include? repo_name
-        return File.join(prefix, apt_repo_name(is_nonfinal), debian_code_name)
-      end
-
-      # For puppet6 and prior
       return File.join(prefix, debian_code_name, apt_repo_name(is_nonfinal))
     when 'dmg'
       return File.join(prefix, 'mac', repo_name(is_nonfinal))

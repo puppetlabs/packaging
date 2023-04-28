@@ -361,8 +361,7 @@ namespace :pl do
   end
 
   ##
-  ## Here's where we start 'shipping' (old terminology) or 'staging' (current terminology)
-  ## by copying local 'pkg' directories to the staging server.
+  ## Here's where we start 'shipping' by copying local 'pkg' directories to the staging server.
   ##
   ## Note, that for debs, we conflate 'staging server' with 'signing server' because we
   ## must stage in th place where we sign.
@@ -388,18 +387,6 @@ namespace :pl do
     Pkg::Util::Ship.ship_debs(
       'pkg', Pkg::Config.nonfinal_apt_repo_staging_path, chattr: false, nonfinal: true
     )
-  end
-
-  ## This is the new-style apt stager
-  desc "Stage debs to #{Pkg::Config.apt_signing_server}"
-  task stage_stable_debs: 'pl:fetch' do
-    Pkg::Util::AptStagingServer.send_packages('pkg', 'stable')
-  end
-  task stage_debs: :stage_stable_debs
-
-  desc "Stage nightly debs to #{Pkg::Config.apt_signing_server}"
-  task stage_nightly_debs: 'pl:fetch' do
-    Pkg::Util::AptStagingServer.send_packages('pkg', 'nightly')
   end
 
   desc 'Ship built gem to rubygems.org, internal Gem mirror, and public file server'

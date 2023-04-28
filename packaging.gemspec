@@ -19,7 +19,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency('rspec')
   gem.add_development_dependency('rubocop')
 
-  gem.add_runtime_dependency('apt_stage_artifacts')
   gem.add_runtime_dependency('artifactory', ['~> 3'])
   gem.add_runtime_dependency('csv', ['>= 3.1.5'])
   gem.add_runtime_dependency('googleauth')

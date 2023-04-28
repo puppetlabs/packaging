@@ -66,7 +66,7 @@ describe 'Pkg::Sign' do
         %W[#{rpm_directory}/sles/11/PC1/x86_64/puppet-agent-5.5.3-1.sles11.x86_64.rpm]
       end
       let(:v4_rpms) do
-        %W[%#{rpm_directory}/el/7/PC1/aarch64/puppet-agent-5.5.3-1.el7.aarch64.rpm]
+        %W[#{rpm_directory}/el/7/PC1/aarch64/puppet-agent-5.5.3-1.el7.aarch64.rpm]
       end
       let(:rpms) { rpms_not_to_sign + v3_rpms + v4_rpms }
       let(:already_signed_rpms) do

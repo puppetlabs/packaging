@@ -3,6 +3,9 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Removed
+- (RE-15217) Remove SUSE Linux Enterprise Server 11 (i386) from PLATFORM_INFO hash.
+- (RE-15221) Remove SUSE Linux Enterprise Server 11 (x86-64) from PLATFORM_INFO hash.
 
 ## [0.109.7] - 2023-04-25
 ### Fixed

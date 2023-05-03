@@ -123,14 +123,6 @@ module Pkg
       },
 
       'sles' => {
-        '11' => {
-          architectures: ['x86_64', 'i386'],
-          source_architecture: 'SRPMS',
-          package_format: 'rpm',
-          source_package_formats: ['src.rpm'],
-          signature_format: 'v3',
-          repo: true,
-        },
         '12' => {
           architectures: ['x86_64', 'ppc64le'],
           source_architecture: 'SRPMS',

@@ -297,27 +297,6 @@ namespace :pl do
       end
     end
 
-    desc "Sync signed apt repos from #{Pkg::Config.apt_signing_server} to Google Cloud Platform"
-    task :sync_apt_repo_to_gcp => 'pl:fetch' do
-      GCP_REPO_SYNC = '/usr/local/bin/gcp_repo_sync'
-      target_site = 'apt.repos.puppet.com'
-      sync_command_puppet_6 = "#{GCP_REPO_SYNC} #{target_site} puppet6"
-      sync_command_puppet_7 = "#{GCP_REPO_SYNC} #{target_site} puppet7"
-      print "Sync apt repos from #{Pkg::Config.apt_signing_server} to #{target_site}? [y,n] "
-      next unless Pkg::Util.ask_yes_or_no
-      puts
-
-      Pkg::Util::Execution.retry_on_fail(times: 3) do
-        Pkg::Util::Net.remote_execute(Pkg::Config.apt_signing_server, sync_command_puppet_6)
-      end
-
-      Pkg::Util::Execution.retry_on_fail(times: 3) do
-        Pkg::Util::Net.remote_execute(Pkg::Config.apt_signing_server, sync_command_puppet_7)
-      end
-    end
-    # Keep 'deploy' for backward compatibility
-    task :deploy_apt_repo_to_gcp => :sync_apt_repo_to_gcp
-
     desc "Sync apt, yum, and downloads.pl.com to AWS S3"
     task :deploy_final_builds_to_s3 => "pl:fetch" do
       Rake::Task['pl:remote:deploy_apt_repo_to_s3'].invoke
@@ -388,18 +367,6 @@ namespace :pl do
     Pkg::Util::Ship.ship_debs(
       'pkg', Pkg::Config.nonfinal_apt_repo_staging_path, chattr: false, nonfinal: true
     )
-  end
-
-  ## This is the new-style apt stager
-  desc "Stage debs to #{Pkg::Config.apt_signing_server}"
-  task stage_stable_debs: 'pl:fetch' do
-    Pkg::Util::AptStagingServer.send_packages('pkg', 'stable')
-  end
-  task stage_debs: :stage_stable_debs
-
-  desc "Stage nightly debs to #{Pkg::Config.apt_signing_server}"
-  task stage_nightly_debs: 'pl:fetch' do
-    Pkg::Util::AptStagingServer.send_packages('pkg', 'nightly')
   end
 
   desc 'Ship built gem to rubygems.org, internal Gem mirror, and public file server'

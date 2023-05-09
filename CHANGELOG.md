@@ -3,7 +3,10 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.110.0] - 2023-05-9
 ### Removed
+- (RE-15479) Remove AptStagingServer module and references to it because it is no longer needed.
 - (RE-15217) Remove SUSE Linux Enterprise Server 11 (i386) from PLATFORM_INFO hash.
 - (RE-15221) Remove SUSE Linux Enterprise Server 11 (x86-64) from PLATFORM_INFO hash.
 
@@ -913,7 +916,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.109.7...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.110.0...HEAD
+[0.110.0]: https://github.com/puppetlabs/packaging/compare/0.109.7...0.110.0
 [0.109.7]: https://github.com/puppetlabs/packaging/compare/0.109.6...0.109.7
 [0.109.6]: https://github.com/puppetlabs/packaging/compare/0.109.5...0.109.6
 [0.109.5]: https://github.com/puppetlabs/packaging/compare/0.109.4...0.109.5

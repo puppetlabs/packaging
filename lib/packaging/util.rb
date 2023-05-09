@@ -4,7 +4,6 @@ module Pkg::Util
   require 'benchmark'
   require 'base64'
   require 'io/console'
-  require 'packaging/util/apt_staging_server'
   require 'packaging/util/build_metadata'
   require 'packaging/util/date'
   require 'packaging/util/distribution_server'

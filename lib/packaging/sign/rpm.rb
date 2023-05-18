@@ -65,7 +65,7 @@ module Pkg::Sign::Rpm
     %W[
       #{gpg_executable} --sign --detach-sign
       #{signing_version_flags(signing_version)}
-      #{passphrase_fd_flag}
+      #{passphrase_fd_flag} --verbose
       --batch --no-armor --no-secmem-warning
       --local-user %{_gpg_name}
       --output %{__signature_filename}
@@ -79,7 +79,7 @@ module Pkg::Sign::Rpm
     when :v3
       '--force-v3-sigs --digest-algo=sha1'
     when :v4
-      ''
+      '--digest-algo=sha512'
     else
       fail "Unrecognized signing_version: '#{signing_version}'"
     end

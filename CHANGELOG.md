@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (maint) Make sign command output verbose and specify digest-algo as sha512.
 
 ## [0.110.0] - 2023-05-9
 ### Removed

@@ -109,7 +109,7 @@ module Pkg
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
-          signature_format: 'v3',
+          signature_format: 'v4',
           repo: true,
         },
         '8' => {
@@ -117,7 +117,7 @@ module Pkg
           source_architecture: 'SRPMS',
           package_format: 'rpm',
           source_package_formats: ['src.rpm'],
-          signature_format: 'v3',
+          signature_format: 'v4',
           repo: true,
         }
       },

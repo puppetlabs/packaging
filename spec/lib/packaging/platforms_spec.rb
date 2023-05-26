@@ -97,7 +97,7 @@ describe 'Pkg::Platforms' do
   end
 
   describe '#platform_lookup' do
-    ['osx-10.15-x86_64', 'osx-11-x86_64', 'osx-12-x86_64'].each do |platform|
+    ['osx-11-x86_64', 'osx-12-x86_64'].each do |platform|
       it 'should return a hash of platform info' do
         expect(Pkg::Platforms.platform_lookup(platform)).to be_instance_of(Hash)
       end
@@ -112,10 +112,6 @@ describe 'Pkg::Platforms' do
   describe '#get_attribute' do
     it 'returns info about a given platform' do
       expect(Pkg::Platforms.get_attribute('el-6-x86_64', :signature_format)).to eq('v4')
-    end
-
-    it 'fails with a reasonable error when specified attribute is not defined' do
-      expect { Pkg::Platforms.get_attribute('osx-10.15-x86_64', :signature_format) }.to raise_error(/doesn't have information/)
     end
   end
 

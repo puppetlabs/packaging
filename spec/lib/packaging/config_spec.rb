@@ -203,7 +203,6 @@ describe 'Pkg::Config' do
 
   describe '#platform_data' do
     platform_tags = %w[
-      osx-10.15-x86_64
       osx-11-x86_64
       ubuntu-18.04-amd64
       el-6-x86_64
@@ -212,7 +211,6 @@ describe 'Pkg::Config' do
     ]
 
     artifacts =
-      "./artifacts/apple/10.15/PC1/x86_64/puppet-agent-5.3.2.658.gc79ef9a-1.osx10.15.dmg\n" \
       "./artifacts/apple/11/PC1/x86_64/puppet-agent-5.3.2.658.gc79ef9a-1.osx11.dmg\n" \
       "./artifacts/deb/bionic/PC1/puppet-agent_5.3.2-1bionic_amd64.deb\n" \
       "./artifacts/el/6/PC1/x86_64/puppet-agent-5.3.2.658.gc79ef9a-1.el6.x86_64.rpm\n" \

@@ -184,7 +184,7 @@ module Pkg::Util::Net
         target_host: nil,
         extra_flags: nil,
         dryrun: ENV['DRYRUN']
-}.merge(opts.delete_if { |_, value| value.nil? })
+}.merge(opts.compact)
 
       stdout, = Pkg::Util::Execution.capture3(rsync_cmd(source, options), true)
       stdout

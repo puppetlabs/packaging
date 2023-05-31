@@ -4,6 +4,9 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Removed
+- (PA-5031) Remove support for macOS 10.15 Catalina.
+
 ## [0.110.0] - 2023-05-9
 ### Removed
 - (RE-15479) Remove AptStagingServer module and references to it because it is no longer needed.

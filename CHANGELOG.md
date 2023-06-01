@@ -3,6 +3,9 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Removed
+- (PA-5031) Remove support for Mac OS 10.15 (x86_64).
+- (PA-5043) Remove Red Hat 7 (aarch64).
 
 ## [0.110.0] - 2023-05-9
 ### Removed

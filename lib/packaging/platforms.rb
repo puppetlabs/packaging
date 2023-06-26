@@ -96,6 +96,11 @@ module Pkg
           package_format: 'dmg',
           repo: false,
         },
+        '13' => {
+          architectures: ['arm64'],
+          package_format: 'dmg',
+          repo: false,
+        },
       },
 
       'redhatfips' => {

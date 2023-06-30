@@ -3,6 +3,10 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- (PA-4775) Add support for macOS 13 ARM 64 architecture
+
+## [Unreleased]
 ### Removed
 - (PA-5031) Remove support for Mac OS 10.15 (x86_64).
 - (PA-5043) Remove Red Hat 7 (aarch64).

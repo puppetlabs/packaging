@@ -18,6 +18,13 @@ module Pkg
           source_package_formats: ['src.rpm'],
           repo: false,
         },
+        '7.2' => {
+          architectures: ['power'],
+          source_architecture: 'SRPMS',
+          package_format: 'rpm',
+          source_package_formats: ['src.rpm'],
+          repo: false,
+        },
       },
 
       'debian' => {

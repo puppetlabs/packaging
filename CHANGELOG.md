@@ -6,6 +6,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ### Added
 - (PA-4775) Add support for macOS 13 ARM 64 architecture
 - (PA-4591) Add support for macOS 13 x86-64 architecture
+- (maint) Add support for AIX 7.2
 
 ## [Unreleased]
 ### Removed

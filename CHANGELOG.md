@@ -3,12 +3,13 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.110.1] - 2023-07-20
 ### Added
 - (PA-4775) Add support for macOS 13 ARM 64 architecture
 - (PA-4591) Add support for macOS 13 x86-64 architecture
 - (maint) Add support for AIX 7.2
 
-## [Unreleased]
 ### Removed
 - (PA-5031) Remove support for Mac OS 10.15 (x86_64).
 - (PA-5043) Remove Red Hat 7 (aarch64).
@@ -927,7 +928,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.110.0...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.110.1...HEAD
+[0.110.1]: https://github.com/puppetlabs/packaging/compare/0.110.0...0.110.1
 [0.110.0]: https://github.com/puppetlabs/packaging/compare/0.109.7...0.110.0
 [0.109.7]: https://github.com/puppetlabs/packaging/compare/0.109.6...0.109.7
 [0.109.6]: https://github.com/puppetlabs/packaging/compare/0.109.5...0.109.6

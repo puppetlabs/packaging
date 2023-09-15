@@ -3,6 +3,7 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+- (PA-5000) Add support for Red Hat 9 (ARM64) architecture
 
 ## [0.110.1] - 2023-07-20
 ### Added

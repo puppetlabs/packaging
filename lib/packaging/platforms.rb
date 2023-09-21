@@ -38,7 +38,7 @@ module Pkg
         },
         '11' => {
           codename: 'bullseye',
-          architectures: ['amd64'],
+          architectures: ['amd64', 'aarch64'],
           source_architecture: 'source',
           package_format: 'deb',
           source_package_formats: DEBIAN_SOURCE_FORMATS,

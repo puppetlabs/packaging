@@ -365,7 +365,7 @@ module Pkg::Paths
 
   #for ubuntu-20.04-aarch64, debian package architecture is arm64
   def package_arch(platform, arch)
-    if platform == 'ubuntu' && arch == 'aarch64'
+    if %w[debian ubuntu].include?(platform) && arch == 'aarch64'
       return 'arm64'
     end
     arch

@@ -4,6 +4,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 ### Added
+- (PA-4605) Add debian platform condition to handle arm architecture
 - (PA-4606) Add support for Debian 11 (ARM64) architecture
 - (PA-5000) Add support for Red Hat 9 (ARM64) architecture
 

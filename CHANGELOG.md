@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.111.0]
 ### Added
 - (PA-4605) Add debian platform condition to handle arm architecture
 - (PA-4606) Add support for Debian 11 (ARM64) architecture
@@ -932,7 +934,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.110.1...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.111.0...HEAD
+[0.111.0]: https://github.com/puppetlabs/packaging/compare/0.110.1...0.111.0
 [0.110.1]: https://github.com/puppetlabs/packaging/compare/0.110.0...0.110.1
 [0.110.0]: https://github.com/puppetlabs/packaging/compare/0.109.7...0.110.0
 [0.109.7]: https://github.com/puppetlabs/packaging/compare/0.109.6...0.109.7

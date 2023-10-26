@@ -4,7 +4,7 @@ describe 'Pkg::Platforms' do
   describe '#by_package_format' do
     it 'should return an array of platforms that use a given format' do
       deb_platforms = ['debian', 'ubuntu']
-      rpm_platforms = ['aix', 'el', 'fedora', 'redhatfips', 'sles']
+      rpm_platforms = ['aix', 'amazon', 'el', 'fedora', 'redhatfips', 'sles']
       expect(Pkg::Platforms.by_package_format('deb')).to match_array(deb_platforms)
       expect(Pkg::Platforms.by_package_format('rpm')).to match_array(rpm_platforms)
     end
@@ -19,7 +19,7 @@ describe 'Pkg::Platforms' do
 
   describe '#supported_platforms' do
     it 'should return all supported platforms' do
-      platforms = ['aix', 'debian', 'el', 'fedora', 'osx', 'redhatfips', 'sles', 'solaris', 'ubuntu', 'windows', 'windowsfips']
+      platforms = ['aix', 'amazon', 'debian', 'el', 'fedora', 'osx', 'redhatfips', 'sles', 'solaris', 'ubuntu', 'windows', 'windowsfips']
       expect(Pkg::Platforms.supported_platforms).to match_array(platforms)
     end
   end

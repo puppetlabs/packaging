@@ -27,6 +27,17 @@ module Pkg
         },
       },
 
+      'amazon' => {
+        '2023' => {
+          architectures: ['x86_64', 'aarch64'],
+          source_architecture: 'SRPMS',
+          package_format: 'rpm',
+          source_package_formats: ['src.rpm'],
+          signature_format: 'v4',
+          repo: true,
+        },
+      },
+
       'debian' => {
         '10' => {
           codename: 'buster',

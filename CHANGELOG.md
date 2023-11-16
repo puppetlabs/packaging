@@ -4,6 +4,10 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.112.0]
+### Added
+- (PA-5568) Added platform for Amazon Linux 2023 for x86_64 & aarch64
+
 ## [0.111.0]
 ### Added
 - (PA-4605) Add debian platform condition to handle arm architecture
@@ -934,7 +938,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.111.0...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.112.0...HEAD
+[0.112.0]: https://github.com/puppetlabs/packaging/compare/0.111.0...0.112.0
 [0.111.0]: https://github.com/puppetlabs/packaging/compare/0.110.1...0.111.0
 [0.110.1]: https://github.com/puppetlabs/packaging/compare/0.110.0...0.110.1
 [0.110.0]: https://github.com/puppetlabs/packaging/compare/0.109.7...0.110.0

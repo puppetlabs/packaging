@@ -8,7 +8,7 @@ namespace :pl do
 
     desc "Update '#{Pkg::Config.repo_name}' yum repository on '#{Pkg::Config.yum_staging_server}'"
     task update_yum_repo: 'pl:fetch' do
-      command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository/Rakefile mk_repo'
+      command = Pkg::Config.yum_repo_command
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       next unless Pkg::Util.ask_yes_or_no
 
@@ -25,7 +25,7 @@ namespace :pl do
 
     desc "Update all final yum repositories on '#{Pkg::Config.yum_staging_server}'"
     task update_all_final_yum_repos: 'pl:fetch' do
-      command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository/Rakefile mk_repo'
+      command = Pkg::Config.yum_repo_command
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       next unless Pkg::Util.ask_yes_or_no
 
@@ -42,7 +42,7 @@ namespace :pl do
 
     desc "Update '#{Pkg::Config.nonfinal_repo_name}' nightly yum repository on '#{Pkg::Config.yum_staging_server}'"
     task update_nightlies_yum_repo: 'pl:fetch' do
-      command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository-nightlies/Rakefile mk_repo'
+      command = Pkg::Config.yum_repo_command
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       next unless Pkg::Util.ask_yes_or_no
 
@@ -59,7 +59,7 @@ namespace :pl do
 
     desc "Update all nightly yum repositories on '#{Pkg::Config.yum_staging_server}'"
     task update_all_nightlies_yum_repos: 'pl:fetch' do
-      command = Pkg::Config.yum_repo_command || 'rake -f /opt/repository-nightlies/Rakefile mk_repo'
+      command = Pkg::Config.yum_repo_command
       $stdout.puts "Really run remote repo update on '#{Pkg::Config.yum_staging_server}'? [y,n]"
       next unless Pkg::Util.ask_yes_or_no
 

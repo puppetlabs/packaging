@@ -55,6 +55,14 @@ module Pkg
           source_package_formats: DEBIAN_SOURCE_FORMATS,
           repo: true,
         },
+        '12' => {
+          codename: 'bookworm',
+          architectures: ['amd64', 'aarch64'],
+          source_architecture: 'source',
+          package_format: 'deb',
+          source_package_formats: DEBIAN_SOURCE_FORMATS,
+          repo: true,
+        },
       },
 
       'el' => {

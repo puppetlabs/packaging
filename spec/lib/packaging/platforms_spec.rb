@@ -36,7 +36,7 @@ describe 'Pkg::Platforms' do
 
   describe '#codenames' do
     it 'should return all codenames for a given platform' do
-      codenames = ['focal', 'bionic', 'bullseye', 'buster', 'jammy']
+      codenames = ['focal', 'bionic', 'bullseye', 'buster', 'bookworm', 'jammy']
       expect(Pkg::Platforms.codenames).to match_array(codenames)
     end
   end

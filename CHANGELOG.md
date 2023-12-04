@@ -6,6 +6,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ### Added
 - (PA-5878) Update puppetlabs/packaging platform hash to include macOS 14 (Intel)
 - (maint) Add support for Debian 12 'bookworm'
+- (PA-5904) Add support for macOS 14 ARM 64 architecture
 ### Removed
 - (maint) Remove mk_repo command because it is no longer used.
 ### Changed

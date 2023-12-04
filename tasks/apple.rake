@@ -53,7 +53,7 @@ def make_directory_tree
   }
   puts "Cleaning Tree: #{project_tmp}"
   rm_rf(project_tmp)
-  @working_tree.each do |key, val|
+  @working_tree.each_value do |val|
     mkdir_p(val)
   end
 
@@ -162,7 +162,7 @@ def pack_source
   # Do a run through first setting the specified permissions then
   # making sure 755 is set for all directories
   unless @source_files['directories'].nil?
-    @source_files['directories'].each do |dir, params|
+    @source_files['directories'].each_value do |params|
       owner = params['owner']
       group = params['group']
       perms = params['perms']

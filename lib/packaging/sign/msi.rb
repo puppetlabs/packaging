@@ -87,7 +87,7 @@ module Pkg::Sign::Msi
   end
 
   def delete_signed_msis(bucket, signed_msis)
-    signed_msis.each do |msi, temp_name|
+    signed_msis.each_value do |temp_name|
       signed_msi = bucket.file(temp_name)
       signed_msi.delete unless signed_msi.nil?
     end

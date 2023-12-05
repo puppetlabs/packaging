@@ -128,7 +128,7 @@ module Pkg
           repo: false,
         },
         '14' => {
-          architectures: ['x86_64'],
+          architectures: ['x86_64', 'arm64'],
           package_format: 'dmg',
           repo: false,
         },

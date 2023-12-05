@@ -8,6 +8,8 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 - (maint) Add support for Debian 12 'bookworm'
 ### Removed
 - (maint) Remove mk_repo command because it is no longer used.
+### Changed
+- (maint) some internal code cleanup to appease Rubocop
 
 ## [0.112.0]
 ### Added

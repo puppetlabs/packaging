@@ -362,7 +362,7 @@ module Pkg
           warn "Package list for #{dist} is empty, skipping"
           next
         end
-        packages.each do |name, info|
+        packages.each_value do |info|
           package_file_name = info['filename']
           puts format(
             "Searching Artifactory [%s]%s for %s (md5: %s)",
@@ -604,20 +604,27 @@ module Pkg
         properties = { 'deb.component' => target_debian_component }
         copied_artifact.properties(properties)
       end
-     end
+    end
 
-    # When we cut a new PE branch, we need to copy the pe components into <pe_version>/{repos,feature,release}/<platform>
-    # @param manifest [File] JSON file containing information about what packages to download and the corresponding md5sums
-    # @param target_path [String] path on artifactory to copy components to, e.g. <pe_version>/release
+    # When we cut a new PE branch, we need to copy the pe components
+    # into <pe_version>/{repos,feature,release}/<platform>
+    # @param manifest [File] JSON file containing information about which packages to download
+    #   and their corresponding md5sums
+    # @param target_path [String] path on artifactory to copy components to
+    #   Example: <pe_version>/release
     def populate_pe_repos(manifest, target_path)
       check_authorization
       manifest.each do |dist, packages|
         puts "Copying #{dist} packages..."
-        packages.each do |name, info|
-          filename = info["filename"]
-          artifact = Artifactory::Resource::Artifact.checksum_search(md5: (info['md5']).to_s, repos: ["rpm_enterprise__local", "debian_enterprise__local"], name: filename).first
+        packages.each_value do |info|
+          filename = info['filename']
+          artifact = Artifactory::Resource::Artifact.checksum_search(
+            md5: (info['md5']).to_s,
+            repos: ['rpm_enterprise__local', 'debian_enterprise__local'],
+            name: filename
+          ).first
           if artifact.nil?
-            raise "Error: what the hell, could not find package #{filename} with md5sum #{info['md5']}"
+            raise "Error: could not find package #{filename} with md5sum #{info['md5']}"
           end
           copy_artifact(artifact, artifact.repo, "#{target_path}/#{dist}/#{filename}")
         end
@@ -639,17 +646,22 @@ module Pkg
     end
 
     # Remove promoted artifacts if promotion is reverted, use information provided in manifest
-    # @param manifest [File] JSON file containing information about what packages to download and the corresponding md5sums
+    # @param manifest [File] JSON file containing information about what packages to
+    #   download and the corresponding md5sums
     # @param remote_path [String] path on artifactory to promoted packages ex. 2019.1/repos/
     # @param package [String] package name ex. puppet-agent
     # @param repos [Array] the repos the promoted artifacts live
     def remove_promoted_packages(manifest, remote_path, package, repos)
       check_authorization
-      manifest.each do |dist, packages|
+      manifest.each_value do |packages|
         packages.each do |package_name, info|
           next unless package_name == package
-          filename = info["filename"]
-          artifacts = Artifactory::Resource::Artifact.checksum_search(md5: (info['md5']).to_s, repos: repos, name: filename)
+          filename = info['filename']
+          artifacts = Artifactory::Resource::Artifact.checksum_search(
+            md5: (info['md5']).to_s,
+            repos: repos,
+            name: filename
+          )
           artifacts.each do |artifact|
             next unless artifact.download_uri.include? remote_path
             puts "Removing reverted package #{artifact.download_uri}"

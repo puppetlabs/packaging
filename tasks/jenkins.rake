@@ -512,13 +512,17 @@ namespace :pl do
   namespace :jenkins do
     desc "Trigger a jenkins uri with SHA of HEAD as a string param, requires \"URI\""
     task :post, :uri do |t, args|
-      uri = (args.uri or ENV['URI']) or fail "pl:jenkins:post requires a URI, either via URI= or pl:jenkin:post[URI]"
+      uri = args.uri || ENV['URI']
+
+      unless uri
+        fail 'pl:jenkins:post requires a URI, either via URI= or pl:jenkin:post[URI]'
+      end
 
       # We use JSON for parsing the json part of the submission.
       begin
         require 'json'
-      rescue LoadError
-        fail "Couldn't require 'json'. JSON is required for sanely generating the string we curl to Jenkins."
+      rescue LoadError => e
+        fail "Error: could not load 'json' gem: #{e}"
       end
 
       # Assemble the JSON string for the JSON parameter
@@ -526,17 +530,16 @@ namespace :pl do
 
       # Assemble our arguments to the post
       args = [
-      "-Fname=SHA", "-Fvalue=#{Pkg::Config.ref}",
-      "-Fjson=#{json.to_json}",
-      "-FSubmit=Build"
+        "-Fname=SHA", "-Fvalue=#{Pkg::Config.ref}",
+        "-Fjson=#{json.to_json}",
+        "-FSubmit=Build"
       ]
-
       _, retval = Pkg::Util::Net.curl_form_data(uri, args)
-      if Pkg::Util::Execution.success?(retval)
-        puts "Job triggered at #{uri}."
-      else
-        fail "An error occurred attempting to trigger the job at #{uri}. Please see the preceding http response for more info."
+      unless Pkg::Util::Execution.success?(retval)
+        fail "An error occurred attempting to trigger the job at \"#{uri}\". " \
+             "See the preceding http response for more information."
       end
+      puts "Job triggered at #{uri}."
     end
   end
 end

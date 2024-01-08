@@ -3,20 +3,22 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.113.0] - 2024-01-08
 ### Added
-- (PA-5878) Update puppetlabs/packaging platform hash to include macOS 14 (Intel)
-- (maint) Add support for Debian 12 'bookworm'
+- (PA-5878) Add support for macOS 14 (Intel)
+- (PA-5551) Add support for Debian 12 'bookworm'
 - (PA-5904) Add support for macOS 14 ARM 64 architecture
 ### Removed
 - (maint) Remove mk_repo command because it is no longer used.
 ### Changed
 - (maint) some internal code cleanup to appease Rubocop
 
-## [0.112.0]
+## [0.112.0] - 2023-11-16
 ### Added
 - (PA-5568) Added platform for Amazon Linux 2023 for x86_64 & aarch64
 
-## [0.111.0]
+## [0.111.0] - 2023-10-17
 ### Added
 - (PA-4605) Add debian platform condition to handle arm architecture
 - (PA-4606) Add support for Debian 11 (ARM64) architecture
@@ -946,7 +948,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.112.0...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.113.0...HEAD
+[0.113.0]: https://github.com/puppetlabs/packaging/compare/0.112.0...0.113.0
 [0.112.0]: https://github.com/puppetlabs/packaging/compare/0.111.0...0.112.0
 [0.111.0]: https://github.com/puppetlabs/packaging/compare/0.110.1...0.111.0
 [0.110.1]: https://github.com/puppetlabs/packaging/compare/0.110.0...0.110.1

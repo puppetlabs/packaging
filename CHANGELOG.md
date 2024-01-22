@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- (PA-5514) Add support for Fedora 38 x86_64
 
 ## [0.113.0] - 2024-01-08
 ### Added

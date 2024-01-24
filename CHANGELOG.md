@@ -3,8 +3,11 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.114.0] - 2024-01-25
 ### Added
 - (PA-5514) Add support for Fedora 38 x86_64
+- (RE-15909) Add support for sles-11-x86_64
 
 ## [0.113.0] - 2024-01-08
 ### Added
@@ -953,7 +956,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.113.0...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.114.0...HEAD
+[0.114.0]: https://github.com/puppetlabs/packaging/compare/0.113.0...0.114.0
 [0.113.0]: https://github.com/puppetlabs/packaging/compare/0.112.0...0.113.0
 [0.112.0]: https://github.com/puppetlabs/packaging/compare/0.111.0...0.112.0
 [0.111.0]: https://github.com/puppetlabs/packaging/compare/0.110.1...0.111.0

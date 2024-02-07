@@ -98,10 +98,10 @@ describe 'Pkg::Rpm::Repo' do
       expect(FileUtils).to receive(:mkdir_p).with('pkg/repo_configs').and_return(true)
       expect(Pkg::Util::Execution)
         .to receive(:capture3)
-        .with(%r{#{wget}.*/repo_configs/rpm})
+        .with("#{wget} -r -np -nH --cut-dirs 3 -P pkg/repo_configs --reject 'index*' #{base_url}/repo_configs/rpm/")
         .and_raise(RuntimeError)
       expect { Pkg::Rpm::Repo.retrieve_repo_configs }
-        .to raise_error(RuntimeError, %r{failed\.$})
+        .to raise_error(RuntimeError, /Couldn't retrieve rpm yum repo configs/)
     end
   end
 

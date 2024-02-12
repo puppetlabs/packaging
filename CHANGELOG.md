@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Changed
+- (RE-13685) Use a wrapper script, rather than inlined bash, to the 'createrepo' command
 
 ## [0.114.0] - 2024-02-07
 ### Added
@@ -14,10 +16,13 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 - (PA-5878) Add support for macOS 14 (Intel)
 - (PA-5551) Add support for Debian 12 'bookworm'
 - (PA-5904) Add support for macOS 14 ARM 64 architecture
+
 ### Removed
 - (maint) Remove mk_repo command because it is no longer used.
+
 ### Changed
 - (maint) some internal code cleanup to appease Rubocop
+- (RE-13865) Use a wrapper script, rather than inlined bash, to the 'createrepo' command
 
 ## [0.112.0] - 2023-11-16
 ### Added

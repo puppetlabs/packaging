@@ -4,6 +4,9 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+- Pass GEM_SOURCE environmental variable to remote hosts.
+
 ## [0.115.0] - 2024-02-13
 ### Changed
 - (RE-13685) Reintroduce wrapper script, rather than inlined bash, to the 'createrepo' command

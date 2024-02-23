@@ -6,6 +6,9 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ### Added
 - (PA-6063) Added platform for Red Hat 9 FIPS for x86_64
 
+### Changed
+- Pass GEM_SOURCE environmental variable to remote hosts.
+
 ## [0.115.0] - 2024-02-13
 ### Changed
 - (RE-13685) Reintroduce wrapper script, rather than inlined bash, to the 'createrepo' command

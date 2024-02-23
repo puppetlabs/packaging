@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.116.0] - 2024-02-23
 ### Added
 - (PA-6063) Added platform for Red Hat 9 FIPS for x86_64
 
@@ -965,7 +967,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.115.0...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.116.0...HEAD
+[0.116.0]: https://github.com/puppetlabs/packaging/compare/0.115.0...0.116.0
 [0.115.0]: https://github.com/puppetlabs/packaging/compare/0.114.0...0.115.0
 [0.114.0]: https://github.com/puppetlabs/packaging/compare/0.113.0...0.114.0
 [0.113.0]: https://github.com/puppetlabs/packaging/compare/0.112.0...0.113.0

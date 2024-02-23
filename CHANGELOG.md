@@ -3,6 +3,8 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- (PA-6063) Added platform for Red Hat 9 FIPS for x86_64
 
 ## [0.115.0] - 2024-02-13
 ### Changed

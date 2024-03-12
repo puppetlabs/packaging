@@ -234,6 +234,14 @@ module Pkg
           source_package_formats: DEBIAN_SOURCE_FORMATS,
           repo: true,
         },
+        '24.04' => {
+          codename: 'noble',
+          architectures: ['amd64', 'aarch64'],
+          source_architecture: 'source',
+          package_format: 'deb',
+          source_package_formats: DEBIAN_SOURCE_FORMATS,
+          repo: true,
+        },
       },
 
       'windows' => {

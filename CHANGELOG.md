@@ -5,6 +5,7 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 ## [Unreleased]
 ### Added
 - (PA-6027) Add support for Ubuntu 24.04 noble
+- (RE-16159) Move MSI signing to Digicert Keylocker-based method.
 
 ## [0.116.0] - 2024-02-23
 ### Added

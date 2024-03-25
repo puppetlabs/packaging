@@ -52,8 +52,7 @@ describe 'Pkg::Sign' do
       end
       it 'fails if gpg_key is not set' do
         allow(Pkg::Config).to receive(:gpg_key).and_return(nil)
-        expect { Pkg::Sign::Rpm.has_sig?(rpm) }
-          .to raise_error(RuntimeError, /You need to set `gpg_key` in your build defaults./)
+        expect { Pkg::Sign::Rpm.has_sig?(rpm) }.to raise_error(RuntimeError, /`gpg_key`/)
       end
     end
 

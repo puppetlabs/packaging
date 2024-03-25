@@ -17,22 +17,22 @@ namespace :pl do
   task :sign_swix, :root_dir do |_t, args|
     swix_dir = args.root_dir || $DEFAULT_DIRECTORY
     packages = Dir["#{swix_dir}/**/*.swix"]
-    unless packages.empty?
-      Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-      packages.each do |swix_package|
-        Pkg::Util::Gpg.sign_file swix_package
-      end
+    next if packages.empty?
+
+    Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
+    packages.each do |swix_package|
+      Pkg::Util::Gpg.sign_file swix_package
     end
   end
 
   desc "Detach sign any solaris svr4 packages"
   task :sign_svr4, :root_dir do |_t, args|
     svr4_dir = args.root_dir || $DEFAULT_DIRECTORY
-    unless Dir["#{svr4_dir}/**/*.pkg.gz"].empty?
-      Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-      Dir["#{svr4_dir}/**/*.pkg.gz"].each do |pkg|
-        Pkg::Util::Gpg.sign_file pkg
-      end
+    next if Dir["#{svr4_dir}/**/*.pkg.gz"].empty?
+
+    Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
+    Dir["#{svr4_dir}/**/*.pkg.gz"].each do |pkg|
+      Pkg::Util::Gpg.sign_file pkg
     end
   end
 
@@ -86,11 +86,11 @@ namespace :pl do
   task :sign_deb_changes, :root_dir do |_t, args|
     deb_dir = args.root_dir || $DEFAULT_DIRECTORY
     change_files = Dir["#{deb_dir}/**/*.changes"]
-    unless change_files.empty?
-      Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-      change_files.each do |file|
-        Pkg::Sign::Deb.sign_changes(file)
-      end
+    next if change_files.empty?
+
+    Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
+    change_files.each do |file|
+      Pkg::Sign::Deb.sign_changes(file)
     end
   ensure
     Pkg::Util::Gpg.kill_keychain
@@ -99,13 +99,17 @@ namespace :pl do
   desc "Sign OSX packages"
   task :sign_osx, [:root_dir] => "pl:fetch" do |_t, args|
     dmg_dir = args.root_dir || $DEFAULT_DIRECTORY
-    Pkg::Sign::Dmg.sign(dmg_dir) unless Dir["#{dmg_dir}/**/*.dmg"].empty?
+    next if Dir["#{dmg_dir}/**/*.dmg"].empty?
+
+    Pkg::Sign::Dmg.sign(dmg_dir)
   end
 
   desc "Sign MSI packages"
   task :sign_msi, [:root_dir] => "pl:fetch" do |_t, args|
     msi_dir = args.root_dir || $DEFAULT_DIRECTORY
-    Pkg::Sign::Msi.sign(msi_dir) unless Dir["#{msi_dir}/**/*.msi"].empty?
+    next if Dir["#{msi_dir}/**/*.msi"].empty?
+
+    Pkg::Sign::Msi.sign(msi_dir)
   end
 
   ##
@@ -117,7 +121,9 @@ namespace :pl do
     task :sign_all, :root_dir do |_t, args|
       Pkg::Util::RakeUtils.invoke_task('pl:fetch')
       root_dir = args.root_dir || $DEFAULT_DIRECTORY
-      Dir["#{root_dir}/*"].empty? and fail "There were no files found in #{root_dir}. Maybe you wanted to build/retrieve something first?"
+      if Dir["#{root_dir}/*"].empty?
+        fail "There were no files found in #{root_dir}. Perhaps build/retrieve something?"
+      end
 
       # Because rpms and debs are laid out differently in PE under pkg/ they
       # have a different sign task to address this. Rather than create a whole

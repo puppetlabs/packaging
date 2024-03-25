@@ -6,7 +6,10 @@ module Pkg::Util::Gpg
     # files that are generated with this repo use the default gpg key to
     # reflect that.
     def key
-      fail "You need to set `gpg_key` in your build defaults." unless Pkg::Config.gpg_key && !Pkg::Config.gpg_key.empty?
+      if Pkg::Config.gpg_key.nil? || Pkg::Config.gpg_key.empty?
+        fail '`gpg_key` configuration variable is unset. Cannot continue.'
+      end
+
       Pkg::Config.gpg_key
     end
 
@@ -19,47 +22,53 @@ module Pkg::Util::Gpg
     end
 
     def load_keychain
-      unless @keychain_loaded
-        unless ENV['RPM_GPG_AGENT']
-          kill_keychain
-          start_keychain
-        end
-        @keychain_loaded = true
-      end
+      return if @keychain_loaded
+      return if ENV['RPM_GPG_AGENT']
+
+      kill_keychain
+      start_keychain
+      @keychain_loaded = true
     end
 
     def kill_keychain
-      if keychain
-        stdout, = Pkg::Util::Execution.capture3("#{keychain} -k mine")
-        stdout
-      end
+      return unless keychain
+
+      Pkg::Util::Execution.capture3("#{keychain} -k mine")[0]
     end
 
     def start_keychain
-      if keychain
-        keychain_output, = Pkg::Util::Execution.capture3("#{keychain} -q --agents gpg --eval #{key}")
-        keychain_output.chomp!
-        new_env = keychain_output.match(/GPG_AGENT_INFO=([^;]*)/)
-        ENV["GPG_AGENT_INFO"] = new_env[1]
-      else
+      unless keychain
         fail "Keychain is not installed, it is required to autosign using gpg."
       end
+
+      keychain_output, = Pkg::Util::Execution.capture3("#{keychain} -q --agents gpg --eval #{key}")
+      keychain_output.chomp!
+
+      ENV['GPG_AGENT_INFO'] = keychain_output.match(/GPG_AGENT_INFO=([^;]*)/)[1]
     end
 
     def sign_file(file)
       gpg ||= Pkg::Util::Tool.find_tool('gpg')
 
-      if gpg
-        if File.exist? "#{file}.asc"
-          warn "Signature on #{file} exists, skipping..."
-          return true
-        end
-        use_tty = "--no-tty --use-agent" if ENV['RPM_GPG_AGENT']
-        stdout, = Pkg::Util::Execution.capture3("#{gpg} #{use_tty} --armor --detach-sign -u #{key} #{file}")
-        stdout
-      else
+      unless gpg
         fail "No gpg available. Cannot sign #{file}."
       end
+
+      if File.exist? "#{file}.asc"
+        warn "Signature on #{file} already exists, skipping."
+        return true
+      end
+
+      use_tty = if ENV['RPM_GPG_AGENT']
+                  '--no-tty --use-agent'
+                else
+                  ''
+                end
+
+      signing_command = "#{gpg} #{use_tty} --armor --detach-sign -u #{key} #{file}"
+      puts "GPG signing with \"#{signing_command}\""
+      Pkg::Util::Execution.capture3(signing_command)
+      puts 'GPG signing succeeded.'
     end
   end
 end

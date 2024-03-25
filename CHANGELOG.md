@@ -7,6 +7,9 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 - (PA-6027) Add support for Ubuntu 24.04 noble
 - (RE-16159) Move MSI signing to Digicert Keylocker-based method.
 
+### Changed
+- (PE-33254) Move Solaris signing to use GPG .asc files
+
 ## [0.116.0] - 2024-02-23
 ### Added
 - (PA-6063) Added platform for Red Hat 9 FIPS for x86_64

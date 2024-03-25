@@ -42,10 +42,16 @@ namespace :pl do
     Pkg::Sign::Rpm.sign_all(rpm_directory)
   end
 
-  desc "Sign ips package, uses PL certificates by default, update privatekey_pem, certificate_pem, and ips_inter_cert in build_defaults.yaml to override."
+  desc "Sign ips package, defaults to PL key, pass GPG_KEY to override"
   task :sign_ips, :root_dir do |_t, args|
     ips_dir = args.root_dir || $DEFAULT_DIRECTORY
-    Pkg::Sign::Ips.sign(ips_dir) unless Dir["#{ips_dir}/**/*.p5p"].empty?
+    packages = Dir["#{ips_dir}/**/*.p5p"]
+    next if packages.empty?
+
+    Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
+    packages.each do |p5p_package|
+      Pkg::Util::Gpg.sign_file p5p_package
+    end
   end
 
   desc "Sign built gems, defaults to PL key, pass GPG_KEY to override or edit build_defaults"

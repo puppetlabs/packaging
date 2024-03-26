@@ -3,11 +3,13 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.117.0] - 2024-03-26
 ### Added
 - (PA-6027) Add support for Ubuntu 24.04 noble
-- (RE-16159) Move MSI signing to Digicert Keylocker-based method.
 
 ### Changed
+- (RE-16159) Move MSI signing to Digicert Keylocker-based method.
 - (PE-33254) Move Solaris signing to use GPG .asc files
 
 ## [0.116.0] - 2024-02-23
@@ -976,7 +978,8 @@ this is a final version.
 
 ## Versions <= 0.5.0 do not have a change log entry
 
-[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.116.0...HEAD
+[Unreleased]: https://github.com/puppetlabs/packaging/compare/0.117.0...HEAD
+[0.117.0]: https://github.com/puppetlabs/packaging/compare/0.116.0...0.117.0
 [0.116.0]: https://github.com/puppetlabs/packaging/compare/0.115.0...0.116.0
 [0.115.0]: https://github.com/puppetlabs/packaging/compare/0.114.0...0.115.0
 [0.114.0]: https://github.com/puppetlabs/packaging/compare/0.113.0...0.114.0

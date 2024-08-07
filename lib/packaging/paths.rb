@@ -128,8 +128,6 @@ module Pkg::Paths
       return File.join(prefix, platform_name, repo_name(is_nonfinal))
     when 'rpm'
       return File.join(prefix, yum_repo_name(is_nonfinal))
-    when 'swix'
-      return File.join(prefix, platform_name, repo_name(is_nonfinal))
     when 'svr4', 'ips'
       return File.join(prefix, 'solaris', repo_name(is_nonfinal))
     else
@@ -150,8 +148,6 @@ module Pkg::Paths
     case package_format
     when 'rpm'
       return File.join(prefix, link)
-    when 'swix'
-      return File.join(prefix, platform_name, link)
     when 'deb'
       debian_code_name = Pkg::Platforms.get_attribute(platform_tag, :codename)
       return File.join(prefix, debian_code_name, link)
@@ -195,8 +191,6 @@ module Pkg::Paths
     case package_format
     when 'rpm'
       File.join(base_path, platform, version, architecture)
-    when 'swix'
-      File.join(base_path, version, architecture)
     when 'deb'
       base_path
     when 'svr4', 'ips'
@@ -222,7 +216,7 @@ module Pkg::Paths
     package_format = Pkg::Platforms.package_format_for_tag(platform_tag)
 
     case package_format
-    when 'rpm', 'swix'
+    when 'rpm'
       if options[:legacy]
         File.join('repos', platform, version, repo_target, arch)
       else
@@ -263,7 +257,7 @@ module Pkg::Paths
     when 'deb'
       # deb/pl-puppet-agent-1.2.5-jessie.list
       File.join('repo_configs', 'deb', "*#{Pkg::Platforms.get_attribute(platform_tag, :codename)}*.list")
-    when 'msi', 'swix', 'dmg', 'svr4', 'ips'
+    when 'msi', 'dmg', 'svr4', 'ips'
       nil
     else
       raise "Not sure what to do with a package format of '#{package_format}'"
@@ -284,8 +278,6 @@ module Pkg::Paths
       nonfinal ? Pkg::Config.nonfinal_apt_repo_path : Pkg::Config.apt_repo_path
     when 'dmg'
       nonfinal ? Pkg::Config.nonfinal_dmg_path : Pkg::Config.dmg_path
-    when 'swix'
-      nonfinal ? Pkg::Config.nonfinal_swix_path : Pkg::Config.swix_path
     when 'msi'
       nonfinal ? Pkg::Config.nonfinal_msi_path : Pkg::Config.msi_path
     else

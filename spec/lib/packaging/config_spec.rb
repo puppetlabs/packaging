@@ -91,7 +91,6 @@ CONFIGURATION_KEYS = %i[
   nonfinal_repo_name
   nonfinal_repo_link_target
   nonfinal_svr4_path
-  nonfinal_swix_path
   nonfinal_yum_repo_path
   notify
   project
@@ -122,7 +121,6 @@ CONFIGURATION_KEYS = %i[
   summary
   svr4_host
   svr4_path
-  swix_path
   tar_excludes
   tar_host
   tarball_path

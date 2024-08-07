@@ -140,7 +140,7 @@ module Pkg
               repo_config = "../repo_configs/rpm/pl-#{self.project}-" \
                             "#{self.ref}-#{original_tag}.repo"
             end
-          when 'swix', 'svr4', 'ips', 'dmg', 'msi'
+          when 'svr4', 'ips', 'dmg', 'msi'
             # No repo_configs for these platforms, so do nothing.
           else
             fail "Error: Unknown package format: '#{package_format}'. Maybe update PLATFORM_INFO?"

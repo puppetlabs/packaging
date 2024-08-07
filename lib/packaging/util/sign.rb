@@ -25,7 +25,6 @@ module Pkg::Util::Sign
       sign_tasks    << "pl:sign_tar" if Pkg::Config.build_tar
       sign_tasks    << "pl:sign_gem" if Pkg::Config.build_gem
       sign_tasks    << "pl:sign_osx" if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
-      sign_tasks    << "pl:sign_swix" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_svr4" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_ips" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_msi" if Pkg::Config.build_msi || Pkg::Config.vanagon_project

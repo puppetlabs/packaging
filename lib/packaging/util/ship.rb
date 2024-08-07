@@ -161,15 +161,6 @@ module Pkg::Util::Ship
     end
   end
 
-  def ship_swix(local_staging_directory, remote_path, opts = {})
-    ship_pkgs(
-      ["#{local_staging_directory}/**/*.swix"],
-      Pkg::Config.swix_staging_server,
-      remote_path,
-      opts
-    )
-  end
-
   def ship_msi(local_staging_directory, remote_path, opts = {})
     packages_have_shipped = ship_pkgs(
       ["#{local_staging_directory}/**/*.msi"],
@@ -241,7 +232,6 @@ module Pkg::Util::Ship
   def create_rolling_repo_links(nonfinal = false)
     yum_path = Pkg::Paths.remote_repo_base(nonfinal: nonfinal, package_format: 'rpm')
     dmg_path = Pkg::Paths.remote_repo_base(nonfinal: nonfinal, package_format: 'dmg')
-    swix_path = Pkg::Paths.remote_repo_base(nonfinal: nonfinal, package_format: 'swix')
     msi_path = Pkg::Paths.remote_repo_base(nonfinal: nonfinal, package_format: 'msi')
 
     create_rolling_repo_link(
@@ -255,13 +245,6 @@ module Pkg::Util::Ship
       Pkg::Platforms.generic_platform_tag('osx'),
       Pkg::Config.dmg_staging_server,
       dmg_path,
-      nonfinal
-    )
-
-    create_rolling_repo_link(
-      Pkg::Platforms.generic_platform_tag('eos'),
-      Pkg::Config.swix_staging_server,
-      swix_path,
       nonfinal
     )
 
@@ -338,14 +321,12 @@ module Pkg::Util::Ship
       MSI_HOST
       P5P_HOST
       SVR4_HOST
-      SWIX_HOST
       TAR_HOST
       YUM_HOST
       APT_SIGNING_SERVER
       APT_STAGING_SERVER
       DMG_STAGING_SERVER
       MSI_STAGING_SERVER
-      SWIX_STAGING_SERVER
       TAR_STAGING_SERVER
       YUM_STAGING_SERVER
       STAGING_SERVER

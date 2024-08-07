@@ -172,17 +172,6 @@ namespace :pl do
       end
     end
 
-    desc "Move swix repos from #{Pkg::Config.swix_staging_server} to #{Pkg::Config.swix_host}"
-    task deploy_swix_repo: 'pl:fetch' do
-      puts "Really run remote rsync to deploy Arista repos from #{Pkg::Config.swix_staging_server} to #{Pkg::Config.swix_host}? [y,n]"
-      if Pkg::Util.ask_yes_or_no
-        Pkg::Util::Execution.retry_on_fail(times: 3) do
-          cmd = Pkg::Util::Net.rsync_cmd(Pkg::Config.swix_path, target_host: Pkg::Config.swix_host, extra_flags: ['--update'])
-          Pkg::Util::Net.remote_execute(Pkg::Config.swix_staging_server, cmd)
-        end
-      end
-    end
-
     desc "Move tar repos from #{Pkg::Config.tar_staging_server} to #{Pkg::Config.tar_host}"
     task deploy_tar_repo: 'pl:fetch' do
       puts "Really run remote rsync to deploy source tarballs from #{Pkg::Config.tar_staging_server} to #{Pkg::Config.tar_host}? [y,n]"
@@ -462,18 +451,6 @@ namespace :pl do
     Pkg::Util::Ship.ship_dmg('pkg', path, nonfinal: true)
   end
 
-  desc "ship Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
-  task ship_swix: 'pl:fetch' do
-    path = Pkg::Paths.remote_repo_base(package_format: 'swix')
-    Pkg::Util::Ship.ship_swix('pkg', path)
-  end
-
-  desc "ship nightly Arista EOS swix packages and signatures to #{Pkg::Config.swix_staging_server}"
-  task ship_nightly_swix: 'pl:fetch' do
-    path = Pkg::Paths.remote_repo_base(package_format: 'swix', nonfinal: true)
-    Pkg::Util::Ship.ship_swix('pkg', path, nonfinal: true)
-  end
-
   desc "ship tarball and signature to #{Pkg::Config.tar_staging_server}"
   task ship_tar: 'pl:fetch' do
     if Pkg::Config.build_tar
@@ -518,7 +495,6 @@ namespace :pl do
     Rake::Task['pl:ship_rpms'].invoke
     Rake::Task['pl:ship_debs'].invoke
     Rake::Task['pl:ship_dmg'].invoke
-    Rake::Task['pl:ship_swix'].invoke
     Rake::Task['pl:ship_nuget'].invoke
     Rake::Task['pl:ship_tar'].invoke
     Rake::Task['pl:ship_svr4'].invoke

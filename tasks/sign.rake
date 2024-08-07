@@ -13,18 +13,6 @@ namespace :pl do
   # If no directory to sign is specified assume "pkg"
   $DEFAULT_DIRECTORY = "pkg"
 
-  desc "Sign the Arista EOS swix packages, defaults to PL key, pass GPG_KEY to override or edit build_defaults"
-  task :sign_swix, :root_dir do |_t, args|
-    swix_dir = args.root_dir || $DEFAULT_DIRECTORY
-    packages = Dir["#{swix_dir}/**/*.swix"]
-    next if packages.empty?
-
-    Pkg::Util::Gpg.load_keychain if Pkg::Util::Tool.find_tool('keychain')
-    packages.each do |swix_package|
-      Pkg::Util::Gpg.sign_file swix_package
-    end
-  end
-
   desc "Detach sign any solaris svr4 packages"
   task :sign_svr4, :root_dir do |_t, args|
     svr4_dir = args.root_dir || $DEFAULT_DIRECTORY
@@ -137,7 +125,6 @@ namespace :pl do
       sign_tasks    << "pl:sign_tar" if Pkg::Config.build_tar
       sign_tasks    << "pl:sign_gem" if Pkg::Config.build_gem
       sign_tasks    << "pl:sign_osx" if Pkg::Config.build_dmg || Pkg::Config.vanagon_project
-      sign_tasks    << "pl:sign_swix" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_svr4" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_ips" if Pkg::Config.vanagon_project
       sign_tasks    << "pl:sign_msi" if Pkg::Config.build_msi || Pkg::Config.vanagon_project

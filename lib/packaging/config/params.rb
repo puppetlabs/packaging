@@ -118,7 +118,6 @@ module Pkg::Params
                   nonfinal_repo_name
                   nonfinal_repo_link_target
                   nonfinal_svr4_path
-                  nonfinal_swix_path
                   nonfinal_yum_repo_path
                   notify
                   nuget_host
@@ -169,9 +168,6 @@ module Pkg::Params
                   summary
                   svr4_host
                   svr4_path
-                  swix_host
-                  swix_path
-                  swix_staging_server
                   tar_excludes
                   tar_host
                   tar_staging_server
@@ -260,7 +256,6 @@ module Pkg::Params
               { :var => :nonfinal_repo_link_target, :envvar => :NONFINAL_REPO_LINK_TARGET },
               { :var => :nonfinal_repo_name,      :envvar => :NONFINAL_REPO_NAME },
               { :var => :nonfinal_svr4_path,      :envvar => :NONFINAL_SVR4_PATH },
-              { :var => :nonfinal_swix_path,      :envvar => :NONFINAL_SWIX_PATH },
               { :var => :nonfinal_yum_repo_path,  :envvar => :NONFINAL_YUM_REPO_PATH },
               { :var => :notify,                  :envvar => :NOTIFY },
               { :var => :nuget_host,              :envvar => :NUGET_HOST },
@@ -288,11 +283,8 @@ module Pkg::Params
               { :var => :sign_tar,                :envvar => :SIGN_TAR,        :type => :bool },
               { :var => :signing_server,          :envvar => :SIGNING_SERVER },
               { :var => :staging_server,          :envvar => :STAGING_SERVER },
-              { :var => :swix_host,               :envvar => :SWIX_HOST },
-              { :var => :swix_staging_server,     :envvar => :SWIX_STAGING_SERVER },
               { :var => :svr4_host,               :envvar => :SVR4_HOST },
               { :var => :svr4_path,               :envvar => :SVR4_PATH },
-              { :var => :swix_path,               :envvar => :SWIX_PATH },
               { :var => :tar_host,                :envvar => :TAR_HOST },
               { :var => :tar_staging_server,      :envvar => :TAR_STAGING_SERVER },
               { :var => :team,                    :envvar => :TEAM },
@@ -343,7 +335,6 @@ module Pkg::Params
                     # These are fall-through values for shipping endpoints
                     { :oldvar => :staging_server,         :newvar => :apt_staging_server },
                     { :oldvar => :staging_server,         :newvar => :dmg_staging_server },
-                    { :oldvar => :staging_server,         :newvar => :swix_staging_server },
                     { :oldvar => :staging_server,         :newvar => :tar_staging_server },
                     { :oldvar => :staging_server,         :newvar => :yum_staging_server },
                     # These are fall-through values for signing/repo endpoints
@@ -356,7 +347,6 @@ module Pkg::Params
                     { :oldvar => :name,                   :newvar => :project },
                     { :oldvar => :pe_name,                :newvar => :project },
                     { :oldvar => :project,                :newvar => :gem_name },
-                    { :oldvar => :yum_host,               :newvar => :swix_host },
                     { :oldvar => :yum_host,               :newvar => :dmg_host },
                     { :oldvar => :yum_host,               :newvar => :tar_host },
                  ]

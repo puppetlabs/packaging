@@ -256,7 +256,6 @@ namespace :pl do
         ship_rpms
         ship_debs
         ship_dmg
-        ship_swix
         ship_tar
         ship_msi
         ship_gem
@@ -285,7 +284,6 @@ namespace :pl do
         ship_nightly_rpms
         ship_nightly_debs
         ship_nightly_dmg
-        ship_nightly_swix
         ship_nightly_msi
       ]
       tasks.map { |t| "pl:#{t}" }.each do |t|
@@ -339,7 +337,6 @@ namespace :pl do
         remote:deploy_apt_repo
         remote:deploy_yum_repo
         remote:deploy_dmg_repo
-        remote:deploy_swix_repo
         remote:deploy_msi_repo
         remote:deploy_tar_repo
         remote:deploy_apt_repo_to_s3
@@ -356,14 +353,12 @@ namespace :pl do
       uber_tasks.delete("remote:deploy_apt_repo") if Pkg::Config.apt_host == Pkg::Config.apt_signing_server
       uber_tasks.delete("remote:deploy_yum_repo") if Pkg::Config.yum_host == Pkg::Config.yum_staging_server
       uber_tasks.delete("remote:deploy_dmg_repo") if Pkg::Config.dmg_host == Pkg::Config.dmg_staging_server
-      uber_tasks.delete("remote:deploy_swix_repo") if Pkg::Config.swix_host == Pkg::Config.swix_staging_server
       uber_tasks.delete("remote:deploy_tar_repo") if Pkg::Config.tar_host == Pkg::Config.tar_staging_server
 
       if Pkg::Config.s3_ship
         uber_tasks.delete("remote:deploy_apt_repo")
         uber_tasks.delete("remote:deploy_yum_repo")
         uber_tasks.delete("remote:deploy_dmg_repo")
-        uber_tasks.delete("remote:deploy_swix_repo")
         uber_tasks.delete("remote:deploy_msi_repo")
         uber_tasks.delete("remote:deploy_tar_repo")
       else
@@ -407,10 +402,6 @@ namespace :pl do
 
       if Dir.glob("pkg/**/*.dmg").empty?
         uber_tasks.delete("remote:deploy_dmg_repo")
-      end
-
-      if Dir.glob("pkg/**/*.swix").empty?
-        uber_tasks.delete("remote:deploy_swix_repo")
       end
 
       if Dir.glob("pkg/**/*.msi").empty?

@@ -3,6 +3,11 @@
 This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Removed
+- (RE-16505) Removed Arista/swix support
+- (RE-16504) Remove unused validation routines. These routines were never realized and gave
+    a false impression that something was being validated when it was not.
+
 ### Changed
 - (RE-16109) Replace call to s3_repo_sync.sh with s3_repo_sync, the latter being an improved
   version of the former.

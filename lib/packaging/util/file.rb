@@ -183,8 +183,6 @@ module Pkg::Util::File
       ensure
         FileUtils.rm_rf(build_data_directory)
       end
-
-      Pkg::Config.perform_validations
     end
 
     # The load_extras method is intended to load variables

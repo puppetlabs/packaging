@@ -363,12 +363,4 @@ module Pkg::Params
     DEPRECATED, 29-Jul-2014: 'gpg_name' has been replaced with 'gpg_key'.
                    Please update this field in your build_defaults.yaml" }]
 
-  # Provide an open-ended template for validating BUILD_PARAMS.
-  #
-  # Each validatation contains the variable name as ':var' and a list of validations it
-  # must pass from the Pkg::Params::Validations class.
-  #
-  VALIDATIONS = [
-    { :var => :project, :validations => [:not_empty?] }
-  ]
 end

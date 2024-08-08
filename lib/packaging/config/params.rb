@@ -362,5 +362,4 @@ module Pkg::Params
                   { :var => :gpg_name, :message => "
     DEPRECATED, 29-Jul-2014: 'gpg_name' has been replaced with 'gpg_key'.
                    Please update this field in your build_defaults.yaml" }]
-
 end

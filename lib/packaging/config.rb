@@ -99,7 +99,7 @@ module Pkg
 
           # Remove the f-prefix from the fedora platform tag keys so that
           # beaker can rely on consistent keys once we rip out the f for good
-          tag = original_tag.sub(/fedora-f/, 'fedora-')
+          tag = original_tag.sub('fedora-f', 'fedora-')
 
           data[tag] ||= {}
 

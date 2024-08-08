@@ -84,7 +84,7 @@ module Pkg::Util::Version
       return "#{dot_version(version)}-#{Pkg::Config.release}".split('-') if final?(version) || Pkg::Config.vanagon_project
 
       if version.include?('SNAPSHOT')
-        new_version = dot_version(version).sub(/\.SNAPSHOT/, "-0.#{Pkg::Config.release}SNAPSHOT")
+        new_version = dot_version(version).sub('.SNAPSHOT', "-0.#{Pkg::Config.release}SNAPSHOT")
       elsif version.include?('rc')
         rc_ver = dot_version(version).match(/\.?rc(\d+)/)[1]
         new_version = dot_version(version).sub(/\.?rc(\d+)/, '') + "-0.#{Pkg::Config.release}rc#{rc_ver}"

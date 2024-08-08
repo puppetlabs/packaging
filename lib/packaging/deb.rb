@@ -15,7 +15,7 @@ module Pkg::Deb
       end
       if Pkg::Config.deb_build_mirrors
         ENV['BUILDMIRROR'] = Pkg::Config.deb_build_mirrors.map do |mirror|
-          mirror.gsub(/__DIST__/, dist)
+          mirror.gsub('__DIST__', dist)
         end.join(' | ')
       end
       ENV['DIST'] = dist

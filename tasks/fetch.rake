@@ -55,7 +55,5 @@ namespace :pl do
     ensure
       rm_rf build_data_directory
     end
-
-    Pkg::Util::RakeUtils.invoke_task('config:validate')
   end
 end

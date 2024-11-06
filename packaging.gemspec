@@ -23,6 +23,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency('csv', '>= 3.1.5')
   gem.add_dependency('googleauth')
   gem.add_dependency('google-cloud-storage')
+  gem.add_dependency('json', '2.7.6')
   gem.add_dependency('rake', '>= 12.3')
   gem.add_dependency('release-metrics')
   gem.add_dependency('retriable', '~> 3.1', '>= 3.1.2')

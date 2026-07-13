@@ -200,11 +200,29 @@ describe 'artifactory.rb' do
   end
 
   describe '#check_authorization' do
+    let(:auth_env_vars) {
+      %w[ARTIFACTORY_USERNAME ARTIFACTORY_PASSWORD ARTIFACTORY_ACCESS_TOKEN ARTIFACTORY_API_KEY]
+    }
+
+    around(:each) do |example|
+      originals = auth_env_vars.each_with_object({}) { |k, h| h[k] = ENV[k] }
+      auth_env_vars.each { |k| ENV[k] = nil }
+      example.run
+      originals.each { |k, v| ENV[k] = v }
+    end
+
     it 'fails gracefully if authorization is not set' do
-      original_artifactory_api_key = ENV['ARTIFACTORY_API_KEY']
-      ENV['ARTIFACTORY_API_KEY'] = nil
       expect { artifact.deploy_package('path/to/el/7/x86_64/package.rpm') }.to raise_error
-      ENV['ARTIFACTORY_API_KEY'] = original_artifactory_api_key
+    end
+
+    it 'accepts ARTIFACTORY_ACCESS_TOKEN as an auth source' do
+      ENV['ARTIFACTORY_ACCESS_TOKEN'] = 'anaccesstokenthatdefinitelyworks'
+      expect { artifact.send(:check_authorization) }.not_to raise_error
+    end
+
+    it 'still accepts ARTIFACTORY_API_KEY for backwards compatibility' do
+      ENV['ARTIFACTORY_API_KEY'] = 'anapikeythatdefinitelyworks'
+      expect { artifact.send(:check_authorization) }.not_to raise_error
     end
   end
 end

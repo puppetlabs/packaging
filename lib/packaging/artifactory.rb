@@ -134,7 +134,9 @@ module Pkg
     # Verify the correct environment variables are set in order to process
     # authorization to access the artifactory repos
     def check_authorization
-      unless (ENV['ARTIFACTORY_USERNAME'] && ENV['ARTIFACTORY_PASSWORD']) || ENV['ARTIFACTORY_API_KEY']
+      unless (ENV['ARTIFACTORY_USERNAME'] && ENV['ARTIFACTORY_PASSWORD']) ||
+             ENV['ARTIFACTORY_ACCESS_TOKEN'] ||
+             ENV['ARTIFACTORY_API_KEY']
         raise <<-DOC
   Unable to determine credentials for Artifactory. Please set one of the
   following environment variables:
@@ -143,10 +145,11 @@ module Pkg
   ARTIFACTORY_USERNAME
   ARTIFACTORY_PASSWORD
 
-  If you would like to use the API key, ensure ARTIFACTORY_USERNAME and
-  ARTIFACTORY_PASSWORD are not set, as these take precedence. Instead, please
-  set:
-  ARTIFACTORY_API_KEY
+  For scoped access token or reference token authentication, please set:
+  ARTIFACTORY_ACCESS_TOKEN
+
+  ARTIFACTORY_API_KEY is also accepted for backwards compatibility, but is
+  deprecated by JFrog and should be migrated to ARTIFACTORY_ACCESS_TOKEN.
 
   You can also set the path to a pem file with your custom certificates with:
   ARTIFACTORY_SSL_PEM_FILE

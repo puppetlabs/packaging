@@ -4,6 +4,10 @@ This changelog adheres to [Keep a CHANGELOG](http://keepachangelog.com).
 
 ## [Unreleased]
 ### Added
+- (maint) Accept `ARTIFACTORY_ACCESS_TOKEN` in `check_authorization` so callers can authenticate
+  with a scoped access token or reference token. `ARTIFACTORY_API_KEY` is still accepted for
+  backwards compatibility, but JFrog has deprecated API-key auth (blocked new keys in Artifactory
+  7.98) and callers should migrate.
 - (maint) Provide a mechanism, by way of a new environment variable `PACKAGING_GITREF_REPLACEMENT`,
   which allows us to not require a release tag before building product.
 
